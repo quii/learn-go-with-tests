@@ -52,6 +52,7 @@ Taking my experience of learning with a group and my own personal way I am going
 ### Table of contents
 
 1. [Hello, world](/hello-world)
+1. [Integers](/integers)
 
 ## Feedback
 
