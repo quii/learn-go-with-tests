@@ -37,6 +37,8 @@ func main() {
 }
 ```
 
+We have created a new function again with `func` but this time we've added another keyword `string` in the definition. This means this function returns a `string`. 
+
 Now create a new file called `hello_test.go` where we are going to write a test for our `Hello` function
 
 ```go
