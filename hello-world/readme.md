@@ -74,13 +74,25 @@ Writing a test is just like writing a function, with a few rules
 
 For now it's enough to know that your `t` of type `*testing.T` is your "hook" into the testing framework so you can do things like `t.Fail()` when you want to fail. 
 
-The rest of the code shouldn't be too unfamiliar apart from the line with `t.ErrorF`. 
+#### New things
 
-We are calling the `ErrorF` method on our `t` which will print out a message and fail the test. The `F` stands for format which allows us to build a string with values inserted into the placeholder values `%s`. When you made the test fail it should be clear how it works. 
+##### `if`
+
+If statements in Go are very much like other programming languages. 
+
+##### Declaring variables
+
+We're declaring some variables with the syntax `varName := value`, which lets us re-use some values in our test for readability
+
+##### `t.ErrorF`
+
+We are calling the `ErrorF` _method_ on our `t` which will print out a message and fail the test. The `F` stands for format which allows us to build a string with values inserted into the placeholder values `%s`. When you made the test fail it should be clear how it works. 
+
+We will later explore the difference between methods and functions.
 
 ### Go doc
 
-Another quality of life feature of Go is the documenation. You can launch the docs locally by running `go doc -http 8000`. If you go to [localhost:8000/pkg](http://localhost:8000/pkg) you will see all the packages installed on your system.
+Another quality of life feature of Go is the documenation. You can launch the docs locally by running `godoc -http :8000`. If you go to [localhost:8000/pkg](http://localhost:8000/pkg) you will see all the packages installed on your system.
 
 The vast majority of the standard library has excellent documentation with examples. Navigating to [http://localhost:8000/pkg/testing/](http://localhost:8000/pkg/testing/) would be worthwhile to see what's available to you. 
 

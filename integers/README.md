@@ -19,6 +19,8 @@ func TestAdder(t *testing.T) {
 }
 ```
 
+You will notice that we're using `%d` as our format strings rather than `%s`. That's because we want it to print an integer rather than a string.
+
 Run the test `go test`
 
 Inspect the compilation error
@@ -58,5 +60,49 @@ Ah hah! Foiled again, TDD is a sham right?
 
 We could write another test, with some different numbers to force that test to fail but that feels like a game of cat and mouse. 
 
-What I am going to introduce is an interesting approach to testing called "Property Based Tests"
+Once we're more familiar with Go's syntax I will introduce a technique called Property Based Testing, which would stop annoying developers and help find you bugs
 
+For now, let's fix it properly
+
+```go
+func Add(x, y int) (sum int) {
+	return x + y
+}
+```
+
+If you re-run the tests they should pass. 
+
+### More work with Go Doc
+
+We explored earlier how by naming the return argument it appears in the documentation but also in most developer's text editors. 
+
+This is great because it aids the usability of code you are writing. It is preferable that a user can understand the useage of your code by just looking at the type signature and documentation. 
+
+You can add documentation to functions with comments, and these will appear in Go Doc
+
+```go
+// Add takes two integers and returns the sum of them
+func Add(x, y int) (sum int) {
+	return x + y
+}
+```
+
+#### Examples
+
+If you really want to go the extra mile you can make examples. You will find a lot of examples in the documentation of the standard library
+
+Often code examples go out of date with what the actual code does because they live outside of the real code and dont get checked. 
+
+With Go examples the examples are executed just like tests as a developer you can be confident examples reflect what the code actually does. 
+
+```go
+func ExampleAdd() {
+	sum := Add(1, 5)
+	fmt.Println(sum)
+	// Output: 6
+}
+```
+
+If your code changes so that the example is no longer valid, your build will fail. 
+
+By adding this code in the example will appear in the documentation inside `godoc` making your code even more accessible.
