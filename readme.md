@@ -49,6 +49,10 @@ Taking my experience of learning with a group and my own personal way I am going
 - Some experience with programming. Understanding of concepts like `if`, variables, functions etc. 
 - Comfortable with using the terminal
 
+### Table of contents
+
+1. [Hello, world](/hello-world)
+
 ## Feedback
 
 - Add issues or [tweet me @quii](https://twitter.com/quii)
