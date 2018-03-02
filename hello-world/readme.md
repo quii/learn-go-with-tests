@@ -155,13 +155,15 @@ hello_test.go:10: expected 'Hello, Chris' but got 'Hello, world'
 
 We finally have a compiling program but it is not meeting our requirements according to the test. 
 
+Let's make the test pass by using the name argument and concatenate it with `Hello, `
+
 ```go
 func Hello(name string) string {
 	return "Hello, " + name
 }
 ```
 
-When you run the tests they should now pass. Normally as part of the TDD cycle we would now *refactor*.
+When you run the tests they should now pass. Normally as part of the TDD cycle we should now *refactor*.
 
 There's not a lot to refactor here, but we can introduce another language feature *constants*
 
