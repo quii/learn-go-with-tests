@@ -1,4 +1,4 @@
-# hello, world
+# Hello, world
 
 It is traditional for your first program in a new language to be Hello, world. Create a file called `hello.go` and write this code. To run it type `go run hello.go`.
 
@@ -12,12 +12,12 @@ func main() {
 }
 ```
 
-## how it works
+## How it works
 When you write a program in Go you will have a `main` package defined with a `main` func inside it. The `func` keyword is how you define a function with a name and a body.
 
 With `import "fmt"` we are importing a package which contains the `Println` function that we use to print
 
-## how to test
+## How to test
 
 How do you test this? It is good to separate your "domain" code from the outside world (side-effects). The `fmt.Println` is a side effect (printing to stdout) and the string we send in is our domain.
 
@@ -58,13 +58,13 @@ Before explaining, let's just run the code. Type `go test`. It should've passed!
 
 Notice how you have not had to pick between multiple testing frameworks or decipher a testing DSL to write a test. Everything you need is built in to the language.
 
-### side-rant
+### Side-rant
 
 Go famously "lacks" a number of programming language features and this is a constant point of discussion. I admittedly would be very pleased if Go supported generics. 
 
-But it is important that syntax is not the _only_ factor in how effective you can be as a programmer. We have just demonstrated one of the reasons Go is popular, it has first class support for testing out of the box and it is no different from writing the "real" code. 
+But it is important to understand that syntax is not the _only_ factor in how effective you can be as a programmer. We have just demonstrated one of the reasons Go is popular, it has first class support for testing out of the box and it is no different from writing the "real" code. 
 
-### back to the tests
+### Back to the tests
 
 Writing a test is just like writing a function, with a few rules
 
@@ -78,7 +78,7 @@ The rest of the code shouldn't be too unfamiliar apart from the line with `t.Err
 
 We are calling the `ErrorF` method on our `t` which will print out a message and fail the test. The `F` stands for format which allows us to build a string with values inserted into the placeholder values `%s`. When you made the test fail it should be clear how it works. 
 
-### go doc
+### Go doc
 
 Another quality of life feature of Go is the documenation. You can launch the docs locally by running `go doc -http 8000`. If you go to [localhost:8000/pkg](http://localhost:8000/pkg) you will see all the packages installed on your system.
 
