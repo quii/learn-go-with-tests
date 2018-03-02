@@ -127,7 +127,7 @@ Now run `go test`, you should have a compilation error
 	want ()
 ```
 
-When using a statically typed language like Go it is important to _listen to the compiler_. The compiler understands how your types should snap together and work so you don't have to. 
+When using a statically typed language like Go it is important to _listen to the compiler_. The compiler understands how your code should snap together and work so you don't have to. 
 
 In this case the compiler is telling you what you need to do to continue. We have to change our function `Hello` to accept an argument.
 
@@ -140,6 +140,12 @@ func Hello(name string) string {
 ```
 
 If you try and run your tests again your `main.go` will fail to compile because you're not passing an argument. Send in "world" to make it pass.
+
+```go
+func main() {
+	fmt.Println(Hello("world"))
+}
+```
 
 Now when you run your tests you should see something like
 
