@@ -37,7 +37,9 @@ We've introduced a few new concepts when writing functions here.
 
 - When you have more than one argument of the same type (in our case two integers) rather than having `(x int, y int)` you can shorten it to `(x, y int)`
 - You can assign a name to the return value `(sum int)` 
-    - This will create a variable called `sum` in your function and then you can return whatever it's set to by just calling `return` rather than `return sum`. 
+    - This will create a variable called `sum` in your function
+    - It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for strings it is `""` 
+     - You can return whatever it's set to by just calling `return` rather than `return sum`. 
     - This will display in the Go Doc for your function so it can make the intent of your code clearer.
     
 Now run the tests and we should be happy that the test is correctly reporting what is wrong.
