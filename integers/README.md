@@ -76,9 +76,9 @@ If you re-run the tests they should pass.
 
 We explored earlier how by naming the return argument it appears in the documentation but also in most developer's text editors. 
 
-This is great because it aids the usability of code you are writing. It is preferable that a user can understand the useage of your code by just looking at the type signature and documentation. 
+This is great because it aids the usability of code you are writing. It is preferable that a user can understand the usage of your code by just looking at the type signature and documentation. 
 
-You can add documentation to functions with comments, and these will appear in Go Doc
+You can add documentation to functions with comments, and these will appear in Go Doc just like when you look at the standard library's documentation.
 
 ```go
 // Add takes two integers and returns the sum of them
@@ -91,9 +91,9 @@ func Add(x, y int) (sum int) {
 
 If you really want to go the extra mile you can make examples. You will find a lot of examples in the documentation of the standard library
 
-Often code examples go out of date with what the actual code does because they live outside of the real code and dont get checked. 
+Often code examples go out of date with what the actual code does because they live outside of the real code and don't get checked. 
 
-With Go examples the examples are executed just like tests as a developer you can be confident examples reflect what the code actually does. 
+Go examples are executed just like tests so you can be confident examples reflect what the code actually does. 
 
 ```go
 func ExampleAdd() {
