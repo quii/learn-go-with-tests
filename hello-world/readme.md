@@ -161,7 +161,33 @@ func Hello(name string) string {
 }
 ```
 
-When you run the tests they should now pass. Normally as part of the TDD cycle we would now *refactor* but it turns out we have written some pretty decent code already, so let's leave it at that.
+When you run the tests they should now pass. Normally as part of the TDD cycle we would now *refactor*.
+
+There's not a lot to refactor here, but we can introduce another language feature *constants*
+
+### Constants
+
+Constants are defined like so
+
+```go
+const helloPrefix = "Hello, "
+```
+
+We can now refactor our code like so
+
+```go
+const helloPrefix = "Hello, "
+
+func Hello(name string) string {
+	return helloPrefix + name
+}
+```
+
+After refactoring, re-run your tests to make sure you haven't broken anything.
+
+Constants should improve performance of your application as it saves you creating the `"Hello, "` string instance every time `Hello` is called. 
+
+To be clear, this is incredibly negligble for this example! But it's worth thinking about creating constants to capture the meaning of values and sometimes to aid performance.
 
 ### Discipline
 

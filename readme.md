@@ -51,7 +51,7 @@ Taking my experience of learning with a group and my own personal way I am going
 
 ### Table of contents
 
-1. [Hello, world](/hello-world) - Declaring variables, if statements, write your first go program and write your first test.
+1. [Hello, world](/hello-world) - Declaring variables, constants, if statements, write your first go program and write your first test.
 2. [Integers](/integers) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
 
 Property based tests (todo)
