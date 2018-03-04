@@ -1,10 +1,12 @@
 # Learn go with tests
 
+I hope that after reading this you'll have a good grasp of the Go language in terms of its syntax, tooling and idioms - and be confident you will be able to start writing great systems in Go. 
+
 I have some experience introducing Go to development teams and have tried different approaches as to how to grow a team from some people curious about Go into highly effective writers of Go systems.
 
 ## What didnt work
 
-### Read a book
+### Read _the_ book
 
 An approach we tried was to take [the blue book](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440) and every week discuss the next chapter along with the exercises. 
 
@@ -53,6 +55,7 @@ Taking my experience of learning with a group and my own personal way I am going
 
 1. [Hello, world](/hello-world) - Declaring variables, constants, if statements, write your first go program and write your first test.
 2. [Integers](/integers) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
+3. [Iteration](/for) - Learn about `for` and benchmarking
 
 Property based tests (todo)
 
