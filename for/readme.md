@@ -1,4 +1,4 @@
-# for
+# Iteration
 
 To do stuff repeatedly in Go, you'll need `for`. In go there are no `while`, `do`, `until` kewords, you can only use `for`. Which is a good thing!
 
@@ -67,7 +67,7 @@ func Repeat(character string) (repeated string) {
 
 `+=` adds a value to another. It works other types like integers.
 
-## next iteration
+## Next iteration
 
 todo: Think of a way to include `continue` in exercise.
 
