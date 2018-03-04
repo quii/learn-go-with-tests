@@ -23,7 +23,7 @@ func TestRepeat(t *testing.T) {
 }
 ```
 
-_Keep the discipline!_ You will dont need to know anything new right now
+_Keep the discipline!_ You don't need to know anything new right now
 
 - Run the test
 - Listen to the compiler
@@ -83,15 +83,13 @@ func BenchmarkRepeat(b *testing.B) {
 }
 ```
 
-I am using gogland so when I type `Test` or `Bench` in a file it generates most of the code for me. 
-
 You'll see the code is very similar to a test.
 
 The `testing.B` gives you access to the cryptically named `b.N`. 
 
-When the benchmark is run the code is ran `b.N` times, and measure how long it takes. 
+When the benchmark is run the code is ran `b.N` times, and measures how long it takes. 
 
-That amount shouldn't matter to you, the framework will determine what is a "good" value for that to let you have some decent results.
+The amount of times the code is ran shouldnt matter to you, the framework will determine what is a "good" value for that to let you have some decent results.
 
 To run the benchmarks do `go test -bench=.`
 
@@ -103,7 +101,7 @@ pkg: github.com/quii/learn-go-with-tests/for/v4
 PASS
 ```
 
-What that means is our function takes 136 nanoseconds to run. Which is pretty ok!
+What that means is our function takes 136 nanoseconds to run (on my computer). Which is pretty ok!
 
 ### Practice exercises
 
