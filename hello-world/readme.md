@@ -58,15 +58,9 @@ func TestHello(t *testing.T) {
 
 Before explaining, let's just run the code. Type `go test`. It should've passed! Just to check, try deliberately breaking the test by changing the `expected` string.
 
-Notice how you have not had to pick between multiple testing frameworks or decipher a testing DSL to write a test. Everything you need is built in to the language.
+Notice how you have not had to pick between multiple testing frameworks or decipher a testing DSL to write a test. Everything you need is built in to the language and the syntax is the same as the rest of the code you will write. 
 
-### Side-rant
-
-Go famously "lacks" a number of programming language features and this is a constant point of discussion. I admittedly would be very pleased if Go supported generics. 
-
-But it is important to understand that syntax is not the _only_ factor in how effective you can be as a programmer. We have just demonstrated one of the reasons Go is popular, it has first class support for testing out of the box and it is no different from writing the "real" code. 
-
-### Back to the tests
+### Writing tests
 
 Writing a test is just like writing a function, with a few rules
 
