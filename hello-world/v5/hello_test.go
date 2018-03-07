@@ -5,6 +5,7 @@ import "testing"
 func TestHello(t *testing.T) {
 
 	assertCorrectMessage := func(expected, actual string) {
+		t.Helper()
 		if expected != actual {
 			t.Errorf("expected '%s' but got '%s'", expected, actual)
 		}

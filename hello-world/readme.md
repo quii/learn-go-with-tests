@@ -233,6 +233,7 @@ Refactoring is not _just_ for the production code! We can and should refactor ou
 func TestHello(t *testing.T) {
 
 	assertCorrectMessage := func(expected, actual string) {
+		t.Helper()
 		if expected != actual {
 			t.Errorf("expected '%s' but got '%s'", expected, actual)
 		}
@@ -258,6 +259,8 @@ What have we done here? In Go you can declare functions inside other functions a
 We've written a function to do our assertion. This reduces duplication and improves readability of our tests.
 
 Now that we have a well-written failing test, let's fix the code, using the `else` keyword.
+
+`TODO:// explain t.Helper()`
 
 ```go
 const helloPrefix = "Hello, "
