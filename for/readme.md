@@ -67,10 +67,6 @@ func Repeat(character string) (repeated string) {
 
 `+=` adds a value to another. It works other types like integers.
 
-## Next iteration
-
-todo: Think of a way to include `continue` in exercise.
-
 ## Benchmarking
 
 Writing benchmarks in Go is another first-class feature of the language and it is very similar to writing tests. 

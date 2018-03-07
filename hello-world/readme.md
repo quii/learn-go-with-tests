@@ -191,6 +191,85 @@ Constants should improve performance of your application as it saves you creatin
 
 To be clear, the performance boost is incredibly negligible for this example! But it's worth thinking about creating constants to capture the meaning of values and sometimes to aid performance.
 
+## Hello, world... again
+
+The next requirement is when our function is called with am emprt string it defaults to printing "Hello, world", rather than "Hello, "
+
+Start by writing a new failing test
+
+```go
+func TestHello(t *testing.T) {
+
+	t.Run("saying hello to people", func(t *testing.T) {
+		message := Hello("Chris")
+		expected := "Hello, Chris"
+
+		if message != expected {
+			t.Errorf("expected '%s' but got '%s'", expected, message)
+		}
+	})
+	
+	t.Run("say hello world when an empty string is supplied", func(t *testing.T) {
+		message := Hello("")
+		expected := "Hello, World"
+
+		if message != expected {
+			t.Errorf("expected '%s' but got '%s'", expected, message)
+		}
+	})
+
+}
+```
+
+Here we are introducing another tool in our testing arsenal, subtests. Sometimes it is useful to group tests around a "thing" and then have subtests describing different scenarios. 
+
+A benefit of this approach is you can set up shared code that can be used in the other tests.
+
+You can see some repetition here in our assertion as to whether the message we got is the same as the message we expect. 
+
+Refactoring is not _just_ for the production code! We can and should refactor our tests.
+
+```go
+func TestHello(t *testing.T) {
+
+	assertCorrectMessage := func(expected, actual string) {
+		if expected != actual {
+			t.Errorf("expected '%s' but got '%s'", expected, actual)
+		}
+	}
+
+	t.Run("saying hello to people", func(t *testing.T) {
+		message := Hello("Chris")
+		expected := "Hello, Chris"
+		assertCorrectMessage(expected, message)
+	})
+
+	t.Run("say hello world when an empty string is supplied", func(t *testing.T) {
+		message := Hello("")
+		expected := "Hello, World"
+		assertCorrectMessage(expected, message)
+	})
+
+}
+```
+
+What have we done here? In Go functions are _first class_, which means we can assign them as variables. We have refactored our assertion code into a function, which we can then re-use across our subtests.
+
+This reduces duplication and improves readability of our tests.
+
+Now that we have a well-written failing test, let's fix the code, using the `else` keyword.
+
+```go
+const helloPrefix = "Hello, "
+
+func Hello(name string) string {
+	if name == "" {
+		name = "World"
+	}
+	return helloPrefix + name
+}
+```
+
 ### Discipline
 
 On the face of it, the cycle of writing a test, failing the compiler, making the code pass and then refactoring may seem tedious but sticking to the feedback loop is important. 

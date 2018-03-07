@@ -54,7 +54,7 @@ Taking my experience of learning with a group and my own personal way I am going
 ### Table of contents
 
 0. todo: Install Go, set up environment for productivity.
-1. [Hello, world](/hello-world) - Declaring variables, constants, if statements, write your first go program and write your first test.
+1. [Hello, world](/hello-world) - Declaring variables, constants, if/else statements, write your first go program and write your first test. Sub-test syntax and first class functions.
 2. [Integers](/integers) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
 3. [Iteration](/for) - Learn about `for` and benchmarking.
 
