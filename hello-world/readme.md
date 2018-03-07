@@ -193,7 +193,7 @@ To be clear, the performance boost is incredibly negligible for this example! Bu
 
 ## Hello, world... again
 
-The next requirement is when our function is called with am emprt string it defaults to printing "Hello, world", rather than "Hello, "
+The next requirement is when our function is called with an empty string it defaults to printing "Hello, World", rather than "Hello, "
 
 Start by writing a new failing test
 
@@ -225,7 +225,7 @@ Here we are introducing another tool in our testing arsenal, subtests. Sometimes
 
 A benefit of this approach is you can set up shared code that can be used in the other tests.
 
-You can see some repetition here in our assertion as to whether the message we got is the same as the message we expect. 
+There is repeated code when we check if the message is what we expect. 
 
 Refactoring is not _just_ for the production code! We can and should refactor our tests.
 
@@ -253,9 +253,9 @@ func TestHello(t *testing.T) {
 }
 ```
 
-What have we done here? In Go functions are _first class_, which means we can assign them as variables. We have refactored our assertion code into a function, which we can then re-use across our subtests.
+What have we done here? In Go you can declare functions inside other functions and then they can _close_ over other variables - in this case our `*testing.T`.
 
-This reduces duplication and improves readability of our tests.
+We've written a function to do our assertion. This reduces duplication and improves readability of our tests.
 
 Now that we have a well-written failing test, let's fix the code, using the `else` keyword.
 
@@ -269,6 +269,8 @@ func Hello(name string) string {
 	return helloPrefix + name
 }
 ```
+
+If we run our tests we should see it satisfies the new requirement and we haven't accidentally broken the other functionality
 
 ### Discipline
 
