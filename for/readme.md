@@ -2,11 +2,11 @@
 
 To do stuff repeatedly in Go, you'll need `for`. In go there are no `while`, `do`, `until` kewords, you can only use `for`. Which is a good thing!
 
-## Repeat a character
-
 Let's write a test for a function that repeats a character 5 times.
 
 There's nothing new so far, so try and write it yourself for practice.
+
+## 1. Write the test first
 
 ```go
 package main
@@ -23,11 +23,15 @@ func TestRepeat(t *testing.T) {
 }
 ```
 
-_Keep the discipline!_ You don't need to know anything new right now
+## 2. Try and run the test
 
-- Run the test
-- Listen to the compiler
-- Make it compile
+`./repeat_test.go:6:14: undefined: Repeat`
+
+## 3. Write the minimal amount of code for the test to run and check the failing test output
+
+_Keep the discipline!_ You don't need to know anything new right now to make the test fail properly.
+
+All you need to do right now is enough to make it compile so you can check your test is written well.
 
 ```go
 package main
@@ -38,6 +42,10 @@ func Repeat(character string) (repeated string)  {
 ```
 
 Isn't it nice to know you already know enough Go to write tests for some basic problems? This means you can now play with the production code as much as you like and know it's behaving as you'd hope.
+
+`repeat_test.go:10: expected 'aaaaa' but got ''`
+
+## 4. Write enough code to make it pass
 
 The `for` syntax is very unremarkable and follows most C-like languages.
 
@@ -51,6 +59,8 @@ func Repeat(character string) (repeated string) {
 ```
 
 Run the test and it should pass. 
+
+## 5. Refactor
 
 Now it's time to refactor and introduce another construct `+=`
 
@@ -67,7 +77,7 @@ func Repeat(character string) (repeated string) {
 
 `+=` adds a value to another. It works other types like integers.
 
-## Benchmarking
+### Benchmarking
 
 Writing benchmarks in Go is another first-class feature of the language and it is very similar to writing tests. 
 

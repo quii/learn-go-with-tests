@@ -221,7 +221,11 @@ A benefit of this approach is you can set up shared code that can be used in the
 
 There is repeated code when we check if the message is what we expect. 
 
-Refactoring is not _just_ for the production code! We can and should refactor our tests.
+Refactoring is not _just_ for the production code! 
+
+It is important that your tests _are clear specifications_ of what the code needs to do.
+
+We can and should refactor our tests.
 
 ```go
 func TestHello(t *testing.T) {
