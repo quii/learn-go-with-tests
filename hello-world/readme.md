@@ -169,7 +169,7 @@ Constants are defined like so
 const helloPrefix = "Hello, "
 ```
 
-We can now refactor our code like so
+We can now refactor our code
 
 ```go
 const helloPrefix = "Hello, "
@@ -338,7 +338,7 @@ func Hello(name string, language string) string {
 		name = "World"
 	}
 
-	if language=="Spanish" {
+	if language == "Spanish" {
 		return "Hola, " + name
 	}
 	
@@ -370,7 +370,7 @@ func Hello(name string, language string) string {
 
 ### French
 
-- Write a test asserting that if you pass in `"french"` you get `"Bonjour, "`
+- Write a test asserting that if you pass in `"French"` you get `"Bonjour, "`
 - See it fail, check the error message is easy to read
 - Do the smallest reasonable change in the code
 
@@ -418,6 +418,42 @@ func Hello(name string, language string) string {
 ```
 
 Write a test to now include a greeting in the language of your choice and you should see how simple it is to extend our _amazing_ function. 
+
+### one...last...refactor?
+
+You could argue that maybe our function is getting a little big. The simplest refactor for this would be to extract out some functionality into another function and you already know how to declare functions.
+
+```go
+func Hello(name string, language string) string {
+	if name == "" {
+		name = "World"
+	}
+
+	return greetingPrefix(language) + name
+}
+
+func greetingPrefix(language string) (prefix string) {
+	switch language {
+	case french:
+		prefix = frenchHelloPrefix
+	case spanish:
+		prefix = spanishHelloPrefix
+	default:
+		prefix = englishPrefix
+	}
+	return
+}
+```
+
+A few new concepts:
+
+- In our function signature we have made a _named return value_ `(prefix string)`. 
+- This will create a variable called `sum` in your function
+    - It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for strings it is `""` 
+     - You can return whatever it's set to by just calling `return` rather than `return sum`. 
+    - This will display in the Go Doc for your function so it can make the intent of your code clearer.
+- `default` in the switch case will be branched to if none of the other `case` statements match
+- The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We dont want the internals of our algorithm to be exposes to the world so we made this function private.
 
 ## Wrapping up
 
