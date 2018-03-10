@@ -99,3 +99,12 @@ func ExampleAdd() {
 If your code changes so that the example is no longer valid, your build will fail. 
 
 By adding this code in the example will appear in the documentation inside `godoc` making your code even more accessible.
+
+## Wrapping up
+
+What we have covered:
+
+- More practice of the TDD workflow
+- Integers, addition
+- Writing better documentation so users of our code can understand its usage quickly
+- Examples of how to use our code, which are checked as part of our tests
