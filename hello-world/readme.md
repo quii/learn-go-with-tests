@@ -94,9 +94,13 @@ The vast majority of the standard library has excellent documentation with examp
 
 ### Hello, YOU
 
-Now that we have a test we can iterate on our software safely. Our next requirement is to let us specify the recipient of the greeting. 
+Now that we have a test we can iterate on our software safely. 
 
-Let's start by capturing our requirements in the test. This is basic test driven development and allows us to make sure our test is _actually_ testing what we want. When you retrospectively write tests there is the risk that your test may continue to pass even if the code doesn't work as intended. 
+In the last example we wrote the test _after_ the code had been written just so you could get an example of how to write a test and declare a function. From this point on we will be _writing tests first_
+
+Our next requirement is to let us specify the recipient of the greeting. 
+
+Let's start by capturing these requirements in a test. This is basic test driven development and allows us to make sure our test is _actually_ testing what we want. When you retrospectively write tests there is the risk that your test may continue to pass even if the code doesn't work as intended. 
 
 ```go
 package main
