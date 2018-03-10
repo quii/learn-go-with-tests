@@ -448,9 +448,9 @@ func greetingPrefix(language string) (prefix string) {
 A few new concepts:
 
 - In our function signature we have made a _named return value_ `(prefix string)`. 
-- This will create a variable called `sum` in your function
+- This will create a variable called `prefix` in your function
     - It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for strings it is `""` 
-     - You can return whatever it's set to by just calling `return` rather than `return sum`. 
+     - You can return whatever it's set to by just calling `return` rather than `return prefix`. 
     - This will display in the Go Doc for your function so it can make the intent of your code clearer.
 - `default` in the switch case will be branched to if none of the other `case` statements match
 - The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We dont want the internals of our algorithm to be exposes to the world so we made this function private.
