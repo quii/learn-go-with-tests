@@ -6,7 +6,7 @@ When you have an array, it is very common to have to iterate over them so let's 
 
 Let's use our TDD skills
 
-## 1. Write the test first
+## Write the test first
 
 In `sum_test.go`
 ```go
@@ -27,11 +27,11 @@ Arrays have a _fixed capacity_ which you define when you declare the variable. I
 
 [Read more about the format strings](https://golang.org/pkg/fmt/)
 
-## 2. Try and run the test
+## Try and run the test
 
 By running `go test` the compiler will fail with `./sum_test.go:10:15: undefined: Sum`
 
-## 3. Write the minimal amount of code for the test to run and check the failing test output
+## Write the minimal amount of code for the test to run and check the failing test output
 
 In `sum.go`
 
@@ -45,7 +45,7 @@ Your test should now fail with _a clear error message_
 
 `sum_test.go:13: expected the sum to be 15 but was 0 given, [1 2 3 4 5]`
 
-## 4. Write enough code to make it pass
+## Write enough code to make it pass
 
 ```go
 func Sum(numbers [5]int) (sum int) {
@@ -64,7 +64,7 @@ At this point if you are using source control (which you should!) I would `commi
 
 I _wouldnt_ push to master though, because I plan to refactor next. It is nice to commit at this point in case you somehow get in to a mess with refactoring - you can always go back to the working version.
 
-## 5. Refactor
+## Refactor
 
 Let's introduce `range` to help clean up our code
 
@@ -78,3 +78,9 @@ func Sum(numbers [5]int) (sum int) {
 ```
 
 `range` lets you iterate over an array. Every time it is called it returns two values, the index and the value. We are choosing to ignore the index value by using `_`
+
+## Wrapping up
+
+You may be thinking it's quite cumbersome that arrays are fixed length and most of the time you probably wont be using them! Go has _slices_ which are dynamic in size and most of the time you will probably be using them instead.
+
+An interesting property of arrays though is the size is encoded in its type. If you try and pass an `[4]int` into a function that expects `[5]int`, it wont compile

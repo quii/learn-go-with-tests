@@ -21,7 +21,7 @@ func TestAdder(t *testing.T) {
 
 You will notice that we're using `%d` as our format strings rather than `%s`. That's because we want it to print an integer rather than a string.
 
-## 2. Try and run the test
+## Try and run the test
 
 Run the test `go test`
 
@@ -29,7 +29,7 @@ Inspect the compilation error
 
 `./adder_test.go:6:9: undefined: Add`
 
-## 3. Write the minimal amount of code for the test to run and check the failing test output
+## Write the minimal amount of code for the test to run and check the failing test output
 
 Write enough code to satisfy the compiler *and that's all* - remember we want to check that our tests fail for the correct reason.
 
@@ -45,7 +45,7 @@ Now run the tests and we should be happy that the test is correctly reporting wh
 
 `adder_test.go:10: expected '4' but got '0'`
 
-## 4. Write enough code to make it pass
+## Write enough code to make it pass
 
 In the strictest sense of TDD we should now write the _minimal amount of code to make the test pass_. A pedantic programmer may do this
 
@@ -71,7 +71,7 @@ func Add(x, y int) (sum int) {
 
 If you re-run the tests they should pass. 
 
-## 5. Refactor
+## Refactor
 
 There's not a lot in the _actual_ code we can really improve on here.
 

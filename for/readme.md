@@ -23,11 +23,11 @@ func TestRepeat(t *testing.T) {
 }
 ```
 
-## 2. Try and run the test
+## Try and run the test
 
 `./repeat_test.go:6:14: undefined: Repeat`
 
-## 3. Write the minimal amount of code for the test to run and check the failing test output
+## Write the minimal amount of code for the test to run and check the failing test output
 
 _Keep the discipline!_ You don't need to know anything new right now to make the test fail properly.
 
@@ -45,7 +45,7 @@ Isn't it nice to know you already know enough Go to write tests for some basic p
 
 `repeat_test.go:10: expected 'aaaaa' but got ''`
 
-## 4. Write enough code to make it pass
+## Write enough code to make it pass
 
 The `for` syntax is very unremarkable and follows most C-like languages.
 
@@ -60,7 +60,7 @@ func Repeat(character string) (repeated string) {
 
 Run the test and it should pass. 
 
-## 5. Refactor
+## Refactor
 
 Now it's time to refactor and introduce another construct `+=`
 
