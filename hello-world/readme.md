@@ -275,6 +275,165 @@ On the face of it, the cycle of writing a test, failing the compiler, making the
 
 Not only does it ensure that you have *relevant tests* it helps ensure *you design good software* by refactoring with the safety of tests. 
 
+Seeing the test fail is an important check because it also lets you see what the error message looks like. As a developer it can be very hard to work with a codebase when failing tests do not give a clear idea as to what the problem is. 
+
 By ensuring your tests are *fast* and setting up your tools so that running tests is simple you can get in to a state of flow when writing your code. 
 
 By not writing tests you are committing to manually checking your code by running your software which breaks your state of flow and you wont be saving yourself any time, especially in the long run. 
+
+## Keep going! More requirements
+
+Goodness me, we have more requirements. We now need to support a second parameter, specifying the language of the greeting. If a language is passed in that we do not recognise, just default to English.
+
+We should be confident that we can use TDD to flesh out this functionality easily!
+
+Write a test for a user passing in Spanish. Add it to the existing suite.
+
+```go
+	t.Run("say hello in Spanish", func(t *testing.T) {
+		message := Hello("Elodie", "Spanish")
+		expected := "Hola, Elodie"
+		assertCorrectMessage(expected, message)
+	})
+```
+
+Remember not to cheat! *Test first*. When you try and run the test, the compiler _should_ complain because you are calling `Hello` with two arguments rather than one.
+
+```
+./hello_test.go:27:19: too many arguments in call to Hello
+	have (string, string)
+	want (string)
+```
+
+Fix the compilation problems by adding another string argument to `Hello`
+
+```go
+func Hello(name string, language string) string {
+	if name == "" {
+		name = "World"
+	}
+	return helloPrefix + name
+}
+```
+
+When you try and run the test again it will complain about not passing through enough arguments to `Hello` in your other tests and in `main.go`
+
+```
+./hello.go:15:19: not enough arguments in call to Hello
+	have (string)
+	want (string, string)
+```
+
+Fix them by passing through empty strings. Now all your tests should compile _and_ pass, apart from our new scenario
+
+```
+hello_test.go:29: expected 'Hola, Elodie' but got 'Hello, Elodie'
+```
+
+We can use `if` here to check the language is equal to "Spanish" and if so change the message
+
+```go
+func Hello(name string, language string) string {
+	if name == "" {
+		name = "World"
+	}
+
+	if language=="Spanish" {
+		return "Hola, " + name
+	}
+	
+	return helloPrefix + name
+}
+```
+
+The tests should now pass. 
+
+Now it is time to *refactor*. You should see some problems in the code, "magic" strings, some of which are repeated. Try and refactor it yourself, with every change make sure you re-run the tests to make sure your refactoring isn't breaking anything.
+
+```go
+const spanish = "Spanish"
+const helloPrefix = "Hello, "
+const spanishHelloPrefix = "Hola, "
+
+func Hello(name string, language string) string {
+	if name == "" {
+		name = "World"
+	}
+
+	if language == spanish {
+		return spanishHelloPrefix + name
+	}
+
+	return helloPrefix + name
+}
+```
+
+### French
+
+- Write a test asserting that if you pass in `"french"` you get `"Bonjour, "`
+- See it fail, check the error message is easy to read
+- Do the smallest reasonable change in the code
+
+You may have written something that looks roughly like this
+
+```go
+func Hello(name string, language string) string {
+	if name == "" {
+		name = "World"
+	}
+
+	if language == spanish {
+		return spanishHelloPrefix + name
+	}
+
+	if language == french {
+		return frenchHelloPrefix + name
+	}
+
+	return helloPrefix + name
+}
+```
+
+## `switch`
+
+When you have lots of `if` statements checking a particular value it is common to use a `switch` statement instead. We can use `switch` to refactor the code to make it easier to read and more extensible if we wish to add more language support later
+
+```go
+func Hello(name string, language string) string {
+	if name == "" {
+		name = "World"
+	}
+
+	prefix := helloPrefix
+	
+	switch language {
+	case french:
+		prefix = frenchHelloPrefix
+	case spanish:
+		prefix = spanishHelloPrefix
+	}
+
+	return prefix + name
+}
+```
+
+Write a test to now include a greeting in the language of your choice and you should see how simple it is to extend our _amazing_ function. 
+
+## Wrapping up
+
+Who knew you could get so much out of `Hello, world` ?
+
+By now you should have some understanding of
+
+### Some of Go's syntax around
+
+- Writing tests
+- Declaring functions, with arguments and return types
+- `if`, `else`, `switch`
+- Declaring variables and constants
+
+### An understanding of the TDD process and _why_ the steps are important
+
+- *Write a failing test and see it fail* so we know we have written a _relevant_ test for our requirements and seen that it produces an _easy to understand description of the failure_
+- Writing the smallest amount of code to make it pass so we know we have working software
+- _Then_ refactor, backed with the safety of our tests.
