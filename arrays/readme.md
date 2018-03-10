@@ -58,6 +58,23 @@ func Sum(numbers [5]int) (sum int) {
 
 To get the value out of an array at a particular index, just use `array[index]` syntax. In this case we are using `for` to iterate 5 times to work through the array and add each item onto `sum`
 
-At this point if you are using source control (which you should!) I would `commit` the code as it is. We have working software backed by a test.
+#### A note on source control
+
+At this point if you are using source control (which you should!) I would `commit` the code as it is. We have working software backed by a test. 
+
+I _wouldnt_ push to master though, because I plan to refactor next. It is nice to commit at this point in case you somehow get in to a mess with refactoring - you can always go back to the working version.
 
 ### 5. Refactor
+
+Let's introduce `range` to help clean up our code
+
+```go
+func Sum(numbers [5]int) (sum int) {
+	for _, number := range numbers {
+		sum += number
+	}
+	return
+}
+```
+
+`range` lets you iterate over an array. Every time it is called it returns two values, the index and the value. We are choosing to ignore the index value by using `_`
