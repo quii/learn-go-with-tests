@@ -6,6 +6,15 @@
 - Get a grounding with TDD. Go is a good language for learning TDD because it is a simple language to learn and testing is built in
 - Be confident that you'll be able to start writing robust, well tested systems in Go
 
+## Table of contents
+
+0. todo: Install Go, set up environment for productivity.
+1. [Hello, world](/hello-world) - Declaring variables, constants, if/else statements, switch, write your first go program and write your first test. Sub-test syntax and closures.
+2. [Integers](/integers) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
+3. [Iteration](/for) - Learn about `for` and benchmarking.
+
+Property based tests (todo)
+
 ## Background
 
 I have some experience introducing Go to development teams and have tried different approaches as to how to grow a team from some people curious about Go into highly effective writers of Go systems.
@@ -56,15 +65,6 @@ Taking my experience of learning with a group and my own personal way I am going
 - A text editor
 - Some experience with programming. Understanding of concepts like `if`, variables, functions etc. 
 - Comfortable with using the terminal
-
-### Table of contents
-
-0. todo: Install Go, set up environment for productivity.
-1. [Hello, world](/hello-world) - Declaring variables, constants, if/else statements, write your first go program and write your first test. Sub-test syntax and closures.
-2. [Integers](/integers) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
-3. [Iteration](/for) - Learn about `for` and benchmarking.
-
-Property based tests (todo)
 
 ## Feedback
 
