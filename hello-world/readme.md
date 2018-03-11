@@ -56,7 +56,7 @@ func TestHello(t *testing.T) {
 }
 ```
 
-Before explaining, let's just run the code. Type `go test`. It should've passed! Just to check, try deliberately breaking the test by changing the `want` string.
+Before explaining, let's just run the code. Run `go test` in your terminal. It should've passed! Just to check, try deliberately breaking the test by changing the `want` string.
 
 Notice how you have not had to pick between multiple testing frameworks or decipher a testing DSL to write a test. Everything you need is built in to the language and the syntax is the same as the rest of the code you will write. 
 
@@ -243,7 +243,7 @@ func TestHello(t *testing.T) {
 
 	t.Run("saying hello to people", func(t *testing.T) {
 		got := Hello("Chris")
-		want := "Hello, Chrisx"
+		want := "Hello, Chris"
 		assertCorrectMessage(got, want)
 	})
 
