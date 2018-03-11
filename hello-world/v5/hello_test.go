@@ -4,23 +4,23 @@ import "testing"
 
 func TestHello(t *testing.T) {
 
-	assertCorrectMessage := func(expected, actual string) {
+	assertCorrectMessage := func(got, want string) {
 		t.Helper()
-		if expected != actual {
-			t.Errorf("expected '%s' but got '%s'", expected, actual)
+		if got != want {
+			t.Errorf("got '%s' want '%s'", got, want)
 		}
 	}
 
 	t.Run("saying hello to people", func(t *testing.T) {
-		message := Hello("Chris")
-		expected := "Hello, Chris"
-		assertCorrectMessage(expected, message)
+		got := Hello("Chris")
+		want := "Hello, Chris"
+		assertCorrectMessage(got, want)
 	})
 
-	t.Run("say hello world when an empty string is supplied", func(t *testing.T) {
-		message := Hello("")
-		expected := "Hello, World"
-		assertCorrectMessage(expected, message)
+	t.Run("empty string defaults to 'world'", func(t *testing.T) {
+		got := Hello("")
+		want := "Hello, World"
+		assertCorrectMessage(got, want)
 	})
 
 }

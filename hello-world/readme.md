@@ -15,7 +15,7 @@ func main() {
 ## How it works
 When you write a program in Go you will have a `main` package defined with a `main` func inside it. The `func` keyword is how you define a function with a name and a body.
 
-With `import "fmt"` we are importing a package which contains the `Println` function that we use to print
+With `import "fmt"` we are importing a package which contains the `Println` function that we use to print.
 
 ## How to test
 
@@ -47,16 +47,16 @@ package main
 import "testing"
 
 func TestHello(t *testing.T) {
-	message := Hello()
-	expected := "Hello, world"
+	got := Hello()
+	want := "Hello, world"
 
-	if message != expected {
-		t.Errorf("expected '%s' but got '%s'", expected, message)
+	if got != want {
+		t.Errorf("got '%s' want '%s'", got, want)
 	}
 }
 ```
 
-Before explaining, let's just run the code. Type `go test`. It should've passed! Just to check, try deliberately breaking the test by changing the `expected` string.
+Before explaining, let's just run the code. Type `go test`. It should've passed! Just to check, try deliberately breaking the test by changing the `want` string.
 
 Notice how you have not had to pick between multiple testing frameworks or decipher a testing DSL to write a test. Everything you need is built in to the language and the syntax is the same as the rest of the code you will write. 
 
@@ -108,11 +108,11 @@ package main
 import "testing"
 
 func TestHello(t *testing.T) {
-	message := Hello("Chris")
-	expected := "Hello, Chris"
+	got := Hello("Chris")
+	want := "Hello, Chris"
 
-	if message != expected {
-		t.Errorf("expected '%s' but got '%s'", expected, message)
+	if got != want {
+		t.Errorf("got '%s' want '%s'", got, want)
 	}
 }
 ```
@@ -148,7 +148,7 @@ func main() {
 Now when you run your tests you should see something like
 
 ```
-hello_test.go:10: expected 'Hello, Chris' but got 'Hello, world'
+hello_test.go:10: got 'Hello, world' want 'Hello, Chris''
 ```
 
 We finally have a compiling program but it is not meeting our requirements according to the test. 
@@ -199,20 +199,20 @@ Start by writing a new failing test
 func TestHello(t *testing.T) {
 
 	t.Run("saying hello to people", func(t *testing.T) {
-		message := Hello("Chris")
-		expected := "Hello, Chris"
+		got := Hello("Chris")
+		want := "Hello, Chris"
 
-		if message != expected {
-			t.Errorf("expected '%s' but got '%s'", expected, message)
+		if got != want {
+			t.Errorf("got '%s' want '%s'", got, want)
 		}
 	})
 	
 	t.Run("say hello world when an empty string is supplied", func(t *testing.T) {
-		message := Hello("")
-		expected := "Hello, World"
+		got := Hello("")
+		want := "Hello, World"
 
-		if message != expected {
-			t.Errorf("expected '%s' but got '%s'", expected, message)
+		if got != want {
+			t.Errorf("got '%s' want '%s'", got, want)
 		}
 	})
 
@@ -234,29 +234,29 @@ We can and should refactor our tests.
 ```go
 func TestHello(t *testing.T) {
 
-	assertCorrectMessage := func(expected, actual string) {
+	assertCorrectMessage := func(got, want string) {
 		t.Helper()
-		if expected != actual {
-			t.Errorf("expected '%s' but got '%s'", expected, actual)
+		if got != want {
+			t.Errorf("got '%s' want '%s'", got, want)
 		}
 	}
 
 	t.Run("saying hello to people", func(t *testing.T) {
-		message := Hello("Chris")
-		expected := "Hello, Chris"
-		assertCorrectMessage(expected, message)
+		got := Hello("Chris")
+		want := "Hello, Chrisx"
+		assertCorrectMessage(got, want)
 	})
 
-	t.Run("say hello world when an empty string is supplied", func(t *testing.T) {
-		message := Hello("")
-		expected := "Hello, World"
-		assertCorrectMessage(expected, message)
+	t.Run("empty string defaults to 'world'", func(t *testing.T) {
+		got := Hello("")
+		want := "Hello, World"
+		assertCorrectMessage(got, want)
 	})
 
 }
 ```
 
-What have we done here? In Go you can declare functions inside other functions and then they can _close_ over other variables - in this case our `*testing.T`.
+What have we done here? In Go you can declare functions inside other functions and then they can _close_ over other variables - in this case our `*testing.T`. This means we can call `t.Errorf` from within our function, even though `t` is outside of the function definition. 
 
 We've written a function to do our assertion. This reduces duplication and improves readability of our tests.
 
@@ -279,7 +279,15 @@ If we run our tests we should see it satisfies the new requirement and we haven'
 
 ### Discipline
 
-On the face of it, the cycle of writing a test, failing the compiler, making the code pass and then refactoring may seem tedious but sticking to the feedback loop is important. 
+Let's go over the cycle again
+
+- Write a test
+- Make the compiler pass
+- Run the test, see that it fails and check the error message is meaningful
+- Write enough code to make the test pass
+- Refactor
+
+On the face of it this may seem tedious but sticking to the feedback loop is important. 
 
 Not only does it ensure that you have *relevant tests* it helps ensure *you design good software* by refactoring with the safety of tests. 
 
@@ -298,10 +306,10 @@ We should be confident that we can use TDD to flesh out this functionality easil
 Write a test for a user passing in Spanish. Add it to the existing suite.
 
 ```go
-	t.Run("say hello in Spanish", func(t *testing.T) {
-		message := Hello("Elodie", "Spanish")
-		expected := "Hola, Elodie"
-		assertCorrectMessage(expected, message)
+	t.Run("in Spanish", func(t *testing.T) {
+		got := Hello("Elodie", "Spanish")
+		want := "Hola, Elodie"
+		assertCorrectMessage(got, want)
 	})
 ```
 
@@ -335,7 +343,7 @@ When you try and run the test again it will complain about not passing through e
 Fix them by passing through empty strings. Now all your tests should compile _and_ pass, apart from our new scenario
 
 ```
-hello_test.go:29: expected 'Hola, Elodie' but got 'Hello, Elodie'
+hello_test.go:29: got 'Hola, Elodie' want 'Hello, Elodie'
 ```
 
 We can use `if` here to check the language is equal to "Spanish" and if so change the message
