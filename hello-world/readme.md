@@ -234,7 +234,7 @@ We can and should refactor our tests.
 ```go
 func TestHello(t *testing.T) {
 
-	assertCorrectMessage := func(got, want string) {
+	assertCorrectMessage := func(t *testing.T, got, want string) {
 		t.Helper()
 		if got != want {
 			t.Errorf("got '%s' want '%s'", got, want)
@@ -243,26 +243,26 @@ func TestHello(t *testing.T) {
 
 	t.Run("saying hello to people", func(t *testing.T) {
 		got := Hello("Chris")
-		want := "Hello, Chris"
-		assertCorrectMessage(got, want)
+		want := "Hello, Chrisx"
+		assertCorrectMessage(t, got, want)
 	})
 
 	t.Run("empty string defaults to 'world'", func(t *testing.T) {
 		got := Hello("")
 		want := "Hello, World"
-		assertCorrectMessage(got, want)
+		assertCorrectMessage(t, got, want)
 	})
 
 }
 ```
 
-What have we done here? In Go you can declare functions inside other functions and then they can _close_ over other variables - in this case our `*testing.T`. This means we can call `t.Errorf` from within our function, even though `t` is outside of the function definition. 
+What have we done here?
 
-We've written a function to do our assertion. This reduces duplication and improves readability of our tests.
+We've refactored our assertion into a function. This reduces duplication and improves readability of our tests. In go you can declare functions inside other functions and assign them to variables. You can then call them, just like normal functions. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
 
 Now that we have a well-written failing test, let's fix the code, using the `else` keyword.
 
-`TODO:// explain t.Helper()`
+`t.Helper()` is needed to tell the test suite that this method is a helper. By doing this when it fails the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems easier. If you still don't understand, comment it out, make a test fail and observe the test output. 
 
 ```go
 const helloPrefix = "Hello, "
@@ -309,7 +309,7 @@ Write a test for a user passing in Spanish. Add it to the existing suite.
 	t.Run("in Spanish", func(t *testing.T) {
 		got := Hello("Elodie", "Spanish")
 		want := "Hola, Elodie"
-		assertCorrectMessage(got, want)
+		assertCorrectMessage(t, got, want)
 	})
 ```
 
