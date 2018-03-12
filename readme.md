@@ -16,6 +16,11 @@
 
 Property based tests (todo)
 
+## Contributing
+
+- *This project is work in progress* If you would like to contribute, please do get in touch.
+- Any ideas? Create an issue 
+
 ## Background
 
 I have some experience introducing Go to development teams and have tried different approaches as to how to grow a team from some people curious about Go into highly effective writers of Go systems.
