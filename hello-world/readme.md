@@ -260,7 +260,7 @@ What have we done here?
 
 We've refactored our assertion into a function. This reduces duplication and improves readability of our tests. In go you can declare functions inside other functions and assign them to variables. You can then call them, just like normal functions. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
 
-Now that we have a well-written failing test, let's fix the code, using the `else` keyword.
+Now that we have a well-written failing test, let's fix the code, using an `if`.
 
 `t.Helper()` is needed to tell the test suite that this method is a helper. By doing this when it fails the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems easier. If you still don't understand, comment it out, make a test fail and observe the test output. 
 
