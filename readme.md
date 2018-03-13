@@ -19,6 +19,7 @@ Property based tests (todo)
 ## Contributing
 
 - *This project is work in progress* If you would like to contribute, please do get in touch.
+- Read [contributing.md](contributing.md) for guidelines
 - Any ideas? Create an issue 
 
 ## Background
