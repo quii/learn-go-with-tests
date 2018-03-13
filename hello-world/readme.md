@@ -481,7 +481,7 @@ By now you should have some understanding of
 
 - Writing tests
 - Declaring functions, with arguments and return types
-- `if`, `else`, `switch`
+- `if`, `const` and `switch`
 - Declaring variables and constants
 
 ### An understanding of the TDD process and _why_ the steps are important
