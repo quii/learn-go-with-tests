@@ -20,4 +20,6 @@ If you don't feel confident to submit your own guide, submitting an issue for so
     
 - Try and minimise the surface area of required knowledge. Thinking of examples that showcase what you're trying to teach without confusing the reader with lots of other features is important.
 - Follow the [Code Review Comments style guide](https://github.com/golang/go/wiki/CodeReviewComments). It's important for a consistent style across all the sections.
+- Your section should have a runnable application at the end (e.g `package main` with a `main` func) so users can see it in action and play with it
+- All tests should pass
 - `go fmt` the code.
