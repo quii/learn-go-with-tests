@@ -1,31 +1,32 @@
 package concurrency
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
-func TestMultipleWebsiteChecker(t *testing.T) {
+func TestWebsiteChecker(t *testing.T) {
 	websites := []string{
 		"http://google.com",
 		"http://blog.gypsydave5.com",
 		"http://furhurterwe.geds",
 	}
 
-	wants := []bool{
+	expectedResults := []bool{
 		true,
 		true,
 		false,
 	}
 
-	gots := multipleWebsiteChecker(websites)
-	fmt.Println(gots)
+	actualResults := websiteChecker(websites)
 
-	for index, want := range wants {
-		got := gots[index]
+	want := len(websites)
+	got := len(actualResults)
+	if len(actualResults) != len(websites) {
+		t.Fatalf("Wanted %v, got %v", want, got)
+	}
 
+	for index, want := range expectedResults {
+		got := actualResults[index]
 		if want != got {
-			t.Errorf("Wanted %v, got %v", want, got)
+			t.Fatalf("Wanted %v, got %v", want, got)
 		}
 	}
 }

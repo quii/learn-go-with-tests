@@ -1,6 +1,6 @@
 package concurrency
 
-func multipleWebsiteChecker(urls []string) []bool {
+func websiteChecker(urls []string) []bool {
 	results := make([]bool, len(urls))
 
 	for index, url := range urls {
