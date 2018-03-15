@@ -175,3 +175,59 @@ increased dramatically when we were really checking websites? It added around
 a quarter of a second to the total time. Although the Internet is fast, and the
 response we're getting from the websites is coming back pretty quickly, it still
 takes time for our functions to make those real requests.
+
+## A New Requirement...
+
+This is all great, but what happens when we try and check more websites. A _lot_
+more websites. Let's check `http://google.co.uk` fifty times.
+
+```go
+package concurrency
+
+import "testing"
+
+func TestWebsiteChecker(t *testing.T) {
+	websites := make([]string, 50)
+	for i := 0; i < len(websites); i++ {
+		websites[i] = "http://google.co.uk"
+	}
+
+	expectedResults := make([]bool, len(websites))
+	for i := 0; i < len(websites); i++ {
+		expectedResults[i] = true
+	}
+
+	actualResults := websiteChecker(websites)
+
+	want := len(websites)
+	got := len(actualResults)
+	if len(actualResults) != len(websites) {
+		t.Fatalf("Wanted %v, got %v", want, got)
+	}
+
+	for index, want := range expectedResults {
+		got := actualResults[index]
+		if want != got {
+			t.Fatalf("Wanted %v, got %v", want, got)
+		}
+	}
+}
+```
+
+Run this test and, after a bit of thumb-twiddling, we finally get:
+
+```sh
+PASS
+ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        10.320s
+```
+
+Ten seconds. So if we kick the number of checks up to 500...?
+
+```sh
+PASS
+ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        51.523s
+```
+
+Well at least it's consistent.
+
+
