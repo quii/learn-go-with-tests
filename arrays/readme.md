@@ -289,7 +289,8 @@ What we need to do is iterate over the varargs, calculate the sum using our `Sum
 
 ```go
 func SumAll(numbersToSum ...[]int) (sums []int) {
-	sums = make([]int, len(numbersToSum))
+	lengthOfNumbers := len(numbersToSum)
+	sums = make([]int, lengthOfNumbers)
 
 	for i, numbers := range numbersToSum {
 		sums[i] = Sum(numbers)
@@ -358,7 +359,8 @@ Rename the function to `SumAllTails` and re-run the test
 ```go
 func SumAllTails(numbersToSum ...[]int) (sums []int) {
 	for _, numbers := range numbersToSum {
-		sums = append(sums, Sum(numbers[1:]))
+		tail := numbers[1:]
+		sums = append(sums, Sum(tail))
 	}
 
 	return
@@ -416,7 +418,8 @@ func SumAllTails(numbersToSum ...[]int) (sums []int) {
 		if len(numbers) == 0 {
 			sums = append(sums, 0)
 		} else {
-			sums = append(sums, Sum(numbers[1:]))
+			tail := numbers[1:]
+			sums = append(sums, Sum(tail))
 		}
 	}
 
