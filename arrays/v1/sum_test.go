@@ -6,10 +6,10 @@ func TestSum(t *testing.T) {
 
 	numbers := [5]int{1, 2, 3, 4, 5}
 
-	expectedSum := 15
-	actualSum := Sum(numbers)
+	got := Sum(numbers)
+	want := 15
 
-	if expectedSum != actualSum {
-		t.Errorf("expected the sum to be %d but was %d given, %v", expectedSum, actualSum, numbers)
+	if want != got {
+		t.Errorf("got %d want %d given, %v", got, want, numbers)
 	}
 }
