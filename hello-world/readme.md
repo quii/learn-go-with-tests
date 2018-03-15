@@ -295,7 +295,7 @@ Seeing the test fail is an important check because it also lets you see what the
 
 By ensuring your tests are *fast* and setting up your tools so that running tests is simple you can get in to a state of flow when writing your code. 
 
-By not writing tests you are committing to manually checking your code by running your software which breaks your state of flow and you wont be saving yourself any time, especially in the long run. 
+By not writing tests you are committing to manually checking your code by running your software which breaks your state of flow and you won't be saving yourself any time, especially in the long run. 
 
 ## Keep going! More requirements
 
@@ -469,7 +469,7 @@ A few new concepts:
      - You can return whatever it's set to by just calling `return` rather than `return prefix`. 
     - This will display in the Go Doc for your function so it can make the intent of your code clearer.
 - `default` in the switch case will be branched to if none of the other `case` statements match
-- The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We dont want the internals of our algorithm to be exposes to the world so we made this function private.
+- The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposes to the world so we made this function private.
 
 ## Wrapping up
 
