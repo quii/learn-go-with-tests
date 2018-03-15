@@ -1,6 +1,6 @@
 # Arrays - WIP
 
-Arrays allow you to store multiple elements of the same type in a variable
+Arrays allow you to store multiple elements of the same type in a variable in a particular order.
 
 When you have an array, it is very common to have to iterate over them so let's use our new-found knowledge of `for` to make a `Sum` function. `Sum` will take an array of numbers and return the total.
 
@@ -81,7 +81,9 @@ func Sum(numbers [5]int) (sum int) {
 
 An interesting property of arrays is the size is encoded in its type. If you try and pass an `[4]int` into a function that expects `[5]int`, it wont compile.
 
-You may be thinking it's quite cumbersome that arrays are fixed length and most of the time you probably wont be using them! Go has _slices_ which are dynamic in size and most of the time you will probably be using them instead.
+You may be thinking it's quite cumbersome that arrays are fixed length and most of the time you probably wont be using them! 
+
+Go has _slices_ which do not encode the size of the collection and instead can have any size.
 
 The next requirement will be to sum collections of varying sizes
 
@@ -435,7 +437,7 @@ func TestSumAllTails(t *testing.T) {
 		}
 	}
 
-	t.Run("make the sums of some slices", func(t *testing.T) {
+	t.Run("make the sums of tails of", func(t *testing.T) {
 		got := SumAllTails([]int{1, 2}, []int{0, 9})
 		want := []int{2, 9}
 		checkSums(t, got, want)
@@ -463,3 +465,7 @@ We have covered
 - `len` to get the length of an array or slice
 - Test coverage tool
 - `reflect.DeepEqual` and why it's useful but can reduce the type-safety of your code
+
+We've used slices and arrays with integers but they work with any other type too, including arrays/slices themselves. So you can declare a variable of `[][]string` if you need to.
+
+[Check out the go blog post on slices](https://blog.golang.org/go-slices-usage-and-internals) for an in-depth look into slices. Maybe try writing more tests to demonstrate what you learn from reading it.
