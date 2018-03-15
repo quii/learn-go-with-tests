@@ -79,7 +79,7 @@ func Sum(numbers [5]int) (sum int) {
 
 `range` lets you iterate over an array. Every time it is called it returns two values, the index and the value. We are choosing to ignore the index value by using `_`
 
-An interesting property of arrays though is the size is encoded in its type. If you try and pass an `[4]int` into a function that expects `[5]int`, it wont compile.
+An interesting property of arrays is the size is encoded in its type. If you try and pass an `[4]int` into a function that expects `[5]int`, it wont compile.
 
 You may be thinking it's quite cumbersome that arrays are fixed length and most of the time you probably wont be using them! Go has _slices_ which are dynamic in size and most of the time you will probably be using them instead.
 
@@ -259,6 +259,8 @@ func TestSumAll(t *testing.T)  {
 }
 ```
 
+(make sure you `import reflect` in the top of your file to have access to `DeepEqual`)
+
 It's important to note that `reflect.DeepEqual` is not "type safe", the code will compile even if you did something a bit silly. To see this in action, temporarily change the test to:
 
 ```go
@@ -321,6 +323,143 @@ func SumAll(numbersToSum ...[]int) (sums []int) {
 
 In this implementation we are worrying less about capacity. We start with an empty slice (defined in the function signature) and append to it the result of `Sum` as we work through the varargs. 
 
-`TODO: Something around slicing slices e.g mySlice[:3]`
+Our next requirement is to change `SumAll` to `SumAllTails`, where it now calculates the totals of the "tails" of each slice. The tail of a collection is all the items apart from the first one (the head)
 
-## `TODO` Wrapping up
+
+
+## Write the test first
+
+```go
+func TestSumAllTails(t *testing.T)  {
+
+	got := SumAllTails([]int{1,2}, []int{0,9})
+	want := []int{2, 9}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v want %v", got, want)
+	}
+}
+```
+
+## Try and run the test
+
+`./sum_test.go:26:9: undefined: SumAllTails`
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+Rename the function to `SumAllTails` and re-run the test
+
+`sum_test.go:30: got [3 9] want [2 9]`
+
+## Write enough code to make it pass
+
+```go
+func SumAllTails(numbersToSum ...[]int) (sums []int) {
+	for _, numbers := range numbersToSum {
+		sums = append(sums, Sum(numbers[1:]))
+	}
+
+	return
+}
+```
+
+Slices can be sliced! The syntax is `slice[low:high]` If you omit the value on one of the sides of the `:` it captures everything to the side of it. In our case we are saying take from 1 to the end with `numbers[1:]`. You might want to invest some time writing other tests around slices and experimenting with the slice operator so you can be familiar with it.
+
+## Refactor
+
+Not a lot to refactor this time.
+
+What do you think would happen if you passed in an empty array into our function? What is the "tail" of an empty array? What happens when you tell go to capture all elements from `myEmptySlice[1:]`. ?
+
+## Write the test first
+
+```go
+func TestSumAllTails(t *testing.T)  {
+
+	t.Run("make the sums of some slices", func(t *testing.T) {
+		got := SumAllTails([]int{1,2}, []int{0,9})
+		want := []int{2, 9}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+
+	t.Run("safely sum empty slices", func(t *testing.T) {
+		got := SumAllTails([]int{}, []int{3, 4, 5})
+		want :=[]int{0, 9}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+
+}
+```
+
+## Try and run the test
+
+```
+panic: runtime error: slice bounds out of range [recovered]
+	panic: runtime error: slice bounds out of range
+```
+
+Oh no! It's important to note the test _has compiled_, it is a runtime error
+
+## Write enough code to make it pass
+
+```go
+func SumAllTails(numbersToSum ...[]int) (sums []int) {
+	for _, numbers := range numbersToSum {
+		if len(numbers) == 0 {
+			sums = append(sums, 0)
+		} else {
+			sums = append(sums, Sum(numbers[1:]))
+		}
+	}
+
+	return
+}
+```
+
+## Refactor
+
+Our tests have some repeated code around assertion again, let's extract that into a function
+
+```go
+func TestSumAllTails(t *testing.T) {
+
+	checkSums := func(t *testing.T, got, want []int) {
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	}
+
+	t.Run("make the sums of some slices", func(t *testing.T) {
+		got := SumAllTails([]int{1, 2}, []int{0, 9})
+		want := []int{2, 9}
+		checkSums(t, got, want)
+	})
+
+	t.Run("safely sum empty slices", func(t *testing.T) {
+		got := SumAllTails([]int{}, []int{3, 4, 5})
+		want := []int{0, 9}
+		checkSums(t, got, want)
+	})
+
+}
+```
+
+A handy side-effect of this is this adds a little type-safety to our code. If a silly developer adds a new test with `checkSums(t, got, "dave")` the compiler will stop them in their tracks.
+
+## Wrapping up
+
+We have covered
+- Arrays
+- Slices
+    - The various ways to make them
+    - How they have a _fixed_ capacity but you can create new slices from old ones using `append`
+    - How to slice, slices!
+- `len` to get the length of an array or slice
+- Test coverage tool
+- `reflect.DeepEqual` and why it's useful but can reduce the type-safety of your code
