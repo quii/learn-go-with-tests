@@ -1,5 +1,7 @@
 # Learn go with tests
 
+[![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)](https://travis-ci.org/quii/learn-go-with-tests)
+
 ## Why?
 
 - Explore the Go language by writing tests
