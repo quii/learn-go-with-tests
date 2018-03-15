@@ -1,8 +1,8 @@
 package main
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestSum(t *testing.T) {
