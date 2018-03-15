@@ -469,3 +469,5 @@ We have covered
 We've used slices and arrays with integers but they work with any other type too, including arrays/slices themselves. So you can declare a variable of `[][]string` if you need to.
 
 [Check out the go blog post on slices](https://blog.golang.org/go-slices-usage-and-internals) for an in-depth look into slices. Maybe try writing more tests to demonstrate what you learn from reading it.
+
+Another handy way to experiment with Go other than writing tests is the Go playground. You can try most things out and you can easily share your code if you need to ask questions. [I have made a go playground with a slice in it for you to experiment with](https://play.golang.org/p/ICCWcRGIO68)
