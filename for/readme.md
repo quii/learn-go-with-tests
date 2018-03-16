@@ -6,7 +6,7 @@ Let's write a test for a function that repeats a character 5 times.
 
 There's nothing new so far, so try and write it yourself for practice.
 
-## 1. Write the test first
+## Write the test first
 
 ```go
 package main
