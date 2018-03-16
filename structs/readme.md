@@ -355,7 +355,7 @@ Once you add this to the code, the tests will pass.
 
 This is quite different to interfaces in most other programming languages. Normally you have to write code to say `My type Foo implements interface Bar`.
 
-In this case, we didn't have to do this, yet we can still pass our `Rectangle` and `Circle` instances as if they are `Shapes`. That's because in Go interface resolution is `implicit`. If the type you pass in matches what the interface is asking for, it will compile. 
+In this case, we didn't have to do this, yet we can still pass our `Rectangle` and `Circle` instances as if they are `Shapes`. That's because in Go **interface resolution is implicit**. If the type you pass in matches what the interface is asking for, it will compile. 
 
 ### Decoupling
 
