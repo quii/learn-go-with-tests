@@ -2,29 +2,44 @@ package concurrency
 
 import "testing"
 
+func fakeIsWebsiteOK(url string) bool {
+	if url == "http://blog.gypsydave5.com" {
+		return false
+	}
+	return true
+}
+
 func TestWebsiteChecker(t *testing.T) {
-	websites := make([]string, 500)
-	for i := 0; i < len(websites); i++ {
-		websites[i] = "http://google.co.uk"
+	websites := []string{
+		"http://google.com",
+		"http://blog.gypsydave5.com",
+		"waat://furhurterwe.geds",
 	}
 
-	expectedResults := make([]bool, len(websites))
-	for i := 0; i < len(websites); i++ {
-		expectedResults[i] = true
+	expectedResults := []bool{
+		true,
+		false,
+		true,
 	}
 
-	actualResults := websiteChecker(websites)
+	actualResults := WebsiteChecker(fakeIsWebsiteOK, websites)
 
 	want := len(websites)
 	got := len(actualResults)
-	if len(actualResults) != len(websites) {
+	if want != got {
 		t.Fatalf("Wanted %v, got %v", want, got)
 	}
 
-	for index, want := range expectedResults {
-		got := actualResults[index]
-		if want != got {
-			t.Fatalf("Wanted %v, got %v", want, got)
+	if !sameResults(expectedResults, actualResults) {
+		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
+	}
+}
+
+func sameResults(as, bs []bool) bool {
+	for index, a := range as {
+		if a != bs[index] {
+			return false
 		}
 	}
+	return true
 }

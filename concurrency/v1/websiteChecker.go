@@ -1,11 +1,9 @@
 package concurrency
 
-func websiteChecker(urls []string) []bool {
-	results := make([]bool, len(urls))
-
-	for index, url := range urls {
-		results[index] = IsWebsiteOK(url)
+func WebsiteChecker(urls []string) (results []bool) {
+	for _, url := range urls {
+		results = append(results, IsWebsiteOK(url))
 	}
 
-	return results
+	return
 }
