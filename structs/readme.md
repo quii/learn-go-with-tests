@@ -81,7 +81,7 @@ func Area(width float64, height float64) (area float64) {
 
 ## Refactor
 
-So far we have been talking about rectangles a lot but it's not reflected much in our code. We pass width and height `float64` to our functions, but they could be the width and height of a circle. 
+So far we have been talking about rectangles a lot but it's not reflected much in our code. We pass width and height `float64` to our functions, but they could be the width and height of a different shape. 
 
 We could name our functions more specifically but instead we could define our own _type_ called `Rectangle` which encapsulates this concept for us. We can then use that type as an argument to our functions instead.
 
