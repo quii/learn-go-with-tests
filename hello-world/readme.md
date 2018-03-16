@@ -258,7 +258,7 @@ func TestHello(t *testing.T) {
 
 What have we done here?
 
-We've refactored our assertion into a function. This reduces duplication and improves readability of our tests. In go you can declare functions inside other functions and assign them to variables. You can then call them, just like normal functions. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
+We've refactored our assertion into a function. This reduces duplication and improves readability of our tests. In Go you can declare functions inside other functions and assign them to variables. You can then call them, just like normal functions. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
 
 Now that we have a well-written failing test, let's fix the code, using an `if`.
 
