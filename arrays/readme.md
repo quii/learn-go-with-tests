@@ -83,17 +83,21 @@ func Sum(numbers [5]int) (sum int) {
 
 Now we are happy with the code I would amend the previous commit so we only check in the lovely version of our code with its test.
 
-An interesting property of arrays is the size is encoded in its type. If you try and pass an `[4]int` into a function that expects `[5]int`, it won't compile.
+### Arrays and their type
+
+An interesting property of arrays is the size is encoded in its type. If you try and pass an `[4]int` into a function that expects `[5]int`, it won't compile. They are different types so it's just the same as trying to pass a `string` into a function that wants an `int`.
 
 You may be thinking it's quite cumbersome that arrays are fixed length and most of the time you probably won't be using them! 
 
 Go has _slices_ which do not encode the size of the collection and instead can have any size.
 
-The next requirement will be to sum collections of varying sizes
+The next requirement will be to sum collections of varying sizes.
 
 ## Write the test first
 
 We will now use the slice type which allows us to have collections of any size. The syntax is very similar to arrays, you just omit the size when declaring them
+
+`mySlice := []int{1,2,3}` rather than `mySlice := [3]int{1,2,3}`
 
 ```go
 func TestSum(t *testing.T) {
@@ -154,7 +158,7 @@ It turns out that fixing the compiler problems were all we need to do here and t
 
 ## Refactor
 
-We had already refactored `Sum` and all we've done is change from arrays to slices, so there's not a lot to do here. But our tests could do with some love...
+We had already refactored `Sum` and all we've done is change from arrays to slices, so there's not a lot to do here. Remember that we must not neglect our test code in the refactoring stage and we have some to do here.
 
 ```go
 func TestSum(t *testing.T) {
@@ -184,7 +188,7 @@ func TestSum(t *testing.T) {
 }
 ```
 
-It is important to question the value of your tests. It should not be a goal to have as many tests as possible, but rather to have as much *confidence* as possible in your code base. Having too many tests can turn in to a real problem and it just adds more overhead in maintenance. 
+It is important to question the value of your tests. It should not be a goal to have as many tests as possible, but rather to have as much *confidence* as possible in your code base. Having too many tests can turn in to a real problem and it just adds more overhead in maintenance. **Every test has a cost**.
 
 In our case, you can see that having two tests for this function is redundant. If it works for a slice of one size it's very likely it'll work for a slice of any size (within reason).
 
