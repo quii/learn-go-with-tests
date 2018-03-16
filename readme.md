@@ -14,7 +14,7 @@
 1. [Hello, world](/hello-world) - Declaring variables, constants, if/else statements, switch, write your first go program and write your first test. Sub-test syntax and closures.
 2. [Integers](/integers) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
 3. [Iteration](/for) - Learn about `for` and benchmarking.
-4. [Arrays and slices (WIP)](/arrays) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
+4. [Arrays and slices](/arrays) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
 5. [Structs, methods & interfaces (WIP)](/structs) - Learn about `struct`, methods, `interface` and table driven tests.
 6. Pointers
 7. [Dependency Injection & interfaces (WIP)](/di-and-interfaces) - Learn about dependency injection, how it relates to using interfaces and a primer on io
