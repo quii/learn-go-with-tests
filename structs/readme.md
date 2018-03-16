@@ -351,7 +351,17 @@ type Shape interface {
 
 Once you add this to the code, the tests will pass. 
 
+### Wait, what?
+
+This is quite different to interfaces in most other programming languages. Normally you have to write code to say `My type Foo implements interface Bar`.
+
+In this case, we didn't have to do this, yet we can still pass our `Rectangle` and `Circle` instances as if they are `Shapes`. That's because in Go interface resolution is `implicit`. If the type you pass in matches what the interface is asking for, it will compile. 
+
+### Decoupling
+
 Notice how our helper does not need to concern itself with whether the shape is a rectangle or a square or a triangle. By declaring an interface the helper is _decoupled_ from the concrete types and just has the method it needs to do it's job. 
+
+This kind of approach of using interfaces to design **only what you need** is very important in software design and will be covered in later sections.
 
 ## Further refactoring
 
