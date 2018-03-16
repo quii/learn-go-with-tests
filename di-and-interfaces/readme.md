@@ -91,6 +91,8 @@ The test will not compile
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
+_Listen to the compiler_ and fix the problem.
+
 ```go
 func Greet(writer *bytes.Buffer, name string) {
 	fmt.Printf("Hello, %s", name)
@@ -127,9 +129,9 @@ func main() {
 
 `./di.go:14:7: cannot use os.Stdout (type *os.File) as type *bytes.Buffer in argument to Greet`
 
-As discussed earlier `fmt.Fprintf` allows you to pass in an `io.Writer` which we know both `os.Stdout` and `bytes.Buffer` both implement.
+As discussed earlier `fmt.Fprintf` allows you to pass in an `io.Writer` which we know both `os.Stdout` and `bytes.Buffer` implement.
 
-If we change our code to use the more general purpose interface we can then use it in both tests and in our application
+If we change our code to use the more general purpose interface we can then use it in both tests and in our application.
 
 ```go
 package main
