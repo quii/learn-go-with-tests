@@ -79,6 +79,10 @@ func Sum(numbers [5]int) (sum int) {
 
 `range` lets you iterate over an array. Every time it is called it returns two values, the index and the value. We are choosing to ignore the index value by using `_`
 
+#### Back to source control
+
+Now we are happy with the code I would amend the previous commit so we only check in the lovely version of our code with its test.
+
 An interesting property of arrays is the size is encoded in its type. If you try and pass an `[4]int` into a function that expects `[5]int`, it won't compile.
 
 You may be thinking it's quite cumbersome that arrays are fixed length and most of the time you probably won't be using them! 
