@@ -6,6 +6,16 @@
 - Make tests pass using a sleep, but demonstrate that this doesn't scale
 - introduce Channels for synchronization between processes
 
+---
+
+change of approach!!!
+
+- start with a result object coming back from the original function
+- avoids this mess with the ordering of the results
+- is this copping out?
+
+---
+
 # Concurrency
 
 Your colleague, Jo, has written a function that checks whether a webpage is
