@@ -62,7 +62,7 @@ To get the value out of an array at a particular index, just use `array[index]` 
 
 At this point if you are using source control (which you should!) I would `commit` the code as it is. We have working software backed by a test. 
 
-I _wouldnt_ push to master though, because I plan to refactor next. It is nice to commit at this point in case you somehow get in to a mess with refactoring - you can always go back to the working version.
+I _wouldn't_ push to master though, because I plan to refactor next. It is nice to commit at this point in case you somehow get into a mess with refactoring - you can always go back to the working version.
 
 ## Refactor
 
@@ -79,9 +79,9 @@ func Sum(numbers [5]int) (sum int) {
 
 `range` lets you iterate over an array. Every time it is called it returns two values, the index and the value. We are choosing to ignore the index value by using `_`
 
-An interesting property of arrays is the size is encoded in its type. If you try and pass an `[4]int` into a function that expects `[5]int`, it wont compile.
+An interesting property of arrays is the size is encoded in its type. If you try and pass an `[4]int` into a function that expects `[5]int`, it won't compile.
 
-You may be thinking it's quite cumbersome that arrays are fixed length and most of the time you probably wont be using them! 
+You may be thinking it's quite cumbersome that arrays are fixed length and most of the time you probably won't be using them! 
 
 Go has _slices_ which do not encode the size of the collection and instead can have any size.
 
@@ -106,7 +106,6 @@ func TestSum(t *testing.T) {
 	})
 
 	t.Run("collection of any size", func(t *testing.T) {
-
 		numbers := []int{1, 2, 3}
 
 		got := Sum(numbers)
@@ -132,7 +131,7 @@ The problem here is we can either
 - Break the existing API by changing the argument to `Sum` to be a slice rather than an array. When we do this we will know we have potentially ruined someone's day because our _other_ test will not compile! 
 - Create a new function
 
-In our case, no-one else is using our function so rather than having two functions to maintain lets just have one. 
+In our case, no-one else is using our function so rather than having two functions to maintain let's just have one. 
 
 ```go
 func Sum(numbers []int) (sum int) {
@@ -151,7 +150,7 @@ It turns out that fixing the compiler problems were all we need to do here and t
 
 ## Refactor
 
-We had already refactored `Sum` and all we've done is change from arrays to slices so there's not a lot to do here but our tests could do with some love. 
+We had already refactored `Sum` and all we've done is change from arrays to slices, so there's not a lot to do here. But our tests could do with some love...
 
 ```go
 func TestSum(t *testing.T) {
@@ -168,7 +167,6 @@ func TestSum(t *testing.T) {
 	})
 
 	t.Run("collection of any size", func(t *testing.T) {
-
 		numbers := []int{1, 2, 3}
 
 		got := Sum(numbers)
@@ -184,7 +182,7 @@ func TestSum(t *testing.T) {
 
 It is important to question the value of your tests. It should not be a goal to have as many tests as possible, but rather to have as much *confidence* as possible in your code base. Having too many tests can turn in to a real problem and it just adds more overhead in maintenance. 
 
-In our case, you can see that having two tests for this function is redundant. If it works for a slice of one size it's very likely it'll work for any size (within reason).
+In our case, you can see that having two tests for this function is redundant. If it works for a slice of one size it's very likely it'll work for a slice of any size (within reason).
 
 Go's built-in testing toolkit features a coverage tool, which can help identify areas of your code you have not covered. I do want to stress that having 100% coverage should not be your goal, it's just a tool to give you an idea of your coverage. If you have been strict with TDD it's quite likely you'll have close to 100% coverage anyway.
 
@@ -326,15 +324,12 @@ func SumAll(numbersToSum ...[]int) (sums []int) {
 
 In this implementation we are worrying less about capacity. We start with an empty slice (defined in the function signature) and append to it the result of `Sum` as we work through the varargs. 
 
-Our next requirement is to change `SumAll` to `SumAllTails`, where it now calculates the totals of the "tails" of each slice. The tail of a collection is all the items apart from the first one (the head)
-
-
+Our next requirement is to change `SumAll` to `SumAllTails`, where it now calculates the totals of the "tails" of each slice. The tail of a collection is all the items apart from the first one (the "head")
 
 ## Write the test first
 
 ```go
 func TestSumAllTails(t *testing.T)  {
-
 	got := SumAllTails([]int{1,2}, []int{0,9})
 	want := []int{2, 9}
 
@@ -408,7 +403,7 @@ panic: runtime error: slice bounds out of range [recovered]
 	panic: runtime error: slice bounds out of range
 ```
 
-Oh no! It's important to note the test _has compiled_, it is a runtime error. Compile time errors are our friend because they help us write software that works, runtime errors are our enemies because they effect our users. 
+Oh no! It's important to note the test _has compiled_, it is a runtime error. Compile time errors are our friend because they help us write software that works, runtime errors are our enemies because they affect our users. 
 
 ## Write enough code to make it pass
 
@@ -471,6 +466,6 @@ We have covered
 
 We've used slices and arrays with integers but they work with any other type too, including arrays/slices themselves. So you can declare a variable of `[][]string` if you need to.
 
-[Check out the go blog post on slices](https://blog.golang.org/go-slices-usage-and-internals) for an in-depth look into slices. Maybe try writing more tests to demonstrate what you learn from reading it.
+[Check out the Go blog post on slices](https://blog.golang.org/go-slices-usage-and-internals) for an in-depth look into slices. Try writing more tests to demonstrate what you learn from reading it.
 
 Another handy way to experiment with Go other than writing tests is the Go playground. You can try most things out and you can easily share your code if you need to ask questions. [I have made a go playground with a slice in it for you to experiment with](https://play.golang.org/p/ICCWcRGIO68)
