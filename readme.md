@@ -15,6 +15,7 @@
 2. [Integers](/integers) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
 3. [Iteration](/for) - Learn about `for` and benchmarking.
 4. [Arrays and slices (WIP)](/arrays) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
+5. [Structs, methods & interfaces (WIP)](/structs) - Learn about `struct`, methods, `interface` and table driven tests.
 
 Property based tests (todo)
 

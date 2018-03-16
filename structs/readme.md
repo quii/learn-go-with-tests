@@ -359,7 +359,7 @@ In this case, we didn't have to do this, yet we can still pass our `Rectangle` a
 
 ### Decoupling
 
-Notice how our helper does not need to concern itself with whether the shape is a rectangle or a square or a triangle. By declaring an interface the helper is _decoupled_ from the concrete types and just has the method it needs to do it's job. 
+Notice how our helper does not need to concern itself with whether the shape is a `Rectangle` or a `Circle` or a `Triangle`. By declaring an interface the helper is _decoupled_ from the concrete types and just has the method it needs to do it's job. 
 
 This kind of approach of using interfaces to design **only what you need** is very important in software design and will be covered in later sections.
 
