@@ -408,7 +408,7 @@ panic: runtime error: slice bounds out of range [recovered]
 	panic: runtime error: slice bounds out of range
 ```
 
-Oh no! It's important to note the test _has compiled_, it is a runtime error
+Oh no! It's important to note the test _has compiled_, it is a runtime error. Compile time errors are our friend because they help us write software that works, runtime errors are our enemies because they effect our users. 
 
 ## Write enough code to make it pass
 
