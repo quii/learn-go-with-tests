@@ -642,10 +642,18 @@ see one of the above three outputs. So now what's going wrong?
 
 There are two issues. First, we're not waiting long enough - this is why we get
 a set of results that isn't the right length. We could fix this by just bumping
-up the time slightly if it wasn't for the other problem.
+up the time slightly - or just waiting for the results slice to be the right
+length - if it wasn't for the other problem.
 
-The other problem is that the goroutines are appending to the results slice in
-a different order to that which they were called in.
+The other problem is that the goroutines are able to append to the results slice in
+a different order to that which they were called in, which has the effect of the
+results coming back in a different order.
+
+This is not a problem that can be solved by sleeping for a few extra seconds; we
+will need a completely approach to handling concurrency that allows coordination
+between different processes.
+
+#### Channels
 
 [^1]: For further reading on Test Doubles, Stubs, Mocks and the like, see https://martinfowler.com/articles/mocksArentStubs.html
 
