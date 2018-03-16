@@ -1,5 +1,5 @@
 package main
 
-func Perimeter(width int, height int) (perimeter int) {
+func Perimeter(width float64, height float64) (perimeter float64) {
 	return 2 * (width + height)
 }
