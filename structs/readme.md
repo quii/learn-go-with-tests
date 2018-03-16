@@ -81,9 +81,9 @@ func Area(width float64, height float64) (area float64) {
 
 ## Refactor
 
-So far we have been talking about rectangles a lot but it's not reflected much in our code. We pass width and height float64o our functions, but they could be the width and height of a circle. 
+So far we have been talking about rectangles a lot but it's not reflected much in our code. We pass width and height `float64` to our functions, but they could be the width and height of a circle. 
 
-We of course could possible name our functions more specifically but instead we could define our own _type_ called `Rectangle` which encapsulates this concept for us. We can then use that type as an argument to our functions instead.
+We could name our functions more specifically but instead we could define our own _type_ called `Rectangle` which encapsulates this concept for us. We can then use that type as an argument to our functions instead.
 
 A struct is just a named collection of fields where you can store data.
 
@@ -361,7 +361,7 @@ In this case, we didn't have to do this, yet we can still pass our `Rectangle` a
 
 Notice how our helper does not need to concern itself with whether the shape is a `Rectangle` or a `Circle` or a `Triangle`. By declaring an interface the helper is _decoupled_ from the concrete types and just has the method it needs to do it's job. 
 
-This kind of approach of using interfaces to design **only what you need** is very important in software design and will be covered in later sections.
+This kind of approach of using interfaces to declare **only what you need** is very important in software design and will be covered in more detail in later sections.
 
 ## Further refactoring
 
