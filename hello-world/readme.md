@@ -437,7 +437,7 @@ Write a test to now include a greeting in the language of your choice and you sh
 
 ### one...last...refactor?
 
-You could argue that maybe our function is getting a little big. The simplest refactor for this would be to extract out some functionality into another function and you already know how to declare functions.
+You could argue that maybe our function is getting a little big. The simplest refactor for this would be to extract out some functionality into another function.
 
 ```go
 func Hello(name string, language string) string {
