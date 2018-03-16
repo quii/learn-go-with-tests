@@ -142,7 +142,7 @@ func Area(rectangle Rectangle) (area float64) {
 }
 ```
 
-I hope you'll agree that passing a `Rectangle` to a function conveys our float64ent more clearly but there are more benefits of using structs that we will get on to.
+I hope you'll agree that passing a `Rectangle` to a function conveys our intent more clearly but there are more benefits of using structs that we will get on to.
 
 Our next requirement is to write an `Area` function for circles.
 
