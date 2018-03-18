@@ -80,9 +80,9 @@ If statements in Go are very much like other programming languages.
 
 We're declaring some variables with the syntax `varName := value`, which lets us re-use some values in our test for readability
 
-##### `t.ErrorF`
+##### `t.Errorf`
 
-We are calling the `ErrorF` _method_ on our `t` which will print out a message and fail the test. The `F` stands for format which allows us to build a string with values inserted into the placeholder values `%s`. When you made the test fail it should be clear how it works. 
+We are calling the `Errorf` _method_ on our `t` which will print out a message and fail the test. The `f` stands for format which allows us to build a string with values inserted into the placeholder values `%s`. When you made the test fail it should be clear how it works. 
 
 We will later explore the difference between methods and functions.
 
