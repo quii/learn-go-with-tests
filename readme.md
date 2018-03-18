@@ -10,6 +10,10 @@
 
 ## Table of contents
 
+If there's no link, it's not done yet! [why not contribute?](contributing.md)
+
+### Go fundamentals
+
 0. todo: Install Go, set up environment for productivity.
 1. [Hello, world](/hello-world) - Declaring variables, constants, if/else statements, switch, write your first go program and write your first test. Sub-test syntax and closures.
 2. [Integers](/integers) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
@@ -18,8 +22,19 @@
 5. [Structs, methods & interfaces (WIP)](/structs) - Learn about `struct`, methods, `interface` and table driven tests.
 6. Pointers
 7. [Dependency Injection & interfaces (WIP)](/di-and-interfaces) - Learn about dependency injection, how it relates to using interfaces and a primer on io
+8. Concurrency (WIP)
+9. Errors
 
 Property based tests (todo)
+
+### Standard lib essentials
+
+- `io`
+- HTTP client
+- HTTP server
+- JSON marhshalling
+- `time`
+- Sorting
 
 ## Contributing
 
