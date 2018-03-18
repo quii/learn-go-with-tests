@@ -1,13 +1,13 @@
 package main
 
 import (
-"fmt"
-"os"
-"io"
+	"fmt"
+	"io"
+	"os"
 )
 
 func Greet(writer io.Writer, name string) {
-	fmt.Fprintf(writer,"Hello, %s", name)
+	fmt.Fprintf(writer, "Hello, %s", name)
 }
 
 func main() {

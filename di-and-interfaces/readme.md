@@ -108,8 +108,8 @@ The test fails. Notice that the name is getting printed out, but it's going to s
 Use the writer to send the greeting to the buffer in our test
 
 ```go
-func Greet(writer *bytes.Buffer, name string) {
-	fmt.Fprintf(writer,"Hello, %s", name)
+func Greet(writer io.Writer, name string) {
+	fmt.Fprintf(writer, "Hello, %s", name)
 }
 ```
 
@@ -131,7 +131,7 @@ func main() {
 
 As discussed earlier `fmt.Fprintf` allows you to pass in an `io.Writer` which we know both `os.Stdout` and `bytes.Buffer` implement.
 
-If we change our code to use the more general purpose interface we can then use it in both tests and in our application.
+If we change our code to use the more general purpose interface we can now use it in both tests and in our application.
 
 ```go
 package main
@@ -143,7 +143,7 @@ import (
 )
 
 func Greet(writer io.Writer, name string) {
-	fmt.Fprintf(writer,"Hello, %s", name)
+	fmt.Fprintf(writer, "Hello, %s", name)
 }
 
 func main() {
@@ -189,9 +189,13 @@ When you write a HTTP handler, you are given a `http.ResponseWriter` and the `ht
 
 You can probably guess that `http.ResponseWriter` also implements `io.Writer` so this is why we could re-use our `Greet` function inside our handler.
 
-The point I am trying to make is that by injecting the dependency of "where to write the data" we have made a function that can be used to write to files, stdout, the internet and lots more. 
-
 ## Wrapping up 
 
-wip wip
+Our first round of code was not easy to test because it wrote data to somewhere we couldn't control.
+
+_Motivated by our tests_ we refactored the code so we could control _where_ the data was written by **injecting a dependency**. 
+
+By having some familiarity of the `io.Writer` interface we are able to use `bytes.Buffer` in our test as our `Writer` and then we can use other `Writer`s from the standard library to use our function in a command line app or in web server.
+
+The more familiar you are with the standard library the more you'll see these general purpose interfaces which you can then re-use in your own code to make your software reusable in a number of contexts.
 
