@@ -201,8 +201,73 @@ ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.269s
 
 #### Refactor
 
-Things are in a pretty good state at the moment, probably because we used what
-we learned from earlier tutorials when we wrote our test. So, no refactor.
+I don't like having to compare two whole maps when trying to work out which
+keys and values are different, so we're going to rewrite the comparison
+function to avoid using `DeepEquals` and to instead compare the two maps in
+a more detailed way.
+
+```go
+package concurrency
+
+import "testing"
+
+func TestWebsiteChecker(t *testing.T) {
+
+	websites := []string{
+		"http://google.com",
+		"http://blog.gypsydave5.com",
+		"waat://furhurterwe.geds",
+	}
+
+	actualResults := WebsiteChecker(websites)
+
+	want := len(websites)
+	got := len(actualResults)
+	if want != got {
+		t.Fatalf("Wanted %v, got %v", want, got)
+	}
+
+	expectedResults := map[string]bool{
+		"http://google.com":          true,
+		"http://blog.gypsydave5.com": true,
+		"waat://furhurterwe.geds":    false,
+	}
+
+	assertSameResults(t, expectedResults, actualResults)
+}
+
+func assertSameResults(t *testing.T, expectedResults, actualResults map[string]bool) {
+	for expectedKey, expectedValue := range expectedResults {
+		actualValue, ok := actualResults[expectedKey]
+		if !ok {
+			t.Fatalf("actual results did not contain expected key: '%s'", expectedKey)
+		}
+		if actualValue != expectedValue {
+			t.Fatalf("expected value of key '%s' in actual results to be '%v', but it was '%v'", expectedKey, expectedValue, actualValue)
+		}
+	}
+
+	for actualKey, _ := range actualResults {
+		if _, ok := expectedResults[actualKey]; !ok {
+			t.Fatalf("found unexpected key in actual results: '%s'", actualKey)
+		}
+	}
+}
+```
+
+This helper function checks that the actual results have each expected key and
+value, and also checks that the actual results don't have any extra keys we
+weren't expecting. We will get a more readable error for each of these failures.
+
+We're taking advantage of the way that assignment from out of a map in Go returns two
+values: the actual value being assigned, and an `ok` value, which is `true` if
+the map actually contained the value, and false if it didn't. This is useful as
+missing values in a map automatically take the zero value of their type - in
+this case, for a bool, 'false'.
+
+Read more about [maps][godoc_maps] and [zero values][godoc_zero_values] in the
+Go documentation.
+
 
 ## Dependency Injection
 
@@ -644,8 +709,9 @@ between different processes.
 
 [^1]: For further reading on Test Doubles, Stubs, Mocks and the like, see https://martinfowler.com/articles/mocksArentStubs.html
 
-
 [Arrays]: ../arrays/
+[godoc_maps]: https://blog.golang.org/go-maps-in-action
+[godoc_zero_values]: https://golang.org/ref/spec#The_zero_value
 
 ## An observation
 
