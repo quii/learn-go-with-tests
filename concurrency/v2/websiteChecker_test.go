@@ -1,6 +1,8 @@
 package concurrency
 
-import "testing"
+import (
+	"testing"
+)
 
 func fakeIsWebsiteOK(url string) bool {
 	if url == "http://blog.gypsydave5.com" {
@@ -16,12 +18,6 @@ func TestWebsiteChecker(t *testing.T) {
 		"waat://furhurterwe.geds",
 	}
 
-	expectedResults := []bool{
-		true,
-		false,
-		true,
-	}
-
 	actualResults := WebsiteChecker(fakeIsWebsiteOK, websites)
 
 	want := len(websites)
@@ -30,16 +26,29 @@ func TestWebsiteChecker(t *testing.T) {
 		t.Fatalf("Wanted %v, got %v", want, got)
 	}
 
-	if !sameResults(expectedResults, actualResults) {
-		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
+	expectedResults := map[string]bool{
+		"http://google.com":          true,
+		"http://blog.gypsydave5.com": false,
+		"waat://furhurterwe.geds":    true,
 	}
+
+	assertSameResults(t, expectedResults, actualResults)
 }
 
-func sameResults(as, bs []bool) bool {
-	for index, a := range as {
-		if a != bs[index] {
-			return false
+func assertSameResults(t *testing.T, expectedResults, actualResults map[string]bool) {
+	for expectedKey, expectedValue := range expectedResults {
+		actualValue, ok := actualResults[expectedKey]
+		if !ok {
+			t.Fatalf("actual results did not contain expected key: '%s'", expectedKey)
+		}
+		if actualValue != expectedValue {
+			t.Fatalf("expected value of key '%s' in actual results to be '%v', but it was '%v'", expectedKey, expectedValue, actualValue)
 		}
 	}
-	return true
+
+	for actualKey, _ := range actualResults {
+		if _, ok := expectedResults[actualKey]; !ok {
+			t.Fatalf("found unexpected key in actual results: '%s'", actualKey)
+		}
+	}
 }

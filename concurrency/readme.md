@@ -268,7 +268,6 @@ this case, for a bool, 'false'.
 Read more about [maps][godoc_maps] and [zero values][godoc_zero_values] in the
 Go documentation.
 
-
 ## Dependency Injection
 
 ### Write the test first
@@ -282,26 +281,23 @@ And in true TDD style, we can demonstrate this with a failing test. So, turn off
 the computer's WiFi / unplug the network cable and run the tests again:
 
 ```sh
---- FAIL: TestWebsiteChecker (0.20s)
-        websiteChecker_test.go:27: Wanted true, got false
+--- FAIL: TestWebsiteChecker (0.00s)
+        websiteChecker_test.go:39: expected value of key 'http://google.com' in actual results to be 'true', but it was 'false'
 FAIL
 exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2        0.214s
+FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2        0.018s
 ```
 
 This dependency on the Internet is a bad thing because these failures will have
 nothing to do with any changes to the behaviour of our code. More precisely, we
 can say that our dependency is on Jo's function `IsWebsiteOK`. If that function
-stops working for any reason at all - whether the network cuts out or Jo creates
-a bug in her code - our code will stop working and our tests will fail.
+stops working for any reason at all - whether the network cuts out or the code
+has a bug - our tests will fail.
 
-To mitigate this problem we can make `IsWebsiteOK` an extra argument to our
-`WebsiteChecker` function. Then, in the tests, we can use a different function
-with the same interface as `IsWebsiteOK` that behaves in a way that we can
-control in our tests.
-
-Let's try it out. So, leaving the internet off, let's make some changes to
-`websiteChecker_test.go`. We're going to change our original test like so
+To mitigate this problem we can make the function `IsWebsiteOK` an
+argument to our `WebsiteChecker` function. Then, in the tests, we can use
+a different function with the same interface as that behaves in a way that we
+can control.
 
 ```go
 package concurrency
@@ -322,12 +318,6 @@ func TestWebsiteChecker(t *testing.T) {
 		"waat://furhurterwe.geds",
 	}
 
-	expectedResults := []bool{
-		true,
-		false,
-		true,
-	}
-
 	actualResults := WebsiteChecker(fakeIsWebsiteOK, websites)
 
 	want := len(websites)
@@ -336,18 +326,22 @@ func TestWebsiteChecker(t *testing.T) {
 		t.Fatalf("Wanted %v, got %v", want, got)
 	}
 
-	if !sameResults(expectedResults, actualResults) {
-		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
+	expectedResults := map[string]bool{
+		"http://google.com":          true,
+		"http://blog.gypsydave5.com": false,
+		"waat://furhurterwe.geds":    true,
 	}
+
+	assertSameResults(t, expectedResults, actualResults)
 }
 ```
 
 We've added a new function, `fakeIsWebsiteOK`, which has the same behaviour as
-`IsWebsiteOK`. From the outside you couldn't tell the difference between them
+`IsWebsiteOK`. From the outside you couldn't tell the difference between them -
 they take a `string` and return a `bool`. But on the inside `fakeIsWebsiteOK`
 is just an `if` statement that always returns `true` unless the `string`
 argument is `"http://blog.gypsydave5.com"`. It's a function we have complete
-control over - because we wrote it!
+control over - because we wrote it.
 
 The expectations have also been updated; we now expect the middle one to fail.
 
@@ -361,10 +355,8 @@ websites. So that's what we've written in the test
 
 ### Try and run the test
 
-If we run this we get
-
 ```sh
-./websiteChecker_test.go:25:33: too many arguments in call to websiteChecker
+./websiteChecker_test.go:21:33: too many arguments in call to WebsiteChecker
         have (func(string) bool, []string)
         want ([]string)
 FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2 [build failed]
@@ -386,34 +378,34 @@ will be 90% of the way to making them pass.
 
 ### Write the minimal amount of code for the test to run and check the failing test output
 
-We should now be able to change `websiteChecker` to at least get the compilation
-to work, just by adding an extra argument of type `func(string) bool` to its
-argument list.
-
 ```go
 package concurrency
 
-func WebsiteChecker(_ func(string) bool, urls []string) (results []bool) {
+func WebsiteChecker(_ func(string) bool, urls []string) map[string]bool {
+	results := make(map[string]bool)
+
 	for _, url := range urls {
-		results = append(results, IsWebsiteOK(url))
+		results[url] = IsWebsiteOK(url)
 	}
 
-	return
+	return results
 }
 ```
 
 ```sh
-WebsiteChecker_test.go:36: Wanted false, got true
+--- FAIL: TestWebsiteChecker (0.00s)
+        websiteChecker_test.go:45: expected value of key 'http://google.com' in actual results to be 'true', but it was 'false'
 FAIL
 exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2     0.241s
+FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2        0.018s
 ```
 
 Which is because we're still not using the function we're passing in.
 
-### Write enough code to make it pass
+(Take a look at the test output - do you agree that it's more readable than
+printing out the full values of both maps? Could it be made even more useful?)
 
-This is easily fixed by naming and using the function:
+### Write enough code to make it pass
 
 ```go
 package concurrency
@@ -427,8 +419,6 @@ func WebsiteChecker(isOK func(string) bool, urls []string) (results []bool) {
 }
 ```
 
-And now...
-
 ```sh
 PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2     0.013s
@@ -438,16 +428,14 @@ ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2     0.013s
 
 `func(string) bool` doesn't exactly trip off the tongue when trying to describe
 what the function is doing - you can tell the behaviour, but it's hard to say
-what the intention of it is. Happily in Go we can give a type an alias - like
-a nickname we can use for a type. This will help us to remember that the
-function we pass in is for checking a website's status.
+what the intention of it is.
 
 ```go
 package concurrency
 
-type testURL func(string) bool
+type TestURL func(string) bool
 
-func WebsiteChecker(isOK testURL, urls []string) []bool {
+func WebsiteChecker(isOK TestURL, urls []string) []bool {
 	results := make([]bool, len(urls))
 
 	for index, url := range urls {
@@ -458,13 +446,11 @@ func WebsiteChecker(isOK testURL, urls []string) []bool {
 }
 ```
 
-We've used the `type` keyword to say that we'd like `func(string) bool` to also
-be known as `testURL` in the rest of this package. This is a useful technique to
-help your code read nicely, especially when some of the function types get
-really, really long.
+We've used the `type` keyword here to say that we'd like `func(string) bool` to
+also be known as `TestURL`. This is a useful technique to help your code read
+nicely, especially with long function types.
 
-
-##### Note on Dependency Injection and Test Doubles
+##### A note on Dependency Injection and Test Doubles
 
 This technique of handling the dependencies of your software is called *Dependency
 Injection*. The thing our code depends on to work, the `IsWebsiteOK` function,
@@ -484,8 +470,7 @@ our tests that we either don't own or want to test elsewhere.
 This is all great, but what happens when we try and check more websites. A _lot_
 more websites. Let's check `http://google.co.uk` fifty times. To begin with,
 let's use the real version of `IsWebsiteOK`; we'll want to change it pretty soon
-but this test will give us a good idea of the pain point we're going to hit
-(hint: it involves concurrency. Finally.)
+but this test will give us a good idea of the pain point we're going to hit.
 
 ```go
 package concurrency

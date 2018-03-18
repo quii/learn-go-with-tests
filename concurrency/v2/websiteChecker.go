@@ -1,11 +1,13 @@
 package concurrency
 
-type URLchecker func(string) bool
+type TestURL func(string) bool
 
-func WebsiteChecker(isOK URLchecker, urls []string) (results []bool) {
+func WebsiteChecker(isOK TestURL, urls []string) map[string]bool {
+	results := make(map[string]bool)
+
 	for _, url := range urls {
-		results = append(results, isOK(url))
+		results[url] = isOK(url)
 	}
 
-	return
+	return results
 }
