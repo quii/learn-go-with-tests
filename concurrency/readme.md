@@ -734,6 +734,70 @@ different goroutines performing writes on a map - pretty much as we suspected.
 
 ### Channels
 
+We can solve this problem by coordinating our goroutines using _channels_.
+Channels are a Go data structure that can both receive and send values. These
+operations, along with their details, allow communication between processes.
+
+```go
+package concurrency
+
+type TestURL func(string) bool
+type result struct {
+	string
+	bool
+}
+
+func WebsiteChecker(isOK TestURL, urls []string) map[string]bool {
+	results := make(map[string]bool)
+	urlChannel := make(chan string)
+	resultChannel := make(chan result)
+
+	go func() {
+		for {
+			url := <-urlChannel
+
+			good := isOK(url)
+			result := result{url, good}
+			resultChannel <- result
+		}
+	}()
+
+	for _, url := range urls {
+		urlChannel <- url
+	}
+
+	for i := 0; i < len(urls); i++ {
+		result := <-resultChannel
+		results[result.string] = result.bool
+	}
+
+	return results
+}
+```
+
+This version of `WebsiteChecker` uses two channels to organise the work of one
+anonymous goroutine which is where the bulk of the work gets done.
+
+The first change to note is that we've introduced a new type, `result`, which is
+a struct of a `string` and a `bool`. We will use this to keep the information
+about a URL and its test result together.
+
+First, we `make` two channels, one of which communicates using strings (`chan
+string`), and the other which communicates using results (`chan result`). We
+will use the first channel to manage the URLs and the second to manage the
+results of using the `TestURL` function.
+
+Next comes the main goroutine. It's made of an infinite loop - a `for` that has
+no terminating condition. First it takes a value from the `urlChannel` with the
+receive operation: `url := <-urlChannel`. We then test the url using our `isOK`
+function, package the response up into a `result` along with the original URL,
+and then uses the send operation to put the result onto the `resultChannel`:
+`resultChannel <- result`.
+
+Because this loop is in a goroutine it won't block the main process of
+`WebsiteChecker`, but will keep on receiving and sending values to the two
+channels as long as there are values to receive and send.
+
 [^1]: For further reading on Test Doubles, Stubs, Mocks and the like, see https://martinfowler.com/articles/mocksArentStubs.html
 
 [Arrays]: ../arrays/
