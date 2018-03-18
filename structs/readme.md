@@ -1,6 +1,6 @@
 # Structs - WIP
 
-The first requirement we have is to write a `Perimeter(width, height float64)` function, which will calculate the perimeter of a square given a width and height. `float64` is a type like `int` but allows you to add precision like `123.45`
+The first requirement we have is to write a `Perimeter(width, height float64)` function, which will calculate the perimeter of a square given a width and height. `float64` is for floating point numbers like `123.45`
 
 The TDD cycle should be pretty familiar to you by now.
 
@@ -17,7 +17,7 @@ func TestPerimeter(t *testing.T) {
 }
 ```
 
-Notice the new format string? The `f` is for our `float64` and the `.2` means print 2 decimal places (todo: eugh word this better)
+Notice the new format string? The `f` is for our `float64` and the `.2` means print 2 decimal places.
 
 ## Try and run the test
 
@@ -214,7 +214,7 @@ So far we have only been writing *functions* but we have been using some methods
 
 Methods are very similar to functions but they are called by invoking them on an instance of a particular type. Where you can just call functions wherever you like, such as `Area(rectangle)` you can only call methods on "things".
 
-As always, an example will help so let's change our tests first to call methods instead and then fix the code
+An example will help so let's change our tests first to call methods instead and then fix the code.
 
 ```go
 func TestArea(t *testing.T) {
@@ -249,6 +249,10 @@ If we try to run the tests we get
 ./shapes_test.go:29:16: circle.Area undefined (type Circle has no field or method Area)
 ```
 
+> type Circle has no field or method Area
+
+I would like to reiterate how great the compiler is here. It is so important to take the time to slowly read the error messages you get, it will help you in the long run. 
+
 ## Write the minimal amount of code for the test to run and check the failing test output
 
 Let's add some methods to our types
@@ -274,7 +278,7 @@ func (c Circle) Area() (area float64)  {
 
 The syntax for declaring methods is almost the same as functions and that's because they're so similar. The only difference is the syntax of the method receiver `func (receiverName RecieverType) MethodName(args)`.
 
-When your method is called on an variable of that type, you get your reference to it's data via the receiverName variable. In many other programming languages this is done implicitly and you access the reciever via `this`.
+When your method is called on an variable of that type, you get your reference to it's data via the `receiverName` variable. In many other programming languages this is done implicitly and you access the receiver via `this`.
 
 It is a convention in Go to have the receiver variable be the first letter of the type.
 
@@ -292,7 +296,7 @@ func (r Rectangle) Area() (area float64)  {
 
 If you re-run the tests the rectangle tests should be passing but circle should still be failing.
 
-To make circle's `Area` function pass we will borrow a constant from the `math` package
+To make circle's `Area` function pass we will borrow the `Pi` constant from the `math` package (remember to import it).
 
 ```go
 func (c Circle) Area() (area float64)  {
@@ -302,7 +306,9 @@ func (c Circle) Area() (area float64)  {
 
 ## Refactor
 
-There is some duplication in our tests. If you zoom out a bit all we want to do is take a collection of _shapes_, call the `Area()` method on them and then check the result. 
+There is some duplication in our tests. 
+
+All we want to do is take a collection of _shapes_, call the `Area()` method on them and then check the result. 
 
 Our shapes share a common _interface_: `Area() float64`. 
 
@@ -310,10 +316,9 @@ In Go, if you want to write functions which can be called with different types, 
 
 > I only accept arguments that have methods called `Area` which return `float64`
 
-You do this with `interface`. Interfaces are a very powerful concept in statically typed languages like Go, they allow you to make re-useable functions that can be used with different types and create highly-decoupled code. 
+You do this with `interface`. Interfaces are a very powerful concept in statically typed languages like Go, they allow you to make functions that can be used with different types and create highly-decoupled code whilst still maintaining type-safety.
 
 Let's introduce this by refactoring our tests.
-
 
 ```go
 func TestArea(t *testing.T) {
@@ -348,6 +353,7 @@ type Shape interface {
 	Area() float64
 }
 ```
+We're creating a new `type` just like we did with `Rectangle` and `Circle` but this time it is an `interface` rather than a `struct`.
 
 Once you add this to the code, the tests will pass. 
 
@@ -365,9 +371,9 @@ This kind of approach of using interfaces to declare **only what you need** is v
 
 ## Further refactoring
 
-Now that you have some understanding of structs we can now introduce "table based tests"
+Now that you have some understanding of structs we can now introduce "table driven tests"
 
-Table based tests are useful when you want to build a list of test cases that can be tested in the same manner.
+Table driven tests are useful when you want to build a list of test cases that can be tested in the same manner.
 
 ```go
 func TestArea(t *testing.T) {
@@ -391,7 +397,7 @@ func TestArea(t *testing.T) {
 
 ```
 
-The only new syntax here is creating an "anonymous struct". We are declaring a slice of structs with two fields, the `shape` and the `want`. Then we fill the array with cases. 
+The only new syntax here is creating an "anonymous struct". We are declaring a slice of structs by using `[]struct` with two fields, the `shape` and the `want`. Then we fill the array with cases. 
 
 We then iterate over them just like we do any other slice, using the struct fields to run our tests.
 
@@ -405,5 +411,9 @@ What we have covered
 
 - Declaring structs
 - Adding methods
-- Interfaces
-- Table based tests 
+- Declaring interfaces
+- Table based tests
+
+This was an important chapter because we are now starting to define our own types. In statically typed languages like Go, being able to design your own types is essential for building software that is easy to understand, to piece together and to test. 
+
+Interfaces are a great tool for hiding complexity away from other parts of the system. In our case our test helper _code_ did not need to know the exact shape it was asserting on, only how to "ask" for it's area. 
