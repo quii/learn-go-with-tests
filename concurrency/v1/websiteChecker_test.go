@@ -1,18 +1,15 @@
 package concurrency
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestWebsiteChecker(t *testing.T) {
 	websites := []string{
 		"http://google.com",
 		"http://blog.gypsydave5.com",
 		"waat://furhurterwe.geds",
-	}
-
-	expectedResults := []bool{
-		true,
-		true,
-		false,
 	}
 
 	actualResults := WebsiteChecker(websites)
@@ -23,16 +20,17 @@ func TestWebsiteChecker(t *testing.T) {
 		t.Fatalf("Wanted %v, got %v", want, got)
 	}
 
+	expectedResults := map[string]bool{
+		"http://google.com":          true,
+		"http://blog.gypsydave5.com": true,
+		"waat://furhurterwe.geds":    false,
+	}
+
 	if !sameResults(expectedResults, actualResults) {
 		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
 	}
 }
 
-func sameResults(as, bs []bool) bool {
-	for index, a := range as {
-		if a != bs[index] {
-			return false
-		}
-	}
-	return true
+func sameResults(expectedResults, actualResults map[string]bool) bool {
+	return reflect.DeepEqual(expectedResults, actualResults)
 }

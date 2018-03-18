@@ -14,6 +14,8 @@ change of approach!!!
 - avoids this mess with the ordering of the results
 - is this copping out?
 
+- use map!!!
+
 ---
 
 # Concurrency
@@ -52,33 +54,21 @@ each one.
 
 ### Write the test first
 
-We'd like a function that takes a slice of strings and returns a slice of
-bools. For each URL that returns a `true`, the returned slice will have
-a `true` at that index - and vice versa for `false`s
-
-We'll use a list of three URLs for now; the first two we know _should_ work; the
-last one shouldn't work.
-
-The first test checks that `WebsiteChecker` returns the same number of results
-as websites; the second test checks that the results are what we expect for each
-website.
+In a file called `websiteChecker_test.go`
 
 ```go
 package concurrency
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestWebsiteChecker(t *testing.T) {
 	websites := []string{
 		"http://google.com",
 		"http://blog.gypsydave5.com",
 		"waat://furhurterwe.geds",
-	}
-
-	expectedResults := []bool{
-		true,
-		true,
-		false,
 	}
 
 	actualResults := WebsiteChecker(websites)
@@ -89,14 +79,40 @@ func TestWebsiteChecker(t *testing.T) {
 		t.Fatalf("Wanted %v, got %v", want, got)
 	}
 
-	for index, want := range expectedResults {
-		got := actualResults[index]
-		if want != got {
-			t.Fatalf("Wanted %v, got %v", want, got)
-		}
+	expectedResults := map[string]bool{
+		"http://google.com":          true,
+		"http://blog.gypsydave5.com": true,
+		"waat://furhurterwe.geds":    false,
+	}
+
+	if !sameResults(expectedResults, actualResults) {
+		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
 	}
 }
+
+func sameResults(expectedResults, actualResults map[string]bool) bool {
+	return reflect.DeepEqual(expectedResults, actualResults)
+}
 ```
+
+We'd like a function that takes a slice of strings and returns a `map` of
+`string` to `bool`, with each of the strings being a url we're testing, and
+each of the bools being the result of checking that url. A `map` is the basic Go
+associative data structure, associating a key of one type to a value of
+a (possibly different) type. Maps have a type of `map[key_type]value_type`, so
+in our case the map is `map[string]bool`.
+
+Like slices and arrays in [the arrays chapter][Arrays], maps cannot be directly
+compared unless you use `DeepEqual` from the `reflect` package. As we did in
+that example we've wrapped the comparison in a custom function to help add some
+type safety.
+
+We'll test using a list of three URLs for now; the first two we know _should_
+work; the last one shouldn't work.
+
+We've written two tests here; the first test checks that `WebsiteChecker`
+returns the same number of results as websites; the second test checks that the
+results are what we expect.
 
 ### Try and run the test
 
@@ -104,22 +120,22 @@ When we run the tests we see
 
 ```sh
 # github.com/gypsydave5/learn-go-with-tests/concurrency/v1
-./websiteChecker_test.go:18:10: undefined: websiteChecker
+./websiteChecker_test.go:18:10: undefined: WebsiteChecker
 FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1 [build failed]
 ```
 
 ### Write the minimal amount of code for the test to run and check the failing test output
 
-To get this to pass we need to implement `websiteChecker` with the correct type
-signature - a function that takes a single argument of a slice of `string`s
-(`[]string`) and returns a slice of `bool`s (`[]bool`).
+In a file called `websiteChecker.go`, the simplest implementation we can write
+is:
 
-The simplest implementation of this is:
 ```go
 func WebsiteChecker(_ []string) (result []bool) {
 	return
 }
 ```
+A function that takes a single argument of a slice of `string`s (`[]string`) and
+returns a `map[string]bool`.
 
 Now when we run the tests we get
 ```sh
@@ -132,45 +148,50 @@ FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.010s
 
 ### Write enough code to make it pass
 
-The code now builds (hooray), but the first test fails because the length of the
-slice returned is too short. This is easy enough to fix by defining a length for
-the slice:
+The first test fails because the length of the slice returned is too short. We
+can fix this by putting things into the map:
 
 ```go
-func WebsiteChecker(_ []string) (result [3]bool) {
-	return
+func WebsiteChecker(_ []string) map[string]bool {
+	return map[string]bool{
+		"1": true,
+		"2": true,
+		"3": true,
+	}
 }
 ```
 
 Now when we run the tests we get:
 ```sh
 --- FAIL: TestWebsiteChecker (0.00s)
-        websiteChecker_test.go:29: Wanted true, got false
+        websiteChecker_test.go:30: Wanted map[http://google.com:true http://blog.gypsydave5.com:true waat://furhurterwe.geds:false], got map[1:true 2:true 3:true]
 FAIL
 exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.013s
+FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.020s
 ```
 
-Which is OK. So now we have to do some work in getting the right results!
-
-To make the second test pass we will iterate through the slice of URLs using
-a `for...  range` loop. For each URL we will call `IsWebsiteOK` with the URL and
-then store the answer in the `results` slice.  We grow the `results` slice by
-using the `append` function, as seen in [the Arrays Tutorial][Arrays], so the
-response from `IsWebsiteOK` will be at the same index as the `url` we're
-checking.
-
-When we've checked all of the URLs we'll finally return the `results` slice.
+So now we have to get the right results.
 
 ```go
-func WebsiteChecker(urls []string) (results []bool) {
+func WebsiteChecker(urls []string) map[string]bool {
+  results := make(map[string]bool)
+
 	for _, url := range urls {
-		results = append(results, IsWebsiteOK(url))
+		results[url] = IsWebsiteOK(url)
 	}
 
-	return
+	return results
 }
 ```
+
+We iterate through the slice of URLs using a `for...  range` loop. For each URL
+we will call `IsWebsiteOK` with the URL and then store the answer in the
+`results` map.
+
+We add the result of `IsWebsiteOK` to the results by assignment: `map[key]
+= value`
+
+When we've checked all of the URLs we finally return the `results` map.
 
 Now when we run our tests:
 ```sh
@@ -180,52 +201,8 @@ ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.269s
 
 #### Refactor
 
-Could we refactor this? Well, the actual code isn't too bad at all, but we might
-want to try and make our tests a little more readable by changing the test that
-the two `bool` slices are equal. We could use `reflect.DeepEqual` as seen
-previously, but instead this time we'll a small helper function to iterate
-through both slices and flag up the difference (if any).
-
-```go
-package concurrency
-
-import "testing"
-
-func TestWebsiteChecker(t *testing.T) {
-	websites := []string{
-		"http://google.com",
-		"http://blog.gypsydave5.com",
-		"waat://furhurterwe.geds",
-	}
-
-	expectedResults := []bool{
-		true,
-		true,
-		false,
-	}
-
-	actualResults := WebsiteChecker(websites)
-
-	want := len(websites)
-	got := len(actualResults)
-	if want != got {
-		t.Fatalf("Wanted %v, got %v", want, got)
-	}
-
-	if !sameResults(expectedResults, actualResults) {
-		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
-	}
-}
-
-func sameResults(as, bs []bool) bool {
-	for index, a := range as {
-		if a != bs[index] {
-			return false
-		}
-	}
-	return true
-}
-```
+Things are in a pretty good state at the moment, probably because we used what
+we learned from earlier tutorials when we wrote our test. So, no refactor.
 
 ## Dependency Injection
 
@@ -236,8 +213,8 @@ So far, so good. But there are already two problems with what we've got so far.
 1. If `google.co.uk` goes down, (or someone puts a website at `waat://furhurterwe.geds`), our expectations will be wrong for our tests.
 2. If we turn off the Internet, our tests will always fail.
 
-And in true TDD style, we should demonstrate this with a failing test. So, let's
-turn off the computer's WiFi / unplug the network cable and run the tests again:
+And in true TDD style, we can demonstrate this with a failing test. So, turn off
+the computer's WiFi / unplug the network cable and run the tests again:
 
 ```sh
 --- FAIL: TestWebsiteChecker (0.20s)
