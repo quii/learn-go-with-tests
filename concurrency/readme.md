@@ -468,9 +468,7 @@ our tests that we either don't own or want to test elsewhere.
 ## Concurrency
 
 This is all great, but what happens when we try and check more websites. A _lot_
-more websites. Let's check `http://google.co.uk` fifty times. To begin with,
-let's use the real version of `IsWebsiteOK`; we'll want to change it pretty soon
-but this test will give us a good idea of the pain point we're going to hit.
+more websites. Let's check `http://google.co.uk` one hundred times.
 
 ```go
 package concurrency
@@ -478,55 +476,51 @@ package concurrency
 import "testing"
 
 func TestWebsiteCheckerWithManyURLs(t *testing.T) {
-	websites := make([]string, 50)
+	websites := make([]string, 100)
 	for i := 0; i < len(websites); i++ {
 		websites[i] = "http://google.co.uk"
 	}
 
-	expectedResults := make([]bool, len(websites))
+	expectedResults := make(map[string]bool)
+
 	for i := 0; i < len(websites); i++ {
-		expectedResults[i] = true
+		expectedResults["http://google.co.uk"] = true
 	}
 
-	actualResults := websiteChecker(IsWebsiteOK, websites)
+	actualResults := WebsiteChecker(IsWebsiteOK, websites)
 
-	want := len(websites)
+	want := len(expectedResults)
 	got := len(actualResults)
 	if len(actualResults) != len(websites) {
 		t.Fatalf("Wanted %v, got %v", want, got)
 	}
 
-	for index, want := range expectedResults {
-		got := actualResults[index]
-		if want != got {
-			t.Fatalf("Wanted %v, got %v", want, got)
-		}
-	}
+	assertSameResults(t, expectedResults, actualResults)
 }
 ```
+We've written a new test that uses the real version of `IsWebsiteOK` for now.
 
 Run this test and, after a bit of thumb-twiddling, we finally get:
 
 ```sh
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        10.320s
+ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v3        11.122s
 ```
 
-Ten seconds. So if we kick the number of checks up to 500...?
+Ten seconds or so. So if we kick the number of checks up to 500...?
 
 ```sh
 PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        51.523s
 ```
 
-Well at least it's consistent... consistently slower, that is!
+A proportional increase in latency (i.e. it was five times as slow)
 
-We're looking for a way of testing the _speed_ of our code now. Happily Go's
-testing library supports benchmarking so that we can show that our code is
-speeding up.
+We're looking for a way of testing the _speed_ of our code now. We can do this
+by using a benchmark again as we saw in [the `for` tutorial][For].
 
 ```go
-func BenchmarkWebsiteCheckerWithManyURLs(b *testing.B) {
+func BenchmarkWebsiteChecker(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		websites := make([]string, 100)
 		for index, _ := range websites {
@@ -538,30 +532,25 @@ func BenchmarkWebsiteCheckerWithManyURLs(b *testing.B) {
 }
 ```
 
-Here's your first benchmark. Benchmarks in Go are characterized by the `for...`
-loop on the outside of the code that you want to benchmark. What it does in
-effect is repeat the loop a number of times until it doesn't differ
-significantly from the previous runs - until it is 'stable'.
-
-To run it you need to add a flag to your `go test` command: `go test -benchmark=.`
+When we run `go test -benchmark=.`
 
 ```sh
 goos: darwin
 goarch: amd64
 pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v3
-BenchmarkWebsiteCheckerWithManyURLs-4                  1        11352126640 ns/op
+BenchmarkWebsiteChecker-4              1        11100348034 ns/op
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v3        25.216s
+ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v3        21.936s
 ```
 
 The key number we want to read here is the one before `ns/op` - this is the
 number of nanoseconds that it took, on average, to perform the operation in the
-benchmark loop. 11352126640 nanoseconds is about 10 seconds, so the benchmark
+benchmark loop. 11100348034 nanoseconds is about 10 seconds, so the benchmark
 confirms what our ad hoc testing has shown us.
 
-Finally, let's stop annoying the good people at Google with hundreds of requests
-everytime we run our tests. We can use another fake version of
-`fakeIsWebsiteOK`, but this time we'll make it slow - say abut 20ms.
+Finally, let's stop annoying Google with hundreds of requests everytime we run
+our tests. We can use another fake version of `fakeIsWebsiteOK`, but this time
+we'll make it slow - say abut 20ms.
 
 ```go
 func slowIsWebsiteOK(_ string) bool {
@@ -571,7 +560,19 @@ func slowIsWebsiteOK(_ string) bool {
 ```
 
 The `Sleep()` function in from the `time` package is fairly self explanitory.
-When we plug _that_ into the code in our benchmark, things get a lot faster.
+
+```go
+func BenchmarkWebsiteChecker(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		websites := make([]string, 100)
+		for index, _ := range websites {
+			websites[index] = "http://google.co.uk"
+		}
+
+		WebsiteChecker(slowIsWebsiteOK, websites)
+	}
+}
+```
 
 ```sh
 goos: darwin
@@ -582,35 +583,32 @@ PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v3        2.281s
 ```
 
-Our goal now should be to make that 2 seconds duration much closer to 2 miliseconds.
+Our goal now should be to make that 2 seconds duration much closer to 2 milliseconds.
 
 ### Write enough code to make it pass
 
-For the purposes of this test, 'passing' should be thought of as being
-synonymous with 'making it a lot faster'.
-
-Which means that we finally get to do something with concurrency in Go!
-
 ```go
 func WebsiteChecker(isOK URLchecker, urls []string) (results []bool) {
+	results := make(map[string]bool)
+
 	for _, url := range urls {
-		go func(url string) {
-			results = append(results, isOK(url))
-		}()
+		go func(u string) {
+			results[u] = isOK(u)
+		}(url)
 	}
 
-	return
+	return results
 }
 ```
 
-Concurrency in Go is built up from the snappily-named 'goroutines'. In any place
-where you can call a function, you can place the keyword `go` in front of it and
-the function will execute as a separate process to the parent process.
+Concurrency in Go is built up from the _goroutines_. In any place where you can
+call a function, you can place the keyword `go` in front of it and the function
+will execute as a separate process to the parent process.
 
 Here we are executing an anonymous function as a goroutine inside the `for` loop
 we had before. The body of the function is just the same as the loop body was
-before. The only difference here is that each iteration of the loop will spin
-off a new process, concurrent with the current process (the `WebsiteChecker`
+before. The only difference is that each iteration of the loop will start
+a new process, in parallel to with the current process (the `WebsiteChecker`
 function) each of which will append its result to the `results` slice.
 
 But when we give this a go:
@@ -626,77 +624,123 @@ FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v3        0.015s
 We are caught by the first test we wrote; `WebsiteChecker` is now returning an
 empty slice. What went wrong?
 
-None of the goroutines that span off in our for loop had enough time to append
-their result to the `results` slice; `WebsiteChecker` is too fast for them, and
-it returns the still empty slice.
+None of the goroutines that our `for` loop started had enough time to add
+their result to the `results` map; the `WebsiteChecker` function is too fast for
+them, and it returns the still empty map.
 
 To fix this we can just wait while all the goroutines do their work, and then
 return. Two seconds ought to do it
 
 ```go
-func WebsiteChecker(isOK URLchecker, urls []string) (results []bool) {
+package concurrency
+
+import "time"
+
+type TestURL func(string) bool
+
+func WebsiteChecker(isOK TestURL, urls []string) map[string]bool {
+	results := make(map[string]bool)
+
 	for _, url := range urls {
-		go func(url string) {
-			results = append(results, isOK(url))
+		go func(u string) {
+			results[u] = isOK(u)
 		}(url)
 	}
 
 	time.Sleep(2 * time.Second)
 
-	return
+	return results
 }
 ```
 
-Now when we run the tests
+Now when we run the tests you might get
 
 ```sh
 PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v3        2.022s
 ```
 
-But if we run them again
+But if you're unlucky (this is more likely if you run them with `go test -bench=.`)
 
 ```sh
---- FAIL: TestWebsiteChecker (2.00s)
-        websiteChecker_test.go:26: Wanted 3, got 1
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v3        2.015s
+fatal error: concurrent map writes
+
+goroutine 8 [running]:
+runtime.throw(0x12c5895, 0x15)
+        /usr/local/Cellar/go/1.9.3/libexec/src/runtime/panic.go:605 +0x95 fp=0xc420037700 sp=0xc4200376e0 pc=0x102d395
+runtime.mapassign_faststr(0x1271d80, 0xc42007acf0, 0x12c6634, 0x17, 0x0)
+        /usr/local/Cellar/go/1.9.3/libexec/src/runtime/hashmap_fast.go:783 +0x4f5 fp=0xc420037780 sp=0xc420037700 pc=0x100eb65
+github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker.func1(0xc42007acf0, 0x12d3938, 0x12c6634, 0x17)
+        /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12 +0x71 fp=0xc4200377c0 sp=0xc420037780 pc=0x12308f1
+runtime.goexit()
+        /usr/local/Cellar/go/1.9.3/libexec/src/runtime/asm_amd64.s:2337 +0x1 fp=0xc4200377c8 sp=0xc4200377c0 pc=0x105cf01
+created by github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker
+        /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11 +0xa1
+
+        ... many more scary lines of text ...
 ```
 
-and again
+Errors this long tend to freak me out, but the headline is what we should be
+paying attention to. `fatal error: concurrent map writes`. Maps in Go don't like
+it when more than one thing tries to write to them at once.
+
+What we have here is a classic _race condition_, an bug that occurs when the
+output of our software is dependent on the timing and sequence of events that we
+have no control over. Because we cannot control exactly when each goroutine
+writes to the results, we are vulnerable to two goroutines writing to it at the
+same time.
+
+Go can help us to spot race conditions with its built in [_race detetector_][godoc_race_detector].
+To enable this feature, run the tests with the `race` flag: `go test -race`.
+
+You should get some pretty verbose output that looks a bit like this:
 
 ```sh
---- FAIL: TestWebsiteChecker (2.00s)
-        websiteChecker_test.go:30: Wanted [true false true], got [true true false]
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v3        2.020s
+==================
+WARNING: DATA RACE
+Write at 0x00c420084d20 by goroutine 8:
+  runtime.mapassign_faststr()
+      /usr/local/Cellar/go/1.9.3/libexec/src/runtime/hashmap_fast.go:774 +0x0
+  github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker.func1()
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12 +0x82
+
+Previous write at 0x00c420084d20 by goroutine 7:
+  runtime.mapassign_faststr()
+      /usr/local/Cellar/go/1.9.3/libexec/src/runtime/hashmap_fast.go:774 +0x0
+  github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker.func1()
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12 +0x82
+
+Goroutine 8 (running) created at:
+  github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker()
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11 +0xc4
+  github.com/gypsydave5/learn-go-with-tests/concurrency/v3.TestWebsiteChecker()
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker_test.go:27 +0xad
+  testing.tRunner()
+      /usr/local/Cellar/go/1.9.3/libexec/src/testing/testing.go:746 +0x16c
+
+Goroutine 7 (finished) created at:
+  github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker()
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11 +0xc4
+  github.com/gypsydave5/learn-go-with-tests/concurrency/v3.TestWebsiteChecker()
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker_test.go:27 +0xad
+  testing.tRunner()
+      /usr/local/Cellar/go/1.9.3/libexec/src/testing/testing.go:746 +0x16c
+==================
 ```
 
-Your tests may give slightly different results, but we should still expect to
-see one of the above three outputs. So now what's going wrong?
+Again, the details are hard to read, but the headline isn't: `WARNING: DATA
+RACE` is pretty unambiguous. Reading into the body of the error we can see two
+different goroutines performing writes on a map - pretty much as we suspected.
 
-There are two issues. First, we're not waiting long enough - this is why we get
-a set of results that isn't the right length. We could fix this by just bumping
-up the time slightly - or just waiting for the results slice to be the right
-length - if it wasn't for the other problem.
-
-The other problem is that the goroutines are able to append to the results slice in
-a different order to that which they were called in, which has the effect of the
-results coming back in a different order.
-
-This is not a problem that can be solved by sleeping for a few extra seconds; we
-will need a completely approach to handling concurrency that allows coordination
-between different processes.
-
-#### Channels
+### Channels
 
 [^1]: For further reading on Test Doubles, Stubs, Mocks and the like, see https://martinfowler.com/articles/mocksArentStubs.html
 
 [Arrays]: ../arrays/
+[For]: ../for/
 [godoc_maps]: https://blog.golang.org/go-maps-in-action
 [godoc_zero_values]: https://golang.org/ref/spec#The_zero_value
+[godoc_race_detector]: https://blog.golang.org/race-detector
 
 ## An observation
 

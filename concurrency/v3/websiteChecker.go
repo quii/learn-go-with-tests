@@ -1,52 +1,19 @@
 package concurrency
 
-type URLchecker func(string) bool
-type Result struct {
-	index   int
-	success bool
-	url     string
-}
+import "time"
 
-func WebsiteChecker(isOK URLchecker, urls []string) []bool {
-	results := make([]bool, len(urls))
-	urlChan := ofStrings(urls)
-	resultsChan := checkEach(urlChan, isOK)
+type TestURL func(string) bool
 
-	resultsCount := 0
-	for resultsCount != len(urls) {
-		r := <-resultsChan
-		resultsCount += 1
-		results[r.index] = r.success
+func WebsiteChecker(isOK TestURL, urls []string) map[string]bool {
+	results := make(map[string]bool)
+
+	for _, url := range urls {
+		go func(u string) {
+			results[u] = isOK(u)
+		}(url)
 	}
+
+	time.Sleep(2 * time.Second)
 
 	return results
-}
-
-func checkEach(urls <-chan Result, f URLchecker) <-chan Result {
-	out := make(chan Result)
-
-	for r := range urls {
-		go func(r Result) {
-			out <- Result{r.index, f(r.url), r.url}
-		}(r)
-	}
-
-	return out
-}
-
-func ofStrings(urls []string) <-chan Result {
-	c := make(chan Result)
-
-	go func() {
-		for index, url := range urls {
-			c <- Result{
-				index,
-				false,
-				url,
-			}
-		}
-		close(c)
-	}()
-
-	return c
 }
