@@ -435,7 +435,7 @@ func TestArea(t *testing.T) {
 
 ## Try and run the test
 
-Remember, work keep trying to run the test and let the compiler guide you toward a solution.
+Remember, keep trying to run the test and let the compiler guide you toward a solution.
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
