@@ -209,7 +209,7 @@ Now delete one of the tests and check the coverage again.
 
 Now that we are happy we have a well tested function you should commit your great work before taking on the next challenge.
 
-We need a few function called `SumAll` which will take a varying number of slices, returning a new slice containing the totals for each slice pass in. 
+We need a new function called `SumAll` which will take a varying number of slices, returning a new slice containing the totals for each slice pass in. 
 
 For example
 
