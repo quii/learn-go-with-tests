@@ -405,6 +405,80 @@ You can see how it would be very easy for a developer to introduce a new shape, 
 
 Table based tests can be a great item in your toolbox but be sure that you have a need for the extra noise in the tests. If you wish to test various implementations of an interface, or if the data being passed in to a function has lots of different requirements that need testing then they are a great fit.
 
+Let's demonstrate all this by adding another shape and testing it; a cube. 
+
+## Write the test first
+
+Adding a new shape to our list is very easy
+
+```go
+func TestArea(t *testing.T) {
+
+	areaTests := []struct {
+		shape Shape
+		want  float64
+	}{
+		{Rectangle{12, 6}, 72.0},
+		{Circle{10}, 314.1592653589793},
+		{Cube{10}, 600},
+	}
+
+	for _, tt := range areaTests {
+		got := tt.shape.Area()
+		if got != tt.want {
+			t.Errorf("got %.2f want %.2f", got, tt.want)
+		}
+	}
+
+}
+```
+
+## Try and run the test
+
+Remember, work keep trying to run the test and let the compiler guide you toward a solution.
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+`./shapes_test.go:25:4: undefined: Cube`
+
+We have not defined Cube yet
+
+```go
+type Cube struct {
+	length float64
+}
+```
+
+Try again
+
+```
+./shapes_test.go:25:8: cannot use Cube literal (type Cube) as type Shape in field value:
+	Cube does not implement Shape (missing Area method)
+```
+
+It's telling us we cant use a Cube as a shape because it does not have an `Area()` method, so add an empty implementation to get the test working
+
+```go
+func (c Cube) Area() (area float64) {
+	return
+}
+```
+
+Finally the code compiles and we get our error
+
+`shapes_test.go:31: got 0.00 want 600.00`
+
+
+## Write enough code to make it pass
+
+```go
+func (c Cube) Area() (area float64) {
+	return (c.length*c.length) * 6
+}
+```
+
+And our tests pass!
+
 ## Wrapping up
 
 What we have covered
