@@ -28,7 +28,7 @@ type Cube struct {
 }
 
 func (c Cube) Area() (area float64) {
-	return (c.length*c.length) * 6
+	return (c.length * c.length) * 6
 }
 
 func Perimeter(rectangle Rectangle) (perimeter float64) {
