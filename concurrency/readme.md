@@ -20,18 +20,14 @@ change of approach!!!
 
 # Concurrency
 
-Your colleague, Jo, has written a function that checks whether a webpage is
-working or not. It's called `IsWebsiteOK`
+Here is are a pair of functions that somebody else has written:
 
 ```go
 package concurrency
 
-import (
-	"net/http"
-)
+import "net/http"
 
-// IsWebsiteOK returns true if the URL returns a 200 status code, false otherwise
-func IsWebsiteOK(url string) bool {
+func CheckWebsite(url string) bool {
 	response, err := http.Head(url)
 	if err != nil {
 		return false
@@ -45,16 +41,29 @@ func IsWebsiteOK(url string) bool {
 }
 ```
 
-If the above isn't familiar to you, don't worry about it. The key thing for this
-exercise is that the above function _may_ take some time to return a result.
+```go
+package concurrency
 
-Jo's function is great, but you've been asked to make a version that takes
-_multiple_ URLs and returns a list with the result that `IsWebsiteOK` gives for
-each one.
+func CheckWebsites(urls []string) []bool {
+	results := make([]bool, len(urls))
 
-### Write the test first
+	for index, url := range urls {
+		results[index] = isOK(url)
+	}
 
-In a file called `websiteChecker_test.go`
+	return results
+}
+```
+
+`CheckWebsite` takes a URL as an argument and returns `true` if that URL returns
+a 200 status code to an HTTP HEAD request, `false` for any other response or
+error.
+
+`CheckWebsites` takes a slice of URLs and returns a `map[string]bool`, mapping
+together the original URLs to the result of them being checked by
+`CheckWebsite`.
+
+Here is the test for `CheckWebsites`:
 
 ```go
 package concurrency
@@ -64,14 +73,14 @@ import (
 	"testing"
 )
 
-func TestWebsiteChecker(t *testing.T) {
+func TestCheckWebsites(t *testing.T) {
 	websites := []string{
 		"http://google.com",
 		"http://blog.gypsydave5.com",
 		"waat://furhurterwe.geds",
 	}
 
-	actualResults := WebsiteChecker(websites)
+	actualResults := CheckWebsites(websites)
 
 	want := len(websites)
 	got := len(actualResults)
@@ -85,188 +94,103 @@ func TestWebsiteChecker(t *testing.T) {
 		"waat://furhurterwe.geds":    false,
 	}
 
-	if !sameResults(expectedResults, actualResults) {
+	if !reflect.DeepEqual(expectedResults, actualResults) {
 		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
 	}
 }
+```
 
-func sameResults(expectedResults, actualResults map[string]bool) bool {
-	return reflect.DeepEqual(expectedResults, actualResults)
+This test sends a slice of URLs to `CheckWebsites`, and asserts on the length of
+the map returned, as well as the contents of that map (using `reflect.DeepEqual`).
+
+`CheckWebsites` is currently being used with very large slices of URLs, and
+people are complaining about the speed. We've been asked to make it faster.
+
+If the above isn't familiar to you, don't worry about it. The key thing for this
+exercise is that the above function _may_ take some time to return a result.
+
+### Write the test first
+
+```go
+func BenchmarkCheckWebsites(b *testing.B) {
+	websites := make([]string, 100)
+	for i := 0; i < len(websites); i++ {
+		websites[i] = "http://google.com"
+	}
+
+	for i := 0; i < b.N; i++ {
+		CheckWebsites(websites)
+	}
 }
 ```
 
-We'd like a function that takes a slice of strings and returns a `map` of
-`string` to `bool`, with each of the strings being a url we're testing, and
-each of the bools being the result of checking that url. A `map` is the basic Go
-associative data structure, associating a key of one type to a value of
-a (possibly different) type. Maps have a type of `map[key_type]value_type`, so
-in our case the map is `map[string]bool`.
+A simple benchmark that executes `CheckWebsites` using a slice of 100 URLs. When
+we run this with `go test -bench=.`:
 
-Like slices and arrays in [the arrays chapter][Arrays], maps cannot be directly
-compared unless you use `DeepEqual` from the `reflect` package. As we did in
-that example we've wrapped the comparison in a custom function to help add some
-type safety.
+```sh
+pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v1
+BenchmarkCheckWebsites-4               1        9940439437 ns/op
+PASS
+ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v1        10.723s
+```
 
-We'll test using a list of three URLs for now; the first two we know _should_
-work; the last one shouldn't work.
+9940439437 nanoseconds = ~10 seconds.
 
-We've written two tests here; the first test checks that `WebsiteChecker`
-returns the same number of results as websites; the second test checks that the
-results are what we expect.
+This test is slow to run, which is a bad thing. If a test is slow we will
+be less willing to run it, and if a test isn't being run then that test is
+useless.
+
+Secondly, the test is making real network requests to google.com. This will make
+the benchmark inconsistent - what if google.com is down, or we have no Internet
+connection? The speed that the benchmark reports will fluctuate, and we will
+find it harder to be sure that any changes we make have sped up or slowed down
+`CheckWebsites`.
+
+```go
+func fakeWebsiteChecker(url string) bool {
+	return true
+}
+
+func BenchmarkCheckWebsites(b *testing.B) {
+	websites := make([]string, 100)
+	for i := 0; i < len(websites); i++ {
+		websites[i] = "http://google.com"
+	}
+
+	for i := 0; i < b.N; i++ {
+		CheckWebsites(fakeWebsiteChecker, websites)
+	}
+}
+```
+
+We have written a function called `stubWebsiteChecker` which performs in the
+same way as the real `CheckWebsite` - it takes a `string` and returns a `bool` -
+only without making any network calls. We are using `stubWebsiteChecker` as the
+first argument to `CheckWebsites`.
 
 ### Try and run the test
 
-When we run the tests we see
+When we run `go build`:
 
 ```sh
-# github.com/gypsydave5/learn-go-with-tests/concurrency/v1
-./websiteChecker_test.go:18:10: undefined: WebsiteChecker
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1 [build failed]
+# github.com/gypsydave5/learn-go-with-tests/concurrency/v2
+./CheckWebsites_test.go:22:32: too many arguments in call to CheckWebsites
+        have (func(string) bool, []string)
+        want ([]string)
+FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2 [build failed]
 ```
 
-### Write the minimal amount of code for the test to run and check the failing test output
+This is telling us that we need to update `CheckWebsites` to take an extra
+argument of the type `func(string) bool`.
 
-In a file called `websiteChecker.go`, the simplest implementation we can write
-is:
+Just by reading the output of the compiler carefully, we now know exactly what
+we have to do next. When performing TDD it is _vital_ that you read the output of
+the compiler and your tests carefully. These outputs, especially those from the
+compiler, will be telling you exactly what we have to do next. While there
+should only be one way in which your tests can pass, there are many ways in
+which they can fail. If you can read and understand why they are failing, you
+will be 90% of the way to making them pass.
 
-```go
-func WebsiteChecker(_ []string) (result []bool) {
-	return
-}
-```
-A function that takes a single argument of a slice of `string`s (`[]string`) and
-returns a `map[string]bool`.
-
-Now when we run the tests we get
-```sh
---- FAIL: TestWebsiteChecker (0.00s)
-        websiteChecker_test.go:23: Wanted 3, got 0
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.010s
-```
-
-### Write enough code to make it pass
-
-The first test fails because the length of the slice returned is too short. We
-can fix this by putting things into the map:
-
-```go
-func WebsiteChecker(_ []string) map[string]bool {
-	return map[string]bool{
-		"1": true,
-		"2": true,
-		"3": true,
-	}
-}
-```
-
-Now when we run the tests we get:
-```sh
---- FAIL: TestWebsiteChecker (0.00s)
-        websiteChecker_test.go:30: Wanted map[http://google.com:true http://blog.gypsydave5.com:true waat://furhurterwe.geds:false], got map[1:true 2:true 3:true]
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.020s
-```
-
-So now we have to get the right results.
-
-```go
-func WebsiteChecker(urls []string) map[string]bool {
-  results := make(map[string]bool)
-
-	for _, url := range urls {
-		results[url] = IsWebsiteOK(url)
-	}
-
-	return results
-}
-```
-
-We iterate through the slice of URLs using a `for...  range` loop. For each URL
-we will call `IsWebsiteOK` with the URL and then store the answer in the
-`results` map.
-
-We add the result of `IsWebsiteOK` to the results by assignment: `map[key]
-= value`
-
-When we've checked all of the URLs we finally return the `results` map.
-
-Now when we run our tests:
-```sh
-PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.269s
-```
-
-#### Refactor
-
-I don't like having to compare two whole maps when trying to work out which
-keys and values are different, so we're going to rewrite the comparison
-function to avoid using `DeepEquals` and to instead compare the two maps in
-a more detailed way.
-
-```go
-package concurrency
-
-import "testing"
-
-func TestWebsiteChecker(t *testing.T) {
-
-	websites := []string{
-		"http://google.com",
-		"http://blog.gypsydave5.com",
-		"waat://furhurterwe.geds",
-	}
-
-	actualResults := WebsiteChecker(websites)
-
-	want := len(websites)
-	got := len(actualResults)
-	if want != got {
-		t.Fatalf("Wanted %v, got %v", want, got)
-	}
-
-	expectedResults := map[string]bool{
-		"http://google.com":          true,
-		"http://blog.gypsydave5.com": true,
-		"waat://furhurterwe.geds":    false,
-	}
-
-	assertSameResults(t, expectedResults, actualResults)
-}
-
-func assertSameResults(t *testing.T, expectedResults, actualResults map[string]bool) {
-	for expectedKey, expectedValue := range expectedResults {
-		actualValue, ok := actualResults[expectedKey]
-		if !ok {
-			t.Fatalf("actual results did not contain expected key: '%s'", expectedKey)
-		}
-		if actualValue != expectedValue {
-			t.Fatalf("expected value of key '%s' in actual results to be '%v', but it was '%v'", expectedKey, expectedValue, actualValue)
-		}
-	}
-
-	for actualKey, _ := range actualResults {
-		if _, ok := expectedResults[actualKey]; !ok {
-			t.Fatalf("found unexpected key in actual results: '%s'", actualKey)
-		}
-	}
-}
-```
-
-This helper function checks that the actual results have each expected key and
-value, and also checks that the actual results don't have any extra keys we
-weren't expecting. We will get a more readable error for each of these failures.
-
-We're taking advantage of the way that assignment from out of a map in Go returns two
-values: the actual value being assigned, and an `ok` value, which is `true` if
-the map actually contained the value, and false if it didn't. This is useful as
-missing values in a map automatically take the zero value of their type - in
-this case, for a bool, 'false'.
-
-Read more about [maps][godoc_maps] and [zero values][godoc_zero_values] in the
-Go documentation.
 
 ## Dependency Injection
 
