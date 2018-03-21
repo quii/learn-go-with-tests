@@ -1,6 +1,6 @@
 # Structs - WIP
 
-The first requirement we have is to write a `Perimeter(width, height float64)` function, which will calculate the perimeter of a square given a width and height. `float64` is for floating point numbers like `123.45`
+Suppose that we need some geometry code to calculate the perimeter of a rectangle given a height and width. We can write a `Perimeter(width, height float64)` function, where `float64` is for floating point numbers like `123.45`
 
 The TDD cycle should be pretty familiar to you by now.
 
@@ -41,7 +41,7 @@ func Perimeter(width float64, height float64) (perimeter float64) {
 }
 ```
 
-So far, so easy. Now you need to create a function called `Area(width, height float64)` which returns the area of a rectangle.
+So far, so easy. Now let's create a function called `Area(width, height float64)` which returns the area of a rectangle.
 
 Try and do it yourself, following the TDD cycle.
 
@@ -81,11 +81,11 @@ func Area(width float64, height float64) (area float64) {
 
 ## Refactor
 
-So far we have been talking about rectangles a lot but it's not reflected much in our code. We pass width and height `float64` to our functions, but they could be the width and height of a different shape. 
+Our code does the job, but it doesn't contain anything explicit about rectangles. An unwary developer might try to supply the width and height of a triangle to these functions without realising they will return the wrong answer.
 
-We could name our functions more specifically but instead we could define our own _type_ called `Rectangle` which encapsulates this concept for us. We can then use that type as an argument to our functions instead.
+We could just give the functions more specific names like `RectangleArea`. A neater solution would be to add the define our own _type_ called `Rectangle` which encapsulates this concept for us. 
 
-A struct is just a named collection of fields where you can store data.
+We can create a simple type using a **struct**. A struct is just a named collection of fields where you can store data.
 
 Declare a struct like this
 
