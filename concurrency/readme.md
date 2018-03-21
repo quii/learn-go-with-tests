@@ -20,313 +20,31 @@ change of approach!!!
 
 # Concurrency
 
-Here is are a pair of functions that somebody else has written:
+Here's the setup: a colleague has written a function, `CheckWebsites`, that
+checks the status of a list of URLs.
 
 ```go
 package concurrency
 
-import "net/http"
+type WebsiteChecker func(string) bool
 
-func CheckWebsite(url string) bool {
-	response, err := http.Head(url)
-	if err != nil {
-		return false
-	}
-
-	if response.StatusCode != http.StatusOK {
-		return false
-	}
-
-	return true
-}
-```
-
-```go
-package concurrency
-
-func CheckWebsites(urls []string) []bool {
-	results := make([]bool, len(urls))
-
-	for index, url := range urls {
-		results[index] = isOK(url)
-	}
-
-	return results
-}
-```
-
-`CheckWebsite` takes a URL as an argument and returns `true` if that URL returns
-a 200 status code to an HTTP HEAD request, `false` for any other response or
-error.
-
-`CheckWebsites` takes a slice of URLs and returns a `map[string]bool`, mapping
-together the original URLs to the result of them being checked by
-`CheckWebsite`.
-
-Here is the test for `CheckWebsites`:
-
-```go
-package concurrency
-
-import (
-	"reflect"
-	"testing"
-)
-
-func TestCheckWebsites(t *testing.T) {
-	websites := []string{
-		"http://google.com",
-		"http://blog.gypsydave5.com",
-		"waat://furhurterwe.geds",
-	}
-
-	actualResults := CheckWebsites(websites)
-
-	want := len(websites)
-	got := len(actualResults)
-	if want != got {
-		t.Fatalf("Wanted %v, got %v", want, got)
-	}
-
-	expectedResults := map[string]bool{
-		"http://google.com":          true,
-		"http://blog.gypsydave5.com": true,
-		"waat://furhurterwe.geds":    false,
-	}
-
-	if !reflect.DeepEqual(expectedResults, actualResults) {
-		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
-	}
-}
-```
-
-This test sends a slice of URLs to `CheckWebsites`, and asserts on the length of
-the map returned, as well as the contents of that map (using `reflect.DeepEqual`).
-
-`CheckWebsites` is currently being used with very large slices of URLs, and
-people are complaining about the speed. We've been asked to make it faster.
-
-If the above isn't familiar to you, don't worry about it. The key thing for this
-exercise is that the above function _may_ take some time to return a result.
-
-### Write the test first
-
-```go
-func BenchmarkCheckWebsites(b *testing.B) {
-	websites := make([]string, 100)
-	for i := 0; i < len(websites); i++ {
-		websites[i] = "http://google.com"
-	}
-
-	for i := 0; i < b.N; i++ {
-		CheckWebsites(websites)
-	}
-}
-```
-
-A simple benchmark that executes `CheckWebsites` using a slice of 100 URLs. When
-we run this with `go test -bench=.`:
-
-```sh
-pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v1
-BenchmarkCheckWebsites-4               1        9940439437 ns/op
-PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v1        10.723s
-```
-
-9940439437 nanoseconds, around 10 seconds.
-
-This test is slow to run, which is a bad thing. If a test is slow we will
-be less willing to run it, and if a test isn't being run then that test is
-useless.
-
-Secondly, the test is making real network requests to google.com. This will make
-the benchmark inconsistent - what if google.com is down, or we have no Internet
-connection? The speed that the benchmark reports will fluctuate, and we will
-find it harder to be sure that any changes we make have sped up or slowed down
-`CheckWebsites`.
-
-```go
-func fakeWebsiteChecker(url string) bool {
-	return true
-}
-
-func BenchmarkCheckWebsites(b *testing.B) {
-	websites := make([]string, 100)
-	for i := 0; i < len(websites); i++ {
-		websites[i] = "http://google.com"
-	}
-
-	for i := 0; i < b.N; i++ {
-		CheckWebsites(fakeWebsiteChecker, websites)
-	}
-}
-```
-
-We have written a function called `stubWebsiteChecker` which performs in the
-same way as the real `CheckWebsite` - it takes a `string` and returns a `bool` -
-only without making any network calls. We are using `stubWebsiteChecker` as the
-first argument to `CheckWebsites`.
-
-### Try and run the test
-
-When we run `go build`:
-
-```sh
-# github.com/gypsydave5/learn-go-with-tests/concurrency/v2
-./CheckWebsites_test.go:22:32: too many arguments in call to CheckWebsites
-        have (func(string) bool, []string)
-        want ([]string)
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2 [build failed]
-```
-
-This is telling us that we need to update `CheckWebsites` to take an extra
-argument of the type `func(string) bool`.
-
-Just by reading the output of the compiler carefully, we now know exactly what
-we have to do next. When performing TDD it is _vital_ that you read the output of
-the compiler and your tests carefully. These outputs, especially those from the
-compiler, will be telling you exactly what we have to do next. While there
-should only be one way in which your tests can pass, there are many ways in
-which they can fail. If you can read and understand why they are failing, you
-will be 90% of the way to making them pass.
-
-
-## Dependency Injection
-
-### Write the test first
-
-So far, so good. But there are already two problems with what we've got so far.
-
-1. If `google.co.uk` goes down, (or someone puts a website at `waat://furhurterwe.geds`), our expectations will be wrong for our tests.
-2. If we turn off the Internet, our tests will always fail.
-
-And in true TDD style, we can demonstrate this with a failing test. So, turn off
-the computer's WiFi / unplug the network cable and run the tests again:
-
-```sh
---- FAIL: TestWebsiteChecker (0.00s)
-        websiteChecker_test.go:39: expected value of key 'http://google.com' in actual results to be 'true', but it was 'false'
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2        0.018s
-```
-
-This dependency on the Internet is a bad thing because these failures will have
-nothing to do with any changes to the behaviour of our code. More precisely, we
-can say that our dependency is on Jo's function `IsWebsiteOK`. If that function
-stops working for any reason at all - whether the network cuts out or the code
-has a bug - our tests will fail.
-
-To mitigate this problem we can make the function `IsWebsiteOK` an
-argument to our `WebsiteChecker` function. Then, in the tests, we can use
-a different function with the same interface as that behaves in a way that we
-can control.
-
-```go
-package concurrency
-
-import "testing"
-
-func fakeIsWebsiteOK(url string) bool {
-    if url == "http://blog.gypsydave5.com" {
-        return false
-    }
-    return true
-}
-
-func TestWebsiteChecker(t *testing.T) {
-	websites := []string{
-		"http://google.com",
-		"http://blog.gypsydave5.com",
-		"waat://furhurterwe.geds",
-	}
-
-	actualResults := WebsiteChecker(fakeIsWebsiteOK, websites)
-
-	want := len(websites)
-	got := len(actualResults)
-	if want != got {
-		t.Fatalf("Wanted %v, got %v", want, got)
-	}
-
-	expectedResults := map[string]bool{
-		"http://google.com":          true,
-		"http://blog.gypsydave5.com": false,
-		"waat://furhurterwe.geds":    true,
-	}
-
-	assertSameResults(t, expectedResults, actualResults)
-}
-```
-
-We've added a new function, `fakeIsWebsiteOK`, which has the same behaviour as
-`IsWebsiteOK`. From the outside you couldn't tell the difference between them -
-they take a `string` and return a `bool`. But on the inside `fakeIsWebsiteOK`
-is just an `if` statement that always returns `true` unless the `string`
-argument is `"http://blog.gypsydave5.com"`. It's a function we have complete
-control over - because we wrote it.
-
-The expectations have also been updated; we now expect the middle one to fail.
-
-The way we want this to work is for `WebsiteChecker` to take our
-`fakeIsWebsiteOK` function as it's first argument and to use it to 'check' the
-websites. So that's what we've written in the test
-
-```go
-  actualResults := websiteChecker(fakeIsWebsiteOK, websites)
-```
-
-### Try and run the test
-
-```sh
-./websiteChecker_test.go:21:33: too many arguments in call to WebsiteChecker
-        have (func(string) bool, []string)
-        want ([]string)
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2 [build failed]
-```
-
-A faiure to compile. If we read the output of the compiler we can see that
-`websiteChecker` wants `([]string)` as it's arguments, but we gave it
-`(func(string) bool, []string)`. So we've learnt that `func(string) bool` is the
-type of our `fakeWebsiteOK` function in the same way as `[]string` is the type
-of the slice of strings we're passing in as the second argument.
-
-Just by reading the output of the compiler carefully, we now know exactly what
-we have to do next. When performing TDD it is _vital_ that you read the output of
-the compiler and your tests carefully. These outputs, especially those from the
-compiler, will be telling you exactly what we have to do next. While there
-should only be one way in which your tests can pass, there are many ways in
-which they can fail. If you can read and understand why they are failing, you
-will be 90% of the way to making them pass.
-
-### Write the minimal amount of code for the test to run and check the failing test output
-
-```go
-package concurrency
-
-func WebsiteChecker(_ func(string) bool, urls []string) map[string]bool {
+func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 	results := make(map[string]bool)
 
 	for _, url := range urls {
-		results[url] = IsWebsiteOK(url)
+		results[url] = wc(url)
 	}
 
 	return results
 }
 ```
 
-```sh
-# github.com/gypsydave5/learn-go-with-tests/concurrency/v2
-./CheckWebsites_test.go:21:32: not enough arguments in call to CheckWebsites
-        have ([]string)
-        want (func(string) bool, []string)
-./CheckWebsites_test.go:35:6: undefined: reflect
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2 [build failed]
-```
+It returns a map of the URL checked to a boolean - `true` for a good response,
+`false` for a bad response. They've also been sensible enough to inject the
+function that tests each individual website, and they've given it a sensible
+alias: `WebsiteChecker`.
 
-Just need to update the original test...
-
+Here's the tests they've written:
 ```go
 package concurrency
 
@@ -335,7 +53,7 @@ import (
 	"testing"
 )
 
-func stubWebsiteChecker(url string) bool {
+func mockWebsiteChecker(url string) bool {
 	if url == "waat://furhurterwe.geds" {
 		return false
 	}
@@ -349,7 +67,7 @@ func TestCheckWebsites(t *testing.T) {
 		"waat://furhurterwe.geds",
 	}
 
-	actualResults := CheckWebsites(stubWebsiteChecker, websites)
+	actualResults := CheckWebsites(mockWebsiteChecker, websites)
 
 	want := len(websites)
 	got := len(actualResults)
@@ -369,182 +87,221 @@ func TestCheckWebsites(t *testing.T) {
 }
 ```
 
-And now it runs the test OK
+The function is in production and being used to check hundreds of websites. But
+your colleague has started to get complaints that it's slow, so they've asked
+you to help speed it up.
 
-```sh
-pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v2
-BenchmarkCheckWebsites-8               1        8772112216 ns/op
-PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        8.934s
-```
+### Write a test
 
-But it's still really slow.
-
-### Write enough code to make it pass
-
-It won't speed up until we actually use the function we're passing in to check
-the websites:
+Let's use a benchmark to test the speed of `CheckWebsites`:
 
 ```go
 package concurrency
 
-func CheckWebsites(websiteChecker func(string) bool, urls []string) map[string]bool {
-	results := make(map[string]bool)
+import (
+	"testing"
+	"time"
+)
 
-	for _, url := range urls {
-		results[url] = websiteChecker(url)
+func slowStubWebsiteChecker(_ string) bool {
+	time.Sleep(20 * time.Millisecond)
+	return true
+}
+
+func BenchmarkCheckWebsites(b *testing.B) {
+	urls := make([]string, 100)
+	for i := 0; i < len(urls); i++ {
+		urls[i] = "a url"
 	}
 
-	return results
+	for i := 0; i < b.N; i++ {
+		CheckWebsites(slowStubWebsiteChecker, urls)
+	}
 }
 ```
 
+The benchmark tests `CheckWebsites` using a slice of one hundred urls and uses
+a new fake implementation of `WebsiteChecker`. `slowStubWebsiteChecker` is
+deliberately slow. It uses `time.Sleep` to wait exactly twenty milliseconds and
+then it returns true.
+
+When we run the benchmark using `go test -bench=.`:
+
 ```sh
-pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v2
-BenchmarkCheckWebsites-8         1000000              1942 ns/op
+pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v0
+BenchmarkCheckWebsites-4               1        2249228637 ns/op
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        1.975s
+ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v0        2.268s
 ```
 
-#### Refactor
+`CheckWebsites` has been benchmarked at 2249228637 nanoseconds - about two and
+a quarter seconds.
 
-`func(string) bool` doesn't exactly trip off the tongue when trying to describe
-what the function is doing - you can tell the behaviour, but it's hard to say
-what the intention of it is.
+Let's try and make this faster.
+
+### Write enough code to make it pass
+
+### Concurrency and Parallelism
 
 ```go
 package concurrency
 
 type WebsiteChecker func(string) bool
 
-func CheckWebsites(websiteChecker WebsiteChecker, urls []string) map[string]bool {
+func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 	results := make(map[string]bool)
 
 	for _, url := range urls {
-		results[url] = websiteChecker(url)
+		go func() {
+			results[url] = wc(url)
+		}()
 	}
 
 	return results
 }
 ```
-
-We've used the `type` keyword here to say that we'd like `func(string) bool` to
-also be known as `WebsiteChecker`. This is a useful technique to help your code read
-nicely, especially with long function types.
-
-This technique of handling the dependencies of your software is called *Dependency
-Injection*. The thing our code depends on to work, the `CheckWebsite` function,
-is injected, in this case as an argument, into our code.
-
-TDD will inspire you to perform Dependency Injection in order to make testing
-easier, but the real benefits come when you are able to understand your code in
-discrete, individual parts.
-
-The technique we've used here of sending in a fake version of our dependency in
-our tests is called "Mocking" or "Stubbing out" the dependency.  It's an
-excellent technique that allows us to control the behaviour of things in our
-tests that we either don't own or want to test elsewhere.
-
-Finally, it isn't a good simulation if our fake `WebsiteChecker` takes no time
-at all to return; let's make it wait a few milliseconds before it returns:
-
-```go
-import (
-	"reflect"
-	"testing"
-	"time"
-)
-
-func slowWebsiteChecker(url string) bool {
-	time.Sleep(20 * time.Millisecond)
-	return true
-}
-
-func BenchmarkCheckWebsites(b *testing.B) {
-	websites := make([]string, 100)
-	for i := 0; i < len(websites); i++ {
-		websites[i] = "http://google.com"
-	}
-
-	for i := 0; i < b.N; i++ {
-		CheckWebsites(slowWebsiteChecker, websites)
-	}
-}
-```
-
-```sh
-pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v2
-BenchmarkCheckWebsites-8               1        2274322184 ns/op
-PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        2.287s
-```
-
-Much better. Now our goal should be making that `ns/op` number as small as
-possible.
-
->>>CARRY ON HERE<<<
-
-### Concurrency
-
-### Write enough code to make it pass
-
-```go
-func WebsiteChecker(isOK URLchecker, urls []string) (results []bool) {
-	results := make(map[string]bool)
-
-	for _, url := range urls {
-		go func(u string) {
-			results[u] = isOK(u)
-		}(url)
-	}
-
-	return results
-}
-```
-
-Concurrency in Go is built up from the _goroutines_. In any place where you can
-call a function, you can place the keyword `go` in front of it and the function
-will execute as a separate process to the parent process.
+Concurrency in Go is built up from _goroutines_. In any place where you can call
+a function, you can place the keyword `go` in front of it and the function will
+execute as a separate process to the parent process.
 
 Here we are executing an anonymous function as a goroutine inside the `for` loop
-we had before. The body of the function is just the same as the loop body was
-before. The only difference is that each iteration of the loop will start
-a new process, in parallel to with the current process (the `WebsiteChecker`
-function) each of which will append its result to the `results` slice.
+we had before. In Go, anonymous function literals look exactly the same as
+normal functions, only they don't have names (because they're anonymous).
 
-But when we give this a go:
+The body of the function is just the same as the loop body was before. The only
+difference is that each iteration of the loop will start a new process, in
+parallel to with the current process (the `WebsiteChecker` function) each of
+which will add its result to the results map.
+
+But when we run `go test`:
 
 ```sh
---- FAIL: TestWebsiteChecker (0.00s)
-        websiteChecker_test.go:26: Wanted 3, got 0
+--- FAIL: TestCheckWebsites (0.00s)
+        CheckWebsites_test.go:27: Wanted 3, got 0
 FAIL
 exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v3        0.015s
+FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.014s
 ```
 
-We are caught by the first test we wrote; `WebsiteChecker` is now returning an
-empty slice. What went wrong?
+A quick aside into a parallel universe...
+
+You might not get this result. You might get an enormous panic message that
+we're going to talk about in a bit. Don't worry if you got that, just keep
+running the test until you _do_ get the result above. Or pretend that you did.
+Up to you. Welcome to concurrency: when it's not handled correctly it's hard to
+predict what's going to happen. Don't worry - that's why we're writing tests, to
+help us know when we're handling concurrency predictably.
+
+... ok and we're back.
+
+We are caught by the original tests `WebsiteChecker` is now returning an
+empty map. What went wrong?
 
 None of the goroutines that our `for` loop started had enough time to add
 their result to the `results` map; the `WebsiteChecker` function is too fast for
 them, and it returns the still empty map.
 
 To fix this we can just wait while all the goroutines do their work, and then
-return. Two seconds ought to do it
+return. Two seconds ought to do it, right?
 
 ```go
 package concurrency
 
 import "time"
 
-type TestURL func(string) bool
+type WebsiteChecker func(string) bool
 
-func WebsiteChecker(isOK TestURL, urls []string) map[string]bool {
+func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
+	results := make(map[string]bool)
+
+	for _, url := range urls {
+		go func() {
+			results[url] = wc(url)
+		}()
+	}
+
+	time.Sleep(2 * time.Second)
+
+	return results
+}
+```
+
+Now when we run the tests you get:[^1]
+
+```sh
+--- FAIL: TestCheckWebsites (2.00s)
+        CheckWebsites_test.go:27: Wanted 3, got 1
+FAIL
+exit status 1
+FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        2.024s
+```
+
+This isn't great - why only one result? We might try and fix this by increasing
+the time we wait - try it if you like. It won't work. The problem here is that
+the variable `url` is reused for each iteration of the `for ...` loop - it takes
+a new value from `urls` each time. But each of our anonymous function goroutines
+have a reference to the `url` variable - they don't have their own independent
+copy. So they're _all_ (probably) writing the final value that `url` reaches.
+
+We can see this if we sneak in a quick `fmt.Println` into the function body.
+
+```go
+package concurrency
+
+import (
+	"fmt"
+	"time"
+)
+
+type WebsiteChecker func(string) bool
+
+func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
+	results := make(map[string]bool)
+
+	for _, url := range urls {
+		go func() {
+			results[url] = wc(url)
+		}()
+	}
+
+	time.Sleep(2 * time.Second)
+
+	fmt.Println(results)
+
+	return results
+}
+```
+
+```sh
+map[waat://furhurterwe.geds:false]
+--- FAIL: TestCheckWebsites (2.00s)
+        CheckWebsites_test.go:27: Wanted 3, got 1
+FAIL
+exit status 1
+FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        2.030s
+```
+
+There it is - just at the top! Each of the three goroutines in the test wrote
+exactly the same value into the map, and as the map's keys have to be unique
+each write overwrote the last.
+
+To fix this:
+
+```go
+package concurrency
+
+import (
+	"time"
+)
+
+type WebsiteChecker func(string) bool
+
+func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 	results := make(map[string]bool)
 
 	for _, url := range urls {
 		go func(u string) {
-			results[u] = isOK(u)
+			results[u] = wc(u)
 		}(url)
 	}
 
@@ -554,12 +311,15 @@ func WebsiteChecker(isOK TestURL, urls []string) map[string]bool {
 }
 ```
 
-Now when we run the tests you might get
+By giving each anonymous function a parameter for the url - `u` - and then
+calling the anonymous function with the `url` as the argument, we make sure that
+the value of `u` is fixed as the value of `url` for the iteration of the loop
+that we're launching the goroutine in. `u` is a copy of the value of `url`, and
+so can't be changed.
 
-```sh
-PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v3        2.022s
-```
+Now if you're lucky you'll get:
+
+<<<CARRY ON HERE>>>
 
 But if you're unlucky (this is more likely if you run them with `go test -bench=.`)
 
@@ -699,7 +459,7 @@ Because this loop is in a goroutine it won't block the main process of
 `WebsiteChecker`, but will keep on receiving and sending values to the two
 channels as long as there are values to receive and send.
 
-[^1]: For further reading on Test Doubles, Stubs, Mocks and the like, see https://martinfowler.com/articles/mocksArentStubs.html
+[^1] Or the huge error message. Again with the concurrency headaches.
 
 [Arrays]: ../arrays/
 [For]: ../for/

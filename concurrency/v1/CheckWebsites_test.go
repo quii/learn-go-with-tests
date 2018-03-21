@@ -5,6 +5,13 @@ import (
 	"testing"
 )
 
+func mockWebsiteChecker(url string) bool {
+	if url == "waat://furhurterwe.geds" {
+		return false
+	}
+	return true
+}
+
 func TestCheckWebsites(t *testing.T) {
 	websites := []string{
 		"http://google.com",
@@ -12,7 +19,7 @@ func TestCheckWebsites(t *testing.T) {
 		"waat://furhurterwe.geds",
 	}
 
-	actualResults := CheckWebsites(websites)
+	actualResults := CheckWebsites(mockWebsiteChecker, websites)
 
 	want := len(websites)
 	got := len(actualResults)
@@ -28,16 +35,5 @@ func TestCheckWebsites(t *testing.T) {
 
 	if !reflect.DeepEqual(expectedResults, actualResults) {
 		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
-	}
-}
-
-func BenchmarkCheckWebsites(b *testing.B) {
-	websites := make([]string, 100)
-	for i := 0; i < len(websites); i++ {
-		websites[i] = "http://google.com"
-	}
-
-	for i := 0; i < b.N; i++ {
-		CheckWebsites(websites)
 	}
 }

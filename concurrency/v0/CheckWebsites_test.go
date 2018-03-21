@@ -5,6 +5,13 @@ import (
 	"testing"
 )
 
+func mockWebsiteChecker(url string) bool {
+	if url == "waat://furhurterwe.geds" {
+		return false
+	}
+	return true
+}
+
 func TestCheckWebsites(t *testing.T) {
 	websites := []string{
 		"http://google.com",
@@ -12,7 +19,7 @@ func TestCheckWebsites(t *testing.T) {
 		"waat://furhurterwe.geds",
 	}
 
-	actualResults := CheckWebsites(websites)
+	actualResults := CheckWebsites(mockWebsiteChecker, websites)
 
 	want := len(websites)
 	got := len(actualResults)
