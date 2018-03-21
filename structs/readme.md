@@ -83,7 +83,7 @@ func Area(width float64, height float64) (area float64) {
 
 Our code does the job, but it doesn't contain anything explicit about rectangles. An unwary developer might try to supply the width and height of a triangle to these functions without realising they will return the wrong answer.
 
-We could just give the functions more specific names like `RectangleArea`. A neater solution would be to add the define our own _type_ called `Rectangle` which encapsulates this concept for us. 
+We could just give the functions more specific names like `RectangleArea`. A neater solution is to define our own _type_ called `Rectangle` which encapsulates this concept for us. 
 
 We can create a simple type using a **struct**. A struct is just a named collection of fields where you can store data.
 
