@@ -310,13 +310,11 @@ There is some duplication in our tests.
 
 All we want to do is take a collection of _shapes_, call the `Area()` method on them and then check the result. 
 
-Our shapes share a common _interface_: `Area() float64`. 
+We want to be able to write some kind of `checkArea` function that we can pass both `Rectangle`s and `Circle`s to, but fail to compile if we try and pass in something that isn't a shape.
 
-In Go, if you want to write functions which can be called with different types, like `Rectangle` and `Circle`s that share *the same interface*, you can define your function to say
+With Go we can codify this intent with **interfaces**. 
 
-> I only accept arguments that have methods called `Area` which return `float64`
-
-You do this with `interface`. Interfaces are a very powerful concept in statically typed languages like Go, they allow you to make functions that can be used with different types and create highly-decoupled code whilst still maintaining type-safety.
+Interfaces are a very powerful concept in statically typed languages like Go because they allow you to make functions that can be used with different types and create highly-decoupled code whilst still maintaining type-safety.
 
 Let's introduce this by refactoring our tests.
 
