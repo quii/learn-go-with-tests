@@ -134,7 +134,7 @@ PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v1        10.723s
 ```
 
-9940439437 nanoseconds = ~10 seconds.
+9940439437 nanoseconds, around 10 seconds.
 
 This test is slow to run, which is a bad thing. If a test is slow we will
 be less willing to run it, and if a test isn't being run then that test is
@@ -317,35 +317,93 @@ func WebsiteChecker(_ func(string) bool, urls []string) map[string]bool {
 ```
 
 ```sh
---- FAIL: TestWebsiteChecker (0.00s)
-        websiteChecker_test.go:45: expected value of key 'http://google.com' in actual results to be 'true', but it was 'false'
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2        0.018s
+# github.com/gypsydave5/learn-go-with-tests/concurrency/v2
+./CheckWebsites_test.go:21:32: not enough arguments in call to CheckWebsites
+        have ([]string)
+        want (func(string) bool, []string)
+./CheckWebsites_test.go:35:6: undefined: reflect
+FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v2 [build failed]
 ```
 
-Which is because we're still not using the function we're passing in.
-
-(Take a look at the test output - do you agree that it's more readable than
-printing out the full values of both maps? Could it be made even more useful?)
-
-### Write enough code to make it pass
+Just need to update the original test...
 
 ```go
 package concurrency
 
-func WebsiteChecker(isOK func(string) bool, urls []string) (results []bool) {
-	for _, url := range urls {
-		results = append(results, isOK(url))
+import (
+	"reflect"
+	"testing"
+)
+
+func stubWebsiteChecker(url string) bool {
+	if url == "waat://furhurterwe.geds" {
+		return false
+	}
+	return true
+}
+
+func TestCheckWebsites(t *testing.T) {
+	websites := []string{
+		"http://google.com",
+		"http://blog.gypsydave5.com",
+		"waat://furhurterwe.geds",
 	}
 
-	return
+	actualResults := CheckWebsites(stubWebsiteChecker, websites)
+
+	want := len(websites)
+	got := len(actualResults)
+	if want != got {
+		t.Fatalf("Wanted %v, got %v", want, got)
+	}
+
+	expectedResults := map[string]bool{
+		"http://google.com":          true,
+		"http://blog.gypsydave5.com": true,
+		"waat://furhurterwe.geds":    false,
+	}
+
+	if !reflect.DeepEqual(expectedResults, actualResults) {
+		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
+	}
+}
+```
+
+And now it runs the test OK
+
+```sh
+pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v2
+BenchmarkCheckWebsites-8               1        8772112216 ns/op
+PASS
+ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        8.934s
+```
+
+But it's still really slow.
+
+### Write enough code to make it pass
+
+It won't speed up until we actually use the function we're passing in to check
+the websites:
+
+```go
+package concurrency
+
+func CheckWebsites(websiteChecker func(string) bool, urls []string) map[string]bool {
+	results := make(map[string]bool)
+
+	for _, url := range urls {
+		results[url] = websiteChecker(url)
+	}
+
+	return results
 }
 ```
 
 ```sh
+pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v2
+BenchmarkCheckWebsites-8         1000000              1942 ns/op
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2     0.013s
+ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        1.975s
 ```
 
 #### Refactor
@@ -357,13 +415,13 @@ what the intention of it is.
 ```go
 package concurrency
 
-type TestURL func(string) bool
+type WebsiteChecker func(string) bool
 
-func WebsiteChecker(isOK TestURL, urls []string) []bool {
-	results := make([]bool, len(urls))
+func CheckWebsites(websiteChecker WebsiteChecker, urls []string) map[string]bool {
+	results := make(map[string]bool)
 
-	for index, url := range urls {
-		results[index] = isOK(url)
+	for _, url := range urls {
+		results[url] = websiteChecker(url)
 	}
 
 	return results
@@ -373,8 +431,6 @@ func WebsiteChecker(isOK TestURL, urls []string) []bool {
 We've used the `type` keyword here to say that we'd like `func(string) bool` to
 also be known as `TestURL`. This is a useful technique to help your code read
 nicely, especially with long function types.
-
-##### A note on Dependency Injection and Test Doubles
 
 This technique of handling the dependencies of your software is called *Dependency
 Injection*. The thing our code depends on to work, the `IsWebsiteOK` function,
@@ -389,7 +445,9 @@ dependency in our tests is called "Mocking" or "Stubbing out" the dependency.
 It's an excellent technique that allows us to control the behaviour of things in
 our tests that we either don't own or want to test elsewhere.
 
-## Concurrency
+>>>CARRY ON HERE<<<
+
+### Concurrency
 
 This is all great, but what happens when we try and check more websites. A _lot_
 more websites. Let's check `http://google.co.uk` one hundred times.
