@@ -1,13 +1,16 @@
 package main
 
-func Sum(numbers []int) (sum int) {
+func Sum(numbers []int) int {
+	sum := 0
 	for _, number := range numbers {
 		sum += number
 	}
-	return
+	return sum
 }
 
-func SumAllTails(numbersToSum ...[]int) (sums []int) {
+
+func SumAllTails(numbersToSum ...[]int) []int {
+	var sums []int
 	for _, numbers := range numbersToSum {
 		if len(numbers) == 0 {
 			sums = append(sums, 0)
@@ -17,5 +20,5 @@ func SumAllTails(numbersToSum ...[]int) (sums []int) {
 		}
 	}
 
-	return
+	return sums
 }

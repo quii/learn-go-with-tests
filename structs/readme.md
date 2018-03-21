@@ -26,7 +26,7 @@ Notice the new format string? The `f` is for our `float64` and the `.2` means pr
 ## Write the minimal amount of code for the test to run and check the failing test output
 
 ```go
-func Perimeter(width float64, height float64) (perimeter float64) {
+func Perimeter(width float64, height float64) float64 {
 	return
 }
 ```
@@ -36,7 +36,7 @@ Results in `shapes_test.go:10: got 0 want 40`
 ## Write enough code to make it pass
 
 ```go
-func Perimeter(width float64, height float64) (perimeter float64) {
+func Perimeter(width float64, height float64) float64 {
 	return 2 * (width + height)
 }
 ```
@@ -70,11 +70,11 @@ func TestArea(t *testing.T) {
 And code like this
 
 ```go
-func Perimeter(width float64, height float64) (perimeter float64) {
+func Perimeter(width float64, height float64) float64 {
 	return 2 * (width + height)
 }
 
-func Area(width float64, height float64) (area float64) {
+func Area(width float64, height float64) float64 {
 	return width * height
 }
 ```
@@ -133,11 +133,11 @@ You can access the fields of a struct with the syntax of `myStruct.field`.
 Change the two functions to fix the test.
 
 ```go
-func Perimeter(rectangle Rectangle) (perimeter float64) {
+func Perimeter(rectangle Rectangle) float64 {
 	return 2 * (rectangle.width + rectangle.height)
 }
 
-func Area(rectangle Rectangle) (area float64) {
+func Area(rectangle Rectangle) float64 {
 	return rectangle.width * rectangle.height
 }
 ```
@@ -263,7 +263,7 @@ type Rectangle struct {
 	height float64
 }
 
-func (r Rectangle) Area() (area float64)  {
+func (r Rectangle) Area() float64  {
 	return
 }
 
@@ -271,7 +271,7 @@ type Circle struct {
 	radius float64
 }
 
-func (c Circle) Area() (area float64)  {
+func (c Circle) Area() float64  {
 	return
 }
 ```
@@ -289,7 +289,7 @@ If you try and re-run the tests they should now compile and give you some failin
 Now let's make our rectangle tests pass by fixing our new method
 
 ```go
-func (r Rectangle) Area() (area float64)  {
+func (r Rectangle) Area() float64  {
 	return r.width * r.height
 }
 ```
@@ -299,7 +299,7 @@ If you re-run the tests the rectangle tests should be passing but circle should 
 To make circle's `Area` function pass we will borrow the `Pi` constant from the `math` package (remember to import it).
 
 ```go
-func (c Circle) Area() (area float64)  {
+func (c Circle) Area() float64  {
 	return math.Pi * c.radius * c.radius
 }
 ```
@@ -457,7 +457,7 @@ Try again
 It's telling us we cant use a Cube as a shape because it does not have an `Area()` method, so add an empty implementation to get the test working
 
 ```go
-func (c Cube) Area() (area float64) {
+func (c Cube) Area() float64 {
 	return
 }
 ```
@@ -470,7 +470,7 @@ Finally the code compiles and we get our error
 ## Write enough code to make it pass
 
 ```go
-func (c Cube) Area() (area float64) {
+func (c Cube) Area() float64 {
 	return (c.length*c.length) * 6
 }
 ```

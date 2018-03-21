@@ -1,8 +1,9 @@
 package main
 
-func Repeat(character string) (repeated string) {
+func Repeat(character string) string {
+	var repeated string
 	for i := 0; i < 5; i++ {
 		repeated = repeated + character
 	}
-	return
+	return repeated
 }
