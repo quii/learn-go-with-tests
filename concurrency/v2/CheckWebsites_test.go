@@ -37,18 +37,3 @@ func TestCheckWebsites(t *testing.T) {
 		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
 	}
 }
-
-func fakeWebsiteChecker(url string) bool {
-	return true
-}
-
-func BenchmarkCheckWebsites(b *testing.B) {
-	websites := make([]string, 100)
-	for i := 0; i < len(websites); i++ {
-		websites[i] = "http://google.com"
-	}
-
-	for i := 0; i < b.N; i++ {
-		CheckWebsites(fakeWebsiteChecker, websites)
-	}
-}

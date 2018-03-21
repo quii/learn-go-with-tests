@@ -429,143 +429,62 @@ func CheckWebsites(websiteChecker WebsiteChecker, urls []string) map[string]bool
 ```
 
 We've used the `type` keyword here to say that we'd like `func(string) bool` to
-also be known as `TestURL`. This is a useful technique to help your code read
+also be known as `WebsiteChecker`. This is a useful technique to help your code read
 nicely, especially with long function types.
 
 This technique of handling the dependencies of your software is called *Dependency
-Injection*. The thing our code depends on to work, the `IsWebsiteOK` function,
+Injection*. The thing our code depends on to work, the `CheckWebsite` function,
 is injected, in this case as an argument, into our code.
 
 TDD will inspire you to perform Dependency Injection in order to make testing
 easier, but the real benefits come when you are able to understand your code in
 discrete, individual parts.
 
-Finally, the technique we've used here of sending in a fake version of our
-dependency in our tests is called "Mocking" or "Stubbing out" the dependency.
-It's an excellent technique that allows us to control the behaviour of things in
-our tests that we either don't own or want to test elsewhere.
+The technique we've used here of sending in a fake version of our dependency in
+our tests is called "Mocking" or "Stubbing out" the dependency.  It's an
+excellent technique that allows us to control the behaviour of things in our
+tests that we either don't own or want to test elsewhere.
+
+Finally, it isn't a good simulation if our fake `WebsiteChecker` takes no time
+at all to return; let's make it wait a few milliseconds before it returns:
+
+```go
+import (
+	"reflect"
+	"testing"
+	"time"
+)
+
+func slowWebsiteChecker(url string) bool {
+	time.Sleep(20 * time.Millisecond)
+	return true
+}
+
+func BenchmarkCheckWebsites(b *testing.B) {
+	websites := make([]string, 100)
+	for i := 0; i < len(websites); i++ {
+		websites[i] = "http://google.com"
+	}
+
+	for i := 0; i < b.N; i++ {
+		CheckWebsites(slowWebsiteChecker, websites)
+	}
+}
+```
+
+```sh
+pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v2
+BenchmarkCheckWebsites-8               1        2274322184 ns/op
+PASS
+ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        2.287s
+```
+
+Much better. Now our goal should be making that `ns/op` number as small as
+possible.
 
 >>>CARRY ON HERE<<<
 
 ### Concurrency
-
-This is all great, but what happens when we try and check more websites. A _lot_
-more websites. Let's check `http://google.co.uk` one hundred times.
-
-```go
-package concurrency
-
-import "testing"
-
-func TestWebsiteCheckerWithManyURLs(t *testing.T) {
-	websites := make([]string, 100)
-	for i := 0; i < len(websites); i++ {
-		websites[i] = "http://google.co.uk"
-	}
-
-	expectedResults := make(map[string]bool)
-
-	for i := 0; i < len(websites); i++ {
-		expectedResults["http://google.co.uk"] = true
-	}
-
-	actualResults := WebsiteChecker(IsWebsiteOK, websites)
-
-	want := len(expectedResults)
-	got := len(actualResults)
-	if len(actualResults) != len(websites) {
-		t.Fatalf("Wanted %v, got %v", want, got)
-	}
-
-	assertSameResults(t, expectedResults, actualResults)
-}
-```
-We've written a new test that uses the real version of `IsWebsiteOK` for now.
-
-Run this test and, after a bit of thumb-twiddling, we finally get:
-
-```sh
-PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v3        11.122s
-```
-
-Ten seconds or so. So if we kick the number of checks up to 500...?
-
-```sh
-PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        51.523s
-```
-
-A proportional increase in latency (i.e. it was five times as slow)
-
-We're looking for a way of testing the _speed_ of our code now. We can do this
-by using a benchmark again as we saw in [the `for` tutorial][For].
-
-```go
-func BenchmarkWebsiteChecker(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		websites := make([]string, 100)
-		for index, _ := range websites {
-			websites[index] = "http://google.co.uk"
-		}
-
-		WebsiteChecker(IsWebsiteOK, websites)
-	}
-}
-```
-
-When we run `go test -benchmark=.`
-
-```sh
-goos: darwin
-goarch: amd64
-pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v3
-BenchmarkWebsiteChecker-4              1        11100348034 ns/op
-PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v3        21.936s
-```
-
-The key number we want to read here is the one before `ns/op` - this is the
-number of nanoseconds that it took, on average, to perform the operation in the
-benchmark loop. 11100348034 nanoseconds is about 10 seconds, so the benchmark
-confirms what our ad hoc testing has shown us.
-
-Finally, let's stop annoying Google with hundreds of requests everytime we run
-our tests. We can use another fake version of `fakeIsWebsiteOK`, but this time
-we'll make it slow - say abut 20ms.
-
-```go
-func slowIsWebsiteOK(_ string) bool {
-	time.Sleep(20 * time.Millisecond)
-	return true
-}
-```
-
-The `Sleep()` function in from the `time` package is fairly self explanitory.
-
-```go
-func BenchmarkWebsiteChecker(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		websites := make([]string, 100)
-		for index, _ := range websites {
-			websites[index] = "http://google.co.uk"
-		}
-
-		WebsiteChecker(slowIsWebsiteOK, websites)
-	}
-}
-```
-
-```sh
-goos: darwin
-goarch: amd64
-pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v3
-BenchmarkWebsiteCheckerWithManyURLs-4                  1        2267018950 ns/op
-PASS
-ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v3        2.281s
-```
-
-Our goal now should be to make that 2 seconds duration much closer to 2 milliseconds.
 
 ### Write enough code to make it pass
 
