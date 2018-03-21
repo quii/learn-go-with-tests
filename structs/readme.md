@@ -409,7 +409,7 @@ Let's demonstrate all this by adding another shape and testing it; a cube.
 
 ## Write the test first
 
-Adding a new shape to our list is very easy
+Adding a new test for our new shape is very easy. Just add `{Cube{10}, 600}` to our list. 
 
 ```go
 func TestArea(t *testing.T) {
