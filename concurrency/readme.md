@@ -192,7 +192,7 @@ Up to you. Welcome to concurrency: when it's not handled correctly it's hard to
 predict what's going to happen. Don't worry - that's why we're writing tests, to
 help us know when we're handling concurrency predictably.
 
-... ok and we're back.
+... and we're back.
 
 We are caught by the original tests `WebsiteChecker` is now returning an
 empty map. What went wrong?
@@ -315,11 +315,15 @@ By giving each anonymous function a parameter for the url - `u` - and then
 calling the anonymous function with the `url` as the argument, we make sure that
 the value of `u` is fixed as the value of `url` for the iteration of the loop
 that we're launching the goroutine in. `u` is a copy of the value of `url`, and
-so can't be changed.
+so can't be changed. This is a huge gotcha when running anonymous functions as
+goroutines, so watch out for it.
 
 Now if you're lucky you'll get:
 
-<<<CARRY ON HERE>>>
+```sh
+PASS
+ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v1        2.012s
+```
 
 But if you're unlucky (this is more likely if you run them with `go test -bench=.`)
 
@@ -341,15 +345,16 @@ created by github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteCheck
         ... many more scary lines of text ...
 ```
 
-Errors this long tend to freak me out, but the headline is what we should be
-paying attention to. `fatal error: concurrent map writes`. Maps in Go don't like
-it when more than one thing tries to write to them at once.
+Errors this long tend to freak me out, but all we need to do is pay attention to
+the headline: `fatal error: concurrent map writes`. Sometimes, when we run our
+tests, two of the goroutines write to the results map at exactly the same time,
+and maps in Go don't like it when more than one thing tries to write to them at
+once.
 
-What we have here is a classic _race condition_, an bug that occurs when the
-output of our software is dependent on the timing and sequence of events that we
-have no control over. Because we cannot control exactly when each goroutine
-writes to the results, we are vulnerable to two goroutines writing to it at the
-same time.
+This is a _race condition_, a bug that occurs when the output of our software is
+dependent on the timing and sequence of events that we have no control over.
+Because we cannot control exactly when each goroutine writes to the results, we
+are vulnerable to two goroutines writing to it at the same time.
 
 Go can help us to spot race conditions with its built in [_race detetector_][godoc_race_detector].
 To enable this feature, run the tests with the `race` flag: `go test -race`.
@@ -389,7 +394,7 @@ Goroutine 7 (finished) created at:
 ==================
 ```
 
-Again, the details are hard to read, but the headline isn't: `WARNING: DATA
+The details are, again, hard to read - but the headline isn't: `WARNING: DATA
 RACE` is pretty unambiguous. Reading into the body of the error we can see two
 different goroutines performing writes on a map - pretty much as we suspected.
 
@@ -397,7 +402,13 @@ different goroutines performing writes on a map - pretty much as we suspected.
 
 We can solve this problem by coordinating our goroutines using _channels_.
 Channels are a Go data structure that can both receive and send values. These
-operations, along with their details, allow communication between processes.
+operations, along with their details, allow communication between different
+processes.
+
+In this case we want to think about the communication between the parent process
+and each of the goroutines it makes to do the work of running the
+`WebsiteChecker` function with the url.
+
 
 ```go
 package concurrency
