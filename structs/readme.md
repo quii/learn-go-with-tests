@@ -27,7 +27,7 @@ Notice the new format string? The `f` is for our `float64` and the `.2` means pr
 
 ```go
 func Perimeter(width float64, height float64) float64 {
-	return
+	return 0
 }
 ```
 
