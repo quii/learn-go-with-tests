@@ -394,9 +394,26 @@ Goroutine 7 (finished) created at:
 ==================
 ```
 
-The details are, again, hard to read - but the headline isn't: `WARNING: DATA
+The details are, again, hard to read - but not the headline isn't: `WARNING: DATA
 RACE` is pretty unambiguous. Reading into the body of the error we can see two
-different goroutines performing writes on a map - pretty much as we suspected.
+different goroutines performing writes on a map:
+
+`Write at 0x00c420084d20 by goroutine 8:` 
+
+is writing to the same block of code as 
+
+`Previous write at 0x00c420084d20 by goroutine 7:`
+
+On top of that we can see the line of code where the write is happening:
+
+`/Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12`
+
+and the line of code where goroutines 7 an 8 are started:
+
+`/Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11`
+
+Everything is in the stack trace - all you have to do is be patient enough to
+read it.
 
 ### Channels
 
@@ -409,33 +426,23 @@ In this case we want to think about the communication between the parent process
 and each of the goroutines it makes to do the work of running the
 `WebsiteChecker` function with the url.
 
-
 ```go
 package concurrency
 
-type TestURL func(string) bool
+type WebsiteChecker func(string) bool
 type result struct {
 	string
 	bool
 }
 
-func WebsiteChecker(isOK TestURL, urls []string) map[string]bool {
+func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 	results := make(map[string]bool)
-	urlChannel := make(chan string)
 	resultChannel := make(chan result)
 
-	go func() {
-		for {
-			url := <-urlChannel
-
-			good := isOK(url)
-			result := result{url, good}
-			resultChannel <- result
-		}
-	}()
-
 	for _, url := range urls {
-		urlChannel <- url
+		go func(u string) {
+			resultChannel <- result{u, wc(u)}
+		}(url)
 	}
 
 	for i := 0; i < len(urls); i++ {
@@ -445,6 +452,13 @@ func WebsiteChecker(isOK TestURL, urls []string) map[string]bool {
 
 	return results
 }
+```
+
+```sh
+pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v2
+BenchmarkCheckWebsites-8             100          23406615 ns/op
+PASS
+ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        2.377s
 ```
 
 This version of `WebsiteChecker` uses two channels to organise the work of one
