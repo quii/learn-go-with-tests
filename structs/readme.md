@@ -511,7 +511,7 @@ Now our tests (at least the list of cases) make assertions of truth about shapes
 
 One final tip with table driven tests is to use `t.Run`. 
 
-By wrapping each case in a `t.Run` you will have clearer test output on errors 
+By wrapping each case in a `t.Run` you will have clearer test output on errors as it can print the name of the case that fails
 
 ```
 --- FAIL: TestArea (0.00s)
@@ -519,7 +519,7 @@ By wrapping each case in a `t.Run` you will have clearer test output on errors
     	shapes_test.go:33: got 72.00 want 72.10
 ```
 
-compared to 
+compared to before which doesn't make clear which scenario is actually failing.
 
 ```
 --- FAIL: TestArea (0.00s)
