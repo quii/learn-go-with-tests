@@ -509,6 +509,8 @@ In "Test-Driven Development" (which is a really nice and easy book to read) Kent
 
 Now our tests (at least the list of cases) make assertions of truth about shapes and their areas. 
 
+#### Make sure your test output is helpful
+
 Remember earlier when we were implementing `Cube` and we had the failing test? It printed ``shapes_test.go:31: got 0.00 want 600.00``
 
 We knew this was in relation to Cube because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table. How would a developer know which case failed?
