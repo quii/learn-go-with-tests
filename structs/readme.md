@@ -91,8 +91,8 @@ Declare a struct like this
 
 ```go
 type Rectangle struct {
-	width float64
-	height float64
+	Width float64
+	Height float64
 }
 ```
 
@@ -134,11 +134,11 @@ Change the two functions to fix the test.
 
 ```go
 func Perimeter(rectangle Rectangle) float64 {
-	return 2 * (rectangle.width + rectangle.height)
+	return 2 * (rectangle.Width + rectangle.Height)
 }
 
 func Area(rectangle Rectangle) float64 {
-	return rectangle.width * rectangle.height
+	return rectangle.Width * rectangle.Height
 }
 ```
 
@@ -184,7 +184,7 @@ We need to define our `Circle` type.
 
 ```go
 type Circle struct {
-	radius float64
+	Radius float64
 }
 ```
 
@@ -259,8 +259,8 @@ Let's add some methods to our types
 
 ```go
 type Rectangle struct {
-	width  float64
-	height float64
+	Width  float64
+	Height float64
 }
 
 func (r Rectangle) Area() float64  {
@@ -268,7 +268,7 @@ func (r Rectangle) Area() float64  {
 }
 
 type Circle struct {
-	radius float64
+	Radius float64
 }
 
 func (c Circle) Area() float64  {
@@ -290,7 +290,7 @@ Now let's make our rectangle tests pass by fixing our new method
 
 ```go
 func (r Rectangle) Area() float64  {
-	return r.width * r.height
+	return r.Width * r.Height
 }
 ```
 
@@ -300,7 +300,7 @@ To make circle's `Area` function pass we will borrow the `Pi` constant from the 
 
 ```go
 func (c Circle) Area() float64  {
-	return math.Pi * c.radius * c.radius
+	return math.Pi * c.Radius * c.Radius
 }
 ```
 
@@ -443,7 +443,7 @@ We have not defined Cube yet
 
 ```go
 type Cube struct {
-	length float64
+	Length float64
 }
 ```
 
@@ -471,11 +471,91 @@ Finally the code compiles and we get our error
 
 ```go
 func (c Cube) Area() float64 {
-	return (c.length*c.length) * 6
+	return (c.Length*c.Length) * 6
 }
 ```
 
 And our tests pass!
+
+## Refactor
+
+Again, the implementation is fine but our tests could do with some improvement
+
+When you scan this
+
+```go
+		{Rectangle{12, 6}, 72.0},
+		{Circle{10}, 314.1592653589793},
+		{Cube{10}, 600},
+```
+
+It's not immediately clear what the numbers represent and you should be aiming for your tests to easily understood. 
+
+So far you've only been shown one syntax for creating instances of structs `MyStruct{val1, val2}` but you can optionally name the fields.
+
+Let's see what looks like
+
+```go
+		{shape: Rectangle{Width: 12, Height: 6}, hasArea: 72.0},
+		{shape: Circle{Radius: 10}, hasArea: 314.1592653589793},
+		{shape: Cube{Length: 10}, hasArea: 600},
+```
+
+In "Test-Driven Development" (which is a really nice and easy book to read) Kent Beck refactors some tests to a point and asserts
+
+> The test speaks to us more clearly, as if it were an assertion of truth, **not a sequence of operations**
+
+(emphasis mine)
+
+Now our tests (at least the list of cases) make assertions of truth about shapes and their areas. 
+
+One final tip with table driven tests is to use `t.Run`. 
+
+By wrapping each case in a `t.Run` you will have clearer test output on errors 
+
+```
+--- FAIL: TestArea (0.00s)
+    --- FAIL: TestArea/Rectangle (0.00s)
+    	shapes_test.go:33: got 72.00 want 72.10
+```
+
+compared to 
+
+```
+--- FAIL: TestArea (0.00s)
+	shapes_test.go:31: got 72.00 want 72.10
+```
+
+And you can run specific tests within your table with `go test -run TestArea/Rectangle`
+
+Here is our final test code which captures this 
+
+```go
+func TestArea(t *testing.T) {
+
+	areaTests := []struct {
+		name    string
+		shape   Shape
+		hasArea float64
+	}{
+		{name: "Rectangle", shape: Rectangle{Width: 12, Height: 6}, hasArea: 72.0},
+		{name: "Circle", shape: Circle{Radius: 10}, hasArea: 314.1592653589793},
+		{name: "Cube", shape: Cube{Length: 10}, hasArea: 600},
+	}
+
+	for _, tt := range areaTests {
+		// using tt.name from the case to use it as the `t.Run` test name
+		t.Run(tt.name, func(t *testing.T) { 
+			got := tt.shape.Area()
+			if got != tt.hasArea {
+				t.Errorf("got %.2f want %.2f", got, tt.hasArea)
+			}
+		})
+
+	}
+
+}
+```
 
 ## Wrapping up
 
