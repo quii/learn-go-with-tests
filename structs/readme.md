@@ -484,21 +484,21 @@ Again, the implementation is fine but our tests could do with some improvement
 When you scan this
 
 ```go
-		{Rectangle{12, 6}, 72.0},
-		{Circle{10}, 314.1592653589793},
-		{Cube{10}, 600},
+{Rectangle{12, 6}, 72.0},
+{Circle{10}, 314.1592653589793},
+{Cube{10}, 600},
 ```
 
-It's not immediately clear what the numbers represent and you should be aiming for your tests to easily understood. 
+It's not immediately clear what all the numbers represent and you should be aiming for your tests to easily understood. 
 
 So far you've only been shown one syntax for creating instances of structs `MyStruct{val1, val2}` but you can optionally name the fields.
 
 Let's see what looks like
 
 ```go
-		{shape: Rectangle{Width: 12, Height: 6}, hasArea: 72.0},
-		{shape: Circle{Radius: 10}, hasArea: 314.1592653589793},
-		{shape: Cube{Length: 10}, hasArea: 600},
+{shape: Rectangle{Width: 12, Height: 6}, hasArea: 72.0},
+{shape: Circle{Radius: 10}, hasArea: 314.1592653589793},
+{shape: Cube{Length: 10}, hasArea: 600},
 ```
 
 In "Test-Driven Development" (which is a really nice and easy book to read) Kent Beck refactors some tests to a point and asserts
