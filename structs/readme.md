@@ -509,21 +509,18 @@ In "Test-Driven Development" (which is a really nice and easy book to read) Kent
 
 Now our tests (at least the list of cases) make assertions of truth about shapes and their areas. 
 
+Remember earlier when we were implementing `Cube` and we had the failing test? It printed ``shapes_test.go:31: got 0.00 want 600.00``
+
+We knew this was in relation to Cube because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table. How would a developer know which case failed?
+
 One final tip with table driven tests is to use `t.Run`. 
 
-By wrapping each case in a `t.Run` you will have clearer test output on errors as it can print the name of the case that fails
+By wrapping each case in a `t.Run` you will have clearer test output on failures as it will print the name of the case
 
 ```
 --- FAIL: TestArea (0.00s)
     --- FAIL: TestArea/Rectangle (0.00s)
     	shapes_test.go:33: got 72.00 want 72.10
-```
-
-compared to before which doesn't make clear which scenario is actually failing.
-
-```
---- FAIL: TestArea (0.00s)
-	shapes_test.go:31: got 72.00 want 72.10
 ```
 
 And you can run specific tests within your table with `go test -run TestArea/Rectangle`
