@@ -37,7 +37,7 @@ All you need to do right now is enough to make it compile so you can check your 
 package main
 
 func Repeat(character string) string  {
-	return
+	return ""
 }
 ```
 
