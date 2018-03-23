@@ -34,8 +34,8 @@ Inspect the compilation error
 Write enough code to satisfy the compiler *and that's all* - remember we want to check that our tests fail for the correct reason.
 
 ```go
-func Add(x, y int) (sum int) {
-	return
+func Add(x, y int) int {
+	return 0
 }
 ```
 
@@ -45,12 +45,16 @@ Now run the tests and we should be happy that the test is correctly reporting wh
 
 `adder_test.go:10: expected '4' but got '0'`
 
+If you have noticed we learnt about _named return value_ in the [last](/hello-world/readme.md#one...last...refactor?) section but aren't using the same here.
+It should generally be used when the meaning of the result isn't clear from context, in our case it's pretty much clear that `Add` function will add the parameters.
+You can refer [this](https://github.com/golang/go/wiki/CodeReviewComments#named-result-parameters) wiki for more details.
+
 ## Write enough code to make it pass
 
 In the strictest sense of TDD we should now write the _minimal amount of code to make the test pass_. A pedantic programmer may do this
 
 ```go
-func Add(x, y int) (sum int) {
+func Add(x, y int) int {
 	return 4
 }
 ```
@@ -64,7 +68,7 @@ Once we're more familiar with Go's syntax I will introduce a technique called Pr
 For now, let's fix it properly
 
 ```go
-func Add(x, y int) (sum int) {
+func Add(x, y int) int {
 	return x + y
 }
 ```
@@ -83,7 +87,7 @@ You can add documentation to functions with comments, and these will appear in G
 
 ```go
 // Add takes two integers and returns the sum of them
-func Add(x, y int) (sum int) {
+func Add(x, y int) int {
 	return x + y
 }
 ```

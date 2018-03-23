@@ -1,5 +1,5 @@
 package main
 
-func Add(x, y int) (sum int) {
+func Add(x, y int) int {
 	return x + y
 }

@@ -36,7 +36,7 @@ All you need to do right now is enough to make it compile so you can check your 
 ```go
 package main
 
-func Repeat(character string) (repeated string)  {
+func Repeat(character string) string  {
 	return
 }
 ```
@@ -50,11 +50,12 @@ Isn't it nice to know you already know enough Go to write tests for some basic p
 The `for` syntax is very unremarkable and follows most C-like languages.
 
 ```go
-func Repeat(character string) (repeated string) {
+func Repeat(character string) string {
+	var repeated string
 	for i := 0; i < 5; i++ {
 		repeated = repeated + character
 	}
-	return
+	return repeated
 }
 ```
 
@@ -67,11 +68,12 @@ Now it's time to refactor and introduce another construct `+=`
 ```go
 const repeatCount = 5
 
-func Repeat(character string) (repeated string) {
+func Repeat(character string) string {
+	var repeated string
 	for i := 0; i < repeatCount; i++ {
 		repeated += character
 	}
-	return
+	return repeated
 }
 ```
 

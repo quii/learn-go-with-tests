@@ -36,8 +36,8 @@ By running `go test` the compiler will fail with `./sum_test.go:10:15: undefined
 In `sum.go`
 
 ```go
-func Sum(numbers [5]int) (sum int) {
-	return
+func Sum(numbers [5]int) int {
+	return 0
 }
 ```
 
@@ -48,11 +48,12 @@ Your test should now fail with _a clear error message_
 ## Write enough code to make it pass
 
 ```go
-func Sum(numbers [5]int) (sum int) {
+func Sum(numbers [5]int) int {
+	sum := 0
 	for i := 0; i < 5; i++ {
 		sum += numbers[i]
 	}
-	return
+	return sum
 }
 ```
 
@@ -69,11 +70,12 @@ I _wouldn't_ push to master though, because I plan to refactor next. It is nice 
 Let's introduce `range` to help clean up our code
 
 ```go
-func Sum(numbers [5]int) (sum int) {
+func Sum(numbers [5]int) int {
+	sum := 0
 	for _, number := range numbers {
 		sum += number
 	}
-	return
+	return sum
 }
 ```
 
@@ -142,11 +144,12 @@ The problem here is we can either
 In our case, no-one else is using our function so rather than having two functions to maintain let's just have one. 
 
 ```go
-func Sum(numbers []int) (sum int) {
+func Sum(numbers []int) int {
+	sum := 0
 	for _, number := range numbers {
 		sum += number
 	}
-	return
+	return sum
 }
 ```
 
@@ -294,15 +297,15 @@ Change the test back again and run it, you should have test output looking like 
 What we need to do is iterate over the varargs, calculate the sum using our `Sum` function from before and then add it to the slice we will return
 
 ```go
-func SumAll(numbersToSum ...[]int) (sums []int) {
+func SumAll(numbersToSum ...[]int) []int {
 	lengthOfNumbers := len(numbersToSum)
-	sums = make([]int, lengthOfNumbers)
+	sums := make([]int, lengthOfNumbers)
 
 	for i, numbers := range numbersToSum {
 		sums[i] = Sum(numbers)
 	}
 
-	return
+	return sums
 }
 ```
 
@@ -321,12 +324,13 @@ As mentioned, slices have a capacity. If you have a slice with a capacity of 2 a
 However you can use the `append` function which takes a slice and a new value, returning a new slice with all the items in it.
 
 ```go
-func SumAll(numbersToSum ...[]int) (sums []int) {
+func SumAll(numbersToSum ...[]int) []int {
+	var sums []int
 	for _, numbers := range numbersToSum {
 		sums = append(sums, Sum(numbers))
 	}
 
-	return
+	return sums
 }
 ```
 
@@ -360,13 +364,14 @@ Rename the function to `SumAllTails` and re-run the test
 ## Write enough code to make it pass
 
 ```go
-func SumAllTails(numbersToSum ...[]int) (sums []int) {
+func SumAllTails(numbersToSum ...[]int) []int {
+	var sums []int
 	for _, numbers := range numbersToSum {
 		tail := numbers[1:]
 		sums = append(sums, Sum(tail))
 	}
 
-	return
+	return sums
 }
 ```
 
@@ -416,7 +421,8 @@ Oh no! It's important to note the test _has compiled_, it is a runtime error. Co
 ## Write enough code to make it pass
 
 ```go
-func SumAllTails(numbersToSum ...[]int) (sums []int) {
+func SumAllTails(numbersToSum ...[]int) []int {
+	var sums []int
 	for _, numbers := range numbersToSum {
 		if len(numbers) == 0 {
 			sums = append(sums, 0)
@@ -426,7 +432,7 @@ func SumAllTails(numbersToSum ...[]int) (sums []int) {
 		}
 	}
 
-	return
+	return sums
 }
 ```
 
