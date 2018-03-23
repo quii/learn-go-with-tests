@@ -6,6 +6,7 @@ Contributions are very welcome, I hope for this to become a great home for guide
 
 - Teaching Go features (e.g things like `if`, `select`, structs, methods, etc)
 - Showcase interesting functionality within the standard library. Show off how easy it is to TDD a HTTP server for instance.
+- Show how Go's tooling, like benchmarking, race detectors, etc can help you arrive at great software
 
 If you don't feel confident to submit your own guide, submitting an issue for something you want to learn is still a valuable contribution. 
 
@@ -18,7 +19,10 @@ If you don't feel confident to submit your own guide, submitting an issue for so
     - `Hello(name string)` <- default to "world" using `if`
     - `Hello(name, language string)` <- `switch`
     
-- Try and minimise the surface area of required knowledge. Thinking of examples that showcase what you're trying to teach without confusing the reader with lots of other features is important.
+- Try and minimise the surface area of required knowledge. 
+    - Thinking of examples that showcase what you're trying to teach without confusing the reader with other features is important. 
+    - For example you can learn about `struct`s without understanding pointers.
+    - Brevity is king.
 - Follow the [Code Review Comments style guide](https://github.com/golang/go/wiki/CodeReviewComments). It's important for a consistent style across all the sections.
 - Your section should have a runnable application at the end (e.g `package main` with a `main` func) so users can see it in action and play with it
 - All tests should pass
