@@ -35,7 +35,7 @@ Write enough code to satisfy the compiler *and that's all* - remember we want to
 
 ```go
 func Add(x, y int) int {
-	return
+	return 0
 }
 ```
 
