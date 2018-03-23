@@ -264,7 +264,7 @@ type Rectangle struct {
 }
 
 func (r Rectangle) Area() float64  {
-	return
+	return 0
 }
 
 type Circle struct {
@@ -272,7 +272,7 @@ type Circle struct {
 }
 
 func (c Circle) Area() float64  {
-	return
+	return 0
 }
 ```
 
@@ -458,7 +458,7 @@ It's telling us we cant use a Cube as a shape because it does not have an `Area(
 
 ```go
 func (c Cube) Area() float64 {
-	return
+	return 0
 }
 ```
 
