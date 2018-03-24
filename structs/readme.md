@@ -278,7 +278,7 @@ func (c Circle) Area() float64  {
 
 The syntax for declaring methods is almost the same as functions and that's because they're so similar. The only difference is the syntax of the method receiver `func (receiverName RecieverType) MethodName(args)`.
 
-When your method is called on an variable of that type, you get your reference to it's data via the `receiverName` variable. In many other programming languages this is done implicitly and you access the receiver via `this`.
+When your method is called on a variable of that type, you get your reference to it's data via the `receiverName` variable. In many other programming languages this is done implicitly and you access the receiver via `this`.
 
 It is a convention in Go to have the receiver variable be the first letter of the type.
 
@@ -519,9 +519,9 @@ Now our tests (at least the list of cases) make assertions of truth about shapes
 
 #### Make sure your test output is helpful
 
-Remember earlier when we were implementing `Triangle` and we had the failing test? It printed ``shapes_test.go:31: got 0.00 want 600.00``
+Remember earlier when we were implementing `Triangle` and we had the failing test? It printed `shapes_test.go:31: got 0.00 want 36.00`
 
-We knew this was in relation to Triangle because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table. How would a developer know which case failed?
+We knew this was in relation to `Triangle` because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table. How would a developer know which case failed? This is not a great experience for the developer, they will have to manually look through the cases to find out which case actually failed.
 
 One final tip with table driven tests is to use `t.Run`. 
 
