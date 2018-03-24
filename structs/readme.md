@@ -1,4 +1,4 @@
-# Structs - WIP
+# Structs, methods and interfaces
 
 Suppose that we need some geometry code to calculate the perimeter of a rectangle given a height and width. We can write a `Perimeter(width float64, height float64)` function, where `float64` is for floating point numbers like `123.45`
 
@@ -502,7 +502,7 @@ Let's see what looks like
 {shape: Triangle{Base: 12, Height: 6}, hasArea: 36.0,
 ```
 
-In "Test-Driven Development" Kent Beck refactors some tests to a point and asserts
+In [Test-Driven Development by Example](https://g.co/kgs/yCzDLF) Kent Beck refactors some tests to a point and asserts
 
 > The test speaks to us more clearly, as if it were an assertion of truth, **not a sequence of operations**
 
