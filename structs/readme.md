@@ -366,7 +366,7 @@ But in our case
 - `string` does not have such a method, so it doesn't satisfy the interface
 - etc.
 
-That's because in Go **interface resolution is implicit**. If the type you pass in matches what the interface is asking for, it will compile. 
+In Go **interface resolution is implicit**. If the type you pass in matches what the interface is asking for, it will compile. 
 
 ### Decoupling
 
