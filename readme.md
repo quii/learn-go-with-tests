@@ -19,7 +19,7 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 2. [Integers](/integers) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
 3. [Iteration](/for) - Learn about `for` and benchmarking.
 4. [Arrays and slices](/arrays) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
-5. [Structs, methods & interfaces (WIP)](/structs) - Learn about `struct`, methods, `interface` and table driven tests.
+5. [Structs, methods & interfaces](/structs) - Learn about `struct`, methods, `interface` and table driven tests.
 6. Pointers
 7. [Dependency Injection & interfaces (WIP)](/di-and-interfaces) - Learn about dependency injection, how it relates to using interfaces and a primer on io
 8. Concurrency (WIP)
