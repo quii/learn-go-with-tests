@@ -403,11 +403,11 @@ You can see how it would be very easy for a developer to introduce a new shape, 
 
 Table based tests can be a great item in your toolbox but be sure that you have a need for the extra noise in the tests. If you wish to test various implementations of an interface, or if the data being passed in to a function has lots of different requirements that need testing then they are a great fit.
 
-Let's demonstrate all this by adding another shape and testing it; a cube. 
+Let's demonstrate all this by adding another shape and testing it; a triangle. 
 
 ## Write the test first
 
-Adding a new test for our new shape is very easy. Just add `{Cube{10}, 600}` to our list. 
+Adding a new test for our new shape is very easy. Just add `{Triangle{12, 6}, 36.0},` to our list. 
 
 ```go
 func TestArea(t *testing.T) {
@@ -418,7 +418,7 @@ func TestArea(t *testing.T) {
 	}{
 		{Rectangle{12, 6}, 72.0},
 		{Circle{10}, 314.1592653589793},
-		{Cube{10}, 600},
+		{Triangle{12, 6}, 36.0},
 	}
 
 	for _, tt := range areaTests {
@@ -437,41 +437,42 @@ Remember, keep trying to run the test and let the compiler guide you toward a so
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-`./shapes_test.go:25:4: undefined: Cube`
+`./shapes_test.go:25:4: undefined: Triangle`
 
-We have not defined Cube yet
+We have not defined Triangle yet
 
 ```go
-type Cube struct {
-	Length float64
+type Triangle struct {
+	Base   float64
+	Height float64
 }
 ```
 
 Try again
 
 ```
-./shapes_test.go:25:8: cannot use Cube literal (type Cube) as type Shape in field value:
-	Cube does not implement Shape (missing Area method)
+./shapes_test.go:25:8: cannot use Triangle literal (type Triangle) as type Shape in field value:
+	Triangle does not implement Shape (missing Area method)
 ```
 
-It's telling us we cant use a Cube as a shape because it does not have an `Area()` method, so add an empty implementation to get the test working
+It's telling us we cant use a Triangle as a shape because it does not have an `Area()` method, so add an empty implementation to get the test working
 
 ```go
-func (c Cube) Area() float64 {
+func (c Triangle) Area() float64 {
 	return 0
 }
 ```
 
 Finally the code compiles and we get our error
 
-`shapes_test.go:31: got 0.00 want 600.00`
+`shapes_test.go:31: got 0.00 want 36.00`
 
 
 ## Write enough code to make it pass
 
 ```go
-func (c Cube) Area() float64 {
-	return (c.Length*c.Length) * 6
+func (c Triangle) Area() float64 {
+	return (c.Base * c.Height) * 0.5
 }
 ```
 
@@ -486,7 +487,7 @@ When you scan this
 ```go
 {Rectangle{12, 6}, 72.0},
 {Circle{10}, 314.1592653589793},
-{Cube{10}, 600},
+{Triangle{12, 6}, 36.0},
 ```
 
 It's not immediately clear what all the numbers represent and you should be aiming for your tests to easily understood. 
@@ -498,10 +499,10 @@ Let's see what looks like
 ```go
 {shape: Rectangle{Width: 12, Height: 6}, hasArea: 72.0},
 {shape: Circle{Radius: 10}, hasArea: 314.1592653589793},
-{shape: Cube{Length: 10}, hasArea: 600},
+{shape: Triangle{Base: 12, Height: 6}, hasArea: 36.0,
 ```
 
-In "Test-Driven Development" (which is a really nice and easy book to read) Kent Beck refactors some tests to a point and asserts
+In "Test-Driven Development" Kent Beck refactors some tests to a point and asserts
 
 > The test speaks to us more clearly, as if it were an assertion of truth, **not a sequence of operations**
 
@@ -511,9 +512,9 @@ Now our tests (at least the list of cases) make assertions of truth about shapes
 
 #### Make sure your test output is helpful
 
-Remember earlier when we were implementing `Cube` and we had the failing test? It printed ``shapes_test.go:31: got 0.00 want 600.00``
+Remember earlier when we were implementing `Triangle` and we had the failing test? It printed ``shapes_test.go:31: got 0.00 want 600.00``
 
-We knew this was in relation to Cube because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table. How would a developer know which case failed?
+We knew this was in relation to Triangle because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table. How would a developer know which case failed?
 
 One final tip with table driven tests is to use `t.Run`. 
 
@@ -539,12 +540,12 @@ func TestArea(t *testing.T) {
 	}{
 		{name: "Rectangle", shape: Rectangle{Width: 12, Height: 6}, hasArea: 72.0},
 		{name: "Circle", shape: Circle{Radius: 10}, hasArea: 314.1592653589793},
-		{name: "Cube", shape: Cube{Length: 10}, hasArea: 600},
+		{name: "Triangle", shape: Triangle{Base: 12, Height: 6}, hasArea: 36.0},
 	}
 
 	for _, tt := range areaTests {
 		// using tt.name from the case to use it as the `t.Run` test name
-		t.Run(tt.name, func(t *testing.T) { 
+		t.Run(tt.name, func(t *testing.T) {
 			got := tt.shape.Area()
 			if got != tt.hasArea {
 				t.Errorf("got %.2f want %.2f", got, tt.hasArea)

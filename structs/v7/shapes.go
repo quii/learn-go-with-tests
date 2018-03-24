@@ -23,12 +23,13 @@ func (c Circle) Area() float64 {
 	return math.Pi * c.Radius * c.Radius
 }
 
-type Cube struct {
-	Length float64
+type Triangle struct {
+	Base   float64
+	Height float64
 }
 
-func (c Cube) Area() float64 {
-	return (c.Length * c.Length) * 6
+func (c Triangle) Area() float64 {
+	return (c.Base * c.Height) * 0.5
 }
 
 func Perimeter(rectangle Rectangle) float64 {
