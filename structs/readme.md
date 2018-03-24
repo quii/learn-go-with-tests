@@ -571,7 +571,7 @@ This was more TDD practice, iterating over our solutions to basic mathematic pro
 - Declaring structs to create your own data types which lets you bundle related data together and make the intent of your code clearer
 - Declaring interfaces so you can define functions that can be used by different types ([parametric polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism))
 - Adding methods so you can add functionality to your data types and so you can implement interfaces
-- Table based tests to make your assertions clearer and your suites easier to extend
+- Table based tests to make your assertions clearer and your suites easier to extend & maintain
 
 This was an important chapter because we are now starting to define our own types. In statically typed languages like Go, being able to design your own types is essential for building software that is easy to understand, to piece together and to test. 
 
