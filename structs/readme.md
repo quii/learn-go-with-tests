@@ -210,7 +210,7 @@ We have two choices
 
 ### What are methods?
 
-So far we have only been writing *functions* but we have been using some methods. When we call `t.Errof` we are calling the method `ErrorF` on the instance of our `t` (`testing.T`). 
+So far we have only been writing *functions* but we have been using some methods. When we call `t.Errorf` we are calling the method `ErrorF` on the instance of our `t` (`testing.T`). 
 
 Methods are very similar to functions but they are called by invoking them on an instance of a particular type. Where you can just call functions wherever you like, such as `Area(rectangle)` you can only call methods on "things".
 
