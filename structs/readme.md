@@ -523,7 +523,7 @@ Remember earlier when we were implementing `Triangle` and we had the failing tes
 
 We knew this was in relation to `Triangle` because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table. How would a developer know which case failed? This is not a great experience for the developer, they will have to manually look through the cases to find out which case actually failed.
 
-We can change our error message `%#v.Area() got %.2f want %.2f`. `%#v` format string will print out our struct with the values in it's field, so the developer can see at a glance the properties that are being tested.
+We can change our error message `%#v got %.2f want %.2f`. `%#v` format string will print out our struct with the values in it's field, so the developer can see at a glance the properties that are being tested.
 
 One final tip with table driven tests is to use `t.Run`. 
 
@@ -532,7 +532,7 @@ By wrapping each case in a `t.Run` you will have clearer test output on failures
 ```
 --- FAIL: TestArea (0.00s)
     --- FAIL: TestArea/Rectangle (0.00s)
-    	shapes_test.go:33: main.Rectangle{Width:12, Height:6}.Area() got 72.00 want 72.10
+    	shapes_test.go:33: main.Rectangle{Width:12, Height:6} got 72.00 want 72.10
 ```
 
 And you can run specific tests within your table with `go test -run TestArea/Rectangle`
@@ -557,7 +557,7 @@ func TestArea(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.shape.Area()
 			if got != tt.hasArea {
-				t.Errorf("%#v.Area() got %.2f want %.2f", tt.shape, got, tt.hasArea)
+				t.Errorf("%#v got %.2f want %.2f", tt.shape, got, tt.hasArea)
 			}
 		})
 
