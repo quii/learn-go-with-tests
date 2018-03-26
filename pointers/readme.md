@@ -155,3 +155,72 @@ The difference is the receiver type is `*Wallet` rather than `Wallet` which you 
 Try and re-run the tests and they should pass. 
 
 ## Refactor
+
+We said we were making a Bitcoin wallet but we have not mentioned them so far. We've been using `int` because they're a good type for counting things!
+
+It seems a bit overkill to create a `struct` for this. `int` is fine in terms of the way it works but it's not descriptive.
+
+Go lets you create **type aliases** which let you effectively create a new type out of an existing one.
+
+The syntax is `type MyName OriginalType` 
+
+```go
+type Bitcoin int
+
+type Wallet struct {
+	balance Bitcoin
+}
+
+func (w *Wallet) Deposit(amount Bitcoin) {
+	w.balance += amount
+}
+
+func (w *Wallet) Balance() Bitcoin {
+	return w.balance
+}
+```
+
+```go
+func TestWallet(t *testing.T) {
+
+	wallet := Wallet{}
+
+	wallet.Deposit(Bitcoin(10))
+
+	got := wallet.Balance()
+
+	want := Bitcoin(10)
+
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
+}
+```
+
+To make `Bitcoin` you just use the syntax `Bitcoin(999)`
+
+An interesting property of type aliasing is that you can also declare _methods_ on them. This can be very useful when you want to add some domain specific functionality on top of existing types.
+
+Let's implement `String` on our new type so that in our tests its clearer what currency we are dealing with. When you implement `String` on a type it will be called when used with `%s` format string.
+
+```go
+func (b Bitcoin) String() string {
+	return fmt.Sprintf("%d BTC", b)
+}
+```
+
+As you can see, the syntax for creating a method on a type alias is the same as it is on a struct.
+
+Next we need to update our test format strings so they will use `String()` instead.
+
+```go
+	if got != want {
+		t.Errorf("got %s want %s", got, want)
+	}
+```
+
+To see this in action, deliberately break the test so we can see it
+
+`wallet_test.go:18: got 10 BTC want 20 BTC`
+
+This makes it clearer what's going on in our test. 
