@@ -394,7 +394,7 @@ t.Run("Withdraw over balance limit", func(t *testing.T) {
     wallet := Wallet{balance: Bitcoin(20)}
     err := wallet.Withdraw(Bitcoin(100))
 
-    if err ==nil {
+    if err == nil {
         t.Errorf("expected an error to be returned when withdrawing too much")
     }
 
@@ -486,9 +486,9 @@ We can do this with a _type assertion_. When you have a value and all you know i
 
 The syntax is `theThingCastToThetype, booleanConfirmingItIsTheType := thing.(MyType)`. You can see this in action in the test code. 
 
-- First important change is we change the nil check to use `t.Fatalf` rather than `t.Errorf`. Fatalf is helpful if you want the test to stop. `Errorf` will fail the rest of the code will continue. In our case if we dont get an error there's no point in carrying on
+- First important change is we change the nil check to use `t.Fatalf` rather than `t.Errorf`. `Fatalf` is helpful if you want the test to stop. `Errorf` will fail the test but the rest of the code will continue. In our case if we don't get an error there's no point in carrying on.
 - We then do our type assertion. We check that it is the type we want and if not we fail the test.
-- If it _is_ a `WithdrawError` then we check it's values with a normal assertion
+- If it _is_ a `WithdrawError` then we check it's values with a normal assertion.
 
 ## Try and run the test
 ## Write the minimal amount of code for the test to run and check the failing test output
