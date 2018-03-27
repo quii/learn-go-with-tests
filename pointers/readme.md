@@ -491,6 +491,60 @@ The syntax is `theThingCastToThetype, booleanConfirmingItIsTheType := thing.(MyT
 - If it _is_ a `WithdrawError` then we check it's values with a normal assertion.
 
 ## Try and run the test
+
+`./wallet_test.go:37:30: undefined: WithdrawError`
+
 ## Write the minimal amount of code for the test to run and check the failing test output
+
+We have not defined our new error type yet
+
+```go
+type WithdrawError struct {
+	CurrentBalance   Bitcoin
+	AmountToWithdraw Bitcoin
+}
+```
+
+Try again.
+
+```
+./wallet_test.go:37:28: impossible type assertion:
+	WithdrawError does not implement error (missing Error method)
+```
+
+Go knows that our current type cannot possibly be an `error` due to the missing method, so lets implement the `error` interface on our new type.
+
+```go
+func (w WithdrawError) Error() string {
+	return fmt.Sprintf("cannot withdraw %s, insufficient funds (%s)", w.AmountToWithdraw, w.CurrentBalance)
+}
+```
+
+Finally the test runs and fails as we'd expect
+
+`wallet_test.go:40: did not get a withdraw error &errors.errorString{s:"cannot withdraw 100 BTC, insufficient funds (20 BTC)"}`
+
+Our `Withdraw` method is failing the type assertion
+
 ## Write enough code to make it pass
+
+Make the method use our new type instead
+
+```go
+func (w *Wallet) Withdraw(amount Bitcoin) error {
+
+	if amount > w.balance {
+		return WithdrawError{
+			CurrentBalance:   w.balance,
+			AmountToWithdraw: amount,
+		}
+	}
+
+	w.balance -= amount
+	return nil
+}
+```
+
+The test should now pass. 
+
 ## Refactor
