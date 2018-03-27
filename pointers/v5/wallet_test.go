@@ -31,20 +31,24 @@ func TestWallet(t *testing.T) {
 		err := wallet.Withdraw(Bitcoin(100))
 
 		if err == nil {
-			t.Errorf("expected an error to be returned when withdrawing too much")
+			t.Fatalf("expected an error to be returned when withdrawing too much")
 		}
 
-		if got, isWithdrawErr := err.(WithdrawError); isWithdrawErr {
-			want := WithdrawError{
-				AmountToWithdraw: Bitcoin(100),
-				CurrentBalance:   Bitcoin(20),
-			}
-			if want != got {
-				t.Errorf("got %#v, want %#v", got, want)
-			}
-		} else {
-			t.Errorf("did not get a withdraw error %#v", err)
+		got, isWithdrawErr := err.(WithdrawError)
+
+		if !isWithdrawErr {
+			t.Fatalf("did not get a withdraw error %#v", err)
 		}
+
+		want := WithdrawError{
+			AmountToWithdraw: Bitcoin(100),
+			CurrentBalance:   Bitcoin(20),
+		}
+
+		if want != got {
+			t.Errorf("got %#v, want %#v", got, want)
+		}
+
 	})
 
 }

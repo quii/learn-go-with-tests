@@ -328,14 +328,14 @@ Let's try this out in a test
 ## Write the test first
 
 ```go
-	t.Run("Withdraw over balance limit", func(t *testing.T) {
-		wallet := Wallet{balance: Bitcoin(20)}
-		err := wallet.Withdraw(Bitcoin(100))
-		
-		if err ==nil {
-			t.Errorf("expected an error to be returned when withdrawing too much")
-		}
-	})
+t.Run("Withdraw over balance limit", func(t *testing.T) {
+    wallet := Wallet{balance: Bitcoin(20)}
+    err := wallet.Withdraw(Bitcoin(100))
+    
+    if err ==nil {
+        t.Errorf("expected an error to be returned when withdrawing too much")
+    }
+})
 ```
 
 We now want `Withdraw` to return an error _if_ you try and take out more than you have. 
@@ -390,19 +390,19 @@ Hopefully you may be thinking that the error of "oh no" could maybe be a little 
 ## Write the test first
 
 ```go
-	t.Run("Withdraw over balance limit", func(t *testing.T) {
-		wallet := Wallet{balance: Bitcoin(20)}
-		err := wallet.Withdraw(Bitcoin(100))
+t.Run("Withdraw over balance limit", func(t *testing.T) {
+    wallet := Wallet{balance: Bitcoin(20)}
+    err := wallet.Withdraw(Bitcoin(100))
 
-		if err ==nil {
-			t.Errorf("expected an error to be returned when withdrawing too much")
-		}
+    if err ==nil {
+        t.Errorf("expected an error to be returned when withdrawing too much")
+    }
 
-		expectedErrorMessage := "cannot withdraw 100 BTC, insufficient funds (20 BTC)"
-		if err.Error() != expectedErrorMessage {
-			t.Errorf(`got error message of "%s", want "%s"`, err.Error(), expectedErrorMessage)
-		}
-	})
+    expectedErrorMessage := "cannot withdraw 100 BTC, insufficient funds (20 BTC)"
+    if err.Error() != expectedErrorMessage {
+        t.Errorf(`got error message of "%s", want "%s"`, err.Error(), expectedErrorMessage)
+    }
+})
 ```
 ## Try and run the test
 
@@ -452,37 +452,44 @@ This gives the users of our library some flexibility in their error handling:
 ## Write the test first
 
 ```go
-	t.Run("Withdraw over balance limit", func(t *testing.T) {
-		wallet := Wallet{balance: Bitcoin(20)}
-		err := wallet.Withdraw(Bitcoin(100))
+t.Run("Withdraw over balance limit", func(t *testing.T) {
+    wallet := Wallet{balance: Bitcoin(20)}
+    err := wallet.Withdraw(Bitcoin(100))
 
-		if err ==nil {
-			t.Errorf("expected an error to be returned when withdrawing too much")
-		}
+    if err == nil {
+        t.Fatalf("expected an error to be returned when withdrawing too much")
+    }
 
-		if got, isWithdrawErr := err.(WithdrawError); isWithdrawErr {
-			want := WithdrawError {
-				AmountToWithdraw:Bitcoin(100),
-				CurrentBalance:Bitcoin(20),
-			}
-			if want != got {
-				t.Errorf("got %#v, want %#v", got, want)
-			}
-		} else {
-			t.Errorf("did not get a withdraw error %#v", err)
-		}
-	})
+    got, isWithdrawErr := err.(WithdrawError)
+
+    if !isWithdrawErr {
+        t.Fatalf("did not get a withdraw error %#v", err)
+    }
+
+    want := WithdrawError{
+        AmountToWithdraw: Bitcoin(100),
+        CurrentBalance:   Bitcoin(20),
+    }
+
+    if want != got {
+        t.Errorf("got %#v, want %#v", got, want)
+    }
+
+})
 ```
 
 _We will probably refactor this!_ Hold your nose while we go through some concepts. 
 
-As we discussed earlier, by design the concept of interfaces hides the concrete type. Most of the time this is super nice but in this case we do need to check the _particular type_ is returned because we are! 
+As we discussed earlier, by design the concept of interfaces hides the concrete type. Most of the time this is super nice but in this case we do need to check the _particular type_ is returned because we want to make sure the information in the concrete type is returned. 
 
-We dont want a boring `string` error, we want one with all the details we need.
+We can do this with a _type assertion_. When you have a value and all you know is it's an interface, you can ask Go if a particular thing is _actually_ type `Foo`. It returns two values, the value _cast to the type_ and a boolean telling you the result of the check.
 
-We can do this with a _type assertion_. When you have a value and all you know is it's an interface, you can ask Go if a particular thing is _actually type `Foo`. It returns two values, the value _cast to the type_ and a boolean telling you the result of the check.
+The syntax is `theThingCastToThetype, booleanConfirmingItIsTheType := thing.(MyType)`. You can see this in action in the test code. 
 
-The syntax is `theThingCastToThetype, booleanConfirmingItIsTheType := thing.(MyType)`. You can see this in action in the test code
+- First important change is we change the nil check to use `t.Fatalf` rather than `t.Errorf`. Fatalf is helpful if you want the test to stop. `Errorf` will fail the rest of the code will continue. In our case if we dont get an error there's no point in carrying on
+- We then do our type assertion. We check that it is the type we want and if not we fail the test.
+- If it _is_ a `WithdrawError` then we check it's values with a normal assertion
+
 ## Try and run the test
 ## Write the minimal amount of code for the test to run and check the failing test output
 ## Write enough code to make it pass
