@@ -63,7 +63,7 @@ Ah hah! Foiled again, TDD is a sham right?
 
 We could write another test, with some different numbers to force that test to fail but that feels like a game of cat and mouse. 
 
-Once we're more familiar with Go's syntax I will introduce a technique called Property Based Testing, which would stop annoying developers and help find you bugs
+Once we're more familiar with Go's syntax I will introduce a technique called Property Based Testing, which would stop annoying developers and help you find bugs.
 
 For now, let's fix it properly
 
