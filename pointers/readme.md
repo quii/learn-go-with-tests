@@ -383,7 +383,7 @@ Remember to import `errors` into your code.
 
 ## Refactor
 
-There is a temptation to add a table driven test for `Withdraw` tests but let's resist that tempotation for now. 
+There is a temptation to add a table driven test for `Withdraw` but let's resist that temptation for now. 
 
 Hopefully you may be thinking that the error of "oh no" could maybe be a little improved. 
 
@@ -428,7 +428,10 @@ Remember to remove the import of `errors` and add `fmt`.
 
 ## Refactor
 
-The main problem we have is the potential of an annoying test. We are asserting on the exact wording of the error. If a developer decides to change the wording of the message, a test will fail which seems too heavy handed. In addition, the useful data in the error is "trapped" inside a `string`. If a developer wants to do something useful with this data she is going to be quite stuck. 
+The main problem we have is the potential of a flaky test. We are asserting on the exact wording of the error, which is not very important to us. If a developer decides to change the wording of the message, a test will fail which seems too heavy handed. **Remember our tests should not be a burden**
+
+
+In addition, the useful data in the error is "trapped" inside a `string`. If a developer wants to do something useful with this data she is going to be quite stuck. 
 
 What we really want to assert is that we have useful information in our error but still somehow return an `error`
 
