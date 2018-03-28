@@ -1,22 +1,4 @@
-## Outline / notes
-
-- Create a trivial, but paralizable, example - i.e. fetching multiple webpages
-- Introduce goroutines to improve the performance
-- Note that the test now fails as we can't be sure when the goroutines return
-- Make tests pass using a sleep, but demonstrate that this doesn't scale
-- introduce Channels for synchronization between processes
-
----
-
-change of approach!!!
-
-- start with a result object coming back from the original function
-- avoids this mess with the ordering of the results
-- is this copping out?
-
-- use map!!!
-
----
+## WIP
 
 # Concurrency
 
@@ -141,7 +123,11 @@ Let's try and make this faster.
 
 ### Write enough code to make it pass
 
-### Concurrency and Parallelism
+Concurrency in Go is built up from _goroutines_. In any place where you can call
+a function, you can place the keyword `go` in front of it and the function will
+execute as a separate process to the parent process.
+
+With a normal function in Go
 
 ```go
 package concurrency
@@ -160,6 +146,7 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 	return results
 }
 ```
+
 Concurrency in Go is built up from _goroutines_. In any place where you can call
 a function, you can place the keyword `go` in front of it and the function will
 execute as a separate process to the parent process.
@@ -398,9 +385,9 @@ The details are, again, hard to read - but not the headline isn't: `WARNING: DAT
 RACE` is pretty unambiguous. Reading into the body of the error we can see two
 different goroutines performing writes on a map:
 
-`Write at 0x00c420084d20 by goroutine 8:` 
+`Write at 0x00c420084d20 by goroutine 8:`
 
-is writing to the same block of code as 
+is writing to the same block of code as
 
 `Previous write at 0x00c420084d20 by goroutine 7:`
 
