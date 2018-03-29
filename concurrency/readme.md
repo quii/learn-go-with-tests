@@ -470,11 +470,20 @@ we're assigning to is on the left:
 result := <-resultChannel
 ```
 
-We then use the `result` received to update the results map.
+We then use the `result` received to update the map.
 
 By sending the results into a channel, we can control the timing of each write
-into the results map. Although each of the calls of `wc` is now happening in
-parallel inside its own process.
+into the results map, ensuring that it happens one at a time. Although each of
+the calls of `wc`, and each send to the result channel, is happening in parallel
+inside its own process, each of the results is being dealt with one at a time as
+we take values out of the result channel with the receive expression.
+
+We have paralellized the part of the code that we wanted to make faster, while
+making sure that the part that cannot happen in parallel still happens linearly.
+And we have communicated across the multiple processes involved by using
+channels.
+
+When we run the benchmark:
 
 ```sh
 pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v2
@@ -482,6 +491,8 @@ BenchmarkCheckWebsites-8             100          23406615 ns/op
 PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        2.377s
 ```
+23406615 nanoseconds - 0.023 seconds, about one hundred times as fast as
+original function. A great success.
 
 [^1]: Or the huge error message. Again with the concurrency headaches.
 
@@ -490,11 +501,3 @@ ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        2.377s
 [godoc_maps]: https://blog.golang.org/go-maps-in-action
 [godoc_zero_values]: https://golang.org/ref/spec#The_zero_value
 [godoc_race_detector]: https://blog.golang.org/race-detector
-
-## An observation
-
-Did you notice that the time it took for the `websiteCheckerTest` to run
-increased dramatically when we were really checking websites? It added around
-a quarter of a second to the total time. Although the Internet is fast, and the
-response we're getting from the websites is coming back pretty quickly, it still
-takes time for our functions to make those real requests.
