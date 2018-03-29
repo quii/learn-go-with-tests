@@ -9,7 +9,7 @@ There's nothing new so far, so try and write it yourself for practice.
 ## Write the test first
 
 ```go
-package main
+package iteration
 
 import "testing"
 
@@ -34,7 +34,7 @@ _Keep the discipline!_ You don't need to know anything new right now to make the
 All you need to do right now is enough to make it compile so you can check your test is written well.
 
 ```go
-package main
+package iteration
 
 func Repeat(character string) string  {
 	return ""
