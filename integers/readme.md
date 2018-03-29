@@ -5,7 +5,7 @@ Integers work as you would expect. Let's write an add function to try things out
 ## Write the test first
 
 ```go
-package main
+package integers
 
 import "testing"
 
@@ -34,6 +34,8 @@ Inspect the compilation error
 Write enough code to satisfy the compiler *and that's all* - remember we want to check that our tests fail for the correct reason.
 
 ```go
+package integers
+
 func Add(x, y int) int {
 	return 0
 }
