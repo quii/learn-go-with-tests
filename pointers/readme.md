@@ -704,8 +704,8 @@ There's a few new things here
 ## nil
 
 - Pointers can be nil
-- So when a function returns a pointer to something, you need to make sure you check if it's nil or not or you will get a runtime exception, the compiler wont help you here.
-- Useful for when you want to describe a type that could be missing
+- When a function returns a pointer to something, you need to make sure you check if it's nil or not or you will get a runtime exception, the compiler wont help you here.
+- Useful for when you want to describe a value that could be missing
 
 ## Errors
 
@@ -720,4 +720,4 @@ There's a few new things here
 - Useful for adding more domain specific meaning to values
 - Can let you implement interfaces
 
-Pointers and errors are an everyday concept in writing Go that you need to get comfortable with. Thankfully the compiler will usually help you out if you do something wrong, just take your time and read the error.
+Pointers and errors are a big part of writing Go that you need to get comfortable with. Thankfully the compiler will _usually_ help you out if you do something wrong, just take your time and read the error.
