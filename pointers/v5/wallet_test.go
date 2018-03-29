@@ -6,14 +6,6 @@ import (
 
 func TestWallet(t *testing.T) {
 
-	assertBalance := func(t *testing.T, wallet Wallet, want Bitcoin) {
-		got := wallet.Balance()
-
-		if got != want {
-			t.Errorf("got %s want %s", got, want)
-		}
-	}
-
 	t.Run("Deposit", func(t *testing.T) {
 		wallet := Wallet{}
 		wallet.Deposit(Bitcoin(10))
@@ -21,34 +13,61 @@ func TestWallet(t *testing.T) {
 	})
 
 	t.Run("Withdraw", func(t *testing.T) {
-		wallet := Wallet{balance: Bitcoin(20)}
-		wallet.Withdraw(Bitcoin(10))
-		assertBalance(t, wallet, Bitcoin(10))
+
+		cases := []struct {
+			description      string
+			wallet           Wallet
+			amountToWithdraw Bitcoin
+			wantedBalance    Bitcoin
+			wantedErr        *WithdrawError
+		}{
+			{
+				description:      "happy withdraw",
+				wallet:           Wallet{balance: Bitcoin(10)},
+				amountToWithdraw: Bitcoin(5),
+				wantedBalance:    Bitcoin(5),
+				wantedErr:        nil,
+			},
+			{
+				description:      "not enough funds",
+				wallet:           Wallet{balance: Bitcoin(10)},
+				amountToWithdraw: Bitcoin(20),
+				wantedBalance:    Bitcoin(10),
+				wantedErr:        &WithdrawError{AmountToWithdraw: Bitcoin(20), CurrentBalance: Bitcoin(10)},
+			},
+		}
+
+		for _, tt := range cases {
+			t.Run(tt.description, func(t *testing.T) {
+				err := tt.wallet.Withdraw(tt.amountToWithdraw)
+
+				assertBalance(t, tt.wallet, tt.wantedBalance)
+
+				if tt.wantedErr != nil {
+					assertWithdrawError(t, err, *tt.wantedErr)
+				}
+			})
+		}
 	})
 
-	t.Run("Withdraw over balance limit", func(t *testing.T) {
-		wallet := Wallet{balance: Bitcoin(20)}
-		err := wallet.Withdraw(Bitcoin(100))
+}
 
-		if err == nil {
-			t.Fatalf("expected an error to be returned when withdrawing too much")
-		}
+func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
+	got := wallet.Balance()
 
-		got, isWithdrawErr := err.(WithdrawError)
+	if got != want {
+		t.Errorf("got %s want %s", got, want)
+	}
+}
 
-		if !isWithdrawErr {
-			t.Fatalf("did not get a withdraw error %#v", err)
-		}
+func assertWithdrawError(t *testing.T, err error, want WithdrawError) {
+	got, isWithdrawErr := err.(WithdrawError)
 
-		want := WithdrawError{
-			AmountToWithdraw: Bitcoin(100),
-			CurrentBalance:   Bitcoin(20),
-		}
+	if !isWithdrawErr {
+		t.Fatalf("did not get a withdraw error %#v", err)
+	}
 
-		if want != got {
-			t.Errorf("got %#v, want %#v", got, want)
-		}
-
-	})
-
+	if want != got {
+		t.Errorf("got %#v, want %#v", got, want)
+	}
 }

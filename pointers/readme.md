@@ -551,3 +551,173 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 The test should now pass. 
 
 ## Refactor
+
+Our test is not reading great, there's a lot of mechanics around type assertions that makes the intent of the test a little unclear. We can refactor out our type assertion code into a helper like usual.
+
+```go
+func TestWallet(t *testing.T) {
+
+	assertBalance := func(t *testing.T, wallet Wallet, want Bitcoin) {
+		got := wallet.Balance()
+
+		if got != want {
+			t.Errorf("got %s want %s", got, want)
+		}
+	}
+	
+	assertWithdrawError := func(t *testing.T, err error, want WithdrawError) {
+		got, isWithdrawErr := err.(WithdrawError)
+
+		if !isWithdrawErr {
+			t.Fatalf("did not get a withdraw error %#v", err)
+		}
+
+		if want != got {
+			t.Errorf("got %#v, want %#v", got, want)
+		}
+	}
+
+	t.Run("Deposit", func(t *testing.T) {
+		wallet := Wallet{}
+		wallet.Deposit(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
+
+	t.Run("Withdraw", func(t *testing.T) {
+		wallet := Wallet{balance: Bitcoin(20)}
+		wallet.Withdraw(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
+
+	t.Run("Withdraw over balance limit", func(t *testing.T) {
+		wallet := Wallet{balance: Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(100))
+
+		if err == nil {
+			t.Fatalf("expected an error to be returned when withdrawing too much")
+		}
+
+		assertWithdrawError(t, err, WithdrawError{
+			AmountToWithdraw: Bitcoin(100),
+			CurrentBalance:   Bitcoin(20),
+		})
+
+
+	})
+
+}
+```
+
+This is a bit of an improvement, but we can do better. 
+
+There's a few things around `Withdraw` we have not tested 
+
+- If you fail to `Withdraw` it should have no effect on the `balance`
+- If you successfully `Withdraw` an error should not be returned. 
+
+This _feels_ like it might be well suited to a table based test. We want to having some kind of wallet, do `Withdraw` and see what happens with differing amounts of Bitcoin.
+
+```go
+func TestWallet(t *testing.T) {
+
+	t.Run("Deposit", func(t *testing.T) {
+		wallet := Wallet{}
+		wallet.Deposit(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
+
+	t.Run("Withdraw", func(t *testing.T) {
+
+		cases := []struct {
+			description      string
+			wallet           Wallet
+			amountToWithdraw Bitcoin
+			wantedBalance    Bitcoin
+			wantedErr        *WithdrawError
+		}{
+			{
+				description:      "happy withdraw",
+				wallet:           Wallet{balance: Bitcoin(10)},
+				amountToWithdraw: Bitcoin(5),
+				wantedBalance:    Bitcoin(5),
+				wantedErr:        nil,
+			},
+			{
+				description:      "not enough funds",
+				wallet:           Wallet{balance: Bitcoin(10)},
+				amountToWithdraw: Bitcoin(20),
+				wantedBalance:    Bitcoin(10),
+				wantedErr:        &WithdrawError{AmountToWithdraw: Bitcoin(20), CurrentBalance: Bitcoin(10)},
+			},
+		}
+
+		for _, tt := range cases {
+			t.Run(tt.description, func(t *testing.T) {
+				err := tt.wallet.Withdraw(tt.amountToWithdraw)
+
+				assertBalance(t, tt.wallet, tt.wantedBalance)
+
+				if tt.wantedErr != nil {
+					assertWithdrawError(t, err, *tt.wantedErr)
+				}
+			})
+		}
+	})
+
+}
+
+func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
+	got := wallet.Balance()
+
+	if got != want {
+		t.Errorf("got %s want %s", got, want)
+	}
+}
+
+func assertWithdrawError(t *testing.T, err error, want WithdrawError) {
+	got, isWithdrawErr := err.(WithdrawError)
+
+	if !isWithdrawErr {
+		t.Fatalf("did not get a withdraw error %#v", err)
+	}
+
+	if want != got {
+		t.Errorf("got %#v, want %#v", got, want)
+	}
+}
+```
+
+There's a few new things here
+
+- We talked about `nil` earlier and how pointers to things can be nil. In our cases we want to be able to control whether we want an error or not so the type of `wantedErr` to `*WithdrawError`. So we can check for an error if we want to.
+- In order to get a _pointer to a value_ you use the `&` operator on the value. You can see that in our second case for the error we're looking for
+- Our helper function doesn't take a pointer, it takes the full value so we _dereference the pointer_ with `*` when calling `assertWithdrawError`
+- I decided that our helper functions were cluttering up our test code. They're not very interesting so I moved them out and into the bottom of the file.
+
+# Wrapping up
+
+## Pointers
+
+- Go copies values when you pass them to functions/methods so if you're writing a function that needs to mutate state you'll need it to take a pointer to the thing you want to change.
+- The fact that Go takes a copy of values is useful a lot of the time but sometimes you wont want your system to make a copy of something, in which case you need to pass a reference. Examples could be very large data or perhaps things you intend only to have one instance of (like database connection pools)
+
+## nil
+
+- Pointers can be nil
+- So when a function returns a pointer to something, you need to make sure you check if it's nil or not or you will get a runtime exception, the compiler wont help you here.
+- Useful for when you want to describe a type that could be missing
+
+## Errors
+
+- Errors are the way to signify failure when calling a function/method
+- You _may_ wish to introduce your own type of error to let developers work with whatever problems come up
+    - In our case we _listened to our tests_ and came to the conclusion that we would rather assert on some useful data, rather than a string check
+    - Listening to your tests is important. Often if your tests are hard to write/read then the users of your code are also going to have a tough time. This is why TDD is praised as being helpful as a design tool.
+- [Don’t just check errors, handle them gracefully](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully) 
+
+## Type aliases
+
+- Useful for adding more domain specific meaning to values
+- Can let you implement interfaces
+
+Pointers and errors are an everyday concept in writing Go that you need to get comfortable with. Thankfully the compiler will usually help you out if you do something wrong, just take your time and read the error.
