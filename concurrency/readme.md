@@ -387,7 +387,7 @@ different goroutines performing writes on a map:
 
 `Write at 0x00c420084d20 by goroutine 8:`
 
-is writing to the same block of code as
+is writing to the same block of memory as
 
 `Previous write at 0x00c420084d20 by goroutine 7:`
 
@@ -410,7 +410,7 @@ operations, along with their details, allow communication between different
 processes.
 
 In this case we want to think about the communication between the parent process
-and each of the goroutines it makes to do the work of running the
+and each of the goroutines that it makes to do the work of running the
 `WebsiteChecker` function with the url.
 
 ```go
@@ -441,6 +441,41 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
+Alongside the `results` map we now have a `resultChannel`, which we `make` in
+the same way. `chan result` is the type of the channel - a channel of `result`.
+The new type, `result` has been made to associate the return value of the
+`WebsiteChecker` with the url being checked - it's a struct of `string` and
+`bool`. As we don't need either value to be named, each of them is anonymous
+within the struct; this can be useful in when it's hard to know what to name
+a value.
+
+Now when we iterate over the urls, instead of writing to the `map` directly
+we're sending a `result` struct for each call to `wc` to the `resultChannel`
+with a _send statement_. This uses the `<-` operator and has the channel on the
+left, a `<-` and the value on the right:
+
+```
+// Send statement
+resultChannel <- result{u, wc(u)}
+```
+
+The next `for` loop iterates once for each of the urls. Inside we're using
+a _receive expression_, which assigns a value received from a channel to
+a variable. This also uses the `<-` operator, but with the two operands now
+reversed: the channel is now on the right and the variable that
+we're assigning to is on the left:
+
+```
+// Receive expression
+result := <-resultChannel
+```
+
+We then use the `result` received to update the results map.
+
+By sending the results into a channel, we can control the timing of each write
+into the results map. Although each of the calls of `wc` is now happening in
+parallel inside its own process.
+
 ```sh
 pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v2
 BenchmarkCheckWebsites-8             100          23406615 ns/op
@@ -448,30 +483,7 @@ PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        2.377s
 ```
 
-This version of `WebsiteChecker` uses two channels to organise the work of one
-anonymous goroutine which is where the bulk of the work gets done.
-
-The first change to note is that we've introduced a new type, `result`, which is
-a struct of a `string` and a `bool`. We will use this to keep the information
-about a URL and its test result together.
-
-First, we `make` two channels, one of which communicates using strings (`chan
-string`), and the other which communicates using results (`chan result`). We
-will use the first channel to manage the URLs and the second to manage the
-results of using the `TestURL` function.
-
-Next comes the main goroutine. It's made of an infinite loop - a `for` that has
-no terminating condition. First it takes a value from the `urlChannel` with the
-receive operation: `url := <-urlChannel`. We then test the url using our `isOK`
-function, package the response up into a `result` along with the original URL,
-and then uses the send operation to put the result onto the `resultChannel`:
-`resultChannel <- result`.
-
-Because this loop is in a goroutine it won't block the main process of
-`WebsiteChecker`, but will keep on receiving and sending values to the two
-channels as long as there are values to receive and send.
-
-[^1] Or the huge error message. Again with the concurrency headaches.
+[^1]: Or the huge error message. Again with the concurrency headaches.
 
 [Arrays]: ../arrays/
 [For]: ../for/
