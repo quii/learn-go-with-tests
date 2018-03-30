@@ -44,7 +44,7 @@ Now we've made our wallet, try and run the test again
 
 ```go
 ./wallet_test.go:9:8: wallet.Deposit undefined (type Wallet has no field or method Deposit)
-./wallet_test.go:11:15: wallet.Balance undefined (type Wallet has no field or method Balance, but does have balance)
+./wallet_test.go:11:15: wallet.Balance undefined (type Wallet has no field or method Balance)
 ```
 
 As expected, we need to define these methods to make the test pass. 
