@@ -101,9 +101,9 @@ With our career in fintech secured, run our tests and bask in the passing test
 
 Well this is confusing, our code looks like it should work, we add the new amount onto our balance and then the balance method should return the current state of it.
 
-In Go, when you call a function or a method the arguments are _copied_. 
+In Go, **when you call a function or a method the arguments are _copied_**. 
 
-So when we call `func (w Wallet) Deposit(amount int)` the `w` is a copy of whatever we called the method from. 
+When calling `func (w Wallet) Deposit(amount int)` the `w` is a copy of whatever we called the method from. 
 
 Without getting too computer-sciency, when you create a value - like a wallet, it is stored somewhere in memory. You can find out what the _address_ of that bit of memory with `&myVal`
 
@@ -207,7 +207,15 @@ To make `Bitcoin` you just use the syntax `Bitcoin(999)`
 
 An interesting property of type aliasing is that you can also declare _methods_ on them. This can be very useful when you want to add some domain specific functionality on top of existing types.
 
-Let's implement `String` on our new type so that in our tests its clearer what currency we are dealing with. When you implement `String` on a type it will be called when used with `%s` format string.
+[Let's implement Stringer on Bitcoin](https://golang.org/pkg/fmt/#Stringer)
+
+```go
+type Stringer interface {
+        String() string
+}
+```
+
+This interface is defined in the `fmt` package and let's you define how your type is printed when used with the `%s` format string in prints.
 
 ```go
 func (b Bitcoin) String() string {
@@ -338,7 +346,7 @@ t.Run("Withdraw over balance limit", func(t *testing.T) {
     wallet := Wallet{balance: Bitcoin(20)}
     err := wallet.Withdraw(Bitcoin(100))
     
-    if err ==nil {
+    if err == nil {
         t.Errorf("expected an error to be returned when withdrawing too much")
     }
 })
@@ -356,7 +364,7 @@ Like `null` if you try and access a value that is `nil` it will throw a **runtim
 
 `./wallet_test.go:31:25: wallet.Withdraw(Bitcoin(100)) used as value`
 
-The wording is perhaps a little unclear, but our previous intent with Withdraw was just to call it, it will never return a value. To make this compile we will need to change it so it has a return type.
+The wording is perhaps a little unclear, but our previous intent with `Withdraw` was just to call it, it will never return a value. To make this compile we will need to change it so it has a return type.
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
