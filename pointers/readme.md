@@ -49,7 +49,7 @@ Now we've made our wallet, try and run the test again
 
 As expected, we need to define these methods to make the test pass. 
 
-Remember to only do enough to make the tests run. We need to make sure our test fails correctly with a clear error message
+Remember to only do enough to make the tests run. We need to make sure our test fails correctly with a clear error message.
 
 ```go
 func (w Wallet) Deposit(amount int) {
@@ -77,7 +77,7 @@ type Wallet struct {
 }
 ```
 
-In Go if a symbol (so variables, types, functions et al) starts with a lowercase symbol then it is private _outside the package it's defined in_
+In Go if a symbol (so variables, types, functions et al) starts with a lowercase symbol then it is private _outside the package it's defined in_.
 
 In our case we want our methods to be able to manipulate this value but no one else.
 

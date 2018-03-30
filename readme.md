@@ -1,11 +1,13 @@
 # Learn Go with Tests
 
+_Or learn test-driven development with Go_
+
 [![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)](https://travis-ci.org/quii/learn-go-with-tests)
 
 ## Why
 
 - Explore the Go language by writing tests
-- Get a grounding with TDD. Go is a good language for learning TDD because it is a simple language to learn and testing is built in
+- **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built in
 - Be confident that you'll be able to start writing robust, well tested systems in Go
 
 ## Table of contents
