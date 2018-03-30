@@ -37,8 +37,7 @@ In the previous example we accessed fields directly with the field name, however
 The compiler doesn't know what a `Wallet` is so let's tell it.
 
 ```go
-type Wallet struct {
-}
+type Wallet struct { }
 ```
 
 Now we've made our wallet, try and run the test again
@@ -74,7 +73,7 @@ We will need some kind of _balance_ variable in our struct to store the state
 
 ```go
 type Wallet struct {
-	balance Bitcoin
+	balance int
 }
 ```
 
