@@ -38,13 +38,8 @@ The compiler doesn't know what a `Wallet` is so let's tell it.
 
 ```go
 type Wallet struct {
-	balance int
 }
 ```
-
-You may have noticed that `balance` starts with a lowercase letter. In Go if a name of a value starts with a lowercase that means it is private outside the package it was defined in. 
-
-This means that we can control our state and anyone importing our package can only use the methods we decide to expose
 
 Now we've made our wallet, try and run the test again
 
@@ -74,6 +69,18 @@ The tests should now compile and run
 `wallet_test.go:15: got 0 want 10`
 
 ## Write enough code to make it pass
+
+We will need some kind of _balance_ variable in our struct to store the state
+
+```go
+type Wallet struct {
+	balance Bitcoin
+}
+```
+
+In Go if a symbol (so variables, types, functions et al) starts with a lowercase symbol then it is private _outside the package it's defined in_
+
+In our case we want our methods to be able to manipulate this value but no one else.
 
 Remember we can access the internal `balance` field in the struct using the "receiver" variable.
 
