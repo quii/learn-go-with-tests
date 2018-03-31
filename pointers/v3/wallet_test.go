@@ -21,18 +21,45 @@ func TestWallet(t *testing.T) {
 	})
 
 	t.Run("Withdraw", func(t *testing.T) {
-		wallet := Wallet{balance: Bitcoin(20)}
-		wallet.Withdraw(Bitcoin(10))
-		assertBalance(t, wallet, Bitcoin(10))
-	})
+		cases := []struct {
+			name             string
+			wallet           Wallet
+			amountToWithdraw Bitcoin
+			wantedBalance    Bitcoin
+			wantedErr        bool
+		}{
+			{
+				name:             "sufficient funds",
+				wallet:           Wallet{Bitcoin(20)},
+				amountToWithdraw: Bitcoin(10),
+				wantedBalance:    Bitcoin(10),
+				wantedErr:        false,
+			},
+			{
+				name:             "insufficient funds",
+				wallet:           Wallet{Bitcoin(20)},
+				amountToWithdraw: Bitcoin(100),
+				wantedBalance:    Bitcoin(20),
+				wantedErr:        true,
+			},
+		}
 
-	t.Run("Withdraw over balance limit", func(t *testing.T) {
-		wallet := Wallet{balance: Bitcoin(20)}
-		err := wallet.Withdraw(Bitcoin(100))
+		for _, tt := range cases {
+			t.Run(tt.name, func(t *testing.T) {
+				err := tt.wallet.Withdraw(tt.amountToWithdraw)
 
-		if err == nil {
-			t.Errorf("expected an error to be returned when withdrawing too much")
+				if tt.wallet.Balance() != tt.wantedBalance {
+					t.Errorf("got balance %s want %s", tt.wallet.Balance(), tt.wantedBalance)
+				}
+
+				if tt.wantedErr && err == nil {
+					t.Error("wanted an error but didnt get one")
+				}
+
+				if !tt.wantedErr && err != nil {
+					t.Errorf("didnt want an error but got one %s", err)
+				}
+			})
 		}
 	})
-
 }

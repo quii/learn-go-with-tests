@@ -26,7 +26,7 @@ func TestWallet(t *testing.T) {
 }
 ```
 
-In the previous example we accessed fields directly with the field name, however in our _very secure wallet_ we dont want to expose our inner state to the rest of the world. We want to control access via methods.
+In the previous example we accessed fields directly with the field name, however in our _very secure wallet_ we don't want to expose our inner state to the rest of the world. We want to control access via methods.
 
 ## Try and run the test
 
@@ -397,30 +397,116 @@ Remember to import `errors` into your code.
 
 ## Refactor
 
-There is a temptation to add a table driven test for `Withdraw` but let's resist that temptation for now. 
+We have a couple of tests around the same method so let's refactor it into a table test.
 
-Hopefully you may be thinking that the error of "oh no" could maybe be a little improved. 
+```go
+t.Run("Withdraw", func(t *testing.T) {
+    cases := []struct {
+        name             string
+        wallet           Wallet
+        amountToWithdraw Bitcoin
+        wantedBalance    Bitcoin
+        wantedErr        bool
+    }{
+        {
+            name:             "sufficient funds",
+            wallet:           Wallet{Bitcoin(20)},
+            amountToWithdraw: Bitcoin(10),
+            wantedBalance:    Bitcoin(10),
+            wantedErr:        false,
+        },
+        {
+            name:             "insufficient funds",
+            wallet:           Wallet{Bitcoin(20)},
+            amountToWithdraw: Bitcoin(100),
+            wantedBalance:    Bitcoin(20),
+            wantedErr:        true,
+        },
+    }
+
+    for _, tt := range cases {
+        t.Run(tt.name, func(t *testing.T) {
+            err := tt.wallet.Withdraw(tt.amountToWithdraw)
+
+            if tt.wallet.Balance() != tt.wantedBalance {
+                t.Errorf("got balance %s want %s", tt.wallet.Balance(), tt.wantedBalance)
+            }
+
+            if tt.wantedErr && err == nil {
+                t.Error("wanted an error but didn't get one")
+            }
+
+            if !tt.wantedErr && err != nil {
+                t.Errorf("didnt want an error but got one %s", err)
+            }
+        })
+    }
+})
+```
+
+Our test cases are describing our intent a little clearer now.
+
+Hopefully when returning an error of "oh no" you were thinking that we _might_ iterate on that because it doesn't seem that useful to return.
+
+Assuming that the error ultimately gets returned to the user, let's update our test to assert on some kind of error message rather than just the existence of an error
 
 ## Write the test first
 
 ```go
-t.Run("Withdraw over balance limit", func(t *testing.T) {
-    wallet := Wallet{balance: Bitcoin(20)}
-    err := wallet.Withdraw(Bitcoin(100))
-
-    if err == nil {
-        t.Errorf("expected an error to be returned when withdrawing too much")
+t.Run("Withdraw", func(t *testing.T) {
+    cases := []struct {
+        name             string
+        wallet           Wallet
+        amountToWithdraw Bitcoin
+        wantedBalance    Bitcoin
+        wantedErr        error
+    }{
+        {
+            name:             "sufficient funds",
+            wallet:           Wallet{Bitcoin(20)},
+            amountToWithdraw: Bitcoin(10),
+            wantedBalance:    Bitcoin(10),
+            wantedErr:        nil,
+        },
+        {
+            name:             "insufficient funds",
+            wallet:           Wallet{Bitcoin(20)},
+            amountToWithdraw: Bitcoin(100),
+            wantedBalance:    Bitcoin(20),
+            wantedErr:        errors.New("cannot withdraw 100 BTC, insufficient funds - current balance is 20 BTC"),
+        },
     }
 
-    expectedErrorMessage := "cannot withdraw 100 BTC, insufficient funds (20 BTC)"
-    if err.Error() != expectedErrorMessage {
-        t.Errorf(`got error message of "%s", want "%s"`, err.Error(), expectedErrorMessage)
+    for _, tt := range cases {
+        t.Run(tt.name, func(t *testing.T) {
+            err := tt.wallet.Withdraw(tt.amountToWithdraw)
+
+            assertBalance(t, tt.wallet, tt.wantedBalance)
+
+            if tt.wantedErr != nil {
+                if err == nil {
+                    t.Error("wanted an error but didn't get one")
+                }
+
+                if err.Error() != tt.wantedErr.Error() {
+                    t.Errorf("got err '%s' want '%s'", err.Error(), tt.wantedErr)
+                }
+            }
+
+            if tt.wantedErr == nil && err != nil {
+                t.Errorf("didn't want an error but got one %s", err)
+            }
+        })
     }
 })
 ```
+
+- We have changed the table so that `err` is now an `error`. This lets us define a particular kind of error to look for in the test and also let us put the value `nil` if we have a case where we don't want an error.
+- Introduced `t.Fatal` which will stop the test if it is called. This is because we dont want to make any more assertions on the error returned if there isn't one around. Without this the test would carry on to the next step and panic because of a nil pointer.
+
 ## Try and run the test
 
-`wallet_test.go:39: got error message of "oh no", want "cannot withdraw 100 BTC, insufficient funds (20 BTC)"`
+`wallet_test.go:62: got err 'oh no' want 'cannot withdraw 100 BTC, insufficient funds - current balance is 20 BTC'`
 
 ## Write enough code to make it pass
 
@@ -428,7 +514,7 @@ t.Run("Withdraw over balance limit", func(t *testing.T) {
 func (w *Wallet) Withdraw(amount Bitcoin) error {
 
 	if amount > w.balance {
-		return fmt.Errorf("cannot withdraw %s, insufficient funds (%s)", amount, w.balance)
+		return fmt.Errorf("cannot withdraw %s, insufficient funds - current balance is %s", amount, w.balance)
 	}
 
 	w.balance -= amount
@@ -436,20 +522,65 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 }
 ```
 
-Remember to remove the import of `errors` and add `fmt`. 
-
-`fmt.Errorf` is like `t.Errorf` in that it takes a format string and some values but instead of failing a test it returns an error
+`fmt.Errorf` is like `fmt.Printf` and `t.Errorf` but returns an `error` given a format string and values
 
 ## Refactor
 
-The main problem we have is the potential of a flaky test. We are asserting on the exact wording of the error, which is not very important to us. If a developer decides to change the wording of the message, a test will fail which seems too heavy handed. **Remember our tests should not be a burden**
+Going back to the tests. Whilst the intent in the table is clear I'm not enjoying reading the multiple nested `ifs` and can see it being a problem if we need to change our testing further.
 
+```go
+t.Run("Withdraw", func(t *testing.T) {
+    cases := []struct {
+        name             string
+        wallet           Wallet
+        amountToWithdraw Bitcoin
+        wantedBalance    Bitcoin
+        wantedErr        error
+    }{
+        {
+            name:             "sufficient funds",
+            wallet:           Wallet{Bitcoin(20)},
+            amountToWithdraw: Bitcoin(10),
+            wantedBalance:    Bitcoin(10),
+            wantedErr:        nil,
+        },
+        {
+            name:             "insufficient funds",
+            wallet:           Wallet{Bitcoin(20)},
+            amountToWithdraw: Bitcoin(100),
+            wantedBalance:    Bitcoin(20),
+            wantedErr:        errors.New("cannot withdraw 100 BTC, insufficient funds - current balance is 20 BTC"),
+        },
+    }
 
-In addition, the useful data in the error is "trapped" inside a `string`. If a developer wants to do something useful with this data she is going to be quite stuck. 
+    for _, tt := range cases {
+        t.Run(tt.name, func(t *testing.T) {
+            err := tt.wallet.Withdraw(tt.amountToWithdraw)
 
-What we really want to assert is that we have useful information in our error but still somehow return an `error`
+            assertBalance(t, tt.wallet, tt.wantedBalance)
 
-As mentioned before, [`error` is an interface](https://golang.org/pkg/builtin/#error).
+            gotAnError := err != nil
+            wantAnError := tt.wantedErr != nil
+
+            if gotAnError != wantAnError {
+                t.Fatalf("got error '%s' want '%s'", err, tt.wantedErr)
+            }
+
+            if wantAnError && err.Error() != tt.wantedErr.Error() {
+                t.Errorf("got err '%s' want '%s'", err.Error(), tt.wantedErr)
+            }
+        })
+    }
+})
+```
+
+We still have some issues. Here's some hypothetical questions
+
+- What if a developer decided to update the wording of the error. Would you be happy with tests failing? Would they? Is the _exact_ wording of the error important in regards to the tests? **Our tests should not be a burden**
+- If you were a developer working with this code, how would you handle these errors right now? Currently, your only practical choice would be to either return it to your own caller or log it somehow. The useful information is "locked" into a string. You _could_ try and parse it out but that's just asking for trouble if the structure of the error changes.
+- Does it "feel" right that the wallet is in charge of the specific wording of an error?
+
+As mentioned before, [error is an interface](https://golang.org/pkg/builtin/#error).
 
 ```go
 type error interface {
@@ -461,51 +592,64 @@ From the previous sections we learned how to implement interfaces. So what we ca
 
 This gives the users of our library some flexibility in their error handling:
 
-- They can extract out the pertinent values of the error and do _something different_
+- They can extract out the pertinent values of the error and do something different
 - Simply use the `Error()` as is, perhaps logging it or printing it to the user
 
-*Plus* it makes our tests more useful and less prone to error due to wording changes.
+Plus it makes our tests more useful and less prone to error due to wording changes.
 
-## Write the test first
+Let's continue refactoring by introducing a new type into our tests but keeping the overall behaviour the same.
+
+(strictly speaking the behaviour _has_ changed because of a different _type_ but the _interface_ of `Withdraw` is the same)
 
 ```go
-t.Run("Withdraw over balance limit", func(t *testing.T) {
-    wallet := Wallet{balance: Bitcoin(20)}
-    err := wallet.Withdraw(Bitcoin(100))
+	t.Run("Withdraw", func(t *testing.T) {
+		cases := []struct {
+			name             string
+			wallet           Wallet
+			amountToWithdraw Bitcoin
+			wantedBalance    Bitcoin
+			wantedErr        error
+		}{
+			{
+				name:             "sufficient funds",
+				wallet:           Wallet{Bitcoin(20)},
+				amountToWithdraw: Bitcoin(10),
+				wantedBalance:    Bitcoin(10),
+				wantedErr:        nil,
+			},
+			{
+				name:             "insufficient funds",
+				wallet:           Wallet{Bitcoin(20)},
+				amountToWithdraw: Bitcoin(100),
+				wantedBalance:    Bitcoin(20),
+				wantedErr:        WithdrawError{AmountToWithdraw: Bitcoin(100), CurrentBalance: Bitcoin(20)},
+			},
+		}
 
-    if err == nil {
-        t.Fatalf("expected an error to be returned when withdrawing too much")
-    }
+		for _, tt := range cases {
+			t.Run(tt.name, func(t *testing.T) {
+				err := tt.wallet.Withdraw(tt.amountToWithdraw)
 
-    got, isWithdrawErr := err.(WithdrawError)
+				assertBalance(t, tt.wallet, tt.wantedBalance)
 
-    if !isWithdrawErr {
-        t.Fatalf("did not get a withdraw error %#v", err)
-    }
+				gotAnError := err != nil
+				wantAnError := tt.wantedErr != nil
 
-    want := WithdrawError{
-        AmountToWithdraw: Bitcoin(100),
-        CurrentBalance:   Bitcoin(20),
-    }
+				if gotAnError != wantAnError {
+					t.Fatalf("got error '%s' want '%s'", err, tt.wantedErr)
+				}
 
-    if want != got {
-        t.Errorf("got %#v, want %#v", got, want)
-    }
-
-})
+				if wantAnError && err.Error() != tt.wantedErr.Error() {
+					t.Errorf("got err '%s' want '%s'", err.Error(), tt.wantedErr)
+				}
+			})
+		}
+	})
 ```
 
-_We will probably refactor this!_ Hold your nose while we go through some concepts. 
+Notice how the type in the table definition is still `error` and not our new `WithdrawError`.
 
-As we discussed earlier, by design the concept of interfaces hides the concrete type. Most of the time this is super nice but in this case we do need to check the _particular type_ is returned because we want to make sure the information in the concrete type is returned. 
-
-We can do this with a _type assertion_. When you have a value and all you know is it's an interface, you can ask Go if a particular thing is _actually_ type `Foo`. It returns two values, the value _cast to the type_ and a boolean telling you the result of the check.
-
-The syntax is `theThingCastToThetype, booleanConfirmingItIsTheType := thing.(MyType)`. You can see this in action in the test code. 
-
-- First important change is we change the nil check to use `t.Fatalf` rather than `t.Errorf`. `Fatalf` is helpful if you want the test to stop. `Errorf` will fail the test but the rest of the code will continue. In our case if we don't get an error there's no point in carrying on.
-- We then do our type assertion. We check that it is the type we want and if not we fail the test.
-- If it _is_ a `WithdrawError` then we check it's values with a normal assertion.
+Use your tests and the compiler to help you arrive at a solution.
 
 ## Try and run the test
 
@@ -513,12 +657,13 @@ The syntax is `theThingCastToThetype, booleanConfirmingItIsTheType := thing.(MyT
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
+
 We have not defined our new error type yet
 
 ```go
 type WithdrawError struct {
-	CurrentBalance   Bitcoin
 	AmountToWithdraw Bitcoin
+	CurrentBalance   Bitcoin
 }
 ```
 
@@ -533,27 +678,19 @@ Go knows that our current type cannot possibly be an `error` due to the missing 
 
 ```go
 func (w WithdrawError) Error() string {
-	return fmt.Sprintf("cannot withdraw %s, insufficient funds (%s)", w.AmountToWithdraw, w.CurrentBalance)
+	return fmt.Sprintf("cannot withdraw %s, insufficient funds - current balance is %s", w.AmountToWithdraw, w.CurrentBalance)
 }
 ```
 
-Finally the test runs and fails as we'd expect
-
-`wallet_test.go:40: did not get a withdraw error &errors.errorString{s:"cannot withdraw 100 BTC, insufficient funds (20 BTC)"}`
-
-Our `Withdraw` method is failing the type assertion
-
-## Write enough code to make it pass
-
-Make the method use our new type instead
+Finally to complete our refactor, use our new type in the `Wallet`.
 
 ```go
 func (w *Wallet) Withdraw(amount Bitcoin) error {
 
 	if amount > w.balance {
 		return WithdrawError{
-			CurrentBalance:   w.balance,
 			AmountToWithdraw: amount,
+			CurrentBalance:   w.balance,
 		}
 	}
 
@@ -562,151 +699,7 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 }
 ```
 
-The test should now pass. 
-
-## Refactor
-
-Our test is not reading great, there's a lot of mechanics around type assertions that makes the intent of the test a little unclear. We can refactor out our type assertion code into a helper like usual.
-
-```go
-func TestWallet(t *testing.T) {
-
-	assertBalance := func(t *testing.T, wallet Wallet, want Bitcoin) {
-		got := wallet.Balance()
-
-		if got != want {
-			t.Errorf("got %s want %s", got, want)
-		}
-	}
-	
-	assertWithdrawError := func(t *testing.T, err error, want WithdrawError) {
-		got, isWithdrawErr := err.(WithdrawError)
-
-		if !isWithdrawErr {
-			t.Fatalf("did not get a withdraw error %#v", err)
-		}
-
-		if want != got {
-			t.Errorf("got %#v, want %#v", got, want)
-		}
-	}
-
-	t.Run("Deposit", func(t *testing.T) {
-		wallet := Wallet{}
-		wallet.Deposit(Bitcoin(10))
-		assertBalance(t, wallet, Bitcoin(10))
-	})
-
-	t.Run("Withdraw", func(t *testing.T) {
-		wallet := Wallet{balance: Bitcoin(20)}
-		wallet.Withdraw(Bitcoin(10))
-		assertBalance(t, wallet, Bitcoin(10))
-	})
-
-	t.Run("Withdraw over balance limit", func(t *testing.T) {
-		wallet := Wallet{balance: Bitcoin(20)}
-		err := wallet.Withdraw(Bitcoin(100))
-
-		if err == nil {
-			t.Fatalf("expected an error to be returned when withdrawing too much")
-		}
-
-		assertWithdrawError(t, err, WithdrawError{
-			AmountToWithdraw: Bitcoin(100),
-			CurrentBalance:   Bitcoin(20),
-		})
-
-
-	})
-
-}
-```
-
-This is a bit of an improvement, but we can do better. 
-
-There's a few things around `Withdraw` we have not tested 
-
-- If you fail to `Withdraw` it should have no effect on the `balance`
-- If you successfully `Withdraw` an error should not be returned. 
-
-This _feels_ like it might be well suited to a table based test. We want to having some kind of wallet, do `Withdraw` and see what happens with differing amounts of Bitcoin.
-
-```go
-func TestWallet(t *testing.T) {
-
-	t.Run("Deposit", func(t *testing.T) {
-		wallet := Wallet{}
-		wallet.Deposit(Bitcoin(10))
-		assertBalance(t, wallet, Bitcoin(10))
-	})
-
-	t.Run("Withdraw", func(t *testing.T) {
-
-		cases := []struct {
-			description      string
-			wallet           Wallet
-			amountToWithdraw Bitcoin
-			wantedBalance    Bitcoin
-			wantedErr        *WithdrawError
-		}{
-			{
-				description:      "happy withdraw",
-				wallet:           Wallet{balance: Bitcoin(10)},
-				amountToWithdraw: Bitcoin(5),
-				wantedBalance:    Bitcoin(5),
-				wantedErr:        nil,
-			},
-			{
-				description:      "not enough funds",
-				wallet:           Wallet{balance: Bitcoin(10)},
-				amountToWithdraw: Bitcoin(20),
-				wantedBalance:    Bitcoin(10),
-				wantedErr:        &WithdrawError{AmountToWithdraw: Bitcoin(20), CurrentBalance: Bitcoin(10)},
-			},
-		}
-
-		for _, tt := range cases {
-			t.Run(tt.description, func(t *testing.T) {
-				err := tt.wallet.Withdraw(tt.amountToWithdraw)
-
-				assertBalance(t, tt.wallet, tt.wantedBalance)
-
-				if tt.wantedErr != nil {
-					assertWithdrawError(t, err, *tt.wantedErr)
-				}
-			})
-		}
-	})
-
-}
-
-func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
-	got := wallet.Balance()
-
-	if got != want {
-		t.Errorf("got %s want %s", got, want)
-	}
-}
-
-func assertWithdrawError(t *testing.T, err error, want WithdrawError) {
-	got, isWithdrawErr := err.(WithdrawError)
-
-	if !isWithdrawErr {
-		t.Fatalf("did not get a withdraw error %#v", err)
-	}
-
-	if want != got {
-		t.Errorf("got %#v, want %#v", got, want)
-	}
-}
-```
-
-There's a few new things here
-
-- We talked about `nil` earlier and how pointers to things can be nil. In our cases we want to be able to control whether we want an error or not so the type of `wantedErr` to `*WithdrawError`. So we can check for an error if we want to.
-- In order to get a _pointer to a value_ you use the `&` operator on the value. You can see that in our second case for the error we're looking for
-- Our helper function doesn't take a pointer, it takes the full value so we _dereference the pointer_ with `*` when calling `assertWithdrawError`
-- I decided that our helper functions were cluttering up our test code. They're not very interesting so I moved them out and into the bottom of the file.
+This feels better. We have delegated the responsibility of this kind of error to a new type, simplifying `Withdraw` but maintaining our simple interface. 
 
 # Wrapping up
 

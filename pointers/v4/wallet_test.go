@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"errors"
 )
 
 func TestWallet(t *testing.T) {
@@ -21,23 +22,46 @@ func TestWallet(t *testing.T) {
 	})
 
 	t.Run("Withdraw", func(t *testing.T) {
-		wallet := Wallet{balance: Bitcoin(20)}
-		wallet.Withdraw(Bitcoin(10))
-		assertBalance(t, wallet, Bitcoin(10))
-	})
-
-	t.Run("Withdraw over balance limit", func(t *testing.T) {
-		wallet := Wallet{balance: Bitcoin(20)}
-		err := wallet.Withdraw(Bitcoin(100))
-
-		if err == nil {
-			t.Errorf("expected an error to be returned when withdrawing too much")
+		cases := []struct {
+			name             string
+			wallet           Wallet
+			amountToWithdraw Bitcoin
+			wantedBalance    Bitcoin
+			wantedErr        error
+		}{
+			{
+				name:             "sufficient funds",
+				wallet:           Wallet{Bitcoin(20)},
+				amountToWithdraw: Bitcoin(10),
+				wantedBalance:    Bitcoin(10),
+				wantedErr:        nil,
+			},
+			{
+				name:             "insufficient funds",
+				wallet:           Wallet{Bitcoin(20)},
+				amountToWithdraw: Bitcoin(100),
+				wantedBalance:    Bitcoin(20),
+				wantedErr:        errors.New("cannot withdraw 100 BTC, insufficient funds - current balance is 20 BTC"),
+			},
 		}
 
-		expectedErrorMessage := "cannot withdraw 100 BTC, insufficient funds (20 BTC)"
-		if err.Error() != expectedErrorMessage {
-			t.Errorf(`got error message of "%s", want "%s"`, err.Error(), expectedErrorMessage)
+		for _, tt := range cases {
+			t.Run(tt.name, func(t *testing.T) {
+				err := tt.wallet.Withdraw(tt.amountToWithdraw)
+
+				assertBalance(t, tt.wallet, tt.wantedBalance)
+
+				gotAnError := err != nil
+				wantAnError := tt.wantedErr != nil
+
+				if gotAnError != wantAnError {
+					t.Fatalf("got error '%s' want '%s'", err, tt.wantedErr)
+				}
+
+				if wantAnError && err.Error() != tt.wantedErr.Error() {
+					t.Errorf("got err '%s' want '%s'", err.Error(), tt.wantedErr)
+				}
+			})
 		}
 	})
-
 }
