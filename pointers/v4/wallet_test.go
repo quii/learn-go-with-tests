@@ -2,7 +2,6 @@ package main
 
 import (
 	"testing"
-	"errors"
 )
 
 func TestWallet(t *testing.T) {
@@ -41,7 +40,7 @@ func TestWallet(t *testing.T) {
 				wallet:           Wallet{Bitcoin(20)},
 				amountToWithdraw: Bitcoin(100),
 				wantedBalance:    Bitcoin(20),
-				wantedErr:        errors.New("cannot withdraw 100 BTC, insufficient funds - current balance is 20 BTC"),
+				wantedErr:        InsufficientFundsError,
 			},
 		}
 
@@ -58,7 +57,7 @@ func TestWallet(t *testing.T) {
 					t.Fatalf("got error '%s' want '%s'", err, tt.wantedErr)
 				}
 
-				if wantAnError && err.Error() != tt.wantedErr.Error() {
+				if wantAnError && err != tt.wantedErr {
 					t.Errorf("got err '%s' want '%s'", err.Error(), tt.wantedErr)
 				}
 			})

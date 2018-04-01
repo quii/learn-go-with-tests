@@ -473,7 +473,7 @@ t.Run("Withdraw", func(t *testing.T) {
             wallet:           Wallet{Bitcoin(20)},
             amountToWithdraw: Bitcoin(100),
             wantedBalance:    Bitcoin(20),
-            wantedErr:        errors.New("cannot withdraw 100 BTC, insufficient funds - current balance is 20 BTC"),
+            wantedErr:        errors.New("cannot withdraw, insufficient funds"),
         },
     }
 
@@ -502,11 +502,11 @@ t.Run("Withdraw", func(t *testing.T) {
 ```
 
 - We have changed the table so that `err` is now an `error`. This lets us define a particular kind of error to look for in the test and also let us put the value `nil` if we have a case where we don't want an error.
-- Introduced `t.Fatal` which will stop the test if it is called. This is because we dont want to make any more assertions on the error returned if there isn't one around. Without this the test would carry on to the next step and panic because of a nil pointer.
+- Introduced `t.Fatal` which will stop the test if it is called. This is because we don't want to make any more assertions on the error returned if there isn't one around. Without this the test would carry on to the next step and panic because of a nil pointer.
 
 ## Try and run the test
 
-`wallet_test.go:62: got err 'oh no' want 'cannot withdraw 100 BTC, insufficient funds - current balance is 20 BTC'`
+`wallet_test.go:61: got err 'oh no' want 'cannot withdraw, insufficient funds'`
 
 ## Write enough code to make it pass
 
@@ -514,7 +514,7 @@ t.Run("Withdraw", func(t *testing.T) {
 func (w *Wallet) Withdraw(amount Bitcoin) error {
 
 	if amount > w.balance {
-		return fmt.Errorf("cannot withdraw %s, insufficient funds - current balance is %s", amount, w.balance)
+		return errors.New("cannot withdraw, insufficient funds")
 	}
 
 	w.balance -= amount
@@ -522,11 +522,29 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 }
 ```
 
-`fmt.Errorf` is like `fmt.Printf` and `t.Errorf` but returns an `error` given a format string and values
-
 ## Refactor
 
-Going back to the tests. Whilst the intent in the table is clear I'm not enjoying reading the multiple nested `ifs` and can see it being a problem if we need to change our testing further.
+We have duplication of the error message in both the test code and the `Withdraw` code. 
+
+It would be really annoying for the test to fail if someone wanted to re-word the error and it's just too much detail for our test. We don't _really_ care what the exact wording is, just that some kind of meaningful error around withdrawing is returned given a certain condition. 
+
+In Go, errors are values, so we can refactor it out into a variable and have a single source of truth for it. 
+
+```go
+var InsufficientFundsError = errors.New("cannot withdraw, insufficient funds")
+
+func (w *Wallet) Withdraw(amount Bitcoin) error {
+
+	if amount > w.balance {
+		return InsufficientFundsError
+	}
+
+	w.balance -= amount
+	return nil
+}
+```
+
+This is a positive change in itself because now our `Withdraw` function looks very clear.
 
 ```go
 t.Run("Withdraw", func(t *testing.T) {
@@ -549,7 +567,7 @@ t.Run("Withdraw", func(t *testing.T) {
             wallet:           Wallet{Bitcoin(20)},
             amountToWithdraw: Bitcoin(100),
             wantedBalance:    Bitcoin(20),
-            wantedErr:        errors.New("cannot withdraw 100 BTC, insufficient funds - current balance is 20 BTC"),
+            wantedErr:        InsufficientFundsError,
         },
     }
 
@@ -566,7 +584,7 @@ t.Run("Withdraw", func(t *testing.T) {
                 t.Fatalf("got error '%s' want '%s'", err, tt.wantedErr)
             }
 
-            if wantAnError && err.Error() != tt.wantedErr.Error() {
+            if wantAnError && err != tt.wantedErr {
                 t.Errorf("got err '%s' want '%s'", err.Error(), tt.wantedErr)
             }
         })
@@ -574,155 +592,31 @@ t.Run("Withdraw", func(t *testing.T) {
 })
 ```
 
-We still have some issues. Here's some hypothetical questions
+And now the test is easier to follow too.
 
-- What if a developer decided to update the wording of the error. Would you be happy with tests failing? Would they? Is the _exact_ wording of the error important in regards to the tests? **Our tests should not be a burden**
-- If you were a developer working with this code, how would you handle these errors right now? Currently, your only practical choice would be to either return it to your own caller or log it somehow. The useful information is "locked" into a string. You _could_ try and parse it out but that's just asking for trouble if the structure of the error changes.
-- Does it "feel" right that the wallet is in charge of the specific wording of an error?
+Another useful property of tests is that they help us understand the _real_ usage of our code so we can make sympathetic code. We can see here that a developer can simply call our code and do an equals check to `InsufficientFundsError` and act accordingly.
 
-As mentioned before, [error is an interface](https://golang.org/pkg/builtin/#error).
+## Wrapping up
 
-```go
-type error interface {
-        Error() string
-}
-```
-
-From the previous sections we learned how to implement interfaces. So what we can do is create a custom error type, which has raw values accessible to the caller of `Withdraw`.
-
-This gives the users of our library some flexibility in their error handling:
-
-- They can extract out the pertinent values of the error and do something different
-- Simply use the `Error()` as is, perhaps logging it or printing it to the user
-
-Plus it makes our tests more useful and less prone to error due to wording changes.
-
-Let's continue refactoring by introducing a new type into our tests but keeping the overall behaviour the same.
-
-(strictly speaking the behaviour _has_ changed because of a different _type_ but the _interface_ of `Withdraw` is the same)
-
-```go
-	t.Run("Withdraw", func(t *testing.T) {
-		cases := []struct {
-			name             string
-			wallet           Wallet
-			amountToWithdraw Bitcoin
-			wantedBalance    Bitcoin
-			wantedErr        error
-		}{
-			{
-				name:             "sufficient funds",
-				wallet:           Wallet{Bitcoin(20)},
-				amountToWithdraw: Bitcoin(10),
-				wantedBalance:    Bitcoin(10),
-				wantedErr:        nil,
-			},
-			{
-				name:             "insufficient funds",
-				wallet:           Wallet{Bitcoin(20)},
-				amountToWithdraw: Bitcoin(100),
-				wantedBalance:    Bitcoin(20),
-				wantedErr:        WithdrawError{AmountToWithdraw: Bitcoin(100), CurrentBalance: Bitcoin(20)},
-			},
-		}
-
-		for _, tt := range cases {
-			t.Run(tt.name, func(t *testing.T) {
-				err := tt.wallet.Withdraw(tt.amountToWithdraw)
-
-				assertBalance(t, tt.wallet, tt.wantedBalance)
-
-				gotAnError := err != nil
-				wantAnError := tt.wantedErr != nil
-
-				if gotAnError != wantAnError {
-					t.Fatalf("got error '%s' want '%s'", err, tt.wantedErr)
-				}
-
-				if wantAnError && err.Error() != tt.wantedErr.Error() {
-					t.Errorf("got err '%s' want '%s'", err.Error(), tt.wantedErr)
-				}
-			})
-		}
-	})
-```
-
-Notice how the type in the table definition is still `error` and not our new `WithdrawError`.
-
-Use your tests and the compiler to help you arrive at a solution.
-
-## Try and run the test
-
-`./wallet_test.go:37:30: undefined: WithdrawError`
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-
-We have not defined our new error type yet
-
-```go
-type WithdrawError struct {
-	AmountToWithdraw Bitcoin
-	CurrentBalance   Bitcoin
-}
-```
-
-Try again.
-
-```
-./wallet_test.go:37:28: impossible type assertion:
-	WithdrawError does not implement error (missing Error method)
-```
-
-Go knows that our current type cannot possibly be an `error` due to the missing method, so lets implement the `error` interface on our new type.
-
-```go
-func (w WithdrawError) Error() string {
-	return fmt.Sprintf("cannot withdraw %s, insufficient funds - current balance is %s", w.AmountToWithdraw, w.CurrentBalance)
-}
-```
-
-Finally to complete our refactor, use our new type in the `Wallet`.
-
-```go
-func (w *Wallet) Withdraw(amount Bitcoin) error {
-
-	if amount > w.balance {
-		return WithdrawError{
-			AmountToWithdraw: amount,
-			CurrentBalance:   w.balance,
-		}
-	}
-
-	w.balance -= amount
-	return nil
-}
-```
-
-This feels better. We have delegated the responsibility of this kind of error to a new type, simplifying `Withdraw` but maintaining our simple interface. 
-
-# Wrapping up
-
-## Pointers
+### Pointers
 
 - Go copies values when you pass them to functions/methods so if you're writing a function that needs to mutate state you'll need it to take a pointer to the thing you want to change.
 - The fact that Go takes a copy of values is useful a lot of the time but sometimes you wont want your system to make a copy of something, in which case you need to pass a reference. Examples could be very large data or perhaps things you intend only to have one instance of (like database connection pools)
 
-## nil
+### nil
 
 - Pointers can be nil
-- When a function returns a pointer to something, you need to make sure you check if it's nil or not or you will get a runtime exception, the compiler wont help you here.
+- When a function returns a pointer to something, you need to make sure you check if it's nil or you might raise a runtime exception, the compiler wont help you here.
 - Useful for when you want to describe a value that could be missing
 
-## Errors
+### Errors
 
 - Errors are the way to signify failure when calling a function/method
-- You _may_ wish to introduce your own type of error to let developers work with whatever problems come up
-    - In our case we _listened to our tests_ and came to the conclusion that we would rather assert on some useful data, rather than a string check
-    - Listening to your tests is important. Often if your tests are hard to write/read then the users of your code are also going to have a tough time. This is why TDD is praised as being helpful as a design tool.
+- By listening to our tests we concluded that checking for a string in an error would result in a flaky test. So we refactored to use a meaningful value instead and this resulted in easier to test code and concluded this would be easier for users of our API too. 
+- This is not the end of the story with error handling, you can do more sophisticated things but this is just an intro. Later sections will cover more strategies.
 - [Don’t just check errors, handle them gracefully](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully) 
 
-## Type aliases
+### Type aliases
 
 - Useful for adding more domain specific meaning to values
 - Can let you implement interfaces
