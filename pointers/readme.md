@@ -402,23 +402,23 @@ Remember to import `errors` into your code.
 Let's make a quick test helper for our error check just to help our test read clearer
 
 ```go
-	assertError := func(t *testing.T, err error) {
-		if err == nil {
-			t.Error("wanted an error but didnt get one")
-		}
+assertError := func(t *testing.T, err error) {
+    if err == nil {
+        t.Error("wanted an error but didnt get one")
     }
+}
 ```
 
 And in our test
 
 ```go
-	t.Run("Withdraw insufficient funds", func(t *testing.T) {
-		wallet := Wallet{Bitcoin(20)}
-		err := wallet.Withdraw(Bitcoin(100))
+t.Run("Withdraw insufficient funds", func(t *testing.T) {
+    wallet := Wallet{Bitcoin(20)}
+    err := wallet.Withdraw(Bitcoin(100))
 
-		assertBalance(t, wallet, Bitcoin(20))
-		assertError(t, err)
-    })
+    assertBalance(t, wallet, Bitcoin(20))
+    assertError(t, err)
+})
 ```
 
 Hopefully when returning an error of "oh no" you were thinking that we _might_ iterate on that because it doesn't seem that useful to return.
@@ -444,13 +444,13 @@ assertError := func(t *testing.T, got error, want string) {
 And then update the caller
 
 ```go
-	t.Run("Withdraw insufficient funds", func(t *testing.T) {
-		wallet := Wallet{Bitcoin(20)}
-		err := wallet.Withdraw(Bitcoin(100))
+t.Run("Withdraw insufficient funds", func(t *testing.T) {
+    wallet := Wallet{Bitcoin(20)}
+    err := wallet.Withdraw(Bitcoin(100))
 
-		assertBalance(t, wallet, Bitcoin(20))
-		assertError(t, err, "cannot withdraw, insufficient funds")
-    })
+    assertBalance(t, wallet, Bitcoin(20))
+    assertError(t, err, "cannot withdraw, insufficient funds")
+})
 ```
 
 We've introduced `t.Fatal` which will stop the test if it is called. This is because we don't want to make any more assertions on the error returned if there isn't one around. Without this the test would carry on to the next step and panic because of a nil pointer.
