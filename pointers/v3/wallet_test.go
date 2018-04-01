@@ -14,52 +14,31 @@ func TestWallet(t *testing.T) {
 		}
 	}
 
+	assertError := func(t *testing.T, err error) {
+		if err == nil {
+			t.Error("wanted an error but didnt get one")
+		}
+	}
+
 	t.Run("Deposit", func(t *testing.T) {
 		wallet := Wallet{}
 		wallet.Deposit(Bitcoin(10))
+
 		assertBalance(t, wallet, Bitcoin(10))
 	})
 
-	t.Run("Withdraw", func(t *testing.T) {
-		cases := []struct {
-			name             string
-			wallet           Wallet
-			amountToWithdraw Bitcoin
-			wantedBalance    Bitcoin
-			wantedErr        bool
-		}{
-			{
-				name:             "sufficient funds",
-				wallet:           Wallet{Bitcoin(20)},
-				amountToWithdraw: Bitcoin(10),
-				wantedBalance:    Bitcoin(10),
-				wantedErr:        false,
-			},
-			{
-				name:             "insufficient funds",
-				wallet:           Wallet{Bitcoin(20)},
-				amountToWithdraw: Bitcoin(100),
-				wantedBalance:    Bitcoin(20),
-				wantedErr:        true,
-			},
-		}
+	t.Run("Withdraw with funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		wallet.Withdraw(Bitcoin(10))
 
-		for _, tt := range cases {
-			t.Run(tt.name, func(t *testing.T) {
-				err := tt.wallet.Withdraw(tt.amountToWithdraw)
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-				if tt.wallet.Balance() != tt.wantedBalance {
-					t.Errorf("got balance %s want %s", tt.wallet.Balance(), tt.wantedBalance)
-				}
+	t.Run("Withdraw insufficient funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(100))
 
-				if tt.wantedErr && err == nil {
-					t.Error("wanted an error but didnt get one")
-				}
-
-				if !tt.wantedErr && err != nil {
-					t.Errorf("didnt want an error but got one %s", err)
-				}
-			})
-		}
+		assertBalance(t, wallet, Bitcoin(20))
+		assertError(t, err)
 	})
 }

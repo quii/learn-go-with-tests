@@ -342,21 +342,23 @@ Let's try this out in a test
 ## Write the test first
 
 ```go
-t.Run("Withdraw over balance limit", func(t *testing.T) {
-    wallet := Wallet{balance: Bitcoin(20)}
+t.Run("Withdraw insufficient funds", func(t *testing.T) {
+    wallet := Wallet{Bitcoin(20)}
     err := wallet.Withdraw(Bitcoin(100))
-    
+
+    assertBalance(t, wallet, Bitcoin(20))
+
     if err == nil {
-        t.Errorf("expected an error to be returned when withdrawing too much")
+        t.Error("wanted an error but didn't get one")
     }
 })
 ```
 
-We now want `Withdraw` to return an error _if_ you try and take out more than you have. 
+We want `Withdraw` to return an error _if_ you try and take out more than you have.
 
 We then check it has returned it by failing the test if it is `nil`
 
-`nil` is synonomous with `null` from other programming languages. Errors can be `nil` because the return type of `Widthdraw` will be `error`, which is an interface. If you see a function that takes arguments or returns values that are interfaces, they can be nillable. 
+`nil` is synonymous with `null` from other programming languages. Errors can be `nil` because the return type of `Widthdraw` will be `error`, which is an interface. If you see a function that takes arguments or returns values that are interfaces, they can be nillable. 
 
 Like `null` if you try and access a value that is `nil` it will throw a **runtime panic**. This is bad! You should make sure that you check for nils. 
 
@@ -397,54 +399,27 @@ Remember to import `errors` into your code.
 
 ## Refactor
 
-We have a couple of tests around the same method so let's refactor it into a table test.
+Let's make a quick test helper for our error check just to help our test read clearer
 
 ```go
-t.Run("Withdraw", func(t *testing.T) {
-    cases := []struct {
-        name             string
-        wallet           Wallet
-        amountToWithdraw Bitcoin
-        wantedBalance    Bitcoin
-        wantedErr        bool
-    }{
-        {
-            name:             "sufficient funds",
-            wallet:           Wallet{Bitcoin(20)},
-            amountToWithdraw: Bitcoin(10),
-            wantedBalance:    Bitcoin(10),
-            wantedErr:        false,
-        },
-        {
-            name:             "insufficient funds",
-            wallet:           Wallet{Bitcoin(20)},
-            amountToWithdraw: Bitcoin(100),
-            wantedBalance:    Bitcoin(20),
-            wantedErr:        true,
-        },
+	assertError := func(t *testing.T, err error) {
+		if err == nil {
+			t.Error("wanted an error but didnt get one")
+		}
     }
-
-    for _, tt := range cases {
-        t.Run(tt.name, func(t *testing.T) {
-            err := tt.wallet.Withdraw(tt.amountToWithdraw)
-
-            if tt.wallet.Balance() != tt.wantedBalance {
-                t.Errorf("got balance %s want %s", tt.wallet.Balance(), tt.wantedBalance)
-            }
-
-            if tt.wantedErr && err == nil {
-                t.Error("wanted an error but didn't get one")
-            }
-
-            if !tt.wantedErr && err != nil {
-                t.Errorf("didnt want an error but got one %s", err)
-            }
-        })
-    }
-})
 ```
 
-Our test cases are describing our intent a little clearer now.
+And in our test
+
+```go
+	t.Run("Withdraw insufficient funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(100))
+
+		assertBalance(t, wallet, Bitcoin(20))
+		assertError(t, err)
+    })
+```
 
 Hopefully when returning an error of "oh no" you were thinking that we _might_ iterate on that because it doesn't seem that useful to return.
 
@@ -452,57 +427,33 @@ Assuming that the error ultimately gets returned to the user, let's update our t
 
 ## Write the test first
 
+Update our helper for a `string` to compare against.
+
 ```go
-t.Run("Withdraw", func(t *testing.T) {
-    cases := []struct {
-        name             string
-        wallet           Wallet
-        amountToWithdraw Bitcoin
-        wantedBalance    Bitcoin
-        wantedErr        error
-    }{
-        {
-            name:             "sufficient funds",
-            wallet:           Wallet{Bitcoin(20)},
-            amountToWithdraw: Bitcoin(10),
-            wantedBalance:    Bitcoin(10),
-            wantedErr:        nil,
-        },
-        {
-            name:             "insufficient funds",
-            wallet:           Wallet{Bitcoin(20)},
-            amountToWithdraw: Bitcoin(100),
-            wantedBalance:    Bitcoin(20),
-            wantedErr:        errors.New("cannot withdraw, insufficient funds"),
-        },
+assertError := func(t *testing.T, got error, want string) {
+    if got == nil {
+        t.Fatal("didn't get an error but wanted one")
     }
 
-    for _, tt := range cases {
-        t.Run(tt.name, func(t *testing.T) {
-            err := tt.wallet.Withdraw(tt.amountToWithdraw)
-
-            assertBalance(t, tt.wallet, tt.wantedBalance)
-
-            if tt.wantedErr != nil {
-                if err == nil {
-                    t.Error("wanted an error but didn't get one")
-                }
-
-                if err.Error() != tt.wantedErr.Error() {
-                    t.Errorf("got err '%s' want '%s'", err.Error(), tt.wantedErr)
-                }
-            }
-
-            if tt.wantedErr == nil && err != nil {
-                t.Errorf("didn't want an error but got one %s", err)
-            }
-        })
+    if got.Error() != want {
+        t.Errorf("got %s, want %s", got, want)
     }
-})
+}
 ```
 
-- We have changed the table so that `err` is now an `error`. This lets us define a particular kind of error to look for in the test and also let us put the value `nil` if we have a case where we don't want an error.
-- Introduced `t.Fatal` which will stop the test if it is called. This is because we don't want to make any more assertions on the error returned if there isn't one around. Without this the test would carry on to the next step and panic because of a nil pointer.
+And then update the caller
+
+```go
+	t.Run("Withdraw insufficient funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(100))
+
+		assertBalance(t, wallet, Bitcoin(20))
+		assertError(t, err, "cannot withdraw, insufficient funds")
+    })
+```
+
+We've introduced `t.Fatal` which will stop the test if it is called. This is because we don't want to make any more assertions on the error returned if there isn't one around. Without this the test would carry on to the next step and panic because of a nil pointer.
 
 ## Try and run the test
 
@@ -544,57 +495,128 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 }
 ```
 
+The `var` keyword allows us to define values global to the package.
+
 This is a positive change in itself because now our `Withdraw` function looks very clear.
 
+Next we can refactor our test code to use this value instead of specific strings.
+
 ```go
-t.Run("Withdraw", func(t *testing.T) {
-    cases := []struct {
-        name             string
-        wallet           Wallet
-        amountToWithdraw Bitcoin
-        wantedBalance    Bitcoin
-        wantedErr        error
-    }{
-        {
-            name:             "sufficient funds",
-            wallet:           Wallet{Bitcoin(20)},
-            amountToWithdraw: Bitcoin(10),
-            wantedBalance:    Bitcoin(10),
-            wantedErr:        nil,
-        },
-        {
-            name:             "insufficient funds",
-            wallet:           Wallet{Bitcoin(20)},
-            amountToWithdraw: Bitcoin(100),
-            wantedBalance:    Bitcoin(20),
-            wantedErr:        InsufficientFundsError,
-        },
-    }
+func TestWallet(t *testing.T) {
 
-    for _, tt := range cases {
-        t.Run(tt.name, func(t *testing.T) {
-            err := tt.wallet.Withdraw(tt.amountToWithdraw)
+	t.Run("Deposit", func(t *testing.T) {
+		wallet := Wallet{}
+		wallet.Deposit(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-            assertBalance(t, tt.wallet, tt.wantedBalance)
+	t.Run("Withdraw with funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		wallet.Withdraw(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-            gotAnError := err != nil
-            wantAnError := tt.wantedErr != nil
+	t.Run("Withdraw insufficient funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(100))
 
-            if gotAnError != wantAnError {
-                t.Fatalf("got error '%s' want '%s'", err, tt.wantedErr)
-            }
+		assertBalance(t, wallet, Bitcoin(20))
+		assertError(t, err, InsufficientFundsError)
+	})
+}
 
-            if wantAnError && err != tt.wantedErr {
-                t.Errorf("got err '%s' want '%s'", err.Error(), tt.wantedErr)
-            }
-        })
-    }
-})
+func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
+	got := wallet.Balance()
+
+	if got != want {
+		t.Errorf("got %s want %s", got, want)
+	}
+}
+
+func assertError(t *testing.T, got error, want error) {
+	if got == nil {
+		t.Fatal("didn't get an error but wanted one")
+	}
+
+	if got != want {
+		t.Errorf("got %s, want %s", got, want)
+	}
+}
 ```
 
 And now the test is easier to follow too.
 
+I have moved the helpers out of the main test function just so when someone opens up a file they can start reading our assertions first, rather than some helpers.
+
 Another useful property of tests is that they help us understand the _real_ usage of our code so we can make sympathetic code. We can see here that a developer can simply call our code and do an equals check to `InsufficientFundsError` and act accordingly.
+
+Whilst the Go compiler helps you a lot, sometimes there are things you can still miss and error handling can sometimes be tricky. 
+
+There is one scenario we have not tested. To find it, run the following in a terminal to install `errcheck`, one of many linters available for Go.
+
+`go get -u github.com/kisielk/errcheck`
+
+Then, inside the directory with your code run `errcheck .`
+
+You should get something like
+
+`wallet_test.go:17:18:	wallet.Withdraw(Bitcoin(10))`
+
+What this is telling us is that we have not checked the error being returned on that line of code. That line of code on my computer corresponds to our normal withdraw scenario because we have not checked that if the Withdraw is successful that an error is _not_ returned. 
+
+Here is the final test code that accounts for this
+
+```go
+func TestWallet(t *testing.T) {
+
+	t.Run("Deposit", func(t *testing.T) {
+		wallet := Wallet{}
+		wallet.Deposit(Bitcoin(10))
+
+		assertBalance(t, wallet, Bitcoin(10))
+	})
+
+	t.Run("Withdraw with funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(10))
+
+		assertBalance(t, wallet, Bitcoin(10))
+		assertNoError(t, err)
+	})
+
+	t.Run("Withdraw insufficient funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(100))
+
+		assertBalance(t, wallet, Bitcoin(20))
+		assertError(t, err, InsufficientFundsError)
+	})
+}
+
+func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
+	got := wallet.Balance()
+
+	if got != want {
+		t.Errorf("got %s want %s", got, want)
+	}
+}
+
+func assertNoError(t *testing.T, got error) {
+	if got != nil {
+		t.Fatal("got an error but didnt want one")
+	}
+}
+
+func assertError(t *testing.T, got error, want error) {
+	if got == nil {
+		t.Fatal("didn't get an error but wanted one")
+	}
+
+	if got != want {
+		t.Errorf("got %s, want %s", got, want)
+	}
+}
+```
 
 ## Wrapping up
 
@@ -612,7 +634,7 @@ Another useful property of tests is that they help us understand the _real_ usag
 ### Errors
 
 - Errors are the way to signify failure when calling a function/method
-- By listening to our tests we concluded that checking for a string in an error would result in a flaky test. So we refactored to use a meaningful value instead and this resulted in easier to test code and concluded this would be easier for users of our API too. 
+- By listening to our tests we concluded that checking for a string in an error would result in a flaky test. So we refactored to use a meaningful value instead and this resulted in easier to test code and concluded this would be easier for users of our API too.
 - This is not the end of the story with error handling, you can do more sophisticated things but this is just an intro. Later sections will cover more strategies.
 - [Don’t just check errors, handle them gracefully](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully) 
 
