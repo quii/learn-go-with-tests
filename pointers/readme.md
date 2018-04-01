@@ -550,6 +550,8 @@ I have moved the helpers out of the main test function just so when someone open
 
 Another useful property of tests is that they help us understand the _real_ usage of our code so we can make sympathetic code. We can see here that a developer can simply call our code and do an equals check to `InsufficientFundsError` and act accordingly.
 
+### Unchecked errors
+
 Whilst the Go compiler helps you a lot, sometimes there are things you can still miss and error handling can sometimes be tricky. 
 
 There is one scenario we have not tested. To find it, run the following in a terminal to install `errcheck`, one of many linters available for Go.
