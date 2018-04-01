@@ -1,4 +1,4 @@
-# Pointers and errors (WIP)
+# Pointers and errors
 
 We learned about structs in the last section which let us capture a number of values related around a concept. 
 
@@ -343,10 +343,11 @@ Let's try this out in a test
 
 ```go
 t.Run("Withdraw insufficient funds", func(t *testing.T) {
-    wallet := Wallet{Bitcoin(20)}
+    startingBalance := Bitcoin(20)
+    wallet := Wallet{startingBalance}
     err := wallet.Withdraw(Bitcoin(100))
 
-    assertBalance(t, wallet, Bitcoin(20))
+    assertBalance(t, wallet, startingBalance)
 
     if err == nil {
         t.Error("wanted an error but didn't get one")
@@ -354,9 +355,9 @@ t.Run("Withdraw insufficient funds", func(t *testing.T) {
 })
 ```
 
-We want `Withdraw` to return an error _if_ you try and take out more than you have.
+We want `Withdraw` to return an error _if_ you try and take out more than you have and the balance should stay the same
 
-We then check it has returned it by failing the test if it is `nil`
+We then check an error has returned by failing the test if it is `nil`.
 
 `nil` is synonymous with `null` from other programming languages. Errors can be `nil` because the return type of `Widthdraw` will be `error`, which is an interface. If you see a function that takes arguments or returns values that are interfaces, they can be nillable. 
 
@@ -445,10 +446,11 @@ And then update the caller
 
 ```go
 t.Run("Withdraw insufficient funds", func(t *testing.T) {
-    wallet := Wallet{Bitcoin(20)}
+    startingBalance := Bitcoin(20)
+    wallet := Wallet{startingBalance}
     err := wallet.Withdraw(Bitcoin(100))
 
-    assertBalance(t, wallet, Bitcoin(20))
+    assertBalance(t, wallet, startingBalance)
     assertError(t, err, "cannot withdraw, insufficient funds")
 })
 ```
