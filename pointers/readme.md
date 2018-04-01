@@ -1,4 +1,4 @@
-# Pointers and errors (WIP)
+# Pointers and errors
 
 We learned about structs in the last section which let us capture a number of values related around a concept. 
 
@@ -564,9 +564,9 @@ You should get something like
 
 `wallet_test.go:17:18:	wallet.Withdraw(Bitcoin(10))`
 
-What this is telling us is that we have not checked the error being returned on that line of code. That line of code on my computer corresponds to our normal withdraw scenario because we have not checked that if the Withdraw is successful that an error is _not_ returned. 
+What this is telling us is that we have not checked the error being returned on that line of code. That line of code on my computer corresponds to our normal withdraw scenario because we have not checked that if the `Withdraw` is successful that an error is _not_ returned. 
 
-Here is the final test code that accounts for this
+Here is the final test code that accounts for this.
 
 ```go
 func TestWallet(t *testing.T) {
