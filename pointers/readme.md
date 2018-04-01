@@ -1,4 +1,4 @@
-# Pointers and errors
+# Pointers and errors (WIP)
 
 We learned about structs in the last section which let us capture a number of values related around a concept. 
 
