@@ -359,7 +359,7 @@ We want `Withdraw` to return an error _if_ you try and take out more than you ha
 
 We then check an error has returned by failing the test if it is `nil`.
 
-`nil` is synonymous with `null` from other programming languages. Errors can be `nil` because the return type of `Widthdraw` will be `error`, which is an interface. If you see a function that takes arguments or returns values that are interfaces, they can be nillable. 
+`nil` is synonymous with `null` from other programming languages. Errors can be `nil` because the return type of `Withdraw` will be `error`, which is an interface. If you see a function that takes arguments or returns values that are interfaces, they can be nillable. 
 
 Like `null` if you try and access a value that is `nil` it will throw a **runtime panic**. This is bad! You should make sure that you check for nils. 
 
