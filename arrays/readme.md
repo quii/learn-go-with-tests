@@ -24,8 +24,8 @@ func TestSum(t *testing.T) {
 ```
 
 Arrays have a _fixed capacity_ which you define when you declare the variable. We can initialize array in two ways:
-* [N]type{value1, value2, ..., valueN}  e.g. numbers := [5]int{1, 2, 3, 4, 5}
-* [...]type{value1, value2, ..., valueN}  e.g. numbers := [...]int{1, 2, 3, 4, 5}
+* [N]type{value1, value2, ..., valueN}  e.g. `numbers := [5]int{1, 2, 3, 4, 5}`
+* [...]type{value1, value2, ..., valueN}  e.g. `numbers := [...]int{1, 2, 3, 4, 5}`
 
 It is sometimes useful to also print the inputs to the function in the error message and we are using the `%v` placeholder which is the "default" format, which works well for arrays.
 
