@@ -23,7 +23,11 @@ func TestSum(t *testing.T) {
 }
 ```
 
-Arrays have a _fixed capacity_ which you define when you declare the variable. It is sometimes useful to also print the inputs to the function in the error message and we are using the `%v` placeholder which is the "default" format, which works well for arrays.
+Arrays have a _fixed capacity_ which you define when you declare the variable. We can initialize array in two ways:
+* [N]type{value1, value2, ..., valueN}  e.g. numbers := [5]int{1, 2, 3, 4, 5}
+* [...]type{value1, value2, ..., valueN}  e.g. numbers := [...]int{1, 2, 3, 4, 5}
+
+It is sometimes useful to also print the inputs to the function in the error message and we are using the `%v` placeholder which is the "default" format, which works well for arrays.
 
 [Read more about the format strings](https://golang.org/pkg/fmt/)
 
@@ -57,7 +61,7 @@ func Sum(numbers [5]int) int {
 }
 ```
 
-To get the value out of an array at a particular index, just use `array[index]` syntax. In this case we are using `for` to iterate 5 times to work through the array and add each item onto `sum`
+To get the value out of an array at a particular index, just use `array[index]` syntax. In this case we are using `for` to iterate 5 times to work through the array and add each item onto `sum`.
 
 #### A note on source control
 
