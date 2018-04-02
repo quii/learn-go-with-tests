@@ -166,7 +166,7 @@ We said we were making a Bitcoin wallet but we have not mentioned them so far. W
 
 It seems a bit overkill to create a `struct` for this. `int` is fine in terms of the way it works but it's not descriptive.
 
-Go lets you create **type aliases** which let you effectively create a new type out of an existing one.
+Go lets you create new types from existing ones. 
 
 The syntax is `type MyName OriginalType` 
 
@@ -642,7 +642,7 @@ func assertError(t *testing.T, got error, want error) {
 - This is not the end of the story with error handling, you can do more sophisticated things but this is just an intro. Later sections will cover more strategies.
 - [Don’t just check errors, handle them gracefully](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully) 
 
-### Type aliases
+### Create new types from existing ones
 
 - Useful for adding more domain specific meaning to values
 - Can let you implement interfaces
