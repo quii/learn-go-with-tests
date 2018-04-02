@@ -23,8 +23,8 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 4. [Arrays and slices](/arrays) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
 5. [Structs, methods & interfaces](/structs) - Learn about `struct`, methods, `interface` and table driven tests.
 6. [Pointers & errors](/pointers) - Learn about pointers, errors and type aliasing.
-7. [Dependency Injection Part 1](/di-1) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
-8. [Dependency Inject Part 2](/di-2) - Take some existing untested code and use DI with mocking to test it.
+7. [Dependency Injection Part 1 (WIP)](/di-1) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
+8. [Dependency Inject Part 2 (WIP)](/di-2) - Take some existing untested code and use DI with mocking to test it.
 9. Concurrency (WIP)
 
 Property based tests (todo)
