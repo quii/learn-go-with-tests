@@ -1,4 +1,4 @@
-# An intro to dependency injection
+# Dependency injection (part 1, WIP)
 
 It is assumed that you have read the structs section before reading this.
 
@@ -195,8 +195,8 @@ Our first round of code was not easy to test because it wrote data to somewhere 
 
 _Motivated by our tests_ we refactored the code so we could control _where_ the data was written by **injecting a dependency** which allowed us to:
 
-- **Test our code** If you cant test a function _easily_, it's usually because of dependencies hard-wired into a function _or_ global state. If you have a global database connection pool for instance that is used by some kind of service layer, it is likely going to be difficult to test and they will be slow to run. DI can help you generate an interface for the DB interactions and then you can easily test the function with snappy tests.
-- **Separate our concerns**, decoupling _where the data goes_ from _how to generate it_. If you ever feel like a method/function has too many responsibilities (generating data _and_ writing to a db? handling http requests _and_ doing domain level logic?) DI is probably going to be the tool you need.
+- **Test our code** If you cant test a function _easily_, it's usually because of dependencies hard-wired into a function _or_ global state. If you have a global database connection pool for instance that is used by some kind of service layer, it is likely going to be difficult to test and they will be slow to run. DI will motivate you to inject in a database dependency (via an interface) which you can then mock out with something you can control in your tests.
+- **Separate our concerns**, decoupling _where the data goes_ from _how to generate it_. If you ever feel like a method/function has too many responsibilities (generating data _and_ writing to a db? handling HTTP requests _and_ doing domain level logic?) DI is probably going to be the tool you need.
 - **Allow our code to be re-used in different contexts** The first "new" context our code can be used in is inside tests. But further on if someone wants to try something new with your function they can inject their own dependencies.
 
 ### The Go standard library is really good, take time to study it
@@ -204,4 +204,3 @@ _Motivated by our tests_ we refactored the code so we could control _where_ the 
 By having some familiarity of the `io.Writer` interface we are able to use `bytes.Buffer` in our test as our `Writer` and then we can use other `Writer`s from the standard library to use our function in a command line app or in web server.
 
 The more familiar you are with the standard library the more you'll see these general purpose interfaces which you can then re-use in your own code to make your software reusable in a number of contexts.
-
