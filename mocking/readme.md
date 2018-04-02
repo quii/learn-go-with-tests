@@ -163,6 +163,8 @@ Go!`
 
 The backtick syntax is another way of creating a `string` but lets you put things like newlines which is perfect for our test.
 
+Isn't it nice that by focusing on getting our software working end-to-end that iterating on the requirements is very straightforward. By investing in getting the overall plumbing working right, we can focus on the next requirements easily.
+
 ## Try and run the test
 
 ```
