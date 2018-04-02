@@ -1,4 +1,4 @@
-# Dependency injection and interfaces - WIP
+# An intro to dependency injection
 
 It is assumed that you have read the structs section before reading this.
 
@@ -57,7 +57,7 @@ type Writer interface {
 
 As you write more Go code you will find this interface popping up a lot because it's a great general purpose interface for "put this data somewhere".
 
-Now that we know this, we can write a test!
+So we know under the covers we're ultimately using `Writer` to send our greeting somewhere. Let's use this existing abstraction to make our code testable and more reusable.
 
 ## Write the test first
 
@@ -193,7 +193,13 @@ You can probably guess that `http.ResponseWriter` also implements `io.Writer` so
 
 Our first round of code was not easy to test because it wrote data to somewhere we couldn't control.
 
-_Motivated by our tests_ we refactored the code so we could control _where_ the data was written by **injecting a dependency**. 
+_Motivated by our tests_ we refactored the code so we could control _where_ the data was written by **injecting a dependency** which allowed us to:
+
+- **Test our code**
+- **Separate our concerns**
+- **Allow our code to be re-used in different contexts**
+
+#### The Go standard library is really good, take time to study it
 
 By having some familiarity of the `io.Writer` interface we are able to use `bytes.Buffer` in our test as our `Writer` and then we can use other `Writer`s from the standard library to use our function in a command line app or in web server.
 
