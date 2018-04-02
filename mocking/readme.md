@@ -1,4 +1,4 @@
-# Dependency injection (part 2, WIP)
+# Mocking
 
 We'll next cover _mocking_ and it's relation to DI with a case-study. 
 
