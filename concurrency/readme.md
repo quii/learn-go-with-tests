@@ -1,5 +1,3 @@
-## WIP
-
 # Concurrency
 
 Here's the setup: a colleague has written a function, `CheckWebsites`, that
@@ -170,9 +168,9 @@ exit status 1
 FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.014s
 ```
 
-A quick aside into a parallel universe...
+A quick aside into a parallel(ism) universe...
 
-You might not get this result. You might get an enormous panic message that
+You might not get this result. You might get a panic message that
 we're going to talk about in a bit. Don't worry if you got that, just keep
 running the test until you _do_ get the result above. Or pretend that you did.
 Up to you. Welcome to concurrency: when it's not handled correctly it's hard to
@@ -213,7 +211,7 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-Now when we run the tests you get:[^1]
+Now when we run the tests you get (or or don't get - see above):
 
 ```sh
 --- FAIL: TestCheckWebsites (2.00s)
@@ -493,8 +491,6 @@ ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        2.377s
 ```
 23406615 nanoseconds - 0.023 seconds, about one hundred times as fast as
 original function. A great success.
-
-[^1]: Or the huge error message. Again with the concurrency headaches.
 
 [Arrays]: ../arrays/
 [For]: ../for/
