@@ -35,7 +35,7 @@ func Printf(format string, a ...interface{}) (n int, err error) {
 
 Interesting! Under the hood `Printf` just calls `Fprintf` passing in `os.Stdout`.
 
-What exactly _is_ an `os.Stdout` ? What does `Fprintf` expect to get passed to it in 1st argument?
+What exactly _is_ an `os.Stdout` ? What does `Fprintf` expect to get passed to it for the 1st argument?
 
 ```go
 func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
