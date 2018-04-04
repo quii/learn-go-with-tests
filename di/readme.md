@@ -79,9 +79,9 @@ func TestGreet(t *testing.T) {
 }
 ```
 
-The `buffer` type from the `bytes` package implements the `Writer` interface so it is perfect for us to try and record what is being written.
+The `buffer` type from the `bytes` package implements the `Writer` interface.
 
-We call the `Greet` function and afterwards read the buffer into a `string` so we can assert on it.
+So we'll use it in our test to send in as our `Writer` and then we can check what was written to it after we invoke `Greet`
 
 ## Try and run the test
 
