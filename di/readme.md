@@ -109,7 +109,7 @@ The test fails. Notice that the name is getting printed out, but it's going to s
 
 ## Write enough code to make it pass
 
-Use the writer to send the greeting to the buffer in our test
+Use the writer to send the greeting to the buffer in our test. Remember `fmt.Fprintf` is like `fmt.Printf` but instead takes a `Writer` to send the string to, whereas `fmt.Printf` defaults to stdout. 
 
 ```go
 func Greet(writer *bytes.Buffer, name string) {
@@ -117,7 +117,7 @@ func Greet(writer *bytes.Buffer, name string) {
 }
 ```
 
-The test now pass
+The test now passes
 
 ## Refactor
 
