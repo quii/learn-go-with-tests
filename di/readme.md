@@ -22,7 +22,11 @@ func Greet(name string) {
 
 But how can we test this? Calling `fmt.Printf` prints to stdout, which is pretty hard for us to capture using the testing framework. 
 
-What we need to do is to be able to **inject** (which is just a fancy word for pass in) the dependency of printing. If we do that, we can then change the implementation to print to something we control so that we can test it. In "real life" you would inject in something that writes to stdout.  
+What we need to do is to be able to **inject** (which is just a fancy word for pass in) the dependency of printing. 
+
+**Our function doesn't need to care _where_ or _how_ the printing happens, so we should accept an _interface_ rather than a concrete type.** 
+
+If we do that, we can then change the implementation to print to something we control so that we can test it. In "real life" you would inject in something that writes to stdout.  
 
 If you look at the source code of `fmt.Printf` you can see a way for us to hook in
 
