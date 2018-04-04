@@ -112,7 +112,7 @@ The test fails. Notice that the name is getting printed out, but it's going to s
 Use the writer to send the greeting to the buffer in our test
 
 ```go
-func Greet(writer io.Writer, name string) {
+func Greet(writer *bytes.Buffer, name string) {
 	fmt.Fprintf(writer, "Hello, %s", name)
 }
 ```
