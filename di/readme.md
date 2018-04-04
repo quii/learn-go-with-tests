@@ -1,4 +1,4 @@
-# Dependency injection (WIP)
+# Dependency injection
 
 It is assumed that you have read the structs section before as some understanding of interfaces will be needed for this.
 

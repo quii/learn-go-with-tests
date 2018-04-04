@@ -23,7 +23,7 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 4. [Arrays and slices](/arrays) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
 5. [Structs, methods & interfaces](/structs) - Learn about `struct`, methods, `interface` and table driven tests.
 6. [Pointers & errors](/pointers) - Learn about pointers and errors.
-7. [Dependency Injection (WIP)](/di) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
+7. [Dependency Injection](/di) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
 8. [Mocking (WIP)](/mocking) - Take some existing untested code and use DI with mocking to test it.
 9. Concurrency (WIP)
 
