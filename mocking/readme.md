@@ -172,7 +172,7 @@ countdown_test.go:21: got '5' want '5
 		4
 		3
 		2
-        1
+    1
 		Go!'
 ```
 ## Write enough code to make it pass
@@ -190,7 +190,7 @@ Use a `for` loop counting backwards with `i--` and use `fmt.Fprintln` to print t
 
 ## Refactor
 
-There's not much to refactor other than removing some magic strings.
+There's not much to refactor other than removing some magic values.
 
 ```go
 const finalWord = "Go!"
@@ -241,6 +241,11 @@ type Sleeper interface {
 	Sleep()
 }
 ```
+
+I made a design decision that our `Countdown` function would not be responsible
+for how long the sleep is. This simplifies our code a little for now at least
+and means a user of our function can configure that sleepiness however they
+like.
 
 Now we need to make a _mock_ of it for our tests to use. 
 
@@ -327,7 +332,11 @@ func (o *ConfigurableSleeper) Sleep() {
 }
 ```
 
-And then use it in main
+I decided to make a little extra effort and make it so our real sleeper is
+configurable but you could just as easily not bother and hard-code it for
+1 second (YAGNI right?).
+
+We can then use it in our real application like so
 
 ```go
 func main() {
