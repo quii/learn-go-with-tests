@@ -237,20 +237,24 @@ If we can _mock_ `time.Sleep` we can use _dependency injection_ to use it instea
 Let's define our dependency
 
 ```go
-type Sleeper func(time.Duration)
+type Sleeper interface {
+	Sleep()
+}
 ```
 
-Now we need to make a _mock_ of it for our tests to use. It will need to be defined as a method on a struct so we can record what calls have been made to it (spy on it).
+Now we need to make a _mock_ of it for our tests to use. 
 
 ```go
 type SpySleeper struct {
-	Calls []time.Duration
+	Calls int
 }
 
-func (s *SpySleeper) Sleep(duration time.Duration) {
-	s.Calls = append(s.Calls, duration)
+func (s *SpySleeper) Sleep() {
+	s.Calls++
 }
 ```
+
+There's nothing new to learn here, we just need to be able to _spy_ on the calls to our mock so we can check it has been called `N` times.
 
 Update the tests to inject a dependency on our Spy and assert that the sleep has been called 6 times.
 
@@ -259,7 +263,7 @@ func TestCountdown(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	spySleeper := &SpySleeper{}
 
-	Countdown(buffer, spySleeper.Sleep)
+	Countdown(buffer, spySleeper)
 
 	got := buffer.String()
 	want := `5
@@ -273,8 +277,8 @@ Go!`
 		t.Errorf("got '%s' want '%s'", got, want)
 	}
 
-	if len(spySleeper.Calls) != 6 {
-		t.Errorf("not enough calls to sleeper, want 6 got %d", len(spySleeper.Calls))
+	if spySleeper.Calls != 6 {
+		t.Errorf("not enough calls to sleeper, want 6 got %d", spySleeper.Calls)
 	}
 }
 ```
@@ -283,7 +287,7 @@ Go!`
 
 ```
 too many arguments in call to Countdown
-	have (*bytes.Buffer, func(time.Duration))
+	have (*bytes.Buffer, Sleeper)
 	want (io.Writer)
 ```
 
@@ -292,7 +296,7 @@ too many arguments in call to Countdown
 We need to update `Countdown` to accept our `Sleeper`
 
 ```go
-func Countdown(out io.Writer, sleep Sleeper) {
+func Countdown(out io.Writer, sleeper Sleeper) {
 	for i := countdownStart; i > 0; i-- {
 		time.Sleep(1 * time.Second)
 		fmt.Fprintln(out, i)
@@ -311,11 +315,24 @@ If you try again, your `main` will no longer compile for the same reason
 	want (io.Writer, Sleeper)
 ```
 
-Send in the _real_ sleeper.
+Let's create a _real_ sleeper which implements the interface we need
+
+```go
+type ConfigurableSleeper struct {
+	duration time.Duration
+}
+
+func (o *ConfigurableSleeper) Sleep() {
+	time.Sleep(o.duration)
+}
+```
+
+And then use it in main
 
 ```go
 func main() {
-	Countdown(os.Stdout, time.Sleep)
+	sleeper := &ConfigurableSleeper{1 * time.Second}
+	Countdown(os.Stdout, sleeper)
 }
 ```
 
@@ -324,13 +341,13 @@ func main() {
 The test is now compiling but not passing because we're still calling the `time.Sleep` rather than the injected in dependency. Let's fix that.
 
 ```go
-func Countdown(out io.Writer, sleep Sleeper) {
+func Countdown(out io.Writer, sleeper Sleeper) {
 	for i := countdownStart; i > 0; i-- {
-		sleep(1 * time.Second)
+		sleeper.sleep()
 		fmt.Fprintln(out, i)
 	}
 
-	sleep(1 * time.Second)
+	sleeper.sleep()
 	fmt.Fprint(out, finalWord)
 }
 ```
@@ -339,20 +356,3 @@ Now the test should be passing (and no longer taking 6 seconds!).
 
 ## Refactor
 
-We can DRY away the duration
-
-```go
-const finalWord = "Go!"
-const countdownStart = 5
-const sleepDuration = 1 * time.Second
-
-func Countdown(out io.Writer, sleep Sleeper) {
-	for i := countdownStart; i > 0; i-- {
-		sleep(sleepDuration)
-		fmt.Fprintln(out, i)
-	}
-
-	sleep(sleepDuration)
-	fmt.Fprint(out, finalWord)
-}
-```

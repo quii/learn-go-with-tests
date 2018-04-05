@@ -3,14 +3,13 @@ package main
 import (
 	"bytes"
 	"testing"
-	"time"
 )
 
 func TestCountdown(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	spySleeper := &SpySleeper{}
 
-	Countdown(buffer, spySleeper.Sleep)
+	Countdown(buffer, spySleeper)
 
 	got := buffer.String()
 	want := `5
@@ -24,15 +23,15 @@ Go!`
 		t.Errorf("got '%s' want '%s'", got, want)
 	}
 
-	if len(spySleeper.Calls) != 6 {
-		t.Errorf("not enough calls to sleeper, want 6 got %d", len(spySleeper.Calls))
+	if spySleeper.Calls != 6 {
+		t.Errorf("not enough calls to sleeper, want 6 got %d", spySleeper.Calls)
 	}
 }
 
 type SpySleeper struct {
-	Calls []time.Duration
+	Calls int
 }
 
-func (s *SpySleeper) Sleep(duration time.Duration) {
-	s.Calls = append(s.Calls, duration)
+func (s *SpySleeper) Sleep() {
+	s.Calls++
 }
