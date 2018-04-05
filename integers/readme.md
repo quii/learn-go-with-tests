@@ -1,6 +1,6 @@
 # Integers
 
-Integers work as you would expect. Let's write an add function to try things out
+Integers work as you would expect. Let's write an add function to try things out.  Create a test file called `adder_test.go` and write this code.
 
 ## Write the test first
 
@@ -20,6 +20,8 @@ func TestAdder(t *testing.T) {
 ```
 
 You will notice that we're using `%d` as our format strings rather than `%s`. That's because we want it to print an integer rather than a string.
+
+Also note that we are no longer using the main package, instead we've defined a package named integers, as the name suggests this will group functions for working with integers such as Add.
 
 ## Try and run the test
 
@@ -96,11 +98,15 @@ func Add(x, y int) int {
 
 #### Examples
 
-If you really want to go the extra mile you can make examples. You will find a lot of examples in the documentation of the standard library
+If you really want to go the extra mile you can make [examples](https://blog.golang.org/examples). You will find a lot of examples in the documentation of the standard library
 
-Often code examples go out of date with what the actual code does because they live outside of the real code and don't get checked. 
+Often code examples go out of date with what the actual code does because they live outside of the real code and don't get checked.
 
-Go examples are executed just like tests so you can be confident examples reflect what the code actually does. 
+Go examples are executed just like tests so you can be confident examples reflect what the code actually does.
+
+Examples are compiled (and optionally executed) as part of a package's test suite.
+
+As with typical tests, examples are functions that reside in a package's _test.go files.  Add the following ExampleAdd function to the `adder_test.go` file.
 
 ```go
 func ExampleAdd() {
@@ -110,7 +116,17 @@ func ExampleAdd() {
 }
 ```
 
-If your code changes so that the example is no longer valid, your build will fail. 
+If your code changes so that the example is no longer valid, your build will fail.
+
+Running the package's test suite, we can see the example function is executed with no further arrangement from us:
+
+```sh
+$ go test -v
+=== RUN   TestAdder
+--- PASS: TestAdder (0.00s)
+=== RUN   ExampleAdd
+--- PASS: ExampleAdd (0.00s)
+```
 
 By adding this code in the example will appear in the documentation inside `godoc` making your code even more accessible.
 
