@@ -85,7 +85,7 @@ Our code does the job, but it doesn't contain anything explicit about rectangles
 
 We could just give the functions more specific names like `RectangleArea`. A neater solution is to define our own _type_ called `Rectangle` which encapsulates this concept for us.
 
-We can create a simple type using a **struct**. A struct is just a named collection of fields where you can store data.
+We can create a simple type using a **struct**. [A struct](https://golang.org/ref/spec#Struct_types) is just a named collection of fields where you can store data.
 
 Declare a struct like this
 
@@ -206,11 +206,13 @@ But you cannot in Go
 We have two choices
 
 - You can have functions with the same name declared in different _packages_. So we could create our `Area(Circle)` in a new package, but that feels overkill here
-- We can define _methods_ on our newly defined types instead.
+- We can define [_methods_](https://golang.org/ref/spec#Method_declarations) on our newly defined types instead.
 
 ### What are methods?
 
 So far we have only been writing *functions* but we have been using some methods. When we call `t.Errorf` we are calling the method `ErrorF` on the instance of our `t` (`testing.T`).
+
+A method is a function with a receiver. A method declaration binds an identifier, the method name, to a method, and associates the method with the receiver's base type.
 
 Methods are very similar to functions but they are called by invoking them on an instance of a particular type. Where you can just call functions wherever you like, such as `Area(rectangle)` you can only call methods on "things".
 
@@ -282,6 +284,10 @@ When your method is called on a variable of that type, you get your reference to
 
 It is a convention in Go to have the receiver variable be the first letter of the type.
 
+```go
+r Rectangle
+```
+
 If you try to re-run the tests they should now compile and give you some failing output
 
 ## Write enough code to make it pass
@@ -314,7 +320,7 @@ We want to be able to write some kind of `checkArea` function that we can pass b
 
 With Go, we can codify this intent with **interfaces**.
 
-Interfaces are a very powerful concept in statically typed languages like Go because they allow you to make functions that can be used with different types and create highly-decoupled code whilst still maintaining type-safety.
+[Interfaces](https://golang.org/ref/spec#Interface_types) are a very powerful concept in statically typed languages like Go because they allow you to make functions that can be used with different types and create highly-decoupled code whilst still maintaining type-safety.
 
 Let's introduce this by refactoring our tests.
 
@@ -379,7 +385,7 @@ This kind of approach of using interfaces to declare **only what you need** is v
 
 Now that you have some understanding of structs we can now introduce "table driven tests"
 
-Table driven tests are useful when you want to build a list of test cases that can be tested in the same manner.
+[Table driven tests](https://github.com/golang/go/wiki/TableDrivenTests) are useful when you want to build a list of test cases that can be tested in the same manner.
 
 ```go
 func TestArea(t *testing.T) {
@@ -403,7 +409,7 @@ func TestArea(t *testing.T) {
 
 ```
 
-The only new syntax here is creating an "anonymous struct". We are declaring a slice of structs by using `[]struct` with two fields, the `shape` and the `want`. Then we fill the array with cases.
+The only new syntax here is creating an "anonymous struct", areaTests. We are declaring a slice of structs by using `[]struct` with two fields, the `shape` and the `want`. Then we fill the array with cases.
 
 We then iterate over them just like we do any other slice, using the struct fields to run our tests.
 
@@ -505,9 +511,9 @@ So far you've only been shown one syntax for creating instances of structs `MySt
 Let's see what looks like
 
 ```go
-{shape: Rectangle{Width: 12, Height: 6}, hasArea: 72.0},
-{shape: Circle{Radius: 10}, hasArea: 314.1592653589793},
-{shape: Triangle{Base: 12, Height: 6}, hasArea: 36.0,
+		{shape: Rectangle{Width: 12, Height: 6}, want: 72.0},
+		{shape: Circle{Radius: 10}, want: 314.1592653589793},
+		{shape: Triangle{Base: 12, Height: 6}, want: 36.0},
 ```
 
 In [Test-Driven Development by Example](https://g.co/kgs/yCzDLF) Kent Beck refactors some tests to a point and asserts
@@ -516,7 +522,7 @@ In [Test-Driven Development by Example](https://g.co/kgs/yCzDLF) Kent Beck refac
 
 (emphasis mine)
 
-Now our tests (at least the list of cases) make assertions of truth about shapes and their areas. 
+Now our tests (at least the list of cases) make assertions of truth about shapes and their areas.
 
 #### Make sure your test output is helpful
 
@@ -538,7 +544,7 @@ By wrapping each case in a `t.Run` you will have clearer test output on failures
 
 And you can run specific tests within your table with `go test -run TestArea/Rectangle`
 
-Here is our final test code which captures this 
+Here is our final test code which captures this
 
 ```go
 func TestArea(t *testing.T) {
