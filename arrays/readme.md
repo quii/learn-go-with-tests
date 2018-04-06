@@ -31,7 +31,7 @@ It is sometimes useful to also print the inputs to the function in the error mes
 
 [Read more about the format strings](https://golang.org/pkg/fmt/)
 
-## Try and run the test
+## Try to run the test
 
 By running `go test` the compiler will fail with `./sum_test.go:10:15: undefined: Sum`
 
@@ -65,13 +65,13 @@ To get the value out of an array at a particular index, just use `array[index]` 
 
 #### A note on source control
 
-At this point if you are using source control (which you should!) I would `commit` the code as it is. We have working software backed by a test. 
+At this point if you are using source control (which you should!) I would `commit` the code as it is. We have working software backed by a test.
 
 I _wouldn't_ push to master though, because I plan to refactor next. It is nice to commit at this point in case you somehow get into a mess with refactoring - you can always go back to the working version.
 
 ## Refactor
 
-Let's introduce `range` to help clean up our code
+Let's introduce [`range`](https://gobyexample.com/range) to help clean up our code
 
 ```go
 func Sum(numbers [5]int) int {
@@ -83,7 +83,7 @@ func Sum(numbers [5]int) int {
 }
 ```
 
-`range` lets you iterate over an array. Every time it is called it returns two values, the index and the value. We are choosing to ignore the index value by using `_`
+`range` lets you iterate over an array. Every time it is called it returns two values, the index and the value. We are choosing to ignore the index value by using `_` [blank identifier](https://golang.org/doc/effective_go.html#blank).
 
 #### Back to source control
 
@@ -91,9 +91,9 @@ Now we are happy with the code I would amend the previous commit so we only chec
 
 ### Arrays and their type
 
-An interesting property of arrays is the size is encoded in its type. If you try and pass an `[4]int` into a function that expects `[5]int`, it won't compile. They are different types so it's just the same as trying to pass a `string` into a function that wants an `int`.
+An interesting property of arrays is the size is encoded in its type. If you try to pass an `[4]int` into a function that expects `[5]int`, it won't compile. They are different types so it's just the same as trying to pass a `string` into a function that wants an `int`.
 
-You may be thinking it's quite cumbersome that arrays are fixed length and most of the time you probably won't be using them! 
+You may be thinking it's quite cumbersome that arrays are fixed length and most of the time you probably won't be using them!
 
 Go has _slices_ which do not encode the size of the collection and instead can have any size.
 
@@ -101,9 +101,9 @@ The next requirement will be to sum collections of varying sizes.
 
 ## Write the test first
 
-We will now use the slice type which allows us to have collections of any size. The syntax is very similar to arrays, you just omit the size when declaring them
+We will now use the [slice type](https://golang.org/doc/effective_go.html#slices) which allows us to have collections of any size. The syntax is very similar to arrays, you just omit the size when declaring them
 
-`mySlice := []int{1,2,3}` rather than `mySlice := [3]int{1,2,3}`
+`mySlice := []int{1,2,3}` rather than `myArray := [3]int{1,2,3}`
 
 ```go
 func TestSum(t *testing.T) {
@@ -132,6 +132,7 @@ func TestSum(t *testing.T) {
 
 }
 ```
+
 ## Try and run the test
 
 This does not compile
@@ -145,7 +146,7 @@ The problem here is we can either
 - Break the existing API by changing the argument to `Sum` to be a slice rather than an array. When we do this we will know we have potentially ruined someone's day because our _other_ test will not compile! 
 - Create a new function
 
-In our case, no-one else is using our function so rather than having two functions to maintain let's just have one. 
+In our case, no-one else is using our function so rather than having two functions to maintain let's just have one.
 
 ```go
 func Sum(numbers []int) int {
@@ -157,7 +158,7 @@ func Sum(numbers []int) int {
 }
 ```
 
-If you try and run the tests they will still not compile, you will have to change the first test to pass in a slice rather than an array. 
+If you try to run the tests they will still not compile, you will have to change the first test to pass in a slice rather than an array.
 
 ## Write enough code to make it pass
 
@@ -199,15 +200,15 @@ It is important to question the value of your tests. It should not be a goal to 
 
 In our case, you can see that having two tests for this function is redundant. If it works for a slice of one size it's very likely it'll work for a slice of any size (within reason).
 
-Go's built-in testing toolkit features a coverage tool, which can help identify areas of your code you have not covered. I do want to stress that having 100% coverage should not be your goal, it's just a tool to give you an idea of your coverage. If you have been strict with TDD it's quite likely you'll have close to 100% coverage anyway.
+Go's built-in testing toolkit features a [coverage tool](https://blog.golang.org/cover), which can help identify areas of your code you have not covered. I do want to stress that having 100% coverage should not be your goal, it's just a tool to give you an idea of your coverage. If you have been strict with TDD, it's quite likely you'll have close to 100% coverage anyway.
 
-Try running 
+Try running
 
 `go test -cover`
 
-You should see 
+You should see
 
-```
+```sh
 PASS
 coverage: 100.0% of statements
 ```
@@ -216,13 +217,13 @@ Now delete one of the tests and check the coverage again.
 
 Now that we are happy we have a well tested function you should commit your great work before taking on the next challenge.
 
-We need a new function called `SumAll` which will take a varying number of slices, returning a new slice containing the totals for each slice pass in. 
+We need a new function called `SumAll` which will take a varying number of slices, returning a new slice containing the totals for each slice pass in.
 
 For example
 
 `SumAll([]int{1,2}, []int{0,9})` would return `[]int{3, 9}`
 
-or 
+or
 
 `SumAll([]int{1,1,1})` would return `[]int{3}`
 
@@ -248,7 +249,7 @@ func TestSumAll(t *testing.T)  {
 
 We need to define SumAll according to what our test wants.
 
-Go can let you write _variadic functions_ that can take a variable number of arguments.
+Go can let you write [_variadic functions_](https://gobyexample.com/variadic-functions) that can take a variable number of arguments.
 
 ```go
 func SumAll(numbersToSum ...[]int) (sums []int) {
@@ -256,11 +257,11 @@ func SumAll(numbersToSum ...[]int) (sums []int) {
 }
 ```
 
-Try and compile but our tests still don't compile! 
+Try to compile but our tests still don't compile!
 
 `./sum_test.go:26:9: invalid operation: got != want (slice can only be compared to nil)`
 
-Go does not let you use equality operators with slices. You _could_ write a function to iterate over each `got` and `want` slice and check their values but for convenience sake we can use `reflect.DeepEqual` which is useful for seeing if _any_ two variables are the same.
+Go does not let you use equality operators with slices. You _could_ write a function to iterate over each `got` and `want` slice and check their values but for convenience sake we can use [`reflect.DeepEqual`](https://golang.org/pkg/reflect/#DeepEqual) which is useful for seeing if _any_ two variables are the same.
 
 ```go
 func TestSumAll(t *testing.T)  {
@@ -313,7 +314,7 @@ func SumAll(numbersToSum ...[]int) []int {
 }
 ```
 
-Lots of new things to learn! 
+Lots of new things to learn!
 
 There's a new way to create a slice. `make` allows you to create a slice with a starting capacity of the `len` of the `numbersToSum` we need to work through.
 
@@ -323,9 +324,9 @@ The tests should now pass
 
 ## Refactor
 
-As mentioned, slices have a capacity. If you have a slice with a capacity of 2 and try and do `mySlice[10] = 1` you will get a _runtime_ error. 
+As mentioned, slices have a capacity. If you have a slice with a capacity of 2 and try to do `mySlice[10] = 1` you will get a _runtime_ error.
 
-However you can use the `append` function which takes a slice and a new value, returning a new slice with all the items in it.
+However, you can use the `append` function which takes a slice and a new value, returning a new slice with all the items in it.
 
 ```go
 func SumAll(numbersToSum ...[]int) []int {
@@ -420,7 +421,7 @@ panic: runtime error: slice bounds out of range [recovered]
 	panic: runtime error: slice bounds out of range
 ```
 
-Oh no! It's important to note the test _has compiled_, it is a runtime error. Compile time errors are our friend because they help us write software that works, runtime errors are our enemies because they affect our users. 
+Oh no! It's important to note the test _has compiled_, it is a runtime error. Compile time errors are our friend because they help us write software that works, runtime errors are our enemies because they affect our users.
 
 ## Write enough code to make it pass
 
@@ -469,6 +470,11 @@ func TestSumAllTails(t *testing.T) {
 ```
 
 A handy side-effect of this is this adds a little type-safety to our code. If a silly developer adds a new test with `checkSums(t, got, "dave")` the compiler will stop them in their tracks.
+
+```sh
+$ go test
+./sum_test.go:52:21: cannot use "dave" (type string) as type []int in argument to checkSums
+```
 
 ## Wrapping up
 
