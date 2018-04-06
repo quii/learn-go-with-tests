@@ -59,11 +59,15 @@ func Repeat(character string) string {
 }
 ```
 
-Run the test and it should pass. 
+Unlike other languages like C, Java, or JavaScript there are no parentheses surrounding the three components of the for statement and the braces { } are always required.
+
+Run the test and it should pass.
+
+Additional variants of the for loop are described [here](https://gobyexample.com/for).
 
 ## Refactor
 
-Now it's time to refactor and introduce another construct `+=`
+Now it's time to refactor and introduce another construct `+=` assignment operator.
 
 ```go
 const repeatCount = 5
@@ -77,11 +81,11 @@ func Repeat(character string) string {
 }
 ```
 
-`+=` adds a value to another. It works other types like integers.
+`+=` the Add AND assignment operator, adds the right operand to the left operand and assigns the result to left operand. It works with other types like integers.
 
 ### Benchmarking
 
-Writing benchmarks in Go is another first-class feature of the language and it is very similar to writing tests. 
+Writing [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks) in Go is another first-class feature of the language and it is very similar to writing tests.
 
 ```go
 func BenchmarkRepeat(b *testing.B) {
@@ -95,7 +99,7 @@ You'll see the code is very similar to a test.
 
 The `testing.B` gives you access to the cryptically named `b.N`. 
 
-When the benchmark is run the code is ran `b.N` times, and measures how long it takes. 
+When the benchmark is run the code is ran `b.N` times, and measures how long it takes.
 
 The amount of times the code is ran shouldnt matter to you, the framework will determine what is a "good" value for that to let you have some decent results.
 
@@ -110,6 +114,8 @@ PASS
 ```
 
 What that means is our function takes 136 nanoseconds to run (on my computer). Which is pretty ok!
+
+_NOTE_ by default Benchmarks are run sequentially.
 
 ## Practice exercises
 
