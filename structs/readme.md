@@ -1,6 +1,6 @@
 # Structs, methods and interfaces
 
-Suppose that we need some geometry code to calculate the perimeter of a rectangle given a height and width. We can write a `Perimeter(width float64, height float64)` function, where `float64` is for floating point numbers like `123.45`
+Suppose that we need some geometry code to calculate the perimeter of a rectangle given a height and width. We can write a `Perimeter(width float64, height float64)` function, where `float64` is for floating-point numbers like `123.45`
 
 The TDD cycle should be pretty familiar to you by now.
 
@@ -19,7 +19,7 @@ func TestPerimeter(t *testing.T) {
 
 Notice the new format string? The `f` is for our `float64` and the `.2` means print 2 decimal places.
 
-## Try and run the test
+## Try to run the test
 
 `./shapes_test.go:6:9: undefined: Perimeter`
 
@@ -43,7 +43,7 @@ func Perimeter(width float64, height float64) float64 {
 
 So far, so easy. Now let's create a function called `Area(width, height float64)` which returns the area of a rectangle.
 
-Try and do it yourself, following the TDD cycle.
+Try to do it yourself, following the TDD cycle.
 
 You should end up with tests like this
 
@@ -83,7 +83,7 @@ func Area(width float64, height float64) float64 {
 
 Our code does the job, but it doesn't contain anything explicit about rectangles. An unwary developer might try to supply the width and height of a triangle to these functions without realising they will return the wrong answer.
 
-We could just give the functions more specific names like `RectangleArea`. A neater solution is to define our own _type_ called `Rectangle` which encapsulates this concept for us. 
+We could just give the functions more specific names like `RectangleArea`. A neater solution is to define our own _type_ called `Rectangle` which encapsulates this concept for us.
 
 We can create a simple type using a **struct**. A struct is just a named collection of fields where you can store data.
 
@@ -96,7 +96,7 @@ type Rectangle struct {
 }
 ```
 
-Now let's refactor the tests to use `Rectangle` instead of plain `float64`s.
+Now lets refactor the tests to use `Rectangle` instead of plain `float64`s.
 
 ```go
 func TestPerimeter(t *testing.T) {
@@ -128,7 +128,7 @@ Remember to run your tests before attempting to fix, you should get a helpful er
 	want (float64, float64)
 ```
 
-You can access the fields of a struct with the syntax of `myStruct.field`. 
+You can access the fields of a struct with the syntax of `myStruct.field`.
 
 Change the two functions to fix the test.
 
@@ -174,7 +174,7 @@ func TestArea(t *testing.T) {
 }
 ```
 
-## Try and run the test
+## Try to run the test
 
 `./shapes_test.go:28:13: undefined: Circle`
 
@@ -188,7 +188,7 @@ type Circle struct {
 }
 ```
 
-Now try and run the tests again
+Now try to run the tests again
 
 `./shapes_test.go:29:14: cannot use circle (type Circle) as type Rectangle in argument to Area`
 
@@ -206,11 +206,11 @@ But you cannot in Go
 We have two choices
 
 - You can have functions with the same name declared in different _packages_. So we could create our `Area(Circle)` in a new package, but that feels overkill here
-- We can define _methods_ on our newly defined types instead. 
+- We can define _methods_ on our newly defined types instead.
 
 ### What are methods?
 
-So far we have only been writing *functions* but we have been using some methods. When we call `t.Errorf` we are calling the method `ErrorF` on the instance of our `t` (`testing.T`). 
+So far we have only been writing *functions* but we have been using some methods. When we call `t.Errorf` we are calling the method `ErrorF` on the instance of our `t` (`testing.T`).
 
 Methods are very similar to functions but they are called by invoking them on an instance of a particular type. Where you can just call functions wherever you like, such as `Area(rectangle)` you can only call methods on "things".
 
@@ -242,7 +242,7 @@ func TestArea(t *testing.T) {
 }
 ```
 
-If we try to run the tests we get
+If we try to run the tests, we get
 
 ```
 ./shapes_test.go:19:19: rectangle.Area undefined (type Rectangle has no field or method Area)
@@ -251,7 +251,7 @@ If we try to run the tests we get
 
 > type Circle has no field or method Area
 
-I would like to reiterate how great the compiler is here. It is so important to take the time to slowly read the error messages you get, it will help you in the long run. 
+I would like to reiterate how great the compiler is here. It is so important to take the time to slowly read the error messages you get, it will help you in the long run.
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
@@ -278,11 +278,11 @@ func (c Circle) Area() float64  {
 
 The syntax for declaring methods is almost the same as functions and that's because they're so similar. The only difference is the syntax of the method receiver `func (receiverName RecieverType) MethodName(args)`.
 
-When your method is called on a variable of that type, you get your reference to it's data via the `receiverName` variable. In many other programming languages this is done implicitly and you access the receiver via `this`.
+When your method is called on a variable of that type, you get your reference to its data via the `receiverName` variable. In many other programming languages this is done implicitly and you access the receiver via `this`.
 
 It is a convention in Go to have the receiver variable be the first letter of the type.
 
-If you try and re-run the tests they should now compile and give you some failing output
+If you try to re-run the tests they should now compile and give you some failing output
 
 ## Write enough code to make it pass
 
@@ -306,13 +306,13 @@ func (c Circle) Area() float64  {
 
 ## Refactor
 
-There is some duplication in our tests. 
+There is some duplication in our tests.
 
-All we want to do is take a collection of _shapes_, call the `Area()` method on them and then check the result. 
+All we want to do is take a collection of _shapes_, call the `Area()` method on them and then check the result.
 
-We want to be able to write some kind of `checkArea` function that we can pass both `Rectangle`s and `Circle`s to, but fail to compile if we try and pass in something that isn't a shape.
+We want to be able to write some kind of `checkArea` function that we can pass both `Rectangle`s and `Circle`s to, but fail to compile if we try to pass in something that isn't a shape.
 
-With Go we can codify this intent with **interfaces**. 
+With Go, we can codify this intent with **interfaces**.
 
 Interfaces are a very powerful concept in statically typed languages like Go because they allow you to make functions that can be used with different types and create highly-decoupled code whilst still maintaining type-safety.
 
@@ -342,7 +342,7 @@ func TestArea(t *testing.T) {
 }
 ```
 
-We are creating a helper function like we have in other exercises but this time we are asking for a `Shape` to be passed in. If we try and call this with something that isn't a shape then it will not compile.
+We are creating a helper function like we have in other exercises but this time we are asking for a `Shape` to be passed in. If we try to call this with something that isn't a shape, then it will not compile.
 
 How does something become a shape? We just tell Go what a `Shape` is using an interface declaration
 
@@ -351,9 +351,10 @@ type Shape interface {
 	Area() float64
 }
 ```
+
 We're creating a new `type` just like we did with `Rectangle` and `Circle` but this time it is an `interface` rather than a `struct`.
 
-Once you add this to the code, the tests will pass. 
+Once you add this to the code, the tests will pass.
 
 ### Wait, what?
 
@@ -366,11 +367,11 @@ But in our case
 - `string` does not have such a method, so it doesn't satisfy the interface
 - etc.
 
-In Go **interface resolution is implicit**. If the type you pass in matches what the interface is asking for, it will compile. 
+In Go **interface resolution is implicit**. If the type you pass in matches what the interface is asking for, it will compile.
 
 ### Decoupling
 
-Notice how our helper does not need to concern itself with whether the shape is a `Rectangle` or a `Circle` or a `Triangle`. By declaring an interface the helper is _decoupled_ from the concrete types and just has the method it needs to do it's job. 
+Notice how our helper does not need to concern itself with whether the shape is a `Rectangle` or a `Circle` or a `Triangle`. By declaring an interface the helper is _decoupled_ from the concrete types and just has the method it needs to do its job.
 
 This kind of approach of using interfaces to declare **only what you need** is very important in software design and will be covered in more detail in later sections.
 
@@ -402,19 +403,19 @@ func TestArea(t *testing.T) {
 
 ```
 
-The only new syntax here is creating an "anonymous struct". We are declaring a slice of structs by using `[]struct` with two fields, the `shape` and the `want`. Then we fill the array with cases. 
+The only new syntax here is creating an "anonymous struct". We are declaring a slice of structs by using `[]struct` with two fields, the `shape` and the `want`. Then we fill the array with cases.
 
 We then iterate over them just like we do any other slice, using the struct fields to run our tests.
 
-You can see how it would be very easy for a developer to introduce a new shape, implement `Area` and then add it to the test cases. In addition if a bug is found with `Area` it is very easy to add a new test case to exercise it before fixing it.
+You can see how it would be very easy for a developer to introduce a new shape, implement `Area` and then add it to the test cases. In addition, if a bug is found with `Area` it is very easy to add a new test case to exercise it before fixing it.
 
 Table based tests can be a great item in your toolbox but be sure that you have a need for the extra noise in the tests. If you wish to test various implementations of an interface, or if the data being passed in to a function has lots of different requirements that need testing then they are a great fit.
 
-Let's demonstrate all this by adding another shape and testing it; a triangle. 
+Let's demonstrate all this by adding another shape and testing it; a triangle.
 
 ## Write the test first
 
-Adding a new test for our new shape is very easy. Just add `{Triangle{12, 6}, 36.0},` to our list. 
+Adding a new test for our new shape is very easy. Just add `{Triangle{12, 6}, 36.0},` to our list.
 
 ```go
 func TestArea(t *testing.T) {
@@ -438,7 +439,7 @@ func TestArea(t *testing.T) {
 }
 ```
 
-## Try and run the test
+## Try to run the test
 
 Remember, keep trying to run the test and let the compiler guide you toward a solution.
 
@@ -462,7 +463,7 @@ Try again
 	Triangle does not implement Shape (missing Area method)
 ```
 
-It's telling us we cant use a Triangle as a shape because it does not have an `Area()` method, so add an empty implementation to get the test working
+It's telling us we cannot use a Triangle as a shape because it does not have an `Area()` method, so add an empty implementation to get the test working
 
 ```go
 func (c Triangle) Area() float64 {
@@ -497,7 +498,7 @@ When you scan this
 {Triangle{12, 6}, 36.0},
 ```
 
-It's not immediately clear what all the numbers represent and you should be aiming for your tests to easily understood. 
+It's not immediately clear what all the numbers represent and you should be aiming for your tests to easily understood.
 
 So far you've only been shown one syntax for creating instances of structs `MyStruct{val1, val2}` but you can optionally name the fields.
 
@@ -525,7 +526,7 @@ We knew this was in relation to `Triangle` because we were just working with it,
 
 We can change our error message `%#v got %.2f want %.2f`. `%#v` format string will print out our struct with the values in it's field, so the developer can see at a glance the properties that are being tested.
 
-One final tip with table driven tests is to use `t.Run`. 
+One final tip with table driven tests is to use `t.Run`.
 
 By wrapping each case in a `t.Run` you will have clearer test output on failures as it will print the name of the case
 
@@ -577,6 +578,6 @@ This was more TDD practice, iterating over our solutions to basic mathematic pro
 
 This was an important chapter because we are now starting to define our own types. In statically typed languages like Go, being able to design your own types is essential for building software that is easy to understand, to piece together and to test. 
 
-Interfaces are a great tool for hiding complexity away from other parts of the system. In our case our test helper _code_ did not need to know the exact shape it was asserting on, only how to "ask" for it's area. 
+Interfaces are a great tool for hiding complexity away from other parts of the system. In our case our test helper _code_ did not need to know the exact shape it was asserting on, only how to "ask" for it's area.
 
-As you become more familiar with Go you start to see the real strength of interfaces and the standard library. You'll learn about interfaces defined in the standard library that are used _everywhere_ and by implementing them against your own types you can very quickly re-use a lot of great functionality. 
+As you become more familiar with Go you start to see the real strength of interfaces and the standard library. You'll learn about interfaces defined in the standard library that are used _everywhere_ and by implementing them against your own types you can very quickly re-use a lot of great functionality.
