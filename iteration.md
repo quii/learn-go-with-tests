@@ -14,12 +14,12 @@ package iteration
 import "testing"
 
 func TestRepeat(t *testing.T) {
-	repeated := Repeat("a")
-	expected := "aaaaa"
-	
-	if repeated != expected {
-		t.Errorf("expected '%s' but got '%s'", expected, repeated)
-	}
+    repeated := Repeat("a")
+    expected := "aaaaa"
+
+    if repeated != expected {
+        t.Errorf("expected '%s' but got '%s'", expected, repeated)
+    }
 }
 ```
 
@@ -37,7 +37,7 @@ All you need to do right now is enough to make it compile so you can check your 
 package iteration
 
 func Repeat(character string) string  {
-	return ""
+    return ""
 }
 ```
 
@@ -51,11 +51,11 @@ The `for` syntax is very unremarkable and follows most C-like languages.
 
 ```go
 func Repeat(character string) string {
-	var repeated string
-	for i := 0; i < 5; i++ {
-		repeated = repeated + character
-	}
-	return repeated
+    var repeated string
+    for i := 0; i < 5; i++ {
+        repeated = repeated + character
+    }
+    return repeated
 }
 ```
 
@@ -73,11 +73,11 @@ Now it's time to refactor and introduce another construct `+=` assignment operat
 const repeatCount = 5
 
 func Repeat(character string) string {
-	var repeated string
-	for i := 0; i < repeatCount; i++ {
-		repeated += character
-	}
-	return repeated
+    var repeated string
+    for i := 0; i < repeatCount; i++ {
+        repeated += character
+    }
+    return repeated
 }
 ```
 
@@ -89,15 +89,15 @@ Writing [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks) in Go is an
 
 ```go
 func BenchmarkRepeat(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Repeat("a")
-	}
+    for i := 0; i < b.N; i++ {
+        Repeat("a")
+    }
 }
 ```
 
 You'll see the code is very similar to a test.
 
-The `testing.B` gives you access to the cryptically named `b.N`. 
+The `testing.B` gives you access to the cryptically named `b.N`.
 
 When the benchmark is run the code is ran `b.N` times, and measures how long it takes.
 
@@ -105,26 +105,27 @@ The amount of times the code is ran shouldnt matter to you, the framework will d
 
 To run the benchmarks do `go test -bench=.`
 
-```
+```text
 goos: darwin
 goarch: amd64
 pkg: github.com/quii/learn-go-with-tests/for/v4
-10000000	       136 ns/op
+10000000           136 ns/op
 PASS
 ```
 
-What that means is our function takes 136 nanoseconds to run (on my computer). Which is pretty ok!
+What that means is our function takes 136 nanoseconds to run \(on my computer\). Which is pretty ok!
 
 _NOTE_ by default Benchmarks are run sequentially.
 
 ## Practice exercises
 
-- Change the test so a caller can specify how many times the character is repeated and then fix the code
-- Write `ExampleRepeat` to document your function
-- Have a look through the [the strings package](https://golang.org/pkg/strings)  package. Find functions you think could be useful and experiment with them by writing tests like we have here. Investing time learning the standard library will really pay off over time.
+* Change the test so a caller can specify how many times the character is repeated and then fix the code
+* Write `ExampleRepeat` to document your function
+* Have a look through the [the strings package](https://golang.org/pkg/strings)  package. Find functions you think could be useful and experiment with them by writing tests like we have here. Investing time learning the standard library will really pay off over time.
 
 ## Wrapping up
 
-- More TDD practice
-- Learned `for`.
-- Learned how to write benchmarks
+* More TDD practice
+* Learned `for`.
+* Learned how to write benchmarks
+

@@ -1,11 +1,13 @@
-# Summary
+# Table of contents
 
-* [Introduction](gb-readme.md)
-* [Hello, World](hello-world/readme.md)
-* [Integers](integers/readme.md)
-* [Iteration](for/readme.md)
-* [Arrays and slices](arrays/readme.md)
-* [Structs, methods & interfaces](structs/readme.md)
-* [Pointers & errors](pointers/readme.md)
-* [Dependency Injection](di/readme.md)
-* [Contributing](CONTRIBUTING.md)
+* [Introduction](README.md)
+* [Introduction](introduction.md)
+* [Hello, World](hello-world.md)
+* [Integers](integers.md)
+* [Iteration](iteration.md)
+* [Arrays and slices](arrays-and-slices.md)
+* [Structs, methods & interfaces](structs-methods-and-interfaces.md)
+* [Pointers & errors](pointers-and-errors.md)
+* [Dependency Injection](dependency-injection.md)
+* [Contributing](contributing.md)
+
