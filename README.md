@@ -4,6 +4,8 @@ _Or learn test-driven development with Go_
 
 ![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)
 
+[You can read this on Gitbook](https://quii.gitbook.io/learn-go-with-tests)
+
 ## Why
 
 * Explore the Go language by writing tests
@@ -12,19 +14,19 @@ _Or learn test-driven development with Go_
 
 ## Table of contents
 
-If there's no link, it's not done yet! [why not contribute?](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/contributing.md)
+If there's no link, it's not done yet! [why not contribute?](contributing.md)
 
 ### Go fundamentals
 
 1. todo: Install Go, set up environment for productivity.
-2. [Hello, world](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/hello-world/README.md) - Declaring variables, constants, if/else statements, switch, write your first go program and write your first test. Sub-test syntax and closures.
-3. [Integers](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/integers/README.md) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
-4. [Iteration](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/for/README.md) - Learn about `for` and benchmarking.
-5. [Arrays and slices](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/arrays/README.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
-6. [Structs, methods & interfaces](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/structs/README.md) - Learn about `struct`, methods, `interface` and table driven tests.
-7. [Pointers & errors](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/pointers/README.md) - Learn about pointers and errors.
-8. [Dependency Injection](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/di/README.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
-9. [Mocking \(WIP\)](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/mocking/README.md) - Take some existing untested code and use DI with mocking to test it.
+2. [Hello, world](hello-world.md) - Declaring variables, constants, if/else statements, switch, write your first go program and write your first test. Sub-test syntax and closures.
+3. [Integers](integers.md) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
+4. [Iteration](iteration.md) - Learn about `for` and benchmarking.
+5. [Arrays and slices](arrays-and-slices.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
+6. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
+7. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.
+8. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
+9. [Mocking \(WIP\)](mocking.md) - Take some existing untested code and use DI with mocking to test it.
 10. Concurrency \(WIP\)
 
 Property based tests \(todo\)
@@ -101,5 +103,5 @@ Taking my experience of learning with a group and my own personal way I am going
 
 * Add issues or [tweet me @quii](https://twitter.com/quii)
 
-[MIT license](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/LICENSE.md)
+[MIT license](LICENSE.md)
 
