@@ -98,3 +98,5 @@ Taking my experience of learning with a group and my own personal way I am going
 ## Feedback
 
 - Add issues or [tweet me @quii](https://twitter.com/quii)
+
+[MIT license](LICENSE.md)
