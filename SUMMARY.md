@@ -1,6 +1,6 @@
 # Summary
 
-* [Introduction](README.md)
+* [Introduction](gb-readme.md)
 * [Hello, World](hello-world/readme.md)
 * [Integers](integers/readme.md)
 * [Iteration](for/readme.md)
