@@ -1,7 +1,7 @@
 # Table of contents
 
 * [Introduction](README.md)
-* [Introduction](introduction.md)
+* [Why?](introduction.md)
 * [Hello, World](hello-world.md)
 * [Integers](integers.md)
 * [Iteration](iteration.md)

@@ -1,6 +1,4 @@
-# Introduction
-
-
+# Why?
 
 ## Why
 
