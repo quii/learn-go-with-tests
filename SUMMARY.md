@@ -1,30 +1,31 @@
-
 # Table of contents
 
-* [Introduction](README.md)
-* [Why?](introduction.md)
+* [Learn Go with tests](gb-readme.md)
+* [Introduction](introduction.md)
+* Why?
 
 ## Go fundamentals
 
-* [Hello, World](hello-world.md)
-* [Integers](integers.md)
-* [Iteration](iteration.md)
-* [Arrays and slices](arrays-and-slices.md)
-* [Structs, methods & interfaces](structs-methods-and-interfaces.md)
-* [Pointers & errors](pointers-and-errors.md)
-* [Dependency Injection](dependency-injection.md)
-* [Mocking (WIP)](mocking.md)
+* [Hello, World](go-fundamentals/hello-world.md)
+* [Integers](go-fundamentals/integers.md)
+* [Iteration](go-fundamentals/iteration.md)
+* [Arrays and slices](go-fundamentals/arrays-and-slices.md)
+* [Structs, methods & interfaces](go-fundamentals/structs-methods-and-interfaces.md)
+* [Pointers & errors](go-fundamentals/pointers-and-errors.md)
+* [Dependency Injection](go-fundamentals/dependency-injection.md)
+* [Mocking \(WIP\)](go-fundamentals/mocking-wip.md)
 
 ## Standard lib essentials
 
-- [`io` (todo)](#)
-- [HTTP client (todo)](#)
-- [HTTP server (todo)](#)
-- [JSON marhshalling (todo)](#)
-- [`time` (todo)](#)
-- [Sorting (todo)](#)
+* io \(todo\)
+* HTTP client \(todo\)
+* HTTP server \(todo\)
+* JSON marhshalling \(todo\)
+* time \(todo\)
+* Sorting \(todo\)
 
 ## Meta
 
-* [Contributing](contributing.md)
-* [Chapter Template](template.md)
+* [Contributing](meta/contributing.md)
+* [Chapter Template](meta/chapter-template.md)
+
