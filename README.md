@@ -1,4 +1,4 @@
-# Introduction
+# Learn Go with tests
 
 _Or learn test-driven development with Go_
 
