@@ -1,3 +1,5 @@
 {
-    "structure.readme": "gb-readme.md"
+    "structure": {
+        "readme": "gb-readme.md" 
+    }
 }
