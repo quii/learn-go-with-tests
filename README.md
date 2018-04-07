@@ -1,4 +1,4 @@
-# Introduction
+# Learn Go with tests
 
 _Or learn test-driven development with Go_
 
@@ -14,19 +14,19 @@ _Or learn test-driven development with Go_
 
 ## Table of contents
 
-If there's no link, it's not done yet! [why not contribute?](meta/contributing.md)
+If there's no link, it's not done yet! [why not contribute?](contributing.md)
 
 ### Go fundamentals
 
 1. todo: Install Go, set up environment for productivity.
-2. [Hello, world](go-fundamentals/hello-world.md) - Declaring variables, constants, if/else statements, switch, write your first go program and write your first test. Sub-test syntax and closures.
-3. [Integers](go-fundamentals/integers.md) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
-4. [Iteration](go-fundamentals/iteration.md) - Learn about `for` and benchmarking.
-5. [Arrays and slices](go-fundamentals/arrays-and-slices.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
-6. [Structs, methods & interfaces](go-fundamentals/structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
-7. [Pointers & errors](go-fundamentals/pointers-and-errors.md) - Learn about pointers and errors.
-8. [Dependency Injection](go-fundamentals/dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
-9. [Mocking \(WIP\)](go-fundamentals/mocking-wip.md) - Take some existing untested code and use DI with mocking to test it.
+2. [Hello, world](hello-world.md) - Declaring variables, constants, if/else statements, switch, write your first go program and write your first test. Sub-test syntax and closures.
+3. [Integers](integers.md) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
+4. [Iteration](iteration.md) - Learn about `for` and benchmarking.
+5. [Arrays and slices](arrays-and-slices.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
+6. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
+7. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.
+8. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
+9. [Mocking \(WIP\)](mocking.md) - Take some existing untested code and use DI with mocking to test it.
 10. Concurrency \(WIP\)
 
 Property based tests \(todo\)
@@ -103,5 +103,5 @@ Taking my experience of learning with a group and my own personal way I am going
 
 * Add issues or [tweet me @quii](https://twitter.com/quii)
 
-[MIT license](https://github.com/quii/learn-go-with-tests/tree/d7f0a901b25a420dd918411938375a2427f82869/LICENSE.md)
+[MIT license](LICENSE.md)
 
