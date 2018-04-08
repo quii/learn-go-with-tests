@@ -119,9 +119,9 @@ gometalinter --install
 
 ## Refactoring and your tooling
 
-A big emphasis of this book is around the importance of refactoring. So many people practicing TDD forget or neglect this step. 
+A big emphasis of this book is around the importance of refactoring.
 
-Your tools can help you do bigger refactoring with confidence. 
+Your tools can help you do bigger refactoring with confidence.
 
 You should be familiar enough with your editor to perform the following with a simple key combination:
 
