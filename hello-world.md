@@ -476,7 +476,7 @@ A few new concepts:
 
 Who knew you could get so much out of `Hello, world` ?
 
-By now you should have some understanding of
+By now you should have some understanding of:
 
 ### Some of Go's syntax around
 
@@ -485,7 +485,7 @@ By now you should have some understanding of
 * `if`, `const` and `switch`
 * Declaring variables and constants
 
-### An understanding of the TDD process and _why_ the steps are important
+### The TDD process and _why_ the steps are important
 
 * _Write a failing test and see it fail_ so we know we have written a _relevant_ test for our requirements and seen that it produces an _easy to understand description of the failure_
 * Writing the smallest amount of code to make it pass so we know we have working software
