@@ -365,3 +365,20 @@ Now the test should be passing (and no longer taking 6 seconds!).
 
 ## Refactor
 
+todo
+
+
+## But isn't mocking evil?
+
+You may have heard mocking is evil. Just like anything in software development it can be used for evil, just like DRY. 
+
+People normally get in to a bad state when they dont _listen to their tests_ and _not respecting the refactoring stage_. 
+
+If your mocking code is becoming complicated or you are having to mock out lots of things to test something, you should _listen_ to that bad feeling and think about your code. Usually it is a sign of
+
+- The thing you are testing is having to do too many things. 
+- Its dependencies are too fine-grained
+
+Normally a lot of mocking points to _bad abstraction_ in your code. 
+
+**What people see here is a weakness in TDD but it is actually a strength**, more often than not poor test code is a result of bad design or put more nicely, well-designed code is easy to test. 
