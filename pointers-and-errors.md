@@ -26,9 +26,9 @@ func TestWallet(t *testing.T) {
 }
 ```
 
-In the previous example we accessed fields directly with the field name, however in our _very secure wallet_ we don't want to expose our inner state to the rest of the world. We want to control access via methods.
+In the [previous example](./structs-methods-and-interfaces.md) we accessed fields directly with the field name, however in our _very secure wallet_ we don't want to expose our inner state to the rest of the world. We want to control access via methods.
 
-## Try and run the test
+## Try to run the test
 
 `./wallet_test.go:7:12: undefined: Wallet`
 
@@ -101,7 +101,7 @@ With our career in fintech secured, run our tests and bask in the passing test
 
 Well this is confusing, our code looks like it should work, we add the new amount onto our balance and then the balance method should return the current state of it.
 
-In Go, **when you call a function or a method the arguments are **_**copied**_.
+In Go, **when you call a function or a method the arguments are** _**copied**_.
 
 When calling `func (w Wallet) Deposit(amount int)` the `w` is a copy of whatever we called the method from.
 
@@ -144,7 +144,7 @@ address of balance in test is 0xc420012260
 
 You can see that the addresses of the two balances are different. So when we change the value of the balance inside the code, we are working on a copy of what came from the test. Therefore the balance in the test is unchanged.
 
-We can fix this with _pointers_. Pointers let us _point_ to some values and then let us change them. So rather than taking a copy of the Wallet, we take a pointer to the wallet so we can change it.
+We can fix this with _pointers_. [Pointers](https://gobyexample.com/pointers) let us _point_ to some values and then let us change them. So rather than taking a copy of the Wallet, we take a pointer to the wallet so we can change it.
 
 ```go
 func (w *Wallet) Deposit(amount int) {
@@ -207,7 +207,7 @@ To make `Bitcoin` you just use the syntax `Bitcoin(999)`
 
 An interesting property of type aliasing is that you can also declare _methods_ on them. This can be very useful when you want to add some domain specific functionality on top of existing types.
 
-[Let's implement Stringer on Bitcoin](https://golang.org/pkg/fmt/#Stringer)
+Let's implement [Stringer](https://golang.org/pkg/fmt/#Stringer) on Bitcoin
 
 ```go
 type Stringer interface {
@@ -215,7 +215,7 @@ type Stringer interface {
 }
 ```
 
-This interface is defined in the `fmt` package and let's you define how your type is printed when used with the `%s` format string in prints.
+This interface is defined in the `fmt` package and lets you define how your type is printed when used with the `%s` format string in prints.
 
 ```go
 func (b Bitcoin) String() string {
@@ -279,7 +279,7 @@ func TestWallet(t *testing.T) {
 }
 ```
 
-## Try and run the test
+## Try to run the test
 
 `./wallet_test.go:26:9: wallet.Withdraw undefined (type Wallet has no field or method Withdraw)`
 
@@ -303,7 +303,7 @@ func (w *Wallet) Withdraw(amount Bitcoin) {
 
 ## Refactor
 
-There's some duplication in our tests, let's refactor that out.
+There's some duplication in our tests, lets refactor that out.
 
 ```go
 func TestWallet(t *testing.T) {
@@ -331,7 +331,7 @@ func TestWallet(t *testing.T) {
 }
 ```
 
-What should happen if you try and `Withdraw` more than is left in the account? For now, our requirement is to assume there is not an overdraft facility.
+What should happen if you try to `Withdraw` more than is left in the account? For now, our requirement is to assume there is not an overdraft facility.
 
 How do we signal a problem when using `Withdraw` ?
 
@@ -355,13 +355,13 @@ t.Run("Withdraw insufficient funds", func(t *testing.T) {
 })
 ```
 
-We want `Withdraw` to return an error _if_ you try and take out more than you have and the balance should stay the same
+We want `Withdraw` to return an error _if_ you try to take out more than you have and the balance should stay the same
 
 We then check an error has returned by failing the test if it is `nil`.
 
 `nil` is synonymous with `null` from other programming languages. Errors can be `nil` because the return type of `Withdraw` will be `error`, which is an interface. If you see a function that takes arguments or returns values that are interfaces, they can be nillable.
 
-Like `null` if you try and access a value that is `nil` it will throw a **runtime panic**. This is bad! You should make sure that you check for nils.
+Like `null` if you try to access a value that is `nil` it will throw a **runtime panic**. This is bad! You should make sure that you check for nils.
 
 ## Try and run the test
 
@@ -457,7 +457,7 @@ t.Run("Withdraw insufficient funds", func(t *testing.T) {
 
 We've introduced `t.Fatal` which will stop the test if it is called. This is because we don't want to make any more assertions on the error returned if there isn't one around. Without this the test would carry on to the next step and panic because of a nil pointer.
 
-## Try and run the test
+## Try to run the test
 
 `wallet_test.go:61: got err 'oh no' want 'cannot withdraw, insufficient funds'`
 
@@ -648,4 +648,3 @@ func assertError(t *testing.T, got error, want error) {
 * Can let you implement interfaces
 
 Pointers and errors are a big part of writing Go that you need to get comfortable with. Thankfully the compiler will _usually_ help you out if you do something wrong, just take your time and read the error.
-
