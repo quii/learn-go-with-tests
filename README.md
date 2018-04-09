@@ -18,7 +18,7 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 
 ### Go fundamentals
 
-1. todo: Install Go, set up environment for productivity.
+1. [Install Go](install-go.md) - Set up environment for productivity.
 2. [Hello, world](hello-world.md) - Declaring variables, constants, if/else statements, switch, write your first go program and write your first test. Sub-test syntax and closures.
 3. [Integers](integers.md) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
 4. [Iteration](iteration.md) - Learn about `for` and benchmarking.
