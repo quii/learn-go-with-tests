@@ -25,12 +25,17 @@ func main() {
 
 While this is a pretty trivial program, to test it fully we will need as always to take an _iterative_, _test-driven_ approach. 
 
-What do I mean by iterative? We make sure we take the smallest steps we can to have _useful software_. We dont want to spend a long time with code that will theoretically work after some hacking. 
+What do I mean by iterative? We make sure we take the smallest steps we can to have _useful software_. 
 
-- Print 5 to 1, followed by "Go!" to stdout
-- Wait a second between each
+We dont want to spend a long time with code that will theoretically work after some hacking because that's often how developers fall down rabit holes. **It's an important skill to be able to slice up requirements as small as you can so you can have _working software_.**
 
-Let's just work on the first one, writing a program which prints 5 to 1 to stdout. 
+Here's how we can divide our work up and iterate on it
+
+- Print 5 
+- Print 5 to Go!
+- Wait a second between each line
+
+Let's just work on the first one.
 
 ## Write the test first
 
@@ -57,8 +62,6 @@ We know we want our `Countdown` function to write data somewhere and `io.Writer`
 
 - In `main` we will send to `os.Stdout` so our users see the countdown printed to the terminal
 - In test we will send to `bytes.Buffer` so our tests can capture what data is being generated
-
-Notice that we're just capturing the first thing that should be printed first, it's an important skill to be able to slice up requirements as small as you can so you can have _working software_.
 
 ## Try and run the test
 
@@ -163,7 +166,7 @@ Go!`
 
 The backtick syntax is another way of creating a `string` but lets you put things like newlines which is perfect for our test.
 
-Isn't it nice that by focusing on getting our software working end-to-end that iterating on the requirements is very straightforward. By investing in getting the overall plumbing working right, we can focus on the next requirements easily.
+Isn't it nice that by focusing on getting our software working end-to-end that iterating on the requirements is very straightforward. By investing in getting the overall plumbing working right, we can focus on the next requirements easily. 
 
 ## Try and run the test
 
@@ -172,7 +175,7 @@ countdown_test.go:21: got '5' want '5
 		4
 		3
 		2
-    1
+        1
 		Go!'
 ```
 ## Write enough code to make it pass
