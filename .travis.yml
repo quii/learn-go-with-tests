@@ -5,4 +5,8 @@ go:
 
 install: true
 
-script: go test ./...
+before_script:
+  - go get github.com/golang/lint/golint
+
+script:
+  - ./build.sh

@@ -484,12 +484,12 @@ It would be really annoying for the test to fail if someone wanted to re-word th
 In Go, errors are values, so we can refactor it out into a variable and have a single source of truth for it.
 
 ```go
-var InsufficientFundsError = errors.New("cannot withdraw, insufficient funds")
+var ErrInsufficientFunds = errors.New("cannot withdraw, insufficient funds")
 
 func (w *Wallet) Withdraw(amount Bitcoin) error {
 
     if amount > w.balance {
-        return InsufficientFundsError
+        return ErrInsufficientFunds
     }
 
     w.balance -= amount
@@ -523,7 +523,7 @@ func TestWallet(t *testing.T) {
         err := wallet.Withdraw(Bitcoin(100))
 
         assertBalance(t, wallet, Bitcoin(20))
-        assertError(t, err, InsufficientFundsError)
+        assertError(t, err, ErrInsufficientFunds)
     })
 }
 
@@ -550,7 +550,7 @@ And now the test is easier to follow too.
 
 I have moved the helpers out of the main test function just so when someone opens up a file they can start reading our assertions first, rather than some helpers.
 
-Another useful property of tests is that they help us understand the _real_ usage of our code so we can make sympathetic code. We can see here that a developer can simply call our code and do an equals check to `InsufficientFundsError` and act accordingly.
+Another useful property of tests is that they help us understand the _real_ usage of our code so we can make sympathetic code. We can see here that a developer can simply call our code and do an equals check to `ErrInsufficientFunds` and act accordingly.
 
 ### Unchecked errors
 
@@ -593,7 +593,7 @@ func TestWallet(t *testing.T) {
         err := wallet.Withdraw(Bitcoin(100))
 
         assertBalance(t, wallet, Bitcoin(20))
-        assertError(t, err, InsufficientFundsError)
+        assertError(t, err, ErrInsufficientFunds)
     })
 }
 

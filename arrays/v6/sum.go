@@ -9,7 +9,7 @@ func Sum(numbers []int) int {
 	return sum
 }
 
-// SumAll calculates the respective sums of every slice passed in
+// SumAllTails calculates the respective sums of every slice passed in
 func SumAllTails(numbersToSum ...[]int) []int {
 	var sums []int
 	for _, numbers := range numbersToSum {

@@ -14,11 +14,12 @@ type Sleeper interface {
 
 // ConfigurableSleeper is an implementation of Sleeper with a defined delay
 type ConfigurableSleeper struct {
-	duration time.Duration
+	Duration time.Duration
 }
 
+// Sleep will pause execution for the defined Duration
 func (o *ConfigurableSleeper) Sleep() {
-	time.Sleep(o.duration)
+	time.Sleep(o.Duration)
 }
 
 const finalWord = "Go!"
