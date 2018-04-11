@@ -1,6 +1,12 @@
 # Integers
 
-Integers work as you would expect. Let's write an add function to try things out. Create a test file called `adder_test.go` and write this code.
+Go has builtin support for the following integer types:
+
+```uint8, uint16, uint32, uint64, int8, int16, int32 and int64```
+
+Signed integers are defined using `int` while unsigned use `uint`.
+
+Let's write an add function to try things out. Create a test file called `adder_test.go` and write this code.
 
 ## Write the test first
 
