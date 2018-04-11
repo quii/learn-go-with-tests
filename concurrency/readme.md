@@ -1,3 +1,56 @@
+
+Dave notes
+
+1.
+> They've also been sensible enough to inject the function that tests each
+> individual website, and they've given it a sensible alias: WebsiteChecker.
+
+You have to pass in a `WebsiteChecker` which takes a single URL and returns
+a boolean. This is used by the function to check all the websites.
+
+Using DI has allowed them to test the function without making real HTTP calls,
+making it reliable and fast.
+
+2.
+
+> Let's use a benchmark to test the speed of CheckWebsites
+
+Let's use a benchmark to test the speed of CheckWebsites so that we can see the
+effect of our changes.
+
+3. We kinda just dive into go routines. Perhaps explain the approach more
+broadly. “Rather than checking one website at a time, if we could check them in
+parallel that would be faster”. THEN go on to go routines and how they let you
+do things in parallel
+
+4. “With a normal function in Go”. What does this mean?
+
+5. You then repeat your concurrency blurb :D
+6. I think you need to briefly explain why you need an anon function . You can’t
+just do go foo = bar because….
+7. The parallel universe bit is good, but put a title to break it up a bit,
+there’s just a lot of text, needs some breathing space.  8.  We can see this if
+we sneak in a quick fmt.Println into the function body.  This is actually
+a smell David! Your test should just output the map on failure. Refactor the
+test so it prints the map when it fails and then you don’t need to explain as
+much. Plus you don’t need that snippet.
+
+You need a wrapping up section to summarise the new things learned and
+introduced and why its all good.
+
+Also:
+
+
+Woke up and thought "he doesnt need the length check anyway, the map check would
+be enough and would simplify matters more"
+
+like, why check the length, and the map?
+i think it's legacy from when you were returning a slice of results
+INSUFFICIENT REFACTOR STAGE
+
+---
+
+
 # Concurrency
 
 Here's the setup: a colleague has written a function, `CheckWebsites`, that
