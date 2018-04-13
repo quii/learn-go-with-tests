@@ -5,6 +5,7 @@ You have been asked to make a function called `WebsiteRacer` which takes two URL
 For this we will be using
 
 - `net/http` to make the HTTP calls.
+- `net/http/httptest` to help us test them.
 - _Dependency injection_ with _mocking_ to let us control our tests, keep them fast and test edge cases.
 - `go` routines.
 - `select` to synchronise processes. 
