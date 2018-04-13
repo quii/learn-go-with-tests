@@ -1,10 +1,11 @@
 package racer
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 )
 
+// Racer compares the response times of a and b, returning the fastest one
 func Racer(a, b string) (winner string) {
 	select {
 	case <-measureResponseTime(a):

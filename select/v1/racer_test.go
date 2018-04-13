@@ -1,9 +1,9 @@
 package racer
 
 import (
-	"testing"
-	"net/http/httptest"
 	"net/http"
+	"net/http/httptest"
+	"testing"
 	"time"
 )
 
