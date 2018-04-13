@@ -43,6 +43,8 @@ func Racer(a, b string) (winner string) {
 }
 ```
 
+`racer_test.go:25: got '', want 'http://127.0.0.1:54228'`
+
 ## Write enough code to make it pass
 
 ```go
