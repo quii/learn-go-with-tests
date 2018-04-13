@@ -520,8 +520,8 @@ have been performed because
 > [Premature optimization is the root of all evil][popt]
 > -- Donald Knuth
 
-[Arrays]: ../arrays/
-[For]: ../for/
+[Arrays]: ../arrays-and-slices.md#
+[For]: ../iteration.md#
 [DI]: ../dependency-injection.md#
 [wrf]: http://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast
 [godoc_maps]: https://blog.golang.org/go-maps-in-action
