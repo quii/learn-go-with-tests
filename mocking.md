@@ -223,11 +223,13 @@ func Countdown(out io.Writer) {
 }
 ```
 
-If you run the program it works as we want it to. The tests still pass, but they now take 6 seconds. 
-
-Not only that, but this seems like an important property of the function that we have not tested. 
+If you run the program it works as we want it to.
 
 ## Mocking
+
+The tests still pass, but they now take 6 seconds. 
+
+Not only that, but this seems like an important property of the function that we have not tested. 
 
 We have a dependency on `Sleep`ing which we need to extract so we can then control it in our tests.
 
@@ -375,13 +377,41 @@ todo
 
 You may have heard mocking is evil. Just like anything in software development it can be used for evil, just like DRY. 
 
-People normally get in to a bad state when they dont _listen to their tests_ and _not respecting the refactoring stage_. 
+People normally get in to a bad state when they don't _listen to their tests_ and _not respecting the refactoring stage_. 
 
 If your mocking code is becoming complicated or you are having to mock out lots of things to test something, you should _listen_ to that bad feeling and think about your code. Usually it is a sign of
 
 - The thing you are testing is having to do too many things. 
 - Its dependencies are too fine-grained
+- Your test is too concerned with implementation details
 
 Normally a lot of mocking points to _bad abstraction_ in your code. 
 
 **What people see here is a weakness in TDD but it is actually a strength**, more often than not poor test code is a result of bad design or put more nicely, well-designed code is easy to test. 
+
+### But mocking is still making my life hard! 
+
+Ever run into this situation?
+
+- You want to do some refactoring
+- To do this you have to end up changing lots of tests and lots of mocks
+- You question TDD and make a post on Medium titled "Mocking considered harmful"
+
+This is usually a sign of you testing too much _implementation detail_. Try to make it so your tests are testing _useful behaviour_ unless the implementation is really important to how the system runs.
+
+It is sometimes hard to know _what level_ to test exactly but here are some thought processes and rules I try to follow
+
+- **The definition of refactoring is that the code changes but the behaviour stays the same**. If you have decided to do some refactoring in theory you should be able to do make the commit without any test changes. So when writing a test ask yourself
+    - Am i testing the behaviour i want or the implementation details?
+    - If i were to refactor this code, would I have to make lots of changes to the tests?
+- Although Go lets you test private functions, I would avoid it as private functions are to do with implementation.
+
+## Wrapping up
+
+Without mocking you will live in a world of:
+
+- Important areas of your code not tested
+- Slow tests, resulting in **slow feedback loops**
+
+Whilst you can find tools to create mocks it is actually quite simple to create your own and then you reduce a level of magic and uncertainty in your codebase. 
+
