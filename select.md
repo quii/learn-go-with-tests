@@ -194,17 +194,16 @@ To do this, we're going to introduce a new construct called `select` which helps
 ```go
 func Racer(a, b string) (winner string) {
 	select {
-	case <-measureResponseTime(a):
+	case <-ping(a):
 		return a
-	case <-measureResponseTime(b):
+	case <-ping(b):
 		return b
 	}
 }
 
-func measureResponseTime(url string) chan interface{} {
+func ping(url string) chan interface{} {
 	ch := make(chan interface{})
 	go func() {
-		fmt.Println("getting", url)
 		http.Get(url)
 		ch <- true
 	}()
@@ -216,7 +215,7 @@ If you recall from the concurrency chapter, you can wait for values to be sent t
 
 What `select` lets you do is wait on _multiple_ channels. The first one to send a value "wins" and the code underneath the `case` is executed. 
 
-In our case we have defined a function `measureResponseTime` which creates a `chan interface` and returns it. `inteface` is a type in Go which means "i dont know what the type is". In our case, we don't really _care_ what the type is returned, we just want to send a signal back in the channel to say we're finished. 
+In our case we have defined a function `ping` which creates a `chan interface` and returns it. `inteface` is a type in Go which means "i don't know what the type is". In our case, we don't really _care_ what the type is returned, we just want to send a signal back in the channel to say we're finished. 
 
 Inside the same function we start a go routine which will send a signal into that channel once we have completed `http.Get(url)`
 
@@ -255,9 +254,9 @@ We've made our test servers take longer than 10s to return to exercise this scen
 ```go
 func Racer(a, b string) (winner string, error error) {
 	select {
-	case <-measureResponseTime(a):
+	case <-ping(a):
 		return a, nil
-	case <-measureResponseTime(b):
+	case <-ping(b):
 		return b, nil
 	}
 }
@@ -282,9 +281,9 @@ If you run it now after 11 seconds it will fail
 ```go
 func Racer(a, b string) (winner string, error error) {
 	select {
-	case <-measureResponseTime(a):
+	case <-ping(a):
 		return a, nil
-	case <-measureResponseTime(b):
+	case <-ping(b):
 		return b, nil
 	case <-time.After(10 * time.Second):
 		return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
@@ -292,7 +291,7 @@ func Racer(a, b string) (winner string, error error) {
 }
 ```
 
-`time.After` is a very handy function when using `select`. Although it didn't happen in our case you can potentially write code that blocks forever if the channels you're listening on never return a value. `time.After` returns a `chan` like `measureResponseTime` and will send a signal down it after the amount of time you define. 
+`time.After` is a very handy function when using `select`. Although it didn't happen in our case you can potentially write code that blocks forever if the channels you're listening on never return a value. `time.After` returns a `chan` like `ping` and will send a signal down it after the amount of time you define. 
 
 For us this is perfect, if `a` or `b` manage to return they win, but if we get to 10 seconds then our `time.After` will send a signal and we'll return an `error`
 
@@ -305,9 +304,9 @@ What we can do is make the timeout configurable so in our test we can have a ver
 ```go
 func Racer(a, b string, timeout time.Duration) (winner string, error error) {
 	select {
-	case <-measureResponseTime(a):
+	case <-ping(a):
 		return a, nil
-	case <-measureResponseTime(b):
+	case <-ping(b):
 		return b, nil
 	case <-time.After(timeout):
 		return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
@@ -333,9 +332,9 @@ func Racer(a, b string) (winner string, error error) {
 
 func ConfigurableRacer(a, b string, timeout time.Duration) (winner string, error error) {
 	select {
-	case <-measureResponseTime(a):
+	case <-ping(a):
 		return a, nil
-	case <-measureResponseTime(b):
+	case <-ping(b):
 		return b, nil
 	case <-time.After(timeout):
 		return "", fmt.Errorf("timed out waiting for %s and %s", a, b)

@@ -16,19 +16,18 @@ func Racer(a, b string) (winner string, error error) {
 // ConfigurableRacer compares the response times of a and b, returning the fastest one
 func ConfigurableRacer(a, b string, timeout time.Duration) (winner string, error error) {
 	select {
-	case <-measureResponseTime(a):
+	case <-ping(a):
 		return a, nil
-	case <-measureResponseTime(b):
+	case <-ping(b):
 		return b, nil
 	case <-time.After(timeout):
 		return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
 	}
 }
 
-func measureResponseTime(url string) chan interface{} {
+func ping(url string) chan interface{} {
 	ch := make(chan interface{})
 	go func() {
-		fmt.Println("getting", url)
 		http.Get(url)
 		ch <- true
 	}()
