@@ -368,10 +368,141 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 
 Now the test should be passing (and no longer taking 6 seconds!).
 
-## Refactor
+### Still some problems (this is just a spike right now...)
 
-todo
+There's still another important property we haven't tested. 
 
+The important thing about the function is that it:
+
+- Print N
+- Sleep
+- Print N-1
+- Sleep
+- etc
+
+Our latest change only asserts that it has slept 6 times, but those sleeps could occur out of sequence
+
+Imagine a strange refactor by an evil developer resulted in this
+
+```go
+func Countdown(out io.Writer, sleeper Sleeper) {
+	for i := countdownStart; i > 0; i-- {
+		sleeper.Sleep()
+	}
+
+	for i := countdownStart; i > 0; i-- {
+		fmt.Fprintln(out, i)
+	}
+
+	sleeper.Sleep()
+	fmt.Fprint(out, finalWord)
+}
+```
+
+Let's use spying again with a new test to check the order of operations (which is important to us) is correct. Edit your code to look like the one above so we can have a failing test.
+
+We have two different dependencies and we want to record all of their operations into one list. So we'll create one Spy for both dependencies
+
+```go
+type CountdownOperationsSpy struct {
+	Calls []string
+}
+
+func (s *CountdownOperationsSpy) Sleep() {
+	s.Calls = append(s.Calls, sleep)
+}
+
+func (s *CountdownOperationsSpy) Write(p []byte) (n int, err error) {
+	s.Calls = append(s.Calls, write)
+	return
+}
+
+const write = "write"
+const sleep = "sleep"
+```
+
+Our `CountdownOperationsSpy` implements both types of dependencies and records every call into one list. In this test we're only concerned about the order of operations, so just recording them as list of named operations is sufficient. 
+
+We can now add a subtest into our test suite.
+
+
+```go
+t.Run("sleep after every print", func(t *testing.T) {
+    spySleepPrinter := &CountdownOperationsSpy{}
+    Countdown(spySleepPrinter, spySleepPrinter)
+
+    want := []string{
+        write,
+        sleep,
+        write,
+        sleep,
+        write,
+        sleep,
+        write,
+        sleep,
+        write,
+        sleep,
+        write,
+    }
+
+    if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
+        t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
+    }
+})
+```
+
+This test should now fail with the code from before. Revert it back and the new test should pass. 
+
+We now have two tests spying on the `Sleeper` so we can now refactor our test so one is testing what is being printed and the other one is ensuring we're sleeping in between the prints. Finally we can delete our first spy as it's not used anymore. 
+
+```go
+func TestCountdown(t *testing.T) {
+
+	t.Run("prints 5 to Go!", func(t *testing.T) {
+		buffer := &bytes.Buffer{}
+		Countdown(buffer, &CountdownOperationsSpy{})
+
+		got := buffer.String()
+		want := `5
+4
+3
+2
+1
+Go!`
+
+		if got != want {
+			t.Errorf("got '%s' want '%s'", got, want)
+		}
+	})
+
+	t.Run("sleep after every print", func(t *testing.T) {
+		spySleepPrinter := &CountdownOperationsSpy{}
+		Countdown(spySleepPrinter, spySleepPrinter)
+
+		want := []string{
+			write,
+			sleep,
+			write,
+			sleep,
+			write,
+			sleep,
+			write,
+			sleep,
+			write,
+			sleep,
+			write,
+		}
+
+		if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
+			t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
+		}
+	})
+}
+```
+
+
+
+### end of spike
 
 ## But isn't mocking evil?
 
