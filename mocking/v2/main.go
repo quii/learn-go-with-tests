@@ -7,7 +7,7 @@ import (
 )
 
 const finalWord = "Go!"
-const countdownStart = 5
+const countdownStart = 3
 
 // Countdown prints a countdown from 5 to out
 func Countdown(out io.Writer) {

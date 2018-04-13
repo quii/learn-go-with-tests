@@ -2,11 +2,9 @@
 
 We'll next cover _mocking_ and it's relation to DI with a case-study. 
 
-You have been asked to write a program which will count 5 seconds, printing each number on a new line and when it reaches zero it will print "Go!" and exit. 
+You have been asked to write a program which will count 3 seconds, printing each number on a new line and when it reaches zero it will print "Go!" and exit. 
 
 ```
-5
-4
 3
 2
 1
@@ -31,8 +29,8 @@ We dont want to spend a long time with code that will theoretically work after s
 
 Here's how we can divide our work up and iterate on it
 
-- Print 5 
-- Print 5 to Go!
+- Print 3 
+- Print 3 to Go!
 - Wait a second between each line
 
 Let's just work on the first one.
@@ -48,7 +46,7 @@ func TestCountdown(t *testing.T) {
 	Countdown(buffer)
 
 	got := buffer.String()
-	want := "5"
+	want := "3"
 
 	if got != want {
 		t.Errorf("got '%s' want '%s'", got, want)
@@ -90,7 +88,7 @@ The compiler is telling you what your function signature could be, so update it.
 func Countdown(out *bytes.Buffer) {}
 ```
 
-`countdown_test.go:17: got '' want '5'`
+`countdown_test.go:17: got '' want '3'`
 
 Perfect!
 
@@ -98,7 +96,7 @@ Perfect!
 
 ```go
 func Countdown(out *bytes.Buffer) {
-	fmt.Fprint(out, "5")
+	fmt.Fprint(out, "3")
 }
 ```
 
@@ -110,7 +108,7 @@ We know that while `*bytes.Buffer` works, it would be better to use a general pu
 
 ```go
 func Countdown(out io.Writer) {
-	fmt.Fprint(out, "5")
+	fmt.Fprint(out, "3")
 }
 ```
 
@@ -128,7 +126,7 @@ import (
 )
 
 func Countdown(out io.Writer) {
-	fmt.Fprint(out, "5")
+	fmt.Fprint(out, "3")
 }
 
 func main() {
@@ -151,9 +149,7 @@ func TestCountdown(t *testing.T) {
 	Countdown(buffer)
 
 	got := buffer.String()
-	want := `5
-4
-3
+	want := `3
 2
 1
 Go!`
@@ -171,9 +167,7 @@ Isn't it nice that by focusing on getting our software working end-to-end that i
 ## Try and run the test
 
 ```
-countdown_test.go:21: got '5' want '5
-		4
-		3
+countdown_test.go:21: got '3' want '3
 		2
         1
 		Go!'
@@ -182,7 +176,7 @@ countdown_test.go:21: got '5' want '5
 
 ```go
 func Countdown(out io.Writer) {
-	for i := 5; i > 0; i-- {
+	for i := 3; i > 0; i-- {
 		fmt.Fprintln(out, i)
     }
     fmt.Fprint(out, "Go!")
@@ -197,7 +191,7 @@ There's not much to refactor other than removing some magic values.
 
 ```go
 const finalWord = "Go!"
-const countdownStart = 5
+const countdownStart = 3
 
 func Countdown(out io.Writer) {
 	for i := countdownStart; i > 0; i-- {
@@ -276,9 +270,7 @@ func TestCountdown(t *testing.T) {
 	Countdown(buffer, spySleeper)
 
 	got := buffer.String()
-	want := `5
-4
-3
+	want := `3
 2
 1
 Go!`
@@ -287,8 +279,8 @@ Go!`
 		t.Errorf("got '%s' want '%s'", got, want)
 	}
 
-	if spySleeper.Calls != 6 {
-		t.Errorf("not enough calls to sleeper, want 6 got %d", spySleeper.Calls)
+	if spySleeper.Calls != 4 {
+		t.Errorf("not enough calls to sleeper, want 4 got %d", spySleeper.Calls)
 	}
 }
 ```
@@ -372,15 +364,16 @@ Now the test should be passing (and no longer taking 6 seconds!).
 
 There's still another important property we haven't tested. 
 
-The important thing about the function is that it:
+The important thing about the function is that it sleeps before the first print and then after each one until the last, e.g:
 
-- Print N
-- Sleep
-- Print N-1
-- Sleep
+- `Sleep`
+- `Print N`
+- `Sleep`
+- `Print N-1`
+- `Sleep`
 - etc
 
-Our latest change only asserts that it has slept 6 times, but those sleeps could occur out of sequence
+Our latest change only asserts that it has slept 4 times, but those sleeps could occur out of sequence
 
 When writing tests and you're not confident you have working code, just break it! Change the code to the following
 
@@ -434,10 +427,7 @@ t.Run("sleep after every print", func(t *testing.T) {
     Countdown(spySleepPrinter, spySleepPrinter)
 
     want := []string{
-        write,
-        sleep,
-        write,
-        sleep,
+    	sleep,
         write,
         sleep,
         write,
@@ -460,14 +450,12 @@ We now have two tests spying on the `Sleeper` so we can now refactor our test so
 ```go
 func TestCountdown(t *testing.T) {
 
-	t.Run("prints 5 to Go!", func(t *testing.T) {
+	t.Run("prints 3 to Go!", func(t *testing.T) {
 		buffer := &bytes.Buffer{}
 		Countdown(buffer, &CountdownOperationsSpy{})
 
 		got := buffer.String()
-		want := `5
-4
-3
+		want := `3
 2
 1
 Go!`
@@ -482,9 +470,6 @@ Go!`
 		Countdown(spySleepPrinter, spySleepPrinter)
 
 		want := []string{
-			write,
-			sleep,
-			write,
 			sleep,
 			write,
 			sleep,

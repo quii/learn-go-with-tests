@@ -8,7 +8,7 @@ import (
 
 // Countdown prints a countdown from 5 to out
 func Countdown(out io.Writer) {
-	fmt.Fprint(out, "5")
+	fmt.Fprint(out, "3")
 }
 
 func main() {

@@ -23,16 +23,17 @@ func (o *ConfigurableSleeper) Sleep() {
 }
 
 const finalWord = "Go!"
-const countdownStart = 5
+const countdownStart = 3
 
 // Countdown prints a countdown from 5 to out with a delay between count provided by Sleeper
 func Countdown(out io.Writer, sleeper Sleeper) {
 
 	for i := countdownStart; i > 0; i-- {
-		fmt.Fprintln(out, i)
 		sleeper.Sleep()
+		fmt.Fprintln(out, i)
 	}
 
+	sleeper.Sleep()
 	fmt.Fprint(out, finalWord)
 }
 

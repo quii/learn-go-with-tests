@@ -1,9 +1,9 @@
 package main
 
 import (
-	"testing"
 	"bytes"
 	"reflect"
+	"testing"
 )
 
 func TestCountdown(t *testing.T) {
@@ -13,9 +13,7 @@ func TestCountdown(t *testing.T) {
 		Countdown(buffer, &CountdownOperationsSpy{})
 
 		got := buffer.String()
-		want := `5
-4
-3
+		want := `3
 2
 1
 Go!`
@@ -30,9 +28,6 @@ Go!`
 		Countdown(spySleepPrinter, spySleepPrinter)
 
 		want := []string{
-			write,
-			sleep,
-			write,
 			sleep,
 			write,
 			sleep,
