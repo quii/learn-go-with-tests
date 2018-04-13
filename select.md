@@ -12,7 +12,7 @@ For this we will be using
 
 ## Write the test first
 
-Let's start with something naieve to get us going.
+Let's start with something naive to get us going.
 
 ```go
 func TestRacer(t *testing.T) {
