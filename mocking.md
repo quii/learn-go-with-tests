@@ -524,14 +524,14 @@ It is sometimes hard to know _what level_ to test exactly but here are some thou
 - I feel like if a test is working with **more than 3 mocks then it is a red flag** - time for a rethink on the design
 - Use spies with caution. Spies let you see the insides of the algorithm you are writing which can be very useful but that means a tighter coupling between your test code and the implementation. **Be sure you actually care about these details if you're going to spy on them**
 
-As always, rules in software development aren't really rules and there can be exceptions.
+As always, rules in software development aren't really rules and there can be exceptions. [Uncle Bob's article of "When to mock"](https://8thlight.com/blog/uncle-bob/2014/05/10/WhenToMock.html) has some excellent pointers.
 
 ## Wrapping up
 
-Without mocking you will live in a world of:
-
-- Important areas of your code untested
-- Slow tests, resulting in **slow feedback loops**
+- **Without mocking important areas of your code will be untested**. In our case we would not be able to test that our code paused between each print but there are countless other examples. Calling a service that _can_ fail? Wanting to test your system in a particular state? It is very hard to test these scenarios without mocking.
+- Without mocks you may have to set up databases and other third parties things just to test simple business rules. You're likely to have slow tests, resulting in **slow feedback loops**.
+- By having to spin up a database or a webservice to test something you're likely to have **fragile tests** due to the unreliability of such services.
 
 Once a developer learns about mocking it becomes very easy to over-test every single facet of a system in terms of the _way it works_ rather than _what it does_. Always be mindful about **the value of your tests** and what impact they would have in future refactoring.
 
+In this post about mocking we have only covered **Spies** which are a kind of mock. There are different kind of mocks. [Uncle Bob explains the types in a very easy and short article](https://8thlight.com/blog/uncle-bob/2014/05/14/TheLittleMocker.html), go read it. 
