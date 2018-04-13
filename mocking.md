@@ -185,7 +185,7 @@ func Countdown(out io.Writer) {
 	for i := 5; i > 0; i-- {
 		fmt.Fprintln(out, i)
     }
-    fmt.Fprint(w, "Go!")
+    fmt.Fprint(out, "Go!")
 }
 ```
 
