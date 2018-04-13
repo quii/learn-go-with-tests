@@ -43,7 +43,7 @@ func Racer(a, b string) (winner string) {
 }
 ```
 
-`racer_test.go:25: got '', want 'http://127.0.0.1:54228'`
+`racer_test.go:25: got '', want 'http://www.quii.co.uk'`
 
 ## Write enough code to make it pass
 
