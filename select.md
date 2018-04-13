@@ -87,7 +87,7 @@ In the mocking and dependency injection chapters we covered how ideally we dont 
 
 In go there is a package `net/http/httptest` where you can easily create a mock http server that you can fully control.
 
-Let's change our tests to be a little more reliable. 
+Let's change our tests to use mocks we control so they will be reliable.
 
 ```go
 func TestRacer(t *testing.T) {
