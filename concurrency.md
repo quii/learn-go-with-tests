@@ -78,7 +78,7 @@ you to help speed it up.
 
 ### Write a test
 
-Let's use a benchmark to test the speed of CheckWebsites so that we can see the
+Let's use a benchmark to test the speed of `CheckWebsites` so that we can see the
 effect of our changes.
 
 ```go
@@ -445,7 +445,7 @@ we're sending a `result` struct for each call to `wc` to the `resultChannel`
 with a _send statement_. This uses the `<-` operator, taking a channel on the
 left and a value on the right:
 
-```
+```go
 // Send statement
 resultChannel <- result{u, wc(u)}
 ```
@@ -456,7 +456,7 @@ a variable. This also uses the `<-` operator, but with the two operands now
 reversed: the channel is now on the right and the variable that
 we're assigning to is on the left:
 
-```
+```go
 // Receive expression
 result := <-resultChannel
 ```
@@ -494,7 +494,7 @@ place, as well as the benchmark we wrote, allowed us to refactor `CheckWebsites`
 in a way that maintained confidence that the software was still working, while
 demonstrating that it had actually become faster.
 
-In making it faster we learned saw
+In making it faster we learned about
 
 - *goroutines*, the basic unit of concurrency in Go, which let us check more
   than one website at the same time.
@@ -502,6 +502,7 @@ In making it faster we learned saw
   that check websites.
 - *channels*, to help organize and control the communication between the
   different processes, allowing us to avoid a *race condition* bug.
+- *the race detector* which helped us debug problems with concurrent code
 
 ### Make it fast
 
