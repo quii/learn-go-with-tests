@@ -565,7 +565,7 @@ Another handy way to experiment with Go other than writing tests is the Go
 playground. You can try most things out and you can easily share your code if
 you need to ask questions. [I have made a go playground with a slice in it for you to experiment with](https://play.golang.org/p/ICCWcRGIO68)
 
-[for]: https://github.com/quii/learn-go-with-tests/tree/a73f90bff0c5e79ce2a12ed9e247769637817e5e/for/README.md
+[for]: ../iteration.md#
 [blog-slice]: https://blog.golang.org/go-slices-usage-and-internals
 [deepEqual]: https://golang.org/pkg/reflect/#DeepEqual
 [slice]: https://golang.org/doc/effective_go.html#slices
