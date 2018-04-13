@@ -389,7 +389,7 @@ Normally a lot of mocking points to _bad abstraction_ in your code.
 
 **What people see here is a weakness in TDD but it is actually a strength**, more often than not poor test code is a result of bad design or put more nicely, well-designed code is easy to test. 
 
-### But mocking is still making my life hard! 
+### But mocks and tests are still making my life hard! 
 
 Ever run into this situation?
 
@@ -402,16 +402,19 @@ This is usually a sign of you testing too much _implementation detail_. Try to m
 It is sometimes hard to know _what level_ to test exactly but here are some thought processes and rules I try to follow
 
 - **The definition of refactoring is that the code changes but the behaviour stays the same**. If you have decided to do some refactoring in theory you should be able to do make the commit without any test changes. So when writing a test ask yourself
-    - Am i testing the behaviour i want or the implementation details?
+    - Am i testing the behaviour I want or the implementation details?
     - If i were to refactor this code, would I have to make lots of changes to the tests?
 - Although Go lets you test private functions, I would avoid it as private functions are to do with implementation.
+- I feel like if a test is working with more than 3 mocks then it is a red flag - time for a rethink on the design
+
+As always, rules in software development aren't really rules and there can be exceptions.
 
 ## Wrapping up
 
 Without mocking you will live in a world of:
 
-- Important areas of your code not tested
+- Important areas of your code untested
 - Slow tests, resulting in **slow feedback loops**
 
-Whilst you can find tools to create mocks it is actually quite simple to create your own and then you reduce a level of magic and uncertainty in your codebase. 
+Once a developer learns about mocking it becomes very easy to over-test every single facet of a system in terms of the _way it works_ rather than _what it does_. Always be mindful about **the value of your tests** and what impact they would have in future refactoring.
 
