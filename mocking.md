@@ -368,7 +368,7 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 
 Now the test should be passing (and no longer taking 6 seconds!).
 
-### Still some problems (this is just a spike right now...)
+### Still some problems
 
 There's still another important property we haven't tested. 
 
@@ -382,7 +382,7 @@ The important thing about the function is that it:
 
 Our latest change only asserts that it has slept 6 times, but those sleeps could occur out of sequence
 
-Imagine a strange refactor by an evil developer resulted in this
+When writing tests and you're not confident you have working code, just break it! Change the code to the following
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
@@ -399,9 +399,11 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 }
 ```
 
-Let's use spying again with a new test to check the order of operations (which is important to us) is correct. Edit your code to look like the one above so we can have a failing test.
+If you run your tests they should still be passing.
 
-We have two different dependencies and we want to record all of their operations into one list. So we'll create one Spy for both dependencies
+Let's use spying again with a new test to check the order of operations is correct.
+
+We have two different dependencies and we want to record all of their operations into one list. So we'll create _one Spy for them both_.
 
 ```go
 type CountdownOperationsSpy struct {
@@ -421,9 +423,9 @@ const write = "write"
 const sleep = "sleep"
 ```
 
-Our `CountdownOperationsSpy` implements both types of dependencies and records every call into one list. In this test we're only concerned about the order of operations, so just recording them as list of named operations is sufficient. 
+Our `CountdownOperationsSpy` implements both types of dependencies and records every call into one slice. In this test we're only concerned about the order of operations, so just recording them as list of named operations is sufficient. 
 
-We can now add a subtest into our test suite.
+We can now add a sub-test into our test suite.
 
 
 ```go
@@ -451,7 +453,7 @@ t.Run("sleep after every print", func(t *testing.T) {
 })
 ```
 
-This test should now fail with the code from before. Revert it back and the new test should pass. 
+This test should now fail. Revert it back and the new test should pass. 
 
 We now have two tests spying on the `Sleeper` so we can now refactor our test so one is testing what is being printed and the other one is ensuring we're sleeping in between the prints. Finally we can delete our first spy as it's not used anymore. 
 
@@ -500,9 +502,7 @@ Go!`
 }
 ```
 
-
-
-### end of spike
+Finally we have our function and it's two important properties properly tested.
 
 ## But isn't mocking evil?
 
