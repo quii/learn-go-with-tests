@@ -291,7 +291,7 @@ func Racer(a, b string) (winner string, error error) {
 }
 ```
 
-`time.After` is a very handy function when using `select`. Although it didn't happen in our case you can potentially write code that blocks forever if the channels you're listening on never return a value. `time.After` returns a `chan` like `ping` and will send a signal down it after the amount of time you define. 
+`time.After` is a very handy function when using `select`. Although it didn't happen in our case you can potentially write code that blocks forever if the channels you're listening on never return a value. `time.After` returns a `chan` (like `ping`) and will send a signal down it after the amount of time you define. 
 
 For us this is perfect, if `a` or `b` manage to return they win, but if we get to 10 seconds then our `time.After` will send a signal and we'll return an `error`
 
@@ -358,7 +358,11 @@ func TestRacer(t *testing.T) {
 		fastURL := fastServer.URL
 
 		want := fastURL
-		got, _ := Racer(slowURL, fastURL)
+		got, err := Racer(slowURL, fastURL)
+		
+		if err != nil {
+			t.Fatalf("did not expect an error but got one %v", err)
+		}
 
 		if got != want {
 			t.Errorf("got '%s', want '%s'", got, want)
@@ -379,8 +383,16 @@ func TestRacer(t *testing.T) {
 }
 ```
 
+I added one final check on the first test to verify we dont get an `error`
+
 ## Wrapping up
 
 ### `select`
 
+- Helps you wait on multiple channels.
+- Sometimes you'll want to include `time.After` in one of your `cases` to prevent your system blocking forever.
+
 ### `httptest`
+
+- Convenient way of creating test servers so you can have reliable and controllable tests.
+- Uses the same interfaces as the "real" `net/http` servers which is consistent and less for you to learn
