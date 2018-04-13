@@ -1,8 +1,6 @@
 # Mocking
 
-We'll next cover _mocking_ and it's relation to DI with a case-study. 
-
-You have been asked to write a program which will count 3 seconds, printing each number on a new line and when it reaches zero it will print "Go!" and exit. 
+You have been asked to write a program which counts from 3, printing each number on a new line and when it reaches zero it will print "Go!" and exit. 
 
 ```
 3
@@ -32,8 +30,6 @@ Here's how we can divide our work up and iterate on it
 - Print 3 
 - Print 3 to Go!
 - Wait a second between each line
-
-Let's just work on the first one.
 
 ## Write the test first
 
@@ -138,7 +134,7 @@ Try and run the program and be amazed at your handywork.
 
 Yes this seems trivial but this approach is what I would recommend for any project. **Take a thin slice of functionality and make it work end-to-end, backed by tests.**
 
-Next we can make it print 4,3,2,1 and then "Go!".
+Next we can make it print 2,1 and then "Go!".
 
 ## Write the test first
 
@@ -258,9 +254,9 @@ func (s *SpySleeper) Sleep() {
 }
 ```
 
-There's nothing new to learn here, we just need to be able to _spy_ on the calls to our mock so we can check it has been called `N` times.
+_Spies_ are a kind of _mock_ which can record how a dependency is used. They can record the arguments sent in, how many times, etc. In our case, we're keeping track of how many times `Sleep()` is called so we can check it in our test.
 
-Update the tests to inject a dependency on our Spy and assert that the sleep has been called 6 times.
+Update the tests to inject a dependency on our Spy and assert that the sleep has been called 4 times.
 
 ```go
 func TestCountdown(t *testing.T) {
@@ -331,7 +327,7 @@ func (o *ConfigurableSleeper) Sleep() {
 
 I decided to make a little extra effort and make it so our real sleeper is
 configurable but you could just as easily not bother and hard-code it for
-1 second (YAGNI right?).
+1 second.
 
 We can then use it in our real application like so
 
@@ -396,7 +392,7 @@ If you run your tests they should still be passing.
 
 Let's use spying again with a new test to check the order of operations is correct.
 
-We have two different dependencies and we want to record all of their operations into one list. So we'll create _one Spy for them both_.
+We have two different dependencies and we want to record all of their operations into one list. So we'll create _one spy for them both_.
 
 ```go
 type CountdownOperationsSpy struct {
@@ -416,7 +412,7 @@ const write = "write"
 const sleep = "sleep"
 ```
 
-Our `CountdownOperationsSpy` implements both types of dependencies and records every call into one slice. In this test we're only concerned about the order of operations, so just recording them as list of named operations is sufficient. 
+Our `CountdownOperationsSpy` implements both `io.Writer` and `Sleeper`, recording every call into one slice. In this test we're only concerned about the order of operations, so just recording them as list of named operations is sufficient. 
 
 We can now add a sub-test into our test suite.
 
@@ -487,13 +483,13 @@ Go!`
 }
 ```
 
-Finally we have our function and it's two important properties properly tested.
+Finally we have our function and its 2 important properties properly tested.
 
 ## But isn't mocking evil?
 
 You may have heard mocking is evil. Just like anything in software development it can be used for evil, just like DRY. 
 
-People normally get in to a bad state when they don't _listen to their tests_ and _not respecting the refactoring stage_. 
+People normally get in to a bad state when they don't _listen to their tests_ and are _not respecting the refactoring stage_. 
 
 If your mocking code is becoming complicated or you are having to mock out lots of things to test something, you should _listen_ to that bad feeling and think about your code. Usually it is a sign of
 
@@ -510,7 +506,7 @@ Normally a lot of mocking points to _bad abstraction_ in your code.
 Ever run into this situation?
 
 - You want to do some refactoring
-- To do this you have to end up changing lots of tests and lots of mocks
+- To do this you end up changing lots of tests
 - You question TDD and make a post on Medium titled "Mocking considered harmful"
 
 This is usually a sign of you testing too much _implementation detail_. Try to make it so your tests are testing _useful behaviour_ unless the implementation is really important to how the system runs.
@@ -528,10 +524,17 @@ As always, rules in software development aren't really rules and there can be ex
 
 ## Wrapping up
 
+### More on TDD approach
+
+- When faced with less trivial examples, break the problem down into "thin vertical slices". Try to get to a point where you have _working software backed by tests_ as soon as you can, to avoid getting in rabbit holes and taking a "big bang" approach.
+- Once you have some working software it should be easier to _iterate with small steps_ until you arrive at the software you need.
+
+### Mocking
+ 
 - **Without mocking important areas of your code will be untested**. In our case we would not be able to test that our code paused between each print but there are countless other examples. Calling a service that _can_ fail? Wanting to test your system in a particular state? It is very hard to test these scenarios without mocking.
 - Without mocks you may have to set up databases and other third parties things just to test simple business rules. You're likely to have slow tests, resulting in **slow feedback loops**.
 - By having to spin up a database or a webservice to test something you're likely to have **fragile tests** due to the unreliability of such services.
 
 Once a developer learns about mocking it becomes very easy to over-test every single facet of a system in terms of the _way it works_ rather than _what it does_. Always be mindful about **the value of your tests** and what impact they would have in future refactoring.
 
-In this post about mocking we have only covered **Spies** which are a kind of mock. There are different kind of mocks. [Uncle Bob explains the types in a very easy and short article](https://8thlight.com/blog/uncle-bob/2014/05/14/TheLittleMocker.html), go read it. 
+In this post about mocking we have only covered **Spies** which are a kind of mock. There are different kind of mocks. [Uncle Bob explains the types in a very easy and short article](https://8thlight.com/blog/uncle-bob/2014/05/14/TheLittleMocker.html), go read it. In later chapters we will need to write code that depends on others for data, which is where we will show **Stubs** in action.
