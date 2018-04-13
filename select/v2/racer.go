@@ -12,8 +12,6 @@ func Racer(a, b string) (winner string) {
 	case <-measureResponseTime(b):
 		return b
 	}
-
-	return "wtf"
 }
 
 func measureResponseTime(url string) chan interface{} {

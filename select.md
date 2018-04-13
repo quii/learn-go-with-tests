@@ -28,7 +28,7 @@ func TestRacer(t *testing.T) {
 }
 ```
 
-
+We know this isn't perfect and has problems but it will get us going. It's important not to get too hung-up on getting things perfect first time.
 
 ## Try to run the test
 
@@ -197,8 +197,6 @@ func Racer(a, b string) (winner string) {
 	case <-measureResponseTime(b):
 		return b
 	}
-
-	return "wtf"
 }
 
 func measureResponseTime(url string) chan interface{} {
