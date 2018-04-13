@@ -227,9 +227,9 @@ If you run the program it works as we want it to.
 
 ## Mocking
 
-The tests still pass, but they now take 6 seconds. 
-
-Not only that, but this seems like an important property of the function that we have not tested. 
+The tests still pass and the software works as intended but we have some problems:
+- Our tests take 6 seconds to run. Every forward thinking post about software development emphasises the importance of quick feedback loops. **Slow tests ruin developer productivity**.
+- We have not tested an important property of our function. 
 
 We have a dependency on `Sleep`ing which we need to extract so we can then control it in our tests.
 
