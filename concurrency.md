@@ -334,7 +334,7 @@ dependent on the timing and sequence of events that we have no control over.
 Because we cannot control exactly when each goroutine writes to the results map,
 we are vulnerable to two goroutines writing to it at the same time.
 
-Go can help us to spot race conditions with its built in [_race detetector_][godoc_race_detector].
+Go can help us to spot race conditions with its built in [_race detector_][godoc_race_detector].
 To enable this feature, run the tests with the `race` flag: `go test -race`.
 
 You should get some output that looks like this:
@@ -522,7 +522,7 @@ have been performed because
 
 [Arrays]: ../arrays/
 [For]: ../for/
-[DI]: ../di-and-interfaces/
+[DI]: ../di.md
 [wrf]: http://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast
 [godoc_maps]: https://blog.golang.org/go-maps-in-action
 [godoc_zero_values]: https://golang.org/ref/spec#The_zero_value
