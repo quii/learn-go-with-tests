@@ -522,7 +522,7 @@ have been performed because
 
 [Arrays]: ../arrays/
 [For]: ../for/
-[DI]: ../di.md
+[DI]: ../dependency-injection.md#
 [wrf]: http://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast
 [godoc_maps]: https://blog.golang.org/go-maps-in-action
 [godoc_zero_values]: https://golang.org/ref/spec#The_zero_value
