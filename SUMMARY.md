@@ -14,6 +14,7 @@
 * [Pointers & errors](pointers-and-errors.md)
 * [Dependency Injection](dependency-injection.md)
 * [Mocking (WIP)](mocking.md)
+* [Concurrency (WIP)](concurrency.md)
 * [Select (WIP)](select.md)
 
 ## Standard lib essentials
