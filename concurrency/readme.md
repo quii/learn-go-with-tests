@@ -1,56 +1,3 @@
-
-Dave notes
-
-1.
-> They've also been sensible enough to inject the function that tests each
-> individual website, and they've given it a sensible alias: WebsiteChecker.
-
-You have to pass in a `WebsiteChecker` which takes a single URL and returns
-a boolean. This is used by the function to check all the websites.
-
-Using DI has allowed them to test the function without making real HTTP calls,
-making it reliable and fast.
-
-2.
-
-> Let's use a benchmark to test the speed of CheckWebsites
-
-Let's use a benchmark to test the speed of CheckWebsites so that we can see the
-effect of our changes.
-
-3. We kinda just dive into go routines. Perhaps explain the approach more
-broadly. “Rather than checking one website at a time, if we could check them in
-parallel that would be faster”. THEN go on to go routines and how they let you
-do things in parallel
-
-4. “With a normal function in Go”. What does this mean?
-
-5. You then repeat your concurrency blurb :D
-6. I think you need to briefly explain why you need an anon function . You can’t
-just do go foo = bar because….
-7. The parallel universe bit is good, but put a title to break it up a bit,
-there’s just a lot of text, needs some breathing space.  8.  We can see this if
-we sneak in a quick fmt.Println into the function body.  This is actually
-a smell David! Your test should just output the map on failure. Refactor the
-test so it prints the map when it fails and then you don’t need to explain as
-much. Plus you don’t need that snippet.
-
-You need a wrapping up section to summarise the new things learned and
-introduced and why its all good.
-
-Also:
-
-
-Woke up and thought "he doesnt need the length check anyway, the map check would
-be enough and would simplify matters more"
-
-like, why check the length, and the map?
-i think it's legacy from when you were returning a slice of results
-INSUFFICIENT REFACTOR STAGE
-
----
-
-
 # Concurrency
 
 Here's the setup: a colleague has written a function, `CheckWebsites`, that
@@ -72,12 +19,17 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-It returns a map of the URL checked to a boolean - `true` for a good response,
-`false` for a bad response. They've also been sensible enough to inject the
-function that tests each individual website, and they've given it a sensible
-alias: `WebsiteChecker`.
+It returns a map of each URL checked to a boolean value - `true` for a good
+response, `false` for a bad response.
 
-Here's the tests they've written:
+You also have to pass in a `WebsiteChecker` which takes a single URL and returns
+a boolean. This is used by the function to check all the websites.
+
+Using [dependency injection][DI] has allowed them to test the function without
+making real HTTP calls, making it reliable and fast.
+
+Here's the test they've written:
+
 ```go
 package concurrency
 
@@ -126,7 +78,8 @@ you to help speed it up.
 
 ### Write a test
 
-Let's use a benchmark to test the speed of `CheckWebsites`:
+Let's use a benchmark to test the speed of CheckWebsites so that we can see the
+effect of our changes.
 
 ```go
 package concurrency
@@ -174,11 +127,34 @@ Let's try and make this faster.
 
 ### Write enough code to make it pass
 
-Concurrency in Go is built up from _goroutines_. In any place where you can call
-a function, you can place the keyword `go` in front of it and the function will
-execute as a separate process to the parent process.
+Now we can finally talk about concurrency which, for the purposes of the
+following, means 'having more than one thing in progress'. This is something
+that we do naturally everyday.
 
-With a normal function in Go
+For instance, this morning I made a cup of tea. I put the kettle on and then,
+while I was waiting for it to boil, I got the milk out of the fridge, got the
+tea out of the cupboard, found my favourite mug, put the teabag into the cup and
+then, when the kettle had boiled, I put the water in the cup.
+
+What I _didn't_ do was put the kettle on and then stand there blankly staring at
+the kettle until it boiled, then do everything else once the kettle had boiled.
+
+If you can understand why it's faster to make tea the first way, then you can
+understand how we will make `CheckWebsites` faster. Instead of waiting for
+a website to respond before sending a request to the next website, we will tell
+our computer to make the next request while it is waiting.
+
+Normally in Go when we call a function `doSomething()` we wait for it to return
+(even if it has no value to return, we still wait for it to finish). We say that
+this operation is *blocking* - it makes us wait for it to finish. An operation
+that does not block in Go will run in a separate *process* called a *goroutine*.
+Think of a process as reading down the page of Go code from top to bottom, going
+'inside' each function when it gets called to read what it does. When a separate
+process starts it's like another reader begins reading inside the function,
+leaving the original reader to carry on going down the page.
+
+To tell Go to start a new goroutine we turn a function call into a `go`
+statement by putting the keyword `go` in front of it: `go doSomething()`.
 
 ```go
 package concurrency
@@ -198,30 +174,36 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-Concurrency in Go is built up from _goroutines_. In any place where you can call
-a function, you can place the keyword `go` in front of it and the function will
-execute as a separate process to the parent process.
+Because the only way to start a goroutine is to put `go` in front of a function
+call, we often use *anonymous functions* when we want to start a goroutine. An
+anonymous function literal looks just the same as a normal function declaration,
+but without a name (unsurprisingly). You can see one above in the body of the
+`for` loop.
 
-Here we are executing an anonymous function as a goroutine inside the `for` loop
-we had before. In Go, anonymous function literals look exactly the same as
-normal functions, only they don't have names (because they're anonymous).
+Anonymous functions have a number of features which make them useful, two of
+which we're using above. Firstly, they can be executed at the same time that
+the're declared - this is what the `()` at the end of the anonymous function is
+doing. Secondly they maintain access to the lexical scope they are defined in -
+all the variables that are available at the point when you declare the anonymous
+function are also available in the body of the function.
 
-The body of the function is just the same as the loop body was before. The only
-difference is that each iteration of the loop will start a new process, in
-parallel to with the current process (the `WebsiteChecker` function) each of
-which will add its result to the results map.
+The body of the anonymous function above is just the same as the loop body was
+before. The only difference is that each iteration of the loop will start a new
+goroutine, concurrent with the current process (the `WebsiteChecker` function)
+each of which will add its result to the results map.
 
 But when we run `go test`:
 
 ```sh
 --- FAIL: TestCheckWebsites (0.00s)
-        CheckWebsites_test.go:27: Wanted 3, got 0
+        CheckWebsites_test.go:31: Wanted map[http://google.com:true http://blog.gypsydave5.com:true waat://furhurterwe.geds:false], got map[]
 FAIL
 exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.014s
+FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.010s
+
 ```
 
-A quick aside into a parallel(ism) universe...
+### A quick aside into a parallel(ism) universe...
 
 You might not get this result. You might get a panic message that
 we're going to talk about in a bit. Don't worry if you got that, just keep
@@ -230,7 +212,7 @@ Up to you. Welcome to concurrency: when it's not handled correctly it's hard to
 predict what's going to happen. Don't worry - that's why we're writing tests, to
 help us know when we're handling concurrency predictably.
 
-... and we're back.
+### ... and we're back.
 
 We are caught by the original tests `WebsiteChecker` is now returning an
 empty map. What went wrong?
@@ -267,61 +249,20 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 Now when we run the tests you get (or or don't get - see above):
 
 ```sh
---- FAIL: TestCheckWebsites (2.00s)
-        CheckWebsites_test.go:27: Wanted 3, got 1
+--- FAIL: TestCheckWebsites (0.00s)
+        CheckWebsites_test.go:31: Wanted map[http://google.com:true http://blog.gypsydave5.com:true waat://furhurterwe.geds:false], got map[waat://furhurterwe.geds:false]
 FAIL
 exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        2.024s
+FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.010s
 ```
 
 This isn't great - why only one result? We might try and fix this by increasing
 the time we wait - try it if you like. It won't work. The problem here is that
-the variable `url` is reused for each iteration of the `for ...` loop - it takes
-a new value from `urls` each time. But each of our anonymous function goroutines
-have a reference to the `url` variable - they don't have their own independent
-copy. So they're _all_ (probably) writing the final value that `url` reaches.
-
-We can see this if we sneak in a quick `fmt.Println` into the function body.
-
-```go
-package concurrency
-
-import (
-	"fmt"
-	"time"
-)
-
-type WebsiteChecker func(string) bool
-
-func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
-	results := make(map[string]bool)
-
-	for _, url := range urls {
-		go func() {
-			results[url] = wc(url)
-		}()
-	}
-
-	time.Sleep(2 * time.Second)
-
-	fmt.Println(results)
-
-	return results
-}
-```
-
-```sh
-map[waat://furhurterwe.geds:false]
---- FAIL: TestCheckWebsites (2.00s)
-        CheckWebsites_test.go:27: Wanted 3, got 1
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        2.030s
-```
-
-There it is - just at the top! Each of the three goroutines in the test wrote
-exactly the same value into the map, and as the map's keys have to be unique
-each write overwrote the last.
+the variable `url` is reused for each iteration of the `for` loop - it takes
+a new value from `urls` each time. But each of our goroutines have a reference
+to the `url` variable - they don't have their own independent copy. So they're
+_all_ writing the value that `url` has at the end of the iteration - the last
+url. Which is why the one result we have is the last url.
 
 To fix this:
 
@@ -353,8 +294,7 @@ By giving each anonymous function a parameter for the url - `u` - and then
 calling the anonymous function with the `url` as the argument, we make sure that
 the value of `u` is fixed as the value of `url` for the iteration of the loop
 that we're launching the goroutine in. `u` is a copy of the value of `url`, and
-so can't be changed. This is a huge gotcha when running anonymous functions as
-goroutines, so watch out for it.
+so can't be changed.
 
 Now if you're lucky you'll get:
 
@@ -383,21 +323,21 @@ created by github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteCheck
         ... many more scary lines of text ...
 ```
 
-Errors this long tend to freak me out, but all we need to do is pay attention to
-the headline: `fatal error: concurrent map writes`. Sometimes, when we run our
-tests, two of the goroutines write to the results map at exactly the same time,
-and maps in Go don't like it when more than one thing tries to write to them at
-once.
+This is long and scary, but all we need to do is take a breath and read the
+stacktrace: `fatal error: concurrent map writes`. Sometimes, when we run our
+tests, two of the goroutines write to the results map at exactly the same time.
+Maps in Go don't like it when more than one thing tries to write to them at
+once, and so `fatal error`.
 
 This is a _race condition_, a bug that occurs when the output of our software is
 dependent on the timing and sequence of events that we have no control over.
-Because we cannot control exactly when each goroutine writes to the results, we
-are vulnerable to two goroutines writing to it at the same time.
+Because we cannot control exactly when each goroutine writes to the results map,
+we are vulnerable to two goroutines writing to it at the same time.
 
 Go can help us to spot race conditions with its built in [_race detetector_][godoc_race_detector].
 To enable this feature, run the tests with the `race` flag: `go test -race`.
 
-You should get some pretty verbose output that looks a bit like this:
+You should get some output that looks like this:
 
 ```sh
 ==================
@@ -432,9 +372,9 @@ Goroutine 7 (finished) created at:
 ==================
 ```
 
-The details are, again, hard to read - but not the headline isn't: `WARNING: DATA
-RACE` is pretty unambiguous. Reading into the body of the error we can see two
-different goroutines performing writes on a map:
+The details are, again, hard to read - but `WARNING: DATA RACE` is pretty
+unambiguous. Reading into the body of the error we can see two different
+goroutines performing writes on a map:
 
 `Write at 0x00c420084d20 by goroutine 8:`
 
@@ -450,12 +390,12 @@ and the line of code where goroutines 7 an 8 are started:
 
 `/Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11`
 
-Everything is in the stack trace - all you have to do is be patient enough to
-read it.
+Everything you need to know is printed to your terminal - all you have to do is
+be patient enough to read it.
 
 ### Channels
 
-We can solve this problem by coordinating our goroutines using _channels_.
+We can solve this data race by coordinating our goroutines using _channels_.
 Channels are a Go data structure that can both receive and send values. These
 operations, along with their details, allow communication between different
 processes.
@@ -502,8 +442,8 @@ a value.
 
 Now when we iterate over the urls, instead of writing to the `map` directly
 we're sending a `result` struct for each call to `wc` to the `resultChannel`
-with a _send statement_. This uses the `<-` operator and has the channel on the
-left, a `<-` and the value on the right:
+with a _send statement_. This uses the `<-` operator, taking a channel on the
+left and a value on the right:
 
 ```
 // Send statement
@@ -545,8 +485,46 @@ ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        2.377s
 23406615 nanoseconds - 0.023 seconds, about one hundred times as fast as
 original function. A great success.
 
+## Wrapping up
+
+This exercise has been a little lighter on the TDD than usual. In a way we've
+been taking part in one long refactoring of the `CheckWebsites` function; the
+inputs and outputs never changed, it just got faster. But the tests we had in
+place, as well as the benchmark we wrote, allowed us to refactor `CheckWebsites`
+in a way that maintained confidence that the software was still working, while
+demonstrating that it had actually become faster.
+
+In making it faster we learned saw
+
+- *goroutines*, the basic unit of concurrency in Go, which let us check more
+  than one website at the same time.
+- *anonymous functions*, which we used to start each of the concurrent processes
+  that check websites.
+- *channels*, to help organize and control the communication between the
+  different processes, allowing us to avoid a *race condition* bug.
+
+### Make it fast
+
+One formulation of an agile way of building software, often misattributed to Kent
+Beck, is:
+
+> [Make it work, make it right, make it fast][wrf]
+
+Where 'work' is making the tests pass, 'right' is refactoring the code, and
+'fast' is optimizing the code to make it, for example, run quickly. We can only
+'make it fast' once we've made it work and made it right. We were lucky that the
+code we were given was already demonstrated to be working, and didn't need to be
+refactored. We should never try to 'make it fast' before the other two steps
+have been performed because
+
+> [Premature optimization is the root of all evil][popt]
+> -- Donald Knuth
+
 [Arrays]: ../arrays/
 [For]: ../for/
+[DI]: ../di-and-interfaces/
+[wrf]: http://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast
 [godoc_maps]: https://blog.golang.org/go-maps-in-action
 [godoc_zero_values]: https://golang.org/ref/spec#The_zero_value
 [godoc_race_detector]: https://blog.golang.org/race-detector
+[popt]: http://wiki.c2.com/?PrematureOptimization
