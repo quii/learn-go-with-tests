@@ -183,7 +183,7 @@ Use a `for` loop counting backwards with `i--` and use `fmt.Fprintln` to print t
 
 ## Refactor
 
-There's not much to refactor other than removing some magic values.
+There's not much to refactor other than refactoring some magic values into named constants.
 
 ```go
 const finalWord = "Go!"
@@ -218,7 +218,10 @@ If you run the program it works as we want it to.
 ## Mocking
 
 The tests still pass and the software works as intended but we have some problems:
-- Our tests take 4 seconds to run. Every forward thinking post about software development emphasises the importance of quick feedback loops. **Slow tests ruin developer productivity**.
+- Our tests take 4 seconds to run. 
+	- Every forward thinking post about software development emphasises the importance of quick feedback loops. 
+	- **Slow tests ruin developer productivity**.
+	- Imagine if the requirements get more sophisticated warranting more tests. Are we happy with 4s added to the test run for every new test of `Countdown`?
 - We have not tested an important property of our function. 
 
 We have a dependency on `Sleep`ing which we need to extract so we can then control it in our tests.
@@ -227,7 +230,7 @@ If we can _mock_ `time.Sleep` we can use _dependency injection_ to use it instea
 
 ## Write the test first
 
-Let's define our dependency
+Let's define our dependency as an interface. This lets us then use a _real_ Sleeper in `main` and a _spy sleeper_ in our tests. By using an interface our `Countdown` function is obvlivious to this and adds some flexibility for the caller.
 
 ```go
 type Sleeper interface {
@@ -352,7 +355,7 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 }
 ```
 
-Now the test should be passing (and no longer taking 4 seconds!).
+The test should pass and no longer taking 4 seconds.
 
 ### Still some problems
 
@@ -369,7 +372,7 @@ There's still another important property we haven't tested.
 
 Our latest change only asserts that it has slept 4 times, but those sleeps could occur out of sequence
 
-When writing tests and you're not confident you have working code, just break it! (make sure you have commited your changes to source control first though). Change the code to the following
+When writing tests if you're not confident that your tests are giving you sufficient confidence, just break it! (make sure you have commited your changes to source control first though). Change the code to the following
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
@@ -491,9 +494,12 @@ People normally get in to a bad state when they don't _listen to their tests_ an
 
 If your mocking code is becoming complicated or you are having to mock out lots of things to test something, you should _listen_ to that bad feeling and think about your code. Usually it is a sign of
 
-- The thing you are testing is having to do too many things. 
+- The thing you are testing is having to do too many things.
+	- Break the module apart so it does less
 - Its dependencies are too fine-grained
+	- Think about how you can consolidate some of these dependencies into one meaningful module.
 - Your test is too concerned with implementation details
+	- Favour testing expected behaviour rather than the implementation
 
 Normally a lot of mocking points to _bad abstraction_ in your code. 
 
@@ -535,4 +541,4 @@ As always, rules in software development aren't really rules and there can be ex
 
 Once a developer learns about mocking it becomes very easy to over-test every single facet of a system in terms of the _way it works_ rather than _what it does_. Always be mindful about **the value of your tests** and what impact they would have in future refactoring.
 
-In this post about mocking we have only covered **Spies** which are a kind of mock. There are different kind of mocks. [Uncle Bob explains the types in a very easy and short article](https://8thlight.com/blog/uncle-bob/2014/05/14/TheLittleMocker.html), go read it. In later chapters we will need to write code that depends on others for data, which is where we will show **Stubs** in action.
+In this post about mocking we have only covered **Spies** which are a kind of mock. There are different kind of mocks. [Uncle Bob explains the types in a very easy to read article](https://8thlight.com/blog/uncle-bob/2014/05/14/TheLittleMocker.html). In later chapters we will need to write code that depends on others for data, which is where we will show **Stubs** in action.
