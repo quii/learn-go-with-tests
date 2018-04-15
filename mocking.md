@@ -138,6 +138,8 @@ Next we can make it print 2,1 and then "Go!".
 
 ## Write the test first
 
+By investing in getting the overall plumbing working right, we can iterate on our solution safely and easily. We will no longer need to stop and re-run the program to be confident of it working as all the logic is tested.
+
 ```go
 func TestCountdown(t *testing.T) {
 	buffer := &bytes.Buffer{}
@@ -157,8 +159,6 @@ Go!`
 ```
 
 The backtick syntax is another way of creating a `string` but lets you put things like newlines which is perfect for our test.
-
-Isn't it nice that by focusing on getting our software working end-to-end that iterating on the requirements is very straightforward. By investing in getting the overall plumbing working right, we can focus on the next requirements easily. 
 
 ## Try and run the test
 
