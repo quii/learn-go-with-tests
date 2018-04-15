@@ -218,12 +218,10 @@ If you run the program it works as we want it to.
 ## Mocking
 
 The tests still pass and the software works as intended but we have some problems:
-- Our tests take 6 seconds to run. Every forward thinking post about software development emphasises the importance of quick feedback loops. **Slow tests ruin developer productivity**.
+- Our tests take 4 seconds to run. Every forward thinking post about software development emphasises the importance of quick feedback loops. **Slow tests ruin developer productivity**.
 - We have not tested an important property of our function. 
 
 We have a dependency on `Sleep`ing which we need to extract so we can then control it in our tests.
-
-We want to assert that after every count we `Sleep` for a second.
 
 If we can _mock_ `time.Sleep` we can use _dependency injection_ to use it instead of a "real" `time.Sleep` and then we can **spy on the calls** to make assertions on them. 
 
@@ -354,13 +352,13 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 }
 ```
 
-Now the test should be passing (and no longer taking 6 seconds!).
+Now the test should be passing (and no longer taking 4 seconds!).
 
 ### Still some problems
 
 There's still another important property we haven't tested. 
 
-The important thing about the function is that it sleeps before the first print and then after each one until the last, e.g:
+`Countdown` should sleep before the first print and then after each one until the last, e.g:
 
 - `Sleep`
 - `Print N`
@@ -371,7 +369,7 @@ The important thing about the function is that it sleeps before the first print 
 
 Our latest change only asserts that it has slept 4 times, but those sleeps could occur out of sequence
 
-When writing tests and you're not confident you have working code, just break it! Change the code to the following
+When writing tests and you're not confident you have working code, just break it! (make sure you have commited your changes to source control first though). Change the code to the following
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
@@ -388,7 +386,7 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 }
 ```
 
-If you run your tests they should still be passing.
+If you run your tests they should still be passing even though the implementation is wrong.
 
 Let's use spying again with a new test to check the order of operations is correct.
 
@@ -483,7 +481,7 @@ Go!`
 }
 ```
 
-Finally we have our function and its 2 important properties properly tested.
+We now have our function and its 2 important properties properly tested.
 
 ## But isn't mocking evil?
 
