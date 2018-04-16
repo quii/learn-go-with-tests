@@ -187,7 +187,12 @@ We've refactored our server making into `makeDelayedServer` just to move some un
 
 There's a keyword that is maybe unfamiliar to you called `defer`. What this means it will run the function _at the end of the containing function_. Before we had the two `Close` calls at the end of our test. `defer` is useful when you want to keep the context of these important cleanup operations closer to where it's relevant. We're telling the reader (and the compiler) to remember to close our servers once the function is finished.
 
-This is an improvement but there's more we can do. Why are we testing the speeds of the websites one after another when Go is great at concurrency. We should be able to test them at the same time and whatever comes back first wins. 
+### Synchronising processes
+
+This is an improvement but maybe we can use a simpler approach.  
+
+- Why are we testing the speeds of the websites one after another when Go is great at concurrency? We should be able to check both at the same time
+- We don't really care about _the exact response times_ of the requests, we just want to know which one comes back first. 
 
 To do this, we're going to introduce a new construct called `select` which helps us synchronise processes really easily and clearly.  
 
