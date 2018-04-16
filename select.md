@@ -323,7 +323,7 @@ Our tests now wont compile because we're not supplying a timeout
 
 Before rushing in to add this default value to both our tests let's just listen to them.
 
-- Do we care about the timeout in the "happy" test
+- Do we care about the timeout in the "happy" test?
 - The requirements were explicit about the timeout
 
 Given this knowledge, let's do a little refactoring to be sympathetic to both our tests and the users of our code
