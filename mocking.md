@@ -1,6 +1,6 @@
 # Mocking
 
-You have been asked to write a program which counts from 3, printing each number on a new line and when it reaches zero it will print "Go!" and exit. 
+You have been asked to write a program which counts from 3, printing each number on a new line (with a 1 second pause) and when it reaches zero it will print "Go!" and exit. 
 
 ```
 3
