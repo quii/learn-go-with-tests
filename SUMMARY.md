@@ -13,7 +13,7 @@
 * [Structs, methods & interfaces](structs-methods-and-interfaces.md)
 * [Pointers & errors](pointers-and-errors.md)
 * [Dependency Injection](dependency-injection.md)
-* [Mocking (WIP)](mocking.md)
+* [Mocking](mocking.md)
 * [Concurrency](concurrency.md)
 * [Select and intro to HTTP client tests (WIP)](select.md)
 
