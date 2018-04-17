@@ -27,7 +27,7 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 7. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.
 8. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
 9. [Mocking](mocking.md) - Take some existing untested code and use DI with mocking to test it.
-10.[Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
+10. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
 
 Property based tests \(todo\)
 
