@@ -6,8 +6,7 @@ For this we will be using
 
 - `net/http` to make the HTTP calls.
 - `net/http/httptest` to help us test them.
-- _Mocking_ to let us control our tests, keep them fast and test edge cases.
-- `go` routines.
+- go routines.
 - `select` to synchronise processes. 
 
 ## Write the test first
@@ -220,7 +219,9 @@ If you recall from the concurrency chapter, you can wait for values to be sent t
 
 What `select` lets you do is wait on _multiple_ channels. The first one to send a value "wins" and the code underneath the `case` is executed. 
 
-In our case we have defined a function `ping` which creates a `chan interface` and returns it. `inteface` is a type in Go which means "i don't know what the type is". In our case, we don't really _care_ what the type is returned, we just want to send a signal back in the channel to say we're finished. 
+In our case we have defined a function `ping` which creates a `chan interface` and returns it. `inteface` is a type in Go which means "i don't know what the type is". 
+
+In our case, we don't really _care_ what the type sent in the channel, _we just want to send a signal_ to say we're finished. 
 
 Inside the same function we start a go routine which will send a signal into that channel once we have completed `http.Get(url)`
 
