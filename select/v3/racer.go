@@ -25,8 +25,8 @@ func ConfigurableRacer(a, b string, timeout time.Duration) (winner string, error
 	}
 }
 
-func ping(url string) chan interface{} {
-	ch := make(chan interface{})
+func ping(url string) chan bool {
+	ch := make(chan bool)
 	go func() {
 		http.Get(url)
 		ch <- true

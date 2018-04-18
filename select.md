@@ -207,8 +207,8 @@ func Racer(a, b string) (winner string) {
 	}
 }
 
-func ping(url string) chan interface{} {
-	ch := make(chan interface{})
+func ping(url string) chan bool {
+	ch := make(chan bool)
 	go func() {
 		http.Get(url)
 		ch <- true
@@ -218,9 +218,9 @@ func ping(url string) chan interface{} {
 ```
 #### `ping`
 
-We have defined a function `ping` which creates a `chan interface` and returns it. `inteface` is a type in Go which means "i don't know what the type is". 
+We have defined a function `ping` which creates a `chan bool` and returns it.
 
-In our case, we don't really _care_ what the type sent in the channel, _we just want to send a signal_ to say we're finished. 
+In our case, we don't really _care_ what the type sent in the channel, _we just want to send a signal_ to say we're finished so booleans are fine.
 
 Inside the same function we start a goroutine which will send a signal into that channel once we have completed `http.Get(url)`
 
