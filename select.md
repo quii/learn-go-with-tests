@@ -228,7 +228,9 @@ If you recall from the concurrency chapter, you can wait for values to be sent t
 
 What `select` lets you do is wait on _multiple_ channels. The first one to send a value "wins" and the code underneath the `case` is executed. 
 
-We use `ping` in our `select` to set up two channels for each of our `URL`s. Whichever one writes to its channel first will have its code executed in the `select`, which results in its `URL` being returned (and being the winner). 
+We use `ping` in our `select` to set up two channels for each of our `URL`s. Whichever one writes to its channel first will have its code executed in the `select`, which results in its `URL` being returned (and being the winner).
+
+After these changes the intent behind our code is very clear and the implementation is actually simpler.  
 
 ### Timeouts
 
