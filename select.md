@@ -277,9 +277,7 @@ func Racer(a, b string) (winner string, error error) {
 
 Change the signature of `Racer` to return the winner and an `error`. Return `nil` for our happy cases.
 
-The compiler will complain about your _first test_ only looking for one value so change that line to
-
-`got, _ := Racer(slowURL, fastURL)`, knowing that we should check we _don't_ get an error in our happy scenario. 
+The compiler will complain about your _first test_ only looking for one value so change that line to `got, _ := Racer(slowURL, fastURL)`, knowing that we should check we _don't_ get an error in our happy scenario. 
 
 If you run it now after 11 seconds it will fail
 
@@ -306,7 +304,7 @@ func Racer(a, b string) (winner string, error error) {
 
 `time.After` is a very handy function when using `select`. Although it didn't happen in our case you can potentially write code that blocks forever if the channels you're listening on never return a value. `time.After` returns a `chan` (like `ping`) and will send a signal down it after the amount of time you define. 
 
-For us this is perfect, if `a` or `b` manage to return they win, but if we get to 10 seconds then our `time.After` will send a signal and we'll return an `error`
+For us this is perfect; if `a` or `b` manage to return they win, but if we get to 10 seconds then our `time.After` will send a signal and we'll return an `error`
 
 ### Slow tests
 
@@ -396,7 +394,7 @@ func TestRacer(t *testing.T) {
 }
 ```
 
-I added one final check on the first test to verify we dont get an `error`
+I added one final check on the first test to verify we don't get an `error`
 
 ## Wrapping up
 
