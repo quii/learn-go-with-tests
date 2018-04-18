@@ -84,9 +84,9 @@ In the mocking and dependency injection chapters we covered how ideally we dont 
 - Flaky
 - Can't test edge cases
 
-In Go there is a package `net/http/httptest` where you can easily create a mock HTTP server that you can fully control.
+In the standard library there is a package [`net/http/httptest`](https://golang.org/pkg/net/http/httptest/) where you can easily create a mock HTTP server.
 
-Let's change our tests to use mocks we control so they will be reliable.
+Let's change our tests to use mocks so we have reliable servers to test against that we can control.
 
 ```go
 func TestRacer(t *testing.T) {
@@ -184,9 +184,10 @@ func makeDelayedServer(delay time.Duration) *httptest.Server {
 
 We've refactored creating our fake servers into a function called `makeDelayedServer` to move some uninteresting code out of the test and reduce repetition.
 
-There's a keyword that is maybe unfamiliar to you called `defer`. By prefixing a function call with `defer` it will now call that function _at the end of the containing function_. 
+#### `defer`
+By prefixing a function call with `defer` it will now call that function _at the end of the containing function_. 
 
-Sometimes you will need to cleanup resources, such as closing a file or in our case closing a server so that it does not continue to listen to a port. You want this to happen at the end of the function, but keep it within the context of when you opened the resource. `defer` allows you to keep these calls together.
+Sometimes you will need to cleanup resources, such as closing a file or in our case closing a server so that it does not continue to listen to a port. You want this to happen at the end of the function, but keep it within the context of when you opened the resource. `defer` allows you to keep these calls together which makes it easier for readers of your code.
 
 Our refactoring is an improvement and is a reasonable solution given the Go features covered so far, but we can make the solution simpler. 
 
