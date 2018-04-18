@@ -236,7 +236,7 @@ After these changes the intent behind our code is very clear and the implementat
 
 ### Timeouts
 
-Our final requirement was to return an error if the test took longer than 10 seconds. 
+Our final requirement was to return an error if `Racer` takes longer than 10 seconds. 
 
 ## Write the test first
 
