@@ -82,9 +82,9 @@ In the mocking and dependency injection chapters we covered how ideally we dont 
 
 - Slow
 - Flaky
-- Cant test edge cases
+- Can't test edge cases
 
-In go there is a package `net/http/httptest` where you can easily create a mock http server that you can fully control.
+In Go there is a package `net/http/httptest` where you can easily create a mock HTTP server that you can fully control.
 
 Let's change our tests to use mocks we control so they will be reliable.
 
@@ -119,15 +119,15 @@ The syntax may look a bit busy but just take your time.
 
 `httptest.NewServer` takes a `http.HandlerFunc` which we are sending in via an _anonymous function_. 
 
-`http.HandlerFunc` is a type that looks like this `type HandlerFunc func(ResponseWriter, *Request)`
+`http.HandlerFunc` is a type that looks like this: `type HandlerFunc func(ResponseWriter, *Request)`
 
-All it's really saying is it needs a function takes a `ResponseWriter` and a `Request`, which is not too surprising for a HTTP server
+All it's really saying is it needs a function that takes a `ResponseWriter` and a `Request`, which is not too surprising for a HTTP server
 
 It turns out there's really no extra magic here, **this is also how you would write a _real_ HTTP server in Go**. The only difference is we are wrapping it in a `httptest.NewServer` which makes it easier to use with testing, as it finds an open port to listen on and then you can close it when you're done with your test.
 
-Inside our two servers we make the slow one have a short `time.Sleep` when we get a request to make it slower than the other one. Both servers then write an `OK` response back to the caller.
+Inside our two servers we make the slow one have a short `time.Sleep` when we get a request to make it slower than the other one. Both servers then write an `OK` response with `w.WriteHeader(http.StatusOK)` back to the caller.
 
-If you re-run the test it will definitely pass now and should be faster. Try playing with sleeps to deliberately break the test.
+If you re-run the test it will definitely pass now and should be faster. Play with these sleeps to deliberately break the test.
 
 ## Refactor
 
@@ -182,9 +182,11 @@ func makeDelayedServer(delay time.Duration) *httptest.Server {
 }
 ```
 
-We've refactored our server making into `makeDelayedServer` to move some uninteresting code out of the test and reduce repetition.
+We've refactored creating our fake servers into a function called `makeDelayedServer` to move some uninteresting code out of the test and reduce repetition.
 
-There's a keyword that is maybe unfamiliar to you called `defer`. What this means it will run the function _at the end of the containing function_. Before we had the two `Close` calls at the end of our test. `defer` is useful when you want to keep the context of these important cleanup operations closer to where it's relevant. We're telling the reader (and the compiler) to remember to close our servers once the function is finished.
+There's a keyword that is maybe unfamiliar to you called `defer`. By prefixing a function call with `defer` it will now call that function _at the end of the containing function_. 
+
+Sometimes you will need to cleanup resources, such as closing a file or in our case closing a server so that it does not continue to listen to a port. You want this to happen at the end of the function, but keep it within the context of when you opened the resource. `defer` allows you to keep these calls together.
 
 Our refactoring is an improvement and is a reasonable solution given the Go features covered so far, but we can make the solution simpler. 
 
