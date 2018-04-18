@@ -15,7 +15,7 @@
 * [Dependency Injection](dependency-injection.md)
 * [Mocking](mocking.md)
 * [Concurrency](concurrency.md)
-* [Select and intro to HTTP client tests (WIP)](select.md)
+* [Select](select.md)
 
 ## Standard lib essentials
 

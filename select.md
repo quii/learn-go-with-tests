@@ -1,4 +1,4 @@
-# Select (WIP)
+# Select
 
 You have been asked to make a function called `WebsiteRacer` which takes two URLs and "races" them by hitting them with a HTTP GET and returning the URL which returned first. If none of them return within 10 seconds then it should return an `error`
 
@@ -67,7 +67,7 @@ func Racer(a, b string) (winner string) {
 For each url: 
 
 1. We use `time.Now()` to record just before we try and get the `URL`
-2. Then we use `http.Get` to try and get the contents of the `URL`. This function returns a response and an `error` but so far we are not interested in these values
+2. Then we use [`http.Get`](https://golang.org/pkg/net/http/#Client.Get) to try and get the contents of the `URL`. This function returns a [`http.Response`](https://golang.org/pkg/net/http/#Response) and an `error` but so far we are not interested in these values
 3. `time.Since` takes the start time and returns a `time.Duration` of the difference.
 
 Once we have done this we simply compare the durations to see which is the quickest.
