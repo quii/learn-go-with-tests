@@ -187,7 +187,7 @@ We've refactored our server making into `makeDelayedServer` to move some uninter
 
 There's a keyword that is maybe unfamiliar to you called `defer`. What this means it will run the function _at the end of the containing function_. Before we had the two `Close` calls at the end of our test. `defer` is useful when you want to keep the context of these important cleanup operations closer to where it's relevant. We're telling the reader (and the compiler) to remember to close our servers once the function is finished.
 
-This is an improvement but maybe we can use a simpler approach.  
+Our refactoring is an improvement and is a reasonable solution given the Go features covered so far, but we can make the solution simpler. 
 
 ### Synchronising processes
 
