@@ -183,7 +183,7 @@ func makeDelayedServer(delay time.Duration) *httptest.Server {
 }
 ```
 
-We've refactored our server making into `makeDelayedServer` just to move some uninteresting code out of the test and reduce repetition.
+We've refactored our server making into `makeDelayedServer` to move some uninteresting code out of the test and reduce repetition.
 
 There's a keyword that is maybe unfamiliar to you called `defer`. What this means it will run the function _at the end of the containing function_. Before we had the two `Close` calls at the end of our test. `defer` is useful when you want to keep the context of these important cleanup operations closer to where it's relevant. We're telling the reader (and the compiler) to remember to close our servers once the function is finished.
 
@@ -321,7 +321,7 @@ func Racer(a, b string, timeout time.Duration) (winner string, error error) {
 
 Our tests now wont compile because we're not supplying a timeout
 
-Before rushing in to add this default value to both our tests let's just listen to them.
+Before rushing in to add this default value to both our tests let's _listen to them_.
 
 - Do we care about the timeout in the "happy" test?
 - The requirements were explicit about the timeout
@@ -347,7 +347,7 @@ func ConfigurableRacer(a, b string, timeout time.Duration) (winner string, error
 }
 ```
 
-Our users and our first test can just use `Racer` (which uses `ConfigurableRacer` under the hood) and our sad path test can use `ConfigurableRacer`.
+Our users and our first test can use `Racer` (which uses `ConfigurableRacer` under the hood) and our sad path test can use `ConfigurableRacer`.
 
 ```go
 func TestRacer(t *testing.T) {
