@@ -214,18 +214,21 @@ func ping(url string) chan interface{} {
 	return ch
 }
 ```
+#### `ping`
 
-If you recall from the concurrency chapter, you can wait for values to be sent to a channel with `myVar := <-ch`. This is a _blocking_ call, as you're waiting for a value. 
-
-What `select` lets you do is wait on _multiple_ channels. The first one to send a value "wins" and the code underneath the `case` is executed. 
-
-In our case we have defined a function `ping` which creates a `chan interface` and returns it. `inteface` is a type in Go which means "i don't know what the type is". 
+We have defined a function `ping` which creates a `chan interface` and returns it. `inteface` is a type in Go which means "i don't know what the type is". 
 
 In our case, we don't really _care_ what the type sent in the channel, _we just want to send a signal_ to say we're finished. 
 
 Inside the same function we start a go routine which will send a signal into that channel once we have completed `http.Get(url)`
 
-We use this function in our `select` to set up two channels for each of our `URL`s. Whichever one writes to its channel first will have its code executed in the `select`, which results in its `URL` being returned (and being the winner). 
+#### `select`
+
+If you recall from the concurrency chapter, you can wait for values to be sent to a channel with `myVar := <-ch`. This is a _blocking_ call, as you're waiting for a value. 
+
+What `select` lets you do is wait on _multiple_ channels. The first one to send a value "wins" and the code underneath the `case` is executed. 
+
+We use `ping` in our `select` to set up two channels for each of our `URL`s. Whichever one writes to its channel first will have its code executed in the `select`, which results in its `URL` being returned (and being the winner). 
 
 ### Timeouts
 
