@@ -126,6 +126,8 @@ $ go test -v
 --- PASS: ExampleAdd (0.00s)
 ```
 
+Please note that the example function will not be executed if you remove the comment "//Output: 6".Although the function will be compiled, it won't be executed.
+
 By adding this code in the example will appear in the documentation inside `godoc` making your code even more accessible.
 
 ## Wrapping up
