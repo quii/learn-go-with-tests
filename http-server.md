@@ -167,7 +167,7 @@ We "know" that we need the concept of a `PlayerStore` at some point, but let's t
 
 ```go
 func TestGETPlayers(t *testing.T) {
-	t.Run("returns the player's score", func(t *testing.T) {
+	t.Run("returns Pepper's score", func(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodGet, "/players/Pepper", nil)
 		res := httptest.NewRecorder()
 
@@ -183,13 +183,13 @@ func TestGETPlayers(t *testing.T) {
 }
 ```
 
-We're now putting in something a bit more concrete in our test by saying if you ask for `/player/Pepper` you should get back 20.
+We're now putting in something a bit more concrete in our test by saying if you ask for `/player/Pepper` you should get back `"20"`.
 
 We also know in the current state the resulting code to make it will be a little silly, but suspend your reservations for now.
 
 ## Try to run the test
 
-```go
+```
 === RUN   TestGETPlayers/returns_the_player's_score
     --- FAIL: TestGETPlayers/returns_the_player's_score (0.00s)
     	server_test.go:20: got 'Hello, world', want '20'
@@ -211,19 +211,19 @@ What we're going to do now is write _another_ test to force us into making a pos
 ## Write the test first
 
 ```go
-	t.Run("returns Floyd's score", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodGet, "/players/Floyd", nil)
-		res := httptest.NewRecorder()
+t.Run("returns Floyd's score", func(t *testing.T) {
+    req, _ := http.NewRequest(http.MethodGet, "/players/Floyd", nil)
+    res := httptest.NewRecorder()
 
-		PlayerServer(res, req)
+    PlayerServer(res, req)
 
-		got := res.Body.String()
-		want := "10"
+    got := res.Body.String()
+    want := "10"
 
-		if got != want {
-			t.Errorf("got '%s', want '%s'", got, want)
-		}
-	})
+    if got != want {
+        t.Errorf("got '%s', want '%s'", got, want)
+    }
+})
 ```
 
 ## Try to run the test
@@ -374,18 +374,19 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 #### Fix the issues
 
-This was quite a few changes and we know our tests and application will no longer compiler but just relax and let the compiler work through it
+This was quite a few changes and we know our tests and application will no longer compile but just relax and let the compiler work through it
 
 `./main.go:9:58: type PlayerServer is not an expression`
 
 If the compiler was really nice it would say something like `PlayerServer is not a function, it's a type, dummy`. 
 
-We need to change our tests to instead create a new instance of our `PlayerServer`
+We need to change our tests to instead create a new instance of our `PlayerServer` and then call its method `ServeHTTP`.
 
 ```go
 func TestGETPlayers(t *testing.T) {
+	server := &PlayerServer{}
+	
 	t.Run("returns the Pepper's score", func(t *testing.T) {
-		server := &PlayerServer{}
 		req := newGetScoreRequest("Pepper")
 		res := httptest.NewRecorder()
 
@@ -395,7 +396,6 @@ func TestGETPlayers(t *testing.T) {
 	})
 
 	t.Run("returns Floyd's score", func(t *testing.T) {
-		server := &PlayerServer{}
 		req := newGetScoreRequest("Floyd")
 		res := httptest.NewRecorder()
 
@@ -406,7 +406,7 @@ func TestGETPlayers(t *testing.T) {
 }
 ```
 
-Notice we're still not worrying about making stores _just yet_, we want to get into the state of the code at least compiling as soon as we can.
+Notice we're still not worrying about making stores _just yet_, we just want the compiler passing as soon as we can. By adding more functionality (like stub stores) we are opening ourselves up to potentially _more_ compilation problems.
 
 Now `main.go` won't compile for the same reason.
 
@@ -474,3 +474,166 @@ func TestGETPlayers(t *testing.T) {
 ```
 
 Our tests now pass and are looking better. The _intent_ behind our code is clearer now due to the introduction of the store. We're telling the reader that because we have _this data in a `PlayerStore`_ that when you use it with a `PlayerServer` you should get the following responses.
+
+#### Run the application
+
+Now our tests are passing the last thing we need to do to complete this refactor is to check our application is working. The program should start up but you'll get a horrible response if you try and hit the server at `http://localhost:5000/players/Pepper`. 
+
+The reason for this is that we have not passed in a `PlayerStore`.
+
+We'll need to make an implementation of one, but that's difficult right now as we're not storing any meaningful data so it'll have to be hard-coded for the time being. 
+
+```go
+type InMemoryPlayerStore struct{}
+
+func (i *InMemoryPlayerStore) GetPlayerScore(name string) string {
+	return "123"
+}
+
+func main() {
+	server := &PlayerServer{&InMemoryPlayerStore{}}
+
+	if err := http.ListenAndServe(":5000", server); err != nil {
+		log.Fatalf("could not listen on port 5000 %v", err)
+	}
+}
+```
+
+If you `go build` again and hit the same URL you should get `"123"`. Not great, but until we store data that's the best we can do. 
+
+We have a few options as to what to do next
+
+- Handle scenario where the player doesn't exist
+- Handle the `POST /players/{name}/win` scenario
+- What happens if someone hits a completely wrong URL like `/playerz/{name}` ?
+
+Whilst the `POST` scenario gets us closer to the "happy path", I feel it'll be easier to tackle the missing player scenario first as we're in that context already. 
+
+## Write the test first
+
+Just add it to our existing suite. 
+
+```go
+	t.Run("returns 404 on missing players", func(t *testing.T) {
+		req := newGetScoreRequest("Apollo")
+		res := httptest.NewRecorder()
+
+		server.ServeHTTP(res, req)
+
+		got := res.Code
+		want := http.StatusNotFound
+
+		if got != want {
+			t.Errorf("got status %d want %d", got, want)
+		}
+	})
+```
+
+## Try to run the test
+
+```
+=== RUN   TestGETPlayers/returns_404_on_missing_players
+    --- FAIL: TestGETPlayers/returns_404_on_missing_players (0.00s)
+    	server_test.go:56: got status 200 want 404
+```
+
+## Write enough code to make it pass
+
+```go
+func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	player := r.URL.Path[len("/players/"):]
+	
+	w.WriteHeader(http.StatusNotFound)
+	
+	fmt.Fprint(w, p.store.GetPlayerScore(player))
+}
+```
+
+Sometimes I heavily roll my eyes when TDD advocates say "make sure you just write the minimal amount of code to make it pass" as it can feel heavily pedantic. 
+
+But this scenario illustrates the example well. I have done the bare minimum (knowing it is not correct), which is write a `StatusNotFound` on **all responses** but all our tests are passing! 
+
+**By doing the bare minimum to make the tests pass it can highlight gaps in your tests** In our case we are not asserting that we should be getting a `StatusOK` when players do exist in the store.
+
+Update the other two tests to assert on the status and fix the code. 
+
+Here are the new tests
+
+```go
+func TestGETPlayers(t *testing.T) {
+	store := StubPlayerStore{
+		map[string]string{
+			"Pepper": "20",
+			"Floyd":  "10",
+		},
+	}
+	server := &PlayerServer{&store}
+
+	t.Run("returns Pepper's score", func(t *testing.T) {
+		req := newGetScoreRequest("Pepper")
+		res := httptest.NewRecorder()
+
+		server.ServeHTTP(res, req)
+
+		assertStatus(t, res.Code, http.StatusOK)
+		assertResponseBody(t, res.Body.String(), "20")
+	})
+
+	t.Run("returns Floyd's score", func(t *testing.T) {
+		req := newGetScoreRequest("Floyd")
+		res := httptest.NewRecorder()
+
+		server.ServeHTTP(res, req)
+
+		assertStatus(t, res.Code, http.StatusOK)
+		assertResponseBody(t, res.Body.String(), "10")
+	})
+
+	t.Run("returns 404 on missing players", func(t *testing.T) {
+		req := newGetScoreRequest("Apollo")
+		res := httptest.NewRecorder()
+
+		server.ServeHTTP(res, req)
+
+		assertStatus(t, res.Code, http.StatusNotFound)
+	})
+}
+
+func assertStatus(t *testing.T, got, want int) {
+	t.Helper()
+	if got != want {
+		t.Errorf("did not get correct status, got %d, want %d", got, want)
+	}
+} 
+
+func newGetScoreRequest(name string) *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
+	return req
+}
+
+func assertResponseBody(t *testing.T, got, want string) {
+	t.Helper()
+	if got != want {
+		t.Errorf("response body is wrong, got '%s' want '%s'", got, want)
+	}
+}
+```
+
+We're checking the status in all our tests now so I made a helper `assertStatus` to facilitate that. 
+
+Now our first two tests fail because of the 404 instead of 200 so we can fix `PlayerServer`.
+
+```go
+func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	player := r.URL.Path[len("/players/"):]
+	
+	score := p.store.GetPlayerScore(player)
+
+	if score == "" {
+		w.WriteHeader(http.StatusNotFound)
+	}
+
+	fmt.Fprint(w, score)
+}
+```
+
