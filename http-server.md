@@ -378,8 +378,6 @@ This was quite a few changes and we know our tests and application will no longe
 
 `./main.go:9:58: type PlayerServer is not an expression`
 
-If the compiler was really nice it would say something like `PlayerServer is not a function, it's a type, dummy`. 
-
 We need to change our tests to instead create a new instance of our `PlayerServer` and then call its method `ServeHTTP`.
 
 ```go
@@ -422,7 +420,7 @@ func main() {
 
 Finally everything is compiling but the tests are failing
 
-```go
+```
 === RUN   TestGETPlayers/returns_the_Pepper's_score
 panic: runtime error: invalid memory address or nil pointer dereference [recovered]
 	panic: runtime error: invalid memory address or nil pointer dereference
@@ -503,7 +501,7 @@ If you `go build` again and hit the same URL you should get `"123"`. Not great, 
 
 We have a few options as to what to do next
 
-- Handle scenario where the player doesn't exist
+- Handle the scenario where the player doesn't exist
 - Handle the `POST /players/{name}/win` scenario
 - What happens if someone hits a completely wrong URL like `/playerz/{name}` ?
 
@@ -511,22 +509,22 @@ Whilst the `POST` scenario gets us closer to the "happy path", I feel it'll be e
 
 ## Write the test first
 
-Just add it to our existing suite. 
+Add a missing player scenario to our existing suite
 
 ```go
-	t.Run("returns 404 on missing players", func(t *testing.T) {
-		req := newGetScoreRequest("Apollo")
-		res := httptest.NewRecorder()
+t.Run("returns 404 on missing players", func(t *testing.T) {
+    req := newGetScoreRequest("Apollo")
+    res := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+    server.ServeHTTP(res, req)
 
-		got := res.Code
-		want := http.StatusNotFound
+    got := res.Code
+    want := http.StatusNotFound
 
-		if got != want {
-			t.Errorf("got status %d want %d", got, want)
-		}
-	})
+    if got != want {
+        t.Errorf("got status %d want %d", got, want)
+    }
+})
 ```
 
 ## Try to run the test
@@ -549,11 +547,11 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-Sometimes I heavily roll my eyes when TDD advocates say "make sure you just write the minimal amount of code to make it pass" as it can feel heavily pedantic. 
+Sometimes I heavily roll my eyes when TDD advocates say "make sure you just write the minimal amount of code to make it pass" as it can feel very pedantic. 
 
 But this scenario illustrates the example well. I have done the bare minimum (knowing it is not correct), which is write a `StatusNotFound` on **all responses** but all our tests are passing! 
 
-**By doing the bare minimum to make the tests pass it can highlight gaps in your tests** In our case we are not asserting that we should be getting a `StatusOK` when players do exist in the store.
+**By doing the bare minimum to make the tests pass it can highlight gaps in your tests** In our case we are not asserting that we should be getting a `StatusOK` when players _do_ exist in the store.
 
 Update the other two tests to assert on the status and fix the code. 
 
