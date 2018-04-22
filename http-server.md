@@ -9,12 +9,12 @@ We will follow the TDD approach, getting to "working software" as quickly as we 
 
 ### Chicken and egg
 
-When faced with a scenario, how can we incrementally build this? We cant `GET` a player without having stored something and it seems hard to know if `POST` has worked without the `GET` endpoint already existing. 
+How can we incrementally build this? We cant `GET` a player without having stored something and it seems hard to know if `POST` has worked without the `GET` endpoint already existing. 
 
-This is a scenario where _mocking_ shines. 
+This is where _mocking_ shines. 
 
-- We can start with `GET` and make it call out to a mocked `interface` that lets us get some players.
-- For `POST` we can _spy_ on its calls to an interface for it storing data. 
+- `GET` will need a `PlayerStore` to reach out to. This should be an interface so when we test we can create a simple stub to work with.
+- For `POST` we can _spy_ on its calls to `PlayerStore` to make sure it stores players correctly. 
 - For having some working software quickly we can make a very simple in-memory implementation and then later we can create an implementation backed by whatever store we want. 
 
 ## Write the test first
