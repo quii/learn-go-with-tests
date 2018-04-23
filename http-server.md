@@ -5,7 +5,11 @@ You have been asked to create a web server where users can track how many games 
 - `GET /players/{name}` should return a number indicating total number of wins
 - `POST /players/{name}/win` should increment the number of wins 
 
-We will follow the TDD approach, getting to "working software" as quickly as we can and then incrementing until we have the solution
+We will follow the TDD approach, getting working software as quickly as we can and then making small iterative improvements until we have the solution. By taking this approach we
+
+- Keep the problem space small at any given time
+- Don't go down rabbit holes
+- If we ever get stuck/lost doing a revert wouldn't lose loads of work.
 
 ### Chicken and egg
 
@@ -13,9 +17,9 @@ How can we incrementally build this? We cant `GET` a player without having store
 
 This is where _mocking_ shines. 
 
-- `GET` will need a `PlayerStore` to reach out to. This should be an interface so when we test we can create a simple stub to work with.
-- For `POST` we can _spy_ on its calls to `PlayerStore` to make sure it stores players correctly. 
-- For having some working software quickly we can make a very simple in-memory implementation and then later we can create an implementation backed by whatever store we want. 
+- `GET` will need a `PlayerStore` _thing_ to get scores for a player. This should be an interface so when we test we can create a simple stub to test our code without needing to have implemented any actual storage code.
+- For `POST` we can _spy_ on its calls to `PlayerStore` to make sure it stores players correctly. Our implementation of saving wont be coupled to retrieval.
+- For having some working software quickly we can make a very simple in-memory implementation and then later we can create an implementation backed by whatever storage mechanism we prefer. 
 
 ## Write the test first
 
@@ -27,7 +31,7 @@ To create a web server in Go you will typically call [https://golang.org/pkg/net
 func ListenAndServe(addr string, handler Handler) error
 ```
 
-The [`Handler`](https://golang.org/pkg/net/http/#Handler) part is the bit we'll be working with.
+The [`Handler`](https://golang.org/pkg/net/http/#Handler) is what you pass in to deal with HTTP requests.
 
 ```go
 type Handler interface {
@@ -36,6 +40,8 @@ type Handler interface {
 ```
 
 It's an interface which expects two arguments, the first being where we _write our response_ and the second being the HTTP request that was sent to us.
+
+Let's write a test for a function `PlayerServer` that takes in those two arguments.
 
 ```go
 func TestGETPlayers(t *testing.T) {
@@ -57,8 +63,8 @@ func TestGETPlayers(t *testing.T) {
 
 In order to test our server, we will need a `Request` to send in and we'll want to _spy_ on what our handler writes to the `ResponseWriter`. 
 
-- We make a `Request` to send to our function. The `nil` argument refers to the request's body, which we don't need to set in this case.
-- `net/http/httptest` has a spy already made for us called `ResponseRecorder` so we can use that. 
+- We use `http.NewRequest` to create a request. The `nil` argument refers to the request's body, which we don't need to set in this case.
+- `net/http/httptest` has a spy already made for us called `ResponseRecorder` so we can use that. It has many helpful methods to inspect what has been written as a response.
 
 ## Try to run the test
 
@@ -138,7 +144,7 @@ func main() {
 
 So far all of our "mains" have been in one file, however this isn't best practice for larger projects where you'll want to separate things into different files. 
 
-To run this, do `go build` which will take all the `.go` files in the directory and build you a program. You can then execute it with `./myprogram`
+To run this, do `go build` which will take all the `.go` files in the directory and build you a program. You can then execute it with `./myprogram`. 
 
 ### `http.HandlerFunc`
 
@@ -157,7 +163,7 @@ So we use this to wrap our `PlayerServer` function so that it now conforms to `H
 
 ### `http.ListenAndServe(":5000"...`
 
-ListenAndServer takes a port to listen on and a `Handler` indefinitely. If the port is already being listened to it will return an `error` so we are using an `if` statement to capture that scenario and log the problem to the user.
+ListenAndServer takes a port to listen on and a `Handler`. If the port is already being listened to it will return an `error` so we are using an `if` statement to capture that scenario and log the problem to the user.
 
 Next let's make our endpoint return a player's score. 
 
@@ -239,11 +245,13 @@ t.Run("returns Floyd's score", func(t *testing.T) {
 
 By doing this the test has forced us to actually look at the request's URL and make some decision. So whilst in our heads we may have been worrying about stores and interfaces the next logical step actually seems to be about _routing_.
 
+_ If we did start with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**_
+
 ## Write enough code to make it pass
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/player/"):]
+	player := r.URL.Path[len("/players/"):]
 
 	if player == "Pepper" {
 		fmt.Fprint(w, "20")
@@ -259,7 +267,7 @@ func PlayerServer(w http.ResponseWriter, r *http.Request) {
 
 We're resisting the temptation to use any routing libraries right now, just the smallest step to get our test passing.
 
-`r.URL.Path` returns the path of the request and then we are using slice syntax to slice it past the final slash after player. It's not very robust but will do the trick for now.
+`r.URL.Path` returns the path of the request and then we are using slice syntax to slice it past the final slash after `/players/`. It's not very robust but will do the trick for now.
 
 ## Refactor
 
@@ -326,7 +334,7 @@ However we still shouldn't be happy. It doesn't feel right that our server knows
 
 Our refactoring has made it pretty clear what to do. 
 
-We moved the score calculation out of the main body of our handler into a function `GetPlayerScore`. This feels like the right place to slice our functionality up using interfaces. 
+We moved the score calculation out of the main body of our handler into a function `GetPlayerScore`. This feels like the right place to separate the concerns using interfaces. 
 
 Let's move our function we re-factored to be an interface instead
 
@@ -404,7 +412,11 @@ func TestGETPlayers(t *testing.T) {
 }
 ```
 
-Notice we're still not worrying about making stores _just yet_, we just want the compiler passing as soon as we can. By adding more functionality (like stub stores) we are opening ourselves up to potentially _more_ compilation problems.
+Notice we're still not worrying about making stores _just yet_, we just want the compiler passing as soon as we can. 
+
+You should be in the habit of prioritising having code that compiles and then code that passes the tests. 
+
+By adding more functionality (like stub stores) we are opening ourselves up to potentially _more_ compilation problems.
 
 Now `main.go` won't compile for the same reason.
 
@@ -504,8 +516,9 @@ We have a few options as to what to do next
 - Handle the scenario where the player doesn't exist
 - Handle the `POST /players/{name}/win` scenario
 - What happens if someone hits a completely wrong URL like `/playerz/{name}` ?
+- It didn't feel great that our main application was starting up but not actually working. We had to manually test to see the problem.
 
-Whilst the `POST` scenario gets us closer to the "happy path", I feel it'll be easier to tackle the missing player scenario first as we're in that context already. 
+Whilst the `POST` scenario gets us closer to the "happy path", I feel it'll be easier to tackle the missing player scenario first as we're in that context already. We'll get to the rest later.
 
 ## Write the test first
 
