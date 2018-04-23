@@ -12,14 +12,23 @@ We will follow the TDD approach, getting working software as quickly as we can a
 - If we ever get stuck/lost doing a revert wouldn't lose loads of work.
 
 
-### TODO: blurb on red, green
+## Red, green, refactor
 
-- re- Explain red green in context of bigger bit of work
-- Emphasize keeping things safe by writing minimal amount of code to get to green again (quote Kent Beck on doing horrible things)
+Throughout this book we have emphasised the TDD process of write a test & watch it fail (red), write the _minimal_ amount of code to make it work (green) and then refactor.
 
-(and i need to read the http server thing from the go book according to @gypsydave5)
+This discipline of writing the minimal amount of code is important in terms of the safety TDD gives you. You should be striving to get out of "red" as soon as you can.
 
-### end todo
+Kent Beck describes it as 
+
+> Make the test work quickly, committing whatever sins necessary in process.
+
+You can commit these sins because you will refactor afterwards backed by the safety of the tests.
+
+#### What if you don't do this?
+
+The more changes you make while in red, the more likely you are to add more problems, not covered by tests. 
+
+The idea is to be iteratively writing useful code with small steps, driven by tests so that you don't fall into a rabbit hole for hours.
 
 ### Chicken and egg
 
