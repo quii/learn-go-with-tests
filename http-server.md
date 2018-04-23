@@ -11,6 +11,16 @@ We will follow the TDD approach, getting working software as quickly as we can a
 - Don't go down rabbit holes
 - If we ever get stuck/lost doing a revert wouldn't lose loads of work.
 
+
+### TODO: blurb on red, green
+
+- re- Explain red green in context of bigger bit of work
+- Emphasize keeping things safe by writing minimal amount of code to get to green again (quote Kent Beck on doing horrible things)
+
+(and i need to read the http server thing from the go book according to @gypsydave5)
+
+### end todo
+
 ### Chicken and egg
 
 How can we incrementally build this? We cant `GET` a player without having stored something and it seems hard to know if `POST` has worked without the `GET` endpoint already existing. 
