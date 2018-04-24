@@ -42,15 +42,17 @@ This is where _mocking_ shines.
 
 ## Write the test first
 
-Before worrying about any kind of domain-level logic, we should get the overall application scaffolding sorted. We'll start by testing that if we hit an endpoint we get back "Hello, world" and then wire it up into a real application.
+We can write a test and implementing it by returning a hard-coded value to get us started. Kent Beck refers this as "Faking it". Once we have a working test we can then write more tests to help us remove that constant
 
-To create a web server in Go you will typically call [https://golang.org/pkg/net/http/#ListenAndServe](ListenAndServe).
+By doing this very small step, we can make the important start of getting an overall project structure working correctly without having to worry too much about our application logic.
+
+To create a web server in Go you will typically call [https://golang.org/pkg/net/http/#ListenAndServe](ListenAndServe)
 
 ```go
 func ListenAndServe(addr string, handler Handler) error
 ```
 
-The [`Handler`](https://golang.org/pkg/net/http/#Handler) is what you pass in to deal with HTTP requests.
+This will start a web server listening on a port, creating a goroutine for every request and running it against a [`Handler`](https://golang.org/pkg/net/http/#Handler).
 
 ```go
 type Handler interface {
@@ -60,29 +62,27 @@ type Handler interface {
 
 It's an interface which expects two arguments, the first being where we _write our response_ and the second being the HTTP request that was sent to us.
 
-Let's write a test for a function `PlayerServer` that takes in those two arguments.
+Let's write a test for a function `PlayerServer` that takes in those two arguments. The request sent in will be to get a player's score, which we expect to be `"20"`.
 
 ```go
-func TestGETPlayers(t *testing.T) {
-	req, _ := http.NewRequest(http.MethodGet, "/", nil)
-	res := httptest.NewRecorder()
+t.Run("returns Pepper's score", func(t *testing.T) {
+    req, _ := http.NewRequest(http.MethodGet, "/players/Pepper", nil)
+    res := httptest.NewRecorder()
 
-	PlayerServer(res, req)
+    PlayerServer(res, req)
 
-	t.Run("hello world in response body", func(t *testing.T) {
-		got := res.Body.String()
-		want := "Hello, world"
+    got := res.Body.String()
+    want := "20"
 
-		if got != want {
-			t.Errorf("got '%s', want '%s'", got, want)
-		}
-	})
-}
+    if got != want {
+        t.Errorf("got '%s', want '%s'", got, want)
+    }
+})
 ```
 
 In order to test our server, we will need a `Request` to send in and we'll want to _spy_ on what our handler writes to the `ResponseWriter`. 
 
-- We use `http.NewRequest` to create a request. The `nil` argument refers to the request's body, which we don't need to set in this case.
+- We use `http.NewRequest` to create a request. The first argument is the request's method and the second is the request's path. The `nil` argument refers to the request's body, which we don't need to set in this case.
 - `net/http/httptest` has a spy already made for us called `ResponseRecorder` so we can use that. It has many helpful methods to inspect what has been written as a response.
 
 ## Try to run the test
@@ -120,9 +120,9 @@ func PlayerServer(w http.ResponseWriter, r *http.Request) {
 The code now compiles and the test fails
 
 ```
-=== RUN   TestGETPlayers/hello_world_in_response_body
-    --- FAIL: TestGETPlayers/hello_world_in_response_body (0.00s)
-    	server_test.go:20: got '', want 'Hello, world'
+=== RUN   TestGETPlayers/returns_Pepper's_score
+    --- FAIL: TestGETPlayers/returns_Pepper's_score (0.00s)
+    	server_test.go:20: got '', want '20'
 ```
 
 ## Write enough code to make it pass
@@ -131,17 +131,17 @@ From the DI chapter we touched on HTTP servers with a `Greet` function. We learn
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello, world")
+	fmt.Fprint(w, "20")
 }
 ```
 
-The test should now pass
+The test should now pass.
 
 ## Complete the scaffolding
 
-We want to wire this up into an application. Why? All it does right now has little to do with the requirements given
+We want to wire this up into an application. This is important because
 
-- Have _actual working software_, we don't want to write tests for the sake of it, it's good to see the code in action.
+- We'll have _actual working software_, we don't want to write tests for the sake of it, it's good to see the code in action.
 - As we refactor our code, it's likely we will change the structure of the program. We want to make sure this is reflected in our application too as part of the incremental approach.
 
 Create a new file for our application and put this code in.
@@ -161,7 +161,7 @@ func main() {
 }
 ```
 
-So far all of our "mains" have been in one file, however this isn't best practice for larger projects where you'll want to separate things into different files. 
+So far all of our application code have been in one file, however this isn't best practice for larger projects where you'll want to separate things into different files. 
 
 To run this, do `go build` which will take all the `.go` files in the directory and build you a program. You can then execute it with `./myprogram`. 
 
@@ -184,56 +184,15 @@ So we use this to wrap our `PlayerServer` function so that it now conforms to `H
 
 ListenAndServer takes a port to listen on and a `Handler`. If the port is already being listened to it will return an `error` so we are using an `if` statement to capture that scenario and log the problem to the user.
 
-Next let's make our endpoint return a player's score. 
+What we're going to do now is write _another_ test to force us into making a positive change to try and move away from the hard-coded value.
 
 ## Write the test first
 
-We "know" that we need the concept of a `PlayerStore` at some point, but let's try and take smaller steps for now
+You may have been thinking
 
-```go
-func TestGETPlayers(t *testing.T) {
-	t.Run("returns Pepper's score", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodGet, "/players/Pepper", nil)
-		res := httptest.NewRecorder()
+> Surely we need some kind of concept of storage to control which player gets what score. It's weird that the values seem so arbitrary in our tests.
 
-		PlayerServer(res, req)
-
-		got := res.Body.String()
-		want := "20"
-
-		if got != want {
-			t.Errorf("got '%s', want '%s'", got, want)
-		}
-	})
-}
-```
-
-We're now putting in something a bit more concrete in our test by saying if you ask for `/player/Pepper` you should get back `"20"`.
-
-We also know in the current state the resulting code to make it will be a little silly, but suspend your reservations for now.
-
-## Try to run the test
-
-```
-=== RUN   TestGETPlayers/returns_the_player's_score
-    --- FAIL: TestGETPlayers/returns_the_player's_score (0.00s)
-    	server_test.go:20: got 'Hello, world', want '20'
-```
-
-## Write enough code to make it pass
-
-```go
-// PlayerServer currently returns Hello, world given _any_ request
-func PlayerServer(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "20")
-}
-```
-
-Yes, it's silly!
-
-What we're going to do now is write _another_ test to force us into making a positive change
-
-## Write the test first
+Remember we are just trying to take as small as steps as reasonably possible. By writing the test it may drive us toward our goal in an easier step.
 
 ```go
 t.Run("returns Floyd's score", func(t *testing.T) {
@@ -253,18 +212,12 @@ t.Run("returns Floyd's score", func(t *testing.T) {
 
 ## Try to run the test
 ```
-=== RUN   TestGETPlayers/returns_the_Pepper's_score
-    --- PASS: TestGETPlayers/returns_the_Pepper's_score (0.00s)
+=== RUN   TestGETPlayers/returns_Pepper's_score
+    --- PASS: TestGETPlayers/returns_Pepper's_score (0.00s)
 === RUN   TestGETPlayers/returns_Floyd's_score
     --- FAIL: TestGETPlayers/returns_Floyd's_score (0.00s)
     	server_test.go:34: got '20', want '10'
 ```
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-By doing this the test has forced us to actually look at the request's URL and make some decision. So whilst in our heads we may have been worrying about stores and interfaces the next logical step actually seems to be about _routing_.
-
-_ If we did start with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**_
 
 ## Write enough code to make it pass
 
@@ -283,6 +236,10 @@ func PlayerServer(w http.ResponseWriter, r *http.Request) {
 	}
 }
 ```
+
+By doing this the test has forced us to actually look at the request's URL and make some decision. So whilst in our heads we may have been worrying about player stores and interfaces the next logical step actually seems to be about _routing_.
+
+If we did start with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**_
 
 We're resisting the temptation to use any routing libraries right now, just the smallest step to get our test passing.
 
