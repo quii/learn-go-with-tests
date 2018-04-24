@@ -60,7 +60,7 @@ type Handler interface {
 }
 ```
 
-It's an interface which expects two arguments, the first being where we _write our response_ and the second being the HTTP request that was sent to us.
+It's has one function which expects two arguments, the first being where we _write our response_ and the second being the HTTP request that was sent to us.
 
 Let's write a test for a function `PlayerServer` that takes in those two arguments. The request sent in will be to get a player's score, which we expect to be `"20"`.
 
@@ -127,7 +127,7 @@ The code now compiles and the test fails
 
 ## Write enough code to make it pass
 
-From the DI chapter we touched on HTTP servers with a `Greet` function. We learned that net/http `ResponseWriter` also implements io `Writer` so we can use `fmt.Fprint` to send strings as HTTP responses
+From the DI chapter we touched on HTTP servers with a `Greet` function. We learned that net/http's `ResponseWriter` also implements io `Writer` so we can use `fmt.Fprint` to send strings as HTTP responses
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
@@ -155,7 +155,8 @@ import (
 )
 
 func main() {
-	if err := http.ListenAndServe(":5000", http.HandlerFunc(PlayerServer)); err != nil {
+	handler := http.HandlerFunc(PlayerServer)
+	if err := http.ListenAndServe(":5000", handler); err != nil {
 		log.Fatalf("could not listen on port 5000 %v", err)
 	}
 }
@@ -193,6 +194,8 @@ You may have been thinking
 > Surely we need some kind of concept of storage to control which player gets what score. It's weird that the values seem so arbitrary in our tests.
 
 Remember we are just trying to take as small as steps as reasonably possible. By writing the test it may drive us toward our goal in an easier step.
+
+We'll add another subtest to our suite which tries to get the score of a different player, which will break our hard-coded approach.
 
 ```go
 t.Run("returns Floyd's score", func(t *testing.T) {
@@ -239,7 +242,7 @@ func PlayerServer(w http.ResponseWriter, r *http.Request) {
 
 By doing this the test has forced us to actually look at the request's URL and make some decision. So whilst in our heads we may have been worrying about player stores and interfaces the next logical step actually seems to be about _routing_.
 
-If we did start with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**_
+If we did start with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**
 
 We're resisting the temptation to use any routing libraries right now, just the smallest step to get our test passing.
 
@@ -274,7 +277,7 @@ And we can DRY up some of the code in the tests by making some helpers
 
 ```go
 func TestGETPlayers(t *testing.T) {
-	t.Run("returns the Pepper's score", func(t *testing.T) {
+	t.Run("returns Pepper's score", func(t *testing.T) {
 		req := newGetScoreRequest("Pepper")
 		res := httptest.NewRecorder()
 
