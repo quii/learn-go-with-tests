@@ -42,7 +42,7 @@ This is where _mocking_ shines.
 
 ## Write the test first
 
-We can write a test and implementing it by returning a hard-coded value to get us started. Kent Beck refers this as "Faking it". Once we have a working test we can then write more tests to help us remove that constant
+We can write a test and make it pass by returning a hard-coded value to get us started. Kent Beck refers this as "Faking it". Once we have a working test we can then write more tests to help us remove that constant
 
 By doing this very small step, we can make the important start of getting an overall project structure working correctly without having to worry too much about our application logic.
 
