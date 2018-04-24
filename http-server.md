@@ -60,7 +60,7 @@ type Handler interface {
 }
 ```
 
-It's has one function which expects two arguments, the first being where we _write our response_ and the second being the HTTP request that was sent to us.
+It has one function which expects two arguments, the first being where we _write our response_ and the second being the HTTP request that was sent to us.
 
 Let's write a test for a function `PlayerServer` that takes in those two arguments. The request sent in will be to get a player's score, which we expect to be `"20"`.
 
