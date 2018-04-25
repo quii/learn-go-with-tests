@@ -261,9 +261,9 @@ What have we done here?
 
 We've refactored our assertion into a function. This reduces duplication and improves readability of our tests. In Go you can declare functions inside other functions and assign them to variables. You can then call them, just like normal functions. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
 
-Now that we have a well-written failing test, let's fix the code, using an `if`.
-
 `t.Helper()` is needed to tell the test suite that this method is a helper. By doing this when it fails the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems easier. If you still don't understand, comment it out, make a test fail and observe the test output.
+
+Now that we have a well-written failing test, let's fix the code, using an `if`.
 
 ```go
 const helloPrefix = "Hello, "
@@ -290,7 +290,7 @@ Let's go over the cycle again
 
 On the face of it this may seem tedious but sticking to the feedback loop is important.
 
-Not only does it ensure that you have _relevant tests_ it helps ensure _you design good software_ by refactoring with the safety of tests.
+Not only does it ensure that you have _relevant tests_, it helps ensure _you design good software_ by refactoring with the safety of tests.
 
 Seeing the test fail is an important check because it also lets you see what the error message looks like. As a developer it can be very hard to work with a codebase when failing tests do not give a clear idea as to what the problem is.
 
@@ -333,7 +333,7 @@ func Hello(name string, language string) string {
 }
 ```
 
-When you try and run the test again it will complain about not passing through enough arguments to `Hello` in your other tests and in `main.go`
+When you try and run the test again it will complain about not passing through enough arguments to `Hello` in your other tests and in `hello.go`
 
 ```text
 ./hello.go:15:19: not enough arguments in call to Hello
