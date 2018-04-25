@@ -240,7 +240,7 @@ func PlayerServer(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-By doing this the test has forced us to actually look at the request's URL and make some decision. So whilst in our heads we may have been worrying about player stores and interfaces the next logical step actually seems to be about _routing_.
+By doing this the test has forced us to actually look at the request's URL and make a decision. So whilst in our heads we may have been worrying about player stores and interfaces the next logical step actually seems to be about _routing_.
 
 If we did start with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**
 
@@ -395,7 +395,7 @@ Notice we're still not worrying about making stores _just yet_, we just want the
 
 You should be in the habit of prioritising having code that compiles and then code that passes the tests. 
 
-By adding more functionality (like stub stores) we are opening ourselves up to potentially _more_ compilation problems.
+By adding more functionality (like stub stores) whilst the code isn't compiling we are opening ourselves up to potentially _more_ compilation problems.
 
 Now `main.go` won't compile for the same reason.
 
