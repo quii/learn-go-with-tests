@@ -290,7 +290,7 @@ Let's go over the cycle again
 
 On the face of it this may seem tedious but sticking to the feedback loop is important.
 
-Not only it does ensure that you have _relevant tests_, it helps ensure _you design good software_ by refactoring with the safety of tests.
+Not only does it ensure that you have _relevant tests_, it helps ensure _you design good software_ by refactoring with the safety of tests.
 
 Seeing the test fail is an important check because it also lets you see what the error message looks like. As a developer it can be very hard to work with a codebase when failing tests do not give a clear idea as to what the problem is.
 
