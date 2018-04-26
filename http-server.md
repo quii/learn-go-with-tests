@@ -719,3 +719,115 @@ func (p *PlayerServer) processWin(w http.ResponseWriter) {
 ```
 
 This makes the routing aspect of `ServeHTTP` a bit clearer and means our next iterations on storing can just be inside `processWin`.
+
+Next we want to check that when we do our `POST /players/{name}/win` that our `PlayerStore` is told to record the win.
+
+## Write the test first
+
+We can accomplish this by extending our `StubPlayerScore` with a new `Store` method and then spy on its invocations.
+
+```go
+type StubPlayerStore struct {
+	scores   map[string]string
+	winCalls []string
+}
+
+func (s *StubPlayerStore) GetPlayerScore(name string) string {
+	score := s.scores[name]
+	return score
+}
+
+func (s *StubPlayerStore) RecordWin(name string) {
+	s.winCalls = append(s.winCalls, name)
+}
+```
+
+Now extend our test to check the number of invocations for a start
+
+```go
+func TestStoreWins(t *testing.T) {
+	store := StubPlayerStore{
+		map[string]string{},
+	}
+	server := &PlayerServer{&store}
+
+	t.Run("it accepts POSTs to /win", func(t *testing.T) {
+		req, _ := http.NewRequest(http.MethodPost, "/players/Pepper/win", nil)
+		res := httptest.NewRecorder()
+
+		server.ServeHTTP(res, req)
+
+		assertStatus(t, res.Code, http.StatusAccepted)
+
+		if len(store.winCalls) != 1 {
+			t.Errorf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
+		}
+	})
+}
+```
+
+## Try to run the test
+
+```
+./server_test.go:26:20: too few values in struct initializer
+./server_test.go:65:20: too few values in struct initializer
+```
+
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+We need to update our code where we create a `StubPlayerStore` as we've added a new field
+
+```go
+store := StubPlayerStore{
+    map[string]string{},
+    nil,
+}
+```
+
+```
+--- FAIL: TestStoreWins (0.00s)
+    --- FAIL: TestStoreWins/it_accepts_POSTs_to_/win (0.00s)
+    	server_test.go:80: got 0 calls to RecordWin want 1
+```
+## Write enough code to make it pass
+
+As we're only asserting the number of calls rather than the specific values it makes our initial iteration a little smaller. 
+
+We need to update `PlayerServer`'s idea of what a `PlayerStore` is by changing the interface if we're going to be able to call `RecordWin`
+
+```go
+// PlayerStore stores score information about players
+type PlayerStore interface {
+	GetPlayerScore(name string) string
+	RecordWin(name string)
+}
+```
+
+By doing this `main` no longer compiles
+
+```
+./main.go:17:46: cannot use InMemoryPlayerStore literal (type *InMemoryPlayerStore) as type PlayerStore in field value:
+	*InMemoryPlayerStore does not implement PlayerStore (missing RecordWin method)
+```
+
+The compiler tells us what's wrong. Let's update `InMemoryPlayerStore` to have that method. 
+
+```go
+type InMemoryPlayerStore struct{}
+
+func (i *InMemoryPlayerStore) RecordWin(name string) {}
+```
+
+Try and run the tests and we should be back to compiling code but the test still failing. 
+
+Now that `PlayerStore` has `RecordWin` we can call it within our `PlayerServer`
+
+```go
+func (p *PlayerServer) processWin(w http.ResponseWriter) {
+	p.store.RecordWin("Bob")
+	w.WriteHeader(http.StatusAccepted)
+}
+```
+
+Run the tests and it should be passing! Obviously `bob` isn't exactly what we want to lets further refine the test.
