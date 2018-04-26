@@ -611,7 +611,7 @@ func assertResponseBody(t *testing.T, got, want string) {
 
 We're checking the status in all our tests now so I made a helper `assertStatus` to facilitate that. 
 
-Now our first two tests fail because of the 404 instead of 200 so we can fix `PlayerServer`.
+Now our first two tests fail because of the 404 instead of 200 so we can fix `PlayerServer` to only return not found if the score is empty.
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -627,3 +627,34 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
+### Storing scores
+
+Now that we can retrieve scores from a store it now makes sense to be able to store new scores.
+
+## Write the test first
+
+```go
+func TestStoreWins(t *testing.T) {
+	store := StubPlayerStore{
+		map[string]string{},
+	}
+	server := &PlayerServer{&store}
+
+	t.Run("it accepts POSTs to /win", func(t *testing.T) {
+		req, _ := http.NewRequest(http.MethodPost, "/players/Pepper/win", nil)
+		res := httptest.NewRecorder()
+
+		server.ServeHTTP(res, req)
+
+		assertStatus(t, res.Code, http.StatusAccepted)
+	})
+}
+```
+
+For a start let's just check we get the correct status code if we hit the particular route with POST. This lets us drive out the functionality of accepting a different kind of request and handling it differently to `GET /player/{name}`. Once this works we can then start asserting on our handler's interaction with the store
+
+
+## Try to run the test
+## Write the minimal amount of code for the test to run and check the failing test output
+## Write enough code to make it pass
+## Refactor
