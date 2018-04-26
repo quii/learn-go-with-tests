@@ -55,7 +55,7 @@ func TestGETPlayers(t *testing.T) {
 	})
 }
 
-func IgnoreTestStoreWins(t *testing.T) {
+func TestStoreWins(t *testing.T) {
 	store := StubPlayerStore{
 		map[string]string{},
 	}

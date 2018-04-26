@@ -655,6 +655,67 @@ For a start let's just check we get the correct status code if we hit the partic
 
 
 ## Try to run the test
-## Write the minimal amount of code for the test to run and check the failing test output
+
+```
+=== RUN   TestStoreWins/it_accepts_POSTs_to_/win
+    --- FAIL: TestStoreWins/it_accepts_POSTs_to_/win (0.00s)
+    	server_test.go:70: did not get correct status, got 404, want 202
+```
 ## Write enough code to make it pass
+
+Remember we are deliberately commits sins, so an if statement based on the request's method will do the trick. 
+
+```go
+func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method==http.MethodPost {
+		w.WriteHeader(http.StatusAccepted)
+		return
+	}
+
+	player := r.URL.Path[len("/players/"):]
+
+	score := p.store.GetPlayerScore(player)
+
+	if score == "" {
+		w.WriteHeader(http.StatusNotFound)
+	}
+
+	fmt.Fprint(w, score)
+}
+```
+
 ## Refactor
+
+The handler is looking a bit muddled now. Let's break the code up to make it easier to follow and isolate so functionality into new functions.
+
+```go
+func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+	case http.MethodPost:
+		p.processWin(w)
+	case http.MethodGet:
+		p.showScore(w, r)
+	}
+
+}
+
+func (p *PlayerServer) showScore(w http.ResponseWriter, r *http.Request) {
+	player := r.URL.Path[len("/players/"):]
+
+	score := p.store.GetPlayerScore(player)
+
+	if score == "" {
+		w.WriteHeader(http.StatusNotFound)
+	}
+
+	fmt.Fprint(w, score)
+}
+
+func (p *PlayerServer) processWin(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusAccepted)
+}
+```
+
+This makes the routing aspect of `ServeHTTP` a bit clearer and means our next iterations on storing can just be inside `processWin`.
