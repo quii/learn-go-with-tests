@@ -254,7 +254,6 @@ We're resisting the temptation to use any routing libraries right now, just the 
 We can simplify the `PlayerServer` by separating out the score retrieval into a function
 
 ```go
-// PlayerServer currently returns Hello, world given _any_ request
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
 	player := r.URL.Path[len("/player/"):]
 
@@ -495,7 +494,6 @@ We have a few options as to what to do next
 
 - Handle the scenario where the player doesn't exist
 - Handle the `POST /players/{name}` scenario
-- What happens if someone hits a completely wrong URL like `/playerz/{name}` ?
 - It didn't feel great that our main application was starting up but not actually working. We had to manually test to see the problem.
 
 Whilst the `POST` scenario gets us closer to the "happy path", I feel it'll be easier to tackle the missing player scenario first as we're in that context already. We'll get to the rest later.
@@ -612,7 +610,7 @@ func assertResponseBody(t *testing.T, got, want string) {
 
 We're checking the status in all our tests now so I made a helper `assertStatus` to facilitate that. 
 
-Now our first two tests fail because of the 404 instead of 200 so we can fix `PlayerServer` to only return not found if the score is empty.
+Now our first two tests fail because of the 404 instead of 200 so we can fix `PlayerServer` to only return not found if the score is 0.
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -620,7 +618,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	
 	score := p.store.GetPlayerScore(player)
 
-	if score == "" {
+	if score == 0 {
 		w.WriteHeader(http.StatusNotFound)
 	}
 
@@ -664,7 +662,7 @@ For a start let's just check we get the correct status code if we hit the partic
 ```
 ## Write enough code to make it pass
 
-Remember we are deliberately commits sins, so an if statement based on the request's method will do the trick. 
+Remember we are deliberately committing sins, so an if statement based on the request's method will do the trick. 
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -688,7 +686,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 ## Refactor
 
-The handler is looking a bit muddled now. Let's break the code up to make it easier to follow and isolate so functionality into new functions.
+The handler is looking a bit muddled now. Let's break the code up to make it easier to follow and isolate the different functionality into new functions.
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -753,7 +751,7 @@ func TestStoreWins(t *testing.T) {
 	server := &PlayerServer{&store}
 
 	t.Run("it records wins when POST", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodPost, "/players/Pepper", nil)
+		req, _ := newPostWinRequest("Pepper")
 		res := httptest.NewRecorder()
 
 		server.ServeHTTP(res, req)
@@ -764,6 +762,11 @@ func TestStoreWins(t *testing.T) {
 			t.Errorf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
 		}
 	})
+}
+
+func newPostWinRequest(name string) *http.Request {
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", name), nil)
+	return req
 }
 ```
 
@@ -797,7 +800,6 @@ As we're only asserting the number of calls rather than the specific values it m
 We need to update `PlayerServer`'s idea of what a `PlayerStore` is by changing the interface if we're going to be able to call `RecordWin`
 
 ```go
-// PlayerStore stores score information about players
 type PlayerStore interface {
 	GetPlayerScore(name string) int
 	RecordWin(name string)
@@ -838,7 +840,7 @@ Run the tests and it should be passing! Obviously `"Bob"` isn't exactly what we 
 t.Run("it records wins on POST", func(t *testing.T) {
     player := "Pepper"
 
-    req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", player), nil)
+    req := newPostWinRequest(player)
     res := httptest.NewRecorder()
 
     server.ServeHTTP(res, req)
@@ -944,11 +946,6 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	assertStatus(t, response.Code, http.StatusOK)
 
 	assertResponseBody(t, response.Body.String(), "3")
-}
-
-func newPostWinRequest(name string) *http.Request {
-	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("players/%s", name), nil)
-	return req
 }
 ```
 
