@@ -1,5 +1,7 @@
 # Pointers & errors
 
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/pointers)**
+
 We learned about structs in the last section which let us capture a number of values related around a concept.
 
 At some point you may wish to use structs to manage state, exposing methods to let users change the state in a way that you can control.

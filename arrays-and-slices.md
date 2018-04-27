@@ -1,5 +1,7 @@
 # Arrays and slices
 
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/arrays)**
+
 Arrays allow you to store multiple elements of the same type in a variable in
 a particular order.
 
