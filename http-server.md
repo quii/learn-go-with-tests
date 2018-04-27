@@ -1017,7 +1017,7 @@ Build it, run it and then use CURL to test it out
 Great! You've made a REST-ish service. To take this forward you'd want to pick a data store so you can persist the scores longer than the length of time the program runs. 
 
 - Pick a store (Bolt? Mongo? Postgres? File system?)
-- Make it implement `PlayerStore`
+- Make `PostgresPlayerStore` implement `PlayerStore`
 - TDD the functionality so you're sure it works
 - Plug it into the integration test, check it's still ok
 - Finally plug it into `main`
@@ -1033,7 +1033,7 @@ Great! You've made a REST-ish service. To take this forward you'd want to pick a
 ### Interfaces, Mocking and DI
 
 - Let's you iteratively build the system up in smaller chunks
-- Allows you to develop a handler that needs a storage without needing to write one
+- Allows you to develop a handler that needs a storage without needing actual storage
 - TDD to drive out the interfaces you need 
 
 ### Commit sins, then refactor (and then commit to source control)
