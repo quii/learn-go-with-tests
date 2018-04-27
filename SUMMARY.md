@@ -20,10 +20,10 @@
 ## Standard lib essentials
 
 - [HTTP server (WIP)](http-server.md)
-- [JSON (todo)](#)
-- [`io` (todo)](#)
-- [`time` (todo)](#)
-- [Sorting (todo)](#)
+- JSON (todo)
+- `io` (todo)
+- `time` (todo)
+- Sorting (todo
 
 ## Meta
 
