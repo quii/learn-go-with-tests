@@ -19,9 +19,8 @@
 
 ## Standard lib essentials
 
+- [HTTP server (WIP)](http-server.md)
 - [`io` (todo)](#)
-- [HTTP client (todo)](#)
-- [HTTP server (todo)](#)
 - [JSON marhshalling (todo)](#)
 - [`time` (todo)](#)
 - [Sorting (todo)](#)

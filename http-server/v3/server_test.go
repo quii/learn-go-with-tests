@@ -8,19 +8,19 @@ import (
 )
 
 type StubPlayerStore struct {
-	scores map[string]string
+	scores map[string]int
 }
 
-func (s *StubPlayerStore) GetPlayerScore(name string) string {
+func (s *StubPlayerStore) GetPlayerScore(name string) int {
 	score := s.scores[name]
 	return score
 }
 
 func TestGETPlayers(t *testing.T) {
 	store := StubPlayerStore{
-		map[string]string{
-			"Pepper": "20",
-			"Floyd":  "10",
+		map[string]int{
+			"Pepper": 20,
+			"Floyd":  10,
 		},
 	}
 	server := &PlayerServer{&store}
@@ -57,12 +57,12 @@ func TestGETPlayers(t *testing.T) {
 
 func TestStoreWins(t *testing.T) {
 	store := StubPlayerStore{
-		map[string]string{},
+		map[string]int{},
 	}
 	server := &PlayerServer{&store}
 
-	t.Run("it accepts POSTs to /win", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodPost, "/players/Pepper/win", nil)
+	t.Run("it returns accepted on POST", func(t *testing.T) {
+		req, _ := http.NewRequest(http.MethodPost, "/players/Pepper", nil)
 		res := httptest.NewRecorder()
 
 		server.ServeHTTP(res, req)

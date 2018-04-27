@@ -1,26 +1,21 @@
 package main
 
-import (
-	"log"
-	"net/http"
-)
+// NewInMemoryPlayerStore initialises an empty player store
+func NewInMemoryPlayerStore() *InMemoryPlayerStore {
+	return &InMemoryPlayerStore{map[string]int{}}
+}
 
 // InMemoryPlayerStore collects data about players in memory
-type InMemoryPlayerStore struct{}
+type InMemoryPlayerStore struct {
+	store map[string]int
+}
 
 // RecordWin will record a player's win
 func (i *InMemoryPlayerStore) RecordWin(name string) {
+	i.store[name]++
 }
 
 // GetPlayerScore retrieves scores for a given player
 func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
-	return 123
-}
-
-func main() {
-	server := &PlayerServer{&InMemoryPlayerStore{}}
-
-	if err := http.ListenAndServe(":5000", server); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
-	}
+	return i.store[name]
 }
