@@ -47,7 +47,7 @@ We can write a test and make it pass by returning a hard-coded value to get us s
 
 By doing this very small step, we can make the important start of getting an overall project structure working correctly without having to worry too much about our application logic.
 
-To create a web server in Go you will typically call [https://golang.org/pkg/net/http/#ListenAndServe](ListenAndServe)
+To create a web server in Go you will typically call [ListenAndServe](https://golang.org/pkg/net/http/#ListenAndServe)
 
 ```go
 func ListenAndServe(addr string, handler Handler) error
