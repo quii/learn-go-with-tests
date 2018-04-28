@@ -34,7 +34,7 @@ Property based tests \(todo\)
 
 ### Standard lib essentials
 
-* [HTTP server WIP](http-server.md) - Learn how to TDD a web server
+* [HTTP server](http-server.md) - Learn how to TDD a web server
 * JSON
 * `io`
 * `time`
