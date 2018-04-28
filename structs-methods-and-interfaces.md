@@ -2,7 +2,7 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/structs)**
 
-Suppose that we need some geometry code to calculate the perimeter of a rectangle given a height and width. We can write a `Perimeter(width float64, height float64)` function, where `float64` is for floating-point numbers like `123.45`
+Suppose that we need some geometry code to calculate the perimeter of a rectangle given a height and width. We can write a `Perimeter(width float64, height float64)` function, where `float64` is for floating-point numbers like `123.45`.
 
 The TDD cycle should be pretty familiar to you by now.
 
@@ -33,7 +33,7 @@ func Perimeter(width float64, height float64) float64 {
 }
 ```
 
-Results in `shapes_test.go:10: got 0 want 40`
+Results in `shapes_test.go:10: got 0 want 40`.
 
 ## Write enough code to make it pass
 
@@ -205,9 +205,9 @@ But you cannot in Go
 
 `./shapes.go:20:32: Area redeclared in this block`
 
-We have two choices
+We have two choices:
 
-* You can have functions with the same name declared in different _packages_. So we could create our `Area(Circle)` in a new package, but that feels overkill here
+* You can have functions with the same name declared in different _packages_. So we could create our `Area(Circle)` in a new package, but that feels overkill here.
 * We can define [_methods_](https://golang.org/ref/spec#Method_declarations) on our newly defined types instead.
 
 ### What are methods?
@@ -290,7 +290,7 @@ It is a convention in Go to have the receiver variable be the first letter of th
 r Rectangle
 ```
 
-If you try to re-run the tests they should now compile and give you some failing output
+If you try to re-run the tests they should now compile and give you some failing output.
 
 ## Write enough code to make it pass
 
@@ -385,7 +385,7 @@ This kind of approach of using interfaces to declare **only what you need** is v
 
 ## Further refactoring
 
-Now that you have some understanding of structs we can now introduce "table driven tests"
+Now that you have some understanding of structs we can now introduce "table driven tests".
 
 [Table driven tests](https://github.com/golang/go/wiki/TableDrivenTests) are useful when you want to build a list of test cases that can be tested in the same manner.
 
@@ -494,7 +494,7 @@ And our tests pass!
 
 ## Refactor
 
-Again, the implementation is fine but our tests could do with some improvement
+Again, the implementation is fine but our tests could do with some improvement.
 
 When you scan this
 
@@ -516,7 +516,7 @@ Let's see what looks like
         {shape: Triangle{Base: 12, Height: 6}, want: 36.0},
 ```
 
-In [Test-Driven Development by Example](https://g.co/kgs/yCzDLF) Kent Beck refactors some tests to a point and asserts
+In [Test-Driven Development by Example](https://g.co/kgs/yCzDLF) Kent Beck refactors some tests to a point and asserts:
 
 > The test speaks to us more clearly, as if it were an assertion of truth, **not a sequence of operations**
 
@@ -524,9 +524,9 @@ In [Test-Driven Development by Example](https://g.co/kgs/yCzDLF) Kent Beck refac
 
 Now our tests \(at least the list of cases\) make assertions of truth about shapes and their areas.
 
-#### Make sure your test output is helpful
+## Make sure your test output is helpful
 
-Remember earlier when we were implementing `Triangle` and we had the failing test? It printed `shapes_test.go:31: got 0.00 want 36.00`
+Remember earlier when we were implementing `Triangle` and we had the failing test? It printed `shapes_test.go:31: got 0.00 want 36.00`.
 
 We knew this was in relation to `Triangle` because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table. How would a developer know which case failed? This is not a great experience for the developer, they will have to manually look through the cases to find out which case actually failed.
 
@@ -542,7 +542,7 @@ By wrapping each case in a `t.Run` you will have clearer test output on failures
         shapes_test.go:33: main.Rectangle{Width:12, Height:6} got 72.00 want 72.10
 ```
 
-And you can run specific tests within your table with `go test -run TestArea/Rectangle`
+And you can run specific tests within your table with `go test -run TestArea/Rectangle`.
 
 Here is our final test code which captures this
 
@@ -587,4 +587,3 @@ This was an important chapter because we are now starting to define our own type
 Interfaces are a great tool for hiding complexity away from other parts of the system. In our case our test helper _code_ did not need to know the exact shape it was asserting on, only how to "ask" for it's area.
 
 As you become more familiar with Go you start to see the real strength of interfaces and the standard library. You'll learn about interfaces defined in the standard library that are used _everywhere_ and by implementing them against your own types you can very quickly re-use a lot of great functionality.
-
