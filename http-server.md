@@ -67,12 +67,12 @@ Let's write a test for a function `PlayerServer` that takes in those two argumen
 
 ```go
 t.Run("returns Pepper's score", func(t *testing.T) {
-    req, _ := http.NewRequest(http.MethodGet, "/players/Pepper", nil)
-    res := httptest.NewRecorder()
+    request, _ := http.NewRequest(http.MethodGet, "/players/Pepper", nil)
+    response := httptest.NewRecorder()
 
-    PlayerServer(res, req)
+    PlayerServer(response, request)
 
-    got := res.Body.String()
+    got := response.Body.String()
     want := "20"
 
     if got != want {
@@ -163,7 +163,7 @@ func main() {
 }
 ```
 
-So far all of our application code have been in one file, however this isn't best practice for larger projects where you'll want to separate things into different files. 
+So far all of our application code has been in one file, however this isn't best practice for larger projects where you'll want to separate things into different files. 
 
 To run this, do `go build` which will take all the `.go` files in the directory and build you a program. You can then execute it with `./myprogram`. 
 
@@ -190,22 +190,16 @@ What we're going to do now is write _another_ test to force us into making a pos
 
 ## Write the test first
 
-You may have been thinking
-
-> Surely we need some kind of concept of storage to control which player gets what score. It's weird that the values seem so arbitrary in our tests.
-
-Remember we are just trying to take as small as steps as reasonably possible. By writing the test it may drive us toward our goal in an easier step.
-
 We'll add another subtest to our suite which tries to get the score of a different player, which will break our hard-coded approach.
 
 ```go
 t.Run("returns Floyd's score", func(t *testing.T) {
-    req, _ := http.NewRequest(http.MethodGet, "/players/Floyd", nil)
-    res := httptest.NewRecorder()
+    request, _ := http.NewRequest(http.MethodGet, "/players/Floyd", nil)
+    response := httptest.NewRecorder()
 
-    PlayerServer(res, req)
+    PlayerServer(response, request)
 
-    got := res.Body.String()
+    got := response.Body.String()
     want := "10"
 
     if got != want {
@@ -213,6 +207,12 @@ t.Run("returns Floyd's score", func(t *testing.T) {
     }
 })
 ```
+
+You may have been thinking
+
+> Surely we need some kind of concept of storage to control which player gets what score. It's weird that the values seem so arbitrary in our tests.
+
+Remember we are just trying to take as small as steps as reasonably possible, so we're just trying to break the constant for now. 
 
 ## Try to run the test
 ```
@@ -241,9 +241,9 @@ func PlayerServer(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-By doing this the test has forced us to actually look at the request's URL and make a decision. So whilst in our heads we may have been worrying about player stores and interfaces the next logical step actually seems to be about _routing_.
+This test has forced us to actually look at the request's URL and make a decision. So whilst in our heads we may have been worrying about player stores and interfaces the next logical step actually seems to be about _routing_.
 
-If we did start with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**
+If we did started with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**
 
 We're resisting the temptation to use any routing libraries right now, just the smallest step to get our test passing.
 
@@ -278,21 +278,21 @@ And we can DRY up some of the code in the tests by making some helpers
 ```go
 func TestGETPlayers(t *testing.T) {
 	t.Run("returns Pepper's score", func(t *testing.T) {
-		req := newGetScoreRequest("Pepper")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Pepper")
+		response := httptest.NewRecorder()
 
-		PlayerServer(res, req)
+		PlayerServer(response, request)
 
-		assertResponseBody(t, res.Body.String(), "20")
+		assertResponseBody(t, response.Body.String(), "20")
 	})
 
 	t.Run("returns Floyd's score", func(t *testing.T) {
-		req := newGetScoreRequest("Floyd")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Floyd")
+		response := httptest.NewRecorder()
 
-		PlayerServer(res, req)
+		PlayerServer(response, request)
 
-		assertResponseBody(t, res.Body.String(), "10")
+		assertResponseBody(t, response.Body.String(), "10")
 	})
 }
 
@@ -372,21 +372,21 @@ func TestGETPlayers(t *testing.T) {
 	server := &PlayerServer{}
 	
 	t.Run("returns the Pepper's score", func(t *testing.T) {
-		req := newGetScoreRequest("Pepper")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Pepper")
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertResponseBody(t, res.Body.String(), "20")
+		assertResponseBody(t, response.Body.String(), "20")
 	})
 
 	t.Run("returns Floyd's score", func(t *testing.T) {
-		req := newGetScoreRequest("Floyd")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Floyd")
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertResponseBody(t, res.Body.String(), "10")
+		assertResponseBody(t, response.Body.String(), "10")
 	})
 }
 ```
@@ -443,21 +443,21 @@ func TestGETPlayers(t *testing.T) {
 	server := &PlayerServer{&store}
 
 	t.Run("returns the Pepper's score", func(t *testing.T) {
-		req := newGetScoreRequest("Pepper")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Pepper")
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertResponseBody(t, res.Body.String(), "20")
+		assertResponseBody(t, response.Body.String(), "20")
 	})
 
 	t.Run("returns Floyd's score", func(t *testing.T) {
-		req := newGetScoreRequest("Floyd")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Floyd")
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertResponseBody(t, res.Body.String(), "10")
+		assertResponseBody(t, response.Body.String(), "10")
 	})
 }
 ```
@@ -504,12 +504,12 @@ Add a missing player scenario to our existing suite
 
 ```go
 t.Run("returns 404 on missing players", func(t *testing.T) {
-    req := newGetScoreRequest("Apollo")
-    res := httptest.NewRecorder()
+    request := newGetScoreRequest("Apollo")
+    response := httptest.NewRecorder()
 
-    server.ServeHTTP(res, req)
+    server.ServeHTTP(response, request)
 
-    got := res.Code
+    got := response.Code
     want := http.StatusNotFound
 
     if got != want {
@@ -559,32 +559,32 @@ func TestGETPlayers(t *testing.T) {
 	server := &PlayerServer{&store}
 
 	t.Run("returns Pepper's score", func(t *testing.T) {
-		req := newGetScoreRequest("Pepper")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Pepper")
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertStatus(t, res.Code, http.StatusOK)
-		assertResponseBody(t, res.Body.String(), "20")
+		assertStatus(t, response.Code, http.StatusOK)
+		assertResponseBody(t, response.Body.String(), "20")
 	})
 
 	t.Run("returns Floyd's score", func(t *testing.T) {
-		req := newGetScoreRequest("Floyd")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Floyd")
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
 		assertStatus(t, res.Code, http.StatusOK)
-		assertResponseBody(t, res.Body.String(), "10")
+		assertResponseBody(t, response.Body.String(), "10")
 	})
 
 	t.Run("returns 404 on missing players", func(t *testing.T) {
-		req := newGetScoreRequest("Apollo")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Apollo")
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertStatus(t, res.Code, http.StatusNotFound)
+		assertStatus(t, response.Code, http.StatusNotFound)
 	})
 }
 
@@ -640,12 +640,12 @@ func TestStoreWins(t *testing.T) {
 	server := &PlayerServer{&store}
 
 	t.Run("it returns accepted on POST", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodPost, "/players/Pepper", nil)
-		res := httptest.NewRecorder()
+		request, _ := http.NewRequest(http.MethodPost, "/players/Pepper", nil)
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertStatus(t, res.Code, http.StatusAccepted)
+		assertStatus(t, response.Code, http.StatusAccepted)
 	})
 }
 ```
@@ -751,12 +751,12 @@ func TestStoreWins(t *testing.T) {
 	server := &PlayerServer{&store}
 
 	t.Run("it records wins when POST", func(t *testing.T) {
-		req, _ := newPostWinRequest("Pepper")
-		res := httptest.NewRecorder()
+		request, _ := newPostWinRequest("Pepper")
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertStatus(t, res.Code, http.StatusAccepted)
+		assertStatus(t, response.Code, http.StatusAccepted)
 
 		if len(store.winCalls) != 1 {
 			t.Errorf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
@@ -840,12 +840,12 @@ Run the tests and it should be passing! Obviously `"Bob"` isn't exactly what we 
 t.Run("it records wins on POST", func(t *testing.T) {
     player := "Pepper"
 
-    req := newPostWinRequest(player)
-    res := httptest.NewRecorder()
+    request := newPostWinRequest(player)
+    response := httptest.NewRecorder()
 
-    server.ServeHTTP(res, req)
+    server.ServeHTTP(response, request)
 
-    assertStatus(t, res.Code, http.StatusAccepted)
+    assertStatus(t, response.Code, http.StatusAccepted)
 
     if len(store.winCalls) != 1 {
         t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)

@@ -32,32 +32,32 @@ func TestGETPlayers(t *testing.T) {
 	server := &PlayerServer{&store}
 
 	t.Run("returns Pepper's score", func(t *testing.T) {
-		req := newGetScoreRequest("Pepper")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Pepper")
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertStatus(t, res.Code, http.StatusOK)
-		assertResponseBody(t, res.Body.String(), "20")
+		assertStatus(t, response.Code, http.StatusOK)
+		assertResponseBody(t, response.Body.String(), "20")
 	})
 
 	t.Run("returns Floyd's score", func(t *testing.T) {
-		req := newGetScoreRequest("Floyd")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Floyd")
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertStatus(t, res.Code, http.StatusOK)
-		assertResponseBody(t, res.Body.String(), "10")
+		assertStatus(t, response.Code, http.StatusOK)
+		assertResponseBody(t, response.Body.String(), "10")
 	})
 
 	t.Run("returns 404 on missing players", func(t *testing.T) {
-		req := newGetScoreRequest("Apollo")
-		res := httptest.NewRecorder()
+		request := newGetScoreRequest("Apollo")
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertStatus(t, res.Code, http.StatusNotFound)
+		assertStatus(t, response.Code, http.StatusNotFound)
 	})
 }
 
@@ -71,12 +71,12 @@ func TestStoreWins(t *testing.T) {
 	t.Run("it records wins on POST", func(t *testing.T) {
 		player := "Pepper"
 
-		req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", player), nil)
-		res := httptest.NewRecorder()
+		request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", player), nil)
+		response := httptest.NewRecorder()
 
-		server.ServeHTTP(res, req)
+		server.ServeHTTP(response, request)
 
-		assertStatus(t, res.Code, http.StatusAccepted)
+		assertStatus(t, response.Code, http.StatusAccepted)
 
 		if len(store.winCalls) != 1 {
 			t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)

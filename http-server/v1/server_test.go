@@ -7,13 +7,13 @@ import (
 )
 
 func TestGETPlayers(t *testing.T) {
-	req, _ := http.NewRequest(http.MethodGet, "/", nil)
-	res := httptest.NewRecorder()
+	request, _ := http.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
 
-	PlayerServer(res, req)
+	PlayerServer(response, request)
 
 	t.Run("returns Pepper's score", func(t *testing.T) {
-		got := res.Body.String()
+		got := response.Body.String()
 		want := "20"
 
 		if got != want {
