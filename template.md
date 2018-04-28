@@ -8,6 +8,5 @@ Some intro
 ## Write enough code to make it pass
 ## Refactor
 
-
 ## Repeat for new requirements
 ## Wrapping up
