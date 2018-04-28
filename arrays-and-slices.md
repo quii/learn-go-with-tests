@@ -6,7 +6,7 @@ Arrays allow you to store multiple elements of the same type in a variable in
 a particular order.
 
 When you have an array, it is very common to have to iterate over them. So let's
-use [our new-found knowledge of `for`][for] to make a `Sum` function. `Sum` will
+use [our new-found knowledge of `for`](for.md) to make a `Sum` function. `Sum` will
 take an array of numbers and return the total.
 
 Let's use our TDD skills
@@ -75,7 +75,7 @@ To get the value out of an array at a particular index, just use `array[index]`
 syntax. In this case we are using `for` to iterate 5 times to work through the
 array and add each item onto `sum`.
 
-#### A note on source control
+### A note on source control
 
 At this point if you are using source control \(which you should!\) I would
 `commit` the code as it is. We have working software backed by a test.
@@ -102,7 +102,7 @@ func Sum(numbers [5]int) int {
 values, the index and the value. We are choosing to ignore the index value by
 using `_` [blank identifier](https://golang.org/doc/effective_go.html#blank).
 
-#### Back to source control
+### Back to source control
 
 Now we are happy with the code I would amend the previous commit so we only
 check in the lovely version of our code with its test.
