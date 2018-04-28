@@ -6,10 +6,10 @@ It is assumed that you have read the structs section before as some understandin
 
 There is _a lot_ of misunderstandings around dependency injection around the programming community. Hopefully this guide will show you how
 
-* You dont need a framework
+* You don't need a framework
 * It does not overcomplicate your design
 * It facilitates testing
-* It allows you to write great, general-purpose functions. 
+* It allows you to write great, general-purpose functions.
 
 We want to write a function that greets someone, just like we did in the hello-world chapter but this time we are going to be testing the _actual printing_.
 
@@ -118,7 +118,7 @@ func Greet(writer *bytes.Buffer, name string) {
 }
 ```
 
-The test now passes
+The test now passes.
 
 ## Refactor
 
@@ -186,9 +186,9 @@ func main() {
 }
 ```
 
-Go to [http://localhost:5000](http://localhost:5000). You'll see your greeting function being used.
+Run the program and go to [http://localhost:5000](http://localhost:5000). You'll see your greeting function being used.
 
-HTTP servers will be covered in a later chapter so dont worry too much about the details.
+HTTP servers will be covered in a later chapter so don't worry too much about the details.
 
 When you write a HTTP handler, you are given a `http.ResponseWriter` and the `http.Request` that was used to make the request. When you implement your server you _write_ your response using the writer.
 
@@ -200,7 +200,7 @@ Our first round of code was not easy to test because it wrote data to somewhere 
 
 _Motivated by our tests_ we refactored the code so we could control _where_ the data was written by **injecting a dependency** which allowed us to:
 
-* **Test our code** If you cant test a function _easily_, it's usually because of dependencies hard-wired into a function _or_ global state. If you have a global database connection pool for instance that is used by some kind of service layer, it is likely going to be difficult to test and they will be slow to run. DI will motivate you to inject in a database dependency \(via an interface\) which you can then mock out with something you can control in your tests.
+* **Test our code** If you can't test a function _easily_, it's usually because of dependencies hard-wired into a function _or_ global state. If you have a global database connection pool for instance that is used by some kind of service layer, it is likely going to be difficult to test and they will be slow to run. DI will motivate you to inject in a database dependency \(via an interface\) which you can then mock out with something you can control in your tests.
 * **Separate our concerns**, decoupling _where the data goes_ from _how to generate it_. If you ever feel like a method/function has too many responsibilities \(generating data _and_ writing to a db? handling HTTP requests _and_ doing domain level logic?\) DI is probably going to be the tool you need.
 * **Allow our code to be re-used in different contexts** The first "new" context our code can be used in is inside tests. But further on if someone wants to try something new with your function they can inject their own dependencies.
 
@@ -215,4 +215,3 @@ By having some familiarity of the `io.Writer` interface we are able to use `byte
 The more familiar you are with the standard library the more you'll see these general purpose interfaces which you can then re-use in your own code to make your software reusable in a number of contexts.
 
 This example is heavily influenced from a chapter in [The Go Programming language](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440), so if you enjoyed this, go buy it!
-
