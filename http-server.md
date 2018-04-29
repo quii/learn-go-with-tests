@@ -820,7 +820,7 @@ type InMemoryPlayerStore struct{}
 func (i *InMemoryPlayerStore) RecordWin(name string) {}
 ```
 
-Try and run the tests and we should be back to compiling code but the test still failing.
+Try and run the tests and we should be back to compiling code - but the test is still failing.
 
 Now that `PlayerStore` has `RecordWin` we can call it within our `PlayerServer`
 
@@ -831,7 +831,7 @@ func (p *PlayerServer) processWin(w http.ResponseWriter) {
 }
 ```
 
-Run the tests and it should be passing! Obviously `"Bob"` isn't exactly what we want to lets further refine the test.
+Run the tests and it should be passing! Obviously `"Bob"` isn't exactly what we want to send to `RecordWin`, so let's further refine the test.
 
 ## Write the test first
 
@@ -910,25 +910,25 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 }
 ```
 
-While our tests are passing but we don't really have working software. If you try and run main and use the software as intended it doesn't work because we haven't got round to implementing `PlayerStore` correctly. This is fine though, by focusing on our handler we have identified the interface that we need, rather than trying to design it up-front.
+Even though our tests are passing we don't really have working software. If you try and run `main` and use the software as intended it doesn't work because we haven't got round to implementing `PlayerStore` correctly. This is fine though; by focusing on our handler we have identified the interface that we need, rather than trying to design it up-front.
 
-We _could_ start writing some tests around our `InMemoryPlayerStore` but it's only a temporary thing for when we use a _real_ database.
+We _could_ start writing some tests around our `InMemoryPlayerStore` but it's only here temporarily until we implement a more robust way of persisting player scores (i.e. a database).
 
-What we'll do for now is write an _integration test_ between our `PlayerServer` and `InMemoryPlayerStore` to finish off the functionality. This will let us get to our goal of being confident our application is working, without having to directly test `InMemoryPlayerStore`. Not only that, but when we get around to implementing `PlayerStore` with a real database, we can just plug that implementation directly into our integration test if we want to.
+What we'll do for now is write an _integration test_ between our `PlayerServer` and `InMemoryPlayerStore` to finish off the functionality. This will let us get to our goal of being confident our application is working, without having to directly test `InMemoryPlayerStore`. Not only that, but when we get around to implementing `PlayerStore` with a database, we can test that implementation with the same integration test.
 
 ### Integration tests
 
-Integration tests can be useful for testing that larger areas of your system work but you must bear in mind
+Integration tests can be useful for testing that larger areas of your system work but you must bear in mind:
 
 - They are harder to write
-- When they fail, it can be difficult to know why (as usually its a bug within a component of the integration test) and can be harder to fix
-- Sometimes slower to run (as they often are used to test against a "real" component, like a database)
+- When they fail, it can be difficult to know why (as usually it's a bug within a component of the integration test) and so can be harder to fix
+- They are sometimes slower to run (as they often are used with "real" components, like a database)
 
 For that reason, it is recommended that you research _The Test Pyramid_.
 
 ## Write the test first
 
-In the interests of brevity, I am going to show you the final refactored test.
+In the interest of brevity, I am going to show you the final refactored integration test.
 
 ```go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
@@ -985,8 +985,8 @@ func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 }
 ```
 
-- We need to store the data so i've added a `map[string]int` to the struct
-- For convenience I've made `NewInMemoryPlayerStore` to do the initialisation of the store. (and updated the integration test to use it `store := NewInMemoryPlayerStore()`))
+- We need to store the data so I've added a `map[string]int` to the `InMemoryPlayerStore` struct
+- For convenience I've made `NewInMemoryPlayerStore` to initialise the store, and updated the integration test to use it (`store := NewInMemoryPlayerStore()`)
 - The rest of the code is just wrapping around the `map`
 
 The integration test passes, now we just need to change `main` to use `NewInMemoryPlayerStore()`
@@ -1013,7 +1013,7 @@ Build it, run it and then use CURL to test it out
 - Run this a few times, change the player names if you like `curl -X POST http://localhost:5000/players/Pepper`
 - Check scores with `curl http://localhost:5000/players/Pepper`
 
-Great! You've made a REST-ish service. To take this forward you'd want to pick a data store so you can persist the scores longer than the length of time the program runs.
+Great! You've made a REST-ish service. To take this forward you'd want to pick a data store to persist the scores longer than the length of time the program runs.
 
 - Pick a store (Bolt? Mongo? Postgres? File system?)
 - Make `PostgresPlayerStore` implement `PlayerStore`
@@ -1026,12 +1026,13 @@ Great! You've made a REST-ish service. To take this forward you'd want to pick a
 ### `http.Handler`
 
 - Implement this interface to create web servers
+- Use `http.HandlerFunc` to turn ordinary functions into `http.Handler`s
 - Use `httptest.NewRecorder` to pass in as a `ResponseWriter` to let you spy on the responses your handler sends
 - Use `http.NewRequest` to construct the requests you expect to come in to your system
 
 ### Interfaces, Mocking and DI
 
-- Let's you iteratively build the system up in smaller chunks
+- Lets you iteratively build the system up in smaller chunks
 - Allows you to develop a handler that needs a storage without needing actual storage
 - TDD to drive out the interfaces you need
 
@@ -1040,4 +1041,4 @@ Great! You've made a REST-ish service. To take this forward you'd want to pick a
 - You need to treat having failing compilation or failing tests as a red situation that you need to get out of as soon as you can
 - Write just the necessary code to get there. _Then_ refactor and make the code nice.
 - By trying to do too many changes whilst the code isn't compiling or the tests are failing puts you at risk of compounding the problems
-- Sticking to this approach forces you to write small tests, which means small changes which helps keeps working on complex systems manageable
+- Sticking to this approach forces you to write small tests, which means small changes, which helps keep working on complex systems manageable
