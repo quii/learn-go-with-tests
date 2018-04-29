@@ -130,4 +130,3 @@ _NOTE_ by default Benchmarks are run sequentially.
 * More TDD practice
 * Learned `for`.
 * Learned how to write benchmarks
-

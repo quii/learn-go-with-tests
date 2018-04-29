@@ -8,7 +8,7 @@ At some point you may wish to use structs to manage state, exposing methods to l
 
 **Fintech loves Go** and uhhh bitcoins? so let's show what an amazing banking system we can make.
 
-Let's make a `Wallet` struct which let's us deposit `Bitcoin`
+Let's make a `Wallet` struct which let's us deposit `Bitcoin`.
 
 ## Write the test first
 
@@ -107,7 +107,7 @@ In Go, **when you call a function or a method the arguments are** _**copied**_.
 
 When calling `func (w Wallet) Deposit(amount int)` the `w` is a copy of whatever we called the method from.
 
-Without getting too computer-sciency, when you create a value - like a wallet, it is stored somewhere in memory. You can find out what the _address_ of that bit of memory with `&myVal`
+Without getting too computer-sciency, when you create a value - like a wallet, it is stored somewhere in memory. You can find out what the _address_ of that bit of memory with `&myVal`.
 
 Experiment by adding some prints to your code
 
@@ -205,7 +205,7 @@ func TestWallet(t *testing.T) {
 }
 ```
 
-To make `Bitcoin` you just use the syntax `Bitcoin(999)`
+To make `Bitcoin` you just use the syntax `Bitcoin(999)`.
 
 An interesting property of type aliasing is that you can also declare _methods_ on them. This can be very useful when you want to add some domain specific functionality on top of existing types.
 
@@ -277,7 +277,6 @@ func TestWallet(t *testing.T) {
             t.Errorf("got %s want %s", got, want)
         }
     })
-
 }
 ```
 
@@ -339,7 +338,7 @@ How do we signal a problem when using `Withdraw` ?
 
 In Go, if you want to indicate an error it is idiomatic for your function to return an `err` for the caller to check and act on.
 
-Let's try this out in a test
+Let's try this out in a test.
 
 ## Write the test first
 
@@ -357,7 +356,7 @@ t.Run("Withdraw insufficient funds", func(t *testing.T) {
 })
 ```
 
-We want `Withdraw` to return an error _if_ you try to take out more than you have and the balance should stay the same
+We want `Withdraw` to return an error _if_ you try to take out more than you have and the balance should stay the same.
 
 We then check an error has returned by failing the test if it is `nil`.
 
@@ -380,7 +379,7 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 }
 ```
 
-Again, it is very important to just write enough code to satisfy the compiler. We correct our `Withdraw` method to return `error` and for now we have to return _something_ so let's just return `nil`
+Again, it is very important to just write enough code to satisfy the compiler. We correct our `Withdraw` method to return `error` and for now we have to return _something_ so let's just return `nil`.
 
 ## Write enough code to make it pass
 
@@ -398,7 +397,7 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 
 Remember to import `errors` into your code.
 
-`errors.New` creates a new `error` with a message of your choosing
+`errors.New` creates a new `error` with a message of your choosing.
 
 ## Refactor
 
@@ -426,7 +425,7 @@ t.Run("Withdraw insufficient funds", func(t *testing.T) {
 
 Hopefully when returning an error of "oh no" you were thinking that we _might_ iterate on that because it doesn't seem that useful to return.
 
-Assuming that the error ultimately gets returned to the user, let's update our test to assert on some kind of error message rather than just the existence of an error
+Assuming that the error ultimately gets returned to the user, let's update our test to assert on some kind of error message rather than just the existence of an error.
 
 ## Write the test first
 
@@ -629,7 +628,7 @@ func assertError(t *testing.T, got error, want error) {
 ### Pointers
 
 * Go copies values when you pass them to functions/methods so if you're writing a function that needs to mutate state you'll need it to take a pointer to the thing you want to change.
-* The fact that Go takes a copy of values is useful a lot of the time but sometimes you wont want your system to make a copy of something, in which case you need to pass a reference. Examples could be very large data or perhaps things you intend only to have one instance of \(like database connection pools\)
+* The fact that Go takes a copy of values is useful a lot of the time but sometimes you wont want your system to make a copy of something, in which case you need to pass a reference. Examples could be very large data or perhaps things you intend only to have one instance of \(like database connection pools\).
 
 ### nil
 
@@ -639,10 +638,10 @@ func assertError(t *testing.T, got error, want error) {
 
 ### Errors
 
-* Errors are the way to signify failure when calling a function/method
+* Errors are the way to signify failure when calling a function/method.
 * By listening to our tests we concluded that checking for a string in an error would result in a flaky test. So we refactored to use a meaningful value instead and this resulted in easier to test code and concluded this would be easier for users of our API too.
 * This is not the end of the story with error handling, you can do more sophisticated things but this is just an intro. Later sections will cover more strategies.
-* [Don’t just check errors, handle them gracefully](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully) 
+* [Don’t just check errors, handle them gracefully](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully)
 
 ### Create new types from existing ones
 

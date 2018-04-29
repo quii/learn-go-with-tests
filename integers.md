@@ -45,7 +45,7 @@ func Add(x, y int) int {
 }
 ```
 
-When you have more than one argument of the same type \(in our case two integers\) rather than having `(x int, y int)` you can shorten it to `(x, y int)`
+When you have more than one argument of the same type \(in our case two integers\) rather than having `(x int, y int)` you can shorten it to `(x, y int)`.
 
 Now run the tests and we should be happy that the test is correctly reporting what is wrong.
 
@@ -98,7 +98,7 @@ func Add(x, y int) int {
 
 ### Examples
 
-If you really want to go the extra mile you can make [examples](https://blog.golang.org/examples). You will find a lot of examples in the documentation of the standard library
+If you really want to go the extra mile you can make [examples](https://blog.golang.org/examples). You will find a lot of examples in the documentation of the standard library.
 
 Often code examples go out of date with what the actual code does because they live outside of the real code and don't get checked.
 
@@ -140,4 +140,3 @@ What we have covered:
 * Integers, addition
 * Writing better documentation so users of our code can understand its usage quickly
 * Examples of how to use our code, which are checked as part of our tests
-

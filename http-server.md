@@ -5,7 +5,7 @@
 You have been asked to create a web server where users can track how many games players have won
 
 - `GET /players/{name}` should return a number indicating total number of wins
-- `POST /players/{name}` should record a win for that name, incrementing for every subsequent `POST` 
+- `POST /players/{name}` should record a win for that name, incrementing for every subsequent `POST`
 
 We will follow the TDD approach, getting working software as quickly as we can and then making small iterative improvements until we have the solution. By taking this approach we
 
@@ -19,31 +19,31 @@ Throughout this book we have emphasised the TDD process of write a test & watch 
 
 This discipline of writing the minimal amount of code is important in terms of the safety TDD gives you. You should be striving to get out of "red" as soon as you can.
 
-Kent Beck describes it as 
+Kent Beck describes it as:
 
 > Make the test work quickly, committing whatever sins necessary in process.
 
 You can commit these sins because you will refactor afterwards backed by the safety of the tests.
 
-#### What if you don't do this?
+### What if you don't do this?
 
-The more changes you make while in red, the more likely you are to add more problems, not covered by tests. 
+The more changes you make while in red, the more likely you are to add more problems, not covered by tests.
 
 The idea is to be iteratively writing useful code with small steps, driven by tests so that you don't fall into a rabbit hole for hours.
 
 ### Chicken and egg
 
-How can we incrementally build this? We cant `GET` a player without having stored something and it seems hard to know if `POST` has worked without the `GET` endpoint already existing. 
+How can we incrementally build this? We cant `GET` a player without having stored something and it seems hard to know if `POST` has worked without the `GET` endpoint already existing.
 
-This is where _mocking_ shines. 
+This is where _mocking_ shines.
 
 - `GET` will need a `PlayerStore` _thing_ to get scores for a player. This should be an interface so when we test we can create a simple stub to test our code without needing to have implemented any actual storage code.
 - For `POST` we can _spy_ on its calls to `PlayerStore` to make sure it stores players correctly. Our implementation of saving wont be coupled to retrieval.
-- For having some working software quickly we can make a very simple in-memory implementation and then later we can create an implementation backed by whatever storage mechanism we prefer. 
+- For having some working software quickly we can make a very simple in-memory implementation and then later we can create an implementation backed by whatever storage mechanism we prefer.
 
 ## Write the test first
 
-We can write a test and make it pass by returning a hard-coded value to get us started. Kent Beck refers this as "Faking it". Once we have a working test we can then write more tests to help us remove that constant
+We can write a test and make it pass by returning a hard-coded value to get us started. Kent Beck refers this as "Faking it". Once we have a working test we can then write more tests to help us remove that constant.
 
 By doing this very small step, we can make the important start of getting an overall project structure working correctly without having to worry too much about our application logic.
 
@@ -81,7 +81,7 @@ t.Run("returns Pepper's score", func(t *testing.T) {
 })
 ```
 
-In order to test our server, we will need a `Request` to send in and we'll want to _spy_ on what our handler writes to the `ResponseWriter`. 
+In order to test our server, we will need a `Request` to send in and we'll want to _spy_ on what our handler writes to the `ResponseWriter`.
 
 - We use `http.NewRequest` to create a request. The first argument is the request's method and the second is the request's path. The `nil` argument refers to the request's body, which we don't need to set in this case.
 - `net/http/httptest` has a spy already made for us called `ResponseRecorder` so we can use that. It has many helpful methods to inspect what has been written as a response.
@@ -163,9 +163,9 @@ func main() {
 }
 ```
 
-So far all of our application code has been in one file, however this isn't best practice for larger projects where you'll want to separate things into different files. 
+So far all of our application code has been in one file, however this isn't best practice for larger projects where you'll want to separate things into different files.
 
-To run this, do `go build` which will take all the `.go` files in the directory and build you a program. You can then execute it with `./myprogram`. 
+To run this, do `go build` which will take all the `.go` files in the directory and build you a program. You can then execute it with `./myprogram`.
 
 ### `http.HandlerFunc`
 
@@ -173,14 +173,13 @@ Earlier we explored that the `Handler` interface is what we need to implement in
 
 [HandlerFunc](https://golang.org/pkg/net/http/#HandlerFunc) lets us avoid this.
 
-> The HandlerFunc type is an adapter to allow the use of ordinary functions as HTTP handlers. If f is a function with the appropriate signature, HandlerFunc(f) is a Handler that calls f. 
+> The HandlerFunc type is an adapter to allow the use of ordinary functions as HTTP handlers. If f is a function with the appropriate signature, HandlerFunc(f) is a Handler that calls f.
 
 ```go
 type HandlerFunc func(ResponseWriter, *Request)
 ```
 
 So we use this to wrap our `PlayerServer` function so that it now conforms to `Handler`.
-
 
 ### `http.ListenAndServe(":5000"...`
 
@@ -212,7 +211,7 @@ You may have been thinking
 
 > Surely we need some kind of concept of storage to control which player gets what score. It's weird that the values seem so arbitrary in our tests.
 
-Remember we are just trying to take as small as steps as reasonably possible, so we're just trying to break the constant for now. 
+Remember we are just trying to take as small as steps as reasonably possible, so we're just trying to break the constant for now.
 
 ## Try to run the test
 ```
@@ -243,7 +242,7 @@ func PlayerServer(w http.ResponseWriter, r *http.Request) {
 
 This test has forced us to actually look at the request's URL and make a decision. So whilst in our heads we may have been worrying about player stores and interfaces the next logical step actually seems to be about _routing_.
 
-If we did started with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**
+If we did started with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**.
 
 We're resisting the temptation to use any routing libraries right now, just the smallest step to get our test passing.
 
@@ -309,11 +308,11 @@ func assertResponseBody(t *testing.T, got, want string) {
 }
 ```
 
-However we still shouldn't be happy. It doesn't feel right that our server knows the scores. 
+However we still shouldn't be happy. It doesn't feel right that our server knows the scores.
 
-Our refactoring has made it pretty clear what to do. 
+Our refactoring has made it pretty clear what to do.
 
-We moved the score calculation out of the main body of our handler into a function `GetPlayerScore`. This feels like the right place to separate the concerns using interfaces. 
+We moved the score calculation out of the main body of our handler into a function `GetPlayerScore`. This feels like the right place to separate the concerns using interfaces.
 
 Let's move our function we re-factored to be an interface instead
 
@@ -359,7 +358,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-#### Fix the issues
+### Fix the issues
 
 This was quite a few changes and we know our tests and application will no longer compile but just relax and let the compiler work through it
 
@@ -370,7 +369,7 @@ We need to change our tests to instead create a new instance of our `PlayerServe
 ```go
 func TestGETPlayers(t *testing.T) {
 	server := &PlayerServer{}
-	
+
 	t.Run("returns the Pepper's score", func(t *testing.T) {
 		request := newGetScoreRequest("Pepper")
 		response := httptest.NewRecorder()
@@ -391,9 +390,9 @@ func TestGETPlayers(t *testing.T) {
 }
 ```
 
-Notice we're still not worrying about making stores _just yet_, we just want the compiler passing as soon as we can. 
+Notice we're still not worrying about making stores _just yet_, we just want the compiler passing as soon as we can.
 
-You should be in the habit of prioritising having code that compiles and then code that passes the tests. 
+You should be in the habit of prioritising having code that compiles and then code that passes the tests.
 
 By adding more functionality (like stub stores) whilst the code isn't compiling we are opening ourselves up to potentially _more_ compilation problems.
 
@@ -417,7 +416,7 @@ panic: runtime error: invalid memory address or nil pointer dereference [recover
 	panic: runtime error: invalid memory address or nil pointer dereference
 ```
 
-This is because we have not passed in a `PlayerStore` in our tests. We'll need to make a stub one up. 
+This is because we have not passed in a `PlayerStore` in our tests. We'll need to make a stub one up.
 
 ```go
 type StubPlayerStore struct {
@@ -464,13 +463,13 @@ func TestGETPlayers(t *testing.T) {
 
 Our tests now pass and are looking better. The _intent_ behind our code is clearer now due to the introduction of the store. We're telling the reader that because we have _this data in a `PlayerStore`_ that when you use it with a `PlayerServer` you should get the following responses.
 
-#### Run the application
+### Run the application
 
-Now our tests are passing the last thing we need to do to complete this refactor is to check our application is working. The program should start up but you'll get a horrible response if you try and hit the server at `http://localhost:5000/players/Pepper`. 
+Now our tests are passing the last thing we need to do to complete this refactor is to check our application is working. The program should start up but you'll get a horrible response if you try and hit the server at `http://localhost:5000/players/Pepper`.
 
 The reason for this is that we have not passed in a `PlayerStore`.
 
-We'll need to make an implementation of one, but that's difficult right now as we're not storing any meaningful data so it'll have to be hard-coded for the time being. 
+We'll need to make an implementation of one, but that's difficult right now as we're not storing any meaningful data so it'll have to be hard-coded for the time being.
 
 ```go
 type InMemoryPlayerStore struct{}
@@ -488,7 +487,7 @@ func main() {
 }
 ```
 
-If you `go build` again and hit the same URL you should get `"123"`. Not great, but until we store data that's the best we can do. 
+If you `go build` again and hit the same URL you should get `"123"`. Not great, but until we store data that's the best we can do.
 
 We have a few options as to what to do next
 
@@ -531,20 +530,20 @@ t.Run("returns 404 on missing players", func(t *testing.T) {
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	player := r.URL.Path[len("/players/"):]
-	
+
 	w.WriteHeader(http.StatusNotFound)
-	
+
 	fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
 
-Sometimes I heavily roll my eyes when TDD advocates say "make sure you just write the minimal amount of code to make it pass" as it can feel very pedantic. 
+Sometimes I heavily roll my eyes when TDD advocates say "make sure you just write the minimal amount of code to make it pass" as it can feel very pedantic.
 
-But this scenario illustrates the example well. I have done the bare minimum (knowing it is not correct), which is write a `StatusNotFound` on **all responses** but all our tests are passing! 
+But this scenario illustrates the example well. I have done the bare minimum (knowing it is not correct), which is write a `StatusNotFound` on **all responses** but all our tests are passing!
 
 **By doing the bare minimum to make the tests pass it can highlight gaps in your tests** In our case we are not asserting that we should be getting a `StatusOK` when players _do_ exist in the store.
 
-Update the other two tests to assert on the status and fix the code. 
+Update the other two tests to assert on the status and fix the code.
 
 Here are the new tests
 
@@ -593,7 +592,7 @@ func assertStatus(t *testing.T, got, want int) {
 	if got != want {
 		t.Errorf("did not get correct status, got %d, want %d", got, want)
 	}
-} 
+}
 
 func newGetScoreRequest(name string) *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
@@ -608,14 +607,14 @@ func assertResponseBody(t *testing.T, got, want string) {
 }
 ```
 
-We're checking the status in all our tests now so I made a helper `assertStatus` to facilitate that. 
+We're checking the status in all our tests now so I made a helper `assertStatus` to facilitate that.
 
 Now our first two tests fail because of the 404 instead of 200 so we can fix `PlayerServer` to only return not found if the score is 0.
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	player := r.URL.Path[len("/players/"):]
-	
+
 	score := p.store.GetPlayerScore(player)
 
 	if score == 0 {
@@ -650,8 +649,7 @@ func TestStoreWins(t *testing.T) {
 }
 ```
 
-For a start let's just check we get the correct status code if we hit the particular route with POST. This lets us drive out the functionality of accepting a different kind of request and handling it differently to `GET /player/{name}`. Once this works we can then start asserting on our handler's interaction with the store
-
+For a start let's just check we get the correct status code if we hit the particular route with POST. This lets us drive out the functionality of accepting a different kind of request and handling it differently to `GET /player/{name}`. Once this works we can then start asserting on our handler's interaction with the store.
 
 ## Try to run the test
 
@@ -660,9 +658,10 @@ For a start let's just check we get the correct status code if we hit the partic
     --- FAIL: TestStoreWins/it_returns_accepted_on_POST (0.00s)
     	server_test.go:70: did not get correct status, got 404, want 202
 ```
+
 ## Write enough code to make it pass
 
-Remember we are deliberately committing sins, so an if statement based on the request's method will do the trick. 
+Remember we are deliberately committing sins, so an if statement based on the request's method will do the trick.
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -795,7 +794,7 @@ store := StubPlayerStore{
 ```
 ## Write enough code to make it pass
 
-As we're only asserting the number of calls rather than the specific values it makes our initial iteration a little smaller. 
+As we're only asserting the number of calls rather than the specific values it makes our initial iteration a little smaller.
 
 We need to update `PlayerServer`'s idea of what a `PlayerStore` is by changing the interface if we're going to be able to call `RecordWin`
 
@@ -813,7 +812,7 @@ By doing this `main` no longer compiles
 	*InMemoryPlayerStore does not implement PlayerStore (missing RecordWin method)
 ```
 
-The compiler tells us what's wrong. Let's update `InMemoryPlayerStore` to have that method. 
+The compiler tells us what's wrong. Let's update `InMemoryPlayerStore` to have that method.
 
 ```go
 type InMemoryPlayerStore struct{}
@@ -821,7 +820,7 @@ type InMemoryPlayerStore struct{}
 func (i *InMemoryPlayerStore) RecordWin(name string) {}
 ```
 
-Try and run the tests and we should be back to compiling code but the test still failing. 
+Try and run the tests and we should be back to compiling code but the test still failing.
 
 Now that `PlayerStore` has `RecordWin` we can call it within our `PlayerServer`
 
@@ -925,7 +924,7 @@ Integration tests can be useful for testing that larger areas of your system wor
 - When they fail, it can be difficult to know why (as usually its a bug within a component of the integration test) and can be harder to fix
 - Sometimes slower to run (as they often are used to test against a "real" component, like a database)
 
-For that reason, it is recommended that you research _The Test Pyramid_
+For that reason, it is recommended that you research _The Test Pyramid_.
 
 ## Write the test first
 
@@ -936,7 +935,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	store := InMemoryPlayerStore{}
 	server := PlayerServer{&store}
 	player := "Pepper"
-	
+
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -951,7 +950,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 
 - We are creating our two components we are trying to integrate with; `InMemoryPlayerStore` and `PlayerServer`.
 - We then fire off 3 requests to record 3 wins for `player`. We're not too concerned about the status codes in this test as it's not relevant to whether they are integrating well.
-- The next response we do care about (so we store a variable `response`) because we are going to try and get the `player`'s score. 
+- The next response we do care about (so we store a variable `response`) because we are going to try and get the `player`'s score.
 
 ## Try to run the test
 
@@ -962,9 +961,9 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 
 ## Write enough code to make it pass
 
-I am going to take some liberties here and write more code than you may be comfortable with without writing a test. 
+I am going to take some liberties here and write more code than you may be comfortable with without writing a test.
 
-_This is allowed_! We still have a test checking things should be working correctly but it is not around the specific unit we're working with (`InMemoryPlayerStore`)
+_This is allowed_! We still have a test checking things should be working correctly but it is not around the specific unit we're working with (`InMemoryPlayerStore`).
 
 If i were to get stuck in this scenario, I would revert my changes back to the failing test and then write more specific unit tests around `InMemoryPlayerStore` to help me drive out a solution.
 
@@ -1014,7 +1013,7 @@ Build it, run it and then use CURL to test it out
 - Run this a few times, change the player names if you like `curl -X POST http://localhost:5000/players/Pepper`
 - Check scores with `curl http://localhost:5000/players/Pepper`
 
-Great! You've made a REST-ish service. To take this forward you'd want to pick a data store so you can persist the scores longer than the length of time the program runs. 
+Great! You've made a REST-ish service. To take this forward you'd want to pick a data store so you can persist the scores longer than the length of time the program runs.
 
 - Pick a store (Bolt? Mongo? Postgres? File system?)
 - Make `PostgresPlayerStore` implement `PlayerStore`
@@ -1034,11 +1033,11 @@ Great! You've made a REST-ish service. To take this forward you'd want to pick a
 
 - Let's you iteratively build the system up in smaller chunks
 - Allows you to develop a handler that needs a storage without needing actual storage
-- TDD to drive out the interfaces you need 
+- TDD to drive out the interfaces you need
 
 ### Commit sins, then refactor (and then commit to source control)
 
 - You need to treat having failing compilation or failing tests as a red situation that you need to get out of as soon as you can
-- Write just the necessary code to get there. _Then_ refactor and make the code nice. 
+- Write just the necessary code to get there. _Then_ refactor and make the code nice.
 - By trying to do too many changes whilst the code isn't compiling or the tests are failing puts you at risk of compounding the problems
-- Sticking to this approach forces you to write small tests, which means small changes which helps keeps working on complex systems manageable 
+- Sticking to this approach forces you to write small tests, which means small changes which helps keeps working on complex systems manageable

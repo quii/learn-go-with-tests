@@ -78,7 +78,7 @@ The function is in production and being used to check hundreds of websites. But
 your colleague has started to get complaints that it's slow, so they've asked
 you to help speed it up.
 
-### Write a test
+## Write a test
 
 Let's use a benchmark to test the speed of `CheckWebsites` so that we can see the
 effect of our changes.
@@ -523,11 +523,7 @@ have been performed because
 > [Premature optimization is the root of all evil][popt]
 > -- Donald Knuth
 
-[Arrays]: ../arrays-and-slices.md#
-[For]: ../iteration.md#
 [DI]: ../dependency-injection.md#
 [wrf]: http://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast
-[godoc_maps]: https://blog.golang.org/go-maps-in-action
-[godoc_zero_values]: https://golang.org/ref/spec#The_zero_value
 [godoc_race_detector]: https://blog.golang.org/race-detector
 [popt]: http://wiki.c2.com/?PrematureOptimization

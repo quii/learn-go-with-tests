@@ -1,4 +1,3 @@
-
 # Table of contents
 
 * [Learn Go with tests](gb-readme.md)
@@ -19,11 +18,11 @@
 
 ## Standard lib essentials
 
-- [HTTP server](http-server.md)
-- JSON (todo)
-- `io` (todo)
-- `time` (todo)
-- Sorting (todo
+* [HTTP server](http-server.md)
+* JSON (todo)
+* `io` (todo)
+* `time` (todo)
+* Sorting (todo
 
 ## Meta
 
