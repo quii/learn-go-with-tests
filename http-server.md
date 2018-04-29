@@ -434,7 +434,7 @@ A `map` is a quick and easy way of making a stub key/value store for our tests. 
 ```go
 func TestGETPlayers(t *testing.T) {
 	store := StubPlayerStore{
-		map[string]string{
+		map[string]int{
 			"Pepper": 20,
 			"Floyd":  10,
 		},
