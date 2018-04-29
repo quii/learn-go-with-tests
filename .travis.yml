@@ -5,8 +5,17 @@ go:
 
 install: true
 
-before_script:
-  - go get -u golang.org/x/lint/golint
+stages:
+  - build
+  - markdownlint
 
-script:
-  - ./build.sh
+jobs:
+  include:
+    - stage: build
+      script:
+        - go get -u golang.org/x/lint/golint
+        - ./build.sh
+    - stage: markdownlint
+      script:
+        - gem install mdl
+        - mdl .
