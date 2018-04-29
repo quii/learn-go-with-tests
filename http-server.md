@@ -661,7 +661,7 @@ For a start let's just check we get the correct status code if we hit the partic
 
 ## Write enough code to make it pass
 
-Remember we are deliberately committing sins, so an if statement based on the request's method will do the trick.
+Remember we are deliberately committing sins, so an `if` statement based on the request's method will do the trick.
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
