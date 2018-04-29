@@ -722,7 +722,7 @@ Next we want to check that when we do our `POST /players/{name}` that our `Playe
 
 ## Write the test first
 
-We can accomplish this by extending our `StubPlayerScore` with a new `Store` method and then spy on its invocations.
+We can accomplish this by extending our `StubPlayerScore` with a new `RecordWin` method and then spy on its invocations.
 
 ```go
 type StubPlayerStore struct {
