@@ -2,9 +2,9 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/json-and-io)**
 
-[In the previous chapter](http-server.md) we created a web server to store how many games a player has won. 
+[In the previous chapter](http-server.md) we created a web server to store how many games a player has won.
 
-Our product-owner was mostly delighted but was somewhat perturbed by the software losing the scores when the server was restarted. This was because our implementation of our store was in-memory. 
+Our product-owner was mostly delighted but was somewhat perturbed by the software losing the scores when the server was restarted. This was because our implementation of our store was in-memory.
 
 She also has a new requirement; to have a new endpoint called `/league` which returns a list of all players stored, ordered by wins. She would like this to be returned as JSON.
 
@@ -57,7 +57,7 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 	p.store.RecordWin(player)
 	w.WriteHeader(http.StatusAccepted)
 }
-``` 
+```
 
 ```go
 // InMemoryPlayerStore.go
