@@ -38,7 +38,7 @@ How can we incrementally build this? We cant `GET` a player without having store
 This is where _mocking_ shines.
 
 - `GET` will need a `PlayerStore` _thing_ to get scores for a player. This should be an interface so when we test we can create a simple stub to test our code without needing to have implemented any actual storage code.
-- For `POST` we can _spy_ on its calls to `PlayerStore` to make sure it stores players correctly. Our implementation of saving wont be coupled to retrieval.
+- For `POST` we can _spy_ on its calls to `PlayerStore` to make sure it stores players correctly. Our implementation of saving won't be coupled to retrieval.
 - For having some working software quickly we can make a very simple in-memory implementation and then later we can create an implementation backed by whatever storage mechanism we prefer.
 
 ## Write the test first
@@ -57,7 +57,7 @@ This will start a web server listening on a port, creating a goroutine for every
 
 ```go
 type Handler interface {
-        ServeHTTP(ResponseWriter, *Request)
+    ServeHTTP(ResponseWriter, *Request)
 }
 ```
 
@@ -214,6 +214,7 @@ You may have been thinking
 Remember we are just trying to take as small as steps as reasonably possible, so we're just trying to break the constant for now.
 
 ## Try to run the test
+
 ```
 === RUN   TestGETPlayers/returns_Pepper's_score
     --- PASS: TestGETPlayers/returns_Pepper's_score (0.00s)
@@ -541,7 +542,7 @@ Sometimes I heavily roll my eyes when TDD advocates say "make sure you just writ
 
 But this scenario illustrates the example well. I have done the bare minimum (knowing it is not correct), which is write a `StatusNotFound` on **all responses** but all our tests are passing!
 
-**By doing the bare minimum to make the tests pass it can highlight gaps in your tests** In our case we are not asserting that we should be getting a `StatusOK` when players _do_ exist in the store.
+**By doing the bare minimum to make the tests pass it can highlight gaps in your tests**. In our case we are not asserting that we should be getting a `StatusOK` when players _do_ exist in the store.
 
 Update the other two tests to assert on the status and fix the code.
 
@@ -609,7 +610,7 @@ func assertResponseBody(t *testing.T, got, want string) {
 
 We're checking the status in all our tests now so I made a helper `assertStatus` to facilitate that.
 
-Now our first two tests fail because of the 404 instead of 200 so we can fix `PlayerServer` to only return not found if the score is 0.
+Now our first two tests fail because of the 404 instead of 200, so we can fix `PlayerServer` to only return not found if the score is 0.
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -792,6 +793,7 @@ store := StubPlayerStore{
     --- FAIL: TestStoreWins/it_records_wins_when_POST (0.00s)
     	server_test.go:80: got 0 calls to RecordWin want 1
 ```
+
 ## Write enough code to make it pass
 
 As we're only asserting the number of calls rather than the specific values it makes our initial iteration a little smaller.
@@ -1008,7 +1010,7 @@ func main() {
 }
 ```
 
-Build it, run it and then use CURL to test it out
+Build it, run it and then use CURL to test it out.
 
 - Run this a few times, change the player names if you like `curl -X POST http://localhost:5000/players/Pepper`
 - Check scores with `curl http://localhost:5000/players/Pepper`
