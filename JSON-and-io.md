@@ -106,4 +106,3 @@ func main() {
 You can find the corresponding tests in the link at the top of the chapter.
 
 We'll start by making the league table endpoint.
-
