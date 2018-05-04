@@ -284,7 +284,7 @@ Finally make sure you **delete** `func (p *PlayerServer) ServeHTTP(w http.Respon
 
 ## Embedding
 
-We changed second property of `PlayerServer`, removing the named property `router *http.ServeMux* and replaced it with just `http.Handler`; this is called _embedding_.
+We changed second property of `PlayerServer`, removing the named property `router *http.ServeMux*` and replaced it with `http.Handler`; this is called _embedding_.
 
 > Go does not provide the typical, type-driven notion of subclassing, but it does have the ability to “borrow” pieces of an implementation by embedding types within a struct or interface.
 
@@ -305,7 +305,7 @@ type Animal interface{
 }
 ```
 
-#### Any downsides?
+### Any downsides?
 
 You must be careful with embedding types because you will expose all public methods and properties of the type you embed. In our case it is ok because we embedded just the _interface_ that we wanted to expose (`http.Handler`).
 
