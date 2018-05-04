@@ -57,7 +57,7 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 	p.store.RecordWin(player)
 	w.WriteHeader(http.StatusAccepted)
 }
-``` 
+```
 
 ```go
 // InMemoryPlayerStore.go
@@ -109,7 +109,7 @@ We'll start by making the league table endpoint.
 
 ## Write the test first
 
-We'll extend the existing suite as we have some useful test functions and a fake `PlayerServer` to use.
+We'll extend the existing suite as we have some useful test functions and a fake `PlayerStore` to use.
 
 ```go
 func TestLeague(t *testing.T) {
@@ -155,7 +155,7 @@ In the previous chapter we mentioned this was a fairly naive way of doing our ro
 
 ## Write enough code to make it pass
 
-Go does have a built in routing mechanism called `ServeMux` (server multiplexer) which lets you attach `http.Handler`s to particular paths.
+Go does have a built in routing mechanism called [`ServeMux`](https://golang.org/pkg/net/http/#ServeMux) (request multiplexer) which lets you attach `http.Handler`s to particular request paths.
 
 Let's commit some sins and get the tests passing in the quickest way we can, knowing we can refactor it with safety once we know the tests are passing.
 
@@ -183,7 +183,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-- When the request starts we create a router and then we tell it for `x` path using `y` handler.
+- When the request starts we create a router and then we tell it for `x` path use `y` handler.
 - So for our new endpoint, we use `http.HandlerFunc` and an _anonymous function_ to `w.WriteHeader(http.StatusOK)` when `/league` is requested to make our new test pass.
 - For the `/players/` route we just cut and paste our code into another `http.HandlerFunc`.
 - Finally we handle the request that came in by calling our new router's `ServeHTTP` (notice how `ServeMux` is _also_ a `http.Handler`?)
@@ -282,21 +282,21 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 
 Finally make sure you **delete** `func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request)` as it is no longer needed!
 
-### Embedding 
+## Embedding
 
-The first change is the second property of `PlayerServer`, we have removed the name of the field (it was `router`); this is called _embedding_.
+We changed second property of `PlayerServer`, removing the named property `router *http.ServeMux* and replaced it with just `http.Handler`; this is called _embedding_.
 
 > Go does not provide the typical, type-driven notion of subclassing, but it does have the ability to “borrow” pieces of an implementation by embedding types within a struct or interface.
 
 [Effective Go - Embedding](https://golang.org/doc/effective_go.html#embedding)
 
-What this means is that our `PlayerServer` now has all the methods that `http.ServeMux` has.
+What this means is that our `PlayerServer` now has all the methods that `http.Handler` has, which is just `ServeHTTP`
 
-By doing this our type now implements `http.Handler` by virtue of having `http.ServeMux` embedded in it (because it has the method `ServeHTTP`).
+To "fill in" the `http.Handler` we assign it to the `router` we create in `NewPlayerServer`. We can do this because `http.ServeMux` has the method `ServeHTTP`
 
-This lets us remove our own `ServeHTTP` method, as we are already exposing one.
+This lets us remove our own `ServeHTTP` method, as we are already exposing one via the embedded type
 
-Embedding is a very interesting language feature. You can use it with interfaces too to compose new interfaces.
+Embedding is a very interesting language feature. You can use it with interfaces to compose new interfaces.
 
 ```go
 type Animal interface{
@@ -313,7 +313,7 @@ If we had been lazy and embedded `http.ServeMux` instead (the concrete type) it 
 
 **When embedding types, really think about what impact that has on your public API**.
 
-# Wrapping up
+## Wrapping up
 
 What we've covered:
 
