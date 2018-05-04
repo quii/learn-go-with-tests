@@ -2,9 +2,9 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/json-and-io)**
 
-[In the previous chapter](http-server.md) we created a web server to store how many games a players have won. 
+[In the previous chapter](http-server.md) we created a web server to store how many games players have won.
 
-Our product-owner was mostly delighted but was somewhat perturbed by the software losing the scores when the server was restarted. This was because our implementation of our store was in-memory. 
+Our product-owner was mostly delighted but was somewhat perturbed by the software losing the scores when the server was restarted. This was because our implementation of our store was in-memory.
 
 She also has a new requirement; to have a new endpoint called `/league` which returns a list of all players stored, ordered by wins. She would like this to be returned as JSON.
 
@@ -127,7 +127,7 @@ func TestLeague(t *testing.T) {
 }
 ```
 
-Before worrying about actual scores and JSON we will try and keep the changes small with the plan to iterate toward our goal. The simplest start is to check we can hit `/league` and get an `OK` back. 
+Before worrying about actual scores and JSON we will try and keep the changes small with the plan to iterate toward our goal. The simplest start is to check we can hit `/league` and get an `OK` back.
 
 ## Try to run the test
 
@@ -151,13 +151,13 @@ Your `PlayerServer` should be panicking like this. Go to the line of code in the
 player := r.URL.Path[len("/players/"):]
 ```
 
-In the previous chapter we mentioned this was a fairly naive way of doing our routing. What is happening is it's trying to split the string of the path starting at an index beyond `/league` so it is `slice bounds out of range`
+In the previous chapter we mentioned this was a fairly naive way of doing our routing. What is happening is it's trying to split the string of the path starting at an index beyond `/league` so it is `slice bounds out of range`.
 
 ## Write enough code to make it pass
 
 Go does have a built in routing mechanism called `ServeMux` (server multiplexer) which lets you attach `http.Handler`s to particular paths.
 
-Let's commit some sins and get the tests passing in the quickest way we can, knowing we can refactor it with safety once we know the tests are passing
+Let's commit some sins and get the tests passing in the quickest way we can, knowing we can refactor it with safety once we know the tests are passing.
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -184,8 +184,8 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 ```
 
 - When the request starts we create a router and then we tell it for `x` path using `y` handler.
-- So for our new endpoint, we use `http.HandlerFunc` and an _anonymous function_ to `w.WriteHeader(http.StatusOK)` when `/league` is requested to make our new test pass
-- For the `/players/` route we just cut and paste our code into another `http.HandlerFunc`
+- So for our new endpoint, we use `http.HandlerFunc` and an _anonymous function_ to `w.WriteHeader(http.StatusOK)` when `/league` is requested to make our new test pass.
+- For the `/players/` route we just cut and paste our code into another `http.HandlerFunc`.
 - Finally we handle the request that came in by calling our new router's `ServeHTTP` (notice how `ServeMux` is _also_ a `http.Handler`?)
 
 If you run all the tests, it should all be passing.
@@ -194,7 +194,7 @@ If you run all the tests, it should all be passing.
 
 There's a few improvements we can make.
 
-`ServeHTTP` is looking quite big, we can separate things out a bit by refactoring our handlers into separate methods. 
+`ServeHTTP` is looking quite big, we can separate things out a bit by refactoring our handlers into separate methods.
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -222,11 +222,11 @@ func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-Looking better! 
+Looking better!
 
 Next, it's quite odd (and inefficient) to be setting up a router as a request comes in and then calling it. What we ideally want to do is have some kind of `NewPlayerServer` function which will take our dependencies and do the one time setup of creating the router. Each request can then just use that one instance of the router.
 
-Here are the relevant changes
+Here are the relevant changes.
 
 ```go
 type PlayerServer struct {
@@ -251,13 +251,13 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-- `PlayerServer` now needs to store a router
+- `PlayerServer` now needs to store a router.
 - We have moved the routing creation out of `ServeHTTP` and into our `NewPlayerServer` so this only has to be done once, not per request
-- You will need to update all the test and production code where we used to do `PlayerServer{&store}` with `NewPlayerServer(&store)`
+- You will need to update all the test and production code where we used to do `PlayerServer{&store}` with `NewPlayerServer(&store)`.
 
 ### One final refactor
 
-Try changing the code to the following
+Try changing the code to the following.
 
 ```go
 type PlayerServer struct {
@@ -284,19 +284,19 @@ Finally make sure you **delete** `func (p *PlayerServer) ServeHTTP(w http.Respon
 
 ### Embedding 
 
-The first change is the second property of `PlayerServer`, we have removed the name of the field (it was `router`); this is called _embedding_. 
+The first change is the second property of `PlayerServer`, we have removed the name of the field (it was `router`); this is called _embedding_.
 
-> Go does not provide the typical, type-driven notion of subclassing, but it does have the ability to “borrow” pieces of an implementation by embedding types within a struct or interface. 
+> Go does not provide the typical, type-driven notion of subclassing, but it does have the ability to “borrow” pieces of an implementation by embedding types within a struct or interface.
 
 [Effective Go - Embedding](https://golang.org/doc/effective_go.html#embedding)
 
 What this means is that our `PlayerServer` now has all the methods that `http.ServeMux` has.
 
-By doing this our type now implements `http.Handler` by virtue of having `http.ServeMux` embedded in it (because it has the method `ServeHTTP`). 
+By doing this our type now implements `http.Handler` by virtue of having `http.ServeMux` embedded in it (because it has the method `ServeHTTP`).
 
-This lets us remove our own `ServeHTTP` method, as we are already exposing one. 
+This lets us remove our own `ServeHTTP` method, as we are already exposing one.
 
-Embedding is a very interesting language feature. You can use it with interfaces too to compose new interfaces
+Embedding is a very interesting language feature. You can use it with interfaces too to compose new interfaces.
 
 ```go
 type Animal interface{
@@ -307,11 +307,11 @@ type Animal interface{
 
 #### Any downsides?
 
-You must be careful with embedding types because you will expose all public methods and properties of the type you embed. In our case it is ok because we embedded just the _interface_ that we wanted to expose (`http.Handler`) 
+You must be careful with embedding types because you will expose all public methods and properties of the type you embed. In our case it is ok because we embedded just the _interface_ that we wanted to expose (`http.Handler`).
 
 If we had been lazy and embedded `http.ServeMux` instead (the concrete type) it would still work _but_ users of `PlayerServer` would be able to add new routes to our server because `Handle(path, handler)` would be public.
 
-**When embedding types, really think about what impact that has on your public API**
+**When embedding types, really think about what impact that has on your public API**.
 
 # Wrapping up
 
