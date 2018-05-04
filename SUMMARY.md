@@ -19,7 +19,7 @@
 ## Standard lib essentials
 
 * [HTTP server](http-server.md)
-* JSON (todo)
+* [JSON and IO (WIP)](JSON-and-io.md)
 * `io` (todo)
 * `time` (todo)
 * Sorting (todo
