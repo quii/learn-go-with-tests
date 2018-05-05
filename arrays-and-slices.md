@@ -16,6 +16,10 @@ Let's use our TDD skills
 In `sum_test.go`
 
 ```go
+package main
+
+import "testing"
+
 func TestSum(t *testing.T) {
 
     numbers := [5]int{1, 2, 3, 4, 5}
@@ -50,6 +54,8 @@ By running `go test` the compiler will fail with `./sum_test.go:10:15: undefined
 In `sum.go`
 
 ```go
+package main
+
 func Sum(numbers [5]int) int {
     return 0
 }
