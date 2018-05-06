@@ -242,7 +242,7 @@ func PlayerServer(w http.ResponseWriter, r *http.Request) {
 
 This test has forced us to actually look at the request's URL and make a decision. So whilst in our heads we may have been worrying about player stores and interfaces the next logical step actually seems to be about _routing_.
 
-If we did started with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**.
+If we had started with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**.
 
 We're resisting the temptation to use any routing libraries right now, just the smallest step to get our test passing.
 
