@@ -315,9 +315,9 @@ If we had been lazy and embedded `http.ServeMux` instead (the concrete type) it 
 
 Now we've restructured our application so that we can easily add new routes and have the start of the `/league` endpoint. We now need to make it return some useful information.
 
-We need to return some JSON that looks something like this
+We should return some JSON that looks something like this.
 
-```
+```json
 [
     {"Name": "Bill", Wins: 10},
     {"Name": "Alice", Wins: 15}
@@ -356,14 +356,14 @@ func TestLeague(t *testing.T) {
 
 You could argue a simpler initial step would be just to assert that the response body has a particular JSON string.
 
-In my experience tests that assert against JSON strings have the following problems
+In my experience tests that assert against JSON strings have the following problems.
 
-- *Brittleness*. If you change the data-model your tests will fail
-- *Poor output*. If your API wont return a prettified JSON string it can be very hard to read
-- *Poor intention*. Whilst the output should be JSON, what's really important is exactly what the data is, rather than how it's encoded
+- *Brittleness*. If you change the data-model your tests will fail.
+- *Poor output*. If your API wont return a prettified JSON string it can be very hard to read.
+- *Poor intention*. Whilst the output should be JSON, what's really important is exactly what the data is, rather than how it's encoded.
 - *Re-testing the standard library*. There is no need to test how the standard library outputs JSON, it is already tested. Don't test other people's code.
 
-Instead we should look to parse the JSON into data structures that are relevant for us to test with
+Instead we should look to parse the JSON into data structures that are relevant for us to test with.
 
 ### Data modelling
 
@@ -374,6 +374,13 @@ type Player struct {
 	Name string
 	Wins int
 }
+```
+
+### JSON decoding
+
+```go
+		var got []Player
+		err := json.NewDecoder(response.Body).Decode(&got)
 ```
 
 To parse JSON into our data model we create a `Decoder` from `encoding/json` package and then call its `Decode` method. To create a `Decoder` it needs an `io.Reader` to read from which in our case is our response spy's `Body`.
@@ -411,7 +418,7 @@ The test now passes
 ### Encoding and Decoding
 Notice the lovely symmetry in the standard library
 
-- To create an `Encoder` you need an `io.Writer` which is what `http.ResponseWriter` implements
+- To create an `Encoder` you need an `io.Writer` which is what `http.ResponseWriter` implements.
 - To create a `Decoder` you need an `io.Reader` which the `Body` field of our response spy implements.
 
 Throughout this book we have used `io.Writer` and this is another demonstration of its prevalence in the standard library and how a lot of libraries easily work with it.
