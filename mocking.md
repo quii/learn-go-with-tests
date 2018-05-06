@@ -528,6 +528,10 @@ As always, rules in software development aren't really rules and there can be ex
 - When faced with less trivial examples, break the problem down into "thin vertical slices". Try to get to a point where you have _working software backed by tests_ as soon as you can, to avoid getting in rabbit holes and taking a "big bang" approach.
 - Once you have some working software it should be easier to _iterate with small steps_ until you arrive at the software you need.
 
+> "When to use iterative development? You should use iterative development only on projects that you want to succeed."
+
+Martin Fowler.
+
 ### Mocking
 
 - **Without mocking important areas of your code will be untested**. In our case we would not be able to test that our code paused between each print but there are countless other examples. Calling a service that _can_ fail? Wanting to test your system in a particular state? It is very hard to test these scenarios without mocking.
