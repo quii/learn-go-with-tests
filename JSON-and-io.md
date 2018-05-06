@@ -313,6 +313,128 @@ If we had been lazy and embedded `http.ServeMux` instead (the concrete type) it 
 
 **When embedding types, really think about what impact that has on your public API**.
 
+Now we've restructured our application so that we can easily add new routes and have the start of the `/league` endpoint. We now need to make it return some useful information.
+
+We need to return some JSON that looks something like this
+
+```
+[
+    {"Name": "Bill", Wins: 10},
+    {"Name": "Alice", Wins: 15}
+]
+```
+
+## Write the test first
+
+We'll start by just trying to parse the response into something meaningful.
+
+```go
+func TestLeague(t *testing.T) {
+	store := StubPlayerStore{}
+	server := NewPlayerServer(&store)
+
+	t.Run("it returns 200 on /league", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/league", nil)
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		var got []Player
+
+		err := json.NewDecoder(response.Body).Decode(&got)
+
+		if err != nil {
+			t.Fatalf ("Unable to parse response from server '%s' into slice of Player, '%v'", response.Body, err)
+		}
+
+		assertStatus(t, response.Code, http.StatusOK)
+	})
+}
+```
+
+### Why not test the JSON string?
+
+You could argue a simpler initial step would be just to assert that the response body has a particular JSON string.
+
+In my experience tests that assert against JSON strings have the following problems
+
+- *Brittleness*. If you change the data-model your tests will fail
+- *Poor output*. If your API wont return a prettified JSON string it can be very hard to read
+- *Poor intention*. Whilst the output should be JSON, what's really important is exactly what the data is, rather than how it's encoded
+- *Re-testing the standard library*. There is no need to test how the standard library outputs JSON, it is already tested. Don't test other people's code.
+
+Instead we should look to parse the JSON into data structures that are relevant for us to test with
+
+### Data modelling
+
+Given the JSON data model, it looks like we need an array of `Player` with some fields so we have created a new type to capture this.
+
+```go
+type Player struct {
+	Name string
+	Wins int
+}
+```
+
+To parse JSON into our data model we create a `Decoder` from `encoding/json` package and then call its `Decode` method. To create a `Decoder` it needs an `io.Reader` to read from which in our case is our response spy's `Body`.
+
+`Decode` takes the address of the thing we are trying to decode into which is why we declare an empty slice of `Player` the line before.
+
+Parsing JSON can fail so `Decode` can return an `error`. There's no point continuing the test if that fails so we check for the error and stop the test with `t.Fatalf` if it happens. Notice that we print the response body along with the error as it's important for someone running the test to see what string cannot be parsed.
+
+## Try to run the test
+
+```
+=== RUN   TestLeague/it_returns_200_on_/league
+    --- FAIL: TestLeague/it_returns_200_on_/league (0.00s)
+    	server_test.go:107: Unable to parse response from server '' into slice of Player, 'unexpected end of JSON input'
+```
+
+Our endpoint currently does not return a body so it cannot be parsed into JSON.
+
+## Write enough code to make it pass
+
+```go
+func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
+	leagueTable := []Player{
+		{"Chris", 20},
+	}
+
+	json.NewEncoder(w).Encode(leagueTable)
+
+	w.WriteHeader(http.StatusOK)
+}
+```
+
+The test now passes
+
+### Encoding and Decoding
+Notice the lovely symmetry in the standard library
+
+- To create an `Encoder` you need an `io.Writer` which is what `http.ResponseWriter` implements
+- To create a `Decoder` you need an `io.Reader` which the `Body` field of our response spy implements.
+
+Throughout this book we have used `io.Writer` and this is another demonstration of its prevalence in the standard library and how a lot of libraries easily work with it.
+
+## Refactor
+
+It would be nice to introduce a separation of concern between our handler and getting the `leagueTable` as we know we're going to not hard-code that very soon.
+
+```go
+func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(p.getLeagueTable())
+	w.WriteHeader(http.StatusOK)
+}
+
+func (p *PlayerServer) getLeagueTable() []Player{
+	return []Player{
+		{"Chris", 20},
+	}
+}
+```
+
+Next we'll want to extend our test so that we can control exactly what data we want back.
+
 ## Wrapping up
 
 What we've covered:
