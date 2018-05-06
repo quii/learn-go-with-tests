@@ -318,10 +318,8 @@ Now we've restructured our application so that we can easily add new routes and 
 We should return some JSON that looks something like this.
 
 ```json
-[
-    {"Name": "Bill", Wins: 10},
-    {"Name": "Alice", Wins: 15}
-]
+[ {"Name": "Bill", "Wins": 10},
+  {"Name": "Alice", "Wins": 15} ]
 ```
 
 ## Write the test first
@@ -379,8 +377,8 @@ type Player struct {
 ### JSON decoding
 
 ```go
-		var got []Player
-		err := json.NewDecoder(response.Body).Decode(&got)
+var got []Player
+err := json.NewDecoder(response.Body).Decode(&got)
 ```
 
 To parse JSON into our data model we create a `Decoder` from `encoding/json` package and then call its `Decode` method. To create a `Decoder` it needs an `io.Reader` to read from which in our case is our response spy's `Body`.
