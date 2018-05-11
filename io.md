@@ -564,6 +564,104 @@ If you run the tests, they should now be passing.
 
 ## Refactor
 
+In `GetPlayerScore` and `RecordWin` we are iterating over `[]Player` to find a player by name. 
+
+We could refactor this common code in the internals of `FileSystemStore` but to me it feels like this is maybe useful code we can lift into a new type. Working with a "League" so far has always been with `[]Player` but we can create a new type called `League`. This will be easier for other developers to understand and then we can attach useful methods onto that type for us to use. 
+
+Inside `league.go` add the following
+
+```go
+type League []Player
+
+func (l League) Find(name string) *Player {
+	for i, p := range l {
+		if p.Name==name {
+			return &l[i]
+		}
+	}
+	return nil
+}
+```
+
+Now if anyone has a `League` they can easily find a given player.
+
+And change our `PlayerStore` interface to return `League` rather than `[]Player`. Try and re-run the tests, you'll get a compilation problem because we've changed the interface but it's very easy to fix; just change the return type from `[]Player` to `League`.
+
+This lets us simplify our methods in `FileSystemStore`.
+
+```go
+func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
+
+	player := f.GetLeague().Find(name)
+
+	if player != nil {
+		return player.Wins
+	}
+
+	return 0
+}
+
+func (f *FileSystemPlayerStore) RecordWin(name string) {
+	league := f.GetLeague()
+	player := league.Find(name)
+
+	if player != nil {
+		player.Wins++
+	}
+
+	f.database.Seek(0, 0)
+	json.NewEncoder(f.database).Encode(league)
+}
+```
+
+This is looking much better and we can see how we might be able to find other useful functionality around `League` can be refactored.
+
+We now need to handle the scenario of recording wins of new players.
+
+## Write the test first
+```go
+t.Run("store wins for existing players", func(t *testing.T) {
+    database := createTempFile(t, `[
+        {"Name": "Cleo", "Wins": 10},
+        {"Name": "Chris", "Wins": 33}]`)
+    defer os.Remove(database.Name())
+
+    store := FileSystemPlayerStore{database}
+
+    store.RecordWin("Pepper")
+
+    got := store.GetPlayerScore("Pepper")
+    want := 1
+    assertScoreEquals(t, got, want)
+})
+```
+## Try to run the test
+
+```
+=== RUN   TestFileSystemStore/store_wins_for_existing_players#01
+    --- FAIL: TestFileSystemStore/store_wins_for_existing_players#01 (0.00s)
+    	FileSystemStore_test.go:86: got 0 want 1
+```
+## Write enough code to make it pass
+
+We just need to handle the scenario where `Find` returns `nil` because it couldn't find the player.
+
+```go
+func (f *FileSystemPlayerStore) RecordWin(name string) {
+	league := f.GetLeague()
+	player := league.Find(name)
+
+	if player != nil {
+		player.Wins++
+	} else {
+		league = append(league, Player{name, 1})
+	}
+
+	f.database.Seek(0, 0)
+	json.NewEncoder(f.database).Encode(league)
+}
+```
+
 ## Wrapping up
 
 What we've covered:
