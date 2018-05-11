@@ -686,6 +686,75 @@ Use it in the test.
 assertContentType(t, response, jsonContentType)
 ```
 
+Now that we have sorted out `PlayerServer` for now we can turn our attention to `InMemoryPlayerStore` because right now if we tried to demo this to the product owner `/league` will not work.
+
+The quickest way for us to get some confidence is to add to our integration test, we can hit the new endpoint and check we get back the correct response from `/league`
+
+## Write the test first
+
+We can use `t.Run` to break up this test a bit and we can reuse the helpers from our server tests - again showing the importance of refactoring tests.
+
+```go
+func TestRecordingWinsAndRetrievingThem(t *testing.T) {
+	store := NewInMemoryPlayerStore()
+	server := NewPlayerServer(store)
+	player := "Pepper"
+
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+
+	t.Run("get score", func(t *testing.T) {
+		response := httptest.NewRecorder()
+		server.ServeHTTP(response, newGetScoreRequest(player))
+		assertStatus(t, response.Code, http.StatusOK)
+
+		assertResponseBody(t, response.Body.String(), "3")
+	})
+
+	t.Run("get league", func(t *testing.T) {
+		response := httptest.NewRecorder()
+		server.ServeHTTP(response, newLeagueRequest())
+		assertStatus(t, response.Code, http.StatusOK)
+
+		got := getLeagueFromResponse(t, response.Body)
+		want := []Player{
+			{"Pepper", 3},
+		}
+		assertLeague(t, got, want)
+	})
+}
+```
+
+## Try to run the test
+
+```
+=== RUN   TestRecordingWinsAndRetrievingThem/get_league
+    --- FAIL: TestRecordingWinsAndRetrievingThem/get_league (0.00s)
+    	server_integration_test.go:35: got [] want [{Pepper 3}]
+```
+
+## Write enough code to make it pass
+
+`InMemoryPlayerStore` is returning `nil` when you call `GetLeague()` so we'll need to fix that.
+
+```go
+func (i *InMemoryPlayerStore) GetLeague() []Player {
+	var league []Player
+	for name, wins := range i.store {
+		league = append(league, Player{name, wins})
+	}
+	return league
+}
+```
+
+All we need to do is iterate over the map and convert each key/value to a `Player`.
+
+The test should now pass. We now have some working software but we still need to tackle
+
+- Sorting the players by number of wins
+- Storing the data. 
+
 ## Wrapping up
 
 What we've covered:
