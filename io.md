@@ -320,6 +320,88 @@ Try running the test, it now passes! Happily for us `string.NewReader` that we u
 
 Next we'll implement `GetPlayerScore`
 
+## Write the test first
+
+```go
+t.Run("get player score", func(t *testing.T) {
+    database := strings.NewReader(`[
+        {"Name": "Cleo", "Wins": 10},
+        {"Name": "Chris", "Wins": 33}]`)
+
+    store := FileSystemPlayerStore{database}
+
+    got := store.GetPlayerScore("Chris")
+
+    want := 33
+
+    if got != want {
+        t.Errorf("got %d want %d", got, want)
+    }
+})
+```
+
+## Try to run the test
+
+`./FileSystemStore_test.go:38:15: store.GetPlayerScore undefined (type FileSystemPlayerStore has no field or method GetPlayerScore)`
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+We need to add the method to our new type to get the test to compile.
+
+```go
+func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
+	return 0
+}
+```
+
+Now it compiles and the test fails
+
+```
+=== RUN   TestFileSystemStore/get_player_score
+    --- FAIL: TestFileSystemStore//get_player_score (0.00s)
+    	FileSystemStore_test.go:43: got 0 want 33
+```
+
+## Write enough code to make it pass
+
+We can iterate over the league to find the player and return their score
+
+```go
+func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
+
+	var wins int
+
+	for _, player := range f.GetLeague() {
+		if player.Name == name {
+			wins = player.Wins
+			break
+		}
+	}
+
+	return wins
+}
+```
+
+## Refactor
+
+You will have seen dozens of test helper refactorings so I'll leave this to you to make it work
+
+```go
+t.Run("/get player score", func(t *testing.T) {
+    database := strings.NewReader(`[
+        {"Name": "Cleo", "Wins": 10},
+        {"Name": "Chris", "Wins": 33}]`)
+
+    store := FileSystemPlayerStore{database}
+
+    got := store.GetPlayerScore("Chris")
+    want := 33
+    assertScoreEquals(t, got, want)
+})
+```
+
+Next we need to start recording scores
+
 ## Wrapping up
 
 What we've covered:
