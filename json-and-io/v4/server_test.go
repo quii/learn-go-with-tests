@@ -123,6 +123,7 @@ func TestLeague(t *testing.T) {
 }
 
 func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
+	t.Helper()
 	err := json.NewDecoder(body).Decode(&league)
 
 	if err != nil {
