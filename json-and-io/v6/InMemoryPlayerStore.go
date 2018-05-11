@@ -10,7 +10,7 @@ type InMemoryPlayerStore struct {
 	store map[string]int
 }
 
-// GetLeague currently doesn't work, but it should return the player league
+// GetLeague returns a collection of Players
 func (i *InMemoryPlayerStore) GetLeague() []Player {
 	var league []Player
 	for name, wins := range i.store {
