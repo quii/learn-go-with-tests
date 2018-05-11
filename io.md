@@ -112,13 +112,13 @@ func main() {
 
 ## Store the data
 
-There are dozens of databases we could use for this but we're going to go for a very simple approach. We're going to store the data for this application in a file as JSON. 
+There are dozens of databases we could use for this but we're going to go for a very simple approach. We're going to store the data for this application in a file as JSON.
 
-This keeps the data very portable and is relatively simple to implement. 
+This keeps the data very portable and is relatively simple to implement.
 
 It wont scale especially well but given this is a prototype it'll be fine for now. If our circumstances change and it's no longer appropriate it'll be simple to swap it out for something different because of the `PlayerStore` abstraction we have used.
 
-We will keep the `InMemoryPlayerStore` for now so that the integration tests keep passing as we develop our new store. Once we are confident our new implementation is sufficient to make the integration test pass we will swap it in and then delete `InMemoryPlayerStore`
+We will keep the `InMemoryPlayerStore` for now so that the integration tests keep passing as we develop our new store. Once we are confident our new implementation is sufficient to make the integration test pass we will swap it in and then delete `InMemoryPlayerStore`.
  
 ## Write the test first
 
@@ -162,9 +162,7 @@ We're using `strings.NewReader` which will return us a `Reader`, which is what o
 Let's define `FileSystemStore` in a new file
 
 ```go
-type FileSystemStore struct {
-	
-}
+type FileSystemStore struct {}
 ```
 
 Try again
@@ -207,13 +205,13 @@ func (f *FileSystemStore) GetLeague() []Player {
 }
 ```
 
-The test should pass. 
+The test should pass.
 
 ## Refactor
 
-We _have_ done this before! Our test code for the server had to decode the JSON from the response. 
+We _have_ done this before! Our test code for the server had to decode the JSON from the response.
 
-Let's try DRYing this up into a function. 
+Let's try DRYing this up into a function.
 
 Create a new file called `league.go` and put this inside.
 
@@ -238,7 +236,7 @@ We haven't got a strategy yet for dealing with parsing errors but let's press on
 
 ### Seeking problems
 
-There is a flaw in our implementation. First of all let's remind ourselves how `io.Reader` is defined
+There is a flaw in our implementation. First of all let's remind ourselves how `io.Reader` is defined.
 
 ```go
 type Reader interface {
@@ -248,7 +246,7 @@ type Reader interface {
 
 With our file you can imagine it reading through byte by byte until the end. What happens if you try and `Read` a second time?
 
-Add the following to the end of our current test
+Add the following to the end of our current test.
 
 ```go
 // read again
@@ -256,11 +254,11 @@ got = store.GetLeague()
 assertLeague(t, got, want)
 ```
 
-We want this to pass, but if you run the test it doesnt. 
+We want this to pass, but if you run the test it doesn't.
 
 The problem is our `Reader` has reached to the end so there is nothing more to read. We need a way to tell it to go back to the start.
 
-[ReadSeeker](https://golang.org/pkg/io/#ReadSeeker) is another interface in the standard library that can help. 
+[ReadSeeker](https://golang.org/pkg/io/#ReadSeeker) is another interface in the standard library that can help.
 
 ```go
 type ReadSeeker interface {
