@@ -16,13 +16,13 @@
 * [Concurrency](concurrency.md)
 * [Select](select.md)
 
-## Standard lib essentials
+## Build an application
 
+* [Intro](app-intro.md)
 * [HTTP server](http-server.md)
-* [JSON and IO (WIP)](JSON-and-io.md)
-* `io` (todo)
+* [JSON and routing (WIP)](json.md)
+* [IO and sorting (WIP)](io.md)
 * `time` (todo)
-* Sorting (todo
 
 ## Meta
 

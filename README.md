@@ -35,7 +35,7 @@ Property based tests \(todo\)
 ### Standard lib essentials
 
 * [HTTP server](http-server.md) - Learn how to TDD a web server
-* [JSON and `IO` (WIP)](JSON-and-io.md) - Learn how to work with JSON, plus embedding types and some IO basics
+* [JSON and `IO` (WIP)](json.md) - Learn how to work with JSON, plus embedding types and some IO basics
 * `time`
 * Sorting
 
