@@ -442,7 +442,7 @@ Next we'll want to extend our test so that we can control exactly what data we w
 
 ## Write the test first
 
-We can update the test to assert that the league table contains some players that we will stub in our store. 
+We can update the test to assert that the league table contains some players that we will stub in our store.
 
 Update `StubPlayerStore` to let it store a league, which is just a slice of `Player`. We'll store our expected data in there.
 
@@ -521,7 +521,7 @@ type PlayerStore interface {
 }
 ```
 
-Now we can update our handler code to call that rather than returning a hard-coded list. Delete our method `getLeagueTable()` and then update `leagueHandler` to call `GetLeague()` 
+Now we can update our handler code to call that rather than returning a hard-coded list. Delete our method `getLeagueTable()` and then update `leagueHandler` to call `GetLeague()`.
 
 ```go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
@@ -546,9 +546,9 @@ Try and run the tests.
 	*StubPlayerStore does not implement PlayerStore (missing GetLeague method)
 ```
 
-The compiler is complaining because `InMemoryPlayerStore` and `StubPlayerStore` do not have the new method we added to our interface. 
+The compiler is complaining because `InMemoryPlayerStore` and `StubPlayerStore` do not have the new method we added to our interface.
 
-For `StubPlayerStore` it's pretty easy, just return the `league` field we added earlier. 
+For `StubPlayerStore` it's pretty easy, just return the `league` field we added earlier.
 
 ```go
 func (s *StubPlayerStore) GetLeague() []Player {
@@ -564,7 +564,7 @@ type InMemoryPlayerStore struct {
 }
 ```
 
-Whilst it would be pretty straightforward to implement `GetLeague` "properly" by iterating over the map remember we are just trying to _write the minimal amount of code to make the tests pass_. 
+Whilst it would be pretty straightforward to implement `GetLeague` "properly" by iterating over the map remember we are just trying to _write the minimal amount of code to make the tests pass_.
 
 So let's just get the compiler happy for now and live with the uncomfortable feeling of an incomplete implementation in our `InMemoryStore`.
 
@@ -577,7 +577,7 @@ func (i *InMemoryPlayerStore) GetLeague() []Player {
 What this is really telling us is that _later_ we're going to want to test this but let's park that for now.
 
 Try and run the tests, the compiler should pass and the tests should be passing!
- 
+
 ## Refactor
 
 The server code is looking pretty good already but the test code is a bit of a mess. It does not convey out intent very well and has a lot of boilerplate we can refactor away
@@ -599,7 +599,6 @@ t.Run("it returns the league table as JSON", func(t *testing.T) {
     server.ServeHTTP(response, request)
 
     got := getLeagueFromResponse(t, response.Body)
-    
     assertStatus(t, response.Code, http.StatusOK)
     assertLeague(t, got, wantedLeague)
 })
@@ -630,7 +629,6 @@ func newLeagueRequest() *http.Request {
 	return req
 }
 ```
-
 
 ## Wrapping up
 
