@@ -440,6 +440,198 @@ func (p *PlayerServer) getLeagueTable() []Player{
 
 Next we'll want to extend our test so that we can control exactly what data we want back.
 
+## Write the test first
+
+We can update the test to assert that the league table contains some players that we will stub in our store. 
+
+Update `StubPlayerStore` to let it store a league, which is just a slice of `Player`. We'll store our expected data in there.
+
+```go
+type StubPlayerStore struct {
+	scores   map[string]int
+	winCalls []string
+	league []Player
+}
+```
+
+Next update our current test by putting some players in the league property of our stub and assert they get returned from our server.
+
+```go
+func TestLeague(t *testing.T) {
+
+	t.Run("it returns the league table as JSON", func(t *testing.T) {
+		wantedLeague := []Player{
+			{"Cleo", 32},
+			{"Chris", 20},
+			{"Tiest", 14},
+		}
+
+		store := StubPlayerStore{nil, nil, wantedLeague,}
+		server := NewPlayerServer(&store)
+
+		request, _ := http.NewRequest(http.MethodGet, "/league", nil)
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		var got []Player
+
+		err := json.NewDecoder(response.Body).Decode(&got)
+
+		if err != nil {
+			t.Fatalf("Unable to parse response from server '%s' into slice of Player, '%v'", response.Body, err)
+		}
+
+		assertStatus(t, response.Code, http.StatusOK)
+
+		if !reflect.DeepEqual(got, wantedLeague) {
+			t.Errorf("got %v want %v", got, wantedLeague)
+		}
+	})
+}
+```
+
+## Try to run the test
+
+```
+./server_test.go:33:3: too few values in struct initializer
+./server_test.go:70:3: too few values in struct initializer
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+You'll need to update the other tests as we have a new field in `StubPlayerStore`; set it to nil for the other tests.
+
+Try running the tests again and you should get
+
+```
+=== RUN   TestLeague/it_returns_the_league_table_as_JSON
+    --- FAIL: TestLeague/it_returns_the_league_table_as_JSON (0.00s)
+    	server_test.go:124: got [{Chris 20}] want [{Cleo 32} {Chris 20} {Tiest 14}]
+```
+## Write enough code to make it pass
+
+We know the data is in our `StubPlayerStore` and we've abstracted that away into an interface `PlayerStore`. We need to update this so anyone passing us in a `PlayerStore` can provide us with the data for leagues.
+
+```go
+type PlayerStore interface {
+	GetPlayerScore(name string) int
+	RecordWin(name string)
+	GetLeague() []Player
+}
+```
+
+Now we can update our handler code to call that rather than returning a hard-coded list. Delete our method `getLeagueTable()` and then update `leagueHandler` to call `GetLeague()` 
+
+```go
+func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(p.store.GetLeague())
+	w.WriteHeader(http.StatusOK)
+}
+```
+
+Try and run the tests.
+
+```
+# github.com/quii/learn-go-with-tests/json-and-io/v4
+./main.go:9:50: cannot use NewInMemoryPlayerStore() (type *InMemoryPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+	*InMemoryPlayerStore does not implement PlayerStore (missing GetLeague method)
+./server_integration_test.go:11:27: cannot use store (type *InMemoryPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+	*InMemoryPlayerStore does not implement PlayerStore (missing GetLeague method)
+./server_test.go:36:28: cannot use &store (type *StubPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+	*StubPlayerStore does not implement PlayerStore (missing GetLeague method)
+./server_test.go:74:28: cannot use &store (type *StubPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+	*StubPlayerStore does not implement PlayerStore (missing GetLeague method)
+./server_test.go:106:29: cannot use &store (type *StubPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+	*StubPlayerStore does not implement PlayerStore (missing GetLeague method)
+```
+
+The compiler is complaining because `InMemoryPlayerStore` and `StubPlayerStore` do not have the new method we added to our interface. 
+
+For `StubPlayerStore` it's pretty easy, just return the `league` field we added earlier. 
+
+```go
+func (s *StubPlayerStore) GetLeague() []Player {
+	return s.league
+}
+```
+
+Here's a reminder of how `InMemoryStore` is implemented
+
+```go
+type InMemoryPlayerStore struct {
+	store map[string]int
+}
+```
+
+Whilst it would be pretty straightforward to implement `GetLeague` "properly" by iterating over the map remember we are just trying to _write the minimal amount of code to make the tests pass_. 
+
+So let's just get the compiler happy for now and live with the uncomfortable feeling of an incomplete implementation in our `InMemoryStore`.
+
+```go
+func (i *InMemoryPlayerStore) GetLeague() []Player {
+	return nil
+}
+```
+
+What this is really telling us is that _later_ we're going to want to test this but let's park that for now.
+
+Try and run the tests, the compiler should pass and the tests should be passing!
+ 
+## Refactor
+
+The server code is looking pretty good already but the test code is a bit of a mess. It does not convey out intent very well and has a lot of boilerplate we can refactor away
+
+```go
+t.Run("it returns the league table as JSON", func(t *testing.T) {
+    wantedLeague := []Player{
+        {"Cleo", 32},
+        {"Chris", 20},
+        {"Tiest", 14},
+    }
+
+    store := StubPlayerStore{nil, nil, wantedLeague,}
+    server := NewPlayerServer(&store)
+
+    request := newLeagueRequest()
+    response := httptest.NewRecorder()
+
+    server.ServeHTTP(response, request)
+
+    got := getLeagueFromResponse(t, response.Body)
+    
+    assertStatus(t, response.Code, http.StatusOK)
+    assertLeague(t, got, wantedLeague)
+})
+```
+
+Here are the new helpers
+
+```go
+func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
+	err := json.NewDecoder(body).Decode(&league)
+
+	if err != nil {
+		t.Fatalf("Unable to parse response from server '%s' into slice of Player, '%v'", body, err)
+	}
+	
+	return
+}
+
+func assertLeague(t *testing.T, got, want []Player) {
+	t.Helper()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v want %v", got, want)
+	}
+}
+
+func newLeagueRequest() *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, "/league", nil)
+	return req
+}
+```
+
+
 ## Wrapping up
 
 What we've covered:
