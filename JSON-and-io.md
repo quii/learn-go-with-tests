@@ -613,7 +613,7 @@ func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
 	if err != nil {
 		t.Fatalf("Unable to parse response from server '%s' into slice of Player, '%v'", body, err)
 	}
-	
+
 	return
 }
 
@@ -628,6 +628,61 @@ func newLeagueRequest() *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, "/league", nil)
 	return req
 }
+```
+
+One final thing we need to do for our server to work is make sure we return a `content-type` header in the response so machines can recognise we are returning `JSON`
+
+## Write the test first
+
+Add this assertion to the existing test
+
+```go
+if response.Header().Get("content-type") != "application/json" {
+    t.Errorf("response did not have content-type of application/json, got %v", response.HeaderMap)
+}
+```
+
+## Try to run the test
+
+```
+=== RUN   TestLeague/it_returns_the_league_table_as_JSON
+    --- FAIL: TestLeague/it_returns_the_league_table_as_JSON (0.00s)
+    	server_test.go:124: response did not have content-type of application/json, got map[Content-Type:[text/plain; charset=utf-8]]
+```
+
+## Write enough code to make it pass
+
+Update leagueHandler
+
+```go
+func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(p.store.GetLeague())
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+}
+```
+
+The test should pass
+
+## Refactor
+
+Add a helper for assertContentType.
+
+```go
+const jsonContentType = "application/json"
+
+func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
+	t.Helper()
+	if response.Header().Get("content-type") != want {
+		t.Errorf("response did not have content-type of %s, got %v", want, response.HeaderMap)
+	}
+}
+```
+
+Use it in the test.
+
+```go
+assertContentType(t, response, jsonContentType)
 ```
 
 ## Wrapping up
