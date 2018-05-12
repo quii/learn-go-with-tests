@@ -17,13 +17,11 @@ import (
 	"net/http"
 )
 
-// PlayerStore stores score information about players
 type PlayerStore interface {
 	GetPlayerScore(name string) int
 	RecordWin(name string)
 }
 
-// PlayerServer is a HTTP interface for player information
 type PlayerServer struct {
 	store PlayerStore
 }
@@ -59,22 +57,18 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 // InMemoryPlayerStore.go
 package main
 
-// NewInMemoryPlayerStore initialises an empty player store
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
 	return &InMemoryPlayerStore{map[string]int{}}
 }
 
-// InMemoryPlayerStore collects data about players in memory
 type InMemoryPlayerStore struct {
 	store map[string]int
 }
 
-// RecordWin will record a player's win
 func (i *InMemoryPlayerStore) RecordWin(name string) {
 	i.store[name]++
 }
 
-// GetPlayerScore retrieves scores for a given player
 func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 	return i.store[name]
 }
@@ -151,7 +145,7 @@ In the previous chapter we mentioned this was a fairly naive way of doing our ro
 
 ## Write enough code to make it pass
 
-Go does have a built in routing mechanism called [`ServeMux`](https://golang.org/pkg/net/http/#ServeMux) (request multiplexer) which lets you attach `http.Handler`s to particular request paths.
+Go has a built in routing mechanism called [`ServeMux`](https://golang.org/pkg/net/http/#ServeMux) (request multiplexer) which lets you attach `http.Handler`s to particular request paths.
 
 Let's commit some sins and get the tests passing in the quickest way we can, knowing we can refactor it with safety once we know the tests are passing.
 
@@ -184,11 +178,9 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 - For the `/players/` route we just cut and paste our code into another `http.HandlerFunc`.
 - Finally we handle the request that came in by calling our new router's `ServeHTTP` (notice how `ServeMux` is _also_ a `http.Handler`?)
 
-If you run all the tests, it should all be passing.
+The tests should now pass.
 
 ## Refactor
-
-There's a few improvements we can make.
 
 `ServeHTTP` is looking quite big, we can separate things out a bit by refactoring our handlers into separate methods.
 
@@ -218,11 +210,7 @@ func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-Looking better!
-
-Next, it's quite odd (and inefficient) to be setting up a router as a request comes in and then calling it. What we ideally want to do is have some kind of `NewPlayerServer` function which will take our dependencies and do the one time setup of creating the router. Each request can then just use that one instance of the router.
-
-Here are the relevant changes.
+It's quite odd (and inefficient) to be setting up a router as a request comes in and then calling it. What we ideally want to do is have some kind of `NewPlayerServer` function which will take our dependencies and do the one time setup of creating the router. Each request can then just use that one instance of the router.
 
 ```go
 type PlayerServer struct {
@@ -248,7 +236,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 ```
 
 - `PlayerServer` now needs to store a router.
-- We have moved the routing creation out of `ServeHTTP` and into our `NewPlayerServer` so this only has to be done once, not per request
+- We have moved the routing creation out of `ServeHTTP` and into our `NewPlayerServer` so this only has to be done once, not per request.
 - You will need to update all the test and production code where we used to do `PlayerServer{&store}` with `NewPlayerServer(&store)`.
 
 ### One final refactor
@@ -295,11 +283,13 @@ This lets us remove our own `ServeHTTP` method, as we are already exposing one v
 Embedding is a very interesting language feature. You can use it with interfaces to compose new interfaces.
 
 ```go
-type Animal interface{
+type Animal interface {
 	Eater()
 	Sleeper()
 }
 ```
+
+And you can use it with concrete types too, not just interfaces.
 
 ### Any downsides?
 
@@ -309,18 +299,26 @@ If we had been lazy and embedded `http.ServeMux` instead (the concrete type) it 
 
 **When embedding types, really think about what impact that has on your public API**.
 
-Now we've restructured our application so that we can easily add new routes and have the start of the `/league` endpoint. We now need to make it return some useful information.
+Now we've restructured our application we can easily add new routes and have the start of the `/league` endpoint. We now need to make it return some useful information.
 
 We should return some JSON that looks something like this.
 
 ```json
-[ {"Name": "Bill", "Wins": 10},
-  {"Name": "Alice", "Wins": 15} ]
+[
+   {
+      "Name":"Bill",
+      "Wins":10
+   },
+   {
+      "Name":"Alice",
+      "Wins":15
+   }
+]
 ```
 
 ## Write the test first
 
-We'll start by just trying to parse the response into something meaningful.
+We'll start by trying to parse the response into something meaningful.
 
 ```go
 func TestLeague(t *testing.T) {
@@ -576,7 +574,7 @@ Try and run the tests, the compiler should pass and the tests should be passing!
 
 ## Refactor
 
-The server code is looking pretty good already but the test code is a bit of a mess. It does not convey out intent very well and has a lot of boilerplate we can refactor away
+The test code does not convey out intent very well and has a lot of boilerplate we can refactor away.
 
 ```go
 t.Run("it returns the league table as JSON", func(t *testing.T) {
