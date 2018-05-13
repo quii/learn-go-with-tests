@@ -243,7 +243,7 @@ func PlayerServer(w http.ResponseWriter, r *http.Request) {
 
 This test has forced us to actually look at the request's URL and make a decision. So whilst in our heads we may have been worrying about player stores and interfaces the next logical step actually seems to be about _routing_.
 
-If we did started with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**.
+If we had started with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**.
 
 We're resisting the temptation to use any routing libraries right now, just the smallest step to get our test passing.
 
@@ -255,7 +255,7 @@ We can simplify the `PlayerServer` by separating out the score retrieval into a 
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/player/"):]
+	player := r.URL.Path[len("/players/"):]
 
 	fmt.Fprint(w, GetPlayerScore(player))
 }
@@ -335,7 +335,7 @@ Finally, we will now implement the `Handler` interface by adding a method to our
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/player/"):]
+	player := r.URL.Path[len("/players/"):]
 	fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
@@ -354,7 +354,7 @@ type PlayerServer struct {
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/player/"):]
+	player := r.URL.Path[len("/players/"):]
 	fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
@@ -371,7 +371,7 @@ We need to change our tests to instead create a new instance of our `PlayerServe
 func TestGETPlayers(t *testing.T) {
 	server := &PlayerServer{}
 
-	t.Run("returns the Pepper's score", func(t *testing.T) {
+	t.Run("returns Pepper's score", func(t *testing.T) {
 		request := newGetScoreRequest("Pepper")
 		response := httptest.NewRecorder()
 
@@ -442,7 +442,7 @@ func TestGETPlayers(t *testing.T) {
 	}
 	server := &PlayerServer{&store}
 
-	t.Run("returns the Pepper's score", func(t *testing.T) {
+	t.Run("returns Pepper's score", func(t *testing.T) {
 		request := newGetScoreRequest("Pepper")
 		response := httptest.NewRecorder()
 
@@ -650,7 +650,7 @@ func TestStoreWins(t *testing.T) {
 }
 ```
 
-For a start let's just check we get the correct status code if we hit the particular route with POST. This lets us drive out the functionality of accepting a different kind of request and handling it differently to `GET /player/{name}`. Once this works we can then start asserting on our handler's interaction with the store.
+For a start let's just check we get the correct status code if we hit the particular route with POST. This lets us drive out the functionality of accepting a different kind of request and handling it differently to `GET /players/{name}`. Once this works we can then start asserting on our handler's interaction with the store.
 
 ## Try to run the test
 
