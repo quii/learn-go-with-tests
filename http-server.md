@@ -254,7 +254,7 @@ We can simplify the `PlayerServer` by separating out the score retrieval into a 
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/player/"):]
+	player := r.URL.Path[len("/players/"):]
 
 	fmt.Fprint(w, GetPlayerScore(player))
 }
@@ -334,7 +334,7 @@ Finally, we will now implement the `Handler` interface by adding a method to our
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/player/"):]
+	player := r.URL.Path[len("/players/"):]
 	fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
@@ -353,7 +353,7 @@ type PlayerServer struct {
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/player/"):]
+	player := r.URL.Path[len("/players/"):]
 	fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
@@ -649,7 +649,7 @@ func TestStoreWins(t *testing.T) {
 }
 ```
 
-For a start let's just check we get the correct status code if we hit the particular route with POST. This lets us drive out the functionality of accepting a different kind of request and handling it differently to `GET /player/{name}`. Once this works we can then start asserting on our handler's interaction with the store.
+For a start let's just check we get the correct status code if we hit the particular route with POST. This lets us drive out the functionality of accepting a different kind of request and handling it differently to `GET /players/{name}`. Once this works we can then start asserting on our handler's interaction with the store.
 
 ## Try to run the test
 
