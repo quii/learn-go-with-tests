@@ -370,7 +370,7 @@ We need to change our tests to instead create a new instance of our `PlayerServe
 func TestGETPlayers(t *testing.T) {
 	server := &PlayerServer{}
 
-	t.Run("returns the Pepper's score", func(t *testing.T) {
+	t.Run("returns Pepper's score", func(t *testing.T) {
 		request := newGetScoreRequest("Pepper")
 		response := httptest.NewRecorder()
 
@@ -441,7 +441,7 @@ func TestGETPlayers(t *testing.T) {
 	}
 	server := &PlayerServer{&store}
 
-	t.Run("returns the Pepper's score", func(t *testing.T) {
+	t.Run("returns Pepper's score", func(t *testing.T) {
 		request := newGetScoreRequest("Pepper")
 		response := httptest.NewRecorder()
 
