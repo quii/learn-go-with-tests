@@ -36,7 +36,7 @@ Property based tests \(todo\)
 
 Now that you have hopefully digested the _Go Fundamentals_ section you have a solid grounding of a majority of Go's language features and how to do TDD.
 
-This next section will involve building an application. 
+This next section will involve building an application.
 
 Each chapter will iterate on the previous one, expanding the application's functionality as our product owner dictates.
 
