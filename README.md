@@ -3,6 +3,7 @@
 _Or learn test-driven development with Go_
 
 ![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
 [You can read this on Gitbook](https://quii.gitbook.io/learn-go-with-tests)
 
