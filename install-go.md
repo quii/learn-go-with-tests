@@ -32,7 +32,7 @@ If you are going to deploy your programs to linux based servers, you should enab
 brew install go --cross-compile-common
 ```
 
-*You should follow any instructions reccomended by your package manager, not these may be host os specific*.
+*You should follow any instructions recommended by your package manager, not these may be host os specific*.
 
 You can verify the installation with:
 
@@ -70,7 +70,7 @@ At this point you can _go get_ and the src/package/bin will be installed correct
 
 ## Go Editor
 
-Editor preference is very individualistic, you may already have a preference that supports Go.  If you don't you should consider an Editor such as [Visual Studio Code](https://code.visualstudio.com), which has execptional Go support.
+Editor preference is very individualistic, you may already have a preference that supports Go.  If you don't you should consider an Editor such as [Visual Studio Code](https://code.visualstudio.com), which has exceptional Go support.
 
 To install vs code using brew, because this is a GUI application you need an extension to homebrew called cask to support install vs code.
 

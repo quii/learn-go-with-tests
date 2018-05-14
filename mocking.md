@@ -368,7 +368,7 @@ There's still another important property we haven't tested.
 
 Our latest change only asserts that it has slept 4 times, but those sleeps could occur out of sequence.
 
-When writing tests if you're not confident that your tests are giving you sufficient confidence, just break it! (make sure you have commited your changes to source control first though). Change the code to the following
+When writing tests if you're not confident that your tests are giving you sufficient confidence, just break it! (make sure you have committed your changes to source control first though). Change the code to the following
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
