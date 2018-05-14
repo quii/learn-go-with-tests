@@ -404,7 +404,7 @@ Finally we need to start recording scores with `RecordWin`
 
 ## Write the test first
 
-Our approach is fairly short-sighted for writes. We cant (easily) just update one "row" of JSON in a file. We'll need to store the _whole_ new representation of our database on every write. 
+Our approach is fairly short-sighted for writes. We cant (easily) just update one "row" of JSON in a file. We'll need to store the _whole_ new representation of our database on every write.
 
 How do we write? We'd normally use a `Writer` but we already have our `ReadSeeker`. Potentially we could have two dependencies but the standard library already has an interface for us `ReadWriteSeeker` which lets us do all the things we'll need to do with a file.
 
@@ -441,13 +441,13 @@ Let's create a helper function which will create a temporary file with some data
 ```go
 func createTempFile(t *testing.T, initialData string) *os.File {
 	t.Helper()
-	
+
 	tmpfile, err := ioutil.TempFile("", "db")
 
 	if err != nil {
 		t.Fatalf("could not create temp file %v", err)
 	}
-	
+
 	tmpfile.Write([]byte(initialData))
 	return tmpfile
 }
@@ -527,7 +527,7 @@ Add the new method
 
 ```go
 func (f *FileSystemPlayerStore) RecordWin(name string) {
-	
+
 }
 ```
 
@@ -556,7 +556,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 }
 ```
 
-You may be asking yourself why I am doing `league[i].Wins++` rather than `player.Wins++`. 
+You may be asking yourself why I am doing `league[i].Wins++` rather than `player.Wins++`.
 
 When you `range` over a slice you are returned the current index of the loop (in our case `i`) and a _copy_ of the element at that index. Changing the `Wins` value of a copy wont have any effect on the `league` slice that we iterate on. For that reason we need to get the reference to the actual value by doing `league[i]` and then changing that value instead.
 
@@ -564,9 +564,9 @@ If you run the tests, they should now be passing.
 
 ## Refactor
 
-In `GetPlayerScore` and `RecordWin` we are iterating over `[]Player` to find a player by name. 
+In `GetPlayerScore` and `RecordWin` we are iterating over `[]Player` to find a player by name.
 
-We could refactor this common code in the internals of `FileSystemStore` but to me it feels like this is maybe useful code we can lift into a new type. Working with a "League" so far has always been with `[]Player` but we can create a new type called `League`. This will be easier for other developers to understand and then we can attach useful methods onto that type for us to use. 
+We could refactor this common code in the internals of `FileSystemStore` but to me it feels like this is maybe useful code we can lift into a new type. Working with a "League" so far has always been with `[]Player` but we can create a new type called `League`. This will be easier for other developers to understand and then we can attach useful methods onto that type for us to use.
 
 Inside `league.go` add the following
 

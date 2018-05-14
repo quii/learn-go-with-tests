@@ -744,7 +744,7 @@ func (i *InMemoryPlayerStore) GetLeague() []Player {
 
 All we need to do is iterate over the map and convert each key/value to a `Player`.
 
-The test should now pass. 
+The test should now pass.
 
 ## Wrapping up
 
