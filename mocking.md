@@ -522,7 +522,7 @@ func TestConfigurableSleeper(t *testing.T) {
 }
 ```
 
-There should be nothing new in this test and it is setup very similar to the previous mock tests. 
+There should be nothing new in this test and it is setup very similar to the previous mock tests.
 
 ### Try and run the test
 ```
