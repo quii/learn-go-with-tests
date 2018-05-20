@@ -315,11 +315,9 @@ If you try again, your `main` will no longer compile for the same reason
 Let's create a _real_ sleeper which implements the interface we need
 
 ```go
-type DefaultSleeper struct {
-	duration time.Duration
-}
+type DefaultSleeper struct {}
 
-func (o *DefaultSleeper) Sleep() {
+func (d *DefaultSleeper) Sleep() {
 	time.Sleep(1 * time.Second)
 }
 ```
@@ -546,7 +544,7 @@ countdown_test.go:56: should have slept for 5s but slept for 0s
 
 ### Write enough code to make it pass
 
-All we need to do not is implement the `Sleep` function for `ConfigurableSleeper`.
+All we need to do now is implement the `Sleep` function for `ConfigurableSleeper`.
 
 ```go
 func (c *ConfigurableSleeper) Sleep() {
@@ -569,7 +567,7 @@ func main() {
 
 If we run the tests and the program manually, we can see that all the behavior remains the same.
 
-Since we are using the `ConfigurableSleepr`,  it is safe to delete the `DefaultSleeper` implementation. Wrapping up our program.
+Since we are using the `ConfigurableSleeper`,  it is safe to delete the `DefaultSleeper` implementation. Wrapping up our program.
 
 ## But isn't mocking evil?
 
