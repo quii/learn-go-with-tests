@@ -494,7 +494,7 @@ type ConfigurableSleeper struct {
 }
 ```
 
-We are using `duration` to configure the time slept and `sleep` as a way to pass in a custom sleep function, including a spy.
+We are using `duration` to configure the time slept and `sleep` as a way to pass in a sleep function. The signature of `sleep` is the same as for `time.Sleep` allowing us to use `time.Sleep` in our real implementation and a spy in our tests.
 
 ```go
 type SpyTime struct {
@@ -521,6 +521,40 @@ func TestConfigurableSleeper(t *testing.T) {
 	}
 }
 ```
+
+There should be nothing new in this test and it is setup very similar to the previous mock tests. 
+
+### Try and run the test
+```
+sleeper.Sleep undefined (type ConfigurableSleeper has no field or method Sleep, but does have sleep)
+
+```
+
+You should see a very clear error message indicating that we do not have a `Sleep` method created on our `ConfigurableSleeper`.
+
+### Write the minimal amount of code for the test to run and check failing test output
+```go
+func (c *ConfigurableSleeper) Sleep() {
+}
+```
+
+With our new `Sleep` function implemented we have a failing test.
+
+```
+countdown_test.go:56: should have slept for 5s but slept for 0s
+```
+
+### Write enough code to make it pass
+
+All we need to do not is implement the `Sleep` function for `ConfigurableSleeper`.
+
+```go
+func (c *ConfigurableSleeper) Sleep() {
+	c.sleep(c.duration)
+}
+```
+
+With this change all of the test should be passing again.
 
 ## But isn't mocking evil?
 
