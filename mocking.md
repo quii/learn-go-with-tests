@@ -556,6 +556,21 @@ func (c *ConfigurableSleeper) Sleep() {
 
 With this change all of the test should be passing again.
 
+### Cleanup and refactor
+
+The last thing we need to do is to actually use our `ConfigurableSleeper` in the main function.
+
+```go
+func main() {
+	sleeper := &ConfigurableSleeper{1 * time.Second, time.Sleep}
+	Countdown(os.Stdout, sleeper)
+}
+```
+
+If we run the tests and the program manually, we can see that all the behavior remains the same.
+
+Since we are using the `ConfigurableSleepr`,  it is safe to delete the `DefaultSleeper` implementation. Wrapping up our program.
+
 ## But isn't mocking evil?
 
 You may have heard mocking is evil. Just like anything in software development it can be used for evil, just like [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself).
