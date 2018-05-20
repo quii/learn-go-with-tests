@@ -315,12 +315,12 @@ If you try again, your `main` will no longer compile for the same reason
 Let's create a _real_ sleeper which implements the interface we need
 
 ```go
-type ConfigurableSleeper struct {
+type DefaultSleeper struct {
 	duration time.Duration
 }
 
-func (o *ConfigurableSleeper) Sleep() {
-	time.Sleep(o.duration)
+func (o *DefaultSleeper) Sleep() {
+	time.Sleep(1 * time.Second)
 }
 ```
 
@@ -330,7 +330,7 @@ We can then use it in our real application like so
 
 ```go
 func main() {
-	sleeper := &ConfigurableSleeper{1 * time.Second}
+	sleeper := &DefaultSleeper{}
 	Countdown(os.Stdout, sleeper)
 }
 ```
