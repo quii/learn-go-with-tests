@@ -324,8 +324,6 @@ func (o *DefaultSleeper) Sleep() {
 }
 ```
 
-I decided to make a little extra effort and make it so our real sleeper is configurable but you could just as easily not bother and hard-code it for 1 second.
-
 We can then use it in our real application like so
 
 ```go
@@ -480,6 +478,49 @@ Go!`
 ```
 
 We now have our function and its 2 important properties properly tested.
+
+## Extending Sleeper to be configurable
+
+A nice feature would be for the `Sleeper` to be configurable.
+
+### Write the test first
+
+Let's first create a new type for `ConfigurableSleeper` that accepts what we need for configuration and testing.
+
+```go
+type ConfigurableSleeper struct {
+	duration time.Duration
+	sleep    func(time.Duration)
+}
+```
+
+We are using `duration` to configure the time slept and `sleep` as a way to pass in a custom sleep function, including a spy.
+
+```go
+type SpyTime struct {
+	durationSlept time.Duration
+}
+
+func (s *SpyTime) Sleep(duration time.Duration) {
+	s.durationSlept = duration
+}
+```
+
+With our spy in place, we can create a new test for the configurable sleeper.
+
+```go
+func TestConfigurableSleeper(t *testing.T) {
+	sleepTime := 5 * time.Second
+
+	spyTime := &SpyTime{}
+	sleeper := ConfigurableSleeper{sleepTime, spyTime.Sleep}
+	sleeper.Sleep()
+
+	if spyTime.durationSlept != sleepTime {
+		t.Errorf("should have slept for %v but slept for %v", sleepTime, spyTime.durationSlept)
+	}
+}
+```
 
 ## But isn't mocking evil?
 
