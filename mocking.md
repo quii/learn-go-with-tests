@@ -315,22 +315,18 @@ If you try again, your `main` will no longer compile for the same reason
 Let's create a _real_ sleeper which implements the interface we need
 
 ```go
-type ConfigurableSleeper struct {
-	duration time.Duration
-}
+type DefaultSleeper struct {}
 
-func (o *ConfigurableSleeper) Sleep() {
-	time.Sleep(o.duration)
+func (d *DefaultSleeper) Sleep() {
+	time.Sleep(1 * time.Second)
 }
 ```
-
-I decided to make a little extra effort and make it so our real sleeper is configurable but you could just as easily not bother and hard-code it for 1 second.
 
 We can then use it in our real application like so
 
 ```go
 func main() {
-	sleeper := &ConfigurableSleeper{1 * time.Second}
+	sleeper := &DefaultSleeper{}
 	Countdown(os.Stdout, sleeper)
 }
 ```
@@ -480,6 +476,98 @@ Go!`
 ```
 
 We now have our function and its 2 important properties properly tested.
+
+## Extending Sleeper to be configurable
+
+A nice feature would be for the `Sleeper` to be configurable.
+
+### Write the test first
+
+Let's first create a new type for `ConfigurableSleeper` that accepts what we need for configuration and testing.
+
+```go
+type ConfigurableSleeper struct {
+	duration time.Duration
+	sleep    func(time.Duration)
+}
+```
+
+We are using `duration` to configure the time slept and `sleep` as a way to pass in a sleep function. The signature of `sleep` is the same as for `time.Sleep` allowing us to use `time.Sleep` in our real implementation and a spy in our tests.
+
+```go
+type SpyTime struct {
+	durationSlept time.Duration
+}
+
+func (s *SpyTime) Sleep(duration time.Duration) {
+	s.durationSlept = duration
+}
+```
+
+With our spy in place, we can create a new test for the configurable sleeper.
+
+```go
+func TestConfigurableSleeper(t *testing.T) {
+	sleepTime := 5 * time.Second
+
+	spyTime := &SpyTime{}
+	sleeper := ConfigurableSleeper{sleepTime, spyTime.Sleep}
+	sleeper.Sleep()
+
+	if spyTime.durationSlept != sleepTime {
+		t.Errorf("should have slept for %v but slept for %v", sleepTime, spyTime.durationSlept)
+	}
+}
+```
+
+There should be nothing new in this test and it is setup very similar to the previous mock tests.
+
+### Try and run the test
+```
+sleeper.Sleep undefined (type ConfigurableSleeper has no field or method Sleep, but does have sleep)
+
+```
+
+You should see a very clear error message indicating that we do not have a `Sleep` method created on our `ConfigurableSleeper`.
+
+### Write the minimal amount of code for the test to run and check failing test output
+```go
+func (c *ConfigurableSleeper) Sleep() {
+}
+```
+
+With our new `Sleep` function implemented we have a failing test.
+
+```
+countdown_test.go:56: should have slept for 5s but slept for 0s
+```
+
+### Write enough code to make it pass
+
+All we need to do now is implement the `Sleep` function for `ConfigurableSleeper`.
+
+```go
+func (c *ConfigurableSleeper) Sleep() {
+	c.sleep(c.duration)
+}
+```
+
+With this change all of the test should be passing again.
+
+### Cleanup and refactor
+
+The last thing we need to do is to actually use our `ConfigurableSleeper` in the main function.
+
+```go
+func main() {
+	sleeper := &ConfigurableSleeper{1 * time.Second, time.Sleep}
+	Countdown(os.Stdout, sleeper)
+}
+```
+
+If we run the tests and the program manually, we can see that all the behavior remains the same.
+
+Since we are using the `ConfigurableSleeper`,  it is safe to delete the `DefaultSleeper` implementation. Wrapping up our program.
 
 ## But isn't mocking evil?
 
