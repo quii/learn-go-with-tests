@@ -310,7 +310,8 @@ There's some duplication in our tests, lets refactor that out.
 func TestWallet(t *testing.T) {
 
     assertBalance := func(t *testing.T, wallet Wallet, want Bitcoin) {
-        got := wallet.Balance()
+        t.Helper()
+    	got := wallet.Balance()
 
         if got != want {
             t.Errorf("got %s want %s", got, want)
@@ -405,6 +406,7 @@ Let's make a quick test helper for our error check just to help our test read cl
 
 ```go
 assertError := func(t *testing.T, err error) {
+	t.Helper()
     if err == nil {
         t.Error("wanted an error but didnt get one")
     }
@@ -433,6 +435,7 @@ Update our helper for a `string` to compare against.
 
 ```go
 assertError := func(t *testing.T, got error, want string) {
+	t.Helper()
     if got == nil {
         t.Fatal("didn't get an error but wanted one")
     }
@@ -529,7 +532,8 @@ func TestWallet(t *testing.T) {
 }
 
 func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
-    got := wallet.Balance()
+    t.Helper()
+	got := wallet.Balance()
 
     if got != want {
         t.Errorf("got '%s' want '%s'", got, want)
@@ -537,7 +541,8 @@ func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
 }
 
 func assertError(t *testing.T, got error, want error) {
-    if got == nil {
+    t.Helper()
+	if got == nil {
         t.Fatal("didn't get an error but wanted one")
     }
 
@@ -599,7 +604,8 @@ func TestWallet(t *testing.T) {
 }
 
 func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
-    got := wallet.Balance()
+    t.Helper()
+	got := wallet.Balance()
 
     if got != want {
         t.Errorf("got %s want %s", got, want)
@@ -607,13 +613,15 @@ func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
 }
 
 func assertNoError(t *testing.T, got error) {
-    if got != nil {
+    t.Helper()
+	if got != nil {
         t.Fatal("got an error but didnt want one")
     }
 }
 
 func assertError(t *testing.T, got error, want error) {
-    if got == nil {
+    t.Helper()
+	if got == nil {
         t.Fatal("didn't get an error but wanted one")
     }
 
