@@ -1,5 +1,7 @@
 # Hello, World
 
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/hello-world)**
+
 It is traditional for your first program in a new language to be Hello, world. Create a file called `hello.go` and write this code. To run it type `go run hello.go`.
 
 ```go
@@ -79,7 +81,7 @@ If statements in Go are very much like other programming languages.
 
 **Declaring variables**
 
-We're declaring some variables with the syntax `varName := value`, which lets us re-use some values in our test for readability
+We're declaring some variables with the syntax `varName := value`, which lets us re-use some values in our test for readability.
 
 **t.Errorf**
 
@@ -97,7 +99,7 @@ The vast majority of the standard library has excellent documentation with examp
 
 Now that we have a test we can iterate on our software safely.
 
-In the last example we wrote the test _after_ the code had been written just so you could get an example of how to write a test and declare a function. From this point on we will be _writing tests first_
+In the last example we wrote the test _after_ the code had been written just so you could get an example of how to write a test and declare a function. From this point on we will be _writing tests first_.
 
 Our next requirement is to let us specify the recipient of the greeting.
 
@@ -164,7 +166,7 @@ func Hello(name string) string {
 
 When you run the tests they should now pass. Normally as part of the TDD cycle we should now _refactor_.
 
-There's not a lot to refactor here, but we can introduce another language feature _constants_
+There's not a lot to refactor here, but we can introduce another language feature _constants_.
 
 ### Constants
 
@@ -192,7 +194,7 @@ To be clear, the performance boost is incredibly negligible for this example! Bu
 
 ## Hello, world... again
 
-The next requirement is when our function is called with an empty string it defaults to printing "Hello, World", rather than "Hello, "
+The next requirement is when our function is called with an empty string it defaults to printing "Hello, World", rather than "Hello, ".
 
 Start by writing a new failing test
 
@@ -261,9 +263,9 @@ What have we done here?
 
 We've refactored our assertion into a function. This reduces duplication and improves readability of our tests. In Go you can declare functions inside other functions and assign them to variables. You can then call them, just like normal functions. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
 
-Now that we have a well-written failing test, let's fix the code, using an `if`.
-
 `t.Helper()` is needed to tell the test suite that this method is a helper. By doing this when it fails the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems easier. If you still don't understand, comment it out, make a test fail and observe the test output.
+
+Now that we have a well-written failing test, let's fix the code, using an `if`.
 
 ```go
 const helloPrefix = "Hello, "
@@ -276,7 +278,7 @@ func Hello(name string) string {
 }
 ```
 
-If we run our tests we should see it satisfies the new requirement and we haven't accidentally broken the other functionality
+If we run our tests we should see it satisfies the new requirement and we haven't accidentally broken the other functionality.
 
 ### Discipline
 
@@ -290,7 +292,7 @@ Let's go over the cycle again
 
 On the face of it this may seem tedious but sticking to the feedback loop is important.
 
-Not only does it ensure that you have _relevant tests_ it helps ensure _you design good software_ by refactoring with the safety of tests.
+Not only does it ensure that you have _relevant tests_, it helps ensure _you design good software_ by refactoring with the safety of tests.
 
 Seeing the test fail is an important check because it also lets you see what the error message looks like. As a developer it can be very hard to work with a codebase when failing tests do not give a clear idea as to what the problem is.
 
@@ -333,7 +335,7 @@ func Hello(name string, language string) string {
 }
 ```
 
-When you try and run the test again it will complain about not passing through enough arguments to `Hello` in your other tests and in `main.go`
+When you try and run the test again it will complain about not passing through enough arguments to `Hello` in your other tests and in `hello.go`
 
 ```text
 ./hello.go:15:19: not enough arguments in call to Hello
@@ -464,17 +466,17 @@ func greetingPrefix(language string) (prefix string) {
 
 A few new concepts:
 
-* In our function signature we have made a _named return value_ `(prefix string)`. 
-* This will create a variable called `prefix` in your function
-  * It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for strings it is `""` 
-    * You can return whatever it's set to by just calling `return` rather than `return prefix`. 
+* In our function signature we have made a _named return value_ `(prefix string)`.
+* This will create a variable called `prefix` in your function.
+  * It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for strings it is `""`.
+    * You can return whatever it's set to by just calling `return` rather than `return prefix`.
   * This will display in the Go Doc for your function so it can make the intent of your code clearer.
-* `default` in the switch case will be branched to if none of the other `case` statements match
+* `default` in the switch case will be branched to if none of the other `case` statements match.
 * The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposes to the world so we made this function private.
 
 ## Wrapping up
 
-Who knew you could get so much out of `Hello, world` ?
+Who knew you could get so much out of `Hello, world`?
 
 By now you should have some understanding of:
 
@@ -491,7 +493,6 @@ By now you should have some understanding of:
 * Writing the smallest amount of code to make it pass so we know we have working software
 * _Then_ refactor, backed with the safety of our tests to ensure we have well-crafted code that is easy to work with
 
-  In our case we've gone from `Hello()` to `Hello("name")`, to `Hello("name", "french")` in small, easy to understand steps.
+In our case we've gone from `Hello()` to `Hello("name")`, to `Hello("name", "french")` in small, easy to understand steps.
 
-  This is of course trivial compared to "real world" software but the principles still stand. TDD is a skill that needs practice to develop but by being able to break problems down into smaller components that you can test you will have a much easier time writing software.
-
+This is of course trivial compared to "real world" software but the principles still stand. TDD is a skill that needs practice to develop but by being able to break problems down into smaller components that you can test you will have a much easier time writing software.

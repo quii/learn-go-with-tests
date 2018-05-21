@@ -32,7 +32,7 @@ If you are going to deploy your programs to linux based servers, you should enab
 brew install go --cross-compile-common
 ```
 
-*You should follow any instructions reccomended by your package manager, not these may be host os specific*.
+*You should follow any instructions recommended by your package manager, not these may be host os specific*.
 
 You can verify the installation with:
 
@@ -70,7 +70,7 @@ At this point you can _go get_ and the src/package/bin will be installed correct
 
 ## Go Editor
 
-Editor preference is very individualistic, you may already have a preference that supports Go.  If you don't you should consider an Editor such as [Visual Studio Code](https://code.visualstudio.com), which has execptional Go support.
+Editor preference is very individualistic, you may already have a preference that supports Go.  If you don't you should consider an Editor such as [Visual Studio Code](https://code.visualstudio.com), which has exceptional Go support.
 
 To install vs code using brew, because this is a GUI application you need an extension to homebrew called cask to support install vs code.
 
@@ -87,14 +87,14 @@ brew cask install visual-studio-code
 You can confirm vs code installed correctly you can run the following in your shell.
 
 ```sh
-code . 
+code .
 ```
 
 vs code is shipped with very little software enabled, you enable new software by installing extensions.  To add Go support you must install a extension, there are a variety available for vs code, an exceptional one is [Luke Hobans package](https://github.com/Microsoft/vscode-go).  This can be installed as follows:
 
 ```sh
 code --install-extension lukehoban.Go
-``` 
+```
 
 When you open a Go file for the first time in vs code, it will indicate that the Analysis tools are missing, you should click the button to install these. The list of tools that gets installed (and used) by vs code are available [here](https://github.com/Microsoft/vscode-go/wiki/Go-tools-that-the-Go-extension-depends-on).
 
@@ -131,12 +131,11 @@ You should be familiar enough with your editor to perform the following with a s
 - **go fmt**. Go has an opinioned formatter called `go fmt`. Your editor should be running this on every file save.
 - **Run tests**. It goes without saying that you should be able to do any of the above and then quickly re-run your tests to ensure your refactoring hasn't broken anything
 
-In addition, to help you work with your code you should be able to: 
+In addition, to help you work with your code you should be able to:
 
 - **View function signature** - You should never be unsure how to call a function in Go. Your IDE should describe a function in terms of its documentation, its parameters and what it returns.
 - **View function definition** - If it's still not clear what a function does, you should be able to jump to the source code and try and figure it out yourself.
 - **Find usages of a symbol** Being able to see the contest of a function being called can help your decision process when refactoring.
-
 
 Mastering your tools will help you concentrate on the code and reduce context switching.
 

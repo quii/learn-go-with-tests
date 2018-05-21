@@ -3,6 +3,7 @@
 _Or learn test-driven development with Go_
 
 ![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
 [You can read this on Gitbook](https://quii.gitbook.io/learn-go-with-tests)
 
@@ -26,19 +27,27 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 6. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
 7. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.
 8. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
-9. [Mocking \(WIP\)](mocking.md) - Take some existing untested code and use DI with mocking to test it.
-10. Concurrency \(WIP\)
+9. [Mocking](mocking.md) - Take some existing untested code and use DI with mocking to test it.
+10. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
+11. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
 
 Property based tests \(todo\)
 
-### Standard lib essentials
+### Build an application
 
-* `io`
-* HTTP client
-* HTTP server
-* JSON marhshalling
-* `time`
-* Sorting
+Now that you have hopefully digested the _Go Fundamentals_ section you have a solid grounding of a majority of Go's language features and how to do TDD.
+
+This next section will involve building an application.
+
+Each chapter will iterate on the previous one, expanding the application's functionality as our product owner dictates.
+
+New concepts will be introduced to help facilitate writing great code but most of the new material will be learning what can be accomplished from Go's standard library.
+
+By the end of this you should have a strong grasp as to how to iteratively write an application in Go, backed by tests.
+
+* [HTTP server](http-server.md) - We will create an application which listens to HTTP requests and responds to them.
+* [JSON (WIP)](json.md) - We will make our endpoints return JSON and explore how to do routing.
+* [IO (WIP)](io.md) - We will persist and read our data from disk and we'll cover sorting data.
 
 ## Contributing
 

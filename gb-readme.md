@@ -64,4 +64,3 @@ Taking my experience of learning with a group and my own personal way I am going
 * Add issues or [tweet me @quii](https://twitter.com/quii)
 
 [MIT license](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/LICENSE.md)
-

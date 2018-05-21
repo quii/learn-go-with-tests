@@ -1,6 +1,10 @@
 # Integers
 
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/integers)**
+
 Integers work as you would expect. Let's write an add function to try things out. Create a test file called `adder_test.go` and write this code.
+
+**note:** Go source files can only have one `package` per directory, make sure that your files are organised separately. [Here is a good explanation on this.](https://dave.cheney.net/2014/12/01/five-suggestions-for-setting-up-a-go-project)
 
 ## Write the test first
 
@@ -43,7 +47,7 @@ func Add(x, y int) int {
 }
 ```
 
-When you have more than one argument of the same type \(in our case two integers\) rather than having `(x int, y int)` you can shorten it to `(x, y int)`
+When you have more than one argument of the same type \(in our case two integers\) rather than having `(x int, y int)` you can shorten it to `(x, y int)`.
 
 Now run the tests and we should be happy that the test is correctly reporting what is wrong.
 
@@ -96,7 +100,7 @@ func Add(x, y int) int {
 
 ### Examples
 
-If you really want to go the extra mile you can make [examples](https://blog.golang.org/examples). You will find a lot of examples in the documentation of the standard library
+If you really want to go the extra mile you can make [examples](https://blog.golang.org/examples). You will find a lot of examples in the documentation of the standard library.
 
 Often code examples go out of date with what the actual code does because they live outside of the real code and don't get checked.
 
@@ -126,6 +130,8 @@ $ go test -v
 --- PASS: ExampleAdd (0.00s)
 ```
 
+Please note that the example function will not be executed if you remove the comment "//Output: 6".Although the function will be compiled, it won't be executed.
+
 By adding this code in the example will appear in the documentation inside `godoc` making your code even more accessible.
 
 ## Wrapping up
@@ -136,4 +142,3 @@ What we have covered:
 * Integers, addition
 * Writing better documentation so users of our code can understand its usage quickly
 * Examples of how to use our code, which are checked as part of our tests
-

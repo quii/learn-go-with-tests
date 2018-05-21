@@ -1,5 +1,7 @@
 # Iteration
 
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/for)**
+
 To do stuff repeatedly in Go, you'll need `for`. In go there are no `while`, `do`, `until` keywords, you can only use `for`. Which is a good thing!
 
 Let's write a test for a function that repeats a character 5 times.
@@ -128,4 +130,3 @@ _NOTE_ by default Benchmarks are run sequentially.
 * More TDD practice
 * Learned `for`.
 * Learned how to write benchmarks
-

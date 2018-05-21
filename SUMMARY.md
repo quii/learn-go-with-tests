@@ -1,4 +1,3 @@
-
 # Table of contents
 
 * [Learn Go with tests](gb-readme.md)
@@ -13,16 +12,17 @@
 * [Structs, methods & interfaces](structs-methods-and-interfaces.md)
 * [Pointers & errors](pointers-and-errors.md)
 * [Dependency Injection](dependency-injection.md)
-* [Mocking (WIP)](mocking.md)
+* [Mocking](mocking.md)
+* [Concurrency](concurrency.md)
+* [Select](select.md)
 
-## Standard lib essentials
+## Build an application
 
-- [`io` (todo)](#)
-- [HTTP client (todo)](#)
-- [HTTP server (todo)](#)
-- [JSON marhshalling (todo)](#)
-- [`time` (todo)](#)
-- [Sorting (todo)](#)
+* [Intro](app-intro.md)
+* [HTTP server](http-server.md)
+* [JSON and routing (WIP)](json.md)
+* [IO and sorting (WIP)](io.md)
+* `time` (todo)
 
 ## Meta
 
