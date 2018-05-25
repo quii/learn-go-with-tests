@@ -448,11 +448,11 @@ func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func(
 	}
 
 	tmpfile.Write([]byte(initialData))
-	
+
 	removeFile := func() {
 		os.Remove(tmpfile.Name())
 	}
-	
+
 	return tmpfile, removeFile
 }
 ```
