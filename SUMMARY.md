@@ -20,7 +20,7 @@
 
 * [Intro](app-intro.md)
 * [HTTP server](http-server.md)
-* [JSON and routing (WIP)](json.md)
+* [JSON, routing and embedding](json.md)
 * [IO and sorting (WIP)](io.md)
 * `time` (todo)
 

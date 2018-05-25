@@ -11,5 +11,5 @@ New concepts will be introduced to help facilitate writing great code but most o
 By the end of this you should have a strong grasp as to how to iteratively write an application in Go, backed by tests.
 
 - [HTTP server](http-server.md) - We will create an application which listens to HTTP requests and responds to them.
-- [JSON (WIP)](json.md) - We will make our endpoints return JSON and explore how to do routing.
+- [JSON, routing and embedding](json.md) - We will make our endpoints return JSON, explore how to do routing and learn about type embedding.
 - [IO (WIP)](io.md) - We will persist and read our data from disk and we'll cover sorting data.

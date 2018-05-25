@@ -1,4 +1,4 @@
-# JSON and routing (WIP)
+# JSON, routing & embedding (WIP)
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/json)**
 
@@ -284,20 +284,22 @@ Embedding is a very interesting language feature. You can use it with interfaces
 
 ```go
 type Animal interface {
-	Eater()
-	Sleeper()
+	Eater
+	Sleeper
 }
 ```
 
-And you can use it with concrete types too, not just interfaces.
+And you can use it with concrete types too, not just interfaces. As you'd expect if you embed a concrete type you'll have access to all its public methods and fields. 
 
 ### Any downsides?
 
-You must be careful with embedding types because you will expose all public methods and properties of the type you embed. In our case it is ok because we embedded just the _interface_ that we wanted to expose (`http.Handler`).
+You must be careful with embedding types because you will expose all public methods and fields of the type you embed. In our case it is ok because we embedded just the _interface_ that we wanted to expose (`http.Handler`).
 
 If we had been lazy and embedded `http.ServeMux` instead (the concrete type) it would still work _but_ users of `PlayerServer` would be able to add new routes to our server because `Handle(path, handler)` would be public.
 
 **When embedding types, really think about what impact that has on your public API**.
+
+It is a _very_ common mistake to misuse embedding and end up polluting your APIs and exposing the internals of your type.
 
 Now we've restructured our application we can easily add new routes and have the start of the `/league` endpoint. We now need to make it return some useful information.
 
@@ -351,7 +353,7 @@ You could argue a simpler initial step would be just to assert that the response
 In my experience tests that assert against JSON strings have the following problems.
 
 - *Brittleness*. If you change the data-model your tests will fail.
-- *Poor output*. If your API wont return a prettified JSON string it can be very hard to read.
+- *Hard to debug*. It can be tricky to understand what the actual problem is when comparing two JSON strings.
 - *Poor intention*. Whilst the output should be JSON, what's really important is exactly what the data is, rather than how it's encoded.
 - *Re-testing the standard library*. There is no need to test how the standard library outputs JSON, it is already tested. Don't test other people's code.
 
@@ -748,8 +750,11 @@ The test should now pass.
 
 ## Wrapping up
 
+We've continued to safely iterate on our program using TDD, making it support new endpoints in a maintainable way with a router and it can now return JSON for our consumers. In the next chapter we will cover persisting the data and sorting our league.
+
 What we've covered:
 
-- `struct` embedding
-- JSON deserializing and serializing
-- Routing
+- **Routing**. The standard library offers you an easy to use type to do routing. It fully embraces the `http.Handler` interface in that you assign routes to `Handler`s and the router itself is also a `Handler`. It does not have some features you might expect though such as path variables (e.g `/users/{id}`). You can easily parse this information yourself but you might want to consider looking at other routing libraries if it becomes a burden. Most of the popular ones stick to the standard library's philosophy of also implementing `http.Handler`
+- **Type embedding**. We touched a little on this technique but you can [learn more about it from Effective Go](https://golang.org/doc/effective_go.html#embedding). If there is one thing you should take away from this is that it can be extremely useful but _always thinking about your public API, only expose what's appropiate_
+- **JSON deserializing and serializing**. The standard library makes it very trivial to serialise and deserialise your data. It is also open to configuration and you can customise how these data transformations work if necessary.  
+
