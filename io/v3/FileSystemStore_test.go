@@ -1,12 +1,13 @@
 package main
 
 import (
+	"io"
 	"io/ioutil"
 	"os"
 	"testing"
 )
 
-func createTempFile(t *testing.T, initialData string) *os.File {
+func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func()) {
 	t.Helper()
 
 	tmpfile, err := ioutil.TempFile("", "db")
@@ -16,16 +17,21 @@ func createTempFile(t *testing.T, initialData string) *os.File {
 	}
 
 	tmpfile.Write([]byte(initialData))
-	return tmpfile
+
+	removeFile := func() {
+		os.Remove(tmpfile.Name())
+	}
+
+	return tmpfile, removeFile
 }
 
 func TestFileSystemStore(t *testing.T) {
 
 	t.Run("league from a reader", func(t *testing.T) {
-		database := createTempFile(t, `[
+		database, cleanDatabase := createTempFile(t, `[
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
-		defer os.Remove(database.Name())
+		defer cleanDatabase()
 
 		store := FileSystemPlayerStore{database}
 
@@ -44,10 +50,10 @@ func TestFileSystemStore(t *testing.T) {
 	})
 
 	t.Run("get player score", func(t *testing.T) {
-		database := createTempFile(t, `[
+		database, cleanDatabase := createTempFile(t, `[
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
-		defer os.Remove(database.Name())
+		defer cleanDatabase()
 
 		store := FileSystemPlayerStore{database}
 
@@ -57,10 +63,10 @@ func TestFileSystemStore(t *testing.T) {
 	})
 
 	t.Run("store wins for existing players", func(t *testing.T) {
-		database := createTempFile(t, `[
+		database, cleanDatabase := createTempFile(t, `[
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
-		defer os.Remove(database.Name())
+		defer cleanDatabase()
 
 		store := FileSystemPlayerStore{database}
 
