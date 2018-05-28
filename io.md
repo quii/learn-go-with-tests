@@ -666,6 +666,51 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 }
 ```
 
+The happy path is looking ok so we can now try using our new `Store` in the integration test. This will give us more confidence that the software works and then we can delete the redundant `InMemoryPlayerStore`.
+
+In `TestRecordingWinsAndRetrievingThem` replace the old store.
+
+```go
+database, cleanDatabase := createTempFile(t, "")
+defer cleanDatabase()
+store := &FileSystemPlayerStore{database}
+```
+
+In you run the test it should pass and now we can delete `InMemoryPlayerStore`. `main.go` will now have compilation problems which will motivate us to now use our new store in the "real" code.
+
+```go
+package main
+
+import (
+	"log"
+	"net/http"
+	"os"
+)
+
+const dbFileName = "game.db.json"
+
+func main() {
+	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+
+	if err != nil {
+		log.Fatalf("problem opening %s %v", dbFileName, err)
+	}
+
+	store := &FileSystemPlayerStore{db}
+	server := NewPlayerServer(store)
+
+	if err := http.ListenAndServe(":5000", server); err != nil {
+		log.Fatalf("could not listen on port 5000 %v", err)
+	}
+}
+```
+
+- We create a file for our database. 
+- The 2nd argument to `os.OpenFile` lets you define the permissions for opening the file, in our case `O_RDWR` means we want to read and write _and_ `os.O_CREATE` means create the file if it doesn't exist.
+- The 3rd argument means sets permissions for the file, in our case all users can read and write the file. [(See superuser.com for a more detailed explanation)](https://superuser.com/questions/295591/what-is-the-meaning-of-chmod-666)
+
+Running the program now persists the data in a file in between restarts, hooray!
+
 ## Wrapping up
 
 What we've covered:
