@@ -705,7 +705,7 @@ func main() {
 }
 ```
 
-- We create a file for our database. 
+- We create a file for our database.
 - The 2nd argument to `os.OpenFile` lets you define the permissions for opening the file, in our case `O_RDWR` means we want to read and write _and_ `os.O_CREATE` means create the file if it doesn't exist.
 - The 3rd argument means sets permissions for the file, in our case all users can read and write the file. [(See superuser.com for a more detailed explanation)](https://superuser.com/questions/295591/what-is-the-meaning-of-chmod-666)
 
