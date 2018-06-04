@@ -222,8 +222,8 @@ func main() {
 
 ----------------
 
-作者：[Chris James](https://dev.to/quii)  
-译者：[Noluye](https://github.com/Noluye)  
+作者：[Chris James](https://dev.to/quii)
+译者：[Noluye](https://github.com/Noluye)
 校对：[rxcai](https://github.com/rxcai)
 
 本文由 [GCTT](https://github.com/studygolang/GCTT) 原创编译，[Go 中文网](https://studygolang.com/) 荣誉推出

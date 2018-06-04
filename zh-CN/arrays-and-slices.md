@@ -493,8 +493,8 @@ func TestSumAllTails(t *testing.T) {
 
 ----------------
 
-作者：[Chris James](https://dev.to/quii)  
-译者：[saberuster](https://github.com/saberuster)  
-校对：[polaris1119](https://github.com/polaris1119)  
+作者：[Chris James](https://dev.to/quii)
+译者：[saberuster](https://github.com/saberuster)
+校对：[polaris1119](https://github.com/polaris1119)
 
 本文由 [GCTT](https://github.com/studygolang/GCTT) 原创编译，[Go 中文网](https://studygolang.com/) 荣誉推出

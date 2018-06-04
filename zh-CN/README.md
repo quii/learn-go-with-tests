@@ -2,7 +2,6 @@
 
 以下章节还未翻译：
 
-
 # 目录
 
 * [Learn Go with tests](gb-readme.md) 未翻译

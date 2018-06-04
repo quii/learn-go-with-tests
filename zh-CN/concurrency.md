@@ -409,8 +409,8 @@ ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        2.377s
 
 ----------------
 
-作者：[David Wickes](https://dev.to/gypsydave5)  
-译者：[Donng](https://github.com/Donng)  
-校对：[polaris1119](https://github.com/polaris1119)  
+作者：[David Wickes](https://dev.to/gypsydave5)
+译者：[Donng](https://github.com/Donng)
+校对：[polaris1119](https://github.com/polaris1119)
 
 本文由 [GCTT](https://github.com/studygolang/GCTT) 原创编译，[Go 中文网](https://studygolang.com/) 荣誉推出
