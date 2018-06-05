@@ -1,6 +1,6 @@
 # 依赖注入
 
-**[您可以在这里找到本章的所有代码](https://github.com/quii/learn-go-with-tests/tree/master/di)**
+**[你可以在这里找到本章的所有代码](https://github.com/quii/learn-go-with-tests/tree/master/di)**
 
 因为我们需要懂得一些接口的知识，所以我们假设你已经阅读了前面的结构体篇。
 
@@ -218,7 +218,7 @@ func main() {
 
 随着你越来越熟悉标准库，你会越来越了解，这些在代码中重用的通用接口，会使得你的软件在许多场景都可以重用。
 
-本例深深受到 [The Go Programming language](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440) 中一个章节的启发，如果你喜欢的话，去它买吧！
+本例深深受到 [The Go Programming language](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440) 中一个章节的启发，如果你喜欢的话，去买它吧！
 
 ----------------
 

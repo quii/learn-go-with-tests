@@ -1,6 +1,6 @@
 # 数组与切片
 
-**[您可以在这里找到本章的所有代码](https://github.com/quii/learn-go-with-tests/tree/master/arrays)**
+**[你可以在这里找到本章的所有代码](https://github.com/quii/learn-go-with-tests/tree/master/arrays)**
 
 你可以使用数组按照指定顺序将多个相同类型的变量保存起来。
 

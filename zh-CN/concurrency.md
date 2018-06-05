@@ -1,6 +1,6 @@
 # 并发
 
-**[您可以在这里找到本章的所有代码](https://github.com/quii/learn-go-with-tests/tree/master/concurrency)**
+**[你可以在这里找到本章的所有代码](https://github.com/quii/learn-go-with-tests/tree/master/concurrency)**
 
 这是我们的计划：同事已经写了一个 `CheckWebsites` 的函数检查 URL 列表的状态。
 

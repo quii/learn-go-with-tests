@@ -1,6 +1,6 @@
 # 结构体，方法和接口
 
-**[您可以在这里找到本章的所有代码](https://github.com/quii/learn-go-with-tests/tree/master/structs)**
+**[你可以在这里找到本章的所有代码](https://github.com/quii/learn-go-with-tests/tree/master/structs)**
 
 假设我们需要编程计算一个给定高和宽的长方形的周长。我们可以写一个函数如下：
 

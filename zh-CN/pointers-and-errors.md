@@ -1,6 +1,6 @@
 # 指针和错误
 
-**[您可以在这里找到本章的所有代码](https://github.com/quii/learn-go-with-tests/tree/master/pointers)**
+**[你可以在这里找到本章的所有代码](https://github.com/quii/learn-go-with-tests/tree/master/pointers)**
 
 我们在上一节中学习了结构体（structs），它可以组合与一个概念相关的一系列值。
 
