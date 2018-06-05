@@ -2,13 +2,13 @@
 
 The official installation instructions for Go are available [here](https://golang.org/doc/install).
 
-This guide will assume that you are using a package manager for e.g. [Homebrew](https://brew.sh), [chocolatey](https://chocolatey.org), [Apt](https://help.ubuntu.com/community/AptGet/Howto) or [Yum](https://access.redhat.com/solutions/9934).
+This guide will assume that you are using a package manager for e.g. [Homebrew](https://brew.sh), [Chocolatey](https://chocolatey.org), [Apt](https://help.ubuntu.com/community/AptGet/Howto) or [yum](https://access.redhat.com/solutions/9934).
 
-For demonstration purposes we will show the installation proceddure for OSX using Homebrew.
+For demonstration purposes we will show the installation procedure for OSX using Homebrew.
 
 ## Installation
 
-The process of installation is very easy. First, what you have to do is to run this command to install homebrew (brew).  Brew has a dependency on xcode so you should ensure this is installed first.
+The process of installation is very easy. First, what you have to do is to run this command to install homebrew (brew). Brew has a dependency on Xcode so you should ensure this is installed first.
 
 ```sh
 xcode-select --install
@@ -26,7 +26,7 @@ At this point you can now install Go:
 brew install go
 ```
 
-If you are going to deploy your programs to linux based servers, you should enable cross compilation feature. If so, install using the following command:
+If you are going to deploy your programs to Linux based servers, you should enable cross compilation feature. If so, install using the following command:
 
 ```sh
 brew install go --cross-compile-common
@@ -45,11 +45,11 @@ go version go1.10 darwin/amd64
 
 Go is opinionated.
 
-By convention, all Go code lives within a single workspace (folder). This workspace could be anywhere in your machine. If you don't specify, Go will assume $HOME/go as the default workspace.  The workspace is identified (and modified) by the environment variable [GOPATH](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable).
+By convention, all Go code lives within a single workspace (folder). This workspace could be anywhere in your machine. If you don't specify, Go will assume $HOME/go as the default workspace. The workspace is identified (and modified) by the environment variable [GOPATH](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable).
 
 You should set the evnironment variable so that you can use it later in scripts, shells, etc.
 
-Update your bash_profile to contain the following exports:
+Update your .bash_profile to contain the following exports:
 
 ```sh
 export GOPATH=$HOME/go
@@ -70,37 +70,37 @@ At this point you can _go get_ and the src/package/bin will be installed correct
 
 ## Go Editor
 
-Editor preference is very individualistic, you may already have a preference that supports Go.  If you don't you should consider an Editor such as [Visual Studio Code](https://code.visualstudio.com), which has exceptional Go support.
+Editor preference is very individualistic, you may already have a preference that supports Go. If you don't you should consider an Editor such as [Visual Studio Code](https://code.visualstudio.com), which has exceptional Go support.
 
-To install vs code using brew, because this is a GUI application you need an extension to homebrew called cask to support install vs code.
+To install VS Code using brew, because this is a GUI application you need an extension to homebrew called cask to support install VS Code.
 
 ```sh
 brew tap caskroom/cask
 ```
 
-At this point you can now use brew to install vs code.
+At this point you can now use brew to install VS Code.
 
 ```sh
 brew cask install visual-studio-code
 ```
 
-You can confirm vs code installed correctly you can run the following in your shell.
+You can confirm VS Code installed correctly you can run the following in your shell.
 
 ```sh
 code .
 ```
 
-vs code is shipped with very little software enabled, you enable new software by installing extensions.  To add Go support you must install a extension, there are a variety available for vs code, an exceptional one is [Luke Hobans package](https://github.com/Microsoft/vscode-go).  This can be installed as follows:
+VS Code is shipped with very little software enabled, you can enable new software by installing extensions. To add Go support you must install an extension, there are a variety available for VS Code, an exceptional one is [Luke Hoban's package](https://github.com/Microsoft/vscode-go). This can be installed as follows:
 
 ```sh
 code --install-extension lukehoban.Go
 ```
 
-When you open a Go file for the first time in vs code, it will indicate that the Analysis tools are missing, you should click the button to install these. The list of tools that gets installed (and used) by vs code are available [here](https://github.com/Microsoft/vscode-go/wiki/Go-tools-that-the-Go-extension-depends-on).
+When you open a Go file for the first time in VS Code, it will indicate that the Analysis tools are missing, you should click the button to install these. The list of tools that gets installed (and used) by VS Code are available [here](https://github.com/Microsoft/vscode-go/wiki/Go-tools-that-the-Go-extension-depends-on).
 
 ## Go Debugger
 
-A good option for debugging Go (that's integrated with vs code) is Delve. This can be installed as follows using go get:
+A good option for debugging Go (that's integrated with VS Code) is Delve. This can be installed as follows using go get:
 
 ```sh
 go get -u github.com/derekparker/delve/cmd/dlv
@@ -135,10 +135,10 @@ In addition, to help you work with your code you should be able to:
 
 - **View function signature** - You should never be unsure how to call a function in Go. Your IDE should describe a function in terms of its documentation, its parameters and what it returns.
 - **View function definition** - If it's still not clear what a function does, you should be able to jump to the source code and try and figure it out yourself.
-- **Find usages of a symbol** Being able to see the contest of a function being called can help your decision process when refactoring.
+- **Find usages of a symbol** - Being able to see the context of a function being called can help your decision process when refactoring.
 
 Mastering your tools will help you concentrate on the code and reduce context switching.
 
 ## Wrapping up
 
-At this point you should have Go installed, an editor available and some basic tooling in place.  Go has a very large ecosystem of third party products.  We have identified a few useful components here, for a more complete list see https://awesome-go.com.
+At this point you should have Go installed, an editor available and some basic tooling in place. Go has a very large ecosystem of third party products. We have identified a few useful components here, for a more complete list see https://awesome-go.com.
