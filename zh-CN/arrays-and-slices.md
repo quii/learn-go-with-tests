@@ -198,7 +198,7 @@ func TestSum(t *testing.T) {
 
 运行：
 
-`go test -cover` 
+`go test -cover`
 
 你会看到：
 
@@ -358,7 +358,7 @@ func TestSumAllTails(t *testing.T)  {
 ```
 
 ## 运行测试
-   
+
 `./sum_test.go:26:9: undefined: SumAllTails`
 
 ## 先使用最少的代码来让失败的测试先跑起来
