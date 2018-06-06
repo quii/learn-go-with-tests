@@ -6,7 +6,7 @@
 
 ## Go 基础
 
-* [ ] [Install Go](install-go.md)
+* [x] [Install Go](install-go.md)
 * [ ] [Hello, World](hello-world.md)
 * [ ] [Integers](integers.md)
 * [ ] [Iteration](iteration.md)
