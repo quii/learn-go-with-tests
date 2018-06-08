@@ -48,7 +48,7 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	league, err := p.store.GetLeague()
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not load league, %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -70,7 +70,7 @@ func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
 	score, err := p.store.GetPlayerScore(player)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not show score, %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -85,7 +85,7 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 	err := p.store.RecordWin(player)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not show score, %v", err), http.StatusInternalServerError)
 		return
 	}
 

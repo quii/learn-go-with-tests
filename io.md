@@ -751,7 +751,7 @@ func (f *FileSystemPlayerStore) GetLeague() (League, error) {
 		want GetLeague() League
 ```
 
-This looks bad, but again this is actually a good thing. In a dynamic language you would not get the computer telling you exactly what is wrong. 
+This looks bad, but again this is actually a good thing. In a dynamic language you would not get the computer telling you exactly what is wrong.
 
 We just need to work through the errors from the top until we get green again. Make sure after every change to try recompiling to ensure that the change you do has fixed the problem.
 
@@ -773,7 +773,7 @@ func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 }
 ```
 
-We are going to ignore the error here for now as we're just trying to get green again as quickly as possible. 
+We are going to ignore the error here for now as we're just trying to get green again as quickly as possible.
 
 > `./FileSystemStore.go:33:23: multiple-value f.GetLeague() in single-value context`
 
@@ -837,7 +837,7 @@ Keep going! The compiler is helping us make robust software, just keep ticking o
 > `./server.go:47:27: too many arguments in call to json.NewEncoder(w).Encode
   	have (League, error)
   	want (interface {})`
-  	
+ 	
 This is good, this is where we'll actually have to handle the error but let's resist the temptation for now. We'll want to write a test to exercise this scenario but we musn't add any more code than necessary while we are in a state of the code not compiling
 
 ```go
@@ -851,8 +851,8 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 
 >./FileSystemStore_test.go:38:25: multiple-value store.GetLeague() in single-value context
  ./FileSystemStore_test.go:48:24: multiple-value store.GetLeague() in single-value context
- 
-These two scenarios are the same, just fix the tests by using the underscore syntax to ignore the error. 
+
+These two scenarios are the same, just fix the tests by using the underscore syntax to ignore the error.
 
 Change `got := store.GetLeague()` to `got, _ := store.GetLeague()` and leave a `todo` to remind ourselves to assert there are no errors later.
 
@@ -860,8 +860,8 @@ Change `got := store.GetLeague()` to `got, _ := store.GetLeague()` and leave a `
    	*StubPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
    		have GetLeague() League
    		want GetLeague() (League, error)`
-   		
-We changed the interface of `PlayerStore` so `StubPlayerStore` needs updating. 
+
+We changed the interface of `PlayerStore` so `StubPlayerStore` needs updating.
 
 ```go
 func (s *StubPlayerStore) GetLeague() (League, error) {
@@ -869,7 +869,7 @@ func (s *StubPlayerStore) GetLeague() (League, error) {
 }
 ```
 
-When you try and run the tests it should now all be passing. We have updated our `PlayerStore` interface to reflect the new reality of stores that can fail which will enable us to handle errors better. 
+When you try and run the tests it should now all be passing. We have updated our `PlayerStore` interface to reflect the new reality of stores that can fail which will enable us to handle errors better.
 
 This may have felt arduous but once you become familiar with compiler errors and are handy with your tooling fixing this kind of error only really takes a few minutes.
 
@@ -904,7 +904,7 @@ func (f * FailingPlayerStore) GetLeague() (League, error) {
 }
 ```
 
-I did not want to have to implement the _whole_ interface (e.g also have methods for `GetPlayerScore` and `RecordWin`) for this test so i _embedded the interface_ into our new type. By doing this our new stub implements `PlayerStore` and then we add our specific implementation for `GetLeague` to make it fail. If you try and call any of the other methods that we have not implemented it will panic. This technique is useful when you want to mock an interface with multiple methods but you're not concerned with every method. 
+I did not want to have to implement the _whole_ interface (e.g also have methods for `GetPlayerScore` and `RecordWin`) for this test so i _embedded the interface_ into our new type. By doing this our new stub implements `PlayerStore` and then we add our specific implementation for `GetLeague` to make it fail. If you try and call any of the other methods that we have not implemented it will panic. This technique is useful when you want to mock an interface with multiple methods but you're not concerned with every method.
 
 ## Try to run the test
 
@@ -923,7 +923,7 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	league, err := p.store.GetLeague()
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not load league, %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -931,13 +931,13 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-`http.Error` is a convenient method for when you want to return an error. 
+`http.Error` is a convenient method for when you want to return an error. We are using `fmt.Sprintf` to ensure we add some context to the error message.
 
-## More cleaning up 
+## More cleaning up
 
-As we changed the `GetLeague` interface we left some `TODO`s around for us to come back to. `TODO` is often a dangerous tool which could be renamed to `SOMEDAY I WILL TACKLE THIS, BUT WHATEVER`. We are better than this! 
+As we changed the `GetLeague` interface we left some `TODO`s around for us to come back to. `TODO` is often a dangerous tool which could be renamed to `SOMEDAY I WILL TACKLE THIS, BUT WHATEVER`. We are better than this!
 
-In our `FileSystemStoreTest` we need to update the tests to check we don't get an error. 
+In our `FileSystemStoreTest` we need to update the tests to check we don't get an error.
 
 Make a helper and then fix the `TODO`s
 
@@ -950,7 +950,7 @@ func assertNoError(t *testing.T, err error) {
 }
 ```
 
-We should probably check that if we cannot read the JSON into a league that it actually fails so let's add another test to this suite
+We should probably check that if we cannot read the JSON into a league that it actually fails so let's add another test to this suite.
 
 ```go
 t.Run("return an error when league cannot be read", func(t *testing.T) {
@@ -969,9 +969,9 @@ t.Run("return an error when league cannot be read", func(t *testing.T) {
 
 If we run this test it actually passes. To check it works how we'd hope, change `GetLeague` to return `nil` for the error in all scenarios and check the test output is what you expect. It's very important you check tests fail how you expect them if you didn't follow the strict TDD cycle.
 
-## Remaining technical debt 
+## Remaining technical debt
 
-As we changed the `PlayerStore` interface for `GetLeague` we had to take on more technical debt in `FileSystemStore`. 
+As we changed the `PlayerStore` interface for `GetLeague` we had to take on more technical debt in `FileSystemStore`.
 
 In both `GetPlayerScore` and `RecordWin` we have this line.
 
@@ -979,13 +979,13 @@ In both `GetPlayerScore` and `RecordWin` we have this line.
 league, _ := f.GetLeague()
 ``` 
 
-Getting leagues can fail so therefore these other two methods can fail too. 
+Getting leagues can fail so therefore these other two methods can fail too.
 
-We need to go through the same exercise again of changing the interface of these two methods to be able to return `error`. 
+We need to go through the same exercise again of changing the interface of these two methods to be able to return `error`.
 
-We're not going to document the process again, this is an exercise for you to do. 
+We're not going to document the process again, this is an exercise for you to do.
 
-Commit your code to source control first in-case you get stuck. 
+Commit your code to source control first in-case you get stuck.
 
 Just follow these steps for each method carefully, trying to re-run the compiler after every change.
 
@@ -1011,9 +1011,9 @@ By no longer ignoring the errors when doing `GetLeague` we introduced a bug whic
     	server_integration_test.go:25: response body is wrong, got 'EOF
 ```
 
-The problem is when the file is empty (when we first start) it cannot be read into JSON. 
+The problem is when the file is empty (when we first start) it cannot be read into JSON.
 
-When we were ignoring the error, we would then carry on and start afresh with a new database which is why it was passing before. 
+When we were ignoring the error, we would then carry on and start afresh with a new database which is why it was passing before.
 
 We need a way of making our `FileSystemStore` initialising itself if the file is empty. Thankfully we already have a failing test for this so we can just work with that.
 
@@ -1038,8 +1038,8 @@ func NewFileSystemPlayerStore(database io.ReadWriteSeeker) (*FileSystemPlayerSto
 
 What we need to do is to make a "constructor" which
 - Tries to read the `database`, `io.Copy` will return the number of bytes it has read.
-- If there is an error then return it
-- If the length of the bytes read is zero then we need to encode an empty `League` into the database to initialise ourselves. 
+- If there is an error then return it.
+- If the length of the bytes read is zero then we need to encode an empty `League` into the database to initialise ourselves.
 
 When we use this function in the integration test it now passes. Make sure to update `main` to use it too.
 
@@ -1106,9 +1106,9 @@ func (f *FileSystemPlayerStore) GetLeague() (League, error) {
 }
 ```
 
-[`sort.Slice`](https://golang.org/pkg/sort/#Slice) 
+[`sort.Slice`](https://golang.org/pkg/sort/#Slice)
 
->  Slice sorts the provided slice given the provided less function. 
+>  Slice sorts the provided slice given the provided less function.
 
 Easy!
 
@@ -1116,5 +1116,10 @@ Easy!
 
 What we've covered:
 
-- The `Seeker` interface and its relation with `Reader` and `Writer`
-- Working with files
+- The `Seeker` interface and its relation with `Reader` and `Writer`.
+- Working with files.
+- Returning errors as HTTP responses.
+- Creating an easy to use helper for testing with files that hides all the messy stuff.
+- Using embedding when you want to be lazy about mocking just a part of an interface.
+- `sort.Slice` for sorting slices.
+- Using the compiler to help us make structural changes to the application safely.
