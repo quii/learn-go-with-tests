@@ -837,7 +837,7 @@ Keep going! The compiler is helping us make robust software, just keep ticking o
 > `./server.go:47:27: too many arguments in call to json.NewEncoder(w).Encode
   	have (League, error)
   	want (interface {})`
- 	
+
 This is good, this is where we'll actually have to handle the error but let's resist the temptation for now. We'll want to write a test to exercise this scenario but we musn't add any more code than necessary while we are in a state of the code not compiling
 
 ```go
@@ -977,7 +977,7 @@ In both `GetPlayerScore` and `RecordWin` we have this line.
 
 ```go
 league, _ := f.GetLeague()
-``` 
+```
 
 Getting leagues can fail so therefore these other two methods can fail too.
 
