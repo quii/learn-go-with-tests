@@ -8,8 +8,8 @@ import (
 
 // PlayerStore stores score information about players
 type PlayerStore interface {
-	GetPlayerScore(name string) int
-	RecordWin(name string)
+	GetPlayerScore(name string) (int, error)
+	RecordWin(name string) error
 	GetLeague() (League, error)
 }
 
@@ -67,7 +67,12 @@ func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
-	score := p.store.GetPlayerScore(player)
+	score, err := p.store.GetPlayerScore(player)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	if score == 0 {
 		w.WriteHeader(http.StatusNotFound)
@@ -77,6 +82,12 @@ func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
 }
 
 func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
-	p.store.RecordWin(player)
+	err := p.store.RecordWin(player)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusAccepted)
 }

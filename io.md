@@ -723,9 +723,7 @@ If we go back to `FileSystemStore.go` we have
 
 It was pragmatic to ignore that at the time as we already had failing tests. If we had tried to tackle it at the same time we would be juggling two things at once.
 
-As we are the operators of this software it is up to use how we handle the error. We'll certainly want to log it somehow and probably return a 500 status code to the user with some kind of apology.
-
-It is important to **only handle errors once**. If we decided to log it here _and_ return it to the caller we may end up with duplicate log messages cluttering things. We know our HTTP handler has to return an error to the user so we'll delegate all the error handling to there.
+If we get an error we'll want to inform the user there was some kind of problem by returning a `500` status code and some kind of message. We'll also want to log it, but we'll get onto that in a later chapter.
 
 Let's try and return the error in our function
 
@@ -845,7 +843,7 @@ This is good, this is where we'll actually have to handle the error but let's re
 ```go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", jsonContentType)
-	//todo: handle the error by logging and responding differently
+	//todo: handle the error by responding differently
 	league, _ := p.store.GetLeague()
 	json.NewEncoder(w).Encode(league)
 }
@@ -925,7 +923,6 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	league, err := p.store.GetLeague()
 
 	if err != nil {
-        log.Printf("problem when trying to serve league %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -935,10 +932,6 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 ```
 
 `http.Error` is a convenient method for when you want to return an error. 
-
-`log.Printf` will print a message to stderr. 
-
-This is not exactly best practice because when we run our tests we will log this error which pollutes our output. We'd probably want to consider using structured logging we so we can add more information to our logs and make them searchable. In a later iteration we may want to consider injecting a logger into our server and spying on it but we'll take on this technical debt for brevity's sake. 
 
 ## More cleaning up 
 
@@ -975,6 +968,39 @@ t.Run("return an error when league cannot be read", func(t *testing.T) {
 ```
 
 If we run this test it actually passes. To check it works how we'd hope, change `GetLeague` to return `nil` for the error in all scenarios and check the test output is what you expect. It's very important you check tests fail how you expect them if you didn't follow the strict TDD cycle.
+
+## Remaining technical debt 
+
+As we changed the `PlayerStore` interface for `GetLeague` we had to take on more technical debt in `FileSystemStore`. 
+
+In both `GetPlayerScore` and `RecordWin` we have this line.
+
+```go
+league, _ := f.GetLeague()
+``` 
+
+Getting leagues can fail so therefore these other two methods can fail too. 
+
+We need to go through the same exercise again of changing the interface of these two methods to be able to return `error`. 
+
+We're not going to document the process again, this is an exercise for you to do. 
+
+Commit your code to source control first in-case you get stuck. 
+
+Just follow these steps for each method carefully, trying to re-run the compiler after every change.
+
+1. Try and return the error
+2. Compile
+3. The compiler will complain the method should only return one thing. Change the method signature, compile again
+4. The compiler will now complain that `FileSystemStore` no longer implements the interface, so change it
+5. The compiler will complain about `StubFileStore` no longer implements the interface, so fix it
+6. The compiler will complain about `multiple-value p.store.XXX() in single-value context`, so fix them and handle the errors. For the server return a `500` (don't forget to write a test) and in the tests ensure an error isn't returned.
+
+tl;dr - Make the change you want and use the compiler to help you get back to working code.
+
+If you get stuck, start over. If you get really stuck, [have a look at the current state of the code here](https://github.com/quii/learn-go-with-tests/tree/master/io/v7)
+
+## Sorting
 
 ## Wrapping up
 
