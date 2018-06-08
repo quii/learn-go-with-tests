@@ -1124,3 +1124,9 @@ What we've covered:
 - Using embedding when you want to be lazy about mocking just a part of an interface.
 - `sort.Slice` for sorting slices.
 - Using the compiler to help us make structural changes to the application safely.
+
+Where our software is at:
+
+- We have a HTTP API where you can create players and increment their score.
+- We can return a league of everyone's scores as JSON.
+- The data is persisted as a JSON file.
