@@ -145,6 +145,6 @@ gometalinter --install
 
 作者：[Chris James](https://dev.to/quii)
 译者：[pityonline](https://github.com/pityonline)
-校对：[校对 ID](https://github.com/校对ID)
+校对：[flw](https://github.com/flw-cn)、[Donng](https://github.com/Donng)
 
 本文由 [GCTT](https://github.com/studygolang/GCTT) 原创编译，[Go 中文网](https://studygolang.com/) 荣誉推出
