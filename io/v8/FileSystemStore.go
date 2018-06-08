@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"sort"
 )
 
 // FileSystemPlayerStore stores players in the filesystem
@@ -32,7 +33,13 @@ func NewFileSystemPlayerStore(database io.ReadWriteSeeker) (*FileSystemPlayerSto
 // GetLeague returns the scores of all the players
 func (f *FileSystemPlayerStore) GetLeague() (League, error) {
 	f.database.Seek(0, 0)
-	return NewLeague(f.database)
+	league, err := NewLeague(f.database)
+
+	sort.Slice(league, func(i, j int) bool {
+		return league[i].Wins > league[j].Wins
+	})
+
+	return league, err
 }
 
 // GetPlayerScore retrieves a player's score

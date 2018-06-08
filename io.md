@@ -1000,7 +1000,117 @@ tl;dr - Make the change you want and use the compiler to help you get back to wo
 
 If you get stuck, start over. If you get really stuck, [have a look at the current state of the code here](https://github.com/quii/learn-go-with-tests/tree/master/io/v7)
 
+### Integration test woes
+
+By no longer ignoring the errors when doing `GetLeague` we introduced a bug which is highlighted by our integration test.
+
+```
+=== RUN   TestRecordingWinsAndRetrievingThem/get_score
+    --- FAIL: TestRecordingWinsAndRetrievingThem/get_score (0.00s)
+    	server_integration_test.go:23: did not get correct status, got 500, want 200
+    	server_integration_test.go:25: response body is wrong, got 'EOF
+```
+
+The problem is when the file is empty (when we first start) it cannot be read into JSON. 
+
+When we were ignoring the error, we would then carry on and start afresh with a new database which is why it was passing before. 
+
+We need a way of making our `FileSystemStore` initialising itself if the file is empty. Thankfully we already have a failing test for this so we can just work with that.
+
+```go
+func NewFileSystemPlayerStore(database io.ReadWriteSeeker) (*FileSystemPlayerStore, error) {
+	buf := &bytes.Buffer{}
+	length, err := io.Copy(buf, database)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if length == 0 {
+		json.NewEncoder(database).Encode(League{})
+	}
+
+	return &FileSystemPlayerStore{
+		database: database,
+	}, nil
+}
+```
+
+What we need to do is to make a "constructor" which
+- Tries to read the `database`, `io.Copy` will return the number of bytes it has read.
+- If there is an error then return it
+- If the length of the bytes read is zero then we need to encode an empty `League` into the database to initialise ourselves. 
+
+When we use this function in the integration test it now passes. Make sure to update `main` to use it too.
+
 ## Sorting
+
+Our product owner wants `/league` to return the players sorted by their scores.
+
+The main decision to make here is where in the software should this happen. If we were using a "real" database we would use things like `ORDER BY` so the sorting is super fast so for that reason it feels like implementations of `PlayerStore` should be responsible.
+
+## Write the test first
+
+We can update the assertion on our first test in `TestFileSystemStore`
+
+```go
+	t.Run("league from a reader, sorted", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, `[
+			{"Name": "Cleo", "Wins": 10},
+			{"Name": "Chris", "Wins": 33}]`)
+		defer cleanDatabase()
+
+		store := FileSystemPlayerStore{database}
+
+		got, err := store.GetLeague()
+		assertNoError(t, err)
+
+		want := []Player{
+			{"Chris", 33},
+			{"Cleo", 10},
+		}
+
+		assertLeague(t, got, want)
+
+		// read again
+		got, err = store.GetLeague()
+		assertNoError(t, err)
+		assertLeague(t, got, want)
+	})
+
+```
+
+The order of the JSON coming in is in the wrong order and our `want` will check that it is returned to the caller in the correct order.
+
+## Try to run the test
+
+```
+=== RUN   TestFileSystemStore/league_from_a_reader,_sorted
+    --- FAIL: TestFileSystemStore/league_from_a_reader,_sorted (0.00s)
+    	FileSystemStore_test.go:46: got [{Cleo 10} {Chris 33}] want [{Chris 33} {Cleo 10}]
+    	FileSystemStore_test.go:51: got [{Cleo 10} {Chris 33}] want [{Chris 33} {Cleo 10}]
+```
+
+## Write enough code to make it pass
+
+```go
+func (f *FileSystemPlayerStore) GetLeague() (League, error) {
+	f.database.Seek(0, 0)
+	league, err := NewLeague(f.database)
+
+	sort.Slice(league, func(i, j int) bool {
+		return league[i].Wins > league[j].Wins
+	})
+
+	return league, err
+}
+```
+
+[`sort.Slice`](https://golang.org/pkg/sort/#Slice) 
+
+>  Slice sorts the provided slice given the provided less function. 
+
+Easy!
 
 ## Wrapping up
 
