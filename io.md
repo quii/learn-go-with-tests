@@ -711,6 +711,271 @@ func main() {
 
 Running the program now persists the data in a file in between restarts, hooray!
 
+## Error handling
+
+Before we start working on sorting we should make sure we're happy with our current code and remove any technical debt we may have. It's an important principle to get to working software as quickly as possible (stay out of the red state) but that doesn't mean we should ignore error cases!
+
+If we go back to `FileSystemStore.go` we have
+
+`league, _ := NewLeague(f.database)`
+
+`NewLeague` can return an error if it is unable to parse the league from the `io.Reader` that we provide.
+
+It was pragmatic to ignore that at the time as we already had failing tests. If we had tried to tackle it at the same time we would be juggling two things at once.
+
+As we are the operators of this software it is up to use how we handle the error. We'll certainly want to log it somehow and probably return a 500 status code to the user with some kind of apology.
+
+It is important to **only handle errors once**. If we decided to log it here _and_ return it to the caller we may end up with duplicate log messages cluttering things. We know our HTTP handler has to return an error to the user so we'll delegate all the error handling to there.
+
+Let's try and return the error in our function
+
+```go
+func (f *FileSystemPlayerStore) GetLeague() (League, error) {
+	f.database.Seek(0, 0)
+	return NewLeague(f.database)
+}
+```
+
+### Try and compile
+
+```
+./FileSystemStore.go:22:23: multiple-value f.GetLeague() in single-value context
+./FileSystemStore.go:33:23: multiple-value f.GetLeague() in single-value context
+./main.go:19:27: cannot use store (type *FileSystemPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+	*FileSystemPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
+		have GetLeague() (League, error)
+		want GetLeague() League
+./FileSystemStore_test.go:38:25: multiple-value store.GetLeague() in single-value context
+./FileSystemStore_test.go:48:24: multiple-value store.GetLeague() in single-value context
+./server_integration_test.go:13:27: cannot use store (type *FileSystemPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+	*FileSystemPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
+		have GetLeague() (League, error)
+		want GetLeague() League
+```
+
+This looks bad, but again this is actually a good thing. In a dynamic language you would not get the computer telling you exactly what is wrong. 
+
+We just need to work through the errors from the top until we get green again. Make sure after every change to try recompiling to ensure that the change you do has fixed the problem.
+
+Once we've done that we can take stock of the changes and add whatever tests we feel we need.
+
+> `./FileSystemStore.go:22:23: multiple-value f.GetLeague() in single-value context`
+
+```go
+func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
+
+	league, _ := f.GetLeague()
+	player := league.Find(name)
+
+	if player != nil {
+		return player.Wins
+	}
+
+	return 0
+}
+```
+
+We are going to ignore the error here for now as we're just trying to get green again as quickly as possible. 
+
+> `./FileSystemStore.go:33:23: multiple-value f.GetLeague() in single-value context`
+
+```go
+func (f *FileSystemPlayerStore) RecordWin(name string) {
+	league, _ := f.GetLeague()
+	player := league.Find(name)
+
+	if player != nil {
+		player.Wins++
+	} else {
+		league = append(league, Player{name, 1})
+	}
+
+	f.database.Seek(0, 0)
+	json.NewEncoder(f.database).Encode(league)
+}
+```
+
+Same deal again, just ignore it for now
+
+> `./main.go:19:27: cannot use store (type *FileSystemPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+	*FileSystemPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
+		have GetLeague() (League, error)
+		want GetLeague() League`
+
+Our `FileSystemStore` no longer implements `PlayerStore`. We will have to update the interface to work with our new reality that `GetLeague` could fail.
+
+```go
+type PlayerStore interface {
+	GetPlayerScore(name string) int
+	RecordWin(name string)
+	GetLeague() (League, error)
+}
+```
+
+Try and compile again
+
+```
+./server.go:47:27: too many arguments in call to json.NewEncoder(w).Encode
+	have (League, error)
+	want (interface {})
+./FileSystemStore_test.go:38:25: multiple-value store.GetLeague() in single-value context
+./FileSystemStore_test.go:48:24: multiple-value store.GetLeague() in single-value context
+./server_test.go:40:28: cannot use &store (type *StubPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+	*StubPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
+		have GetLeague() League
+		want GetLeague() (League, error)
+./server_test.go:78:28: cannot use &store (type *StubPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+	*StubPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
+		have GetLeague() League
+		want GetLeague() (League, error)
+./server_test.go:110:29: cannot use &store (type *StubPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+	*StubPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
+		have GetLeague() League
+		want GetLeague() (League, error)
+```
+
+Keep going! The compiler is helping us make robust software, just keep ticking off the errors.
+
+> `./server.go:47:27: too many arguments in call to json.NewEncoder(w).Encode
+  	have (League, error)
+  	want (interface {})`
+  	
+This is good, this is where we'll actually have to handle the error but let's resist the temptation for now. We'll want to write a test to exercise this scenario but we musn't add any more code than necessary while we are in a state of the code not compiling
+
+```go
+func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", jsonContentType)
+	//todo: handle the error by logging and responding differently
+	league, _ := p.store.GetLeague()
+	json.NewEncoder(w).Encode(league)
+}
+```
+
+>./FileSystemStore_test.go:38:25: multiple-value store.GetLeague() in single-value context
+ ./FileSystemStore_test.go:48:24: multiple-value store.GetLeague() in single-value context
+ 
+These two scenarios are the same, just fix the tests by using the underscore syntax to ignore the error. 
+
+Change `got := store.GetLeague()` to `got, _ := store.GetLeague()` and leave a `todo` to remind ourselves to assert there are no errors later.
+
+> `./server_test.go:40:28: cannot use &store (type *StubPlayerStore) as type PlayerStore in argument to NewPlayerServer:
+   	*StubPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
+   		have GetLeague() League
+   		want GetLeague() (League, error)`
+   		
+We changed the interface of `PlayerStore` so `StubPlayerStore` needs updating. 
+
+```go
+func (s *StubPlayerStore) GetLeague() (League, error) {
+	return s.league, nil
+}
+```
+
+When you try and run the tests it should now all be passing. We have updated our `PlayerStore` interface to reflect the new reality of stores that can fail which will enable us to handle errors better. 
+
+This may have felt arduous but once you become familiar with compiler errors and are handy with your tooling fixing this kind of error only really takes a few minutes.
+
+Now we can write a test for our `Server` to log and respond with a `500` when we cannot load the league.
+
+## Write the test first
+
+```go
+t.Run("it returns a 500 when the league cannot be loaded", func(t *testing.T) {
+
+    store := FailingPlayerStore{}
+    server := NewPlayerServer(&store)
+
+    request := newLeagueRequest()
+    response := httptest.NewRecorder()
+
+    server.ServeHTTP(response, request)
+
+    assertStatus(t, response.Code, http.StatusInternalServerError)
+})
+```
+
+What's a `FailingPlayerStore?`. We could've added some flexibility to our `StubPlayerStore` to somehow make it so it fails given some kind of `fail` flag but I felt it would be simpler and perhaps clearer to make a new stub that explicitly fails.
+
+```go
+type FailingPlayerStore struct {
+	PlayerStore
+}
+
+func (f * FailingPlayerStore) GetLeague() (League, error) {
+	return League{}, errors.New("cannot load league")
+}
+```
+
+I did not want to have to implement the _whole_ interface (e.g also have methods for `GetPlayerScore` and `RecordWin`) for this test so i _embedded the interface_ into our new type. By doing this our new stub implements `PlayerStore` and then we add our specific implementation for `GetLeague` to make it fail. If you try and call any of the other methods that we have not implemented it will panic. This technique is useful when you want to mock an interface with multiple methods but you're not concerned with every method. 
+
+## Try to run the test
+
+```
+=== RUN   TestLeague/it_returns_a_500_when_the_league_cannot_be_loaded
+    --- FAIL: TestLeague/it_returns_a_500_when_the_league_cannot_be_loaded (0.00s)
+    	server_test.go:144: did not get correct status, got 200, want 500
+```
+
+## Write enough code to make it pass
+
+```go
+func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", jsonContentType)
+
+	league, err := p.store.GetLeague()
+
+	if err != nil {
+        log.Printf("problem when trying to serve league %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(league)
+}
+```
+
+`http.Error` is a convenient method for when you want to return an error. 
+
+`log.Printf` will print a message to stderr. 
+
+This is not exactly best practice because when we run our tests we will log this error which pollutes our output. We'd probably want to consider using structured logging we so we can add more information to our logs and make them searchable. In a later iteration we may want to consider injecting a logger into our server and spying on it but we'll take on this technical debt for brevity's sake. 
+
+## More cleaning up 
+
+As we changed the `GetLeague` interface we left some `TODO`s around for us to come back to. `TODO` is often a dangerous tool which could be renamed to `SOMEDAY I WILL TACKLE THIS, BUT WHATEVER`. We are better than this! 
+
+In our `FileSystemStoreTest` we need to update the tests to check we don't get an error. 
+
+Make a helper and then fix the `TODO`s
+
+```go
+func assertNoError(t *testing.T, err error) {
+	t.Helper()
+	if err != nil {
+		t.FatalF("unexpected error %v", err)
+	}
+}
+```
+
+We should probably check that if we cannot read the JSON into a league that it actually fails so let's add another test to this suite
+
+```go
+t.Run("return an error when league cannot be read", func(t *testing.T) {
+    database, cleanDatabase := createTempFile(t, `not very good JSON`)
+    defer cleanDatabase()
+
+    store := FileSystemPlayerStore{database}
+
+    _, err := store.GetLeague()
+
+    if err == nil {
+        t.Error("expected an error but didn't get one")
+    }
+})
+```
+
+If we run this test it actually passes. To check it works how we'd hope, change `GetLeague` to return `nil` for the error in all scenarios and check the test output is what you expect. It's very important you check tests fail how you expect them if you didn't follow the strict TDD cycle.
+
 ## Wrapping up
 
 What we've covered:
