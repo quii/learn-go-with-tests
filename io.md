@@ -428,7 +428,7 @@ It's not too surprising that `strings.Reader` does not implement `ReadWriteSeeke
 
 We have two choices
 
-- We create a temporary file for each test. `*os.File` implements `ReadWriteSeeker`. The pro of this is it becomes more of an integration test, we're really reading and writing from the file system so it will give us a very high level of confidence. The cons are we prefer unit tests because they are faster and generally simpler. We will also need to do more work around creating temporary files and then making sure they're removed after the test.
+- Create a temporary file for each test. `*os.File` implements `ReadWriteSeeker`. The pro of this is it becomes more of an integration test, we're really reading and writing from the file system so it will give us a very high level of confidence. The cons are we prefer unit tests because they are faster and generally simpler. We will also need to do more work around creating temporary files and then making sure they're removed after the test.
 - We could use a third party library. [github.com/mattetti](Mattetti) has written a library [filebuffer](https://github.com/mattetti/filebuffer) which implements the interface we need and doesn't touch the file system.
 
 I don't think there's an especially wrong answer here, but by choosing to use a third party library I would have to explain dependency management! So we will use files instead.
@@ -589,7 +589,7 @@ func (l League) Find(name string) *Player {
 
 Now if anyone has a `League` they can easily find a given player.
 
-And change our `PlayerStore` interface to return `League` rather than `[]Player`. Try and re-run the tests, you'll get a compilation problem because we've changed the interface but it's very easy to fix; just change the return type from `[]Player` to `League`.
+Change our `PlayerStore` interface to return `League` rather than `[]Player`. Try and re-run the tests, you'll get a compilation problem because we've changed the interface but it's very easy to fix; just change the return type from `[]Player` to `League`.
 
 This lets us simplify our methods in `FileSystemStore`.
 
@@ -967,7 +967,7 @@ t.Run("return an error when league cannot be read", func(t *testing.T) {
 })
 ```
 
-If we run this test it actually passes. To check it fails how we'd hope, change `GetLeague` to return `nil` for the error in all scenarios and check the test output is what you expect. It's very important you check tests fail how you expect them if you didn't follow the strict TDD cycle.
+This test passes. To check it fails how we'd hope, change `GetLeague` to return `nil` for the error in all scenarios and check the test output is what you expect. It's very important you check tests fail how you expect them if you didn't follow the strict TDD cycle.
 
 ## Remaining technical debt
 
@@ -1122,6 +1122,26 @@ func (f *FileSystemPlayerStore) GetLeague() (League, error) {
 >  Slice sorts the provided slice given the provided less function.
 
 Easy!
+
+## Are the responsibilities right here? More refactoring!
+
+In our code we talked about `Seek` and how we need to make sure we go to the beginning of the `database` for every read and write in our `FileSystemStore`. 
+
+This _feels_ smelly. Should our store be worried about this? 
+
+Our approach also has the potential for some pretty horrible bugs when we are writing. 
+
+For simplicity imagine our file is no longer storing JSON. 
+
+Let's pretend it contains `XXX`
+
+Then, we `Seek` to the beginning and `Write` 'A'. In our case we want it to completely empty the file and then just write the one character but that wont happen! We will end up with `AXX`.
+
+So do we now need to do some clever work in our store to take care of this? **This all feels very smelly**.
+
+Our need to add `Seek` was driven by the shortest path of resistance but ideally we just want to be concerned with `Read` and `Write`. 
+
+We can create a new type called `TruncatingReadWriter` which will be a `ReadWriter` and will encapsulate our particular concerns. This will fix the bug and allow us to simplify `FileSystemStore`.
 
 ## Wrapping up
 
