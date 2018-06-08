@@ -1007,8 +1007,9 @@ By no longer ignoring the errors when doing `GetLeague` we introduced a bug whic
 ```
 === RUN   TestRecordingWinsAndRetrievingThem/get_score
     --- FAIL: TestRecordingWinsAndRetrievingThem/get_score (0.00s)
-    	server_integration_test.go:23: did not get correct status, got 500, want 200
-    	server_integration_test.go:25: response body is wrong, got 'EOF
+    	server_integration_test.go:24: did not get correct status, got 500, want 200
+    	server_integration_test.go:26: response body is wrong, got 'could not show score, EOF
+    		' want '3'
 ```
 
 The problem is when the file is empty (when we first start) it cannot be read into JSON.
