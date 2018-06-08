@@ -723,7 +723,7 @@ If we go back to `FileSystemStore.go` we have
 
 It was pragmatic to ignore that at the time as we already had failing tests. If we had tried to tackle it at the same time we would be juggling two things at once.
 
-If we get an error we'll want to inform the user there was some kind of problem by returning a `500` status code and some kind of message. We'll also want to log it, but we'll get onto that in a later chapter.
+If we get an error we'll want to inform the user there was a problem by returning a `500` status code and a message. We'll also want to log it, but we'll get onto that in a later chapter.
 
 Let's try and return the error in our function
 
@@ -967,7 +967,7 @@ t.Run("return an error when league cannot be read", func(t *testing.T) {
 })
 ```
 
-If we run this test it actually passes. To check it works how we'd hope, change `GetLeague` to return `nil` for the error in all scenarios and check the test output is what you expect. It's very important you check tests fail how you expect them if you didn't follow the strict TDD cycle.
+If we run this test it actually passes. To check it fails how we'd hope, change `GetLeague` to return `nil` for the error in all scenarios and check the test output is what you expect. It's very important you check tests fail how you expect them if you didn't follow the strict TDD cycle.
 
 ## Remaining technical debt
 
@@ -997,6 +997,16 @@ Just follow these steps for each method carefully, trying to re-run the compiler
 6. The compiler will complain about `multiple-value p.store.XXX() in single-value context`, so fix them and handle the errors. For the server return a `500` (don't forget to write a test) and in the tests ensure an error isn't returned.
 
 tl;dr - Make the change you want and use the compiler to help you get back to working code.
+
+Once you have finished this your `PlayerStore` should look like this
+
+```go
+type PlayerStore interface {
+	GetPlayerScore(name string) (int, error)
+	RecordWin(name string) error
+	GetLeague() (League, error)
+}
+```
 
 If you get stuck, start over. If you get really stuck, [have a look at the current state of the code here](https://github.com/quii/learn-go-with-tests/tree/master/io/v7)
 
