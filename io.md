@@ -1125,13 +1125,13 @@ Easy!
 
 ## Are the responsibilities right here? More refactoring!
 
-In our code we talked about `Seek` and how we need to make sure we go to the beginning of the `database` for every read and write in our `FileSystemStore`. 
+In our code we talked about `Seek` and how we need to make sure we go to the beginning of the `database` for every read and write in our `FileSystemStore`.
 
-This _feels_ smelly. Should our store be worried about this? 
+This _feels_ smelly. Should our store be worried about this?
 
-Our approach also has the potential for some pretty horrible bugs when we are writing. 
+Our approach also has the potential for some pretty horrible bugs when we are writing.
 
-For simplicity imagine our file is no longer storing JSON. 
+For simplicity imagine our file is no longer storing JSON.
 
 Let's pretend it contains `XXX`
 
@@ -1139,7 +1139,7 @@ Then, we `Seek` to the beginning and `Write` 'A'. In our case we want it to comp
 
 So do we now need to do some clever work in our store to take care of this? **This all feels very smelly**.
 
-Our need to add `Seek` was driven by the shortest path of resistance but ideally we just want to be concerned with `Read` and `Write`. 
+Our need to add `Seek` was driven by the shortest path of resistance but ideally we just want to be concerned with `Read` and `Write`.
 
 We can create a new type called `TruncatingReadWriter` which will be a `ReadWriter` and will encapsulate our particular concerns. This will fix the bug and allow us to simplify `FileSystemStore`.
 
