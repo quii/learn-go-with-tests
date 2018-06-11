@@ -18,6 +18,6 @@
 
 作者：[Chris James](https://dev.to/quii)
 译者：[flw](https://github.com/flw-cn)
-校对：TBD
+校对：[pity](https://github.com/pityonline)、[polaris](https://github.com/polaris1119)
 
 本文由 [GCTT](https://github.com/studygolang/GCTT) 原创编译，[Go 中文网](https://studygolang.com/) 荣誉推出
