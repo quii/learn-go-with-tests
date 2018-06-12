@@ -22,9 +22,9 @@ func main() {
 
 ## 如何测试
 
-怎么测试这个？将待测试代码和外部世界（副作用）分离会更好（测试）。`fmt.Println` 有副作用（打印到 stdout），而我们传递的字符串是要测试的代码。
+怎么测试这个？将待测试代码和外部世界（副作用）分离会更好（测试）。`fmt.Println` 有副作用（打印到 stdout），而我们传递的字符串是要测试的代码。[^注1]
 
-> 原文：How do you test this? It is good to separate your "domain" code from the outside world \(side-effects\). The `fmt.Println` is a side effect \(printing to stdout\) and the string we send in is our domain.
+[^注1]: 原文: How do you test this? It is good to separate your "domain" code from the outside world \(side-effects\). The `fmt.Println` is a side effect \(printing to stdout\) and the string we send in is our domain.
 
 所以我们把这些问题分开，就更容易测试了。
 
