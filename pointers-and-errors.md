@@ -120,7 +120,7 @@ func TestWallet(t *testing.T) {
 
     got := wallet.Balance()
 
-    fmt.Println("address of balance in test is", &wallet.balance)
+    fmt.Println("address of balance in test is %v \n", &wallet.balance)
 
     want := 10
 
@@ -132,10 +132,12 @@ func TestWallet(t *testing.T) {
 
 ```go
 func (w Wallet) Deposit(amount int) {
-    fmt.Println("address of balance in Deposit is", &w.balance)
+    fmt.Println("address of balance in Deposit is %v \n", &w.balance)
     w.balance += amount
 }
 ```
+
+The `\n` escape character, prints new line after outputing the memory address.
 
 Now re-run the test
 
