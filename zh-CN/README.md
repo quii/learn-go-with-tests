@@ -7,7 +7,7 @@
 ## Go 基础
 
 * [x] [Install Go](install-go.md)
-* [ ] [Hello, World](hello-world.md)
+* [x] [Hello, World](hello-world.md)
 * [ ] [Integers](integers.md)
 * [ ] [Iteration](iteration.md)
 * [x] [数组与切片](arrays-and-slices.md)
