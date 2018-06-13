@@ -137,7 +137,7 @@ func (w Wallet) Deposit(amount int) {
 }
 ```
 
-The `\n` escape charachter, prints new line after outputing the memory address.
+The `\n` escape character, prints new line after outputing the memory address.
 
 Now re-run the test
 
