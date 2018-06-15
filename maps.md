@@ -113,3 +113,122 @@ With this in place our failing test looks a lot clearer
 
 I also decided to get rid of the given piece. That way this assertion is
 more generally useful.
+
+## Write the test first
+
+The basic search was very easy to implement, but what will happen if we
+supply a word that's not in our dictionary?
+
+We actually get nothing back. This is good because the program can continue to run, but there is a better
+approach. The function can report that the word is not in the
+dictionary. This way, the user isn't left wondering if the word doesn't
+exist or if there is just no definition (this might not seem very useful
+for a dictionary.However, it's a scenario that could be key in other usecases).
+
+```go
+func TestSearch(t *testing.T) {
+	dict := map[string]string{"test": "this is just a test"}
+
+	t.Run("known word", func(t *testing.T) {
+		got, _ := Search(dict, "test")
+		want := "this is just a test"
+
+		assertStrings(t, got, want)
+	})
+
+	t.Run("unknown word", func(t *testing.T) {
+		_, got := Search(dict, "test")
+		want := "could not find the word you were looking for"
+
+		if got == nil {
+			t.Error("expected to receive and error.")
+		} else {
+			assertStrings(t, got.Error(), want)
+		}
+	})
+}
+```
+
+The way to handle this scenario in Go is to return a second argument which is
+an `Error` type.
+
+`Error`s can be converted to a string with the `.Error()`
+method, which we do when passing it to the assertion. We are also wrapping
+`assertString` in an if to ensure we don't call `.Error()` on `nil`.
+
+## Try and run the test
+
+This does not compile
+
+```
+./dict_test.go:18:10: assignment mismatch: 2 variables but 1 values
+```
+
+## Write the minimal amount of code for the test to run and check the output
+
+```go
+func Search(dict map[string]string, word string) (string, error) {
+	return dict[word], nil
+}
+```
+
+Your test should now fails with a much clearer error message.
+
+`dict_test.go:22: expected to receive and error.`
+
+## Write enough code to make it pass
+
+```go
+func Search(dict map[string]string, word string) (string, error) {
+	def, ok := dict[word]
+	if !ok {
+		return "", errors.New("could not find the word you were looking for")
+	}
+
+	return def, nil
+}
+```
+
+In order to make this pass we are using an interesting property of the Map lookup. It can return 2 values. The second value being a boolean which
+indicates if the key was found successfully. 
+
+This property allows us to differentiate between a word that doesn't exist
+and a word that just doesn't have a definition.
+
+## Refactor
+
+```go
+var NotFoundError = errors.New("could not find the word you were looking for")
+
+func Search(dict map[string]string, word string) (string, error) {
+	def, ok := dict[word]
+	if !ok {
+		return "", NotFoundError
+	}
+
+	return def, nil
+}
+```
+
+We can get rid of the magic error in our `Search` function by bringing it up
+into a constant. This will also allow us to have a better test.
+
+```go
+t.Run("unknown word", func(t *testing.T) {
+    _, got := Search(dict, "unknown")
+
+    assertError(t, got, NotFoundError)
+})
+
+func assertError(t *testing.T, got, want error) {
+	t.Helper()
+
+	if got != want {
+		t.Errorf("got error '%s' want '%s'", got, want)
+	}
+}
+```
+
+By creating a new helper we were able to simplify our test, and start using
+our `NotFoundError` variable so our test doesn't fail if we change the error
+text in the future.
