@@ -8,7 +8,7 @@
 
 * [x] [Install Go](install-go.md)
 * [x] [Hello, World](hello-world.md)
-* [ ] [Integers](integers.md)
+* [x] [Integers](integers.md)
 * [ ] [Iteration](iteration.md)
 * [x] [数组与切片](arrays-and-slices.md)
 * [x] [结构体，方法和接口](structs-methods-and-interfaces.md)
@@ -20,7 +20,7 @@
 
 ## 构建应用程序
 
-* [ ] [Intro](app-intro.md)
+* [x] [Intro](app-intro.md)
 * [ ] [HTTP server](http-server.md)
 * [ ] [JSON, routing and embedding](json.md)
 * [ ] [IO and sorting (WIP)](io.md)
