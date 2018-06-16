@@ -718,7 +718,7 @@ Running the program now persists the data in a file in between restarts, hooray!
 
 ## More refactoring and performance concerns
 
-Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the file from the start, and parsing it into JSON. We should not have to do that because `FileSystemStore` is entirely responsible for the state of the league; we just want to use the file at the start to get the current state when starting and updating it when data changes. 
+Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the file from the start, and parsing it into JSON. We should not have to do that because `FileSystemStore` is entirely responsible for the state of the league; we just want to use the file at the start to get the current state when starting and updating it when data changes.
 
 We can create a constructor which can do some of this initialisation for us and store the league as a value in our `FileSystemStore` to be used on the reads instead.
 
@@ -774,13 +774,13 @@ If you try and run the tests it will now complain about initialising `FileSystem
 
 ### Another problem
 
-There is some more naivety in the way we are dealing with files which _could_ create a very nasty bug down the line. 
+There is some more naivety in the way we are dealing with files which _could_ create a very nasty bug down the line.
 
-When we `RecordWin` we `Seek` back to the start of the file and then write the new data but what if the new data was smaller than what was there before? 
+When we `RecordWin` we `Seek` back to the start of the file and then write the new data but what if the new data was smaller than what was there before?
 
-In our current case this is impossible. We never edit or delete scores so the data can only get bigger but it would be irresponsible for us to leave the code like this, it's not unthinkable that a delete scenario could come up. 
+In our current case this is impossible. We never edit or delete scores so the data can only get bigger but it would be irresponsible for us to leave the code like this, it's not unthinkable that a delete scenario could come up.
 
-How will we test for this though? What we need to do is first refactor our code so we separate out the concern of the _kind of data we write, from the writing_. We can then test that separately to check it works how we hope.  
+How will we test for this though? What we need to do is first refactor our code so we separate out the concern of the _kind of data we write, from the writing_. We can then test that separately to check it works how we hope.
 
 We'll create a new type to encapsulate our "when we write we go from the beginning" functionality. I'm going to call it `Tape`. Create a new file with the following
 
@@ -802,7 +802,6 @@ func (t *tape) Write(p []byte) (n int, err error) {
 Notice that we're only implementing `Write` now, as it encapsulates the `Seek` part. This means our `FileSystemStore` can just have a reference to a `Writer` instead.
 
 ```go
-// FileSystemPlayerStore stores players in the filesystem
 type FileSystemPlayerStore struct {
 	database io.Writer
 	league   League
@@ -864,7 +863,7 @@ As we thought! It simply writes the data we want, leaving over the rest.
 
 ## Write enough code to make it pass
 
-`os.File` has a truncate function that will let us effectively empty the file. We should be able to just call this to get what we want. 
+`os.File` has a truncate function that will let us effectively empty the file. We should be able to just call this to get what we want.
 
 Change `tape` to the following
 
@@ -880,27 +879,27 @@ func (t *tape) Write(p []byte) (n int, err error) {
 }
 ```
  
-The compiler will fail in a number of places where we are expecting an `io.ReadWriteSeeker` but we are sending in `*os.File`. You should be able to fix these problems yourself by now but if you get stuck just check the source code. 
+The compiler will fail in a number of places where we are expecting an `io.ReadWriteSeeker` but we are sending in `*os.File`. You should be able to fix these problems yourself by now but if you get stuck just check the source code.
 
-Once you get it refactoring our `TestTape_Write` test should be passing! 
+Once you get it refactoring our `TestTape_Write` test should be passing!
 
 ## Didn't we just break some rules there? Testing private things? No interfaces?
 
 ### On testing private types
 
-It's true that _in general_ you should favour not testing private things as that can sometimes lead to your tests being too tightly coupled to the implementation; which can hinder refactoring in future. 
+It's true that _in general_ you should favour not testing private things as that can sometimes lead to your tests being too tightly coupled to the implementation; which can hinder refactoring in future.
 
-However we must not forget that tests should give us _confidence_. 
+However we must not forget that tests should give us _confidence_.
 
-We were not confident that our implementation would work if we added any kind of edit or delete functionality. We did not want to leave the code like that, especially if this was being worked on by more than one person who may not be aware of the shortcomings of our initial approach. 
+We were not confident that our implementation would work if we added any kind of edit or delete functionality. We did not want to leave the code like that, especially if this was being worked on by more than one person who may not be aware of the shortcomings of our initial approach.
 
 Finally, it's just one test! If we decide to change the way it works it wont be a disaster to just delete the test but we have at the very least captured the requirement for future maintainers.
 
 ### Interfaces
 
-We started off the code by using `io.Reader` as that was the easiest path for us to unit test our new `PlayerStore`. As we developed the code we moved on to `io.ReadWriter` and then `io.ReadWriteSeeker`. We then found out there was nothing in the standard library that actually implemented that apart from `*os.File`. We could've taken the decision to write our own or use an open source one but it felt pragmatic just to make temporary files for the tests. 
+We started off the code by using `io.Reader` as that was the easiest path for us to unit test our new `PlayerStore`. As we developed the code we moved on to `io.ReadWriter` and then `io.ReadWriteSeeker`. We then found out there was nothing in the standard library that actually implemented that apart from `*os.File`. We could've taken the decision to write our own or use an open source one but it felt pragmatic just to make temporary files for the tests.
 
-Finally we needed `Truncate` which is also on `*os.File`. It would've been an option to create our own interface capturing these requirements
+Finally we needed `Truncate` which is also on `*os.File`. It would've been an option to create our own interface capturing these requirements.
 
 ```go
 type ReadWriteSeekTruncate interface {
@@ -909,17 +908,15 @@ type ReadWriteSeekTruncate interface {
 }
 ```
 
-But what is this really giving us? Bear in mind we are _not mocking_ and it is unrealistic for a **file system** store to take any type other than a `*os.File` so we don't need the polymorphism that interfaces give us. 
+But what is this really giving us? Bear in mind we are _not mocking_ and it is unrealistic for a **file system** store to take any type other than a `*os.File` so we don't need the polymorphism that interfaces give us.
 
-Don't be afraid to chop and change types and experiment like we have here. The great thing about using a statically typed language is the compiler will help you with every change. 
+Don't be afraid to chop and change types and experiment like we have here. The great thing about using a statically typed language is the compiler will help you with every change.
 
 ## Error handling
 
 Before we start working on sorting we should make sure we're happy with our current code and remove any technical debt we may have. It's an important principle to get to working software as quickly as possible (stay out of the red state) but that doesn't mean we should ignore error cases!
 
-If we go back to `FileSystemStore.go` we have
-
-`league, _ := NewLeague(f.database)` in our constructor.
+If we go back to `FileSystemStore.go` we have `league, _ := NewLeague(f.database)` in our constructor.
 
 `NewLeague` can return an error if it is unable to parse the league from the `io.Reader` that we provide.
 
@@ -943,7 +940,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 }
 ```
 
-Remember it is very important to give helpful error messages (just like your tests). People jokingly on the internet say most Go code is 
+Remember it is very important to give helpful error messages (just like your tests). People jokingly on the internet say most Go code is
 
 ```go
 if err != nil {
@@ -951,7 +948,7 @@ if err != nil {
 }
 ```
 
-**That is 100% not idiomatic**. Adding contextual information (i.e what you were doing to cause the error) to your error messages makes operating your software far easier. 
+**That is 100% not idiomatic**. Adding contextual information (i.e what you were doing to cause the error) to your error messages makes operating your software far easier.
 
 If you try and compile you'll get some errors.
 
@@ -974,7 +971,7 @@ if err != nil {
 }
 ```
 
-In the tests we should assert there is no error. We can make a helper to help with this. 
+In the tests we should assert there is no error. We can make a helper to help with this.
 
 ```go
 func assertNoError(t *testing.T, err error) {
@@ -993,9 +990,9 @@ Work through the other compilation problems using this helper. Finally you shoul
 	server_integration_test.go:14: didnt expect an error but got one, problem loading player store from file /var/folders/nj/r_ccbj5d7flds0sf63yy4vb80000gn/T/db841037437, problem parsing league, EOF
 ```
 
-We cannot parse the league because the file is empty. We weren't getting errors before because we always just ignored them. 
+We cannot parse the league because the file is empty. We weren't getting errors before because we always just ignored them.
 
-Let's fix our big integration test by putting some valid JSON in it and then we can write a specific test for this scenario. 
+Let's fix our big integration test by putting some valid JSON in it and then we can write a specific test for this scenario.
 
 
 ```go
@@ -1004,7 +1001,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	//etc...
 ```
 
-Now all the tests are passing we need to handle the scenario where the file is empty. 
+Now all the tests are passing we need to handle the scenario where the file is empty.
 
 ## Write the test first
 
