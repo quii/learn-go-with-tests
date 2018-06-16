@@ -245,7 +245,12 @@ Create a new file called `league.go` and put this inside.
 func NewLeague(rdr io.Reader) ([]Player, error) {
 	var league []Player
 	err := json.NewDecoder(rdr).Decode(&league)
+	if err != nil {
+		err = fmt.Errorf("problem parsing league, %v", err)
+	}
+
 	return league, err
+}
 }
 ```
 
@@ -711,59 +716,38 @@ func main() {
 
 Running the program now persists the data in a file in between restarts, hooray!
 
-## Error handling
+## More refactoring and performance concerns
 
-Before we start working on sorting we should make sure we're happy with our current code and remove any technical debt we may have. It's an important principle to get to working software as quickly as possible (stay out of the red state) but that doesn't mean we should ignore error cases!
+Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the file from the start, and parsing it into JSON. We should not have to do that because `FileSystemStore` is entirely responsible for the state of the league; we just want to use the file at the start to get the current state when starting and updating it when data changes. 
 
-If we go back to `FileSystemStore.go` we have
-
-`league, _ := NewLeague(f.database)`
-
-`NewLeague` can return an error if it is unable to parse the league from the `io.Reader` that we provide.
-
-It was pragmatic to ignore that at the time as we already had failing tests. If we had tried to tackle it at the same time we would be juggling two things at once.
-
-If we get an error we'll want to inform the user there was a problem by returning a `500` status code and a message. We'll also want to log it, but we'll get onto that in a later chapter.
-
-Let's try and return the error in our function
+We can create a constructor which can do some of this initialisation for us and store the league as a value in our `FileSystemStore` to be used on the reads instead.
 
 ```go
-func (f *FileSystemPlayerStore) GetLeague() (League, error) {
-	f.database.Seek(0, 0)
-	return NewLeague(f.database)
+type FileSystemPlayerStore struct {
+	database io.ReadWriteSeeker
+	league League
+}
+
+func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
+	database.Seek(0, 0)
+	league, _ := NewLeague(database)
+	return &FileSystemPlayerStore{
+		database:database,
+		league:league,
+	}
 }
 ```
 
-### Try and compile
-
-```
-./FileSystemStore.go:22:23: multiple-value f.GetLeague() in single-value context
-./FileSystemStore.go:33:23: multiple-value f.GetLeague() in single-value context
-./main.go:19:27: cannot use store (type *FileSystemPlayerStore) as type PlayerStore in argument to NewPlayerServer:
-	*FileSystemPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
-		have GetLeague() (League, error)
-		want GetLeague() League
-./FileSystemStore_test.go:38:25: multiple-value store.GetLeague() in single-value context
-./FileSystemStore_test.go:48:24: multiple-value store.GetLeague() in single-value context
-./server_integration_test.go:13:27: cannot use store (type *FileSystemPlayerStore) as type PlayerStore in argument to NewPlayerServer:
-	*FileSystemPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
-		have GetLeague() (League, error)
-		want GetLeague() League
-```
-
-This looks bad, but again this is actually a good thing. In a dynamic language you would not get the computer telling you exactly what is wrong.
-
-We just need to work through the errors from the top until we get green again. Make sure after every change to try recompiling to ensure that the change you do has fixed the problem.
-
-Once we've done that we can take stock of the changes and add whatever tests we feel we need.
-
-> `./FileSystemStore.go:22:23: multiple-value f.GetLeague() in single-value context`
+This way we only have to read from disk once. We can now replace all of our previous calls to getting the league from disk and just use `f.league` instead.
 
 ```go
+func (f *FileSystemPlayerStore) GetLeague() League {
+	return f.league
+}
+
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
-	league, _ := f.GetLeague()
-	player := league.Find(name)
+	player := f.league.Find(name)
 
 	if player != nil {
 		return player.Wins
@@ -771,288 +755,357 @@ func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
 	return 0
 }
-```
 
-We are going to ignore the error here for now as we're just trying to get green again as quickly as possible.
-
-> `./FileSystemStore.go:33:23: multiple-value f.GetLeague() in single-value context`
-
-```go
 func (f *FileSystemPlayerStore) RecordWin(name string) {
-	league, _ := f.GetLeague()
-	player := league.Find(name)
+	player := f.league.Find(name)
 
 	if player != nil {
 		player.Wins++
 	} else {
-		league = append(league, Player{name, 1})
+		f.league = append(f.league, Player{name, 1})
 	}
 
 	f.database.Seek(0, 0)
-	json.NewEncoder(f.database).Encode(league)
+	json.NewEncoder(f.database).Encode(f.league)
 }
 ```
 
-Same deal again, just ignore it for now
+If you try and run the tests it will now complain about initialising `FileSystemPlayerStore` so just fix them by calling our new constructor.
 
-> `./main.go:19:27: cannot use store (type *FileSystemPlayerStore) as type PlayerStore in argument to NewPlayerServer:
-	*FileSystemPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
-		have GetLeague() (League, error)
-		want GetLeague() League`
+### Another problem
 
-Our `FileSystemStore` no longer implements `PlayerStore`. We will have to update the interface to work with our new reality that `GetLeague` could fail.
+There is some more naivety in the way we are dealing with files which _could_ create a very nasty bug down the line. 
+
+When we `RecordWin` we `Seek` back to the start of the file and then write the new data but what if the new data was smaller than what was there before? 
+
+In our current case this is impossible. We never edit or delete scores so the data can only get bigger but it would be irresponsible for us to leave the code like this, it's not unthinkable that a delete scenario could come up. 
+
+How will we test for this though? What we need to do is first refactor our code so we separate out the concern of the _kind of data we write, from the writing_. We can then test that separately to check it works how we hope.  
+
+We'll create a new type to encapsulate our "when we write we go from the beginning" functionality. I'm going to call it `Tape`. Create a new file with the following
 
 ```go
-type PlayerStore interface {
-	GetPlayerScore(name string) int
-	RecordWin(name string)
-	GetLeague() (League, error)
+package main
+
+import "io"
+
+type tape struct {
+	file io.ReadWriteSeeker
+}
+
+func (t *tape) Write(p []byte) (n int, err error) {
+	t.file.Seek(0, 0)
+	return t.file.Write(p)
 }
 ```
 
-Try and compile again
-
-```
-./server.go:47:27: too many arguments in call to json.NewEncoder(w).Encode
-	have (League, error)
-	want (interface {})
-./FileSystemStore_test.go:38:25: multiple-value store.GetLeague() in single-value context
-./FileSystemStore_test.go:48:24: multiple-value store.GetLeague() in single-value context
-./server_test.go:40:28: cannot use &store (type *StubPlayerStore) as type PlayerStore in argument to NewPlayerServer:
-	*StubPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
-		have GetLeague() League
-		want GetLeague() (League, error)
-./server_test.go:78:28: cannot use &store (type *StubPlayerStore) as type PlayerStore in argument to NewPlayerServer:
-	*StubPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
-		have GetLeague() League
-		want GetLeague() (League, error)
-./server_test.go:110:29: cannot use &store (type *StubPlayerStore) as type PlayerStore in argument to NewPlayerServer:
-	*StubPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
-		have GetLeague() League
-		want GetLeague() (League, error)
-```
-
-Keep going! The compiler is helping us make robust software, just keep ticking off the errors.
-
-> `./server.go:47:27: too many arguments in call to json.NewEncoder(w).Encode
-  	have (League, error)
-  	want (interface {})`
-
-This is good, this is where we'll actually have to handle the error but let's resist the temptation for now. We'll want to write a test to exercise this scenario but we musn't add any more code than necessary while we are in a state of the code not compiling
+Notice that we're only implementing `Write` now, as it encapsulates the `Seek` part. This means our `FileSystemStore` can just have a reference to a `Writer` instead.
 
 ```go
-func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", jsonContentType)
-	//todo: handle the error by responding differently
-	league, _ := p.store.GetLeague()
-	json.NewEncoder(w).Encode(league)
+// FileSystemPlayerStore stores players in the filesystem
+type FileSystemPlayerStore struct {
+	database io.Writer
+	league   League
 }
 ```
 
->./FileSystemStore_test.go:38:25: multiple-value store.GetLeague() in single-value context
- ./FileSystemStore_test.go:48:24: multiple-value store.GetLeague() in single-value context
-
-These two scenarios are the same, just fix the tests by using the underscore syntax to ignore the error.
-
-Change `got := store.GetLeague()` to `got, _ := store.GetLeague()` and leave a `todo` to remind ourselves to assert there are no errors later.
-
-> `./server_test.go:40:28: cannot use &store (type *StubPlayerStore) as type PlayerStore in argument to NewPlayerServer:
-   	*StubPlayerStore does not implement PlayerStore (wrong type for GetLeague method)
-   		have GetLeague() League
-   		want GetLeague() (League, error)`
-
-We changed the interface of `PlayerStore` so `StubPlayerStore` needs updating.
+Update the constructor to use `Tape`
 
 ```go
-func (s *StubPlayerStore) GetLeague() (League, error) {
-	return s.league, nil
+func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
+	database.Seek(0, 0)
+	league, _ := NewLeague(database)
+
+	return &FileSystemPlayerStore{
+		database: &tape{database},
+		league:   league,
+	}
 }
 ```
 
-When you try and run the tests it should now all be passing. We have updated our `PlayerStore` interface to reflect the new reality of stores that can fail which will enable us to handle errors better.
+Finally we can get the amazing pay-off we wanted by removing the `Seek` call from `RecordWin`. Yes it doesn't feel much, but at least it means if we do any other kind of writes we can rely on our `Write` to behave how we need it to. Plus it will now let us test the potentially problematic code separately and fix it.
 
-This may have felt arduous but once you become familiar with compiler errors and are handy with your tooling fixing this kind of error only really takes a few minutes.
-
-Now we can write a test for our `Server` to log and respond with a `500` when we cannot load the league.
+Let's write the test where we want to update the entire contents of a file with something that is smaller than the original contents. In `tape_test.go`:
 
 ## Write the test first
 
-```go
-t.Run("it returns a 500 when the league cannot be loaded", func(t *testing.T) {
-
-    store := FailingPlayerStore{}
-    server := NewPlayerServer(&store)
-
-    request := newLeagueRequest()
-    response := httptest.NewRecorder()
-
-    server.ServeHTTP(response, request)
-
-    assertStatus(t, response.Code, http.StatusInternalServerError)
-})
-```
-
-What's a `FailingPlayerStore?`. We could've added some flexibility to our `StubPlayerStore` to somehow make it so it fails given some kind of `fail` flag but I felt it would be simpler and perhaps clearer to make a new stub that explicitly fails.
+We'll just create a file, try and write to it using our tape, read it all again and see what's in the file
 
 ```go
-type FailingPlayerStore struct {
-	PlayerStore
-}
+func TestTape_Write(t *testing.T) {
+	file, clean := createTempFile(t, "12345")
+	defer clean()
 
-func (f * FailingPlayerStore) GetLeague() (League, error) {
-	return League{}, errors.New("cannot load league")
+	tape := &tape{file}
+
+	tape.Write([]byte("abc"))
+
+	file.Seek(0, 0)
+	newFileContents, _ := ioutil.ReadAll(file)
+
+	got := string(newFileContents)
+	want := "abc"
+
+	if got != want {
+		t.Errorf("got '%s' want '%s'", got, want)
+	}
 }
 ```
-
-I did not want to have to implement the _whole_ interface (e.g also have methods for `GetPlayerScore` and `RecordWin`) for this test so i _embedded the interface_ into our new type. By doing this our new stub implements `PlayerStore` and then we add our specific implementation for `GetLeague` to make it fail. If you try and call any of the other methods that we have not implemented it will panic. This technique is useful when you want to mock an interface with multiple methods but you're not concerned with every method.
 
 ## Try to run the test
 
 ```
-=== RUN   TestLeague/it_returns_a_500_when_the_league_cannot_be_loaded
-    --- FAIL: TestLeague/it_returns_a_500_when_the_league_cannot_be_loaded (0.00s)
-    	server_test.go:144: did not get correct status, got 200, want 500
+=== RUN   TestTape_Write
+--- FAIL: TestTape_Write (0.00s)
+	tape_test.go:23: got 'abc45' want 'abc'
 ```
+
+As we thought! It simply writes the data we want, leaving over the rest.
 
 ## Write enough code to make it pass
 
+`os.File` has a truncate function that will let us effectively empty the file. We should be able to just call this to get what we want. 
+
+Change `tape` to the following
+
 ```go
-func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", jsonContentType)
+type tape struct {
+	file *os.File
+}
 
-	league, err := p.store.GetLeague()
+func (t *tape) Write(p []byte) (n int, err error) {
+	t.file.Truncate(0)
+	t.file.Seek(0, 0)
+	return t.file.Write(p)
+}
+```
+ 
+The compiler will fail in a number of places where we are expecting an `io.ReadWriteSeeker` but we are sending in `*os.File`. You should be able to fix these problems yourself by now but if you get stuck just check the source code. 
 
-	if err != nil {
-		http.Error(w, fmt.Sprintf("could not load league, %v", err), http.StatusInternalServerError)
-		return
-	}
+Once you get it refactoring our `TestTape_Write` test should be passing! 
 
-	json.NewEncoder(w).Encode(league)
+## Didn't we just break some rules there? Testing private things? No interfaces?
+
+### On testing private types
+
+It's true that _in general_ you should favour not testing private things as that can sometimes lead to your tests being too tightly coupled to the implementation; which can hinder refactoring in future. 
+
+However we must not forget that tests should give us _confidence_. 
+
+We were not confident that our implementation would work if we added any kind of edit or delete functionality. We did not want to leave the code like that, especially if this was being worked on by more than one person who may not be aware of the shortcomings of our initial approach. 
+
+Finally, it's just one test! If we decide to change the way it works it wont be a disaster to just delete the test but we have at the very least captured the requirement for future maintainers.
+
+### Interfaces
+
+We started off the code by using `io.Reader` as that was the easiest path for us to unit test our new `PlayerStore`. As we developed the code we moved on to `io.ReadWriter` and then `io.ReadWriteSeeker`. We then found out there was nothing in the standard library that actually implemented that apart from `*os.File`. We could've taken the decision to write our own or use an open source one but it felt pragmatic just to make temporary files for the tests. 
+
+Finally we needed `Truncate` which is also on `*os.File`. It would've been an option to create our own interface capturing these requirements
+
+```go
+type ReadWriteSeekTruncate interface {
+	io.ReadWriteSeeker
+	Truncate(size int64) error
 }
 ```
 
-`http.Error` is a convenient method for when you want to return an error. We are using `fmt.Sprintf` to ensure we add some context to the error message.
+But what is this really giving us? Bear in mind we are _not mocking_ and it is unrealistic for a **file system** store to take any type other than a `*os.File` so we don't need the polymorphism that interfaces give us. 
 
-## More cleaning up
+Don't be afraid to chop and change types and experiment like we have here. The great thing about using a statically typed language is the compiler will help you with every change. 
 
-As we changed the `GetLeague` interface we left some `TODO`s around for us to come back to. `TODO` is often a dangerous tool which could be renamed to `SOMEDAY I WILL TACKLE THIS, BUT WHATEVER`. We are better than this!
+## Error handling
 
-In our `FileSystemStoreTest` we need to update the tests to check we don't get an error.
+Before we start working on sorting we should make sure we're happy with our current code and remove any technical debt we may have. It's an important principle to get to working software as quickly as possible (stay out of the red state) but that doesn't mean we should ignore error cases!
 
-Make a helper and then fix the `TODO`s
+If we go back to `FileSystemStore.go` we have
+
+`league, _ := NewLeague(f.database)` in our constructor.
+
+`NewLeague` can return an error if it is unable to parse the league from the `io.Reader` that we provide.
+
+It was pragmatic to ignore that at the time as we already had failing tests. If we had tried to tackle it at the same time we would be juggling two things at once.
+
+Let's make it so if our constructor is capable of returning an error.
+
+```go
+func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
+	file.Seek(0, 0)
+	league, err := NewLeague(file)
+
+	if err != nil {
+		return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
+	}
+
+	return &FileSystemPlayerStore{
+		database:&tape{file},
+		league:league,
+	}, nil
+}
+```
+
+Remember it is very important to give helpful error messages (just like your tests). People jokingly on the internet say most Go code is 
+
+```go
+if err != nil {
+	return err
+}
+```
+
+**That is 100% not idiomatic**. Adding contextual information (i.e what you were doing to cause the error) to your error messages makes operating your software far easier. 
+
+If you try and compile you'll get some errors.
+
+```
+./main.go:18:35: multiple-value NewFileSystemPlayerStore() in single-value context
+./FileSystemStore_test.go:35:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./FileSystemStore_test.go:57:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./FileSystemStore_test.go:70:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./FileSystemStore_test.go:85:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./server_integration_test.go:12:35: multiple-value NewFileSystemPlayerStore() in single-value context
+```
+
+In main we'll want to exit the program, printing the error.
+
+```go
+store, err := NewFileSystemPlayerStore(db)
+
+if err != nil {
+    log.Fatalf("problem creating file system player store, %v ", err)
+}
+```
+
+In the tests we should assert there is no error. We can make a helper to help with this. 
 
 ```go
 func assertNoError(t *testing.T, err error) {
 	t.Helper()
 	if err != nil {
-		t.FatalF("unexpected error %v", err)
+		t.Fatalf("didnt expect an error but got one, %v", err)
 	}
 }
 ```
 
-We should probably check that if we cannot read the JSON into a league that it actually fails so let's add another test to this suite.
+Work through the other compilation problems using this helper. Finally you should have a failing test
+
+```
+=== RUN   TestRecordingWinsAndRetrievingThem
+--- FAIL: TestRecordingWinsAndRetrievingThem (0.00s)
+	server_integration_test.go:14: didnt expect an error but got one, problem loading player store from file /var/folders/nj/r_ccbj5d7flds0sf63yy4vb80000gn/T/db841037437, problem parsing league, EOF
+```
+
+We cannot parse the league because the file is empty. We weren't getting errors before because we always just ignored them. 
+
+Let's fix our big integration test by putting some valid JSON in it and then we can write a specific test for this scenario. 
+
 
 ```go
-t.Run("return an error when league cannot be read", func(t *testing.T) {
-    database, cleanDatabase := createTempFile(t, `not very good JSON`)
+func TestRecordingWinsAndRetrievingThem(t *testing.T) {
+	database, cleanDatabase := createTempFile(t, `[]`)
+	//etc...
+```
+
+Now all the tests are passing we need to handle the scenario where the file is empty. 
+
+## Write the test first
+
+```go
+t.Run("works with an empty file", func(t *testing.T) {
+    database, cleanDatabase := createTempFile(t, "")
     defer cleanDatabase()
 
-    store := FileSystemPlayerStore{database}
+    _, err := NewFileSystemPlayerStore(database)
 
-    _, err := store.GetLeague()
-
-    if err == nil {
-        t.Error("expected an error but didn't get one")
-    }
+    assertNoError(t, err)
 })
 ```
 
-This test passes. To check it fails how we'd hope, change `GetLeague` to return `nil` for the error in all scenarios and check the test output is what you expect. It's very important you check tests fail how you expect them if you didn't follow the strict TDD cycle.
+## Try to run the test
 
-## Remaining technical debt
+```
+=== RUN   TestFileSystemStore/works_with_an_empty_file
+    --- FAIL: TestFileSystemStore/works_with_an_empty_file (0.00s)
+    	FileSystemStore_test.go:108: didnt expect an error but got one, problem loading player store from file /var/folders/nj/r_ccbj5d7flds0sf63yy4vb80000gn/T/db019548018, problem parsing league, EOF
+```
 
-As we changed the `PlayerStore` interface for `GetLeague` we had to take on more technical debt in `FileSystemStore`.
+## Write enough code to make it pass
 
-In both `GetPlayerScore` and `RecordWin` we have this line.
+Change our constructor to the following
 
 ```go
-league, _ := f.GetLeague()
-```
+func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
-Getting leagues can fail so therefore these other two methods can fail too.
+	file.Seek(0, 0)
 
-We need to go through the same exercise again of changing the interface of these two methods to be able to return `error`.
-
-We're not going to document the process again, this is an exercise for you to do.
-
-Commit your code to source control first in-case you get stuck.
-
-Just follow these steps for each method carefully, trying to re-run the compiler after every change.
-
-1. Try and return the error
-2. Compile
-3. The compiler will complain the method should only return one thing. Change the method signature, compile again
-4. The compiler will now complain that `FileSystemStore` no longer implements the interface, so change it
-5. The compiler will complain about `StubFileStore` no longer implements the interface, so fix it
-6. The compiler will complain about `multiple-value p.store.XXX() in single-value context`, so fix them and handle the errors. For the server return a `500` (don't forget to write a test) and in the tests ensure an error isn't returned.
-
-tl;dr - Make the change you want and use the compiler to help you get back to working code.
-
-Once you have finished this your `PlayerStore` should look like this
-
-```go
-type PlayerStore interface {
-	GetPlayerScore(name string) (int, error)
-	RecordWin(name string) error
-	GetLeague() (League, error)
-}
-```
-
-If you get stuck, start over. If you get really stuck, [have a look at the current state of the code here](https://github.com/quii/learn-go-with-tests/tree/master/io/v7)
-
-### Integration test woes
-
-By no longer ignoring the errors when doing `GetLeague` we introduced a bug which is highlighted by our integration test.
-
-```
-=== RUN   TestRecordingWinsAndRetrievingThem/get_score
-    --- FAIL: TestRecordingWinsAndRetrievingThem/get_score (0.00s)
-    	server_integration_test.go:24: did not get correct status, got 500, want 200
-    	server_integration_test.go:26: response body is wrong, got 'could not show score, EOF
-    		' want '3'
-```
-
-The problem is when the file is empty (when we first start) it cannot be read into JSON.
-
-When we were ignoring the error, we would then carry on and start afresh with a new database which is why it was passing before.
-
-We need a way of making our `FileSystemStore` initialising itself if the file is empty. Thankfully we already have a failing test for this so we can just work with that.
-
-```go
-func NewFileSystemPlayerStore(database io.ReadWriteSeeker) (*FileSystemPlayerStore, error) {
-	buf := &bytes.Buffer{}
-	length, err := io.Copy(buf, database)
+	info, err := file.Stat()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
 	}
 
-	if length == 0 {
-		json.NewEncoder(database).Encode(League{})
+	if info.Size()==0 {
+		file.Write([]byte("[]"))
+		file.Seek(0, 0)
+	}
+
+	league, err := NewLeague(file)
+
+	if err != nil {
+		return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
 	}
 
 	return &FileSystemPlayerStore{
-		database: database,
+		database:&tape{file},
+		league:league,
 	}, nil
 }
 ```
 
-What we need to do is to make a "constructor" which
-- Tries to read the `database`, `io.Copy` will return the number of bytes it has read.
-- If there is an error then return it.
-- If the length of the bytes read is zero then we need to encode an empty `League` into the database to initialise ourselves.
+`file.Stat` returns stats on our file. This lets us check the size of the file, if it's empty we `Write` an empty JSON array and `Seek` back to the start ready for the rest of the code.
 
-When we use this function in the integration test it now passes. Make sure to update `main` to use it too.
+## Refactor
+
+Our constructor is a bit messy now, we can extract the initialise code into a function
+
+```go
+func initialisePlayerDBFile(file *os.File) error {
+	file.Seek(0, 0)
+
+	info, err := file.Stat()
+
+	if err != nil {
+		return fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
+	}
+
+	if info.Size()==0 {
+		file.Write([]byte("[]"))
+		file.Seek(0, 0)
+	}
+
+	return nil
+}
+```
+
+```go
+func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
+
+	err := initialisePlayerDBFile(file)
+
+	if err != nil {
+		return nil, fmt.Errorf("problem initialising player db file, %v", err)
+	}
+
+	league, err := NewLeague(file)
+
+	if err != nil {
+		return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
+	}
+
+	return &FileSystemPlayerStore{
+		database:&tape{file},
+		league:league,
+	}, nil
+}
+```
 
 ## Sorting
 
@@ -1065,7 +1118,7 @@ The main decision to make here is where in the software should this happen. If w
 We can update the assertion on our first test in `TestFileSystemStore`
 
 ```go
-	t.Run("league from a reader, sorted", func(t *testing.T) {
+	t.Run("league sorted", func(t *testing.T) {
 		database, cleanDatabase := createTempFile(t, `[
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
@@ -1105,15 +1158,11 @@ The order of the JSON coming in is in the wrong order and our `want` will check 
 ## Write enough code to make it pass
 
 ```go
-func (f *FileSystemPlayerStore) GetLeague() (League, error) {
-	f.database.Seek(0, 0)
-	league, err := NewLeague(f.database)
-
-	sort.Slice(league, func(i, j int) bool {
-		return league[i].Wins > league[j].Wins
+func (f *FileSystemPlayerStore) GetLeague() League {
+	sort.Slice(f.league, func(i, j int) bool {
+		return f.league[i].Wins > f.league[j].Wins
 	})
-
-	return league, err
+	return f.league
 }
 ```
 
@@ -1122,26 +1171,6 @@ func (f *FileSystemPlayerStore) GetLeague() (League, error) {
 >  Slice sorts the provided slice given the provided less function.
 
 Easy!
-
-## Are the responsibilities right here? More refactoring!
-
-In our code we talked about `Seek` and how we need to make sure we go to the beginning of the `database` for every read and write in our `FileSystemStore`.
-
-This _feels_ smelly. Should our store be worried about this?
-
-Our approach also has the potential for some pretty horrible bugs when we are writing.
-
-For simplicity imagine our file is no longer storing JSON.
-
-Let's pretend it contains `XXX`
-
-Then, we `Seek` to the beginning and `Write` 'A'. In our case we want it to completely empty the file and then just write the one character but that wont happen! We will end up with `AXX`.
-
-So do we now need to do some clever work in our store to take care of this? **This all feels very smelly**.
-
-Our need to add `Seek` was driven by the shortest path of resistance but ideally we just want to be concerned with `Read` and `Write`.
-
-We can create a new type called `TruncatingReadWriter` which will be a `ReadWriter` and will encapsulate our particular concerns. This will fix the bug and allow us to simplify `FileSystemStore`.
 
 ## Wrapping up
 

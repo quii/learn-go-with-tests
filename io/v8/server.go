@@ -8,9 +8,9 @@ import (
 
 // PlayerStore stores score information about players
 type PlayerStore interface {
-	GetPlayerScore(name string) (int, error)
-	RecordWin(name string) error
-	GetLeague() (League, error)
+	GetPlayerScore(name string) int
+	RecordWin(name string)
+	GetLeague() League
 }
 
 // Player stores a name with a number of wins
@@ -44,15 +44,7 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", jsonContentType)
-
-	league, err := p.store.GetLeague()
-
-	if err != nil {
-		http.Error(w, fmt.Sprintf("could not load league, %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(league)
+	json.NewEncoder(w).Encode(p.store.GetLeague())
 }
 
 func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
@@ -67,12 +59,7 @@ func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
-	score, err := p.store.GetPlayerScore(player)
-
-	if err != nil {
-		http.Error(w, fmt.Sprintf("could not show score, %v", err), http.StatusInternalServerError)
-		return
-	}
+	score := p.store.GetPlayerScore(player)
 
 	if score == 0 {
 		w.WriteHeader(http.StatusNotFound)
@@ -82,12 +69,6 @@ func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
 }
 
 func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
-	err := p.store.RecordWin(player)
-
-	if err != nil {
-		http.Error(w, fmt.Sprintf("could not process win, %v", err), http.StatusInternalServerError)
-		return
-	}
-
+	p.store.RecordWin(player)
 	w.WriteHeader(http.StatusAccepted)
 }

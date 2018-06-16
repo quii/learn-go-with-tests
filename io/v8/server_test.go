@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,33 +15,17 @@ type StubPlayerStore struct {
 	league   []Player
 }
 
-func (s *StubPlayerStore) GetPlayerScore(name string) (int, error) {
+func (s *StubPlayerStore) GetPlayerScore(name string) int {
 	score := s.scores[name]
-	return score, nil
+	return score
 }
 
-func (s *StubPlayerStore) RecordWin(name string) error {
+func (s *StubPlayerStore) RecordWin(name string) {
 	s.winCalls = append(s.winCalls, name)
-	return nil
 }
 
-func (s *StubPlayerStore) GetLeague() (League, error) {
-	return s.league, nil
-}
-
-type FailingPlayerStore struct {
-}
-
-func (f *FailingPlayerStore) GetLeague() (League, error) {
-	return League{}, errors.New("cannot load league")
-}
-
-func (f *FailingPlayerStore) GetPlayerScore(name string) (int, error) {
-	return 0, errors.New("cannot get player score")
-}
-
-func (f *FailingPlayerStore) RecordWin(name string) error {
-	return errors.New("cannot record win")
+func (s *StubPlayerStore) GetLeague() League {
+	return s.league
 }
 
 func TestGETPlayers(t *testing.T) {
@@ -84,16 +67,6 @@ func TestGETPlayers(t *testing.T) {
 
 		assertStatus(t, response.Code, http.StatusNotFound)
 	})
-
-	t.Run("returns 500 when player score cant be got", func(t *testing.T) {
-		server := NewPlayerServer(&FailingPlayerStore{})
-		request := newGetScoreRequest("Apollo")
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, request)
-
-		assertStatus(t, response.Code, http.StatusInternalServerError)
-	})
 }
 
 func TestStoreWins(t *testing.T) {
@@ -122,17 +95,6 @@ func TestStoreWins(t *testing.T) {
 			t.Errorf("did not store correct winner got '%s' want '%s'", store.winCalls[0], player)
 		}
 	})
-
-	t.Run("returns 500 when it cannot store the score", func(t *testing.T) {
-		server := NewPlayerServer(&FailingPlayerStore{})
-
-		request := newPostWinRequest("Dave")
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, request)
-
-		assertStatus(t, response.Code, http.StatusInternalServerError)
-	})
 }
 
 func TestLeague(t *testing.T) {
@@ -158,19 +120,6 @@ func TestLeague(t *testing.T) {
 		assertLeague(t, got, wantedLeague)
 		assertContentType(t, response, jsonContentType)
 
-	})
-
-	t.Run("it returns a 500 when the league cannot be loaded", func(t *testing.T) {
-
-		store := FailingPlayerStore{}
-		server := NewPlayerServer(&store)
-
-		request := newLeagueRequest()
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, request)
-
-		assertStatus(t, response.Code, http.StatusInternalServerError)
 	})
 }
 
