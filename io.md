@@ -878,7 +878,7 @@ func (t *tape) Write(p []byte) (n int, err error) {
 	return t.file.Write(p)
 }
 ```
- 
+
 The compiler will fail in a number of places where we are expecting an `io.ReadWriteSeeker` but we are sending in `*os.File`. You should be able to fix these problems yourself by now but if you get stuck just check the source code.
 
 Once you get it refactoring our `TestTape_Write` test should be passing!
@@ -993,7 +993,6 @@ Work through the other compilation problems using this helper. Finally you shoul
 We cannot parse the league because the file is empty. We weren't getting errors before because we always just ignored them.
 
 Let's fix our big integration test by putting some valid JSON in it and then we can write a specific test for this scenario.
-
 
 ```go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
