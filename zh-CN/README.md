@@ -9,7 +9,7 @@
 * [x] [Install Go](install-go.md)
 * [x] [Hello, World](hello-world.md)
 * [x] [Integers](integers.md)
-* [ ] [Iteration](iteration.md)
+* [x] [Iteration](iteration.md)
 * [x] [数组与切片](arrays-and-slices.md)
 * [x] [结构体，方法和接口](structs-methods-and-interfaces.md)
 * [x] [指针和错误](pointers-and-errors.md)
