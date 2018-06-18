@@ -1,0 +1,25 @@
+# Top-most EditorConfig file
+root = true
+
+# Every file should according to these default configurations if not specified
+[*]
+# Use UNIX-style line endings
+end_of_line = LF
+# Use utf-8 file encoding
+charset = utf-8
+# 4 space indent
+indent_style = space
+indent_size = 4
+# Ensure file ends with a newline when saving(prevent `no newline at EOF`)
+insert_final_newline = true
+# Remove any whitespace characters preceding newline characters
+trim_trailing_whitespace = true
+
+# For YAML
+[*.{yml,yaml}]
+indent_size = 2
+
+# For Go files
+[*.go]
+# `gofmt` uses tabs for indentation
+indent_style = tab

@@ -17,7 +17,7 @@ We'll tackle this by writing a function called `Countdown` which we will then pu
 package main
 
 func main() {
-	Countdown()
+    Countdown()
 }
 ```
 
@@ -39,16 +39,16 @@ Our software needs to print to stdout and we saw how we could use DI to facilita
 
 ```go
 func TestCountdown(t *testing.T) {
-	buffer := &bytes.Buffer{}
+    buffer := &bytes.Buffer{}
 
-	Countdown(buffer)
+    Countdown(buffer)
 
-	got := buffer.String()
-	want := "3"
+    got := buffer.String()
+    want := "3"
 
-	if got != want {
-		t.Errorf("got '%s' want '%s'", got, want)
-	}
+    if got != want {
+        t.Errorf("got '%s' want '%s'", got, want)
+    }
 }
 ```
 
@@ -75,8 +75,8 @@ Try again
 
 ```go
 ./countdown_test.go:11:11: too many arguments in call to Countdown
-	have (*bytes.Buffer)
-	want ()
+    have (*bytes.Buffer)
+    want ()
 ```
 
 The compiler is telling you what your function signature could be, so update it.
@@ -93,7 +93,7 @@ Perfect!
 
 ```go
 func Countdown(out *bytes.Buffer) {
-	fmt.Fprint(out, "3")
+    fmt.Fprint(out, "3")
 }
 ```
 
@@ -105,7 +105,7 @@ We know that while `*bytes.Buffer` works, it would be better to use a general pu
 
 ```go
 func Countdown(out io.Writer) {
-	fmt.Fprint(out, "3")
+    fmt.Fprint(out, "3")
 }
 ```
 
@@ -117,17 +117,17 @@ To complete matters, let's now wire up our function into a `main` so we have som
 package main
 
 import (
-	"fmt"
-	"io"
-	"os"
+    "fmt"
+    "io"
+    "os"
 )
 
 func Countdown(out io.Writer) {
-	fmt.Fprint(out, "3")
+    fmt.Fprint(out, "3")
 }
 
 func main() {
-	Countdown(os.Stdout)
+    Countdown(os.Stdout)
 }
 ```
 
@@ -143,19 +143,19 @@ By investing in getting the overall plumbing working right, we can iterate on ou
 
 ```go
 func TestCountdown(t *testing.T) {
-	buffer := &bytes.Buffer{}
+    buffer := &bytes.Buffer{}
 
-	Countdown(buffer)
+    Countdown(buffer)
 
-	got := buffer.String()
-	want := `3
+    got := buffer.String()
+    want := `3
 2
 1
 Go!`
 
-	if got != want {
-		t.Errorf("got '%s' want '%s'", got, want)
-	}
+    if got != want {
+        t.Errorf("got '%s' want '%s'", got, want)
+    }
 }
 ```
 
@@ -165,18 +165,18 @@ The backtick syntax is another way of creating a `string` but lets you put thing
 
 ```
 countdown_test.go:21: got '3' want '3
-		2
-		1
-		Go!'
+        2
+        1
+        Go!'
 ```
 ## Write enough code to make it pass
 
 ```go
 func Countdown(out io.Writer) {
-	for i := 3; i > 0; i-- {
-		fmt.Fprintln(out, i)
-	}
-	fmt.Fprint(out, "Go!")
+    for i := 3; i > 0; i-- {
+        fmt.Fprintln(out, i)
+    }
+    fmt.Fprint(out, "Go!")
 }
 ```
 
@@ -191,10 +191,10 @@ const finalWord = "Go!"
 const countdownStart = 3
 
 func Countdown(out io.Writer) {
-	for i := countdownStart; i > 0; i-- {
-		fmt.Fprintln(out, i)
-	}
-	fmt.Fprint(out, finalWord)
+    for i := countdownStart; i > 0; i-- {
+        fmt.Fprintln(out, i)
+    }
+    fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -204,13 +204,13 @@ Go let's you achieve this with `time.Sleep`. Try adding it in to our code.
 
 ```go
 func Countdown(out io.Writer) {
-	for i := countdownStart; i > 0; i-- {
-		time.Sleep(1 * time.Second)
-		fmt.Fprintln(out, i)
-	}
+    for i := countdownStart; i > 0; i-- {
+        time.Sleep(1 * time.Second)
+        fmt.Fprintln(out, i)
+    }
 
-	time.Sleep(1 * time.Second)
-	fmt.Fprint(out, finalWord)
+    time.Sleep(1 * time.Second)
+    fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -220,9 +220,9 @@ If you run the program it works as we want it to.
 
 The tests still pass and the software works as intended but we have some problems:
 - Our tests take 4 seconds to run.
-	- Every forward thinking post about software development emphasises the importance of quick feedback loops.
-	- **Slow tests ruin developer productivity**.
-	- Imagine if the requirements get more sophisticated warranting more tests. Are we happy with 4s added to the test run for every new test of `Countdown`?
+    - Every forward thinking post about software development emphasises the importance of quick feedback loops.
+    - **Slow tests ruin developer productivity**.
+    - Imagine if the requirements get more sophisticated warranting more tests. Are we happy with 4s added to the test run for every new test of `Countdown`?
 - We have not tested an important property of our function.
 
 We have a dependency on `Sleep`ing which we need to extract so we can then control it in our tests.
@@ -235,7 +235,7 @@ Let's define our dependency as an interface. This lets us then use a _real_ Slee
 
 ```go
 type Sleeper interface {
-	Sleep()
+    Sleep()
 }
 ```
 
@@ -245,11 +245,11 @@ Now we need to make a _mock_ of it for our tests to use.
 
 ```go
 type SpySleeper struct {
-	Calls int
+    Calls int
 }
 
 func (s *SpySleeper) Sleep() {
-	s.Calls++
+    s.Calls++
 }
 ```
 
@@ -259,24 +259,24 @@ Update the tests to inject a dependency on our Spy and assert that the sleep has
 
 ```go
 func TestCountdown(t *testing.T) {
-	buffer := &bytes.Buffer{}
-	spySleeper := &SpySleeper{}
+    buffer := &bytes.Buffer{}
+    spySleeper := &SpySleeper{}
 
-	Countdown(buffer, spySleeper)
+    Countdown(buffer, spySleeper)
 
-	got := buffer.String()
-	want := `3
+    got := buffer.String()
+    want := `3
 2
 1
 Go!`
 
-	if got != want {
-		t.Errorf("got '%s' want '%s'", got, want)
-	}
+    if got != want {
+        t.Errorf("got '%s' want '%s'", got, want)
+    }
 
-	if spySleeper.Calls != 4 {
-		t.Errorf("not enough calls to sleeper, want 4 got %d", spySleeper.Calls)
-	}
+    if spySleeper.Calls != 4 {
+        t.Errorf("not enough calls to sleeper, want 4 got %d", spySleeper.Calls)
+    }
 }
 ```
 
@@ -284,8 +284,8 @@ Go!`
 
 ```
 too many arguments in call to Countdown
-	have (*bytes.Buffer, *SpySleeper)
-	want (io.Writer)
+    have (*bytes.Buffer, *SpySleeper)
+    want (io.Writer)
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
@@ -294,13 +294,13 @@ We need to update `Countdown` to accept our `Sleeper`
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
-	for i := countdownStart; i > 0; i-- {
-		time.Sleep(1 * time.Second)
-		fmt.Fprintln(out, i)
-	}
+    for i := countdownStart; i > 0; i-- {
+        time.Sleep(1 * time.Second)
+        fmt.Fprintln(out, i)
+    }
 
-	time.Sleep(1 * time.Second)
-	fmt.Fprint(out, finalWord)
+    time.Sleep(1 * time.Second)
+    fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -308,8 +308,8 @@ If you try again, your `main` will no longer compile for the same reason
 
 ```
 ./main.go:26:11: not enough arguments in call to Countdown
-	have (*os.File)
-	want (io.Writer, Sleeper)
+    have (*os.File)
+    want (io.Writer, Sleeper)
 ```
 
 Let's create a _real_ sleeper which implements the interface we need
@@ -318,7 +318,7 @@ Let's create a _real_ sleeper which implements the interface we need
 type DefaultSleeper struct {}
 
 func (d *DefaultSleeper) Sleep() {
-	time.Sleep(1 * time.Second)
+    time.Sleep(1 * time.Second)
 }
 ```
 
@@ -326,8 +326,8 @@ We can then use it in our real application like so
 
 ```go
 func main() {
-	sleeper := &DefaultSleeper{}
-	Countdown(os.Stdout, sleeper)
+    sleeper := &DefaultSleeper{}
+    Countdown(os.Stdout, sleeper)
 }
 ```
 
@@ -337,13 +337,13 @@ The test is now compiling but not passing because we're still calling the `time.
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
-	for i := countdownStart; i > 0; i-- {
-		sleeper.sleep()
-		fmt.Fprintln(out, i)
-	}
+    for i := countdownStart; i > 0; i-- {
+        sleeper.sleep()
+        fmt.Fprintln(out, i)
+    }
 
-	sleeper.Sleep()
-	fmt.Fprint(out, finalWord)
+    sleeper.Sleep()
+    fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -368,16 +368,16 @@ When writing tests if you're not confident that your tests are giving you suffic
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
-	for i := countdownStart; i > 0; i-- {
-		sleeper.Sleep()
-	}
+    for i := countdownStart; i > 0; i-- {
+        sleeper.Sleep()
+    }
 
-	for i := countdownStart; i > 0; i-- {
-		fmt.Fprintln(out, i)
-	}
+    for i := countdownStart; i > 0; i-- {
+        fmt.Fprintln(out, i)
+    }
 
-	sleeper.Sleep()
-	fmt.Fprint(out, finalWord)
+    sleeper.Sleep()
+    fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -389,16 +389,16 @@ We have two different dependencies and we want to record all of their operations
 
 ```go
 type CountdownOperationsSpy struct {
-	Calls []string
+    Calls []string
 }
 
 func (s *CountdownOperationsSpy) Sleep() {
-	s.Calls = append(s.Calls, sleep)
+    s.Calls = append(s.Calls, sleep)
 }
 
 func (s *CountdownOperationsSpy) Write(p []byte) (n int, err error) {
-	s.Calls = append(s.Calls, write)
-	return
+    s.Calls = append(s.Calls, write)
+    return
 }
 
 const write = "write"
@@ -411,23 +411,23 @@ We can now add a sub-test into our test suite.
 
 ```go
 t.Run("sleep after every print", func(t *testing.T) {
-	spySleepPrinter := &CountdownOperationsSpy{}
-	Countdown(spySleepPrinter, spySleepPrinter)
+    spySleepPrinter := &CountdownOperationsSpy{}
+    Countdown(spySleepPrinter, spySleepPrinter)
 
-	want := []string{
-		sleep,
-		write,
-		sleep,
-		write,
-		sleep,
-		write,
-		sleep,
-		write,
-	}
+    want := []string{
+        sleep,
+        write,
+        sleep,
+        write,
+        sleep,
+        write,
+        sleep,
+        write,
+    }
 
-	if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
-		t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
-	}
+    if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
+        t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
+    }
 })
 ```
 
@@ -438,40 +438,40 @@ We now have two tests spying on the `Sleeper` so we can now refactor our test so
 ```go
 func TestCountdown(t *testing.T) {
 
-	t.Run("prints 3 to Go!", func(t *testing.T) {
-		buffer := &bytes.Buffer{}
-		Countdown(buffer, &CountdownOperationsSpy{})
+    t.Run("prints 3 to Go!", func(t *testing.T) {
+        buffer := &bytes.Buffer{}
+        Countdown(buffer, &CountdownOperationsSpy{})
 
-		got := buffer.String()
-		want := `3
+        got := buffer.String()
+        want := `3
 2
 1
 Go!`
 
-		if got != want {
-			t.Errorf("got '%s' want '%s'", got, want)
-		}
-	})
+        if got != want {
+            t.Errorf("got '%s' want '%s'", got, want)
+        }
+    })
 
-	t.Run("sleep after every print", func(t *testing.T) {
-		spySleepPrinter := &CountdownOperationsSpy{}
-		Countdown(spySleepPrinter, spySleepPrinter)
+    t.Run("sleep after every print", func(t *testing.T) {
+        spySleepPrinter := &CountdownOperationsSpy{}
+        Countdown(spySleepPrinter, spySleepPrinter)
 
-		want := []string{
-			sleep,
-			write,
-			sleep,
-			write,
-			sleep,
-			write,
-			sleep,
-			write,
-		}
+        want := []string{
+            sleep,
+            write,
+            sleep,
+            write,
+            sleep,
+            write,
+            sleep,
+            write,
+        }
 
-		if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
-			t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
-		}
-	})
+        if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
+            t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
+        }
+    })
 }
 ```
 
@@ -487,8 +487,8 @@ Let's first create a new type for `ConfigurableSleeper` that accepts what we nee
 
 ```go
 type ConfigurableSleeper struct {
-	duration time.Duration
-	sleep    func(time.Duration)
+    duration time.Duration
+    sleep    func(time.Duration)
 }
 ```
 
@@ -496,11 +496,11 @@ We are using `duration` to configure the time slept and `sleep` as a way to pass
 
 ```go
 type SpyTime struct {
-	durationSlept time.Duration
+    durationSlept time.Duration
 }
 
 func (s *SpyTime) Sleep(duration time.Duration) {
-	s.durationSlept = duration
+    s.durationSlept = duration
 }
 ```
 
@@ -508,15 +508,15 @@ With our spy in place, we can create a new test for the configurable sleeper.
 
 ```go
 func TestConfigurableSleeper(t *testing.T) {
-	sleepTime := 5 * time.Second
+    sleepTime := 5 * time.Second
 
-	spyTime := &SpyTime{}
-	sleeper := ConfigurableSleeper{sleepTime, spyTime.Sleep}
-	sleeper.Sleep()
+    spyTime := &SpyTime{}
+    sleeper := ConfigurableSleeper{sleepTime, spyTime.Sleep}
+    sleeper.Sleep()
 
-	if spyTime.durationSlept != sleepTime {
-		t.Errorf("should have slept for %v but slept for %v", sleepTime, spyTime.durationSlept)
-	}
+    if spyTime.durationSlept != sleepTime {
+        t.Errorf("should have slept for %v but slept for %v", sleepTime, spyTime.durationSlept)
+    }
 }
 ```
 
@@ -548,7 +548,7 @@ All we need to do now is implement the `Sleep` function for `ConfigurableSleeper
 
 ```go
 func (c *ConfigurableSleeper) Sleep() {
-	c.sleep(c.duration)
+    c.sleep(c.duration)
 }
 ```
 
@@ -560,8 +560,8 @@ The last thing we need to do is to actually use our `ConfigurableSleeper` in the
 
 ```go
 func main() {
-	sleeper := &ConfigurableSleeper{1 * time.Second, time.Sleep}
-	Countdown(os.Stdout, sleeper)
+    sleeper := &ConfigurableSleeper{1 * time.Second, time.Sleep}
+    Countdown(os.Stdout, sleeper)
 }
 ```
 

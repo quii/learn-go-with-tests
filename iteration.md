@@ -2,7 +2,7 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/for)**
 
-To do stuff repeatedly in Go, you'll need `for`. In go there are no `while`, `do`, `until` keywords, you can only use `for`. Which is a good thing!
+To do stuff repeatedly in Go, you'll need `for`. In Go there are no `while`, `do`, `until` keywords, you can only use `for`. Which is a good thing!
 
 Let's write a test for a function that repeats a character 5 times.
 
@@ -38,7 +38,7 @@ All you need to do right now is enough to make it compile so you can check your 
 ```go
 package iteration
 
-func Repeat(character string) string  {
+func Repeat(character string) string {
     return ""
 }
 ```
@@ -103,7 +103,7 @@ The `testing.B` gives you access to the cryptically named `b.N`.
 
 When the benchmark is run the code is ran `b.N` times, and measures how long it takes.
 
-The amount of times the code is ran shouldnt matter to you, the framework will determine what is a "good" value for that to let you have some decent results.
+The amount of times the code is ran shouldn't matter to you, the framework will determine what is a "good" value for that to let you have some decent results.
 
 To run the benchmarks do `go test -bench=.`
 
@@ -123,10 +123,10 @@ _NOTE_ by default Benchmarks are run sequentially.
 
 * Change the test so a caller can specify how many times the character is repeated and then fix the code
 * Write `ExampleRepeat` to document your function
-* Have a look through the [the strings package](https://golang.org/pkg/strings)  package. Find functions you think could be useful and experiment with them by writing tests like we have here. Investing time learning the standard library will really pay off over time.
+* Have a look through the [the strings](https://golang.org/pkg/strings) package. Find functions you think could be useful and experiment with them by writing tests like we have here. Investing time learning the standard library will really pay off over time.
 
 ## Wrapping up
 
 * More TDD practice
-* Learned `for`.
+* Learned `for`
 * Learned how to write benchmarks
