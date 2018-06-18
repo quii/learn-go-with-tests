@@ -1,9 +1,8 @@
 git_recurse true
 
-rules "MD001", "MD002", "MD003", "MD004", "MD005", "MD006", "MD007", "MD008", "MD009", "MD011", "MD012", "MD014", "MD015", "MD016", "MD017", "MD018", "MD019", "MD020", "MD021", "MD023", "MD025", "MD028", "MD030", "MD035", "MD037", "MD038", "MD040", "MD041", "MD042"
+rules "MD001", "MD002", "MD003", "MD004", "MD005", "MD006", "MD007", "MD008", "MD009", "MD010", "MD011", "MD012", "MD014", "MD015", "MD016", "MD017", "MD018", "MD019", "MD020", "MD021", "MD023", "MD025", "MD028", "MD030", "MD035", "MD037", "MD038", "MD040", "MD041", "MD042"
 
 # exclude rules
-exclude "MD010" # Hard tabs
 exclude "MD013" # Line length
 exclude "MD022" # Headers should be surrounded by blank lines
 exclude "MD024" # Multiple headers with the same content
