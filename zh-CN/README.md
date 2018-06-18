@@ -16,7 +16,7 @@
 * [x] [依赖注入](dependency-injection.md)
 * [x] [Mocking](mocking.md)
 * [x] [并发](concurrency.md)
-* [ ] [Select](select.md)
+* [x] [Select](select.md)
 
 ## 构建应用程序
 
