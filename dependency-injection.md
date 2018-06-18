@@ -4,7 +4,7 @@
 
 It is assumed that you have read the structs section before as some understanding of interfaces will be needed for this.
 
-There is _a lot_ of misunderstandings around dependency injection around the programming community. Hopefully this guide will show you how
+There is _a lot_ of misunderstandings around dependency injection around the programming community. Hopefully, this guide will show you how
 
 * You don't need a framework
 * It does not overcomplicate your design
@@ -40,7 +40,7 @@ func Printf(format string, a ...interface{}) (n int, err error) {
 
 Interesting! Under the hood `Printf` just calls `Fprintf` passing in `os.Stdout`.
 
-What exactly _is_ an `os.Stdout` ? What does `Fprintf` expect to get passed to it for the 1st argument?
+What exactly _is_ an `os.Stdout`? What does `Fprintf` expect to get passed to it for the 1st argument?
 
 ```go
 func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
@@ -158,7 +158,7 @@ func main() {
 
 ## More on io.Writer
 
-What other places can we write data to using `io.Writer` ? Just how general purpose is our `Greet` function?
+What other places can we write data to using `io.Writer`? Just how general purpose is our `Greet` function?
 
 ### The internet
 
@@ -190,7 +190,7 @@ Run the program and go to [http://localhost:5000](http://localhost:5000). You'll
 
 HTTP servers will be covered in a later chapter so don't worry too much about the details.
 
-When you write a HTTP handler, you are given a `http.ResponseWriter` and the `http.Request` that was used to make the request. When you implement your server you _write_ your response using the writer.
+When you write an HTTP handler, you are given an `http.ResponseWriter` and the `http.Request` that was used to make the request. When you implement your server you _write_ your response using the writer.
 
 You can probably guess that `http.ResponseWriter` also implements `io.Writer` so this is why we could re-use our `Greet` function inside our handler.
 
@@ -210,8 +210,8 @@ Mocking will be covered in detail later \(and it's not evil\). You use mocking t
 
 ### The Go standard library is really good, take time to study it
 
-By having some familiarity of the `io.Writer` interface we are able to use `bytes.Buffer` in our test as our `Writer` and then we can use other `Writer`s from the standard library to use our function in a command line app or in web server.
+By having some familiarity with the `io.Writer` interface we are able to use `bytes.Buffer` in our test as our `Writer` and then we can use other `Writer`s from the standard library to use our function in a command line app or in web server.
 
 The more familiar you are with the standard library the more you'll see these general purpose interfaces which you can then re-use in your own code to make your software reusable in a number of contexts.
 
-This example is heavily influenced from a chapter in [The Go Programming language](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440), so if you enjoyed this, go buy it!
+This example is heavily influenced by a chapter in [The Go Programming language](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440), so if you enjoyed this, go buy it!
