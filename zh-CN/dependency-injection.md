@@ -11,30 +11,30 @@
 * 它易于测试
 * 它能让你编写优秀和通用的函数
 
-就像我们在 hello-world 篇做的那样，我们想要编写一个欢迎某人的函数，只不过这次我们希望测试实际的打印（actual printing）。
+就像我们在 hello-world 篇做的那样，我们想要编写一个问候某人的函数，只不过这次我们希望测试实际的打印（actual printing）。
 
 回顾一下，这个函数应该长这个样子：
 
 ```go
 func Greet(name string) {
-	fmt.Printf("Hello, %s", name)
+    fmt.Printf("Hello, %s", name)
 }
 ```
 
 那么我们该如何测试它呢？调用 `fmt.Printf` 会打印到标准输出，用测试框架来捕获它会非常困难。
 
-我们所需要做的就是**注入**（这只是一个等同于“传入”的好听的词）打印的依赖。
+我们所需要做的就是**注入**（这只是一个等同于「传入」的好听的词）打印的依赖。
 
 **我们的函数不需要关心在哪里打印，以及如何打印，所以我们应该接收一个接口，而非一个具体的类型**。
 
 如果我们这样做的话，就可以通过改变接口的实现，控制打印的内容，于是就能测试它了。在实际情况中，你可以注入一些写入标准输出的内容。
 
-如果你看看 `fmt.Printf` 的源码，你可以找到一种挂钩的方式：
+如果你看看 `fmt.Printf` 的源码，你可以发现一种引入（hook in）的方式：
 
 ```go
 // It returns the number of bytes written and any write error encountered.
 func Printf(format string, a ...interface{}) (n int, err error) {
-	return Fprintf(os.Stdout, format, a...)
+    return Fprintf(os.Stdout, format, a...)
 }
 ```
 
@@ -44,11 +44,11 @@ func Printf(format string, a ...interface{}) (n int, err error) {
 
 ```go
 func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
-	p := newPrinter()
-	p.doPrintf(format, a)
-	n, err = w.Write(p.buf)
-	p.free()
-	return
+    p := newPrinter()
+    p.doPrintf(format, a)
+    n, err = w.Write(p.buf)
+    p.free()
+    return
 }
 ```
 
@@ -56,11 +56,11 @@ func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
 
 ```go
 type Writer interface {
-	Write(p []byte) (n int, err error)
+    Write(p []byte) (n int, err error)
 }
 ```
 
-如果你写过很多 Go 代码的话，你会发现这个接口出现的频率很高，因为 `io.Writer` 是一个很好的通用接口，用于“将数据放在某个地方”。
+如果你写过很多 Go 代码的话，你会发现这个接口出现的频率很高，因为 `io.Writer` 是一个很好的通用接口，用于「将数据放在某个地方」。
 
 所以我们知道了，在幕后我们其实是用 `Writer` 来把问候发送到某处。我们现在来使用这个抽象，让我们的代码可以测试，并且重用性更好。
 
@@ -68,15 +68,15 @@ type Writer interface {
 
 ```go
 func TestGreet(t *testing.T) {
-	buffer := bytes.Buffer{}
-	Greet(&buffer,"Chris")
+    buffer := bytes.Buffer{}
+    Greet(&buffer,"Chris")
 
-	got := buffer.String()
-	want := "Hello, Chris"
+    got := buffer.String()
+    want := "Hello, Chris"
 
-	if got != want {
-		t.Errorf("got '%s' want '%s'", got, want)
-	}
+    if got != want {
+        t.Errorf("got '%s' want '%s'", got, want)
+    }
 }
 ```
 
@@ -88,35 +88,33 @@ func TestGreet(t *testing.T) {
 
 这个测试编译会报错：
 
-```bash
+```text
 ./di_test.go:10:7: too many arguments in call to Greet
-	have (*bytes.Buffer, string)
-	want (string)
+    have (*bytes.Buffer, string)
+    want (string)
 ```
 
 ## 编写最小化代码供测试运行，并检查失败的测试输出
 
-根据编译器，修复问题。
+根据编译器提示修复问题。
 
 ```go
 func Greet(writer *bytes.Buffer, name string) {
-	fmt.Printf("Hello, %s", name)
+    fmt.Printf("Hello, %s", name)
 }
 ```
 
-```bash
-Hello, Chris di_test.go:16: got '' want 'Hello, Chris'
-```
+`Hello, Chris di_test.go:16: got '' want 'Hello, Chris'`
 
-测试失败了。注意到可以打印出 `name`，不过它传入到了标准输出。
+测试失败了。注意到可以打印出 `name`，不过它传到了标准输出。
 
-## 编写代码使其通过
+## 编写足够的代码使其通过
 
 用 `writer` 把问候发送到我们测试中的缓冲区。记住 `fmt.Fprintf` 和 `fmt.Printf` 一样，只不过 `fmt.Fprintf` 会接收一个 `Writer` 参数，用于把字符串传递过去，而 `fmt.Printf` 默认是标准输出。
 
 ```go
 func Greet(writer *bytes.Buffer, name string) {
-	fmt.Fprintf(writer, "Hello, %s", name)
+    fmt.Fprintf(writer, "Hello, %s", name)
 }
 ```
 
@@ -130,7 +128,7 @@ func Greet(writer *bytes.Buffer, name string) {
 
 ```go
 func main() {
-	Greet(os.Stdout, "Elodie")
+    Greet(os.Stdout, "Elodie")
 }
 ```
 
@@ -140,23 +138,23 @@ func main() {
 
 我们前面讨论过，`fmt.Fprintf` 允许传入一个 `io.Writer` 接口，我们知道 `os.Stdout` 和 `bytes.Buffer` 都实现了它。
 
-我们可以修改一下代码，使用更为通用的接口，于是我们现在可以在测试和应用中都使用这个函数了。
+我们可以修改一下代码，使用更为通用的接口，这样我们现在可以在测试和应用中都使用这个函数了。
 
 ```go
 package main
 
 import (
-	"fmt"
-	"os"
-	"io"
+    "fmt"
+    "os"
+    "io"
 )
 
 func Greet(writer io.Writer, name string) {
-	fmt.Fprintf(writer, "Hello, %s", name)
+    fmt.Fprintf(writer, "Hello, %s", name)
 }
 
 func main() {
-	Greet(os.Stdout, "Elodie")
+    Greet(os.Stdout, "Elodie")
 }
 ```
 
@@ -172,25 +170,25 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"io"
-	"net/http"
+    "fmt"
+    "io"
+    "net/http"
 )
 
 func Greet(writer io.Writer, name string) {
-	fmt.Fprintf(writer, "Hello, %s", name)
+    fmt.Fprintf(writer, "Hello, %s", name)
 }
 
 func MyGreeterHandler(w http.ResponseWriter, r *http.Request) {
-	Greet(w, "world")
+    Greet(w, "world")
 }
 
 func main() {
-	http.ListenAndServe(":5000", http.HandlerFunc(MyGreeterHandler))
+    http.ListenAndServe(":5000", http.HandlerFunc(MyGreeterHandler))
 }
 ```
 
-前往 [http://localhost:5000](http://localhost:5000)。你会看到使用到了你的 `greeting` 函数。
+运行程序并访问 [http://localhost:5000](http://localhost:5000)。你会看到你的 `greeting` 函数被使用了。
 
 在下一章会介绍 HTTP 服务器，所以不要太担心这些细节。
 
@@ -205,8 +203,8 @@ func main() {
 通过测试的启发，我们重构了代码。因为有了注入依赖，我们可以控制数据向哪儿写入，它允许我们：
 
 * **测试代码**。如果你不能很轻松地测试函数，这通常是因为有依赖硬链接到了函数或全局状态。例如，如果某个服务层使用了全局的数据库连接池，这通常难以测试，并且运行速度会很慢。DI 提倡你注入一个数据库依赖（通过接口），然后就可以在测试中控制你的模拟数据了。
-* **关注点分离**，解耦了**数据到达的地方**和**如何产生数据**。如果你感觉一个方法/函数负责太多功能了（产生数据**并且**写入一个数据库？处理 HTTP 请求**并且**处理业务级别的逻辑），那么你可能就需要 DI 这项工具了。
-* **使得代码可以在不同环境下重用**。我们的代码所处的第一个“新”环境就是在运行的测试。但是随后，如果其他人想要用你的代码尝试点新东西，他们只要注入他们自己的依赖就可以了。
+* **关注点分离**，解耦了**数据到达的地方**和**如何产生数据**。如果你感觉一个方法 / 函数负责太多功能了（生成数据**并且**写入一个数据库？处理 HTTP 请求**并且**处理业务级别的逻辑），那么你可能就需要 DI 这个工具了。
+* **在不同环境下重用代码**。我们的代码所处的第一个「新」环境就是在内部进行测试。但是随后，如果其他人想要用你的代码尝试点新东西，他们只要注入他们自己的依赖就可以了。
 
 ### 什么是模拟？我听说 DI 要用到模拟，它可讨厌了
 
@@ -214,16 +212,16 @@ func main() {
 
 ### Go 标准库真的很棒，花时间好好研究它吧
 
-通过熟悉 `io.Writer` 接口，我们可以用测试中的 `bytes.Buffer` 来作为 `Writer`，然后我们可以使用标准库中的其他的 `Writer`，在命令行应用或 web 服务器中使用这个函数。
+通过熟悉 `io.Writer` 接口，我们可以用测试中的 `bytes.Buffer` 来作为 `Writer`，然后我们可以使用标准库中的其它的 `Writer`，在命令行应用或 web 服务器中使用这个函数。
 
-随着你越来越熟悉标准库，你会越来越了解，这些在代码中重用的通用接口，会使得你的软件在许多场景都可以重用。
+随着你越来越熟悉标准库，你就会越了解这些在代码中重用的通用接口，它们会使你的软件在许多场景都可以重用。
 
 本例深深受到 [The Go Programming language](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440) 中一个章节的启发，如果你喜欢的话，去买它吧！
 
-----------------
+---
 
 作者：[Chris James](https://dev.to/quii)
 译者：[Noluye](https://github.com/Noluye)
-校对：[rxcai](https://github.com/rxcai)
+校对：[rxcai](https://github.com/rxcai)、[Donng](https://github.com/Donng)、[pityonline](https://github.com/pityonline)
 
 本文由 [GCTT](https://github.com/studygolang/GCTT) 原创编译，[Go 中文网](https://studygolang.com/) 荣誉推出
