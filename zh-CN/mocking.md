@@ -17,7 +17,7 @@ Go!
 package main
 
 func main() {
-	Countdown()
+    Countdown()
 }
 ```
 
@@ -38,16 +38,16 @@ func main() {
 
 ```go
 func TestCountdown(t *testing.T) {
-	buffer := &bytes.Buffer{}
+    buffer := &bytes.Buffer{}
 
-	Countdown(buffer)
+    Countdown(buffer)
 
-	got := buffer.String()
-	want := "3"
+    got := buffer.String()
+    want := "3"
 
-	if got != want {
-		t.Errorf("got '%s' want '%s'", got, want)
-	}
+    if got != want {
+        t.Errorf("got '%s' want '%s'", got, want)
+    }
 }
 ```
 
@@ -73,8 +73,8 @@ func Countdown() {}
 
 ```
 ./countdown_test.go:11:11: too many arguments in call to Countdown
-	have (*bytes.Buffer)
-	want ()
+    have (*bytes.Buffer)
+    want ()
 ```
 
 编译器正在告诉你函数的问题，所以更正它
@@ -91,7 +91,7 @@ func Countdown(out *bytes.Buffer) {}
 
 ```go
 func Countdown(out *bytes.Buffer) {
-	fmt.Fprint(out, "3")
+    fmt.Fprint(out, "3")
 }
 ```
 我们正在使用 `fmt.Fprint`,传入一个 `io.Writer`（例如 `*bytes.Buffer`）并发送一个 `string`。这个测试应该可以通过。
@@ -102,7 +102,7 @@ func Countdown(out *bytes.Buffer) {
 
 ```go
 func Countdown(out io.Writer) {
-	fmt.Fprint(out, "3")
+    fmt.Fprint(out, "3")
 }
 ```
 
@@ -114,17 +114,17 @@ func Countdown(out io.Writer) {
 package main
 
 import (
-	"fmt"
-	"io"
-	"os"
+    "fmt"
+    "io"
+    "os"
 )
 
 func Countdown(out io.Writer) {
-	fmt.Fprint(out, "3")
+    fmt.Fprint(out, "3")
 }
 
 func main() {
-	Countdown(os.Stdout)
+    Countdown(os.Stdout)
 }
 ```
 
@@ -140,19 +140,19 @@ func main() {
 
 ```go
 func TestCountdown(t *testing.T) {
-	buffer := &bytes.Buffer{}
+    buffer := &bytes.Buffer{}
 
-	Countdown(buffer)
+    Countdown(buffer)
 
-	got := buffer.String()
-	want := `3
+    got := buffer.String()
+    want := `3
 2
 1
 Go!`
 
-	if got != want {
-		t.Errorf("got '%s' want '%s'", got, want)
-	}
+    if got != want {
+        t.Errorf("got '%s' want '%s'", got, want)
+    }
 }
 ```
 
@@ -162,19 +162,19 @@ Go!`
 
 ```
 countdown_test.go:21: got '3' want '3
-		2
-		1
-		Go!'
+        2
+        1
+        Go!'
 ```
 
 ## 写足够的代码令测试通过
 
 ```go
 func Countdown(out io.Writer) {
-	for i := 3; i > 0; i-- {
-		fmt.Fprintln(out, i)
-	}
-	fmt.Fprint(out, "Go!")
+    for i := 3; i > 0; i-- {
+        fmt.Fprintln(out, i)
+    }
+    fmt.Fprint(out, "Go!")
 }
 ```
 
@@ -189,10 +189,10 @@ const finalWord = "Go!"
 const countdownStart = 3
 
 func Countdown(out io.Writer) {
-	for i := countdownStart; i > 0; i-- {
-		fmt.Fprintln(out, i)
-	}
-	fmt.Fprint(out, finalWord)
+    for i := countdownStart; i > 0; i-- {
+        fmt.Fprintln(out, i)
+    }
+    fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -202,13 +202,13 @@ Go 可以通过 `time.Sleep` 实现这个功能。尝试将其添加到我们的
 
 ```go
 func Countdown(out io.Writer) {
-	for i := countdownStart; i > 0; i-- {
-		time.Sleep(1 * time.Second)
-		fmt.Fprintln(out, i)
-	}
+    for i := countdownStart; i > 0; i-- {
+        time.Sleep(1 * time.Second)
+        fmt.Fprintln(out, i)
+    }
 
-	time.Sleep(1 * time.Second)
-	fmt.Fprint(out, finalWord)
+    time.Sleep(1 * time.Second)
+    fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -234,7 +234,7 @@ func Countdown(out io.Writer) {
 
 ```go
 type Sleeper interface {
-	Sleep()
+    Sleep()
 }
 ```
 
@@ -245,11 +245,11 @@ type Sleeper interface {
 
 ```go
 type SpySleeper struct {
-	Calls int
+    Calls int
 }
 
 func (s *SpySleeper) Sleep() {
-	s.Calls++
+    s.Calls++
 }
 ```
 
@@ -259,32 +259,32 @@ func (s *SpySleeper) Sleep() {
 
 ```go
 func TestCountdown(t *testing.T) {
-	buffer := &bytes.Buffer{}
-	spySleeper := &SpySleeper{}
+    buffer := &bytes.Buffer{}
+    spySleeper := &SpySleeper{}
 
-	Countdown(buffer, spySleeper)
+    Countdown(buffer, spySleeper)
 
-	got := buffer.String()
-	want := `3
+    got := buffer.String()
+    want := `3
 2
 1
 Go!`
 
-	if got != want {
-		t.Errorf("got '%s' want '%s'", got, want)
-	}
+    if got != want {
+        t.Errorf("got '%s' want '%s'", got, want)
+    }
 
-	if spySleeper.Calls != 4 {
-		t.Errorf("not enough calls to sleeper, want 4 got %d", spySleeper.Calls)
-	}
+    if spySleeper.Calls != 4 {
+        t.Errorf("not enough calls to sleeper, want 4 got %d", spySleeper.Calls)
+    }
 }
 ```
 ## 尝试并运行测试
 
 ```
 too many arguments in call to Countdown
-	have (*bytes.Buffer, Sleeper)
-	want (io.Writer)
+    have (*bytes.Buffer, Sleeper)
+    want (io.Writer)
 ```
 
 ## 为测试的运行编写最少量的代码，并检查失败测试的输出
@@ -293,13 +293,13 @@ too many arguments in call to Countdown
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
-	for i := countdownStart; i > 0; i-- {
-		time.Sleep(1 * time.Second)
-		fmt.Fprintln(out, i)
-	}
+    for i := countdownStart; i > 0; i-- {
+        time.Sleep(1 * time.Second)
+        fmt.Fprintln(out, i)
+    }
 
-	time.Sleep(1 * time.Second)
-	fmt.Fprint(out, finalWord)
+    time.Sleep(1 * time.Second)
+    fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -307,18 +307,18 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 
 ```
 ./main.go:26:11: not enough arguments in call to Countdown
-	have (*os.File)
-	want (io.Writer, Sleeper)
+    have (*os.File)
+    want (io.Writer, Sleeper)
 ```
 让我们创建一个 *真正的* sleeper 来实现我们需要的接口
 
 ```go
 type ConfigurableSleeper struct {
-	duration time.Duration
+    duration time.Duration
 }
 
 func (o *ConfigurableSleeper) Sleep() {
-	time.Sleep(o.duration)
+    time.Sleep(o.duration)
 }
 ```
 
@@ -328,8 +328,8 @@ func (o *ConfigurableSleeper) Sleep() {
 
 ```go
 func main() {
-	sleeper := &ConfigurableSleeper{1 * time.Second}
-	Countdown(os.Stdout, sleeper)
+    sleeper := &ConfigurableSleeper{1 * time.Second}
+    Countdown(os.Stdout, sleeper)
 }
 ```
 
@@ -339,13 +339,13 @@ func main() {
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
-	for i := countdownStart; i > 0; i-- {
-		sleeper.sleep()
-		fmt.Fprintln(out, i)
-	}
+    for i := countdownStart; i > 0; i-- {
+        sleeper.sleep()
+        fmt.Fprintln(out, i)
+    }
 
-	sleeper.sleep()
-	fmt.Fprint(out, finalWord)
+    sleeper.sleep()
+    fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -369,16 +369,16 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
-	for i := countdownStart; i > 0; i-- {
-		sleeper.Sleep()
-	}
+    for i := countdownStart; i > 0; i-- {
+        sleeper.Sleep()
+    }
 
-	for i := countdownStart; i > 0; i-- {
-		fmt.Fprintln(out, i)
-	}
+    for i := countdownStart; i > 0; i-- {
+        fmt.Fprintln(out, i)
+    }
 
-	sleeper.Sleep()
-	fmt.Fprint(out, finalWord)
+    sleeper.Sleep()
+    fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -390,16 +390,16 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 
 ```go
 type CountdownOperationsSpy struct {
-	Calls []string
+    Calls []string
 }
 
 func (s *CountdownOperationsSpy) Sleep() {
-	s.Calls = append(s.Calls, sleep)
+    s.Calls = append(s.Calls, sleep)
 }
 
 func (s *CountdownOperationsSpy) Write(p []byte) (n int, err error) {
-	s.Calls = append(s.Calls, write)
-	return
+    s.Calls = append(s.Calls, write)
+    return
 }
 
 const write = "write"
@@ -412,23 +412,23 @@ const sleep = "sleep"
 
 ```go
 t.Run("sleep after every print", func(t *testing.T) {
-	spySleepPrinter := &CountdownOperationsSpy{}
-	Countdown(spySleepPrinter, spySleepPrinter)
+    spySleepPrinter := &CountdownOperationsSpy{}
+    Countdown(spySleepPrinter, spySleepPrinter)
 
-	want := []string{
-		sleep,
-		write,
-		sleep,
-		write,
-		sleep,
-		write,
-		sleep,
-		write,
-	}
+    want := []string{
+        sleep,
+        write,
+        sleep,
+        write,
+        sleep,
+        write,
+        sleep,
+        write,
+    }
 
-	if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
-		t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
-	}
+    if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
+        t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
+    }
 })
 ```
 
@@ -439,40 +439,40 @@ t.Run("sleep after every print", func(t *testing.T) {
 ```go
 func TestCountdown(t *testing.T) {
 
-	t.Run("prints 3 to Go!", func(t *testing.T) {
-		buffer := &bytes.Buffer{}
-		Countdown(buffer, &CountdownOperationsSpy{})
+    t.Run("prints 3 to Go!", func(t *testing.T) {
+        buffer := &bytes.Buffer{}
+        Countdown(buffer, &CountdownOperationsSpy{})
 
-		got := buffer.String()
-		want := `3
+        got := buffer.String()
+        want := `3
 2
 1
 Go!`
 
-		if got != want {
-			t.Errorf("got '%s' want '%s'", got, want)
-		}
-	})
+        if got != want {
+            t.Errorf("got '%s' want '%s'", got, want)
+        }
+    })
 
-	t.Run("sleep after every print", func(t *testing.T) {
-		spySleepPrinter := &CountdownOperationsSpy{}
-		Countdown(spySleepPrinter, spySleepPrinter)
+    t.Run("sleep after every print", func(t *testing.T) {
+        spySleepPrinter := &CountdownOperationsSpy{}
+        Countdown(spySleepPrinter, spySleepPrinter)
 
-		want := []string{
-			sleep,
-			write,
-			sleep,
-			write,
-			sleep,
-			write,
-			sleep,
-			write,
-		}
+        want := []string{
+            sleep,
+            write,
+            sleep,
+            write,
+            sleep,
+            write,
+            sleep,
+            write,
+        }
 
-		if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
-			t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
-		}
-	})
+        if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
+            t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
+        }
+    })
 }
 ```
 

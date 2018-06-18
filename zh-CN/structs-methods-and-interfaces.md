@@ -14,12 +14,12 @@
 
 ```go
 func TestPerimeter(t *testing.T) {
-	got := Perimeter(10.0, 10.0)
-	want := 40.0
+    got := Perimeter(10.0, 10.0)
+    want := 40.0
 
-	if got != want {
-		t.Errorf("got %.2f want %.2f", got, want)
-	}
+    if got != want {
+        t.Errorf("got %.2f want %.2f", got, want)
+    }
 }
 ```
 
@@ -33,7 +33,7 @@ func TestPerimeter(t *testing.T) {
 
 ```go
 func Perimeter(width float64, height float64) float64 {
-	return 0
+    return 0
 }
 ```
 
@@ -43,7 +43,7 @@ func Perimeter(width float64, height float64) float64 {
 
 ```go
 func Perimeter(width float64, height float64) float64 {
-	return 2*(width + height)
+    return 2*(width + height)
 }
 ```
 
@@ -190,7 +190,7 @@ func TestArea(t *testing.T) {
 
 ```go
 type Circle struct {
-	Radius float64
+    Radius float64
 }
 ```
 
@@ -510,9 +510,9 @@ func (c Triangle) Area() float64 {
 到目前为止我们仅仅学到一种创建结构体 MyStruct{val1, val2} 的方法，但是我们可以选择命名这些域。就像如下代码所示：
 
 ```go
-	{shape: Rectangle{Width: 12, Height: 6}, want: 72.0},
-	{shape: Circle{Radius: 10}, want: 314.1592653589793},
-	{shape: Triangle{Base: 12, Height: 6}, want: 36.0},
+    {shape: Rectangle{Width: 12, Height: 6}, want: 72.0},
+    {shape: Circle{Radius: 10}, want: 314.1592653589793},
+    {shape: Triangle{Base: 12, Height: 6}, want: 36.0},
 ```
 
 在 Kent Beck 的这边题为 [测试驱动开发实例](https://g.co/kgs/yCzDLF) 的帖子中把测试用例重构成要点和断言：

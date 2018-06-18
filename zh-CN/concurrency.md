@@ -10,13 +10,13 @@ package concurrency
 type WebsiteChecker func(string) bool
 
 func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
-	results := make(map[string]bool)
+    results := make(map[string]bool)
 
-	for _, url := range urls {
-		results[url] = wc(url)
-	}
+    for _, url := range urls {
+        results[url] = wc(url)
+    }
 
-	return results
+    return results
 }
 ```
 
@@ -32,41 +32,41 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 package concurrency
 
 import (
-	"reflect"
-	"testing"
+    "reflect"
+    "testing"
 )
 
 func mockWebsiteChecker(url string) bool {
-	if url == "waat://furhurterwe.geds" {
-		return false
-	}
-	return true
+    if url == "waat://furhurterwe.geds" {
+        return false
+    }
+    return true
 }
 
 func TestCheckWebsites(t *testing.T) {
-	websites := []string{
-		"http://google.com",
-		"http://blog.gypsydave5.com",
-		"waat://furhurterwe.geds",
-	}
+    websites := []string{
+        "http://google.com",
+        "http://blog.gypsydave5.com",
+        "waat://furhurterwe.geds",
+    }
 
-	actualResults := CheckWebsites(mockWebsiteChecker, websites)
+    actualResults := CheckWebsites(mockWebsiteChecker, websites)
 
-	want := len(websites)
-	got := len(actualResults)
-	if want != got {
-		t.Fatalf("Wanted %v, got %v", want, got)
-	}
+    want := len(websites)
+    got := len(actualResults)
+    if want != got {
+        t.Fatalf("Wanted %v, got %v", want, got)
+    }
 
-	expectedResults := map[string]bool{
-		"http://google.com":          true,
-		"http://blog.gypsydave5.com": true,
-		"waat://furhurterwe.geds":    false,
-	}
+    expectedResults := map[string]bool{
+        "http://google.com":          true,
+        "http://blog.gypsydave5.com": true,
+        "waat://furhurterwe.geds":    false,
+    }
 
-	if !reflect.DeepEqual(expectedResults, actualResults) {
-		t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
-	}
+    if !reflect.DeepEqual(expectedResults, actualResults) {
+        t.Fatalf("Wanted %v, got %v", expectedResults, actualResults)
+    }
 }
 ```
 该功能在生产环境中被用于检查数百个网站。但是你的同事开始抱怨它速度很慢，所以他们请你帮忙为程序提速。
@@ -79,24 +79,24 @@ func TestCheckWebsites(t *testing.T) {
 package concurrency
 
 import (
-	"testing"
-	"time"
+    "testing"
+    "time"
 )
 
 func slowStubWebsiteChecker(_ string) bool {
-	time.Sleep(20 * time.Millisecond)
-	return true
+    time.Sleep(20 * time.Millisecond)
+    return true
 }
 
 func BenchmarkCheckWebsites(b *testing.B) {
-	urls := make([]string, 100)
-	for i := 0; i < len(urls); i++ {
-		urls[i] = "a url"
-	}
+    urls := make([]string, 100)
+    for i := 0; i < len(urls); i++ {
+        urls[i] = "a url"
+    }
 
-	for i := 0; i < b.N; i++ {
-		CheckWebsites(slowStubWebsiteChecker, urls)
-	}
+    for i := 0; i < b.N; i++ {
+        CheckWebsites(slowStubWebsiteChecker, urls)
+    }
 }
 ```
 
@@ -134,15 +134,15 @@ package concurrency
 type WebsiteChecker func(string) bool
 
 func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
-	results := make(map[string]bool)
+    results := make(map[string]bool)
 
-	for _, url := range urls {
-		go func() {
-			results[url] = wc(url)
-		}()
-	}
+    for _, url := range urls {
+        go func() {
+            results[url] = wc(url)
+        }()
+    }
 
-	return results
+    return results
 }
 ```
 
@@ -156,7 +156,7 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 
 ```
 -------- FAIL: TestCheckWebsites (0.00s)
-		CheckWebsites_test.go:31: Wanted map[http://google.com:true http://blog.gypsydave5.com:true waat://furhurterwe.geds:false], got map[]
+        CheckWebsites_test.go:31: Wanted map[http://google.com:true http://blog.gypsydave5.com:true waat://furhurterwe.geds:false], got map[]
 FAIL
 exit status 1
 FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.010s
@@ -182,17 +182,17 @@ import "time"
 type WebsiteChecker func(string) bool
 
 func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
-	results := make(map[string]bool)
+    results := make(map[string]bool)
 
-	for _, url := range urls {
-		go func() {
-			results[url] = wc(url)
-		}()
-	}
+    for _, url := range urls {
+        go func() {
+            results[url] = wc(url)
+        }()
+    }
 
-	time.Sleep(2 * time.Second)
+    time.Sleep(2 * time.Second)
 
-	return results
+    return results
 }
 ```
 
@@ -200,7 +200,7 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 
 ```
 -------- FAIL: TestCheckWebsites (0.00s)
-		CheckWebsites_test.go:31: Wanted map[http://google.com:true http://blog.gypsydave5.com:true waat://furhurterwe.geds:false], got map[waat://furhurterwe.geds:false]
+        CheckWebsites_test.go:31: Wanted map[http://google.com:true http://blog.gypsydave5.com:true waat://furhurterwe.geds:false], got map[waat://furhurterwe.geds:false]
 FAIL
 exit status 1
 FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.010s
@@ -211,23 +211,23 @@ FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.010s
 
 ```go
 import (
-	"time"
+    "time"
 )
 
 type WebsiteChecker func(string) bool
 
 func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
-	results := make(map[string]bool)
+    results := make(map[string]bool)
 
-	for _, url := range urls {
-		go func(u string) {
-			results[u] = wc(u)
-		}(url)
-	}
+    for _, url := range urls {
+        go func(u string) {
+            results[u] = wc(u)
+        }(url)
+    }
 
-	time.Sleep(2 * time.Second)
+    time.Sleep(2 * time.Second)
 
-	return results
+    return results
 }
 ```
 通过给每个匿名函数一个参数 url(`u`) ，然后用 `url` 作为参数调用匿名函数，我们确保 `u` 的值固定为循环迭代的 `url` 值， 重新启动 `goroutine`。`u` 是 `url` 值的副本，因此无法更改。
@@ -246,17 +246,17 @@ fatal error: concurrent map writes
 
 goroutine 8 [running]:
 runtime.throw(0x12c5895, 0x15)
-		/usr/local/Cellar/go/1.9.3/libexec/src/runtime/panic.go:605 +0x95 fp=0xc420037700 sp=0xc4200376e0 pc=0x102d395
+        /usr/local/Cellar/go/1.9.3/libexec/src/runtime/panic.go:605 +0x95 fp=0xc420037700 sp=0xc4200376e0 pc=0x102d395
 runtime.mapassign_faststr(0x1271d80, 0xc42007acf0, 0x12c6634, 0x17, 0x0)
-		/usr/local/Cellar/go/1.9.3/libexec/src/runtime/hashmap_fast.go:783 +0x4f5 fp=0xc420037780 sp=0xc420037700 pc=0x100eb65
+        /usr/local/Cellar/go/1.9.3/libexec/src/runtime/hashmap_fast.go:783 +0x4f5 fp=0xc420037780 sp=0xc420037700 pc=0x100eb65
 github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker.func1(0xc42007acf0, 0x12d3938, 0x12c6634, 0x17)
-		/Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12 +0x71 fp=0xc4200377c0 sp=0xc420037780 pc=0x12308f1
+        /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12 +0x71 fp=0xc4200377c0 sp=0xc420037780 pc=0x12308f1
 runtime.goexit()
-		/usr/local/Cellar/go/1.9.3/libexec/src/runtime/asm_amd64.s:2337 +0x1 fp=0xc4200377c8 sp=0xc4200377c0 pc=0x105cf01
+        /usr/local/Cellar/go/1.9.3/libexec/src/runtime/asm_amd64.s:2337 +0x1 fp=0xc4200377c8 sp=0xc4200377c0 pc=0x105cf01
 created by github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker
-		/Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11 +0xa1
+        /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11 +0xa1
 
-		... many more scary lines of text ...
+        ... many more scary lines of text ...
 ```
 
 这看上去冗长、可怕，我们需要深呼吸并阅读错误：`fatal error: concurrent map writes`。 有时候，当我们运行我们的测试时，两个 goroutines 完全同时写入 `results` map。 Go 的 Maps 不喜欢多个事物试图一次性写入，所以就导致了 `fatal error`。
@@ -272,31 +272,31 @@ Go可以帮助我们通过其内置的 [race detector](https://blog.golang.org/r
 WARNING: DATA RACE
 Write at 0x00c420084d20 by goroutine 8:
   runtime.mapassign_faststr()
-	  /usr/local/Cellar/go/1.9.3/libexec/src/runtime/hashmap_fast.go:774 +0x0
+      /usr/local/Cellar/go/1.9.3/libexec/src/runtime/hashmap_fast.go:774 +0x0
   github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker.func1()
-	  /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12 +0x82
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12 +0x82
 
 Previous write at 0x00c420084d20 by goroutine 7:
   runtime.mapassign_faststr()
-	  /usr/local/Cellar/go/1.9.3/libexec/src/runtime/hashmap_fast.go:774 +0x0
+      /usr/local/Cellar/go/1.9.3/libexec/src/runtime/hashmap_fast.go:774 +0x0
   github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker.func1()
-	  /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12 +0x82
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12 +0x82
 
 Goroutine 8 (running) created at:
   github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker()
-	  /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11 +0xc4
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11 +0xc4
   github.com/gypsydave5/learn-go-with-tests/concurrency/v3.TestWebsiteChecker()
-	  /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker_test.go:27 +0xad
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker_test.go:27 +0xad
   testing.tRunner()
-	  /usr/local/Cellar/go/1.9.3/libexec/src/testing/testing.go:746 +0x16c
+      /usr/local/Cellar/go/1.9.3/libexec/src/testing/testing.go:746 +0x16c
 
 Goroutine 7 (finished) created at:
   github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteChecker()
-	  /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11 +0xc4
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11 +0xc4
   github.com/gypsydave5/learn-go-with-tests/concurrency/v3.TestWebsiteChecker()
-	  /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker_test.go:27 +0xad
+      /Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker_test.go:27 +0xad
   testing.tRunner()
-	  /usr/local/Cellar/go/1.9.3/libexec/src/testing/testing.go:746 +0x16c
+      /usr/local/Cellar/go/1.9.3/libexec/src/testing/testing.go:746 +0x16c
 ==================
 ```
 
@@ -329,26 +329,26 @@ package concurrency
 
 type WebsiteChecker func(string) bool
 type result struct {
-	string
-	bool
+    string
+    bool
 }
 
 func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
-	results := make(map[string]bool)
-	resultChannel := make(chan result)
+    results := make(map[string]bool)
+    resultChannel := make(chan result)
 
-	for _, url := range urls {
-		go func(u string) {
-			resultChannel <- result{u, wc(u)}
-		}(url)
-	}
+    for _, url := range urls {
+        go func(u string) {
+            resultChannel <- result{u, wc(u)}
+        }(url)
+    }
 
-	for i := 0; i < len(urls); i++ {
-		result := <-resultChannel
-		results[result.string] = result.bool
-	}
+    for i := 0; i < len(urls); i++ {
+        result := <-resultChannel
+        results[result.string] = result.bool
+    }
 
-	return results
+    return results
 }
 ```
 
