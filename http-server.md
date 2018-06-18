@@ -104,8 +104,8 @@ Try again
 
 ```
 ./server_test.go:13:14: too many arguments in call to PlayerServer
-	have (*httptest.ResponseRecorder, *http.Request)
-	want ()
+    have (*httptest.ResponseRecorder, *http.Request)
+    want ()
 ```
 
 Add the arguments to our function
@@ -123,7 +123,7 @@ The code now compiles and the test fails
 ```
 === RUN   TestGETPlayers/returns_Pepper's_score
     --- FAIL: TestGETPlayers/returns_Pepper's_score (0.00s)
-    	server_test.go:20: got '', want '20'
+        server_test.go:20: got '', want '20'
 ```
 
 ## Write enough code to make it pass
@@ -132,7 +132,7 @@ From the DI chapter we touched on HTTP servers with a `Greet` function. We learn
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "20")
+    fmt.Fprint(w, "20")
 }
 ```
 
@@ -151,15 +151,15 @@ Create a new file for our application and put this code in.
 package main
 
 import (
-	"log"
-	"net/http"
+    "log"
+    "net/http"
 )
 
 func main() {
-	handler := http.HandlerFunc(PlayerServer)
-	if err := http.ListenAndServe(":5000", handler); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
-	}
+    handler := http.HandlerFunc(PlayerServer)
+    if err := http.ListenAndServe(":5000", handler); err != nil {
+        log.Fatalf("could not listen on port 5000 %v", err)
+    }
 }
 ```
 
@@ -220,24 +220,24 @@ Remember we are just trying to take as small as steps as reasonably possible, so
     --- PASS: TestGETPlayers/returns_Pepper's_score (0.00s)
 === RUN   TestGETPlayers/returns_Floyd's_score
     --- FAIL: TestGETPlayers/returns_Floyd's_score (0.00s)
-    	server_test.go:34: got '20', want '10'
+        server_test.go:34: got '20', want '10'
 ```
 
 ## Write enough code to make it pass
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
+    player := r.URL.Path[len("/players/"):]
 
-	if player == "Pepper" {
-		fmt.Fprint(w, "20")
-		return
-	}
+    if player == "Pepper" {
+        fmt.Fprint(w, "20")
+        return
+    }
 
-	if player == "Floyd" {
-		fmt.Fprint(w, "10")
-		return
-	}
+    if player == "Floyd" {
+        fmt.Fprint(w, "10")
+        return
+    }
 }
 ```
 
@@ -255,21 +255,21 @@ We can simplify the `PlayerServer` by separating out the score retrieval into a 
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
+    player := r.URL.Path[len("/players/"):]
 
-	fmt.Fprint(w, GetPlayerScore(player))
+    fmt.Fprint(w, GetPlayerScore(player))
 }
 
 func GetPlayerScore(name string) string {
-	if name == "Pepper" {
-		return "20"
-	}
+    if name == "Pepper" {
+        return "20"
+    }
 
-	if name == "Floyd" {
-		return "10"
-	}
+    if name == "Floyd" {
+        return "10"
+    }
 
-	return ""
+    return ""
 }
 ```
 
@@ -277,35 +277,35 @@ And we can DRY up some of the code in the tests by making some helpers
 
 ```go
 func TestGETPlayers(t *testing.T) {
-	t.Run("returns Pepper's score", func(t *testing.T) {
-		request := newGetScoreRequest("Pepper")
-		response := httptest.NewRecorder()
+    t.Run("returns Pepper's score", func(t *testing.T) {
+        request := newGetScoreRequest("Pepper")
+        response := httptest.NewRecorder()
 
-		PlayerServer(response, request)
+        PlayerServer(response, request)
 
-		assertResponseBody(t, response.Body.String(), "20")
-	})
+        assertResponseBody(t, response.Body.String(), "20")
+    })
 
-	t.Run("returns Floyd's score", func(t *testing.T) {
-		request := newGetScoreRequest("Floyd")
-		response := httptest.NewRecorder()
+    t.Run("returns Floyd's score", func(t *testing.T) {
+        request := newGetScoreRequest("Floyd")
+        response := httptest.NewRecorder()
 
-		PlayerServer(response, request)
+        PlayerServer(response, request)
 
-		assertResponseBody(t, response.Body.String(), "10")
-	})
+        assertResponseBody(t, response.Body.String(), "10")
+    })
 }
 
 func newGetScoreRequest(name string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
-	return req
+    req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
+    return req
 }
 
 func assertResponseBody(t *testing.T, got, want string) {
-	t.Helper()
-	if got != want {
-		t.Errorf("response body is wrong, got '%s' want '%s'", got, want)
-	}
+    t.Helper()
+    if got != want {
+        t.Errorf("response body is wrong, got '%s' want '%s'", got, want)
+    }
 }
 ```
 
@@ -319,7 +319,7 @@ Let's move our function we re-factored to be an interface instead
 
 ```go
 type PlayerStore interface {
-	GetPlayerScore(name string) int
+    GetPlayerScore(name string) int
 }
 ```
 
@@ -327,7 +327,7 @@ For our `PlayerServer` to be able to use a `PlayerStore`, it will need a referen
 
 ```go
 type PlayerServer struct {
-	store PlayerStore
+    store PlayerStore
 }
 ```
 
@@ -335,8 +335,8 @@ Finally, we will now implement the `Handler` interface by adding a method to our
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
-	fmt.Fprint(w, p.store.GetPlayerScore(player))
+    player := r.URL.Path[len("/players/"):]
+    fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
 
@@ -346,16 +346,16 @@ Here is the full code listing of our server
 
 ```go
 type PlayerStore interface {
-	GetPlayerScore(name string) int
+    GetPlayerScore(name string) int
 }
 
 type PlayerServer struct {
-	store PlayerStore
+    store PlayerStore
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
-	fmt.Fprint(w, p.store.GetPlayerScore(player))
+    player := r.URL.Path[len("/players/"):]
+    fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
 
@@ -369,25 +369,25 @@ We need to change our tests to instead create a new instance of our `PlayerServe
 
 ```go
 func TestGETPlayers(t *testing.T) {
-	server := &PlayerServer{}
+    server := &PlayerServer{}
 
-	t.Run("returns Pepper's score", func(t *testing.T) {
-		request := newGetScoreRequest("Pepper")
-		response := httptest.NewRecorder()
+    t.Run("returns Pepper's score", func(t *testing.T) {
+        request := newGetScoreRequest("Pepper")
+        response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+        server.ServeHTTP(response, request)
 
-		assertResponseBody(t, response.Body.String(), "20")
-	})
+        assertResponseBody(t, response.Body.String(), "20")
+    })
 
-	t.Run("returns Floyd's score", func(t *testing.T) {
-		request := newGetScoreRequest("Floyd")
-		response := httptest.NewRecorder()
+    t.Run("returns Floyd's score", func(t *testing.T) {
+        request := newGetScoreRequest("Floyd")
+        response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+        server.ServeHTTP(response, request)
 
-		assertResponseBody(t, response.Body.String(), "10")
-	})
+        assertResponseBody(t, response.Body.String(), "10")
+    })
 }
 ```
 
@@ -401,11 +401,11 @@ Now `main.go` won't compile for the same reason.
 
 ```go
 func main() {
-	server := &PlayerServer{}
+    server := &PlayerServer{}
 
-	if err := http.ListenAndServe(":5000", server); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
-	}
+    if err := http.ListenAndServe(":5000", server); err != nil {
+        log.Fatalf("could not listen on port 5000 %v", err)
+    }
 }
 ```
 
@@ -414,19 +414,19 @@ Finally everything is compiling but the tests are failing
 ```
 === RUN   TestGETPlayers/returns_the_Pepper's_score
 panic: runtime error: invalid memory address or nil pointer dereference [recovered]
-	panic: runtime error: invalid memory address or nil pointer dereference
+    panic: runtime error: invalid memory address or nil pointer dereference
 ```
 
 This is because we have not passed in a `PlayerStore` in our tests. We'll need to make a stub one up.
 
 ```go
 type StubPlayerStore struct {
-	scores map[string]int
+    scores map[string]int
 }
 
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
-	score := s.scores[name]
-	return score
+    score := s.scores[name]
+    return score
 }
 ```
 
@@ -434,31 +434,31 @@ A `map` is a quick and easy way of making a stub key/value store for our tests. 
 
 ```go
 func TestGETPlayers(t *testing.T) {
-	store := StubPlayerStore{
-		map[string]int{
-			"Pepper": 20,
-			"Floyd":  10,
-		},
-	}
-	server := &PlayerServer{&store}
+    store := StubPlayerStore{
+        map[string]int{
+            "Pepper": 20,
+            "Floyd":  10,
+        },
+    }
+    server := &PlayerServer{&store}
 
-	t.Run("returns Pepper's score", func(t *testing.T) {
-		request := newGetScoreRequest("Pepper")
-		response := httptest.NewRecorder()
+    t.Run("returns Pepper's score", func(t *testing.T) {
+        request := newGetScoreRequest("Pepper")
+        response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+        server.ServeHTTP(response, request)
 
-		assertResponseBody(t, response.Body.String(), "20")
-	})
+        assertResponseBody(t, response.Body.String(), "20")
+    })
 
-	t.Run("returns Floyd's score", func(t *testing.T) {
-		request := newGetScoreRequest("Floyd")
-		response := httptest.NewRecorder()
+    t.Run("returns Floyd's score", func(t *testing.T) {
+        request := newGetScoreRequest("Floyd")
+        response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+        server.ServeHTTP(response, request)
 
-		assertResponseBody(t, response.Body.String(), "10")
-	})
+        assertResponseBody(t, response.Body.String(), "10")
+    })
 }
 ```
 
@@ -476,15 +476,15 @@ We'll need to make an implementation of one, but that's difficult right now as w
 type InMemoryPlayerStore struct{}
 
 func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
-	return 123
+    return 123
 }
 
 func main() {
-	server := &PlayerServer{&InMemoryPlayerStore{}}
+    server := &PlayerServer{&InMemoryPlayerStore{}}
 
-	if err := http.ListenAndServe(":5000", server); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
-	}
+    if err := http.ListenAndServe(":5000", server); err != nil {
+        log.Fatalf("could not listen on port 5000 %v", err)
+    }
 }
 ```
 
@@ -523,18 +523,18 @@ t.Run("returns 404 on missing players", func(t *testing.T) {
 ```
 === RUN   TestGETPlayers/returns_404_on_missing_players
     --- FAIL: TestGETPlayers/returns_404_on_missing_players (0.00s)
-    	server_test.go:56: got status 200 want 404
+        server_test.go:56: got status 200 want 404
 ```
 
 ## Write enough code to make it pass
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
+    player := r.URL.Path[len("/players/"):]
 
-	w.WriteHeader(http.StatusNotFound)
+    w.WriteHeader(http.StatusNotFound)
 
-	fmt.Fprint(w, p.store.GetPlayerScore(player))
+    fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
 
@@ -550,61 +550,61 @@ Here are the new tests
 
 ```go
 func TestGETPlayers(t *testing.T) {
-	store := StubPlayerStore{
-		map[string]int{
-			"Pepper": 20,
-			"Floyd":  10,
-		},
-	}
-	server := &PlayerServer{&store}
+    store := StubPlayerStore{
+        map[string]int{
+            "Pepper": 20,
+            "Floyd":  10,
+        },
+    }
+    server := &PlayerServer{&store}
 
-	t.Run("returns Pepper's score", func(t *testing.T) {
-		request := newGetScoreRequest("Pepper")
-		response := httptest.NewRecorder()
+    t.Run("returns Pepper's score", func(t *testing.T) {
+        request := newGetScoreRequest("Pepper")
+        response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+        server.ServeHTTP(response, request)
 
-		assertStatus(t, response.Code, http.StatusOK)
-		assertResponseBody(t, response.Body.String(), "20")
-	})
+        assertStatus(t, response.Code, http.StatusOK)
+        assertResponseBody(t, response.Body.String(), "20")
+    })
 
-	t.Run("returns Floyd's score", func(t *testing.T) {
-		request := newGetScoreRequest("Floyd")
-		response := httptest.NewRecorder()
+    t.Run("returns Floyd's score", func(t *testing.T) {
+        request := newGetScoreRequest("Floyd")
+        response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+        server.ServeHTTP(response, request)
 
-		assertStatus(t, response.Code, http.StatusOK)
-		assertResponseBody(t, response.Body.String(), "10")
-	})
+        assertStatus(t, response.Code, http.StatusOK)
+        assertResponseBody(t, response.Body.String(), "10")
+    })
 
-	t.Run("returns 404 on missing players", func(t *testing.T) {
-		request := newGetScoreRequest("Apollo")
-		response := httptest.NewRecorder()
+    t.Run("returns 404 on missing players", func(t *testing.T) {
+        request := newGetScoreRequest("Apollo")
+        response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+        server.ServeHTTP(response, request)
 
-		assertStatus(t, response.Code, http.StatusNotFound)
-	})
+        assertStatus(t, response.Code, http.StatusNotFound)
+    })
 }
 
 func assertStatus(t *testing.T, got, want int) {
-	t.Helper()
-	if got != want {
-		t.Errorf("did not get correct status, got %d, want %d", got, want)
-	}
+    t.Helper()
+    if got != want {
+        t.Errorf("did not get correct status, got %d, want %d", got, want)
+    }
 }
 
 func newGetScoreRequest(name string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
-	return req
+    req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
+    return req
 }
 
 func assertResponseBody(t *testing.T, got, want string) {
-	t.Helper()
-	if got != want {
-		t.Errorf("response body is wrong, got '%s' want '%s'", got, want)
-	}
+    t.Helper()
+    if got != want {
+        t.Errorf("response body is wrong, got '%s' want '%s'", got, want)
+    }
 }
 ```
 
@@ -614,15 +614,15 @@ Now our first two tests fail because of the 404 instead of 200, so we can fix `P
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
+    player := r.URL.Path[len("/players/"):]
 
-	score := p.store.GetPlayerScore(player)
+    score := p.store.GetPlayerScore(player)
 
-	if score == 0 {
-		w.WriteHeader(http.StatusNotFound)
-	}
+    if score == 0 {
+        w.WriteHeader(http.StatusNotFound)
+    }
 
-	fmt.Fprint(w, score)
+    fmt.Fprint(w, score)
 }
 ```
 
@@ -634,19 +634,19 @@ Now that we can retrieve scores from a store it now makes sense to be able to st
 
 ```go
 func TestStoreWins(t *testing.T) {
-	store := StubPlayerStore{
-		map[string]int{},
-	}
-	server := &PlayerServer{&store}
+    store := StubPlayerStore{
+        map[string]int{},
+    }
+    server := &PlayerServer{&store}
 
-	t.Run("it returns accepted on POST", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodPost, "/players/Pepper", nil)
-		response := httptest.NewRecorder()
+    t.Run("it returns accepted on POST", func(t *testing.T) {
+        request, _ := http.NewRequest(http.MethodPost, "/players/Pepper", nil)
+        response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+        server.ServeHTTP(response, request)
 
-		assertStatus(t, response.Code, http.StatusAccepted)
-	})
+        assertStatus(t, response.Code, http.StatusAccepted)
+    })
 }
 ```
 
@@ -657,7 +657,7 @@ For a start let's just check we get the correct status code if we hit the partic
 ```
 === RUN   TestStoreWins/it_returns_accepted_on_POST
     --- FAIL: TestStoreWins/it_returns_accepted_on_POST (0.00s)
-    	server_test.go:70: did not get correct status, got 404, want 202
+        server_test.go:70: did not get correct status, got 404, want 202
 ```
 
 ## Write enough code to make it pass
@@ -667,20 +667,20 @@ Remember we are deliberately committing sins, so an `if` statement based on the 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method==http.MethodPost {
-		w.WriteHeader(http.StatusAccepted)
-		return
-	}
+    if r.Method==http.MethodPost {
+        w.WriteHeader(http.StatusAccepted)
+        return
+    }
 
-	player := r.URL.Path[len("/players/"):]
+    player := r.URL.Path[len("/players/"):]
 
-	score := p.store.GetPlayerScore(player)
+    score := p.store.GetPlayerScore(player)
 
-	if score == 0 {
-		w.WriteHeader(http.StatusNotFound)
-	}
+    if score == 0 {
+        w.WriteHeader(http.StatusNotFound)
+    }
 
-	fmt.Fprint(w, score)
+    fmt.Fprint(w, score)
 }
 ```
 
@@ -691,29 +691,29 @@ The handler is looking a bit muddled now. Let's break the code up to make it eas
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	switch r.Method {
-	case http.MethodPost:
-		p.processWin(w)
-	case http.MethodGet:
-		p.showScore(w, r)
-	}
+    switch r.Method {
+    case http.MethodPost:
+        p.processWin(w)
+    case http.MethodGet:
+        p.showScore(w, r)
+    }
 
 }
 
 func (p *PlayerServer) showScore(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
+    player := r.URL.Path[len("/players/"):]
 
-	score := p.store.GetPlayerScore(player)
+    score := p.store.GetPlayerScore(player)
 
-	if score == 0 {
-		w.WriteHeader(http.StatusNotFound)
-	}
+    if score == 0 {
+        w.WriteHeader(http.StatusNotFound)
+    }
 
-	fmt.Fprint(w, score)
+    fmt.Fprint(w, score)
 }
 
 func (p *PlayerServer) processWin(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusAccepted)
+    w.WriteHeader(http.StatusAccepted)
 }
 ```
 
@@ -727,17 +727,17 @@ We can accomplish this by extending our `StubPlayerScore` with a new `RecordWin`
 
 ```go
 type StubPlayerStore struct {
-	scores   map[string]int
-	winCalls []string
+    scores   map[string]int
+    winCalls []string
 }
 
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
-	score := s.scores[name]
-	return score
+    score := s.scores[name]
+    return score
 }
 
 func (s *StubPlayerStore) RecordWin(name string) {
-	s.winCalls = append(s.winCalls, name)
+    s.winCalls = append(s.winCalls, name)
 }
 ```
 
@@ -745,28 +745,28 @@ Now extend our test to check the number of invocations for a start
 
 ```go
 func TestStoreWins(t *testing.T) {
-	store := StubPlayerStore{
-		map[string]int{},
-	}
-	server := &PlayerServer{&store}
+    store := StubPlayerStore{
+        map[string]int{},
+    }
+    server := &PlayerServer{&store}
 
-	t.Run("it records wins when POST", func(t *testing.T) {
-		request := newPostWinRequest("Pepper")
-		response := httptest.NewRecorder()
+    t.Run("it records wins when POST", func(t *testing.T) {
+        request := newPostWinRequest("Pepper")
+        response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+        server.ServeHTTP(response, request)
 
-		assertStatus(t, response.Code, http.StatusAccepted)
+        assertStatus(t, response.Code, http.StatusAccepted)
 
-		if len(store.winCalls) != 1 {
-			t.Errorf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
-		}
-	})
+        if len(store.winCalls) != 1 {
+            t.Errorf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
+        }
+    })
 }
 
 func newPostWinRequest(name string) *http.Request {
-	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", name), nil)
-	return req
+    req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", name), nil)
+    return req
 }
 ```
 
@@ -791,7 +791,7 @@ store := StubPlayerStore{
 ```
 --- FAIL: TestStoreWins (0.00s)
     --- FAIL: TestStoreWins/it_records_wins_when_POST (0.00s)
-    	server_test.go:80: got 0 calls to RecordWin want 1
+        server_test.go:80: got 0 calls to RecordWin want 1
 ```
 
 ## Write enough code to make it pass
@@ -802,8 +802,8 @@ We need to update `PlayerServer`'s idea of what a `PlayerStore` is by changing t
 
 ```go
 type PlayerStore interface {
-	GetPlayerScore(name string) int
-	RecordWin(name string)
+    GetPlayerScore(name string) int
+    RecordWin(name string)
 }
 ```
 
@@ -811,7 +811,7 @@ By doing this `main` no longer compiles
 
 ```
 ./main.go:17:46: cannot use InMemoryPlayerStore literal (type *InMemoryPlayerStore) as type PlayerStore in field value:
-	*InMemoryPlayerStore does not implement PlayerStore (missing RecordWin method)
+    *InMemoryPlayerStore does not implement PlayerStore (missing RecordWin method)
 ```
 
 The compiler tells us what's wrong. Let's update `InMemoryPlayerStore` to have that method.
@@ -828,8 +828,8 @@ Now that `PlayerStore` has `RecordWin` we can call it within our `PlayerServer`
 
 ```go
 func (p *PlayerServer) processWin(w http.ResponseWriter) {
-	p.store.RecordWin("Bob")
-	w.WriteHeader(http.StatusAccepted)
+    p.store.RecordWin("Bob")
+    w.WriteHeader(http.StatusAccepted)
 }
 ```
 
@@ -865,16 +865,16 @@ Now that we know there is one element in our `winCalls` slice we can safely refe
 ```
 === RUN   TestStoreWins/it_records_wins_on_POST
     --- FAIL: TestStoreWins/it_records_wins_on_POST (0.00s)
-    	server_test.go:86: did not store correct winner got 'Bob' want 'Pepper'
+        server_test.go:86: did not store correct winner got 'Bob' want 'Pepper'
 ```
 
 ## Write enough code to make it pass
 
 ```go
 func (p *PlayerServer) processWin(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
-	p.store.RecordWin(player)
-	w.WriteHeader(http.StatusAccepted)
+    player := r.URL.Path[len("/players/"):]
+    p.store.RecordWin(player)
+    w.WriteHeader(http.StatusAccepted)
 }
 ```
 
@@ -886,29 +886,29 @@ We can DRY up this code a bit as we're extracting the player name the same way i
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
+    player := r.URL.Path[len("/players/"):]
 
-	switch r.Method {
-	case http.MethodPost:
-		p.processWin(w, player)
-	case http.MethodGet:
-		p.showScore(w, player)
-	}
+    switch r.Method {
+    case http.MethodPost:
+        p.processWin(w, player)
+    case http.MethodGet:
+        p.showScore(w, player)
+    }
 }
 
 func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
-	score := p.store.GetPlayerScore(player)
+    score := p.store.GetPlayerScore(player)
 
-	if score == 0 {
-		w.WriteHeader(http.StatusNotFound)
-	}
+    if score == 0 {
+        w.WriteHeader(http.StatusNotFound)
+    }
 
-	fmt.Fprint(w, score)
+    fmt.Fprint(w, score)
 }
 
 func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
-	p.store.RecordWin(player)
-	w.WriteHeader(http.StatusAccepted)
+    p.store.RecordWin(player)
+    w.WriteHeader(http.StatusAccepted)
 }
 ```
 
@@ -934,19 +934,19 @@ In the interest of brevity, I am going to show you the final refactored integrat
 
 ```go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
-	store := InMemoryPlayerStore{}
-	server := PlayerServer{&store}
-	player := "Pepper"
+    store := InMemoryPlayerStore{}
+    server := PlayerServer{&store}
+    player := "Pepper"
 
-	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+    server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+    server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+    server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
 
-	response := httptest.NewRecorder()
-	server.ServeHTTP(response, newGetScoreRequest(player))
-	assertStatus(t, response.Code, http.StatusOK)
+    response := httptest.NewRecorder()
+    server.ServeHTTP(response, newGetScoreRequest(player))
+    assertStatus(t, response.Code, http.StatusOK)
 
-	assertResponseBody(t, response.Body.String(), "3")
+    assertResponseBody(t, response.Body.String(), "3")
 }
 ```
 
@@ -958,7 +958,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 
 ```
 --- FAIL: TestRecordingWinsAndRetrievingThem (0.00s)
-	server_integration_test.go:24: response body is wrong, got '123' want '3'
+    server_integration_test.go:24: response body is wrong, got '123' want '3'
 ```
 
 ## Write enough code to make it pass
@@ -971,19 +971,19 @@ If i were to get stuck in this scenario, I would revert my changes back to the f
 
 ```go
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
-	return &InMemoryPlayerStore{map[string]int{}}
+    return &InMemoryPlayerStore{map[string]int{}}
 }
 
 type InMemoryPlayerStore struct{
-	store map[string]int
+    store map[string]int
 }
 
 func (i *InMemoryPlayerStore) RecordWin(name string) {
-	i.store[name]++
+    i.store[name]++
 }
 
 func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
-	return i.store[name]
+    return i.store[name]
 }
 ```
 
@@ -997,16 +997,16 @@ The integration test passes, now we just need to change `main` to use `NewInMemo
 package main
 
 import (
-	"log"
-	"net/http"
+    "log"
+    "net/http"
 )
 
 func main() {
-	server := &PlayerServer{NewInMemoryPlayerStore()}
+    server := &PlayerServer{NewInMemoryPlayerStore()}
 
-	if err := http.ListenAndServe(":5000", server); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
-	}
+    if err := http.ListenAndServe(":5000", server); err != nil {
+        log.Fatalf("could not listen on port 5000 %v", err)
+    }
 }
 ```
 
