@@ -232,3 +232,99 @@ func assertError(t *testing.T, got, want error) {
 By creating a new helper we were able to simplify our test, and start using
 our `NotFoundError` variable so our test doesn't fail if we change the error
 text in the future.
+
+## Write the test first
+
+We have a great way to search the dictionary. However, we have no way to add
+new words to our dictionary.
+
+```go
+func TestAdd(t *testing.T) {
+	dict := map[string]string{}
+	Add(dict, "test", "this is just a test")
+
+	want := "this is just a test"
+	got, err := Search(dict, "test")
+	if err != nil {
+		t.Fatal("should find added word:", err)
+	}
+
+	if want != got {
+		t.Errorf("got '%s' want '%s'", got, want)
+	}
+}
+```
+
+In this test, we are utilizing our `Search` function to make the
+validation of the dictionary a little easier.
+
+## Write the minimal amount of code for the test to run and check output
+
+In `dict.go`
+
+```go
+func Add(dict map[string]string, word, def string) {
+}
+```
+
+Your test should now fail
+
+```
+dict_test.go:31: should find added word: could not find the word you were
+looking for
+```
+
+## Write enough code to make it pass
+
+```go
+func Add(dict map[string]string, word, def string) {
+	dict[word] = def
+}
+```
+
+Adding to a Map is also similar to an Array. You just need to specify
+key and set it equal to a value.
+
+Another interesting property of Maps is that you can modify them without passing them as a pointer. This is because maps are a reference types. They don't actually hold any values. Instead, they point to the underlying data structure which houses the data.
+
+## Refactor
+
+There isn't much to refactor in our implementation but the test could use
+a little simplification.
+
+```go
+func TestAdd(t *testing.T) {
+	dict := map[string]string{}
+	word := "test"
+	def := "this is just a test"
+
+	Add(dict, word, def)
+
+	assertDef(t, dict, word, def)
+}
+
+func assertDef(t *testing.T, dict map[string]string, word, def string) {
+	t.Helper()
+
+	got, err := Search(dict, word)
+	if err != nil {
+		t.Fatal("should find added word:", err)
+	}
+
+	if def != got {
+		t.Errorf("got '%s' want '%s'", got, def)
+	}
+}
+```
+
+We made variables for word and definition, and moved the definition
+assertion into it's own helper function.
+
+Our `Add` is looking good. Except, we didn't consider what happens when the
+value we are trying to add already exists!
+
+Map will not throw an error if the value already exists. Instead, they will go
+ahead and overwrite the value with the newly provided value. This can
+be convenient in practice, but makes our function name less than
+accurate. `Add` should not modify existing values. It should only add new
+words to our dictionary.
