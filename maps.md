@@ -328,3 +328,119 @@ ahead and overwrite the value with the newly provided value. This can
 be convenient in practice, but makes our function name less than
 accurate. `Add` should not modify existing values. It should only add new
 words to our dictionary.
+
+## Write the test first
+
+```go
+func TestAdd(t *testing.T) {
+	t.Run("new word", func(t *testing.T) {
+		dict := map[string]string{}
+		word := "test"
+		def := "this is just a test"
+
+		err := Add(dict, word, def)
+
+		assertError(t, err, nil)
+		assertDef(t, dict, word, def)
+	})
+
+	t.Run("existing word", func(t *testing.T) {
+		word := "test"
+		def := "this is just a test"
+		dict := map[string]string{word: def}
+		err := Add(dict, word, "new test")
+
+		assertError(t, err, WordExistsError)
+		assertDef(t, dict, word, def)
+	})
+}
+```
+
+For this test we modified `Add` to return an error, which we are
+validating against a new error variable, `WordExistsError`. We also modified
+the previous test to check for a `nil` error.
+
+## Try to run test
+
+The compiler will fail because we are not return a value for `Add`.
+
+```bash
+./dict_test.go:30:13: Add(dict, word, def) used as value
+./dict_test.go:41:13: Add(dict, word, "new test") used as value
+```
+
+## Write the minimal amount of code for the test to run and check the output
+
+In `dict.go`
+
+```go
+var (
+	NotFoundError   = errors.New("could not find the word you were looking for")
+	WordExistsError = errors.New("cannot add word because it already exists")
+)
+
+func Add(dict map[string]string, word, def string) error {
+	dict[word] = def
+	return nil
+}
+```
+
+Now we get two more errors. We are still modifying the value, and
+returning a `nil` error.
+
+```bash
+        dict_test.go:43: got error '%!s(<nil>)' want 'cannot add word because
+        it already exists'
+        dict_test.go:44: got 'new test' want 'this is just a test'
+```
+
+## Write enough code to make it pass
+
+```go
+func Add(dict map[string]string, word, def string) error {
+	_, err := Search(dict, word)
+	switch err {
+	case NotFoundError:
+		dict[word] = def
+	case nil:
+		return WordExistsError
+	default:
+		return err
+
+	}
+
+	return nil
+}
+```
+
+Here we are using a `switch` statement to match on the error. Having a `switch`
+like this provides an extra safety net, in case `Search`returns an error other than `NotFoundError`.
+
+## Refactor
+
+We don't have too much to refactor, but as our error usage grow we can make
+a few modifications.
+
+```go
+const (
+	ErrNotFound   = DictErr("could not find the word you were looking for")
+	ErrWordExists = DictErr("cannot add word because it already exists")
+)
+
+type DictErr string
+
+func (e DictErr) Error() string {
+	return string(e)
+}
+```
+
+The first thing you will notice, is we made the errors constant. This required
+us to create our own `DictErr` type which implements the `error`
+interface. You can read more about
+the details in [this excellent article by Dave Cheney](https://dave.cheney.net/2016/04/07/constant-errors). Simply put, it makes the errors more reusable and immutable.
+
+We also changed the names of the errors to make them IDE friendly.
+If you have auto completion enables it's nice to be able to see all your
+errors by typing `Err`. You can perform this change manually or try out
+[gorename](https://godoc.org/golang.org/x/tools/refactor/rename), which is
+a great refactoring tool!
