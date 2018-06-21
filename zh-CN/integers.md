@@ -1,4 +1,4 @@
-# Integers
+# 整数
 
 **[你可以在这里找到本章的所有代码](https://github.com/quii/learn-go-with-tests/tree/master/integers)**
 
