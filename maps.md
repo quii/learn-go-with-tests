@@ -190,7 +190,7 @@ func Search(dict map[string]string, word string) (string, error) {
 ```
 
 In order to make this pass we are using an interesting property of the Map lookup. It can return 2 values. The second value being a boolean which
-indicates if the key was found successfully. 
+indicates if the key was found successfully.
 
 This property allows us to differentiate between a word that doesn't exist
 and a word that just doesn't have a definition.
@@ -444,3 +444,52 @@ If you have auto completion enables it's nice to be able to see all your
 errors by typing `Err`. You can perform this change manually or try out
 [gorename](https://godoc.org/golang.org/x/tools/refactor/rename), which is
 a great refactoring tool!
+
+## Write the test first
+
+```go
+func TestUpdate(t *testing.T) {
+	word := "test"
+	def := "this is just a test"
+	dict := map[string]string{word: def}
+	newDef := "new def"
+
+	Update(dict, word, newDef)
+
+	assertDef(t, dict, word, newDef)
+}
+```
+
+The last piece of functionality our dictionary needs is a way to update an existing definition.
+
+## Try and run the test
+```
+./dict_test.go:53:2: undefined: Update
+```
+
+## Write minimal amount of code for the test to run and check the failing test output
+
+We already know how to deal with an error like this. We need to define our function.
+
+```go
+func Update(dict map[string]string, word, def string) {}
+```
+
+With that in place we are able to see that we need to change the definition of the word.
+
+```
+	dict_test.go:55: got 'this is just a test' want 'new def'
+```
+
+## Write enough code to make it pass
+
+We already saw how to do this when we fixed the issue with create. So let's implement something really similar to create.
+
+```go
+func Update(dict map[string]string, word, def string) {
+	dict[word] = def
+}
+```
+
+There is no refactoring we need to do on this since it was a simple change. However, we now have the same issue as with create.
+If we pass in a new word, `Update` will add it to the dictionary.
