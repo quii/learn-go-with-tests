@@ -22,7 +22,7 @@
 * [HTTP server](http-server.md)
 * [JSON, routing and embedding](json.md)
 * [IO and sorting](io.md)
-* Command line
+* Command line (todo)
 * `time` (todo)
 
 ## Meta
