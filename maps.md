@@ -460,7 +460,7 @@ func TestUpdate(t *testing.T) {
 }
 ```
 
-The last piece of functionality our dictionary needs is a way to update an existing definition.
+`Update` is very closely related to `Create` and will be our next implementation.
 
 ## Try and run the test
 ```
@@ -493,3 +493,93 @@ func Update(dict map[string]string, word, def string) {
 
 There is no refactoring we need to do on this since it was a simple change. However, we now have the same issue as with create.
 If we pass in a new word, `Update` will add it to the dictionary.
+
+## Write the test first
+
+```go
+t.Run("existing word", func(t *testing.T) {
+    word := "test"
+    def := "this is just a test"
+    newDef := "new def"
+    dict := map[string]string{word: def}
+
+    err := Update(dict, word, newDef)
+
+    assertError(t, err, nil)
+    assertDef(t, dict, word, newDef)
+})
+
+t.Run("new word", func(t *testing.T) {
+    word := "test"
+    def := "this is just a test"
+    dict := map[string]string{}
+
+    err := Update(dict, word, def)
+
+    assertError(t, err, ErrWordDoesNotExist)
+})
+```
+
+We added yet another error type for when the word does not exist. We also modified `Update`
+to return an `error` value.
+
+## Try and run the test
+
+```
+./dict_test.go:53:16: Update(dict, word, "new test") used as value
+./dict_test.go:64:16: Update(dict, word, def) used as value
+./dict_test.go:66:23: undefined: ErrWordDoesNotExists
+```
+
+We get 3 errors this time, but we know how to deal with these.
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+```go
+const (
+	ErrNotFound         = DictErr("could not find the word you were looking for")
+	ErrWordExists       = DictErr("cannot add word because it already exists")
+	ErrWordDoesNotExist = DictErr("cannot update word because it does not exist")
+)
+
+func Update(dict map[string]string, word, def string) error {
+	dict[word] = def
+	return nil
+}
+```
+
+We added our own error type and are returning a `nil` error.
+
+With these changes, we now get a very clear error:
+
+```
+dict_test.go:66: got error '%!s(<nil>)' want 'cannot update word because it does not exist'
+```
+
+## Write enough code to make it pass
+
+```go
+func Update(dict map[string]string, word, def string) error {
+	_, err := Search(dict, word)
+	switch err {
+	case ErrNotFound:
+		return ErrWordDoesNotExist
+	case nil:
+		dict[word] = def
+	default:
+		return err
+
+	}
+
+	dict[word] = def
+	return nil
+}
+```
+
+This algorithm looks almost identical to `Add` except we switched when we update the `dict` and when we return an error.
+
+### Note on declaring a new error for Update
+
+We could reused `ErrNotFound` and not added a new error. However, it is often better to have a precise error for when an update fails.
+
+Having specific errors allows your application to know more about what went wrong. For example, if you are running a website. You might not want the user to see `ErrNotFound`, but instead redirect them to a add page. While `ErrWordDoesNotExist` would be displayed when they are trying to update a word.
