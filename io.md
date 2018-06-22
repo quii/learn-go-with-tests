@@ -893,8 +893,8 @@ Store a reference to an `Encoder` in our type.
 
 ```go
 type FileSystemPlayerStore struct {
-	database *json.Encoder
-	league   League
+    database *json.Encoder
+    league   League
 }
 ```
 
@@ -902,13 +902,13 @@ Initialise it in the constructor
 
 ```go
 func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
-	file.Seek(0, 0)
-	league, _ := NewLeague(file)
+    file.Seek(0, 0)
+    league, _ := NewLeague(file)
 
-	return &FileSystemPlayerStore{
-		database: json.NewEncoder(&tape{file}),
-		league:   league,
-	}
+    return &FileSystemPlayerStore{
+        database: json.NewEncoder(&tape{file}),
+        league:   league,
+    }
 }
 ```
 
@@ -1211,10 +1211,10 @@ Easy!
 
 ### Breaking rules
 
-- Most rules in software engineering aren't really rules, just best practices that work 80% of the time. 
+- Most rules in software engineering aren't really rules, just best practices that work 80% of the time.
 - We discovered a scenario where one of our previous "rules" of not testing internal functions was not helpful for us so we broke the rule.
 - It's important when breaking rules to understand the trade-off you are making. In our case we were ok with it because it was just one test and would've been very difficult to exercise the scenario otherwise.
-- In order to be able to break the rules **you must understand them first**. An analogy is with learning guitar. It doesn't matter how creative you think you are, you must understand and practice the fundamentals. 
+- In order to be able to break the rules **you must understand them first**. An analogy is with learning guitar. It doesn't matter how creative you think you are, you must understand and practice the fundamentals.
 
 ### Where our software is at
 
