@@ -3,8 +3,8 @@
 _Or learn test-driven development with Go_
 
 * Explore the Go language by writing tests
-* **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built in
-* Be confident that you'll be able to start writing robust, well tested systems in Go
+* **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
+* Be confident that you'll be able to start writing robust, well-tested systems in Go
 
 ## Background
 
@@ -22,9 +22,9 @@ I found that whilst a small number of people would read chapter X and do the exe
 
 #### Solve some problems
 
-Katas are fun but they are usually limited in their scope for learning a language; you're unlikely to use go routines to solve a kata.
+Katas are fun but they are usually limited in their scope for learning a language; you're unlikely to use goroutines to solve a kata.
 
-Another problem is when you have varying levels of enthusiasm. Some people just learn way more of the language than others and when demonstrating what they have done end up confusing people with featues the others are not familiar with.
+Another problem is when you have varying levels of enthusiasm. Some people just learn way more of the language than others and when demonstrating what they have done end up confusing people with features the others are not familiar with.
 
 This ends up making the learning feel quite _unstructured_ and _ad hoc_.
 
@@ -40,7 +40,7 @@ It doesn't matter how artistic you think you are, you are unlikely to write good
 
 ### What works for me
 
-When _I_ learn a new programming language I usually start by messing around in a REPL but eventually I need more structure.
+When _I_ learn a new programming language I usually start by messing around in a REPL but eventually, I need more structure.
 
 What I like to do is explore concepts and then solidify the ideas with tests. Tests verify the code I write is correct and documents the feature I have learned.
 
@@ -63,4 +63,4 @@ Taking my experience of learning with a group and my own personal way I am going
 
 * Add issues or [tweet me @quii](https://twitter.com/quii)
 
-[MIT license](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/LICENSE.md)
+[MIT license](LICENSE.md)
