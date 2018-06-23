@@ -20,7 +20,7 @@ package main
 import "testing"
 
 func TestSearch(t *testing.T) {
-	dict := map[string]string{"test": "this is just a test"}
+	dict := Dict{"test": "this is just a test"}
 
 	got := Search(dict, "test")
 	want := "this is just a test"
@@ -94,7 +94,7 @@ readability and extract our assertion.
 
 ```go
 func TestSearch(t *testing.T) {
-	dict := map[string]string{"test": "this is just a test"}
+	dict := Dict{"test": "this is just a test"}
 
 	got := Search(dict, "test")
 	want := "this is just a test"
@@ -281,11 +281,11 @@ new words to our dictionary.
 
 ```go
 func TestAdd(t *testing.T) {
-	dict := map[string]string{}
-	Add(dict, "test", "this is just a test")
+	dict := Dict{}
+	dict.Add("test", "this is just a test")
 
 	want := "this is just a test"
-	got, err := Search(dict, "test")
+	got, err := dict.Search("test")
 	if err != nil {
 		t.Fatal("should find added word:", err)
 	}
@@ -304,7 +304,7 @@ validation of the dictionary a little easier.
 In `dict.go`
 
 ```go
-func Add(dict map[string]string, word, def string) {
+func (d Dict) Add(word, def string) {
 }
 ```
 
@@ -318,7 +318,7 @@ looking for
 ## Write enough code to make it pass
 
 ```go
-func Add(dict map[string]string, word, def string) {
+func (d Dict) Add(word, def string) {
 	dict[word] = def
 }
 ```
@@ -338,19 +338,19 @@ a little simplification.
 
 ```go
 func TestAdd(t *testing.T) {
-	dict := map[string]string{}
+	dict := Dict{}
 	word := "test"
 	def := "this is just a test"
 
-	Add(dict, word, def)
+	dict.Add(word, def)
 
 	assertDef(t, dict, word, def)
 }
 
-func assertDef(t *testing.T, dict map[string]string, word, def string) {
+func assertDef(t *testing.T, dict Dict, word, def string) {
 	t.Helper()
 
-	got, err := Search(dict, word)
+	got, err := dict.Search(word)
 	if err != nil {
 		t.Fatal("should find added word:", err)
 	}
@@ -378,7 +378,7 @@ words to our dictionary.
 ```go
 func TestAdd(t *testing.T) {
 	t.Run("new word", func(t *testing.T) {
-		dict := map[string]string{}
+		dict := Dict{}
 		word := "test"
 		def := "this is just a test"
 
@@ -391,7 +391,7 @@ func TestAdd(t *testing.T) {
 	t.Run("existing word", func(t *testing.T) {
 		word := "test"
 		def := "this is just a test"
-		dict := map[string]string{word: def}
+		dict := Dict{word: def}
 		err := Add(dict, word, "new test")
 
 		assertError(t, err, WordExistsError)
@@ -498,7 +498,7 @@ a great refactoring tool!
 func TestUpdate(t *testing.T) {
 	word := "test"
 	def := "this is just a test"
-	dict := map[string]string{word: def}
+	dict := Dict{word: def}
 	newDef := "new def"
 
 	Update(dict, word, newDef)
@@ -553,7 +553,7 @@ t.Run("existing word", func(t *testing.T) {
     word := "test"
     def := "this is just a test"
     newDef := "new def"
-    dict := map[string]string{word: def}
+    dict := Dict{word: def}
 
     err := Update(dict, word, newDef)
 
@@ -564,7 +564,7 @@ t.Run("existing word", func(t *testing.T) {
 t.Run("new word", func(t *testing.T) {
     word := "test"
     def := "this is just a test"
-    dict := map[string]string{}
+    dict := Dict{}
 
     err := Update(dict, word, def)
 
