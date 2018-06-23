@@ -167,17 +167,17 @@ for a dictionary.However, it's a scenario that could be key in other usecases).
 
 ```go
 func TestSearch(t *testing.T) {
-	dict := map[string]string{"test": "this is just a test"}
+	dict := Dict{"test": "this is just a test"}
 
 	t.Run("known word", func(t *testing.T) {
-		got, _ := Search(dict, "test")
+		got, _ := dict.Search("test")
 		want := "this is just a test"
 
 		assertStrings(t, got, want)
 	})
 
 	t.Run("unknown word", func(t *testing.T) {
-		_, got := Search(dict, "test")
+		_, got := dict.Search("test")
 		want := "could not find the word you were looking for"
 
 		if got == nil {
@@ -207,8 +207,8 @@ This does not compile
 ## Write the minimal amount of code for the test to run and check the output
 
 ```go
-func Search(dict map[string]string, word string) (string, error) {
-	return dict[word], nil
+func (d Dict) Search(word string) (string, error) {
+	return d[word], nil
 }
 ```
 
@@ -219,8 +219,8 @@ Your test should now fails with a much clearer error message.
 ## Write enough code to make it pass
 
 ```go
-func Search(dict map[string]string, word string) (string, error) {
-	def, ok := dict[word]
+func (d Dict) Search(word string) (string, error) {
+	def, ok := d[word]
 	if !ok {
 		return "", errors.New("could not find the word you were looking for")
 	}
@@ -241,8 +241,8 @@ and a word that just doesn't have a definition.
 ```go
 var NotFoundError = errors.New("could not find the word you were looking for")
 
-func Search(dict map[string]string, word string) (string, error) {
-	def, ok := dict[word]
+func (d Dict) Search(word string) (string, error) {
+	def, ok := d[word]
 	if !ok {
 		return "", NotFoundError
 	}
@@ -256,7 +256,7 @@ into a constant. This will also allow us to have a better test.
 
 ```go
 t.Run("unknown word", func(t *testing.T) {
-    _, got := Search(dict, "unknown")
+    _, got := dict.Search("unknown")
 
     assertError(t, got, NotFoundError)
 })
