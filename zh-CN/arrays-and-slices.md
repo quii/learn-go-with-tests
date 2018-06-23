@@ -10,7 +10,7 @@
 
 ## 先写测试函数
 
-在 `sum_test.go` 中:
+在 `sum_test.go` 中：
 
 ```go
 package main
