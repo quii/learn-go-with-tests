@@ -34,7 +34,10 @@ Declaring a Map is somewhat similar to an array. Except, it starts with the
 `map` keyword and requires two types. The first is the key, which is written
 inside the `[]`. The second is the value, which goes right after the `[]`.
 
-The key is special. It can only be a comparable type. Comparable types are explained in depth in the [language spec](https://golang.org/ref/spec#Comparison_operators). But the simple version is:
+The key is special. It can only be a comparable type. Comparable types are
+explained in depth in the [language
+spec](https://golang.org/ref/spec#Comparison_operators). But the simple version
+is:
 * boolean
 * numeric
 * string
@@ -114,15 +117,52 @@ With this in place our failing test looks a lot clearer
 I also decided to get rid of the given piece. That way this assertion is
 more generally useful.
 
+### Using a type alias
+
+We can greatly improve our module's usage by aliasing the Map and making
+`Search` a method.
+
+In `dict_test.go`:
+
+```go
+func TestSearch(t *testing.T) {
+	dict := Dict{"test": "this is just a test"}
+
+	got := dict.Search("test")
+	want := "this is just a test"
+
+	assertStrings(t, got, want)
+}
+```
+
+We switched to using a `Dict` struct which we have not defined yet, and call
+`Search` on the newly created `Dict` instance.
+
+We do not need to change the `assertStrings`.
+
+In `dict.go`:
+
+```go
+type Dict map[string]string
+
+func (d Dict) Search(word string) string {
+	return d[word]
+}
+```
+
+Here we created a type alias which acts as a thin wrapper around
+the actual type. The advantage of using a type alias is that we can now
+create our own methods on our Map type.
+
 ## Write the test first
 
 The basic search was very easy to implement, but what will happen if we
 supply a word that's not in our dictionary?
 
-We actually get nothing back. This is good because the program can continue to run, but there is a better
-approach. The function can report that the word is not in the
-dictionary. This way, the user isn't left wondering if the word doesn't
-exist or if there is just no definition (this might not seem very useful
+We actually get nothing back. This is good because the program can continue to
+run, but there is a better approach. The function can report that the word is
+not in the dictionary. This way, the user isn't left wondering if the word
+doesn't exist or if there is just no definition (this might not seem very useful
 for a dictionary.However, it's a scenario that could be key in other usecases).
 
 ```go
@@ -189,7 +229,8 @@ func Search(dict map[string]string, word string) (string, error) {
 }
 ```
 
-In order to make this pass we are using an interesting property of the Map lookup. It can return 2 values. The second value being a boolean which
+In order to make this pass we are using an interesting property of the Map
+lookup. It can return 2 values. The second value being a boolean which
 indicates if the key was found successfully.
 
 This property allows us to differentiate between a word that doesn't exist
@@ -285,7 +326,10 @@ func Add(dict map[string]string, word, def string) {
 Adding to a Map is also similar to an Array. You just need to specify
 key and set it equal to a value.
 
-Another interesting property of Maps is that you can modify them without passing them as a pointer. This is because maps are a reference types. They don't actually hold any values. Instead, they point to the underlying data structure which houses the data.
+Another interesting property of Maps is that you can modify them without passing
+them as a pointer. This is because maps are a reference types. They don't
+actually hold any values. Instead, they point to the underlying data structure
+which houses the data.
 
 ## Refactor
 
@@ -414,7 +458,8 @@ func Add(dict map[string]string, word, def string) error {
 ```
 
 Here we are using a `switch` statement to match on the error. Having a `switch`
-like this provides an extra safety net, in case `Search`returns an error other than `NotFoundError`.
+like this provides an extra safety net, in case `Search`returns an error other
+than `NotFoundError`.
 
 ## Refactor
 
@@ -437,7 +482,9 @@ func (e DictErr) Error() string {
 The first thing you will notice, is we made the errors constant. This required
 us to create our own `DictErr` type which implements the `error`
 interface. You can read more about
-the details in [this excellent article by Dave Cheney](https://dave.cheney.net/2016/04/07/constant-errors). Simply put, it makes the errors more reusable and immutable.
+the details in [this excellent article by Dave
+Cheney](https://dave.cheney.net/2016/04/07/constant-errors). Simply put, it
+makes the errors more reusable and immutable.
 
 We also changed the names of the errors to make them IDE friendly.
 If you have auto completion enables it's nice to be able to see all your
@@ -460,7 +507,8 @@ func TestUpdate(t *testing.T) {
 }
 ```
 
-`Update` is very closely related to `Create` and will be our next implementation.
+`Update` is very closely related to `Create` and will be our next
+implementation.
 
 ## Try and run the test
 ```
@@ -469,13 +517,15 @@ func TestUpdate(t *testing.T) {
 
 ## Write minimal amount of code for the test to run and check the failing test output
 
-We already know how to deal with an error like this. We need to define our function.
+We already know how to deal with an error like this. We need to define our
+function.
 
 ```go
 func Update(dict map[string]string, word, def string) {}
 ```
 
-With that in place we are able to see that we need to change the definition of the word.
+With that in place we are able to see that we need to change the definition of
+the word.
 
 ```
 	dict_test.go:55: got 'this is just a test' want 'new def'
@@ -483,7 +533,8 @@ With that in place we are able to see that we need to change the definition of t
 
 ## Write enough code to make it pass
 
-We already saw how to do this when we fixed the issue with create. So let's implement something really similar to create.
+We already saw how to do this when we fixed the issue with create. So let's
+implement something really similar to create.
 
 ```go
 func Update(dict map[string]string, word, def string) {
@@ -491,8 +542,9 @@ func Update(dict map[string]string, word, def string) {
 }
 ```
 
-There is no refactoring we need to do on this since it was a simple change. However, we now have the same issue as with create.
-If we pass in a new word, `Update` will add it to the dictionary.
+There is no refactoring we need to do on this since it was a simple change.
+However, we now have the same issue as with create. If we pass in a new word,
+`Update` will add it to the dictionary.
 
 ## Write the test first
 
@@ -520,8 +572,8 @@ t.Run("new word", func(t *testing.T) {
 })
 ```
 
-We added yet another error type for when the word does not exist. We also modified `Update`
-to return an `error` value.
+We added yet another error type for when the word does not exist. We also
+modified `Update` to return an `error` value.
 
 ## Try and run the test
 
@@ -576,10 +628,17 @@ func Update(dict map[string]string, word, def string) error {
 }
 ```
 
-This algorithm looks almost identical to `Add` except we switched when we update the `dict` and when we return an error.
+This algorithm looks almost identical to `Add` except we switched when we update
+the `dict` and when we return an error.
 
 ### Note on declaring a new error for Update
 
-We could reused `ErrNotFound` and not added a new error. However, it is often better to have a precise error for when an update fails.
+We could reused `ErrNotFound` and not added a new error. However, it is often
+better to have a precise error for when an update fails.
 
-Having specific errors allows your application to know more about what went wrong. For example, if you are running a website. You might not want the user to see `ErrNotFound`, but instead redirect them to a add page. While `ErrWordDoesNotExist` would be displayed when they are trying to update a word.
+Having specific errors allows your application to know more about what went
+wrong. For example, if you are running a website. You might not want the user to
+see `ErrNotFound`, but instead redirect them to a add page. While
+`ErrWordDoesNotExist` would be displayed when they are trying to update a word.
+
+## Write the test first
