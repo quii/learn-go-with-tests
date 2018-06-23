@@ -1,4 +1,4 @@
-# JSON, routing & embedding (WIP)
+# JSON, routing & embedding
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/json)**
 

@@ -10,8 +10,8 @@ _Or learn test-driven development with Go_
 ## Why
 
 * Explore the Go language by writing tests
-* **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built in
-* Be confident that you'll be able to start writing robust, well tested systems in Go
+* **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
+* Be confident that you'll be able to start writing robust, well-tested systems in Go
 
 ## Table of contents
 
@@ -31,7 +31,7 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 10. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
 11. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
 
-Property based tests \(todo\)
+Property-based tests \(todo\)
 
 ### Build an application
 
@@ -43,11 +43,12 @@ Each chapter will iterate on the previous one, expanding the application's funct
 
 New concepts will be introduced to help facilitate writing great code but most of the new material will be learning what can be accomplished from Go's standard library.
 
-By the end of this you should have a strong grasp as to how to iteratively write an application in Go, backed by tests.
+By the end of this, you should have a strong grasp as to how to iteratively write an application in Go, backed by tests.
 
 * [HTTP server](http-server.md) - We will create an application which listens to HTTP requests and responds to them.
 * [JSON, routing and embedding](json.md) - We will make our endpoints return JSON and explore how to do routing.
-* [IO (WIP)](io.md) - We will persist and read our data from disk and we'll cover sorting data.
+* [IO and sorting](io.md) - We will persist and read our data from disk and we'll cover sorting data.
+* Command line (TODO) - Working with flags and responding to user input on the command line
 
 ## Contributing
 
@@ -71,9 +72,9 @@ I found that whilst a small number of people would read chapter X and do the exe
 
 #### Solve some problems
 
-Katas are fun but they are usually limited in their scope for learning a language; you're unlikely to use go routines to solve a kata.
+Katas are fun but they are usually limited in their scope for learning a language; you're unlikely to use goroutines to solve a kata.
 
-Another problem is when you have varying levels of enthusiasm. Some people just learn way more of the language than others and when demonstrating what they have done end up confusing people with featues the others are not familiar with.
+Another problem is when you have varying levels of enthusiasm. Some people just learn way more of the language than others and when demonstrating what they have done end up confusing people with features the others are not familiar with.
 
 This ends up making the learning feel quite _unstructured_ and _ad hoc_.
 
@@ -89,7 +90,7 @@ It doesn't matter how artistic you think you are, you are unlikely to write good
 
 ### What works for me
 
-When _I_ learn a new programming language I usually start by messing around in a REPL but eventually I need more structure.
+When _I_ learn a new programming language I usually start by messing around in a REPL but eventually, I need more structure.
 
 What I like to do is explore concepts and then solidify the ideas with tests. Tests verify the code I write is correct and documents the feature I have learned.
 

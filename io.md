@@ -1,4 +1,4 @@
-# IO and sorting (WIP)
+# IO and sorting
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/io)**
 
@@ -718,7 +718,7 @@ Running the program now persists the data in a file in between restarts, hooray!
 
 ## More refactoring and performance concerns
 
-Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the file from the start, and parsing it into JSON. We should not have to do that because `FileSystemStore` is entirely responsible for the state of the league; we just want to use the file at the start to get the current state when starting and updating it when data changes.
+Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the file from the start, and parsing it into JSON. We should not have to do that because `FileSystemStore` is entirely responsible for the state of the league; we just want to use the file at the start to get the current state and updating it when data changes.
 
 We can create a constructor which can do some of this initialisation for us and store the league as a value in our `FileSystemStore` to be used on the reads instead.
 
@@ -882,6 +882,37 @@ func (t *tape) Write(p []byte) (n int, err error) {
 The compiler will fail in a number of places where we are expecting an `io.ReadWriteSeeker` but we are sending in `*os.File`. You should be able to fix these problems yourself by now but if you get stuck just check the source code.
 
 Once you get it refactoring our `TestTape_Write` test should be passing!
+
+### One other small refactor
+
+In `RecordWin` we have the line `json.NewEncoder(f.database).Encode(f.league)`
+
+We dont need to create a new encoder every time we write, we can initialise one in our constructor and use that instead.
+
+Store a reference to an `Encoder` in our type.
+
+```go
+type FileSystemPlayerStore struct {
+    database *json.Encoder
+    league   League
+}
+```
+
+Initialise it in the constructor
+
+```go
+func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
+    file.Seek(0, 0)
+    league, _ := NewLeague(file)
+
+    return &FileSystemPlayerStore{
+        database: json.NewEncoder(&tape{file}),
+        league:   league,
+    }
+}
+```
+
+Use it in `RecordWin`
 
 ## Didn't we just break some rules there? Testing private things? No interfaces?
 
@@ -1170,17 +1201,22 @@ Easy!
 
 ## Wrapping up
 
-What we've covered:
+### What we've covered
 
 - The `Seeker` interface and its relation with `Reader` and `Writer`.
 - Working with files.
-- Returning errors as HTTP responses.
 - Creating an easy to use helper for testing with files that hides all the messy stuff.
-- Using embedding when you want to be lazy about mocking just a part of an interface.
 - `sort.Slice` for sorting slices.
 - Using the compiler to help us make structural changes to the application safely.
 
-Where our software is at:
+### Breaking rules
+
+- Most rules in software engineering aren't really rules, just best practices that work 80% of the time.
+- We discovered a scenario where one of our previous "rules" of not testing internal functions was not helpful for us so we broke the rule.
+- It's important when breaking rules to understand the trade-off you are making. In our case we were ok with it because it was just one test and would've been very difficult to exercise the scenario otherwise.
+- In order to be able to break the rules **you must understand them first**. An analogy is with learning guitar. It doesn't matter how creative you think you are, you must understand and practice the fundamentals.
+
+### Where our software is at
 
 - We have a HTTP API where you can create players and increment their score.
 - We can return a league of everyone's scores as JSON.
