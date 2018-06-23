@@ -4,10 +4,10 @@
 
 ## Go 基础
 
-* [Install Go](install-go.md)
+* [安装 Go](install-go.md)
 * [Hello, World](hello-world.md)
-* [Integers](integers.md)
-* [Iteration](iteration.md)
+* [整数](integers.md)
+* [迭代](iteration.md)
 * [数组与切片](arrays-and-slices.md)
 * [结构体，方法和接口](structs-methods-and-interfaces.md)
 * [指针和错误](pointers-and-errors.md)
@@ -18,7 +18,7 @@
 
 ## 构建应用程序
 
-* [Intro](app-intro.md)
+* [入门](app-intro.md)
 * [HTTP server](http-server.md)
 * [JSON, routing and embedding](json.md)
 * [IO and sorting (WIP)](io.md)

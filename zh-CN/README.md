@@ -1,4 +1,4 @@
-# 通过测试学习 Go 语言中文翻译
+# 《通过测试学习 Go 语言》中文翻译
 
 当前翻译进度：
 
@@ -6,10 +6,10 @@
 
 ## Go 基础
 
-* [x] [Install Go](install-go.md)
+* [x] [安装 Go](install-go.md)
 * [x] [Hello, World](hello-world.md)
-* [x] [Integers](integers.md)
-* [x] [Iteration](iteration.md)
+* [x] [整数](integers.md)
+* [x] [迭代](iteration.md)
 * [x] [数组与切片](arrays-and-slices.md)
 * [x] [结构体，方法和接口](structs-methods-and-interfaces.md)
 * [x] [指针和错误](pointers-and-errors.md)
@@ -20,7 +20,7 @@
 
 ## 构建应用程序
 
-* [x] [Intro](app-intro.md)
+* [x] [入门](app-intro.md)
 * [ ] [HTTP server](http-server.md)
 * [ ] [JSON, routing and embedding](json.md)
 * [ ] [IO and sorting (WIP)](io.md)

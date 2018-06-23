@@ -23,7 +23,7 @@ func TestPerimeter(t *testing.T) {
 }
 ```
 
-注意到新的格式化字符串了吗？这里的 `f` 对应 `float64`，`.2` 表示输出 ２ 位小数。
+注意到新的格式化字符串了吗？这里的 `f` 对应 `float64`，`.2` 表示输出 2 位小数。
 
 ## 运行测试
 
@@ -261,7 +261,7 @@ func TestArea(t *testing.T) {
 
 ## 为运行测试函数编写最少的代码并检查失败时的输出
 
-我们给这些类型加一些方法:
+我们给这些类型加一些方法：
 
 ```go
 type Rectangle struct {
@@ -269,7 +269,7 @@ type Rectangle struct {
     Height float64
 }
 
-func (r Rectangle) Area() float64  {
+func (r Rectangle) Area() float64 {
     return 0
 }
 
@@ -277,14 +277,14 @@ type Circle struct {
     Radius float64
 }
 
-func (c Circle) Area() float64  {
+func (c Circle) Area() float64 {
     return 0
 }
 ```
 
 声明方法的语法跟函数差不多，因为他们本身就很相似。唯一的不同是方法接收者的语法 `func(receiverName ReceiverType) MethodName(args)`。
 
-当方法被这种类型的变量调用时，　数据的引用通过变量 `receiverName` 获得。在其他许多编程语言中这些被隐藏起来并且通过 `this` 来获得接收者。
+当方法被这种类型的变量调用时，数据的引用通过变量 `receiverName` 获得。在其他许多编程语言中这些被隐藏起来并且通过 `this` 来获得接收者。
 
 把类型的第一个字母作为接收者变量是 Go 语言的一个惯例。
 
@@ -299,17 +299,17 @@ r Rectangle
 现在让我们修改我们的新方法以让矩形测试通过：
 
 ```go
-func (r Rectangle) Area() float64  {
+func (r Rectangle) Area() float64 {
     return r.Width * r.Height
 }
 ```
 
 现在重跑测试，矩形测试应该通过了但是圆的测试还是失败的。
 
-为了圆的测试通过我们需要从 math 包中借用常数 Pi(记得引入 math 包)。
+为使 Circle 测试通过我们需要从 math 包中借用常数 Pi（记得引入 math 包）。
 
 ```go
-func (c Circle) Area() float64  {
+func (c Circle) Area() float64 {
     return math.Pi * c.Radius * c.Radius
 }
 ```
@@ -320,7 +320,7 @@ func (c Circle) Area() float64  {
 
 我们想做的是给定一些几何形状，调用 `Area()` 方法并检查结果。
 
-我们想写一个这样的函数 `CheckArea`, 其参数是任何类型的几何形状。如果参数不是几何形状的类型，那么编译应该报错。
+我们想写一个这样的函数 `CheckArea`，其参数是任何类型的几何形状。如果参数不是几何形状的类型，那么编译应该报错。
 Go 语言中我们可以通过接口实现这一目的。
 
 [接口](https://golang.org/ref/spec#Interface_types)在 Go 这种静态类型语言中是一种非常强有力的概念。因为接口可以让函数接受不同类型的参数并能创造类型安全且高解耦的代码。
@@ -361,7 +361,7 @@ type Shape interface {
 }
 ```
 
-这样我们就像创建 `Rectangle` 和 `Circle` 一样创建了一个新类型，不过这次是 interface 而不是 struct 。
+这样我们就像创建 `Rectangle` 和 `Circle` 一样创建了一个新类型，不过这次是 interface 而不是 struct。
 
 加了这个代码后测试运行通过了。
 
@@ -386,7 +386,7 @@ type Shape interface {
 
 ## 进一步重构
 
-现在我们对结构体有一定的理解了，我们可以引入 “表格驱动测试”。
+现在我们对结构体有一定的理解了，我们可以引入「表格驱动测试」。
 
 [表格驱动测试](https://github.com/golang/go/wiki/TableDrivenTests)在我们要创建一系列相同测试方式的测试用例时很有用。
 
@@ -529,9 +529,9 @@ func (c Triangle) Area() float64 {
 
 我们知道它仅仅和三角形有关，但是如果在一个包含二十个测试用例的系统里出现类似的错误呢？开发人员如何指导是哪个测试用例失败了呢？这对于开发人员来说不是一个好的体验，他们需要手工检查所有的测试用例以定位到哪个用例失败了。
 
-我们可以改进我们的错误输出为 "%#v got %.2f want %.2f. %#v", 这样会打印结构体中域的值。这样开发人员能一眼看出被测试的属性。
+我们可以改进我们的错误输出为 "%#v got %.2f want %.2f. %#v"，这样会打印结构体中域的值。这样开发人员能一眼看出被测试的属性。
 
-关于列表驱动测试的最后一点提示是使用 t.Run.
+关于列表驱动测试的最后一点提示是使用 t.Run。
 
 在每个用例中使用 t.Run，测试用例的错误输出中会包含用例的名字：
 
@@ -543,7 +543,7 @@ func (c Triangle) Area() float64 {
 
 我们可以通过如下命令来运行列表中指定的测试用例： `go test -run TestArea/Rectangle`
 
-下面是满足要求的最终测试代码:
+下面是满足要求的最终测试代码：
 
 ```go
 func TestArea(t *testing.T) {
@@ -587,7 +587,7 @@ func TestArea(t *testing.T) {
 
 当你以后更熟悉 Go 后你会发现接口和标准库的真正威力。你会看到标准库中的随处可见的接口。通过在你自己的类型中实现这些接口你能很快的重用大量的伟大功能。
 
----------
+---
 
 作者：[Chris James](https://dev.to/quii)
 译者：[hzpfly](https://github.com/hzpfly)
