@@ -22,7 +22,7 @@ _或者通过 Go 语言学习测试驱动开发_
 
 #### 解决一些问题
 
-[Kata](https://en.wikipedia.org/wiki/Kata_(programming))[^注1] 很有趣，但是他们学习语言的范围通常是有限的；你不太可能用 Go 例程来解决 kata 问题。
+[Kata](https://en.wikipedia.org/wiki/Kata_%28programming%29)[^注1] 很有趣，但是他们学习语言的范围通常是有限的；你不太可能用 Go 例程来解决 kata 问题。
 
 另一个问题是当你们有不同程度的热情时，有些人只是比其他人学得更多，当他们演示他们所做的事情时，最终导致其他人困惑于他们不熟悉的特性。
 
