@@ -382,7 +382,7 @@ func TestAdd(t *testing.T) {
 		word := "test"
 		def := "this is just a test"
 
-		err := Add(dict, word, def)
+		err := dict.Add(word, def)
 
 		assertError(t, err, nil)
 		assertDef(t, dict, word, def)
@@ -392,7 +392,7 @@ func TestAdd(t *testing.T) {
 		word := "test"
 		def := "this is just a test"
 		dict := Dict{word: def}
-		err := Add(dict, word, "new test")
+		err := dict.Add(word, "new test")
 
 		assertError(t, err, WordExistsError)
 		assertDef(t, dict, word, def)
@@ -409,8 +409,8 @@ the previous test to check for a `nil` error.
 The compiler will fail because we are not return a value for `Add`.
 
 ```bash
-./dict_test.go:30:13: Add(dict, word, def) used as value
-./dict_test.go:41:13: Add(dict, word, "new test") used as value
+./dict_test.go:30:13: dict.Add(word, def) used as value
+./dict_test.go:41:13: dict.Add(word, "new test") used as value
 ```
 
 ## Write the minimal amount of code for the test to run and check the output
@@ -423,8 +423,8 @@ var (
 	WordExistsError = errors.New("cannot add word because it already exists")
 )
 
-func Add(dict map[string]string, word, def string) error {
-	dict[word] = def
+func (d Dict) Add(word, def string) error {
+	d[word] = def
 	return nil
 }
 ```
@@ -441,11 +441,11 @@ returning a `nil` error.
 ## Write enough code to make it pass
 
 ```go
-func Add(dict map[string]string, word, def string) error {
-	_, err := Search(dict, word)
+func (d Dict) Add(word, def string) error {
+	_, err := d.Search(word)
 	switch err {
 	case NotFoundError:
-		dict[word] = def
+		d[word] = def
 	case nil:
 		return WordExistsError
 	default:
