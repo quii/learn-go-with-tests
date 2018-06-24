@@ -23,13 +23,13 @@ Our application will help keep track of when the blind should go up, and how muc
 	- e.g 6 players equals 21 minutes for the blind.
 - After the blind time expires the game should alert the players the new amount the blind bet is.
 - The blind starts at 100 chips, then 200, 400, 600, 1000, 2000 and continue to double until the game ends.
-- When the game ends the user should be able to type "Chris wins" and that will record a win for the player in our existing database.
+- When the game ends the user should be able to type "Chris wins" and that will record a win for the player in our existing database. This should then exit the program.
 
-The product owner hopes that we will be able to re-use our player wins database as part of this work. 
+The product owner wants the database to be shared amongst the two applications so that the league update according to wins recorded in the new application.
 
 ## A reminder of the code
 
-We have an application with a `main.go` file that launches a HTTP server. The HTTP server wont be interesting to us for this exercise but the abstraction it uses will. It depends on a `PlayerStore`
+We have an application with a `main.go` file that launches a HTTP server. The HTTP server wont be interesting to us for this exercise but the abstraction it uses will. It depends on a `PlayerStore`.
 
 ```go
 type PlayerStore interface {
@@ -45,7 +45,7 @@ In the previous chapter we made a `FileSystemPlayerStore` which implements that 
 
 Our project now needs to create two binaries, our existing web server and the command line app.
 
-Before we get stuck in to our new work we should structure our project to accommodate this. 
+Before we get stuck in to our new work we should structure our project to accommodate this.
 
 So far all the work has lived in one folder, and we'll assume the code on your computer is living somewhere like
 
@@ -55,7 +55,7 @@ It is good practice not to go over-the-top with package structure and thankfully
 
 Inside the existing project create a `cmd` directory with a `webserver` directory inside that (e.g `mkdir -p cmd/webserver`).
 
-Move the `main.go` inside there. 
+Move the `main.go` inside there.
 
 If you have `tree` installed you should run it and your structure should look like this
 
@@ -74,9 +74,11 @@ If you have `tree` installed you should run it and your structure should look li
 └── tape_test.go
 ```
 
-We now effectively have a separation between our application and the library code but we now need to change some package names. Remember when you build a Go application it's package _must_ be `main`. Change all the other code to have a package called `poker`. 
+We now effectively have a separation between our application and the library code but we now need to change some package names. Remember when you build a Go application it's package _must_ be `main`.
 
-Finally we need to import this package into `main.go` so we can use it to create our web server.
+Change all the other code to have a package called `poker`.
+
+Finally we need to import this package into `main.go` so we can use it to create our web server. Then we can use our library code by using `poker.FunctionName`
 
 The paths will be different on your computer, but it should be similar to this:
 
@@ -111,11 +113,10 @@ func main() {
 		log.Fatalf("could not listen on port 5000 %v", err)
 	}
 }
-```  
+```
 
 ### Final checks
 
 - Inside the root run `go test` and check they're still passing
 - Go inside our `cmd/webserver` and do `go run main.go`
 	- Visit `http://localhost:5000/league` and you should see it's still working
-
