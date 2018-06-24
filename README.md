@@ -48,7 +48,7 @@ By the end of this, you should have a strong grasp as to how to iteratively writ
 * [HTTP server](http-server.md) - We will create an application which listens to HTTP requests and responds to them.
 * [JSON, routing and embedding](json.md) - We will make our endpoints return JSON and explore how to do routing.
 * [IO and sorting](io.md) - We will persist and read our data from disk and we'll cover sorting data.
-* Command line (TODO) - Working with flags and responding to user input on the command line
+* [Command line (TODO)](command-line.md) - Working with flags and responding to user input on the command line
 
 ## Contributing
 
