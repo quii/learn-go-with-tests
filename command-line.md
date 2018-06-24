@@ -4,7 +4,7 @@
 
 Our product owner now wants to _pivot_ by introducing a second application. This will be a command line app which helps a group of people play Texas-Holdem Poker.
 
-## Just enough information on poker. 
+## Just enough information on poker.
 
 - N number of players sit in a circle.
 - There is a dealer button, which gets passed to the left every round.
@@ -18,9 +18,9 @@ Our application will help keep track of when the blind should go up, and how muc
 
 - Create a command line app.
 - When it starts it asks how many players are playing. This determines the amount of time there is before the "blind" bet goes up.
-	- There is a base amount of time of 15 minutes.
-	- For every player, 1 minute is added.
-	- e.g 6 players equals 21 minutes for the blind.
+    - There is a base amount of time of 15 minutes.
+    - For every player, 1 minute is added.
+    - e.g 6 players equals 21 minutes for the blind.
 - After the blind time expires the game should alert the players the new amount the blind bet is.
 - The blind starts at 100 chips, then 200, 400, 600, 1000, 2000 and continue to double until the game ends.
 - When the game ends the user should be able to type "Chris wins" and that will record a win for the player in our existing database. This should then exit the program.
@@ -33,9 +33,9 @@ We have an application with a `main.go` file that launches a HTTP server. The HT
 
 ```go
 type PlayerStore interface {
-	GetPlayerScore(name string) int
-	RecordWin(name string)
-	GetLeague() League
+    GetPlayerScore(name string) int
+    RecordWin(name string)
+    GetLeague() League
 }
 ```
 
@@ -86,32 +86,32 @@ The paths will be different on your computer, but it should be similar to this:
 package main
 
 import (
-	"log"
-	"net/http"
-	"os"
-	"github.com/quii/learn-go-with-tests/command-line/v1"
+    "log"
+    "net/http"
+    "os"
+    "github.com/quii/learn-go-with-tests/command-line/v1"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+    db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
 
-	if err != nil {
-		log.Fatalf("problem opening %s %v", dbFileName, err)
-	}
+    if err != nil {
+        log.Fatalf("problem opening %s %v", dbFileName, err)
+    }
 
-	store, err := poker.NewFileSystemPlayerStore(db)
+    store, err := poker.NewFileSystemPlayerStore(db)
 
-	if err != nil {
-		log.Fatalf("problem creating file system player store, %v ", err)
-	}
+    if err != nil {
+        log.Fatalf("problem creating file system player store, %v ", err)
+    }
 
-	server := poker.NewPlayerServer(store)
+    server := poker.NewPlayerServer(store)
 
-	if err := http.ListenAndServe(":5000", server); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
-	}
+    if err := http.ListenAndServe(":5000", server); err != nil {
+        log.Fatalf("could not listen on port 5000 %v", err)
+    }
 }
 ```
 
@@ -119,4 +119,4 @@ func main() {
 
 - Inside the root run `go test` and check they're still passing
 - Go inside our `cmd/webserver` and do `go run main.go`
-	- Visit `http://localhost:5000/league` and you should see it's still working
+    - Visit `http://localhost:5000/league` and you should see it's still working
