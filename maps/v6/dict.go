@@ -12,8 +12,10 @@ func (e DictErr) Error() string {
 	return string(e)
 }
 
-func Search(dict map[string]string, word string) (string, error) {
-	def, ok := dict[word]
+type Dict map[string]string
+
+func (d Dict) Search(word string) (string, error) {
+	def, ok := d[word]
 	if !ok {
 		return "", ErrNotFound
 	}
@@ -21,11 +23,11 @@ func Search(dict map[string]string, word string) (string, error) {
 	return def, nil
 }
 
-func Add(dict map[string]string, word, def string) error {
-	_, err := Search(dict, word)
+func (d Dict) Add(word, def string) error {
+	_, err := d.Search(word)
 	switch err {
 	case ErrNotFound:
-		dict[word] = def
+		d[word] = def
 	case nil:
 		return ErrWordExists
 	default:
@@ -36,18 +38,17 @@ func Add(dict map[string]string, word, def string) error {
 	return nil
 }
 
-func Update(dict map[string]string, word, def string) error {
-	_, err := Search(dict, word)
+func (d Dict) Update(word, def string) error {
+	_, err := d.Search(word)
 	switch err {
 	case ErrNotFound:
 		return ErrWordDoesNotExist
 	case nil:
-		dict[word] = def
+		d[word] = def
 	default:
 		return err
 
 	}
 
-	dict[word] = def
 	return nil
 }

@@ -623,7 +623,6 @@ func (d Dict) Update(word, def string) error {
 
 	}
 
-	d[word] = def
 	return nil
 }
 ```
@@ -640,5 +639,3 @@ Having specific errors allows your application to know more about what went
 wrong. For example, if you are running a website. You might not want the user to
 see `ErrNotFound`, but instead redirect them to a add page. While
 `ErrWordDoesNotExist` would be displayed when they are trying to update a word.
-
-## Write the test first
