@@ -96,7 +96,7 @@ readability and extract our assertion.
 func TestSearch(t *testing.T) {
 	dict := Dict{"test": "this is just a test"}
 
-	got := Search(dict, "test")
+	got := dict.Search("test")
 	want := "this is just a test"
 
 	assertStrings(t, got, want)
@@ -319,7 +319,7 @@ looking for
 
 ```go
 func (d Dict) Add(word, def string) {
-	dict[word] = def
+	d[word] = def
 }
 ```
 
@@ -501,7 +501,7 @@ func TestUpdate(t *testing.T) {
 	dict := Dict{word: def}
 	newDef := "new def"
 
-	Update(dict, word, newDef)
+	dict.Update(dictword, newDef)
 
 	assertDef(t, dict, word, newDef)
 }
@@ -521,7 +521,7 @@ We already know how to deal with an error like this. We need to define our
 function.
 
 ```go
-func Update(dict map[string]string, word, def string) {}
+func (d Dict) Update(word, def string) {}
 ```
 
 With that in place we are able to see that we need to change the definition of
@@ -537,8 +537,8 @@ We already saw how to do this when we fixed the issue with create. So let's
 implement something really similar to create.
 
 ```go
-func Update(dict map[string]string, word, def string) {
-	dict[word] = def
+func (d Dict) Update(word, def string) {
+	d[word] = def
 }
 ```
 
@@ -555,7 +555,7 @@ t.Run("existing word", func(t *testing.T) {
     newDef := "new def"
     dict := Dict{word: def}
 
-    err := Update(dict, word, newDef)
+    err := dict.Update(word, newDef)
 
     assertError(t, err, nil)
     assertDef(t, dict, word, newDef)
@@ -566,7 +566,7 @@ t.Run("new word", func(t *testing.T) {
     def := "this is just a test"
     dict := Dict{}
 
-    err := Update(dict, word, def)
+    err := dict.Update(dictword, def)
 
     assertError(t, err, ErrWordDoesNotExist)
 })
@@ -578,8 +578,8 @@ modified `Update` to return an `error` value.
 ## Try and run the test
 
 ```
-./dict_test.go:53:16: Update(dict, word, "new test") used as value
-./dict_test.go:64:16: Update(dict, word, def) used as value
+./dict_test.go:53:16: dict.Update(word, "new test") used as value
+./dict_test.go:64:16: dict.Update(word, def) used as value
 ./dict_test.go:66:23: undefined: ErrWordDoesNotExists
 ```
 
@@ -594,8 +594,8 @@ const (
 	ErrWordDoesNotExist = DictErr("cannot update word because it does not exist")
 )
 
-func Update(dict map[string]string, word, def string) error {
-	dict[word] = def
+func (d Dict) Update(word, def string) error {
+	d[word] = def
 	return nil
 }
 ```
@@ -611,19 +611,19 @@ dict_test.go:66: got error '%!s(<nil>)' want 'cannot update word because it does
 ## Write enough code to make it pass
 
 ```go
-func Update(dict map[string]string, word, def string) error {
-	_, err := Search(dict, word)
+func (d Dict) Update(word, def string) error {
+	_, err := dict.Search(word)
 	switch err {
 	case ErrNotFound:
 		return ErrWordDoesNotExist
 	case nil:
-		dict[word] = def
+		d[word] = def
 	default:
 		return err
 
 	}
 
-	dict[word] = def
+	d[word] = def
 	return nil
 }
 ```
