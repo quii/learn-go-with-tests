@@ -512,7 +512,7 @@ implementation.
 
 ## Try and run the test
 ```
-./dict_test.go:53:2: undefined: Update
+./dict_test.go:53:2: dict.Update undefined (type Dict has no field or method Update)
 ```
 
 ## Write minimal amount of code for the test to run and check the failing test output
@@ -639,3 +639,59 @@ Having specific errors allows your application to know more about what went
 wrong. For example, if you are running a website. You might not want the user to
 see `ErrNotFound`, but instead redirect them to a add page. While
 `ErrWordDoesNotExist` would be displayed when they are trying to update a word.
+
+## Write the test first
+
+```go
+func TestDelete(t *testing.T) {
+	word := "test"
+	dict := Dict{word: "test def"}
+
+	dict.Delete(word)
+
+	_, err := dict.Search(word)
+	if err != ErrNotFound {
+		t.Errorf("Expected '%s' to be deleted", word)
+	}
+}
+```
+
+Our test creates a `Dict` with a word and then checks if the word has been
+removed.
+
+## Try to run the test
+
+By running `go test` we get:
+
+```
+./dict_test.go:74:6: dict.Delete undefined (type Dict has no field or method Delete)
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+```go
+func (d Dict) Delete(word string) {
+
+}
+```
+
+After we add this, the test tells us we are not deleting the word.
+
+```
+dict_test.go:78: Expected 'test' to be deleted
+```
+
+## Write enough code to make it pass
+
+```go
+func (d Dict) Delete(word string) {
+	delete(d, word)
+}
+```
+
+Go has a built in function `delete` that works on maps. It takes two arguments.
+The first is the map and the second is the key to be removed.
+
+The `delete` function returns nothing, and we based our `Delete` method on
+the same notion. Since deleting a value that's not there has no effect, unlike
+our `Update` and `Create` methods, we don't need to complicate the api with errors.
