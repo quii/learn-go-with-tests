@@ -14,6 +14,7 @@ jobs:
   include:
     - stage: build
       script:
+        - go get github.com/quii/learn-go-with-tests/command-line/v1
         - go get -u golang.org/x/lint/golint
         - ./build.sh
     - stage: spelling
