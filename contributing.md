@@ -12,7 +12,7 @@ If you don't feel confident to submit your own guide, submitting an issue for so
 
 ## Style guide
 
-* Always be reinforcing the TDD cycle. Take a look at [template.md]().
+* Always be reinforcing the TDD cycle. Take a look at the [Chapter Template](template.md).
 * Emphasis on iterating over functionality driven by tests. The Hello, world example works well because we gradually make it more sophisticated and learning new techniques _driven_ by the tests. For example:
   * `Hello()` &lt;- how to write functions, return types.
   * `Hello(name string)` &lt;- arguments, constants.
