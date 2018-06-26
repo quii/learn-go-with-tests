@@ -1,4 +1,5 @@
 package poker
+
 import (
 	"fmt"
 	"io"
