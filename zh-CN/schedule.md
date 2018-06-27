@@ -2,6 +2,7 @@
 
 当前翻译进度：
 
+* [x] [README](README.md)
 * [x] [Learn Go with tests](gb-readme.md)
 
 ## Go 基础
