@@ -20,13 +20,13 @@ package main
 import "testing"
 
 func TestSearch(t *testing.T) {
-    dict := Dict{"test": "this is just a test"}
+    dict := map[string]string{"test": "this is just a test"}
 
     got := Search(dict, "test")
     want := "this is just a test"
 
     if got != want {
-        t.Errorf("got %s want %s given, %s", got, want, "test")
+        t.Errorf("got '%s' want '%s' given, '%s'", got, want, "test")
     }
 }
 ```
@@ -34,21 +34,10 @@ Declaring a Map is somewhat similar to an array. Except, it starts with the
 `map` keyword and requires two types. The first is the key, which is written
 inside the `[]`. The second is the value, which goes right after the `[]`.
 
-The key is special. It can only be a comparable type. Comparable types are
-explained in depth in the [language
-spec](https://golang.org/ref/spec#Comparison_operators). But the simple version
-is:
-* boolean
-* numeric
-* string
-* pointer
-* channel
-* interface types
-* structs that contain comparable types
-* arrays that contain comparable types
-
-*if you don't know what some of these are yet, don't worry. We will get to
-them later in the book.*
+The key is special. It can only be a comparable type because without the ability
+to tell if 2 keys are equal. We have no way to ensure that we are getting the
+correct value. Comparable types are explained in depth in the [language
+spec](https://golang.org/ref/spec#Comparison_operators).
 
 The value, on the other hand, can be any type you want. It can even be
 another Map.
@@ -74,7 +63,7 @@ func Search(dict map[string]string, word string) string {
 
 Your test should now fail with a *clear error message*
 
-`dict_test.go:12: got  want this is just a test given, test`
+`dict_test.go:12: got '' want 'this is just a test' given, 'test'`.
 
 ## Write enough code to make it pass
 
@@ -88,9 +77,6 @@ Getting a value our of a Map is the same as getting a value out of Array
 `map[key]`.
 
 ## Refactor
-
-Our test output wasn't very clear. Let's make a small change to increase
-readability and extract our assertion.
 
 ```go
 func TestSearch(t *testing.T) {
@@ -111,11 +97,45 @@ func assertStrings(t *testing.T, got, want string) {
 }
 ```
 
-With this in place our failing test looks a lot clearer
-`dict_test.go:12: got '' want 'this is just a test'`.
+I decided to create an `assertStrings` helper and get rid of the
+`given` piece to make the implementation more general.
 
-I also decided to get rid of the given piece. That way this assertion is
-more generally useful.
+### Using a type alias
+
+We can greatly improve our dictionary's usage by aliasing the Map and making
+`Search` a method.
+
+In `dict_test.go`:
+
+```go
+func TestSearch(t *testing.T) {
+    dict := Dict{"test": "this is just a test"}
+
+    got := dict.Search("test")
+    want := "this is just a test"
+
+    assertStrings(t, got, want)
+}
+```
+
+We switched to using a `Dict` alias, which we have not defined yet, and call
+`Search` on the newly created `Dict` instance.
+
+We do not need to change the `assertStrings`.
+
+In `dict.go`:
+
+```go
+type Dict map[string]string
+
+func (d Dict) Search(word string) string {
+    return d[word]
+}
+```
+
+Here we created a type alias which acts as a thin wrapper around
+the actual type. The advantage of using a type alias is that we can now
+create our own methods on our Map type.
 
 ### Using a type alias
 
@@ -251,8 +271,8 @@ func (d Dict) Search(word string) (string, error) {
 }
 ```
 
-We can get rid of the magic error in our `Search` function by bringing it up
-into a constant. This will also allow us to have a better test.
+We can get rid of the magic error in our `Search` function by extracting it
+into a variable. This will also allow us to have a better test.
 
 ```go
 t.Run("unknown word", func(t *testing.T) {
@@ -326,10 +346,43 @@ func (d Dict) Add(word, def string) {
 Adding to a Map is also similar to an Array. You just need to specify
 key and set it equal to a value.
 
-Another interesting property of Maps is that you can modify them without passing
+### Reference Types
+
+An interesting property of Maps is that you can modify them without passing
 them as a pointer. This is because maps are a reference types. They don't
 actually hold any values. Instead, they point to the underlying data structure
-which houses the data.
+which houses the data. The underlying data structure is actually a `hash table`,
+or `hash map`, and you can read more about `hash tables`
+[here](https://en.wikipedia.org/wiki/Hash_table).
+
+Maps being a pointer is really good, because it means that no matter how
+big your Map gets. Go will only make one copy of it unless you force Go to make
+a copy.
+
+A gotcha that reference types introduce is that maps can be a `nil` value. If
+you try to use a `nil` Map, you will get a `nil pointer exception` which will
+stop your program's execution in it's tracks.
+
+Because of `nil pointer exceptions`, you should never initialize an empty Map
+variable:
+
+```go
+var m map[string]string
+```
+
+Instead you can initialize an empty map like we were doing above, or use the
+`make` keyword to create a map for you:
+
+```go
+dict = map[string]string{}
+
+// OR
+
+dict = make(map[string]string)
+```
+
+These approaches, both create an empty `hash map` and point `dict` at it. Which
+ensures that you will never get a `nil pointer exception`.
 
 ## Refactor
 
@@ -627,7 +680,7 @@ func (d Dict) Update(word, def string) error {
 }
 ```
 
-This algorithm looks almost identical to `Add` except we switched when we update
+This function looks almost identical to `Add` except we switched when we update
 the `dict` and when we return an error.
 
 ### Note on declaring a new error for Update
