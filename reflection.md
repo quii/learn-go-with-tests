@@ -19,13 +19,13 @@ So `walk(x interface{}, fn func(string))` will accept any value for `x`.
 ### So why not use `interface` for everything and have really flexible functions?
 
 - As a user of a function that takes `interface` you lose type safety.What if you meant to pass `Foo.bar` of type `string` into a function but instead did `Foo.baz` which is an `int`? The compiler wont be able to inform you of your mistake
-- As a write of such a function you have to be able to inspect _anything_ that has been passed to you and try and figure out what the type is and what you can do with it.This is done using _reflection_.This can be quite clumsy and difficult to read for some and is generally less performant (as you have to do checks at runtime).
+- As a writer of such a function you have to be able to inspect _anything_ that has been passed to you and try and figure out what the type is and what you can do with it. This is done using _reflection_. This can be quite clumsy and difficult to read and is generally less performant (as you have to do checks at runtime).
 
 In short only use reflection if you really need to.
 
 If you want polymorphic functions, consider if you could design it around an interface (not `interface`, confusingly) so that users can use your function with multiple types if they implement whatever methods you need for your function to work.
 
-Our function will need to be able to work with lots of different things.As always we'll take an iterative approach, writing tests for each new thing we want to support and refactoring along the way until we're done.
+Our function will need to be able to work with lots of different things. As always we'll take an iterative approach, writing tests for each new thing we want to support and refactoring along the way until we're done.
 
 ## Write the test first
 
@@ -176,9 +176,41 @@ Now we can easily add a scenario to see what happens if we have more than one st
 
 ## Write the test first
 
+Add the following scenario to the `cases`.
 
+```go
+{
+    "Struct with two string fields",
+    struct {
+        Name string
+        City string
+    }{"Chris", "London"},
+    []string{"Chris", "London"},
+}
+```
 
 ## Try to run the test
-## Write the minimal amount of code for the test to run and check the failing test output
+
+```
+=== RUN   TestWalk/Struct_with_two_string_fields
+    --- FAIL: TestWalk/Struct_with_two_string_fields (0.00s)
+    	reflection_test.go:40: got [Chris], want [Chris London]
+```
+
 ## Write enough code to make it pass
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := reflect.ValueOf(x)
+
+	for i:=0; i<val.NumField(); i++ {
+		field := val.Field(i)
+		fn(field.String())
+	}
+}
+```
+
+`value` has a method `NumField` which returns the number of fields in the value. This lets us iterate over the fields and call `fn` which passes our test.
+
 ## Refactor
+
