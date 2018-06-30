@@ -132,4 +132,53 @@ We then make some very silly assumptions about the the value passed in
 - We look at the first and only field, there may be no fields at all which would cause a panic
 - We then call `String()` which returns the underlying value as a string but we know it would be wrong if the field was something other than a string.
 
+## Refactor
 
+Our code is passing for the simple case but we know there's a lot of shortcomings in our code. 
+
+We're going to be writing a number of tests where we pass in different values and checking the array of strings that `fn` was called with. 
+
+We should refactor our test into a table based test to make this easier to continue testing new scenarios.
+
+```go
+func TestWalk(t *testing.T) {
+
+	cases := []struct{
+		Name string
+		Input interface{}
+		ExpectedCalls []string
+	} {
+		{
+			"Struct with one string field",
+			struct {
+				Name string
+			}{ "Chris"},
+			[]string{"Chris"},
+		},
+	}
+
+	for _, test := range cases {
+		t.Run(test.Name, func(t *testing.T) {
+			var got []string
+			walk(test.Input, func(input string) {
+				got = append(got, input)
+			})
+
+			if !reflect.DeepEqual(got, test.ExpectedCalls) {
+				t.Errorf("got %v, want %v", got, test.ExpectedCalls)
+			}
+		})
+	}
+}
+```
+
+Now we can easily add a scenario to see what happens if we have more than one string field
+
+## Write the test first
+
+
+
+## Try to run the test
+## Write the minimal amount of code for the test to run and check the failing test output
+## Write enough code to make it pass
+## Refactor
