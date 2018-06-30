@@ -32,33 +32,28 @@ Our function will need to be able to work with lots of different things.As alway
 We'll want to call our function with a struct that has a string field in it (`x`).Then we can spy on the function (`fn`) passed in to see if it is called.
 
 ```go
-type CallSpy []string
-
-func (c *CallSpy) Fn(input string) {
-    *c = append(*c, input)
-}
-
 func TestWalk(t *testing.T) {
 
-    expected := "Chris"
-	
-    x := struct {
-        Name string
-    }{expected}
+	expected := "Chris"
+	var got []string
 
-    var fnSpy CallSpy
-	
-    walk(x, fnSpy.Fn)
-	
-    if len(fnSpy) != 1 {
-        t.Errorf("wrong number of calls to CallSpy, got %d want %d", len(fnSpy), 1)
-    }
+	x := struct {
+		Name string
+	}{expected}
+
+	walk(x, func(input string) {
+		got = append(got, input)
+	})
+
+	if len(got) != 1 {
+		t.Errorf("wrong number of function calls, got %d want %d", len(got), 1)
+	}
 }
 ``` 
 
-- We want to store a slice of strings which represent the function calls we got so we've made a new type `CallSpy` based on `[]string`.This lets us add a method which we pass in to `walk`.Every time the method is called we add the `input` to the underlying `[]string` so we can spy on the calls that `walk` makes.
+- We want to store a slice of strings (`got`) which stores which strings were passed into `fn` by `walk`. Often in previous chapters we have made dedicated types for this to spy on function/method invocations but in this case we can just pass in an anonymous function for `fn` that closes over `got`
 - We use an anonymous `struct` with a `Name` field of type string to go for the simplest "happy" path.
-- Finally call `walk` with `x` and the spy and for now just check the number of calls, we'll be more specific with our assertions once we've got something very basic working.
+- Finally call `walk` with `x` and the spy and for now just check the length of `got`, we'll be more specific with our assertions once we've got something very basic working.
 
 
 ## Try to run the test
@@ -82,7 +77,7 @@ Try and run the test again
 ```
 === RUN   TestWalk
 --- FAIL: TestWalk (0.00s)
-	reflection_test.go:24: wrong number of calls to CallSpy, got 0 want 1
+	reflection_test.go:19: wrong number of function calls, got 0 want 1
 FAIL
 ```
 
@@ -96,4 +91,10 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-The test should now be passing.The next thing we'll need to do is make a more specific assertion on what our `fn` is being called with.
+The test should now be passing. The next thing we'll need to do is make a more specific assertion on what our `fn` is being called with.
+
+## Write the test first
+## Try to run the test
+## Write the minimal amount of code for the test to run and check the failing test output
+## Write enough code to make it pass
+## Refactor

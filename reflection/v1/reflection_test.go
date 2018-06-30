@@ -2,26 +2,20 @@ package main
 
 import "testing"
 
-type CallSpy []string
-
-func (c *CallSpy) Fn(input string) {
-	*c = append(*c, input)
-}
-
 func TestWalk(t *testing.T) {
 
 	expected := "Chris"
+	var got []string
 
 	x := struct {
 		Name string
 	}{expected}
 
-	var fnSpy CallSpy
+	walk(x, func(input string) {
+		got = append(got, input)
+	})
 
-	walk(x, fnSpy.Fn)
-
-	if len(fnSpy) != 1 {
-		t.Errorf("wrong number of calls to CallSpy, got %d want %d", len(fnSpy), 1)
+	if len(got) != 1 {
+		t.Errorf("wrong number of function calls, got %d want %d", len(got), 1)
 	}
-
 }
