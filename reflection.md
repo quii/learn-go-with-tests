@@ -94,7 +94,42 @@ func walk(x interface{}, fn func(input string)) {
 The test should now be passing. The next thing we'll need to do is make a more specific assertion on what our `fn` is being called with.
 
 ## Write the test first
+
+Add the following to the existing test to check the string passed to `fn` is correct
+
+```go
+if got[0] != expected {
+    t.Errorf("got '%s', want '%s'", got[0], expected)
+}
+```
+
 ## Try to run the test
-## Write the minimal amount of code for the test to run and check the failing test output
+
+```
+=== RUN   TestWalk
+--- FAIL: TestWalk (0.00s)
+	reflection_test.go:23: got 'I still can't believe South Korea beat Germany 2-0 to put them last in their group', want 'Chris'
+FAIL
+```
+
 ## Write enough code to make it pass
-## Refactor
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := reflect.ValueOf(x)
+	field := val.Field(0)
+	fn(field.String())
+}
+```
+
+This code is _very unsafe and very naive_ but remember our goal when we are in "red" (the tests failing) is to write the smallest amount of code possible. We then write more tests to address our concerns.
+
+We need to use reflection to have a look at `x` and try and look at its properties.
+
+The [reflect package](https://godoc.org/reflect) has a function `ValueOf` which returns us a `Value` of a given variable. This has ways for us to inspect a value, including its fields which we use on the next line. 
+
+We then make some very silly assumptions about the the value passed in
+- We look at the first and only field, there may be no fields at all which would cause a panic
+- We then call `String()` which returns the underlying value as a string but we know it would be wrong if the field was something other than a string.
+
+
