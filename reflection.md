@@ -455,3 +455,89 @@ func getValue(x interface{}) reflect.Value {
 This actually adds _more_ code but I feel the abstraction level is right
 - Get the `reflect.Value` of `x` so i can inspect it, I dont care how.
 - Iterate over the fields, doing whatever needs to be done depending on its type
+
+Next we need to cover slices
+
+## Write the test first
+
+```go
+{
+    "Slices",
+    []Profile {
+        {33, "London"},
+        {34, "Reykjavík"},
+    },
+    []string{"London", "Reykjavík"},
+},
+```
+
+## Try to run the test
+
+```
+=== RUN   TestWalk/Slices
+panic: reflect: call of reflect.Value.NumField on slice Value [recovered]
+	panic: reflect: call of reflect.Value.NumField on slice Value
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+This is similar to the pointer scenario before, we are trying to call `NumField` on our `reflect.Value` but it doesn't have one as it's not a struct.
+
+## Write enough code to make it pass
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := getValue(x)
+
+	if val.Kind() == reflect.Slice {
+		for i:=0; i< val.Len(); i++ {
+			walk(val.Index(i).Interface(), fn)
+		}
+		return
+	}
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+
+		switch field.Kind() {
+		case reflect.String:
+			fn(field.String())
+		case reflect.Struct:
+			walk(field.Interface(), fn)
+		}
+	}
+}
+```
+
+## Refactor
+
+This works but it's yucky but no worries, we have working code backed by tests so we are free to tinker all we like
+
+If you think a little abstractly, we want to call `walk` on either
+- Each field in a struct
+- Each _thing_ in a slice
+
+Our code at the moment does this, but doesn't reflect it very well. We just have a check at the start to see if it's a slice (with a `return` to stop the rest of the code executing) and if it's not we just assume it's a struct. 
+
+Let's rework the code so instead we check the type _first_ and then do our work.
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := getValue(x)
+
+	switch val.Kind() {
+	case reflect.Struct:
+		for i:=0; i<val.NumField(); i++ {
+			walk(val.Field(i).Interface(), fn)
+		}
+	case reflect.Slice:
+		for i:=0; i<val.Len(); i++ {
+			walk(val.Index(i).Interface(), fn)
+		}
+	case reflect.String:
+		fn(val.String())
+	}
+}
+```
+
+Looking much better! If it's a struct or a slice we iterate over its values calling `walk` on each one. Otherwise if it's a `reflect.String` we can call `fn`.
