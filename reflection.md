@@ -370,3 +370,88 @@ func walk(x interface{}, fn func(input string)) {
 ```
 
 When you're doing a comparison on the same value more than once _generally_ refactoring into a `switch` will improve readability and make your code easier to extend.
+
+What if the value of the struct passed in is a pointer?
+
+## Write the test first
+
+Add this case
+
+```go
+{
+    "Pointers to things",
+    &Person{
+        "Chris",
+        Profile{33, "London"},
+    },
+    []string{"Chris", "London"},
+},
+```
+
+## Try to run the test
+
+```
+=== RUN   TestWalk/Pointers_to_things
+panic: reflect: call of reflect.Value.NumField on ptr Value [recovered]
+	panic: reflect: call of reflect.Value.NumField on ptr Value
+```
+
+## Write enough code to make it pass
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := reflect.ValueOf(x)
+
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+
+		switch field.Kind() {
+		case reflect.String:
+			fn(field.String())
+		case reflect.Struct:
+			walk(field.Interface(), fn)
+		}
+	}
+}
+```
+
+You cant use `NumField` on a pointer `Value`, we need to extract the underlying value before we can do that by using `Elem()`
+
+## Refactor
+
+Let's encapsulate the responsibility of extracting the `reflect.Value` from a given `interface{}` into a function
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := getValue(x)
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+
+		switch field.Kind() {
+		case reflect.String:
+			fn(field.String())
+		case reflect.Struct:
+			walk(field.Interface(), fn)
+		}
+	}
+}
+
+func getValue(x interface{}) reflect.Value {
+	val := reflect.ValueOf(x)
+
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	return val
+}
+```
+
+This actually adds _more_ code but I feel the abstraction level is right
+- Get the `reflect.Value` of `x` so i can inspect it, I dont care how.
+- Iterate over the fields, doing whatever needs to be done depending on its type
