@@ -2,7 +2,11 @@
 
 > #golang challenge: write a function `walk(x interface{}, fn func(string))` which takes a struct `x` and calls `fn` for all strings fields found inside.difficulty level: recursively.
 
-Let's do it! 
+To do this we will need to use _reflection_
+
+> Reflection in computing is the ability of a program to examine its own structure, particularly through types; it's a form of metaprogramming. It's also a great source of confusion. 
+
+From [The Go Blog: Reflection](https://blog.golang.org/laws-of-reflection)
 
 ## What is `interface` ?
 
@@ -541,3 +545,190 @@ func walk(x interface{}, fn func(input string)) {
 ```
 
 Looking much better! If it's a struct or a slice we iterate over its values calling `walk` on each one. Otherwise if it's a `reflect.String` we can call `fn`.
+
+Still, to me it feels like it could be better. There's repetition the operation of iterating over fields/values and then calling `walk` but conceptually they're the same.
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := getValue(x)
+
+	numberOfValues := 0
+	var getField func(int) reflect.Value
+
+	switch val.Kind() {
+	case reflect.String:
+		fn(val.String())
+	case reflect.Struct:
+		numberOfValues = val.NumField()
+		getField = val.Field
+	case reflect.Slice:
+		numberOfValues = val.Len()
+		getField = val.Index
+	}
+
+	for i:=0; i< numberOfValues; i++ {
+		walk(getField(i).Interface(), fn)
+	}
+}
+``` 
+
+If the `value` is a `reflect.String` then we just call `fn` like normal. 
+
+Otherwise our `switch` will extract out two things depending on the type
+- How many fields there are
+- How to extract the `Value` (`Field` or `Index`)
+
+Once we've determined those things we can iterate through `numberOfValues` calling `walk` with the result of the `getField` function.
+
+Now we've done this, handling arrays should be trivial.
+
+## Write the test first
+
+Add to the cases
+
+```go
+{
+    "Arrays",
+    [2]Profile {
+        {33, "London"},
+        {34, "Reykjavík"},
+    },
+    []string{"London", "Reykjavík"},
+},
+```
+
+## Try to run the test
+
+```
+=== RUN   TestWalk/Arrays
+    --- FAIL: TestWalk/Arrays (0.00s)
+    	reflection_test.go:78: got [], want [London Reykjavík]
+```
+
+## Write enough code to make it pass
+
+Arrays can be handled the same way as slices, so just add it to the case with a comma
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := getValue(x)
+
+	numberOfValues := 0
+	var getField func(int) reflect.Value
+
+	switch val.Kind() {
+	case reflect.String:
+		fn(val.String())
+	case reflect.Struct:
+		numberOfValues = val.NumField()
+		getField = val.Field
+	case reflect.Slice, reflect.Array:
+		numberOfValues = val.Len()
+		getField = val.Index
+	}
+
+	for i:=0; i< numberOfValues; i++ {
+		walk(getField(i).Interface(), fn)
+	}
+}
+```
+
+The final type we want to handle is `map`
+
+## Write the test first
+
+```go
+{
+    "Maps",
+    map[string]string{
+        "Foo": "Bar",
+        "Baz": "Boz",
+    },
+    []string{"Bar", "Boz"},
+},
+```
+
+## Try to run the test
+
+```
+=== RUN   TestWalk/Maps
+    --- FAIL: TestWalk/Maps (0.00s)
+    	reflection_test.go:86: got [], want [Bar Boz]
+```
+
+## Write enough code to make it pass
+
+Again if you think a little abstractly you can see that `map` is very similar to `struct` it's just the keys are unknown at compile time.
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := getValue(x)
+
+	numberOfValues := 0
+	var getField func(int) reflect.Value
+
+	switch val.Kind() {
+	case reflect.String:
+		fn(val.String())
+	case reflect.Struct:
+		numberOfValues = val.NumField()
+		getField = val.Field
+	case reflect.Slice, reflect.Array:
+		numberOfValues = val.Len()
+		getField = val.Index
+	case reflect.Map:
+		for _, key := range val.MapKeys() {
+			walk(val.MapIndex(key).Interface(), fn)
+		}
+	}
+
+	for i:=0; i< numberOfValues; i++ {
+		walk(getField(i).Interface(), fn)
+	}
+}
+```
+
+However, by design you cannot get values out of a map by index. It's only done by _key_, so that breaks our abstraction, darn.
+
+## Refactor
+
+How do you feel right now? It felt like maybe a nice abstraction at the time but now the code feels a little wonky.
+
+_This is OK!_ Refactoring is a journey and sometimes we will make mistakes. A major point of TDD is it gives us the freedom to try these things out.
+
+By taking small steps backed by steps this is in no way an irreversible situation. Let's just put it back to how it was before the refactor. 
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := getValue(x)
+	
+	walkValue := func(value reflect.Value) {
+		walk(value.Interface(), fn)
+	}
+
+	switch val.Kind() {
+	case reflect.String:
+		fn(val.String())
+	case reflect.Struct:
+		for i := 0; i< val.NumField(); i++ {
+			walkValue(val.Field(i))
+		}
+	case reflect.Slice, reflect.Array:
+		for i:= 0; i<val.Len(); i++ {
+			walkValue(val.Index(i))
+		}
+	case reflect.Map:
+		for _, key := range val.MapKeys() {
+			walkValue(val.MapIndex(key))
+		}
+	}
+}
+```
+
+We've introduced `walkValue` which DRYs up the calls to `walk` inside our `switch` so that they only have to extract out the `reflect.Value`s from `val`.
+
+## Wrapping up
+
+- Introduced some of the concepts from the `reflect` package. 
+- Used recursion to traverse arbitrary data structures
+
