@@ -51,7 +51,7 @@ func TestWalk(t *testing.T) {
 		},
 		{
 			"Slices",
-			[]Profile {
+			[]Profile{
 				{33, "London"},
 				{34, "Reykjavík"},
 			},

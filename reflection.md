@@ -24,7 +24,7 @@ So `walk(x interface{}, fn func(string))` will accept any value for `x`.
 
 ### So why not use `interface` for everything and have really flexible functions?
 
-- As a user of a function that takes `interface` you lose type safety.What if you meant to pass `Foo.bar` of type `string` into a function but instead did `Foo.baz` which is an `int`? The compiler wont be able to inform you of your mistake
+- As a user of a function that takes `interface` you lose type safety. What if you meant to pass `Foo.bar` of type `string` into a function but instead did `Foo.baz` which is an `int`? The compiler wont be able to inform you of your mistake. You also have no idea _what_ you're allowed to pass to a function. Knowing that a function takes a `UserService` for instance is very useful.
 - As a writer of such a function you have to be able to inspect _anything_ that has been passed to you and try and figure out what the type is and what you can do with it. This is done using _reflection_. This can be quite clumsy and difficult to read and is generally less performant (as you have to do checks at runtime).
 
 In short only use reflection if you really need to.
@@ -517,7 +517,7 @@ func walk(x interface{}, fn func(input string)) {
 
 ## Refactor
 
-This works but it's yucky but no worries, we have working code backed by tests so we are free to tinker all we like
+This works but it's yucky. No worries, we have working code backed by tests so we are free to tinker all we like.
 
 If you think a little abstractly, we want to call `walk` on either
 - Each field in a struct
@@ -690,7 +690,7 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-However, by design you cannot get values out of a map by index. It's only done by _key_, so that breaks our abstraction, darn.
+However by design you cannot get values out of a map by index. It's only done by _key_, so that breaks our abstraction, darn.
 
 ## Refactor
 
@@ -732,5 +732,6 @@ We've introduced `walkValue` which DRYs up the calls to `walk` inside our `switc
 ## Wrapping up
 
 - Introduced some of the concepts from the `reflect` package. 
-- Used recursion to traverse arbitrary data structures
+- Used recursion to traverse arbitrary data structures.
+- Did an in retrospect bad refactor but didn't get too upset about it. By working iteratively with tests it's not such a big deal.
 

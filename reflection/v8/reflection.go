@@ -15,11 +15,11 @@ func walk(x interface{}, fn func(input string)) {
 	case reflect.String:
 		fn(val.String())
 	case reflect.Struct:
-		for i := 0; i< val.NumField(); i++ {
+		for i := 0; i < val.NumField(); i++ {
 			walkValue(val.Field(i))
 		}
 	case reflect.Slice, reflect.Array:
-		for i:= 0; i<val.Len(); i++ {
+		for i := 0; i < val.Len(); i++ {
 			walkValue(val.Index(i))
 		}
 	case reflect.Map:

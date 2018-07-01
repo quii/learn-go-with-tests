@@ -21,7 +21,7 @@ func walk(x interface{}, fn func(input string)) {
 		getField = val.Index
 	}
 
-	for i:=0; i< numberOfValues; i++ {
+	for i := 0; i < numberOfValues; i++ {
 		walk(getField(i).Interface(), fn)
 	}
 }
