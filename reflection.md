@@ -214,3 +214,159 @@ func walk(x interface{}, fn func(input string)) {
 
 ## Refactor
 
+It doesn't look like there's any obvious refactors here that would improve the code so let's press on
+
+The next shortcoming in `walk` is that it assumes every field is a `string`. Let's write a test for this scenario
+
+## Write the test first
+
+Add the following case
+
+```go
+{
+    "Struct with non string field",
+    struct {
+        Name string
+        Age  int
+    }{"Chris", 33},
+    []string{"Chris"},
+},
+```
+
+## Try to run the test
+
+```go
+=== RUN   TestWalk/Struct_with_non_string_field
+    --- FAIL: TestWalk/Struct_with_non_string_field (0.00s)
+    	reflection_test.go:46: got [Chris <int Value>], want [Chris]
+```
+
+## Write enough code to make it pass
+
+We need to check that the type of the field is a `string`.
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := reflect.ValueOf(x)
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+
+		if field.Kind() == reflect.String {
+			fn(field.String())
+		}
+	}
+}
+```
+
+We can do that by checking its [`Kind`](https://godoc.org/reflect#Kind)
+
+## Refactor
+
+Again it looks like the code is reasonable enough for now. 
+
+The next scenario is what if it isn't a "flat" `struct`? In other words what happens if we have a `struct` with some nested fields?
+
+## Write the test first
+
+We have been using the anonymous struct syntax to declare types ad-hocly for our tests so we could continue to do that like so
+
+```go
+{
+    "Nested fields",
+    struct {
+        Name string
+        Profile struct {
+            Age  int
+            City string
+        }
+    }{"Chris", struct {
+        Age  int
+        City string
+    }{33, "London"}},
+    []string{"Chris", "London"},
+},
+```
+
+But we can see that when you get inner anonymous structs the syntax gets a little messy. [There is a proposal to make it so the syntax would be nicer](https://github.com/golang/go/issues/12854).
+
+Let's just refactor this by making a known type for this scenario and reference it in the test. There is a little indirection in that some of the code for our test is outside the test but readers should be able to infer the structure of the `struct` by looking at the initialisation.
+
+Add the following type declarations somewhere in your test file
+
+```go
+type Person struct {
+	Name    string
+	Profile Profile
+}
+
+type Profile struct {
+	Age  int
+	City string
+}
+```
+
+Now we can add this to our cases which reads a lot clearer than before
+```go
+{
+    "Nested fields",
+    Person{
+        "Chris",
+        Profile{33, "London"},
+    },
+    []string{"Chris", "London"},
+},
+```
+
+## Try to run the test
+
+```
+=== RUN   TestWalk/Nested_fields
+    --- FAIL: TestWalk/Nested_fields (0.00s)
+    	reflection_test.go:54: got [Chris], want [Chris London]
+```
+
+The problem is we're only iterating on the fields on the first level of the type's hierarchy 
+
+## Write enough code to make it pass
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := reflect.ValueOf(x)
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+
+		if field.Kind() == reflect.String {
+			fn(field.String())
+		}
+
+		if field.Kind() == reflect.Struct {
+			walk(field.Interface(), fn)
+		}
+	}
+}
+```
+
+The solution is quite simple, we again inspect its `Kind` and if it happens to be a `struct` we just call `walk` again on that inner `struct`
+
+## Refactor
+
+```go
+func walk(x interface{}, fn func(input string)) {
+	val := reflect.ValueOf(x)
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+
+		switch field.Kind() {
+		case reflect.String:
+			fn(field.String())
+		case reflect.Struct:
+			walk(field.Interface(), fn)
+		}
+	}
+}
+```
+
+When you're doing a comparison on the same value more than once _generally_ refactoring into a `switch` will improve readability and make your code easier to extend.
