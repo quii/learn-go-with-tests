@@ -2,11 +2,11 @@ package main
 
 import "errors"
 
-type Dict map[string]string
+type Dictionary map[string]string
 
 var NotFoundError = errors.New("could not find the word you were looking for")
 
-func (d Dict) Search(word string) (string, error) {
+func (d Dictionary) Search(word string) (string, error) {
 	def, ok := d[word]
 	if !ok {
 		return "", NotFoundError
@@ -15,6 +15,6 @@ func (d Dict) Search(word string) (string, error) {
 	return def, nil
 }
 
-func (d Dict) Add(word, def string) {
+func (d Dictionary) Add(word, def string) {
 	d[word] = def
 }

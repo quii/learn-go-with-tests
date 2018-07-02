@@ -5,17 +5,17 @@ import (
 )
 
 func TestSearch(t *testing.T) {
-	dict := Dict{"test": "this is just a test"}
+	dictionary := Dictionary{"test": "this is just a test"}
 
 	t.Run("known word", func(t *testing.T) {
-		got, _ := dict.Search("test")
+		got, _ := dictionary.Search("test")
 		want := "this is just a test"
 
 		assertStrings(t, got, want)
 	})
 
 	t.Run("unknown word", func(t *testing.T) {
-		_, got := dict.Search("unknown")
+		_, got := dictionary.Search("unknown")
 
 		assertError(t, got, NotFoundError)
 	})

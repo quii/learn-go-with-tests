@@ -12,7 +12,7 @@ way is there to learn about Maps than to build our own dictionary?
 
 ## Write the test first
 
-In `dict_test.go`
+In `dictionary_test.go`
 
 ```go
 package main
@@ -20,9 +20,9 @@ package main
 import "testing"
 
 func TestSearch(t *testing.T) {
-    dict := map[string]string{"test": "this is just a test"}
+    dictionary := map[string]string{"test": "this is just a test"}
 
-    got := Search(dict, "test")
+    got := Search(dictionary, "test")
     want := "this is just a test"
 
     if got != want {
@@ -46,30 +46,30 @@ Everything else in this test should be familiar.
 
 ## Try to run the test
 
-By running `go test` the compiler will fail with `./dict_test.go:8:9:
+By running `go test` the compiler will fail with `./dictionary_test.go:8:9:
 undefined: Search`.
 
 ## Write the minimal amount of code for the test to run and check the output
 
-In `dict.go`
+In `dictionary.go`
 
 ```go
 package main
 
-func Search(dict map[string]string, word string) string {
+func Search(dictionary map[string]string, word string) string {
     return ""
 }
 ```
 
 Your test should now fail with a *clear error message*
 
-`dict_test.go:12: got '' want 'this is just a test' given, 'test'`.
+`dictionary_test.go:12: got '' want 'this is just a test' given, 'test'`.
 
 ## Write enough code to make it pass
 
 ```go
-func Search(dict map[string]string, word string) string {
-    return dict[word]
+func Search(dictionary map[string]string, word string) string {
+    return dictionary[word]
 }
 ```
 
@@ -80,9 +80,9 @@ Getting a value our of a Map is the same as getting a value out of Array
 
 ```go
 func TestSearch(t *testing.T) {
-    dict := Dict{"test": "this is just a test"}
+    dictionary := Dictionary{"test": "this is just a test"}
 
-    got := dict.Search("test")
+    got := dictionary.Search("test")
     want := "this is just a test"
 
     assertStrings(t, got, want)
@@ -105,30 +105,30 @@ I decided to create an `assertStrings` helper and get rid of the
 We can greatly improve our dictionary's usage by aliasing the Map and making
 `Search` a method.
 
-In `dict_test.go`:
+In `dictionary_test.go`:
 
 ```go
 func TestSearch(t *testing.T) {
-    dict := Dict{"test": "this is just a test"}
+    dictionary := Dictionary{"test": "this is just a test"}
 
-    got := dict.Search("test")
+    got := dictionary.Search("test")
     want := "this is just a test"
 
     assertStrings(t, got, want)
 }
 ```
 
-We switched to using a `Dict` alias, which we have not defined yet, and call
-`Search` on the newly created `Dict` instance.
+We switched to using a `Dictionary` alias, which we have not defined yet, and call
+`Search` on the newly created `Dictionary` instance.
 
 We do not need to change the `assertStrings`.
 
-In `dict.go`:
+In `dictionary.go`:
 
 ```go
-type Dict map[string]string
+type Dictionary map[string]string
 
-func (d Dict) Search(word string) string {
+func (d Dictionary) Search(word string) string {
     return d[word]
 }
 ```
@@ -142,30 +142,30 @@ create our own methods on our Map type.
 We can greatly improve our module's usage by aliasing the Map and making
 `Search` a method.
 
-In `dict_test.go`:
+In `dictionary_test.go`:
 
 ```go
 func TestSearch(t *testing.T) {
-    dict := Dict{"test": "this is just a test"}
+    dictionary := Dictionary{"test": "this is just a test"}
 
-    got := dict.Search("test")
+    got := dictionary.Search("test")
     want := "this is just a test"
 
     assertStrings(t, got, want)
 }
 ```
 
-We switched to using a `Dict` struct which we have not defined yet, and call
-`Search` on the newly created `Dict` instance.
+We switched to using a `Dictionary` struct which we have not defined yet, and call
+`Search` on the newly created `Dictionary` instance.
 
 We do not need to change the `assertStrings`.
 
-In `dict.go`:
+In `dictionary.go`:
 
 ```go
-type Dict map[string]string
+type Dictionary map[string]string
 
-func (d Dict) Search(word string) string {
+func (d Dictionary) Search(word string) string {
     return d[word]
 }
 ```
@@ -187,17 +187,17 @@ for a dictionary.However, it's a scenario that could be key in other usecases).
 
 ```go
 func TestSearch(t *testing.T) {
-    dict := Dict{"test": "this is just a test"}
+    dictionary := Dictionary{"test": "this is just a test"}
 
     t.Run("known word", func(t *testing.T) {
-        got, _ := dict.Search("test")
+        got, _ := dictionary.Search("test")
         want := "this is just a test"
 
         assertStrings(t, got, want)
     })
 
     t.Run("unknown word", func(t *testing.T) {
-        _, got := dict.Search("test")
+        _, got := dictionary.Search("test")
         want := "could not find the word you were looking for"
 
         if got == nil {
@@ -221,25 +221,25 @@ method, which we do when passing it to the assertion. We are also wrapping
 This does not compile
 
 ```
-./dict_test.go:18:10: assignment mismatch: 2 variables but 1 values
+./dictionary_test.go:18:10: assignment mismatch: 2 variables but 1 values
 ```
 
 ## Write the minimal amount of code for the test to run and check the output
 
 ```go
-func (d Dict) Search(word string) (string, error) {
+func (d Dictionary) Search(word string) (string, error) {
     return d[word], nil
 }
 ```
 
 Your test should now fails with a much clearer error message.
 
-`dict_test.go:22: expected to receive and error.`
+`dictionary_test.go:22: expected to receive and error.`
 
 ## Write enough code to make it pass
 
 ```go
-func (d Dict) Search(word string) (string, error) {
+func (d Dictionary) Search(word string) (string, error) {
     def, ok := d[word]
     if !ok {
         return "", errors.New("could not find the word you were looking for")
@@ -261,7 +261,7 @@ and a word that just doesn't have a definition.
 ```go
 var NotFoundError = errors.New("could not find the word you were looking for")
 
-func (d Dict) Search(word string) (string, error) {
+func (d Dictionary) Search(word string) (string, error) {
     def, ok := d[word]
     if !ok {
         return "", NotFoundError
@@ -276,7 +276,7 @@ into a variable. This will also allow us to have a better test.
 
 ```go
 t.Run("unknown word", func(t *testing.T) {
-    _, got := dict.Search("unknown")
+    _, got := dictionary.Search("unknown")
 
     assertError(t, got, NotFoundError)
 })
@@ -301,11 +301,11 @@ new words to our dictionary.
 
 ```go
 func TestAdd(t *testing.T) {
-    dict := Dict{}
-    dict.Add("test", "this is just a test")
+    dictionary := Dictionary{}
+    dictionary.Add("test", "this is just a test")
 
     want := "this is just a test"
-    got, err := dict.Search("test")
+    got, err := dictionary.Search("test")
     if err != nil {
         t.Fatal("should find added word:", err)
     }
@@ -321,24 +321,24 @@ validation of the dictionary a little easier.
 
 ## Write the minimal amount of code for the test to run and check output
 
-In `dict.go`
+In `dictionary.go`
 
 ```go
-func (d Dict) Add(word, def string) {
+func (d Dictionary) Add(word, def string) {
 }
 ```
 
 Your test should now fail
 
 ```
-dict_test.go:31: should find added word: could not find the word you were
+dictionary_test.go:31: should find added word: could not find the word you were
 looking for
 ```
 
 ## Write enough code to make it pass
 
 ```go
-func (d Dict) Add(word, def string) {
+func (d Dictionary) Add(word, def string) {
     d[word] = def
 }
 ```
@@ -374,14 +374,14 @@ Instead you can initialize an empty map like we were doing above, or use the
 `make` keyword to create a map for you:
 
 ```go
-dict = map[string]string{}
+dictionary = map[string]string{}
 
 // OR
 
-dict = make(map[string]string)
+dictionary = make(map[string]string)
 ```
 
-These approaches, both create an empty `hash map` and point `dict` at it. Which
+These approaches, both create an empty `hash map` and point `dictionary` at it. Which
 ensures that you will never get a `nil pointer exception`.
 
 ## Refactor
@@ -391,19 +391,19 @@ a little simplification.
 
 ```go
 func TestAdd(t *testing.T) {
-    dict := Dict{}
+    dictionary := Dictionary{}
     word := "test"
     def := "this is just a test"
 
-    dict.Add(word, def)
+    dictionary.Add(word, def)
 
-    assertDef(t, dict, word, def)
+    assertDef(t, dictionary, word, def)
 }
 
-func assertDef(t *testing.T, dict Dict, word, def string) {
+func assertDef(t *testing.T, dictionary Dictionary, word, def string) {
     t.Helper()
 
-    got, err := dict.Search(word)
+    got, err := dictionary.Search(word)
     if err != nil {
         t.Fatal("should find added word:", err)
     }
@@ -431,24 +431,24 @@ words to our dictionary.
 ```go
 func TestAdd(t *testing.T) {
     t.Run("new word", func(t *testing.T) {
-        dict := Dict{}
+        dictionary := Dictionary{}
         word := "test"
         def := "this is just a test"
 
-        err := dict.Add(word, def)
+        err := dictionary.Add(word, def)
 
         assertError(t, err, nil)
-        assertDef(t, dict, word, def)
+        assertDef(t, dictionary, word, def)
     })
 
     t.Run("existing word", func(t *testing.T) {
         word := "test"
         def := "this is just a test"
-        dict := Dict{word: def}
-        err := dict.Add(word, "new test")
+        dictionary := Dictionary{word: def}
+        err := dictionary.Add(word, "new test")
 
         assertError(t, err, WordExistsError)
-        assertDef(t, dict, word, def)
+        assertDef(t, dictionary, word, def)
     })
 }
 ```
@@ -462,13 +462,13 @@ the previous test to check for a `nil` error.
 The compiler will fail because we are not return a value for `Add`.
 
 ```bash
-./dict_test.go:30:13: dict.Add(word, def) used as value
-./dict_test.go:41:13: dict.Add(word, "new test") used as value
+./dictionary_test.go:30:13: dictionary.Add(word, def) used as value
+./dictionary_test.go:41:13: dictionary.Add(word, "new test") used as value
 ```
 
 ## Write the minimal amount of code for the test to run and check the output
 
-In `dict.go`
+In `dictionary.go`
 
 ```go
 var (
@@ -476,7 +476,7 @@ var (
     WordExistsError = errors.New("cannot add word because it already exists")
 )
 
-func (d Dict) Add(word, def string) error {
+func (d Dictionary) Add(word, def string) error {
     d[word] = def
     return nil
 }
@@ -486,15 +486,15 @@ Now we get two more errors. We are still modifying the value, and
 returning a `nil` error.
 
 ```bash
-        dict_test.go:43: got error '%!s(<nil>)' want 'cannot add word because
+        dictionary_test.go:43: got error '%!s(<nil>)' want 'cannot add word because
         it already exists'
-        dict_test.go:44: got 'new test' want 'this is just a test'
+        dictionary_test.go:44: got 'new test' want 'this is just a test'
 ```
 
 ## Write enough code to make it pass
 
 ```go
-func (d Dict) Add(word, def string) error {
+func (d Dictionary) Add(word, def string) error {
     _, err := d.Search(word)
     switch err {
     case NotFoundError:
@@ -521,19 +521,19 @@ a few modifications.
 
 ```go
 const (
-    ErrNotFound   = DictErr("could not find the word you were looking for")
-    ErrWordExists = DictErr("cannot add word because it already exists")
+    ErrNotFound   = DictionaryErr("could not find the word you were looking for")
+    ErrWordExists = DictionaryErr("cannot add word because it already exists")
 )
 
-type DictErr string
+type DictionaryErr string
 
-func (e DictErr) Error() string {
+func (e DictionaryErr) Error() string {
     return string(e)
 }
 ```
 
 The first thing you will notice, is we made the errors constant. This required
-us to create our own `DictErr` type which implements the `error`
+us to create our own `DictionaryErr` type which implements the `error`
 interface. You can read more about
 the details in [this excellent article by Dave
 Cheney](https://dave.cheney.net/2016/04/07/constant-errors). Simply put, it
@@ -551,12 +551,12 @@ a great refactoring tool!
 func TestUpdate(t *testing.T) {
     word := "test"
     def := "this is just a test"
-    dict := Dict{word: def}
+    dictionary := Dictionary{word: def}
     newDef := "new def"
 
-    dict.Update(dictword, newDef)
+    dictionary.Update(dictionaryword, newDef)
 
-    assertDef(t, dict, word, newDef)
+    assertDef(t, dictionary, word, newDef)
 }
 ```
 
@@ -565,7 +565,7 @@ implementation.
 
 ## Try and run the test
 ```
-./dict_test.go:53:2: dict.Update undefined (type Dict has no field or method Update)
+./dictionary_test.go:53:2: dictionary.Update undefined (type Dictionary has no field or method Update)
 ```
 
 ## Write minimal amount of code for the test to run and check the failing test output
@@ -574,14 +574,14 @@ We already know how to deal with an error like this. We need to define our
 function.
 
 ```go
-func (d Dict) Update(word, def string) {}
+func (d Dictionary) Update(word, def string) {}
 ```
 
 With that in place we are able to see that we need to change the definition of
 the word.
 
 ```
-    dict_test.go:55: got 'this is just a test' want 'new def'
+    dictionary_test.go:55: got 'this is just a test' want 'new def'
 ```
 
 ## Write enough code to make it pass
@@ -590,7 +590,7 @@ We already saw how to do this when we fixed the issue with create. So let's
 implement something really similar to create.
 
 ```go
-func (d Dict) Update(word, def string) {
+func (d Dictionary) Update(word, def string) {
     d[word] = def
 }
 ```
@@ -606,20 +606,20 @@ t.Run("existing word", func(t *testing.T) {
     word := "test"
     def := "this is just a test"
     newDef := "new def"
-    dict := Dict{word: def}
+    dictionary := Dictionary{word: def}
 
-    err := dict.Update(word, newDef)
+    err := dictionary.Update(word, newDef)
 
     assertError(t, err, nil)
-    assertDef(t, dict, word, newDef)
+    assertDef(t, dictionary, word, newDef)
 })
 
 t.Run("new word", func(t *testing.T) {
     word := "test"
     def := "this is just a test"
-    dict := Dict{}
+    dictionary := Dictionary{}
 
-    err := dict.Update(dictword, def)
+    err := dictionary.Update(dictionaryword, def)
 
     assertError(t, err, ErrWordDoesNotExist)
 })
@@ -631,9 +631,9 @@ modified `Update` to return an `error` value.
 ## Try and run the test
 
 ```
-./dict_test.go:53:16: dict.Update(word, "new test") used as value
-./dict_test.go:64:16: dict.Update(word, def) used as value
-./dict_test.go:66:23: undefined: ErrWordDoesNotExists
+./dictionary_test.go:53:16: dictionary.Update(word, "new test") used as value
+./dictionary_test.go:64:16: dictionary.Update(word, def) used as value
+./dictionary_test.go:66:23: undefined: ErrWordDoesNotExists
 ```
 
 We get 3 errors this time, but we know how to deal with these.
@@ -642,12 +642,12 @@ We get 3 errors this time, but we know how to deal with these.
 
 ```go
 const (
-    ErrNotFound         = DictErr("could not find the word you were looking for")
-    ErrWordExists       = DictErr("cannot add word because it already exists")
-    ErrWordDoesNotExist = DictErr("cannot update word because it does not exist")
+    ErrNotFound         = DictionaryErr("could not find the word you were looking for")
+    ErrWordExists       = DictionaryErr("cannot add word because it already exists")
+    ErrWordDoesNotExist = DictionaryErr("cannot update word because it does not exist")
 )
 
-func (d Dict) Update(word, def string) error {
+func (d Dictionary) Update(word, def string) error {
     d[word] = def
     return nil
 }
@@ -658,14 +658,14 @@ We added our own error type and are returning a `nil` error.
 With these changes, we now get a very clear error:
 
 ```
-dict_test.go:66: got error '%!s(<nil>)' want 'cannot update word because it does not exist'
+dictionary_test.go:66: got error '%!s(<nil>)' want 'cannot update word because it does not exist'
 ```
 
 ## Write enough code to make it pass
 
 ```go
-func (d Dict) Update(word, def string) error {
-    _, err := dict.Search(word)
+func (d Dictionary) Update(word, def string) error {
+    _, err := dictionary.Search(word)
     switch err {
     case ErrNotFound:
         return ErrWordDoesNotExist
@@ -681,7 +681,7 @@ func (d Dict) Update(word, def string) error {
 ```
 
 This function looks almost identical to `Add` except we switched when we update
-the `dict` and when we return an error.
+the `dictionary` and when we return an error.
 
 ### Note on declaring a new error for Update
 
@@ -698,18 +698,18 @@ see `ErrNotFound`, but instead redirect them to a add page. While
 ```go
 func TestDelete(t *testing.T) {
     word := "test"
-    dict := Dict{word: "test def"}
+    dictionary := Dictionary{word: "test def"}
 
-    dict.Delete(word)
+    dictionary.Delete(word)
 
-    _, err := dict.Search(word)
+    _, err := dictionary.Search(word)
     if err != ErrNotFound {
         t.Errorf("Expected '%s' to be deleted", word)
     }
 }
 ```
 
-Our test creates a `Dict` with a word and then checks if the word has been
+Our test creates a `Dictionary` with a word and then checks if the word has been
 removed.
 
 ## Try to run the test
@@ -717,13 +717,13 @@ removed.
 By running `go test` we get:
 
 ```
-./dict_test.go:74:6: dict.Delete undefined (type Dict has no field or method Delete)
+./dictionary_test.go:74:6: dictionary.Delete undefined (type Dictionary has no field or method Delete)
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
 ```go
-func (d Dict) Delete(word string) {
+func (d Dictionary) Delete(word string) {
 
 }
 ```
@@ -731,13 +731,13 @@ func (d Dict) Delete(word string) {
 After we add this, the test tells us we are not deleting the word.
 
 ```
-dict_test.go:78: Expected 'test' to be deleted
+dictionary_test.go:78: Expected 'test' to be deleted
 ```
 
 ## Write enough code to make it pass
 
 ```go
-func (d Dict) Delete(word string) {
+func (d Dictionary) Delete(word string) {
     delete(d, word)
 }
 ```

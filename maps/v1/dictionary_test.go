@@ -3,9 +3,9 @@ package main
 import "testing"
 
 func TestSearch(t *testing.T) {
-	dict := Dict{"test": "this is just a test"}
+	dictionary := Dictionary{"test": "this is just a test"}
 
-	got := dict.Search("test")
+	got := dictionary.Search("test")
 	want := "this is just a test"
 
 	assertStrings(t, got, want)

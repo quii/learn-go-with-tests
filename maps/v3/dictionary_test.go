@@ -5,30 +5,30 @@ import (
 )
 
 func TestSearch(t *testing.T) {
-	dict := Dict{"test": "this is just a test"}
+	dictionary := Dictionary{"test": "this is just a test"}
 
 	t.Run("known word", func(t *testing.T) {
-		got, _ := dict.Search("test")
+		got, _ := dictionary.Search("test")
 		want := "this is just a test"
 
 		assertStrings(t, got, want)
 	})
 
 	t.Run("unknown word", func(t *testing.T) {
-		_, got := dict.Search("unknown")
+		_, got := dictionary.Search("unknown")
 
 		assertError(t, got, NotFoundError)
 	})
 }
 
 func TestAdd(t *testing.T) {
-	dict := Dict{}
+	dictionary := Dictionary{}
 	word := "test"
 	def := "this is just a test"
 
-	dict.Add(word, def)
+	dictionary.Add(word, def)
 
-	assertDef(t, dict, word, def)
+	assertDef(t, dictionary, word, def)
 }
 
 func assertStrings(t *testing.T, got, want string) {
@@ -47,10 +47,10 @@ func assertError(t *testing.T, got, want error) {
 	}
 }
 
-func assertDef(t *testing.T, dict Dict, word, def string) {
+func assertDef(t *testing.T, dictionary Dictionary, word, def string) {
 	t.Helper()
 
-	got, err := dict.Search(word)
+	got, err := dictionary.Search(word)
 	if err != nil {
 		t.Fatal("should find added word:", err)
 	}
