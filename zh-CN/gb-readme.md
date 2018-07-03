@@ -2,6 +2,8 @@
 
 _或者通过 Go 语言学习测试驱动开发_
 
+[Read original English version online](https://quii.gitbook.io/learn-go-with-tests)
+
 * 通过编写测试探索 Go 语言
 * **上手测试驱动开发**。Go 是学习测试驱动开发的好语言，因为它简单易学而且内置测试功能
 * 坚信你将开始在 Go 中编写健壮的、经过良好测试的系统
