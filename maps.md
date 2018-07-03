@@ -80,9 +80,9 @@ Getting a value our of a Map is the same as getting a value out of Array
 
 ```go
 func TestSearch(t *testing.T) {
-    dictionary := Dictionary{"test": "this is just a test"}
+    dictionary := map[string]string{"test": "this is just a test"}
 
-    got := dictionary.Search("test")
+    got := Search(dictionary, "test")
     want := "this is just a test"
 
     assertStrings(t, got, want)
@@ -137,43 +137,6 @@ Here we created a type alias which acts as a thin wrapper around
 the actual type. The advantage of using a type alias is that we can now
 create our own methods on our Map type.
 
-### Using a type alias
-
-We can greatly improve our module's usage by aliasing the Map and making
-`Search` a method.
-
-In `dictionary_test.go`:
-
-```go
-func TestSearch(t *testing.T) {
-    dictionary := Dictionary{"test": "this is just a test"}
-
-    got := dictionary.Search("test")
-    want := "this is just a test"
-
-    assertStrings(t, got, want)
-}
-```
-
-We switched to using a `Dictionary` struct which we have not defined yet, and call
-`Search` on the newly created `Dictionary` instance.
-
-We do not need to change the `assertStrings`.
-
-In `dictionary.go`:
-
-```go
-type Dictionary map[string]string
-
-func (d Dictionary) Search(word string) string {
-    return d[word]
-}
-```
-
-Here we created a type alias which acts as a thin wrapper around
-the actual type. The advantage of using a type alias is that we can now
-create our own methods on our Map type.
-
 ## Write the test first
 
 The basic search was very easy to implement, but what will happen if we
@@ -197,14 +160,14 @@ func TestSearch(t *testing.T) {
     })
 
     t.Run("unknown word", func(t *testing.T) {
-        _, got := dictionary.Search("test")
+        _, err := dictionary.Search("test")
         want := "could not find the word you were looking for"
 
-        if got == nil {
-            t.Error("expected to receive and error.")
-        } else {
-            assertStrings(t, got.Error(), want)
+        if err == nil {
+            t.Error("expected to get an error.")
         }
+
+        assertStrings(t, got.Error(), want)
     })
 }
 ```
@@ -240,12 +203,12 @@ Your test should now fails with a much clearer error message.
 
 ```go
 func (d Dictionary) Search(word string) (string, error) {
-    def, ok := d[word]
+    definition, ok := d[word]
     if !ok {
         return "", errors.New("could not find the word you were looking for")
     }
 
-    return def, nil
+    return definition, nil
 }
 ```
 
@@ -262,12 +225,12 @@ and a word that just doesn't have a definition.
 var NotFoundError = errors.New("could not find the word you were looking for")
 
 func (d Dictionary) Search(word string) (string, error) {
-    def, ok := d[word]
+    definition, ok := d[word]
     if !ok {
         return "", NotFoundError
     }
 
-    return def, nil
+    return definition, nil
 }
 ```
 
@@ -324,7 +287,7 @@ validation of the dictionary a little easier.
 In `dictionary.go`
 
 ```go
-func (d Dictionary) Add(word, def string) {
+func (d Dictionary) Add(word, definition string) {
 }
 ```
 
@@ -338,8 +301,8 @@ looking for
 ## Write enough code to make it pass
 
 ```go
-func (d Dictionary) Add(word, def string) {
-    d[word] = def
+func (d Dictionary) Add(word, definition string) {
+    d[word] = definition
 }
 ```
 
@@ -349,15 +312,14 @@ key and set it equal to a value.
 ### Reference Types
 
 An interesting property of Maps is that you can modify them without passing
-them as a pointer. This is because maps are a reference types. They don't
-actually hold any values. Instead, they point to the underlying data structure
-which houses the data. The underlying data structure is actually a `hash table`,
-or `hash map`, and you can read more about `hash tables`
+them as a pointer. This is because `map` is a reference types. Meaning it holds
+a reference to the underlying data structure, much like a pointer. The
+underlying data structure is a `hash table`, or `hash map`, and you can read
+more about `hash tables`
 [here](https://en.wikipedia.org/wiki/Hash_table).
 
-Maps being a pointer is really good, because it means that no matter how
-big your Map gets. Go will only make one copy of it unless you force Go to make
-a copy.
+Maps being a reference is really good, because no matter how big a Map gets there
+will only be one copy. 
 
 A gotcha that reference types introduce is that maps can be a `nil` value. If
 you try to use a `nil` Map, you will get a `nil pointer exception` which will
@@ -381,7 +343,7 @@ dictionary = map[string]string{}
 dictionary = make(map[string]string)
 ```
 
-These approaches, both create an empty `hash map` and point `dictionary` at it. Which
+Both approaches create an empty `hash map` and point `dictionary` at it. Which
 ensures that you will never get a `nil pointer exception`.
 
 ## Refactor
@@ -393,14 +355,14 @@ a little simplification.
 func TestAdd(t *testing.T) {
     dictionary := Dictionary{}
     word := "test"
-    def := "this is just a test"
+    definition := "this is just a test"
 
-    dictionary.Add(word, def)
+    dictionary.Add(word, definition)
 
-    assertDef(t, dictionary, word, def)
+    assertDefinition(t, dictionary, word, definition)
 }
 
-func assertDef(t *testing.T, dictionary Dictionary, word, def string) {
+func assertDefinition(t *testing.T, dictionary Dictionary, word, definition string) {
     t.Helper()
 
     got, err := dictionary.Search(word)
@@ -408,8 +370,8 @@ func assertDef(t *testing.T, dictionary Dictionary, word, def string) {
         t.Fatal("should find added word:", err)
     }
 
-    if def != got {
-        t.Errorf("got '%s' want '%s'", got, def)
+    if definition != got {
+        t.Errorf("got '%s' want '%s'", got, definition)
     }
 }
 ```
@@ -433,22 +395,22 @@ func TestAdd(t *testing.T) {
     t.Run("new word", func(t *testing.T) {
         dictionary := Dictionary{}
         word := "test"
-        def := "this is just a test"
+        definition := "this is just a test"
 
-        err := dictionary.Add(word, def)
+        err := dictionary.Add(word, definition)
 
         assertError(t, err, nil)
-        assertDef(t, dictionary, word, def)
+        assertDefinition(t, dictionary, word, definition)
     })
 
     t.Run("existing word", func(t *testing.T) {
         word := "test"
-        def := "this is just a test"
-        dictionary := Dictionary{word: def}
+        definition := "this is just a test"
+        dictionary := Dictionary{word: definition}
         err := dictionary.Add(word, "new test")
 
         assertError(t, err, WordExistsError)
-        assertDef(t, dictionary, word, def)
+        assertDefinition(t, dictionary, word, definition)
     })
 }
 ```
@@ -462,7 +424,7 @@ the previous test to check for a `nil` error.
 The compiler will fail because we are not return a value for `Add`.
 
 ```bash
-./dictionary_test.go:30:13: dictionary.Add(word, def) used as value
+./dictionary_test.go:30:13: dictionary.Add(word, definition) used as value
 ./dictionary_test.go:41:13: dictionary.Add(word, "new test") used as value
 ```
 
@@ -476,8 +438,8 @@ var (
     WordExistsError = errors.New("cannot add word because it already exists")
 )
 
-func (d Dictionary) Add(word, def string) error {
-    d[word] = def
+func (d Dictionary) Add(word, definition string) error {
+    d[word] = definition
     return nil
 }
 ```
@@ -494,11 +456,11 @@ returning a `nil` error.
 ## Write enough code to make it pass
 
 ```go
-func (d Dictionary) Add(word, def string) error {
+func (d Dictionary) Add(word, definition string) error {
     _, err := d.Search(word)
     switch err {
     case NotFoundError:
-        d[word] = def
+        d[word] = definition
     case nil:
         return WordExistsError
     default:
@@ -550,13 +512,13 @@ a great refactoring tool!
 ```go
 func TestUpdate(t *testing.T) {
     word := "test"
-    def := "this is just a test"
-    dictionary := Dictionary{word: def}
-    newDef := "new def"
+    definition := "this is just a test"
+    dictionary := Dictionary{word: definition}
+    newDefinition := "new definition"
 
-    dictionary.Update(dictionaryword, newDef)
+    dictionary.Update(dictionaryword, newDefinition)
 
-    assertDef(t, dictionary, word, newDef)
+    assertDefinition(t, dictionary, word, newDefinition)
 }
 ```
 
@@ -574,7 +536,7 @@ We already know how to deal with an error like this. We need to define our
 function.
 
 ```go
-func (d Dictionary) Update(word, def string) {}
+func (d Dictionary) Update(word, definition string) {}
 ```
 
 With that in place we are able to see that we need to change the definition of
@@ -590,8 +552,8 @@ We already saw how to do this when we fixed the issue with create. So let's
 implement something really similar to create.
 
 ```go
-func (d Dictionary) Update(word, def string) {
-    d[word] = def
+func (d Dictionary) Update(word, definition string) {
+    d[word] = definition
 }
 ```
 
@@ -604,22 +566,22 @@ However, we now have the same issue as with create. If we pass in a new word,
 ```go
 t.Run("existing word", func(t *testing.T) {
     word := "test"
-    def := "this is just a test"
-    newDef := "new def"
-    dictionary := Dictionary{word: def}
+    definition := "this is just a test"
+    newDefinition := "new definition"
+    dictionary := Dictionary{word: definition}
 
-    err := dictionary.Update(word, newDef)
+    err := dictionary.Update(word, newDefinition)
 
     assertError(t, err, nil)
-    assertDef(t, dictionary, word, newDef)
+    assertDefinition(t, dictionary, word, newDefinition)
 })
 
 t.Run("new word", func(t *testing.T) {
     word := "test"
-    def := "this is just a test"
+    definition := "this is just a test"
     dictionary := Dictionary{}
 
-    err := dictionary.Update(dictionaryword, def)
+    err := dictionary.Update(dictionaryword, definition)
 
     assertError(t, err, ErrWordDoesNotExist)
 })
@@ -632,7 +594,7 @@ modified `Update` to return an `error` value.
 
 ```
 ./dictionary_test.go:53:16: dictionary.Update(word, "new test") used as value
-./dictionary_test.go:64:16: dictionary.Update(word, def) used as value
+./dictionary_test.go:64:16: dictionary.Update(word, definition) used as value
 ./dictionary_test.go:66:23: undefined: ErrWordDoesNotExists
 ```
 
@@ -647,8 +609,8 @@ const (
     ErrWordDoesNotExist = DictionaryErr("cannot update word because it does not exist")
 )
 
-func (d Dictionary) Update(word, def string) error {
-    d[word] = def
+func (d Dictionary) Update(word, definition string) error {
+    d[word] = definition
     return nil
 }
 ```
@@ -664,13 +626,13 @@ dictionary_test.go:66: got error '%!s(<nil>)' want 'cannot update word because i
 ## Write enough code to make it pass
 
 ```go
-func (d Dictionary) Update(word, def string) error {
+func (d Dictionary) Update(word, definition string) error {
     _, err := dictionary.Search(word)
     switch err {
     case ErrNotFound:
         return ErrWordDoesNotExist
     case nil:
-        d[word] = def
+        d[word] = definition
     default:
         return err
 
@@ -688,17 +650,18 @@ the `dictionary` and when we return an error.
 We could reused `ErrNotFound` and not added a new error. However, it is often
 better to have a precise error for when an update fails.
 
-Having specific errors allows your application to know more about what went
-wrong. For example, if you are running a website. You might not want the user to
-see `ErrNotFound`, but instead redirect them to a add page. While
-`ErrWordDoesNotExist` would be displayed when they are trying to update a word.
+Having specific errors gives you more information about what went wrong. Here is an
+example in a web app:
+
+> You can redirect the user when `ErrNotFount` is encountered,
+> but display an error message when `ErrWordDoesNotExist` is encountered.
 
 ## Write the test first
 
 ```go
 func TestDelete(t *testing.T) {
     word := "test"
-    dictionary := Dictionary{word: "test def"}
+    dictionary := Dictionary{word: "test definition"}
 
     dictionary.Delete(word)
 
