@@ -7,6 +7,8 @@ _Or learn test-driven development with Go_
 
 [You can read this on Gitbook](https://quii.gitbook.io/learn-go-with-tests)
 
+Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests)
+
 ## Why
 
 * Explore the Go language by writing tests
