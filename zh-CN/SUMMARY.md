@@ -20,7 +20,7 @@
 
 * [入门](app-intro.md)
 * [HTTP server](http-server.md)
-* [JSON, routing and embedding](json.md)
+* [JSON，路由和嵌入](json.md)
 * [IO and sorting](io.md)
 * Command line (todo)
 * `time` (todo)
