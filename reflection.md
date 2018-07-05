@@ -12,11 +12,11 @@ From [The Go Blog: Reflection](https://blog.golang.org/laws-of-reflection)
 
 ## What is `interface` ?
 
-We have enjoyed the type-safety that Go has offered us in terms of functions that work with known types, such as `strings`, `int32` and our own types like `BankAccount`.
+We have enjoyed the type-safety that Go has offered us in terms of functions that work with known types, such as `string`, `int` and our own types like `BankAccount`.
 
 This means that we get some documentation for free and the compiler will complain if you try and pass the wrong type to a function.
 
-You may come across scenarios though where you want to write a function where you dont know the type at compile time.
+You may come across scenarios though where you want to write a function where you don't know the type at compile time.
 
 Go lets us get around this with the type `interface{}` which you can think of as just _any_ type.
 
@@ -60,7 +60,6 @@ func TestWalk(t *testing.T) {
 - We want to store a slice of strings (`got`) which stores which strings were passed into `fn` by `walk`. Often in previous chapters we have made dedicated types for this to spy on function/method invocations but in this case we can just pass in an anonymous function for `fn` that closes over `got`
 - We use an anonymous `struct` with a `Name` field of type string to go for the simplest "happy" path.
 - Finally call `walk` with `x` and the spy and for now just check the length of `got`, we'll be more specific with our assertions once we've got something very basic working.
-
 
 ## Try to run the test
 
@@ -134,13 +133,13 @@ We need to use reflection to have a look at `x` and try and look at its properti
 
 The [reflect package](https://godoc.org/reflect) has a function `ValueOf` which returns us a `Value` of a given variable. This has ways for us to inspect a value, including its fields which we use on the next line. 
 
-We then make some very silly assumptions about the the value passed in
+We then make some very optimistic assumptions about the the value passed in
 - We look at the first and only field, there may be no fields at all which would cause a panic
 - We then call `String()` which returns the underlying value as a string but we know it would be wrong if the field was something other than a string.
 
 ## Refactor
 
-Our code is passing for the simple case but we know there's a lot of shortcomings in our code. 
+Our code is passing for the simple case but we know our code has a lot of shortcomings. 
 
 We're going to be writing a number of tests where we pass in different values and checking the array of strings that `fn` was called with. 
 
@@ -425,7 +424,7 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-You cant use `NumField` on a pointer `Value`, we need to extract the underlying value before we can do that by using `Elem()`
+You can't use `NumField` on a pointer `Value`, we need to extract the underlying value before we can do that by using `Elem()`
 
 ## Refactor
 
@@ -459,7 +458,7 @@ func getValue(x interface{}) reflect.Value {
 ```
 
 This actually adds _more_ code but I feel the abstraction level is right
-- Get the `reflect.Value` of `x` so i can inspect it, I dont care how.
+- Get the `reflect.Value` of `x` so I can inspect it, I don't care how.
 - Iterate over the fields, doing whatever needs to be done depending on its type
 
 Next we need to cover slices
