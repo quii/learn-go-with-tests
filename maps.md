@@ -30,12 +30,13 @@ func TestSearch(t *testing.T) {
     }
 }
 ```
+
 Declaring a Map is somewhat similar to an array. Except, it starts with the
 `map` keyword and requires two types. The first is the key, which is written
 inside the `[]`. The second is the value, which goes right after the `[]`.
 
 The key is special. It can only be a comparable type because without the ability
-to tell if 2 keys are equal. We have no way to ensure that we are getting the
+to tell if 2 keys are equal, we have no way to ensure that we are getting the
 correct value. Comparable types are explained in depth in the [language
 spec](https://golang.org/ref/spec#Comparison_operators).
 
@@ -146,7 +147,7 @@ We actually get nothing back. This is good because the program can continue to
 run, but there is a better approach. The function can report that the word is
 not in the dictionary. This way, the user isn't left wondering if the word
 doesn't exist or if there is just no definition (this might not seem very useful
-for a dictionary.However, it's a scenario that could be key in other usecases).
+for a dictionary. However, it's a scenario that could be key in other usecases).
 
 ```go
 func TestSearch(t *testing.T) {
@@ -176,8 +177,8 @@ The way to handle this scenario in Go is to return a second argument which is
 an `Error` type.
 
 `Error`s can be converted to a string with the `.Error()`
-method, which we do when passing it to the assertion. We are also wrapping
-`assertString` in an if to ensure we don't call `.Error()` on `nil`.
+method, which we do when passing it to the assertion. We are also protecting
+`assertStrings` with `if` to ensure we don't call `.Error()` on `nil`.
 
 ## Try and run the test
 
@@ -195,9 +196,9 @@ func (d Dictionary) Search(word string) (string, error) {
 }
 ```
 
-Your test should now fails with a much clearer error message.
+Your test should now fail with a much clearer error message.
 
-`dictionary_test.go:22: expected to receive and error.`
+`dictionary_test.go:22: expected to get an error.`
 
 ## Write enough code to make it pass
 
@@ -312,14 +313,14 @@ key and set it equal to a value.
 ### Reference Types
 
 An interesting property of Maps is that you can modify them without passing
-them as a pointer. This is because `map` is a reference types. Meaning it holds
+them as a pointer. This is because `map` is a reference type. Meaning it holds
 a reference to the underlying data structure, much like a pointer. The
 underlying data structure is a `hash table`, or `hash map`, and you can read
 more about `hash tables`
 [here](https://en.wikipedia.org/wiki/Hash_table).
 
 Maps being a reference is really good, because no matter how big a Map gets there
-will only be one copy. 
+will only be one copy.
 
 A gotcha that reference types introduce is that maps can be a `nil` value. If
 you try to use a `nil` Map, you will get a `nil pointer exception` which will
@@ -377,7 +378,7 @@ func assertDefinition(t *testing.T, dictionary Dictionary, word, definition stri
 ```
 
 We made variables for word and definition, and moved the definition
-assertion into it's own helper function.
+assertion into its own helper function.
 
 Our `Add` is looking good. Except, we didn't consider what happens when the
 value we are trying to add already exists!
@@ -421,7 +422,7 @@ the previous test to check for a `nil` error.
 
 ## Try to run test
 
-The compiler will fail because we are not return a value for `Add`.
+The compiler will fail because we are not returning a value for `Add`.
 
 ```bash
 ./dictionary_test.go:30:13: dictionary.Add(word, definition) used as value
@@ -478,7 +479,7 @@ than `NotFoundError`.
 
 ## Refactor
 
-We don't have too much to refactor, but as our error usage grow we can make
+We don't have too much to refactor, but as our error usage grows we can make
 a few modifications.
 
 ```go
@@ -502,7 +503,7 @@ Cheney](https://dave.cheney.net/2016/04/07/constant-errors). Simply put, it
 makes the errors more reusable and immutable.
 
 We also changed the names of the errors to make them IDE friendly.
-If you have auto completion enables it's nice to be able to see all your
+If you have auto completion enabled it's nice to be able to see all your
 errors by typing `Err`. You can perform this change manually or try out
 [gorename](https://godoc.org/golang.org/x/tools/refactor/rename), which is
 a great refactoring tool!
@@ -526,6 +527,7 @@ func TestUpdate(t *testing.T) {
 implementation.
 
 ## Try and run the test
+
 ```
 ./dictionary_test.go:53:2: dictionary.Update undefined (type Dictionary has no field or method Update)
 ```
@@ -543,7 +545,7 @@ With that in place we are able to see that we need to change the definition of
 the word.
 
 ```
-    dictionary_test.go:55: got 'this is just a test' want 'new def'
+    dictionary_test.go:55: got 'this is just a test' want 'new definition'
 ```
 
 ## Write enough code to make it pass
@@ -647,13 +649,13 @@ the `dictionary` and when we return an error.
 
 ### Note on declaring a new error for Update
 
-We could reused `ErrNotFound` and not added a new error. However, it is often
+We could reuse `ErrNotFound` and not add a new error. However, it is often
 better to have a precise error for when an update fails.
 
 Having specific errors gives you more information about what went wrong. Here is an
 example in a web app:
 
-> You can redirect the user when `ErrNotFount` is encountered,
+> You can redirect the user when `ErrNotFound` is encountered,
 > but display an error message when `ErrWordDoesNotExist` is encountered.
 
 ## Write the test first
