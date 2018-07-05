@@ -3,7 +3,7 @@
 **[You can find all the code for this chapter
 here](https://github.com/quii/learn-go-with-tests/tree/master/maps)**
 
-In the previous chapter, you saw how to store values in order. Now, we will
+In [arrays & slices](arrays-and-slices.md), you saw how to store values in order. Now, we will
 look at a way to store items by a `key` and look them up quickly.
 
 Maps allow you to store items in a manner similar to a dictionary. You can
@@ -73,7 +73,7 @@ func Search(dictionary map[string]string, word string) string {
 }
 ```
 
-Getting a value our of a Map is the same as getting a value out of Array
+Getting a value out of a Map is the same as getting a value out of Array
 `map[key]`.
 
 ## Refactor

@@ -11,6 +11,7 @@
 * [Arrays and slices](arrays-and-slices.md)
 * [Structs, methods & interfaces](structs-methods-and-interfaces.md)
 * [Pointers & errors](pointers-and-errors.md)
+* [Maps](maps.md)
 * [Dependency Injection](dependency-injection.md)
 * [Mocking](mocking.md)
 * [Concurrency](concurrency.md)
