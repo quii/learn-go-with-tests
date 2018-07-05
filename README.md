@@ -28,7 +28,7 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 5. [Arrays and slices](arrays-and-slices.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
 6. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
 7. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.
-8. [Maps](maps.md) Learn about storing values in the map data structure.
+8. [Maps](maps.md) - Learn about storing values in the map data structure.
 9. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
 10. [Mocking](mocking.md) - Take some existing untested code and use DI with mocking to test it.
 11. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
