@@ -576,5 +576,83 @@ func (cli *PokerCLI) PlayPoker() {
 }
 ```
 
-No matter what you type, you never see `2` logged. The reason is the `ReadAll`, we cant read "all" of `os.Stdin`, as you can just keep typing stuff in! 
+No matter what you type, you never see `2` logged. The reason is the `ReadAll`, we cant read "all" of `os.Stdin`, as you can just keep typing stuff in! The `os.Stdin` is attached to our process and is a stream that wont finish.
 
+We want to test that if we read _more_ than beyond the first newline that we fail.
+
+```go
+type failOnEndReader struct {
+	t *testing.T
+	rdr io.Reader
+}
+
+func (m failOnEndReader) Read(p []byte) (n int, err error) {
+
+	n, err = m.rdr.Read(p)
+
+	if n == 0 || err == io.EOF {
+		m.t.Fatal("Read to the end when you shouldn't have")
+	}
+
+	return n, err
+}
+```
+
+We've created a custom `io.Reader` wrapping around another and if we get to the end of the reader then we fail the test
+
+We can now create a new test to try it out
+
+```go
+t.Run("do not read beyond the first newline", func(t *testing.T) {
+    in := failOnEndReader{
+        t,
+        strings.NewReader("Chris wins\n hello there"),
+    }
+
+    playerStore := &poker.StubPlayerStore{}
+
+    cli := poker.NewPokerCLI(playerStore, in)
+    cli.PlayPoker()
+})
+```
+
+It fails with
+
+```
+=== RUN   TestCLI/do_not_read_beyond_the_first_newline
+    --- FAIL: TestCLI/do_not_read_beyond_the_first_newline (0.00s)
+    	PokerCLI_test.go:56: Read to the end when you shouldn't have
+```
+
+To fix it, we cant use `io.ReadAll`. Instead we'll use a [`bufio.Reader`](https://golang.org/pkg/bufio/).
+
+> Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer object, creating another object (Reader or Writer) that also implements the interface but provides buffering and some help for textual I/O. 
+
+Update the code to the following
+
+```go
+type PokerCLI struct {
+	playerStore PlayerStore
+	in          *bufio.Reader
+}
+
+func NewPokerCLI(store PlayerStore, in io.Reader) *PokerCLI {
+	return &PokerCLI{
+		playerStore: store,
+		in:          bufio.NewReader(in),
+	}
+}
+
+func (cli *PokerCLI) PlayPoker() {
+	userInput, _ := cli.in.ReadString('\n')
+	cli.playerStore.RecordWin(extractWinner(userInput))
+}
+
+func extractWinner(userInput string) string {
+	return strings.Replace(userInput, " wins\n", "", 1)
+}
+```
+
+Now try to run the application in `main.go` again and it should work how we expect.
+
+We will probably end up deleting this test in time as definitely _will_ want to read beyond the first line as we evaluate multiple commands from the user; but it was helpful to drive out a better solution and we didn't want to add new features while our application was not working properly. 

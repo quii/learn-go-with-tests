@@ -4,6 +4,7 @@ import (
 	"github.com/quii/learn-go-with-tests/command-line/v3"
 	"strings"
 	"testing"
+	"io"
 )
 
 func TestCLI(t *testing.T) {
@@ -28,4 +29,32 @@ func TestCLI(t *testing.T) {
 		poker.AssertPlayerWin(t, playerStore, "Cleo")
 	})
 
+	t.Run("do not read beyond the first newline", func(t *testing.T) {
+		in := failOnEndReader{
+			t,
+			strings.NewReader("Chris wins\n hello there"),
+		}
+
+		playerStore := &poker.StubPlayerStore{}
+
+		cli := poker.NewPokerCLI(playerStore, in)
+		cli.PlayPoker()
+	})
+
+}
+
+type failOnEndReader struct {
+	t *testing.T
+	rdr io.Reader
+}
+
+func (m failOnEndReader) Read(p []byte) (n int, err error) {
+
+	n, err = m.rdr.Read(p)
+
+	if n == 0 || err == io.EOF {
+		m.t.Fatal("Read to the end when you shouldn't have")
+	}
+
+	return n, err
 }
