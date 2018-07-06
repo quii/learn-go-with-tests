@@ -653,6 +653,8 @@ func extractWinner(userInput string) string {
 }
 ```
 
+The tests will now pass.
+
 Now try to run the application in `main.go` again and it should work how we expect.
 
-We will probably end up deleting this test in time as definitely _will_ want to read beyond the first line as we evaluate multiple commands from the user; but it was helpful to drive out a better solution and we didn't want to add new features while our application was not working properly. 
+We will probably end up deleting this test in time as definitely _will_ want to read beyond the first line as we evaluate multiple commands from the user; but it was helpful to drive out a better solution and we didn't want to add new features while our application was not working properly.

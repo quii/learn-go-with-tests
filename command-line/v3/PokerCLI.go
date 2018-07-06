@@ -1,9 +1,9 @@
 package poker
 
 import (
+	"bufio"
 	"io"
 	"strings"
-	"bufio"
 )
 
 // PokerCLI helps players through a game of poker

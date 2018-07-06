@@ -2,9 +2,9 @@ package poker_test
 
 import (
 	"github.com/quii/learn-go-with-tests/command-line/v3"
+	"io"
 	"strings"
 	"testing"
-	"io"
 )
 
 func TestCLI(t *testing.T) {
@@ -44,7 +44,7 @@ func TestCLI(t *testing.T) {
 }
 
 type failOnEndReader struct {
-	t *testing.T
+	t   *testing.T
 	rdr io.Reader
 }
 
