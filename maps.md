@@ -223,12 +223,12 @@ and a word that just doesn't have a definition.
 ## Refactor
 
 ```go
-var NotFoundError = errors.New("could not find the word you were looking for")
+var ErrNotFound = errors.New("could not find the word you were looking for")
 
 func (d Dictionary) Search(word string) (string, error) {
     definition, ok := d[word]
     if !ok {
-        return "", NotFoundError
+        return "", ErrNotFound
     }
 
     return definition, nil
@@ -242,7 +242,7 @@ into a variable. This will also allow us to have a better test.
 t.Run("unknown word", func(t *testing.T) {
     _, got := dictionary.Search("unknown")
 
-    assertError(t, got, NotFoundError)
+    assertError(t, got, ErrNotFound)
 })
 
 func assertError(t *testing.T, got, want error) {
@@ -255,7 +255,7 @@ func assertError(t *testing.T, got, want error) {
 ```
 
 By creating a new helper we were able to simplify our test, and start using
-our `NotFoundError` variable so our test doesn't fail if we change the error
+our `ErrNotFound` variable so our test doesn't fail if we change the error
 text in the future.
 
 ## Write the test first
@@ -435,7 +435,7 @@ In `dictionary.go`
 
 ```go
 var (
-    NotFoundError   = errors.New("could not find the word you were looking for")
+    ErrNotFound   = errors.New("could not find the word you were looking for")
     WordExistsError = errors.New("cannot add word because it already exists")
 )
 
@@ -460,7 +460,7 @@ returning a `nil` error.
 func (d Dictionary) Add(word, definition string) error {
     _, err := d.Search(word)
     switch err {
-    case NotFoundError:
+    case ErrNotFound:
         d[word] = definition
     case nil:
         return WordExistsError
@@ -473,9 +473,7 @@ func (d Dictionary) Add(word, definition string) error {
 }
 ```
 
-Here we are using a `switch` statement to match on the error. Having a `switch`
-like this provides an extra safety net, in case `Search`returns an error other
-than `NotFoundError`.
+Here we are using a `switch` statement to match on the error. Having a `switch` like this provides an extra safety net, in case `Search` returns an error other than `ErrNotFound`.
 
 ## Refactor
 
@@ -495,18 +493,8 @@ func (e DictionaryErr) Error() string {
 }
 ```
 
-The first thing you will notice, is we made the errors constant. This required
-us to create our own `DictionaryErr` type which implements the `error`
-interface. You can read more about
-the details in [this excellent article by Dave
-Cheney](https://dave.cheney.net/2016/04/07/constant-errors). Simply put, it
-makes the errors more reusable and immutable.
-
-We also changed the names of the errors to make them IDE friendly.
-If you have auto completion enabled it's nice to be able to see all your
-errors by typing `Err`. You can perform this change manually or try out
-[gorename](https://godoc.org/golang.org/x/tools/refactor/rename), which is
-a great refactoring tool!
+We made the errors constant; this required us to create our own `DictionaryErr` type which implements the `error` interface. You can read more about the details in [this excellent article by Dave
+Cheney](https://dave.cheney.net/2016/04/07/constant-errors). Simply put, it makes the errors more reusable and immutable.
 
 ## Write the test first
 
