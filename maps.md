@@ -101,10 +101,10 @@ func assertStrings(t *testing.T, got, want string) {
 I decided to create an `assertStrings` helper and get rid of the
 `given` piece to make the implementation more general.
 
-### Using a type alias
+### Using a custom type
 
-We can greatly improve our dictionary's usage by aliasing the Map and making
-`Search` a method.
+We can improve our dictionary's usage by creating a new type around Map
+and making `Search` a method.
 
 In `dictionary_test.go`:
 
@@ -119,10 +119,10 @@ func TestSearch(t *testing.T) {
 }
 ```
 
-We switched to using a `Dictionary` alias, which we have not defined yet, and call
-`Search` on the newly created `Dictionary` instance.
+We started using the `Dictionary` type, which we have not defined yet. Then called
+`Search` on the `Dictionary` instance.
 
-We do not need to change the `assertStrings`.
+We did not need to change `assertStrings`.
 
 In `dictionary.go`:
 
@@ -134,9 +134,8 @@ func (d Dictionary) Search(word string) string {
 }
 ```
 
-Here we created a type alias which acts as a thin wrapper around
-the actual type. The advantage of using a type alias is that we can now
-create our own methods on our Map type.
+Here we created a `Dictionary` type which acts as a thin wrapper around
+`map`. With the custom type defined, we can create the `Search` method.
 
 ## Write the test first
 
