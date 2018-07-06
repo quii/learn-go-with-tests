@@ -120,3 +120,88 @@ func main() {
 - Inside the root run `go test` and check they're still passing
 - Go inside our `cmd/webserver` and do `go run main.go`
   - Visit `http://localhost:5000/league` and you should see it's still working
+
+### Walking skeleton
+
+Before we get stuck in to writing tests, let's add a new application that our project will build. Create another directory inside `cmd` called `cli` (command line interface) and add a `main.go` with the following
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Let's play poker")
+}
+```
+
+The first requirement we'll tackle is recording a win when the user types `{PlayerName} wins`
+
+## Write the test first
+
+Inside `PokerCLI_test.go` (in the root of the project, not inside `cmd`)
+
+We know we need to make something called `PokerCLI` which will allow us to `Play` poker. It'll need to read user input and then record wins to a `PlayerStore`.
+
+Before we jump too far ahead though, let's just write a test to check it integrates with the `PlayerStore` how we'd like
+
+```go
+func TestCLI(t *testing.T) {
+	playerStore := &StubPlayerStore{}
+	cli := &PokerCLI{playerStore}
+	cli.PlayPoker()
+
+	if len(playerStore.winCalls) !=1 {
+		t.Fatal("expected a win call but didnt get any")
+	}
+}
+```
+
+- We can use our `StubPlayerStore` from other tests. 
+- We pass in our dependency into our not yet existing `PokerCLI` type
+- Trigger the game by an unwritten `PlayPoker` method
+- Check that a win is recorded
+
+## Try to run the test
+
+```
+# github.com/quii/learn-go-with-tests/command-line/v2
+./cli_test.go:25:10: undefined: CLI
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+At this point you should be comfortable enough to create our new `CLI` struct with the respective field for our dependency and add a method. 
+
+You should end up with code like this
+
+```go
+type PokerCLI struct {
+	playerStore PlayerStore
+}
+
+func (cli *CLI) PlayPoker() {}
+```
+
+Remember we're just trying to get the test running so we can check the test fails how we'd hope
+
+```
+--- FAIL: TestCLI (0.00s)
+	cli_test.go:30: expected a win call but didnt get any
+FAIL
+```
+
+## Write enough code to make it pass
+
+```go
+func (cli *CLI) PlayPoker() {
+	cli.playerStore.RecordWin("Cleo")
+}
+```
+
+That should make it pass. 
+
+Next we need to simulate reading from `Stdin` (the input from the user) so that we can record wins for specific players.
+
+Let's add a new test to exercise this.
+
