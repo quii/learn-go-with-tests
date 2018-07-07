@@ -4,7 +4,7 @@
 
 在[上一章](json.md)中，我们通过添加新的服务器访问地址 `/league` 来迭代我们的应用程序。在此过程中，我们学习了如何处理 JSON、嵌入类型和路由。
 
-服务器重启后软件会丢失所有分数，产品负责人对此感到不安。这是因为我们存储的实现是在内存里。对于我们没有解释 `/league` 的访问地址应该按赢球数排序返回球员，她也很不满意。
+服务器重启后软件会丢失所有得分，产品负责人对此感到不安。这是因为我们存储的实现是在内存里。对于我们没有解释 `/league` 的访问地址应该按赢的次数排序返回玩家列表，她也很不满意。
 
 ## 目前为止的代码
 
@@ -251,10 +251,9 @@ func NewLeague(rdr io.Reader) ([]Player, error) {
 
     return league, err
 }
-}
 ```
 
-在我们的实现和 `server_test.go` 的测试助手 `getLeagueFromResponse` 中调用这个函数
+在我们的实现和 `server_test.go` 的辅助函数 `getLeagueFromResponse` 中调用这个函数
 
 ```go
 func (f *FileSystemStore) GetLeague() []Player {
@@ -319,6 +318,7 @@ func (f *FileSystemStore) GetLeague() []Player {
     return league
 }
 ```
+
 尝试运行测试，它现在通过了！很高兴我们在测试中使用的 `string.NewReader` 也实现了 `ReadSeeker`，所以我们不需要做任何其他的改变。
 
 接下来我们将实现 `GetPlayerScore`。
@@ -367,7 +367,7 @@ func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
 ## 编写足够的代码使测试通过
 
-我们可以遍历 `league` 寻找球员并返回他们的分数
+我们可以遍历 `league` 寻找玩家并返回他们的得分
 
 ```go
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
@@ -387,7 +387,7 @@ func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
 ## 重构
 
-你会看到许多测试助手需要重构，这些将留给你来实现
+你会看到许多辅助函数需要重构，这些将留给你来实现
 
  ```go
  t.Run("/get player score", func(t *testing.T) {
@@ -403,7 +403,7 @@ func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 })
  ```
 
-最后，我们需要用 `RecordWin` 来记录分数。
+最后，我们需要用 `RecordWin` 来记录得分。
 
 ## 首先编写测试
 
@@ -439,7 +439,7 @@ type FileSystemPlayerStore struct {
 
 在添加测试之前，我们需要通过用 `os.File` 替换 `strings.Reader` 来使其他测试编译通过。
 
-让我们创建一个助手函数，它将创建包含一些数据的临时文件
+让我们创建一个辅助函数，它将创建包含一些数据的临时文件
 
 ```go
 func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func()) {
@@ -463,7 +463,7 @@ func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func(
 
 [TempFile](https://golang.org/pkg/io/ioutil/#TempDir) 创建一个临时文件供我们使用。我们传入的 `"db"` 值是在它将创建的随机文件名上加上的前缀。这是为了确保它不会与其他文件发生意外冲突。
 
-你会注意到，我们不仅返回 `ReadWriteSeeker`（文件），而且还返回一个函数。我们需要确保在测试完成后删除该文件。我们不希望将文件的细节泄露到测试中，因为它很容易出错，对读者来说也没什么意思。通过返回 `removeFile` 函数，我们可以处理助手函数中的细节，调用者只需运行 `deferred cleanDatabase()`。
+你会注意到，我们不仅返回 `ReadWriteSeeker`（文件），而且还返回一个函数。我们需要确保在测试完成后删除该文件。我们不希望将文件的细节泄露到测试中，因为它很容易出错，对读者来说也没什么意思。通过返回 `removeFile` 函数，我们可以处理辅助函数中的细节，调用者只需运行 `deferred cleanDatabase()`。
 
 ```go
 func TestFileSystemStore(t *testing.T) {
@@ -546,7 +546,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
         FileSystemStore_test.go:71: got 33 want 34
 ```
 
-我们的实现是空的，因此旧的分数将会返回。
+我们的实现是空的，因此旧的得分将会返回。
 
 ## 编写足够的代码使测试通过
 
@@ -592,7 +592,7 @@ func (l League) Find(name string) *Player {
 }
 ```
 
-现在如果任何有 `League` 的人都可以很容易找到给定的球员。
+现在如果任何有 `League` 的人都可以很容易找到给定的玩家。
 
 更改我们的 `PlayerStore` 接口以返回 `League` 而不是 `[]Player`。试着重新运行测试，你会遇到编译问题，因为我们修改了接口。但是这很容易修复，只要将返回类型从 `[]Player` 改为 `League` 就行了。
 
@@ -676,7 +676,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 
 效果看起来不错，因此我们现在可以在集成测试中使用我们的新的 `Store`。这将使我们对软件的工作更有信心，然后我们可以删除冗余的 `InMemoryPlayerStore`。
 
-在 `TestRecordingWinsAndRetrievingThem` 中，替换之前的存储。
+在 `TestRecordingWinsAndRetrievingThem` 中，替换之前的记录。
 
 ```go
 database, cleanDatabase := createTempFile(t, "")
@@ -715,7 +715,7 @@ func main() {
 
 - 我们创建了一个文件作为数据库。
 - 第 2 个参数 `os.OpenFile` 允许你定义打开文件的权限，在我们的例子中，`O_RDWR` 意味着我们想要读写权限，`os.O_CREATE` 是指如果文件不存在，则创建该文件。
-- 第 3 个参数表示设置文件的权限，在我们的示例中，所有用户都可以读写文件。[（详情请参阅 superuser.com）](https://superuser.com/questions/295591/what-is-the-meaning-of-chmod-666)
+- 第 3 个参数表示设置文件的权限，在我们的示例中，所有用户都可以读写文件。[（详情请参阅 superuser.com）](https://superuser.com/questions/295591/what-is-the-meaning-of-chmod-666)。
 
 重启运行程序，现在将持久化数据到文件中。
 
@@ -781,7 +781,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 
 当我们 `Recordwin` 时，我们返回到文件的开头，然后写入新的数据，但是如果新的数据比之前的数据要小怎么办?
 
-在我们目前的情况下，这是不可能的。我们从不编辑或删除分数，因此数据只会变得更大，但是这样的代码是不负责任的，出现删除场景的结果是不可想象的。
+在我们目前的情况下，这是不可能的。我们从不编辑或删除得分，因此数据只会变得更大，但是这样的代码是不负责任的，出现删除场景的结果是不可想象的。
 
 但是我们要怎么测试这种问题呢？我们需要做的是首先重构我们的代码，这样就可以将我们所编写的数据和正在写入的分开。然后我们可以分别测试它是否以我们期望的方式运行。
 
@@ -825,9 +825,9 @@ func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStor
 }
 ```
 
-最后，我们可以通过从 `RecordWin` 中删除 `Seek` 调用来获得我们想要的惊人回报。是的，这感觉并不多，但至少这意味着如果我们做任何其他类型的写入操作，我们可以依赖 `write` 来表达我们对它的需求。此外，它现在将允许我们分别测试可能存在问题的代码并修复它。
+最后，我们可以通过从 `RecordWin` 中删除 `Seek` 调用来获得我们想要的惊人回报。是的，这感觉并不多，但至少这意味着如果我们做任何其它类型的写入操作，我们可以依赖 `write` 来表达我们对它的需求。此外，它现在将允许我们分别测试可能存在问题的代码并修复它。
 
-让我们编写一个测试，我们想用比原始内容更小的东西来更新文件的整个内容。在 `tape_test.go`:
+让我们编写一个测试，我们想用比原始内容更小的东西来更新文件的整个内容。在 `tape_test.go` 中：
 
 ## 首先编写测试
 
@@ -942,15 +942,15 @@ type ReadWriteSeekTruncate interface {
 }
 ```
 
-但这有什么好处呢？请记住，我们并不是在故意嘲笑，**文件系统**存储采取除 `*os.File` 之外的任何类型都是不现实的。所以我们不需要接口给我们的多态性。
+但这有什么好处呢？请记住，我们并不是在模拟，**文件系统**存储采取除 `*os.File` 之外的任何类型都是不现实的。所以我们不需要接口给我们的多态性。
 
 不要害怕像我们这里所做的那样去改变类型和做新的实验。使用静态类型语言的好处是编译器可以帮助你完成每一个更改。
 
 ## 错误处理
 
-在开始排序之前，我们应该确保对当前代码感到满意，并删除可能存在的任何技术债务。尽可能快地使用软件（脱离红色状态）是一个重要的原则，但这并不意味着我们应该忽略错误案例！
+在开始排序之前，我们应该确保对当前代码感到满意，并删除可能存在的任何技术债务。尽可能快地使用软件（脱离红色状态）是一个重要的原则，但这并不意味着我们应该忽略出错的场景！
 
-如果我们回到 `FileSystemStore.go`。我们在构造函数中有 `league， _:= NewLeague(f.database)`。
+如果我们回到 `FileSystemStore.go`。我们在构造函数中有 `league, _:= NewLeague(f.database)`。
 
 如果 `NewLeague` 无法从我们提供的`io.Reader` 中解析 league，它会返回一个错误。
 
@@ -974,7 +974,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 }
 ```
 
-请记住，提供有用的错误信息非常重要(就像你写的测试一样)。人们在网上开玩笑说大多数 Go 代码都是
+请记住，提供有用的错误信息非常重要（就像你写的测试一样）。人们在网上开玩笑说大多数 Go 代码都是
 
 ```go
 if err != nil {
@@ -1005,7 +1005,7 @@ if err != nil {
 }
 ```
 
-在测试中，我们应该断言没有错误。我们可以编写测试助手来协助处理。
+在测试中，我们应该断言没有错误。我们可以编写辅助函数来协助处理。
 
 ```go
 func assertNoError(t *testing.T, err error) {
@@ -1016,7 +1016,7 @@ func assertNoError(t *testing.T, err error) {
 }
 ```
 
-使用这个测试助手处理其他编译问题。最后，你应该得到一个失败的测试。
+使用这个辅助函数处理其他编译问题。最后，你应该得到一个失败的测试。
 
 ```go
 === RUN   TestRecordingWinsAndRetrievingThem
@@ -1139,7 +1139,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
 ## 排序
 
-我们的产品所有者想让 `/league` 返回按分数排序的球员。
+我们的产品负责人想让 `/league` 返回按得分排序的玩家。
 
 这里主要要做的决定是，在软件的什么位置处理这个问题。如果我们使用的是「真实的」数据库，我们会使用像 `ORDER BY` 这样的东西，所以排序非常快，所以出于这个原因，应该由 `PlayerStore` 的实现负责。
 
@@ -1206,8 +1206,8 @@ func (f *FileSystemPlayerStore) GetLeague() League {
 ### 讨论的内容
 
 - `Seeker` 接口以及它与 `Reader` 和 `Writer` 的关系。
-- 使用文件存储。
-- 为测试文件创建一个易用的助手，隐藏所有杂乱的东西。
+- 处理文件读写。
+- 为测试创建辅助函数，隐藏文件中所有杂乱的内容。
 - 使用 `sort.Slice` 对切片排序。
 - 利用编译器帮助我们安全地对应用程序进行结构更改。
 
@@ -1220,14 +1220,14 @@ func (f *FileSystemPlayerStore) GetLeague() League {
 
 ### 软件的功能
 
-- 我们创建了一个 HTTP API，你可以利用它创建玩家并增加他们的分数。
-- 我们可以将包含每个人分数的联盟数据作为 JSON 返回。
+- 我们创建了一个 HTTP API，你可以利用它创建玩家并增加他们的得分。
+- 我们可以将包含每个人得分的联盟数据作为 JSON 返回。
 - 数据以 JSON 文件的形式存储。
 
 ---
 
 作者：[Chris James](https://dev.to/quii)
 译者：[Donng](https://github.com/Donng)
-校对：
+校对：[pityonline](https://github.com/pityonline)
 
 本文由 [GCTT](https://github.com/studygolang/GCTT) 原创编译，[Go 中文网](https://studygolang.com/) 荣誉推出
