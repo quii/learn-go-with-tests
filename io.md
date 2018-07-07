@@ -4,7 +4,7 @@
 
 [In the previous chapter](json.md) we continued iterating on our application by adding a new endpoint `/league`. Along the way we learned about how to deal with JSON, embedding types and routing.
 
-Our product-owner is somewhat perturbed by the software losing the scores when the server was restarted. This is because our implementation of our store is in-memory. She is also not pleased that we didn't interpret the `/league` endpoint should return the players ordered by number of wins!
+Our product owner is somewhat perturbed by the software losing the scores when the server was restarted. This is because our implementation of our store is in-memory. She is also not pleased that we didn't interpret the `/league` endpoint should return the players ordered by the number of wins!
 
 ## The code so far
 
@@ -142,7 +142,7 @@ There are dozens of databases we could use for this but we're going to go for a 
 
 This keeps the data very portable and is relatively simple to implement.
 
-It wont scale especially well but given this is a prototype it'll be fine for now. If our circumstances change and it's no longer appropriate it'll be simple to swap it out for something different because of the `PlayerStore` abstraction we have used.
+It won't scale especially well but given this is a prototype it'll be fine for now. If our circumstances change and it's no longer appropriate it'll be simple to swap it out for something different because of the `PlayerStore` abstraction we have used.
 
 We will keep the `InMemoryPlayerStore` for now so that the integration tests keep passing as we develop our new store. Once we are confident our new implementation is sufficient to make the integration test pass we will swap it in and then delete `InMemoryPlayerStore`.
 
@@ -199,7 +199,7 @@ Try again
 ./FileSystemStore_test.go:17:15: store.GetLeague undefined (type FileSystemStore has no field or method GetLeague)
 ```
 
-It's complaining because we're passing in a `Reader` but not expecting one and it doesnt have `GetLeague` defined yet.
+It's complaining because we're passing in a `Reader` but not expecting one and it doesn't have `GetLeague` defined yet.
 
 ```go
 type FileSystemStore struct {
@@ -251,7 +251,6 @@ func NewLeague(rdr io.Reader) ([]Player, error) {
 
     return league, err
 }
-}
 ```
 
 Call this in our implementation and in our test helper `getLeagueFromResponse` in `server_test.go`
@@ -267,15 +266,15 @@ We haven't got a strategy yet for dealing with parsing errors but let's press on
 
 ### Seeking problems
 
-There is a flaw in our implementation. First of all let's remind ourselves how `io.Reader` is defined.
+There is a flaw in our implementation. First of all, let's remind ourselves how `io.Reader` is defined.
 
 ```go
 type Reader interface {
-        Read(p []byte) (n int, err error)
+    Read(p []byte) (n int, err error)
 }
 ```
 
-With our file you can imagine it reading through byte by byte until the end. What happens if you try and `Read` a second time?
+With our file, you can imagine it reading through byte by byte until the end. What happens if you try and `Read` a second time?
 
 Add the following to the end of our current test.
 
@@ -287,14 +286,14 @@ assertLeague(t, got, want)
 
 We want this to pass, but if you run the test it doesn't.
 
-The problem is our `Reader` has reached to the end so there is nothing more to read. We need a way to tell it to go back to the start.
+The problem is our `Reader` has reached the end so there is nothing more to read. We need a way to tell it to go back to the start.
 
 [ReadSeeker](https://golang.org/pkg/io/#ReadSeeker) is another interface in the standard library that can help.
 
 ```go
 type ReadSeeker interface {
-        Reader
-        Seeker
+    Reader
+    Seeker
 }
 ```
 
@@ -302,7 +301,7 @@ Remember embedding? This is an interface comprised of `Reader` and [`Seeker`](ht
 
 ```go
 type Seeker interface {
-        Seek(offset int64, whence int) (int64, error)
+    Seek(offset int64, whence int) (int64, error)
 }
 ```
 
@@ -322,7 +321,7 @@ func (f *FileSystemStore) GetLeague() []Player {
 
 Try running the test, it now passes! Happily for us `string.NewReader` that we used in our test also implements `ReadSeeker` so we didn't have to make any other changes.
 
-Next we'll implement `GetPlayerScore`
+Next we'll implement `GetPlayerScore`.
 
 ## Write the test first
 
@@ -404,11 +403,11 @@ t.Run("/get player score", func(t *testing.T) {
 })
 ```
 
-Finally we need to start recording scores with `RecordWin`
+Finally, we need to start recording scores with `RecordWin`.
 
 ## Write the test first
 
-Our approach is fairly short-sighted for writes. We cant (easily) just update one "row" of JSON in a file. We'll need to store the _whole_ new representation of our database on every write.
+Our approach is fairly short-sighted for writes. We can't (easily) just update one "row" of JSON in a file. We'll need to store the _whole_ new representation of our database on every write.
 
 How do we write? We'd normally use a `Writer` but we already have our `ReadSeeker`. Potentially we could have two dependencies but the standard library already has an interface for us `ReadWriteSeeker` which lets us do all the things we'll need to do with a file.
 
@@ -462,7 +461,7 @@ func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func(
 }
 ```
 
-[TempFile](https://golang.org/pkg/io/ioutil/#TempDir) creates a temporary file for us to use. The `"db"` value we've passed in is a prefix put on a random file name it will create. This is to ensure it wont clash with other files by accident.
+[TempFile](https://golang.org/pkg/io/ioutil/#TempDir) creates a temporary file for us to use. The `"db"` value we've passed in is a prefix put on a random file name it will create. This is to ensure it won't clash with other files by accident.
 
 You'll notice we're not only returning our `ReadWriteSeeker` (the file) but also a function. We need to make sure that the file is removed once the test is finished. We don't want to leak details of the files into the test as it's prone to error and uninteresting for the reader. By returning a `removeFile` function, we can take care of the details in our helper and all the caller has to do is run `defer cleanDatabase()`.
 
@@ -506,7 +505,7 @@ func TestFileSystemStore(t *testing.T) {
 }
 ```
 
-Run the tests and they should be passing! That was a fair amount of changes but now it feels like we have our interface definition complete and it should be very easy to add new tests from now.
+Run the tests and they should be passing! There were a fair amount of changes but now it feels like we have our interface definition complete and it should be very easy to add new tests from now.
 
 Let's get the first iteration of recording a win for an existing player
 
@@ -528,6 +527,7 @@ t.Run("store wins for existing players", func(t *testing.T) {
 ```
 
 ## Try to run the test
+
 `./FileSystemStore_test.go:67:8: store.RecordWin undefined (type FileSystemPlayerStore has no field or method RecordWin)`
 
 ## Write the minimal amount of code for the test to run and check the failing test output
@@ -546,7 +546,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
         FileSystemStore_test.go:71: got 33 want 34
 ```
 
-Our implementation is empty so the old score is getting returned
+Our implementation is empty so the old score is getting returned.
 
 ## Write enough code to make it pass
 
@@ -567,15 +567,15 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 
 You may be asking yourself why I am doing `league[i].Wins++` rather than `player.Wins++`.
 
-When you `range` over a slice you are returned the current index of the loop (in our case `i`) and a _copy_ of the element at that index. Changing the `Wins` value of a copy wont have any effect on the `league` slice that we iterate on. For that reason we need to get the reference to the actual value by doing `league[i]` and then changing that value instead.
+When you `range` over a slice you are returned the current index of the loop (in our case `i`) and a _copy_ of the element at that index. Changing the `Wins` value of a copy won't have any effect on the `league` slice that we iterate on. For that reason, we need to get the reference to the actual value by doing `league[i]` and then changing that value instead.
 
 If you run the tests, they should now be passing.
 
 ## Refactor
 
-In `GetPlayerScore` and `RecordWin` we are iterating over `[]Player` to find a player by name.
+In `GetPlayerScore` and `RecordWin`, we are iterating over `[]Player` to find a player by name.
 
-We could refactor this common code in the internals of `FileSystemStore` but to me it feels like this is maybe useful code we can lift into a new type. Working with a "League" so far has always been with `[]Player` but we can create a new type called `League`. This will be easier for other developers to understand and then we can attach useful methods onto that type for us to use.
+We could refactor this common code in the internals of `FileSystemStore` but to me, it feels like this is maybe useful code we can lift into a new type. Working with a "League" so far has always been with `[]Player` but we can create a new type called `League`. This will be easier for other developers to understand and then we can attach useful methods onto that type for us to use.
 
 Inside `league.go` add the following
 
@@ -628,6 +628,7 @@ This is looking much better and we can see how we might be able to find other us
 We now need to handle the scenario of recording wins of new players.
 
 ## Write the test first
+
 ```go
 t.Run("store wins for existing players", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[
@@ -644,6 +645,7 @@ t.Run("store wins for existing players", func(t *testing.T) {
     assertScoreEquals(t, got, want)
 })
 ```
+
 ## Try to run the test
 
 ```
@@ -651,6 +653,7 @@ t.Run("store wins for existing players", func(t *testing.T) {
     --- FAIL: TestFileSystemStore/store_wins_for_existing_players#01 (0.00s)
         FileSystemStore_test.go:86: got 0 want 1
 ```
+
 ## Write enough code to make it pass
 
 We just need to handle the scenario where `Find` returns `nil` because it couldn't find the player.
@@ -681,7 +684,7 @@ defer cleanDatabase()
 store := &FileSystemPlayerStore{database}
 ```
 
-In you run the test it should pass and now we can delete `InMemoryPlayerStore`. `main.go` will now have compilation problems which will motivate us to now use our new store in the "real" code.
+If you run the test it should pass and now we can delete `InMemoryPlayerStore`. `main.go` will now have compilation problems which will motivate us to now use our new store in the "real" code.
 
 ```go
 package main
@@ -712,7 +715,7 @@ func main() {
 
 - We create a file for our database.
 - The 2nd argument to `os.OpenFile` lets you define the permissions for opening the file, in our case `O_RDWR` means we want to read and write _and_ `os.O_CREATE` means create the file if it doesn't exist.
-- The 3rd argument means sets permissions for the file, in our case all users can read and write the file. [(See superuser.com for a more detailed explanation)](https://superuser.com/questions/295591/what-is-the-meaning-of-chmod-666)
+- The 3rd argument means sets permissions for the file, in our case, all users can read and write the file. [(See superuser.com for a more detailed explanation)](https://superuser.com/questions/295591/what-is-the-meaning-of-chmod-666).
 
 Running the program now persists the data in a file in between restarts, hooray!
 
@@ -778,7 +781,7 @@ There is some more naivety in the way we are dealing with files which _could_ cr
 
 When we `RecordWin` we `Seek` back to the start of the file and then write the new data but what if the new data was smaller than what was there before?
 
-In our current case this is impossible. We never edit or delete scores so the data can only get bigger but it would be irresponsible for us to leave the code like this, it's not unthinkable that a delete scenario could come up.
+In our current case, this is impossible. We never edit or delete scores so the data can only get bigger but it would be irresponsible for us to leave the code like this, it's not unthinkable that a delete scenario could come up.
 
 How will we test for this though? What we need to do is first refactor our code so we separate out the concern of the _kind of data we write, from the writing_. We can then test that separately to check it works how we hope.
 
@@ -822,7 +825,7 @@ func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStor
 }
 ```
 
-Finally we can get the amazing pay-off we wanted by removing the `Seek` call from `RecordWin`. Yes it doesn't feel much, but at least it means if we do any other kind of writes we can rely on our `Write` to behave how we need it to. Plus it will now let us test the potentially problematic code separately and fix it.
+Finally, we can get the amazing payoff we wanted by removing the `Seek` call from `RecordWin`. Yes, it doesn't feel much, but at least it means if we do any other kind of writes we can rely on our `Write` to behave how we need it to. Plus it will now let us test the potentially problematic code separately and fix it.
 
 Let's write the test where we want to update the entire contents of a file with something that is smaller than the original contents. In `tape_test.go`:
 
@@ -885,9 +888,9 @@ Once you get it refactoring our `TestTape_Write` test should be passing!
 
 ### One other small refactor
 
-In `RecordWin` we have the line `json.NewEncoder(f.database).Encode(f.league)`
+In `RecordWin` we have the line `json.NewEncoder(f.database).Encode(f.league)`.
 
-We dont need to create a new encoder every time we write, we can initialise one in our constructor and use that instead.
+We don't need to create a new encoder every time we write, we can initialise one in our constructor and use that instead.
 
 Store a reference to an `Encoder` in our type.
 
@@ -912,7 +915,7 @@ func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
 }
 ```
 
-Use it in `RecordWin`
+Use it in `RecordWin`.
 
 ## Didn't we just break some rules there? Testing private things? No interfaces?
 
@@ -920,17 +923,17 @@ Use it in `RecordWin`
 
 It's true that _in general_ you should favour not testing private things as that can sometimes lead to your tests being too tightly coupled to the implementation; which can hinder refactoring in future.
 
-However we must not forget that tests should give us _confidence_.
+However, we must not forget that tests should give us _confidence_.
 
 We were not confident that our implementation would work if we added any kind of edit or delete functionality. We did not want to leave the code like that, especially if this was being worked on by more than one person who may not be aware of the shortcomings of our initial approach.
 
-Finally, it's just one test! If we decide to change the way it works it wont be a disaster to just delete the test but we have at the very least captured the requirement for future maintainers.
+Finally, it's just one test! If we decide to change the way it works it won't be a disaster to just delete the test but we have at the very least captured the requirement for future maintainers.
 
 ### Interfaces
 
 We started off the code by using `io.Reader` as that was the easiest path for us to unit test our new `PlayerStore`. As we developed the code we moved on to `io.ReadWriter` and then `io.ReadWriteSeeker`. We then found out there was nothing in the standard library that actually implemented that apart from `*os.File`. We could've taken the decision to write our own or use an open source one but it felt pragmatic just to make temporary files for the tests.
 
-Finally we needed `Truncate` which is also on `*os.File`. It would've been an option to create our own interface capturing these requirements.
+Finally, we needed `Truncate` which is also on `*os.File`. It would've been an option to create our own interface capturing these requirements.
 
 ```go
 type ReadWriteSeekTruncate interface {
@@ -939,7 +942,7 @@ type ReadWriteSeekTruncate interface {
 }
 ```
 
-But what is this really giving us? Bear in mind we are _not mocking_ and it is unrealistic for a **file system** store to take any type other than a `*os.File` so we don't need the polymorphism that interfaces give us.
+But what is this really giving us? Bear in mind we are _not mocking_ and it is unrealistic for a **file system** store to take any type other than an `*os.File` so we don't need the polymorphism that interfaces give us.
 
 Don't be afraid to chop and change types and experiment like we have here. The great thing about using a statically typed language is the compiler will help you with every change.
 
@@ -979,7 +982,7 @@ if err != nil {
 }
 ```
 
-**That is 100% not idiomatic**. Adding contextual information (i.e what you were doing to cause the error) to your error messages makes operating your software far easier.
+**That is 100% not idiomatic.** Adding contextual information (i.e what you were doing to cause the error) to your error messages makes operating your software far easier.
 
 If you try and compile you'll get some errors.
 
@@ -1013,7 +1016,7 @@ func assertNoError(t *testing.T, err error) {
 }
 ```
 
-Work through the other compilation problems using this helper. Finally you should have a failing test
+Work through the other compilation problems using this helper. Finally, you should have a failing test
 
 ```
 === RUN   TestRecordingWinsAndRetrievingThem
@@ -1145,30 +1148,29 @@ The main decision to make here is where in the software should this happen. If w
 We can update the assertion on our first test in `TestFileSystemStore`
 
 ```go
-    t.Run("league sorted", func(t *testing.T) {
-        database, cleanDatabase := createTempFile(t, `[
-            {"Name": "Cleo", "Wins": 10},
-            {"Name": "Chris", "Wins": 33}]`)
-        defer cleanDatabase()
+t.Run("league sorted", func(t *testing.T) {
+    database, cleanDatabase := createTempFile(t, `[
+        {"Name": "Cleo", "Wins": 10},
+        {"Name": "Chris", "Wins": 33}]`)
+    defer cleanDatabase()
 
-        store := FileSystemPlayerStore{database}
+    store := FileSystemPlayerStore{database}
 
-        got, err := store.GetLeague()
-        assertNoError(t, err)
+    got, err := store.GetLeague()
+    assertNoError(t, err)
 
-        want := []Player{
-            {"Chris", 33},
-            {"Cleo", 10},
-        }
+    want := []Player{
+        {"Chris", 33},
+        {"Cleo", 10},
+    }
 
-        assertLeague(t, got, want)
+    assertLeague(t, got, want)
 
-        // read again
-        got, err = store.GetLeague()
-        assertNoError(t, err)
-        assertLeague(t, got, want)
-    })
-
+    // read again
+    got, err = store.GetLeague()
+    assertNoError(t, err)
+    assertLeague(t, got, want)
+})
 ```
 
 The order of the JSON coming in is in the wrong order and our `want` will check that it is returned to the caller in the correct order.
@@ -1195,7 +1197,7 @@ func (f *FileSystemPlayerStore) GetLeague() League {
 
 [`sort.Slice`](https://golang.org/pkg/sort/#Slice)
 
->  Slice sorts the provided slice given the provided less function.
+> Slice sorts the provided slice given the provided less function.
 
 Easy!
 
@@ -1213,11 +1215,11 @@ Easy!
 
 - Most rules in software engineering aren't really rules, just best practices that work 80% of the time.
 - We discovered a scenario where one of our previous "rules" of not testing internal functions was not helpful for us so we broke the rule.
-- It's important when breaking rules to understand the trade-off you are making. In our case we were ok with it because it was just one test and would've been very difficult to exercise the scenario otherwise.
+- It's important when breaking rules to understand the trade-off you are making. In our case, we were ok with it because it was just one test and would've been very difficult to exercise the scenario otherwise.
 - In order to be able to break the rules **you must understand them first**. An analogy is with learning guitar. It doesn't matter how creative you think you are, you must understand and practice the fundamentals.
 
 ### Where our software is at
 
-- We have a HTTP API where you can create players and increment their score.
+- We have an HTTP API where you can create players and increment their score.
 - We can return a league of everyone's scores as JSON.
 - The data is persisted as a JSON file.
