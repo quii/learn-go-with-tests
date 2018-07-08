@@ -1,4 +1,4 @@
-# Reflection (WIP)
+# Reflection
 
 [From twitter](https://twitter.com/peterbourgon/status/1011403901419937792?s=09)
 

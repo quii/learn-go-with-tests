@@ -33,7 +33,7 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 10. [Mocking](mocking.md) - Take some existing untested code and use DI with mocking to test it.
 11. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
 12. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
-13. [Reflection (WIP)](reflection.md) - Learn about reflection
+13. [Reflection](reflection.md) - Learn about reflection
 
 Property-based tests \(todo\)
 

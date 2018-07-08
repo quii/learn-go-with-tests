@@ -16,7 +16,7 @@
 * [Mocking](mocking.md)
 * [Concurrency](concurrency.md)
 * [Select](select.md)
-* [Reflection (WIP)](reflection.md)
+* [Reflection](reflection.md)
 
 ## Build an application
 
