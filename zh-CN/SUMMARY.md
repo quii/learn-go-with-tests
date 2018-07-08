@@ -21,7 +21,7 @@
 * [入门](app-intro.md)
 * [HTTP server](http-server.md)
 * [JSON，路由和嵌入](json.md)
-* [IO and sorting](io.md)
+* [IO 和排序](io.md)
 * Command line (todo)
 * `time` (todo)
 
