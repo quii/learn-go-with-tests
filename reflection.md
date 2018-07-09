@@ -4,13 +4,13 @@
 
 > #golang challenge: write a function `walk(x interface{}, fn func(string))` which takes a struct `x` and calls `fn` for all strings fields found inside.difficulty level: recursively.
 
-To do this we will need to use _reflection_
+To do this we will need to use _reflection_.
 
-> Reflection in computing is the ability of a program to examine its own structure, particularly through types; it's a form of metaprogramming. It's also a great source of confusion. 
+> Reflection in computing is the ability of a program to examine its own structure, particularly through types; it's a form of metaprogramming. It's also a great source of confusion.
 
 From [The Go Blog: Reflection](https://blog.golang.org/laws-of-reflection)
 
-## What is `interface` ?
+## What is `interface`?
 
 We have enjoyed the type-safety that Go has offered us in terms of functions that work with known types, such as `string`, `int` and our own types like `BankAccount`.
 
@@ -40,24 +40,24 @@ We'll want to call our function with a struct that has a string field in it (`x`
 ```go
 func TestWalk(t *testing.T) {
 
-	expected := "Chris"
-	var got []string
+    expected := "Chris"
+    var got []string
 
-	x := struct {
-		Name string
-	}{expected}
+    x := struct {
+        Name string
+    }{expected}
 
-	walk(x, func(input string) {
-		got = append(got, input)
-	})
+    walk(x, func(input string) {
+        got = append(got, input)
+    })
 
-	if len(got) != 1 {
-		t.Errorf("wrong number of function calls, got %d want %d", len(got), 1)
-	}
+    if len(got) != 1 {
+        t.Errorf("wrong number of function calls, got %d want %d", len(got), 1)
+    }
 }
-``` 
+```
 
-- We want to store a slice of strings (`got`) which stores which strings were passed into `fn` by `walk`. Often in previous chapters we have made dedicated types for this to spy on function/method invocations but in this case we can just pass in an anonymous function for `fn` that closes over `got`
+- We want to store a slice of strings (`got`) which stores which strings were passed into `fn` by `walk`. Often in previous chapters we have made dedicated types for this to spy on function/method invocations but in this case we can just pass in an anonymous function for `fn` that closes over `got`.
 - We use an anonymous `struct` with a `Name` field of type string to go for the simplest "happy" path.
 - Finally call `walk` with `x` and the spy and for now just check the length of `got`, we'll be more specific with our assertions once we've got something very basic working.
 
@@ -82,7 +82,7 @@ Try and run the test again
 ```
 === RUN   TestWalk
 --- FAIL: TestWalk (0.00s)
-	reflection_test.go:19: wrong number of function calls, got 0 want 1
+    reflection_test.go:19: wrong number of function calls, got 0 want 1
 FAIL
 ```
 
@@ -113,7 +113,7 @@ if got[0] != expected {
 ```
 === RUN   TestWalk
 --- FAIL: TestWalk (0.00s)
-	reflection_test.go:23: got 'I still can't believe South Korea beat Germany 2-0 to put them last in their group', want 'Chris'
+    reflection_test.go:23: got 'I still can't believe South Korea beat Germany 2-0 to put them last in their group', want 'Chris'
 FAIL
 ```
 
@@ -121,9 +121,9 @@ FAIL
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := reflect.ValueOf(x)
-	field := val.Field(0)
-	fn(field.String())
+    val := reflect.ValueOf(x)
+    field := val.Field(0)
+    fn(field.String())
 }
 ```
 
@@ -131,53 +131,54 @@ This code is _very unsafe and very naive_ but remember our goal when we are in "
 
 We need to use reflection to have a look at `x` and try and look at its properties.
 
-The [reflect package](https://godoc.org/reflect) has a function `ValueOf` which returns us a `Value` of a given variable. This has ways for us to inspect a value, including its fields which we use on the next line. 
+The [reflect package](https://godoc.org/reflect) has a function `ValueOf` which returns us a `Value` of a given variable. This has ways for us to inspect a value, including its fields which we use on the next line.
 
 We then make some very optimistic assumptions about the the value passed in
+
 - We look at the first and only field, there may be no fields at all which would cause a panic
 - We then call `String()` which returns the underlying value as a string but we know it would be wrong if the field was something other than a string.
 
 ## Refactor
 
-Our code is passing for the simple case but we know our code has a lot of shortcomings. 
+Our code is passing for the simple case but we know our code has a lot of shortcomings.
 
-We're going to be writing a number of tests where we pass in different values and checking the array of strings that `fn` was called with. 
+We're going to be writing a number of tests where we pass in different values and checking the array of strings that `fn` was called with.
 
 We should refactor our test into a table based test to make this easier to continue testing new scenarios.
 
 ```go
 func TestWalk(t *testing.T) {
 
-	cases := []struct{
-		Name string
-		Input interface{}
-		ExpectedCalls []string
-	} {
-		{
-			"Struct with one string field",
-			struct {
-				Name string
-			}{ "Chris"},
-			[]string{"Chris"},
-		},
-	}
+    cases := []struct{
+        Name string
+        Input interface{}
+        ExpectedCalls []string
+    } {
+        {
+            "Struct with one string field",
+            struct {
+                Name string
+            }{ "Chris"},
+            []string{"Chris"},
+        },
+    }
 
-	for _, test := range cases {
-		t.Run(test.Name, func(t *testing.T) {
-			var got []string
-			walk(test.Input, func(input string) {
-				got = append(got, input)
-			})
+    for _, test := range cases {
+        t.Run(test.Name, func(t *testing.T) {
+            var got []string
+            walk(test.Input, func(input string) {
+                got = append(got, input)
+            })
 
-			if !reflect.DeepEqual(got, test.ExpectedCalls) {
-				t.Errorf("got %v, want %v", got, test.ExpectedCalls)
-			}
-		})
-	}
+            if !reflect.DeepEqual(got, test.ExpectedCalls) {
+                t.Errorf("got %v, want %v", got, test.ExpectedCalls)
+            }
+        })
+    }
 }
 ```
 
-Now we can easily add a scenario to see what happens if we have more than one string field
+Now we can easily add a scenario to see what happens if we have more than one string field.
 
 ## Write the test first
 
@@ -199,19 +200,19 @@ Add the following scenario to the `cases`.
 ```
 === RUN   TestWalk/Struct_with_two_string_fields
     --- FAIL: TestWalk/Struct_with_two_string_fields (0.00s)
-    	reflection_test.go:40: got [Chris], want [Chris London]
+        reflection_test.go:40: got [Chris], want [Chris London]
 ```
 
 ## Write enough code to make it pass
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := reflect.ValueOf(x)
+    val := reflect.ValueOf(x)
 
-	for i:=0; i<val.NumField(); i++ {
-		field := val.Field(i)
-		fn(field.String())
-	}
+    for i:=0; i<val.NumField(); i++ {
+        field := val.Field(i)
+        fn(field.String())
+    }
 }
 ```
 
@@ -219,9 +220,9 @@ func walk(x interface{}, fn func(input string)) {
 
 ## Refactor
 
-It doesn't look like there's any obvious refactors here that would improve the code so let's press on
+It doesn't look like there's any obvious refactors here that would improve the code so let's press on.
 
-The next shortcoming in `walk` is that it assumes every field is a `string`. Let's write a test for this scenario
+The next shortcoming in `walk` is that it assumes every field is a `string`. Let's write a test for this scenario.
 
 ## Write the test first
 
@@ -243,7 +244,7 @@ Add the following case
 ```go
 === RUN   TestWalk/Struct_with_non_string_field
     --- FAIL: TestWalk/Struct_with_non_string_field (0.00s)
-    	reflection_test.go:46: got [Chris <int Value>], want [Chris]
+        reflection_test.go:46: got [Chris <int Value>], want [Chris]
 ```
 
 ## Write enough code to make it pass
@@ -252,23 +253,23 @@ We need to check that the type of the field is a `string`.
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := reflect.ValueOf(x)
+    val := reflect.ValueOf(x)
 
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
+    for i := 0; i < val.NumField(); i++ {
+        field := val.Field(i)
 
-		if field.Kind() == reflect.String {
-			fn(field.String())
-		}
-	}
+        if field.Kind() == reflect.String {
+            fn(field.String())
+        }
+    }
 }
 ```
 
-We can do that by checking its [`Kind`](https://godoc.org/reflect#Kind)
+We can do that by checking its [`Kind`](https://godoc.org/reflect#Kind).
 
 ## Refactor
 
-Again it looks like the code is reasonable enough for now. 
+Again it looks like the code is reasonable enough for now.
 
 The next scenario is what if it isn't a "flat" `struct`? In other words what happens if we have a `struct` with some nested fields?
 
@@ -301,17 +302,18 @@ Add the following type declarations somewhere in your test file
 
 ```go
 type Person struct {
-	Name    string
-	Profile Profile
+    Name    string
+    Profile Profile
 }
 
 type Profile struct {
-	Age  int
-	City string
+    Age  int
+    City string
 }
 ```
 
 Now we can add this to our cases which reads a lot clearer than before
+
 ```go
 {
     "Nested fields",
@@ -328,49 +330,49 @@ Now we can add this to our cases which reads a lot clearer than before
 ```
 === RUN   TestWalk/Nested_fields
     --- FAIL: TestWalk/Nested_fields (0.00s)
-    	reflection_test.go:54: got [Chris], want [Chris London]
+        reflection_test.go:54: got [Chris], want [Chris London]
 ```
 
-The problem is we're only iterating on the fields on the first level of the type's hierarchy 
+The problem is we're only iterating on the fields on the first level of the type's hierarchy.
 
 ## Write enough code to make it pass
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := reflect.ValueOf(x)
+    val := reflect.ValueOf(x)
 
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
+    for i := 0; i < val.NumField(); i++ {
+        field := val.Field(i)
 
-		if field.Kind() == reflect.String {
-			fn(field.String())
-		}
+        if field.Kind() == reflect.String {
+            fn(field.String())
+        }
 
-		if field.Kind() == reflect.Struct {
-			walk(field.Interface(), fn)
-		}
-	}
+        if field.Kind() == reflect.Struct {
+            walk(field.Interface(), fn)
+        }
+    }
 }
 ```
 
-The solution is quite simple, we again inspect its `Kind` and if it happens to be a `struct` we just call `walk` again on that inner `struct`
+The solution is quite simple, we again inspect its `Kind` and if it happens to be a `struct` we just call `walk` again on that inner `struct`.
 
 ## Refactor
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := reflect.ValueOf(x)
+    val := reflect.ValueOf(x)
 
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
+    for i := 0; i < val.NumField(); i++ {
+        field := val.Field(i)
 
-		switch field.Kind() {
-		case reflect.String:
-			fn(field.String())
-		case reflect.Struct:
-			walk(field.Interface(), fn)
-		}
-	}
+        switch field.Kind() {
+        case reflect.String:
+            fn(field.String())
+        case reflect.Struct:
+            walk(field.Interface(), fn)
+        }
+    }
 }
 ```
 
@@ -398,33 +400,33 @@ Add this case
 ```
 === RUN   TestWalk/Pointers_to_things
 panic: reflect: call of reflect.Value.NumField on ptr Value [recovered]
-	panic: reflect: call of reflect.Value.NumField on ptr Value
+    panic: reflect: call of reflect.Value.NumField on ptr Value
 ```
 
 ## Write enough code to make it pass
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := reflect.ValueOf(x)
+    val := reflect.ValueOf(x)
 
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
+    if val.Kind() == reflect.Ptr {
+        val = val.Elem()
+    }
 
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
+    for i := 0; i < val.NumField(); i++ {
+        field := val.Field(i)
 
-		switch field.Kind() {
-		case reflect.String:
-			fn(field.String())
-		case reflect.Struct:
-			walk(field.Interface(), fn)
-		}
-	}
+        switch field.Kind() {
+        case reflect.String:
+            fn(field.String())
+        case reflect.Struct:
+            walk(field.Interface(), fn)
+        }
+    }
 }
 ```
 
-You can't use `NumField` on a pointer `Value`, we need to extract the underlying value before we can do that by using `Elem()`
+You can't use `NumField` on a pointer `Value`, we need to extract the underlying value before we can do that by using `Elem()`.
 
 ## Refactor
 
@@ -432,36 +434,37 @@ Let's encapsulate the responsibility of extracting the `reflect.Value` from a gi
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := getValue(x)
+    val := getValue(x)
 
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
+    for i := 0; i < val.NumField(); i++ {
+        field := val.Field(i)
 
-		switch field.Kind() {
-		case reflect.String:
-			fn(field.String())
-		case reflect.Struct:
-			walk(field.Interface(), fn)
-		}
-	}
+        switch field.Kind() {
+        case reflect.String:
+            fn(field.String())
+        case reflect.Struct:
+            walk(field.Interface(), fn)
+        }
+    }
 }
 
 func getValue(x interface{}) reflect.Value {
-	val := reflect.ValueOf(x)
+    val := reflect.ValueOf(x)
 
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
+    if val.Kind() == reflect.Ptr {
+        val = val.Elem()
+    }
 
-	return val
+    return val
 }
 ```
 
 This actually adds _more_ code but I feel the abstraction level is right
-- Get the `reflect.Value` of `x` so I can inspect it, I don't care how.
-- Iterate over the fields, doing whatever needs to be done depending on its type
 
-Next we need to cover slices
+- Get the `reflect.Value` of `x` so I can inspect it, I don't care how.
+- Iterate over the fields, doing whatever needs to be done depending on its type.
+
+Next we need to cover slices.
 
 ## Write the test first
 
@@ -481,7 +484,7 @@ Next we need to cover slices
 ```
 === RUN   TestWalk/Slices
 panic: reflect: call of reflect.Value.NumField on slice Value [recovered]
-	panic: reflect: call of reflect.Value.NumField on slice Value
+    panic: reflect: call of reflect.Value.NumField on slice Value
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
@@ -492,25 +495,25 @@ This is similar to the pointer scenario before, we are trying to call `NumField`
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := getValue(x)
+    val := getValue(x)
 
-	if val.Kind() == reflect.Slice {
-		for i:=0; i< val.Len(); i++ {
-			walk(val.Index(i).Interface(), fn)
-		}
-		return
-	}
+    if val.Kind() == reflect.Slice {
+        for i:=0; i< val.Len(); i++ {
+            walk(val.Index(i).Interface(), fn)
+        }
+        return
+    }
 
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
+    for i := 0; i < val.NumField(); i++ {
+        field := val.Field(i)
 
-		switch field.Kind() {
-		case reflect.String:
-			fn(field.String())
-		case reflect.Struct:
-			walk(field.Interface(), fn)
-		}
-	}
+        switch field.Kind() {
+        case reflect.String:
+            fn(field.String())
+        case reflect.Struct:
+            walk(field.Interface(), fn)
+        }
+    }
 }
 ```
 
@@ -519,29 +522,30 @@ func walk(x interface{}, fn func(input string)) {
 This works but it's yucky. No worries, we have working code backed by tests so we are free to tinker all we like.
 
 If you think a little abstractly, we want to call `walk` on either
+
 - Each field in a struct
 - Each _thing_ in a slice
 
-Our code at the moment does this, but doesn't reflect it very well. We just have a check at the start to see if it's a slice (with a `return` to stop the rest of the code executing) and if it's not we just assume it's a struct. 
+Our code at the moment does this, but doesn't reflect it very well. We just have a check at the start to see if it's a slice (with a `return` to stop the rest of the code executing) and if it's not we just assume it's a struct.
 
 Let's rework the code so instead we check the type _first_ and then do our work.
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := getValue(x)
+    val := getValue(x)
 
-	switch val.Kind() {
-	case reflect.Struct:
-		for i:=0; i<val.NumField(); i++ {
-			walk(val.Field(i).Interface(), fn)
-		}
-	case reflect.Slice:
-		for i:=0; i<val.Len(); i++ {
-			walk(val.Index(i).Interface(), fn)
-		}
-	case reflect.String:
-		fn(val.String())
-	}
+    switch val.Kind() {
+    case reflect.Struct:
+        for i:=0; i<val.NumField(); i++ {
+            walk(val.Field(i).Interface(), fn)
+        }
+    case reflect.Slice:
+        for i:=0; i<val.Len(); i++ {
+            walk(val.Index(i).Interface(), fn)
+        }
+    case reflect.String:
+        fn(val.String())
+    }
 }
 ```
 
@@ -551,31 +555,32 @@ Still, to me it feels like it could be better. There's repetition the operation 
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := getValue(x)
+    val := getValue(x)
 
-	numberOfValues := 0
-	var getField func(int) reflect.Value
+    numberOfValues := 0
+    var getField func(int) reflect.Value
 
-	switch val.Kind() {
-	case reflect.String:
-		fn(val.String())
-	case reflect.Struct:
-		numberOfValues = val.NumField()
-		getField = val.Field
-	case reflect.Slice:
-		numberOfValues = val.Len()
-		getField = val.Index
-	}
+    switch val.Kind() {
+    case reflect.String:
+        fn(val.String())
+    case reflect.Struct:
+        numberOfValues = val.NumField()
+        getField = val.Field
+    case reflect.Slice:
+        numberOfValues = val.Len()
+        getField = val.Index
+    }
 
-	for i:=0; i< numberOfValues; i++ {
-		walk(getField(i).Interface(), fn)
-	}
+    for i:=0; i< numberOfValues; i++ {
+        walk(getField(i).Interface(), fn)
+    }
 }
-``` 
+```
 
-If the `value` is a `reflect.String` then we just call `fn` like normal. 
+If the `value` is a `reflect.String` then we just call `fn` like normal.
 
 Otherwise our `switch` will extract out two things depending on the type
+
 - How many fields there are
 - How to extract the `Value` (`Field` or `Index`)
 
@@ -603,7 +608,7 @@ Add to the cases
 ```
 === RUN   TestWalk/Arrays
     --- FAIL: TestWalk/Arrays (0.00s)
-    	reflection_test.go:78: got [], want [London Reykjavík]
+        reflection_test.go:78: got [], want [London Reykjavík]
 ```
 
 ## Write enough code to make it pass
@@ -612,29 +617,29 @@ Arrays can be handled the same way as slices, so just add it to the case with a 
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := getValue(x)
+    val := getValue(x)
 
-	numberOfValues := 0
-	var getField func(int) reflect.Value
+    numberOfValues := 0
+    var getField func(int) reflect.Value
 
-	switch val.Kind() {
-	case reflect.String:
-		fn(val.String())
-	case reflect.Struct:
-		numberOfValues = val.NumField()
-		getField = val.Field
-	case reflect.Slice, reflect.Array:
-		numberOfValues = val.Len()
-		getField = val.Index
-	}
+    switch val.Kind() {
+    case reflect.String:
+        fn(val.String())
+    case reflect.Struct:
+        numberOfValues = val.NumField()
+        getField = val.Field
+    case reflect.Slice, reflect.Array:
+        numberOfValues = val.Len()
+        getField = val.Index
+    }
 
-	for i:=0; i< numberOfValues; i++ {
-		walk(getField(i).Interface(), fn)
-	}
+    for i:=0; i< numberOfValues; i++ {
+        walk(getField(i).Interface(), fn)
+    }
 }
 ```
 
-The final type we want to handle is `map`
+The final type we want to handle is `map`.
 
 ## Write the test first
 
@@ -654,7 +659,7 @@ The final type we want to handle is `map`
 ```
 === RUN   TestWalk/Maps
     --- FAIL: TestWalk/Maps (0.00s)
-    	reflection_test.go:86: got [], want [Bar Boz]
+        reflection_test.go:86: got [], want [Bar Boz]
 ```
 
 ## Write enough code to make it pass
@@ -663,29 +668,29 @@ Again if you think a little abstractly you can see that `map` is very similar to
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := getValue(x)
+    val := getValue(x)
 
-	numberOfValues := 0
-	var getField func(int) reflect.Value
+    numberOfValues := 0
+    var getField func(int) reflect.Value
 
-	switch val.Kind() {
-	case reflect.String:
-		fn(val.String())
-	case reflect.Struct:
-		numberOfValues = val.NumField()
-		getField = val.Field
-	case reflect.Slice, reflect.Array:
-		numberOfValues = val.Len()
-		getField = val.Index
-	case reflect.Map:
-		for _, key := range val.MapKeys() {
-			walk(val.MapIndex(key).Interface(), fn)
-		}
-	}
+    switch val.Kind() {
+    case reflect.String:
+        fn(val.String())
+    case reflect.Struct:
+        numberOfValues = val.NumField()
+        getField = val.Field
+    case reflect.Slice, reflect.Array:
+        numberOfValues = val.Len()
+        getField = val.Index
+    case reflect.Map:
+        for _, key := range val.MapKeys() {
+            walk(val.MapIndex(key).Interface(), fn)
+        }
+    }
 
-	for i:=0; i< numberOfValues; i++ {
-		walk(getField(i).Interface(), fn)
-	}
+    for i:=0; i< numberOfValues; i++ {
+        walk(getField(i).Interface(), fn)
+    }
 }
 ```
 
@@ -697,32 +702,32 @@ How do you feel right now? It felt like maybe a nice abstraction at the time but
 
 _This is OK!_ Refactoring is a journey and sometimes we will make mistakes. A major point of TDD is it gives us the freedom to try these things out.
 
-By taking small steps backed by steps this is in no way an irreversible situation. Let's just put it back to how it was before the refactor. 
+By taking small steps backed by steps this is in no way an irreversible situation. Let's just put it back to how it was before the refactor.
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-	val := getValue(x)
-	
-	walkValue := func(value reflect.Value) {
-		walk(value.Interface(), fn)
-	}
+    val := getValue(x)
 
-	switch val.Kind() {
-	case reflect.String:
-		fn(val.String())
-	case reflect.Struct:
-		for i := 0; i< val.NumField(); i++ {
-			walkValue(val.Field(i))
-		}
-	case reflect.Slice, reflect.Array:
-		for i:= 0; i<val.Len(); i++ {
-			walkValue(val.Index(i))
-		}
-	case reflect.Map:
-		for _, key := range val.MapKeys() {
-			walkValue(val.MapIndex(key))
-		}
-	}
+    walkValue := func(value reflect.Value) {
+        walk(value.Interface(), fn)
+    }
+
+    switch val.Kind() {
+    case reflect.String:
+        fn(val.String())
+    case reflect.Struct:
+        for i := 0; i< val.NumField(); i++ {
+            walkValue(val.Field(i))
+        }
+    case reflect.Slice, reflect.Array:
+        for i:= 0; i<val.Len(); i++ {
+            walkValue(val.Index(i))
+        }
+    case reflect.Map:
+        for _, key := range val.MapKeys() {
+            walkValue(val.MapIndex(key))
+        }
+    }
 }
 ```
 
@@ -730,8 +735,8 @@ We've introduced `walkValue` which DRYs up the calls to `walk` inside our `switc
 
 ## Wrapping up
 
-- Introduced some of the concepts from the `reflect` package. 
+- Introduced some of the concepts from the `reflect` package.
 - Used recursion to traverse arbitrary data structures.
 - Did an in retrospect bad refactor but didn't get too upset about it. By working iteratively with tests it's not such a big deal.
-- This only covered a small aspect of reflection. [The Go blog has an excellent post covering more details](https://blog.golang.org/laws-of-reflection)
-- Now that you know about reflection, do you best to avoid using it
+- This only covered a small aspect of reflection. [The Go blog has an excellent post covering more details](https://blog.golang.org/laws-of-reflection).
+- Now that you know about reflection, do you best to avoid using it.
