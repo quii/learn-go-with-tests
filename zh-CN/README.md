@@ -26,10 +26,12 @@ _或者通过 Go 语言学习测试驱动开发_
 5. [数组与切片](arrays-and-slices.md) - 学习数组、切片、`len`、可变参数、`range` 和测试覆盖率。
 6. [结构体，方法和接口](structs-methods-and-interfaces.md) - 学习 `struct`、方法、接口和表驱动测试。
 7. [指针和错误](pointers-and-errors.md) - 学习指针和错误处理。
-8. [依赖注入](dependency-injection.md) - 学习依赖注入、它与使用接口的关系和 io 的入门。
-9. [Mocking](mocking.md) - 使用 DI 测试现有的未经测试的代码。
-10. [并发](concurrency.md) - 学习如何编写并发代码以加快软件运行速度。
-11. [Select](select.md) - 学习如何优雅地处理同步、异步进程。
+8. [Maps](maps.md) - Learn about storing values in the map data structure.
+9. [依赖注入](dependency-injection.md) - 学习依赖注入、它与使用接口的关系和 io 的入门。
+10. [Mocking](mocking.md) - 使用 DI 测试现有的未经测试的代码。
+11. [并发](concurrency.md) - 学习如何编写并发代码以加快软件运行速度。
+12. [Select](select.md) - 学习如何优雅地处理同步、异步进程。
+13. [Reflection](reflection.md) - Learn about reflection
 
 基于属性的测试（todo）
 
@@ -48,7 +50,7 @@ _或者通过 Go 语言学习测试驱动开发_
 * [HTTP 服务](http-server.md) - 我们将创建一个应用程序来监听 HTTP 请求并对其作出响应。
 * [JSON, routing and embedding](json.md) - 我们将生成端点（endpoint）返回 JSON 并探索如何分发路由。
 * [IO 和排序](io.md) - 我们将从磁盘持久化和读取数据，并介绍数据排序。
-* 命令行（TODO）- 使用 flags 并响应用户在命令行中的输入。
+* [命令行（TODO）](command-line.md) - 使用 flags 并响应用户在命令行中的输入。
 
 ## 参与贡献
 

@@ -11,10 +11,12 @@
 * [数组与切片](arrays-and-slices.md)
 * [结构体，方法和接口](structs-methods-and-interfaces.md)
 * [指针和错误](pointers-and-errors.md)
+* [Maps](maps.md)
 * [依赖注入](dependency-injection.md)
 * [Mocking](mocking.md)
 * [并发](concurrency.md)
 * [Select](select.md)
+* [Reflection](reflection.md)
 
 ## 构建应用程序
 
