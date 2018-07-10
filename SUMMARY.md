@@ -11,10 +11,12 @@
 * [Arrays and slices](arrays-and-slices.md)
 * [Structs, methods & interfaces](structs-methods-and-interfaces.md)
 * [Pointers & errors](pointers-and-errors.md)
+* [Maps](maps.md)
 * [Dependency Injection](dependency-injection.md)
 * [Mocking](mocking.md)
 * [Concurrency](concurrency.md)
 * [Select](select.md)
+* [Reflection](reflection.md)
 
 ## Build an application
 
@@ -22,7 +24,7 @@
 * [HTTP server](http-server.md)
 * [JSON, routing and embedding](json.md)
 * [IO and sorting](io.md)
-* Command line (todo)
+* [Command line (todo)](command-line.md)
 * `time` (todo)
 
 ## Meta

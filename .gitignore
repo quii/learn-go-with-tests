@@ -8,3 +8,5 @@ _book/
 *.epub
 *.mobi
 *.pdf
+
+game.db.json

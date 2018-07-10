@@ -473,7 +473,7 @@ Try again
 It's telling us we cannot use a Triangle as a shape because it does not have an `Area()` method, so add an empty implementation to get the test working
 
 ```go
-func (c Triangle) Area() float64 {
+func (t Triangle) Area() float64 {
     return 0
 }
 ```
@@ -485,8 +485,8 @@ Finally the code compiles and we get our error
 ## Write enough code to make it pass
 
 ```go
-func (c Triangle) Area() float64 {
-    return (c.Base * c.Height) * 0.5
+func (t Triangle) Area() float64 {
+    return (t.Base * t.Height) * 0.5
 }
 ```
 

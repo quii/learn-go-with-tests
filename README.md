@@ -7,6 +7,8 @@ _Or learn test-driven development with Go_
 
 [You can read this on Gitbook](https://quii.gitbook.io/learn-go-with-tests)
 
+Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests)
+
 ## Why
 
 * Explore the Go language by writing tests
@@ -26,10 +28,12 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 5. [Arrays and slices](arrays-and-slices.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
 6. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
 7. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.
-8. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
-9. [Mocking](mocking.md) - Take some existing untested code and use DI with mocking to test it.
-10. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
-11. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
+8. [Maps](maps.md) - Learn about storing values in the map data structure.
+9. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
+10. [Mocking](mocking.md) - Take some existing untested code and use DI with mocking to test it.
+11. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
+12. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
+13. [Reflection](reflection.md) - Learn about reflection
 
 Property-based tests \(todo\)
 
@@ -48,7 +52,7 @@ By the end of this, you should have a strong grasp as to how to iteratively writ
 * [HTTP server](http-server.md) - We will create an application which listens to HTTP requests and responds to them.
 * [JSON, routing and embedding](json.md) - We will make our endpoints return JSON and explore how to do routing.
 * [IO and sorting](io.md) - We will persist and read our data from disk and we'll cover sorting data.
-* Command line (TODO) - Working with flags and responding to user input on the command line
+* [Command line (TODO)](command-line.md) - Working with flags and responding to user input on the command line
 
 ## Contributing
 

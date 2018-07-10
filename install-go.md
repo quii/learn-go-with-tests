@@ -47,7 +47,7 @@ Go is opinionated.
 
 By convention, all Go code lives within a single workspace (folder). This workspace could be anywhere in your machine. If you don't specify, Go will assume $HOME/go as the default workspace. The workspace is identified (and modified) by the environment variable [GOPATH](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable).
 
-You should set the evnironment variable so that you can use it later in scripts, shells, etc.
+You should set the environment variable so that you can use it later in scripts, shells, etc.
 
 Update your .bash_profile to contain the following exports:
 

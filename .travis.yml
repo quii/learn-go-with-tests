@@ -14,13 +14,14 @@ jobs:
   include:
     - stage: build
       script:
+        - go get github.com/quii/learn-go-with-tests/command-line/v1
         - go get -u golang.org/x/lint/golint
         - ./build.sh
     - stage: spelling
       script:
         - go get -u github.com/client9/misspell/cmd/misspell
         - misspell -error .
-    - stage: markdownlint
-      script:
-        - gem install mdl
-        - mdl .
+#    - stage: markdownlint
+#      script:
+#        - gem install mdl
+#        - mdl .
