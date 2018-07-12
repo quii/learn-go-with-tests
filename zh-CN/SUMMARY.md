@@ -24,7 +24,7 @@
 * [HTTP server](http-server.md)
 * [JSON，路由和嵌入](json.md)
 * [IO 和排序](io.md)
-* Command line (todo)
+* [Command line (todo)](command-line.md)
 * `time` (todo)
 
 ## Meta
