@@ -73,8 +73,8 @@ Writing a test is just like writing a function, with a few rules
 
 For now it's enough to know that your `t` of type `*testing.T` is your "hook" into the testing framework so you can do things like `t.Fail()` when you want to fail.
 
-#### New things
-
+> ### New things
+>
 >  **if**
 >
 >  If statements in Go are very much like other programming languages.
