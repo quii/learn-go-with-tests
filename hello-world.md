@@ -2,7 +2,15 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/hello-world)**
 
-It is traditional for your first program in a new language to be Hello, world. Create a file called `hello.go` and write this code. To run it type `go run hello.go`.
+It is traditional for your first program in a new language to be Hello, world.
+
+In the previous chapter we discussed how Go is opinionated as to where you put your files.
+
+Make a directory in the following path `$GOPATH/src/github.com/{your-user-id}/hello`.
+
+So if you're on a unix based OS and your username is "bob" and you are happy to stick with Go's conventions about `$GOPATH` (which is the easiest way of setting up) you could run `mkdir -p ~/go/src/github.com/bob/hello`.
+
+Create a file in this directory called `hello.go` and write this code. To run it type `go run hello.go`.
 
 ```go
 package main
