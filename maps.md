@@ -712,5 +712,5 @@ dictionary. Throughout the process we learned how to:
 * Update items in maps
 * Delete items from a map
 * Learned more about errors
-** How to create errors that are constants
-** Writing error wrappers
+  * How to create errors that are constants
+  * Writing error wrappers
