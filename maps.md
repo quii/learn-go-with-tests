@@ -160,7 +160,7 @@ func TestSearch(t *testing.T) {
     })
 
     t.Run("unknown word", func(t *testing.T) {
-        _, err := dictionary.Search("test")
+        _, err := dictionary.Search("unknown")
         want := "could not find the word you were looking for"
 
         if err == nil {
