@@ -101,9 +101,9 @@ You'll see the code is very similar to a test.
 
 The `testing.B` gives you access to the cryptically named `b.N`.
 
-When the benchmark is run the code is ran `b.N` times, and measures how long it takes.
+When the benchmark code is executed, it runs `b.N` times and measures how long it takes.
 
-The amount of times the code is ran shouldn't matter to you, the framework will determine what is a "good" value for that to let you have some decent results.
+The amount of times the code is run shouldn't matter to you, the framework will determine what is a "good" value for that to let you have some decent results.
 
 To run the benchmarks do `go test -bench=.`
 
