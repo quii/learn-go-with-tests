@@ -409,14 +409,14 @@ func TestAdd(t *testing.T) {
         dictionary := Dictionary{word: definition}
         err := dictionary.Add(word, "new test")
 
-        assertError(t, err, WordExistsError)
+        assertError(t, err, ErrWordExists)
         assertDefinition(t, dictionary, word, definition)
     })
 }
 ```
 
 For this test we modified `Add` to return an error, which we are
-validating against a new error variable, `WordExistsError`. We also modified
+validating against a new error variable, `ErrWordExists`. We also modified
 the previous test to check for a `nil` error.
 
 ## Try to run test
@@ -435,7 +435,7 @@ In `dictionary.go`
 ```go
 var (
     ErrNotFound   = errors.New("could not find the word you were looking for")
-    WordExistsError = errors.New("cannot add word because it already exists")
+    ErrWordExists = errors.New("cannot add word because it already exists")
 )
 
 func (d Dictionary) Add(word, definition string) error {
@@ -462,7 +462,7 @@ func (d Dictionary) Add(word, definition string) error {
     case ErrNotFound:
         d[word] = definition
     case nil:
-        return WordExistsError
+        return ErrWordExists
     default:
         return err
 
