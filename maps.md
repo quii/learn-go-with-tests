@@ -164,10 +164,10 @@ func TestSearch(t *testing.T) {
         want := "could not find the word you were looking for"
 
         if err == nil {
-            t.Error("expected to get an error.")
+            t.Fatal("expected to get an error.")
         }
 
-        assertStrings(t, got.Error(), want)
+        assertStrings(t, err.Error(), want)
     })
 }
 ```
