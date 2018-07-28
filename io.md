@@ -1156,8 +1156,7 @@ t.Run("league sorted", func(t *testing.T) {
 
     store := FileSystemPlayerStore{database}
 
-    got, err := store.GetLeague()
-    assertNoError(t, err)
+    got := store.GetLeague()
 
     want := []Player{
         {"Chris", 33},
@@ -1167,8 +1166,7 @@ t.Run("league sorted", func(t *testing.T) {
     assertLeague(t, got, want)
 
     // read again
-    got, err = store.GetLeague()
-    assertNoError(t, err)
+    got = store.GetLeague()
     assertLeague(t, got, want)
 })
 ```
