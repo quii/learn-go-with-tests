@@ -11,21 +11,21 @@ Our product owner now wants to _pivot_ by introducing a second application. This
 - To the left of the dealer there is the "small blind".
 - To the left of the small blind there is the big blind (or just blind).
 - These players *have* to contribute chips to the "pot". The big blind contributing twice as much as the small.
-- This way, every player has to contribute money to the pot, forcing people to play the game rather than "folding" all the time.
+- This way, every player has to contribute money to the pot through the game, forcing people to play rather than "folding" all the time.
 - The amount of chips the player has to contribute as a blind bet increases over time to ensure the game doesn't last too long.
 
 Our application will help keep track of when the blind should go up, and how much it should be.
 
 - Create a command line app.
 - When it starts it asks how many players are playing. This determines the amount of time there is before the "blind" bet goes up.
-  - There is a base amount of time of 15 minutes.
+  - There is a base amount of time of 5 minutes.
   - For every player, 1 minute is added.
-  - e.g 6 players equals 21 minutes for the blind.
+  - e.g 6 players equals 11 minutes for the blind.
 - After the blind time expires the game should alert the players the new amount the blind bet is.
 - The blind starts at 100 chips, then 200, 400, 600, 1000, 2000 and continue to double until the game ends.
 - When the game ends the user should be able to type "Chris wins" and that will record a win for the player in our existing database. This should then exit the program.
 
-The product owner wants the database to be shared amongst the two applications so that the league update according to wins recorded in the new application.
+The product owner wants the database to be shared amongst the two applications so that the league updates according to wins recorded in the new application.
 
 ## A reminder of the code
 
@@ -354,8 +354,8 @@ func (cli *PokerCLI) PlayPoker() {
 ```
 
 The easiest way to make this test pass is: 
-- Read all the contents of the string
-- Extract out the winner by using `strings.Replace` which takes the string to replace, what string to replace, its replacement and finally a flag to say how many instances to replace
+- Read everything from our `cli.in` to a string
+- Extract out the winner by using `strings.Replace` which takes the string to replace, what substring to replace, its replacement and finally a flag to say how many instances to replace (`-1` means replace all).
 
 ## Refactor
 
@@ -373,7 +373,7 @@ func extractWinner(userInput []byte) string {
 }
 ```
 
-Now that we have some working(ish) software, we should wire this up into `main`. Remember we should always strive to have fully-integrated working software as quickly as we can.
+Now that we have some passing tests, we should wire this up into `main`. Remember we should always strive to have fully-integrated working software as quickly as we can.
 
 In `main.go` add the following and run it.
 
@@ -433,11 +433,11 @@ This is fine and it means on the odd occasion where we want to test something in
 
 But given we have advocated for _not_ testing internal things _generally_, can Go help enforce that? What if we could test our code where we only have access to the exported types (like our `main` does)?
 
-When you're writing a project with different packages I would strongly recommend that your test package name has `_test` at the end. When you do this you will only be able to have access to the public types in your package. This would help with this specific case but also helps enforce the discipline of only testing public APIs. 
+When you're writing a project with multiple packages I would strongly recommend that your test package name has `_test` at the end. When you do this you will only be able to have access to the public types in your package. This would help with this specific case but also helps enforce the discipline of only testing public APIs. If you still wish to test internals you can make a separate test with the package you want to test.
 
-An adage with TDD is that if you cannot test your code then it is probably poor code to work with. Using `package foo_test` will help with this.
+An adage with TDD is that if you cannot test your code then it is probably hard for users of your code to integrate with it. Using `package foo_test` will help with this by forcing you to test your code as if you are importing it like users of your package will.
 
-Before fixing `main` let's change the package of our test inside `PokerCLI_test` to `poker_test`
+Before fixing `main` let's change the package of our test inside `PokerCLI_test` to `poker_test`.
 
 If you have a well configured IDE you will suddenly see a lot of red! If you run the compiler you'll get the following errors
 
@@ -450,11 +450,11 @@ If you have a well configured IDE you will suddenly see a lot of red! If you run
 ./PokerCLI_test.go:27:3: undefined: assertPlayerWin
 ```
 
-We have now stumbled into more questions on package design. 
+We have now stumbled into more questions on package design. In order to test our software we made unexported stubs and helper functions which are no longer available for us to use in our `PokerCLI_test`.
 
 #### `Do we want to have our stubs and helpers 'public' ?`
 
-This is a subjective discussion. One could definitely argue that you do not want to pollute your package's API with code to facilitate tests.
+This is a subjective discussion. One could argue that you do not want to pollute your package's API with code to facilitate tests.
 
 In the presentation ["Advanced Testing with Go"](https://speakerdeck.com/mitchellh/advanced-testing-with-go?slide=53) by Mitchell Hashimoto it is described how at HashiCorp they advocate doing this so that users of the package can write tests without having to re-invent the wheel writing stubs. In our case this would mean anyone using our poker package wont have to create their own stub `PlayerStore` if they wish to work with our code.
 
@@ -576,9 +576,9 @@ func (cli *PokerCLI) PlayPoker() {
 }
 ```
 
-No matter what you type, you never see `2` logged. The reason is the `ReadAll`, we cant read "all" of `os.Stdin`, as you can just keep typing stuff in! The `os.Stdin` is attached to our process and is a stream that wont finish.
+No matter what you type, you never see `2` logged. The reason is the `ReadAll`, we cant read "all" of `os.Stdin`, as you can just keep typing stuff in! The `os.Stdin` is attached to our process and is a stream that wont finish until the process finishes.
 
-We want to test that if we read _more_ than beyond the first newline that we fail.
+We want to test that if we read _more_ than beyond the first newline that we fail. This would mean a user could type `Bob wins` followed by a newline and it will be recorded, thus fixing the application.
 
 ```go
 type failOnEndReader struct {
@@ -658,3 +658,362 @@ The tests will now pass.
 Now try to run the application in `main.go` again and it should work how we expect.
 
 We will probably end up deleting this test in time as definitely _will_ want to read beyond the first line as we evaluate multiple commands from the user; but it was helpful to drive out a better solution and we didn't want to add new features while our application was not working properly.
+
+### `time.AfterFunc`
+
+We want to be able to schedule our program to print the blind bet values at certain durations dependant on the number of players.
+
+To limit the scope of what we need to do, we'll forget about the number of players part and just assume there are 5 players so we'll test that _every 10 minutes the new value of the blind bet is printed_.
+
+As usual the standard library has us covered with [`func AfterFunc(d Duration, f func()) *Timer`](https://golang.org/pkg/time/#AfterFunc)
+
+> `AfterFunc` waits for the duration to elapse and then calls f in its own goroutine. It returns a `Timer` that can be used to cancel the call using its Stop method.
+
+When we call `PlayPoker` we'll schedule all of our blind alerts.
+
+Testing this may be a little tricky though. We'll want to verify that each time period is scheduled with the correct blind amount but if you look at the signature of `time.AfterFunc` its second argument is the function it will run. You cannot compare functions in Go so we'd be unable to test what function has been sent in. So we'll need to write some kind of wrapper around `time.AfterFunc` which will take the time to run and the amount to print so we can spy on that.
+
+## Write the test first
+
+Add a new test to our suite
+
+```go
+t.Run("it schedules printing of blind values", func(t *testing.T) {
+    in := strings.NewReader("Chris wins\n")
+    playerStore := &poker.StubPlayerStore{}
+    blindAlerter := &SpyBlindAlerter{}
+
+    cli := poker.NewPokerCLI(playerStore, in, blindAlerter)
+    cli.PlayPoker()
+    
+    if len(blindAlerter.alerts) != 1 {
+        t.Fatal("expected a blind alert to be scheduled")
+    }
+})
+```
+
+You'll notice we've made a `SpyBlindAlerter` which we are trying to inject into our `PokerCLI` and then checking that after we call `PlayerPoker` that an alert is scheduled.
+
+(Remember we are just going for the simplest scenario first and then we'll iterate.)
+
+Here's the definition of `SpyBlindAlerter`
+
+```go
+type SpyBlindAlerter struct {
+	alerts []struct{
+		scheduledAt time.Duration
+		amount int
+	}
+}
+
+func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
+	s.alerts = append(s.alerts, struct {
+		scheduledAt time.Duration
+		amount int
+	}{duration,  amount})
+}
+
+```
+
+
+## Try to run the test
+
+```
+./PokerCLI_test.go:32:27: too many arguments in call to poker.NewPokerCLI
+	have (*poker.StubPlayerStore, *strings.Reader, *SpyBlindAlerter)
+	want (poker.PlayerStore, io.Reader)
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+We have added a new argument and the compiler is complaining. _Strictly speaking_ the minimal amount of code is to make `NewPokerCLI` accept a `*SpyBlindAlerter` but let's cheat a little and just define the dependency as an interface.
+
+```go
+type BlindAlerter interface {
+	ScheduleAlertAt(duration time.Duration, amount int)
+}
+```
+
+And then add it to the constructor
+
+```go
+func NewPokerCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *PokerCLI
+```
+
+Your other tests will now fail as they dont have a `BlindAlerter` passed in to `NewPokerCLI`. 
+
+Spying on BlindAlerter is not relevant for the other tests so in the test file i added 
+
+```go
+var ignoredSpyAlerter = &SpyBlindAlerter{}
+```
+
+And then just passed that into the other tests.
+
+The tests should now compile and our new test fails
+
+```
+=== RUN   TestCLI
+=== RUN   TestCLI/it_schedules_printing_of_blind_values
+--- FAIL: TestCLI (0.00s)
+    --- FAIL: TestCLI/it_schedules_printing_of_blind_values (0.00s)
+    	PokerCLI_test.go:38: expected a blind alert to be scheduled
+```
+
+## Write enough code to make it pass
+
+We'll need to add the `BlindAlerter` as a field on our `PokerCLI` so we can reference it in our `PlayPoker` method.
+
+```go
+type PokerCLI struct {
+	playerStore PlayerStore
+	in          *bufio.Reader
+	alerter     BlindAlerter
+}
+
+func NewPokerCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *PokerCLI {
+	return &PokerCLI{
+		playerStore: store,
+		in:          bufio.NewReader(in),
+		alerter:     alerter,
+	}
+}
+```
+
+To make the test pass, we can call our `BlindAlerter` with anything we like
+
+```go
+func (cli *PokerCLI) PlayPoker() {
+	cli.alerter.ScheduleAlertAt(5 * time.Second, 100)
+	userInput, _ := cli.in.ReadString('\n')
+	cli.playerStore.RecordWin(extractWinner(userInput))
+}
+```
+
+Next we'll want to check it schedules all the alerts we'd hope for, for 5 players
+
+## Write the test first
+
+```go
+	t.Run("it schedules printing of blind values", func(t *testing.T) {
+		in := strings.NewReader("Chris wins\n")
+		playerStore := &poker.StubPlayerStore{}
+		blindAlerter := &SpyBlindAlerter{}
+
+		cli := poker.NewPokerCLI(playerStore, in, blindAlerter)
+		cli.PlayPoker()
+
+		cases := []struct{
+			expectedScheduleTime time.Duration
+			expectedAmount       int
+		} {
+			{0 * time.Second, 100},
+			{10 * time.Minute, 200},
+			{20 * time.Minute, 300},
+			{30 * time.Minute, 400},
+			{40 * time.Minute, 500},
+			{50 * time.Minute, 600},
+			{60 * time.Minute, 800},
+			{70 * time.Minute, 1000},
+			{80 * time.Minute, 2000},
+			{90 * time.Minute, 4000},
+			{100 * time.Minute, 8000},
+		}
+
+		for i, c := range cases {
+			t.Run(fmt.Sprintf("%d scheduled for %v", c.expectedAmount, c.expectedScheduleTime), func(t *testing.T) {
+
+				if len(blindAlerter.alerts) <= i {
+					t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
+				}
+
+				alert := blindAlerter.alerts[i]
+
+				amountGot := alert.amount
+				if amountGot != c.expectedAmount {
+					t.Errorf("got amount %d, want %d", amountGot, c.expectedAmount)
+				}
+
+				gotScheduledTime := alert.scheduledAt
+				if gotScheduledTime != c.expectedScheduleTime {
+					t.Errorf("got scheduled time of %v, want %v", gotScheduledTime, c.expectedScheduleTime)
+				}
+			})
+		}
+	})
+```
+
+Table-based test works nicely here and clearly illustrate what our requirements are. We run through the table and check the `SpyBlindAlerter` to see if the alert has been scheduled with the correct values.
+
+## Try to run the test
+
+You should have a lot of failures looking like this
+
+```go
+=== RUN   TestCLI
+--- FAIL: TestCLI (0.00s)
+=== RUN   TestCLI/it_schedules_printing_of_blind_values
+    --- FAIL: TestCLI/it_schedules_printing_of_blind_values (0.00s)
+=== RUN   TestCLI/it_schedules_printing_of_blind_values/100_scheduled_for_0s
+        --- FAIL: TestCLI/it_schedules_printing_of_blind_values/100_scheduled_for_0s (0.00s)
+        	PokerCLI_test.go:71: got scheduled time of 5s, want 0s
+=== RUN   TestCLI/it_schedules_printing_of_blind_values/200_scheduled_for_10m0s
+        --- FAIL: TestCLI/it_schedules_printing_of_blind_values/200_scheduled_for_10m0s (0.00s)
+        	PokerCLI_test.go:59: alert 1 was not scheduled [{5000000000 100}]
+```
+
+## Write enough code to make it pass
+
+```go
+func (cli *PokerCLI) PlayPoker() {
+
+	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
+	blindTime := 0 * time.Second
+	for _, blind := range blinds {
+		cli.alerter.ScheduleAlertAt(blindTime, blind)
+		blindTime = blindTime + 10*time.Minute
+	}
+
+	userInput, _ := cli.in.ReadString('\n')
+	cli.playerStore.RecordWin(extractWinner(userInput))
+}
+```
+
+It's not a lot more complicated than what we already had. We're just now iterating over an array of `blinds` and calling the scheduler on an increasing `blindTime`
+
+## Refactor
+
+We can encapsulate our scheduled alerts into a method just to make `PlayPoker` read a little clearer.
+
+```go
+func (cli *PokerCLI) PlayPoker() {
+	cli.scheduleBlindAlerts()
+	userInput, _ := cli.in.ReadString('\n')
+	cli.playerStore.RecordWin(extractWinner(userInput))
+}
+
+func (cli *PokerCLI) scheduleBlindAlerts() {
+	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
+	blindTime := 0 * time.Second
+	for _, blind := range blinds {
+		cli.alerter.ScheduleAlertAt(blindTime, blind)
+		blindTime = blindTime + 10*time.Minute
+	}
+}
+```
+
+Finally our tests are looking a little clunky. We have two anonymous structs representing the same thing, a `ScheduledAlert`. Let's refactor that into a new type and then make some helps to compare them.
+
+```go
+type scheduledAlert struct {
+	at time.Duration
+	amount int
+}
+
+func (s scheduledAlert) String() string {
+	return fmt.Sprintf("%d chips at %v", s.amount, s.at)
+}
+
+type SpyBlindAlerter struct {
+	alerts []scheduledAlert
+}
+
+func (s *SpyBlindAlerter) ScheduleAlertAt(at time.Duration, amount int) {
+	s.alerts = append(s.alerts, scheduledAlert{at, amount})
+}
+```
+
+We've added a `String()` method to our type so it prints nicely if the test fails
+
+Update our test to use our new type
+
+```go
+t.Run("it schedules printing of blind values", func(t *testing.T) {
+    in := strings.NewReader("Chris wins\n")
+    playerStore := &poker.StubPlayerStore{}
+    blindAlerter := &SpyBlindAlerter{}
+
+    cli := poker.NewPokerCLI(playerStore, in, blindAlerter)
+    cli.PlayPoker()
+
+    cases := []scheduledAlert {
+        {0 * time.Second, 100},
+        {10 * time.Minute, 200},
+        {20 * time.Minute, 300},
+        {30 * time.Minute, 400},
+        {40 * time.Minute, 500},
+        {50 * time.Minute, 600},
+        {60 * time.Minute, 800},
+        {70 * time.Minute, 1000},
+        {80 * time.Minute, 2000},
+        {90 * time.Minute, 4000},
+        {100 * time.Minute, 8000},
+    }
+
+    for i, want := range cases {
+        t.Run(fmt.Sprint(want), func(t *testing.T) {
+
+            if len(blindAlerter.alerts) <= i {
+                t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
+            }
+
+            got := blindAlerter.alerts[i]
+            assertScheduledAlert(t, got, want)
+        })
+    }
+})
+```
+
+Implement `assertScheduledAlert` yourself.
+
+We've spent a fair amount of time here writing tests and have been somewhat naughty not integrating with our application. Let's address that before we pile on any more requirements.
+
+Try running the app and it wont compile, complaining about not enough args to `NewPokerCLI`.
+
+Let's create an implementation of `BlindAlerter` that we can use in our application.
+
+Create `BlindAlerter.go` and move our `BlindAlerter` interface and add the new things below
+
+```go
+package poker
+
+import (
+	"time"
+	"fmt"
+	"os"
+)
+
+// BlindAlerter schedules alerts for blind amounts
+type BlindAlerter interface {
+	ScheduleAlertAt(duration time.Duration, amount int)
+}
+
+type BlindAlerterFunc func(duration time.Duration, amount int)
+
+func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
+	a(duration, amount)
+}
+
+func StdOutAlerter(duration time.Duration, amount int) {
+	time.AfterFunc(duration, func() {
+		fmt.Fprintf(os.Stdout, "Blind is now %d\n", amount)
+	})
+}
+```
+
+Remember that any _type_ can implement an interface, not just `structs`. If you are making a library that exposes an interface with one function defined it is a common idiom to also expose a `MyInterfaceFunc` type. This type will be a `func` which will also implement your interface. That way users of your interface can convieniently implement your interface with just a function rather than having to create an empty `struct` type.
+
+We then create the function `StdOutAlerter` which has the same signature as the function and just use `time.AfterFunc` to schedule it to print to `os.Stdout`.
+
+Update `main` where we create `NewPokerCLI` to see this in action
+
+```go
+game := poker.NewPokerCLI(store, os.Stdin, poker.BlindAlerterFunc(poker.StdOutAlerter))
+```
+
+Before running you might want to change the `blindTime` increment in `PokerCLI` to be 10 seconds rather than 10 minutes just so you can see it in action.
+
+You should see it print the blind values as we'd expect every 10 seconds. Notice how you can still type "Shaun wins" into the CLI and it will stop the program how we'd expect.
+
+
+
