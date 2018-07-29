@@ -1,13 +1,13 @@
 package poker_test
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/quii/learn-go-with-tests/command-line/v5"
 	"io"
 	"strings"
 	"testing"
 	"time"
-	"bytes"
 )
 
 type scheduledAlert struct {
@@ -42,7 +42,7 @@ func TestCLI(t *testing.T) {
 		cli := poker.NewPokerCLI(dummyPlayerStore, in, stdout, blindAlerter)
 		cli.PlayPoker()
 
-		got :=stdout.String()
+		got := stdout.String()
 		want := poker.PlayerPrompt
 
 		if got != want {
@@ -70,7 +70,7 @@ func TestCLI(t *testing.T) {
 	})
 
 	t.Run("it schedules printing of blind values", func(t *testing.T) {
-		in := strings.NewReader("Chris wins\n")
+		in := strings.NewReader("5\n")
 		playerStore := &poker.StubPlayerStore{}
 		blindAlerter := &SpyBlindAlerter{}
 
@@ -105,7 +105,7 @@ func TestCLI(t *testing.T) {
 	})
 
 	t.Run("record chris win from user input", func(t *testing.T) {
-		in := strings.NewReader("Chris wins\n")
+		in := strings.NewReader("1\nChris wins\n")
 		playerStore := &poker.StubPlayerStore{}
 
 		cli := poker.NewPokerCLI(playerStore, in, dummyStdOut, dummyBlindAlerter)
@@ -115,7 +115,7 @@ func TestCLI(t *testing.T) {
 	})
 
 	t.Run("record cleo win from user input", func(t *testing.T) {
-		in := strings.NewReader("Cleo wins\n")
+		in := strings.NewReader("1\nCleo wins\n")
 		playerStore := &poker.StubPlayerStore{}
 
 		cli := poker.NewPokerCLI(playerStore, in, dummyStdOut, dummyBlindAlerter)
@@ -127,7 +127,7 @@ func TestCLI(t *testing.T) {
 	t.Run("do not read beyond the first newline", func(t *testing.T) {
 		in := failOnEndReader{
 			t,
-			strings.NewReader("Chris wins\n hello there"),
+			strings.NewReader("1\nChris wins\n hello there"),
 		}
 
 		playerStore := &poker.StubPlayerStore{}

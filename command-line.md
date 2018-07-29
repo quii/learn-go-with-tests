@@ -1216,6 +1216,8 @@ func (cli *PokerCLI) scheduleBlindAlerts(numberOfPlayers int) {
 - We `Trim` the string of the newline entered and use `Atoi` to convert it into an integer - ignoring any error scenarios. We'll need to write a test for that scenario later.
 - From here we change `scheduleBlindAlerts` to accept a number of players. We then calculate a `blindIncrement` time to use to add to `blindTime` as we iterate over the blind amounts
 
+While our new test has been fixed, a lot of others have failed because now our system only works if the game starts with a user entering a number. You'll need to fix the tests by changing the user inputs so that a number followed by a newline is added (this is highlighting yet more flaws in our approach right now).
+
 ## Refactor
 
 Let's _listen to our tests_. 

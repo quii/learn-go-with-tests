@@ -2,11 +2,11 @@ package poker
 
 import (
 	"bufio"
+	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
-	"fmt"
-	"strconv"
 )
 
 // PokerCLI helps players through a game of poker
