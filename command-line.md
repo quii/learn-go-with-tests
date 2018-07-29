@@ -742,13 +742,13 @@ func NewPokerCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *PokerCL
 
 Your other tests will now fail as they dont have a `BlindAlerter` passed in to `NewPokerCLI`. 
 
-Spying on BlindAlerter is not relevant for the other tests so in the test file i added 
+Spying on BlindAlerter is not relevant for the other tests so in the test file so add
 
 ```go
-var ignoredSpyAlerter = &SpyBlindAlerter{}
+var dummySpyAlerter = &SpyBlindAlerter{}
 ```
 
-And then just passed that into the other tests.
+Then passed that into the other tests.
 
 The tests should now compile and our new test fails
 
@@ -1015,5 +1015,215 @@ Before running you might want to change the `blindTime` increment in `PokerCLI` 
 
 You should see it print the blind values as we'd expect every 10 seconds. Notice how you can still type "Shaun wins" into the CLI and it will stop the program how we'd expect.
 
+The game wont always be played with 5 people so we need to prompt the user to enter a number of players before the game starts. 
 
+## Write the test first
+
+We'll want to record what is written to StdOut. We've done this a few times now, we know that `os.Stdout` is an `io.Writer` so we can check what is written if we use dependency injection to pass in a `bytes.Buffer` in our test and see what our code will write.
+
+We don't care about our other collaborators in this test just yet so we've made some dummies in our test file. We should be a little wary that we now have 4 dependencies for `PokerCLI`, that feels like maybe it is starting to have too many responsiblities. Let's live with it for now and see if a refactoring emerges as we add this new functionality.
+
+```go
+var dummyBlindAlerter = &SpyBlindAlerter{}
+var dummyPlayerStore = &poker.StubPlayerStore{}
+var dummyStdIn = &bytes.Buffer{}
+var dummyStdOut = &bytes.Buffer{}
+```
+
+And here is our new test
+
+```go
+t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
+    stdout := &bytes.Buffer{}
+    cli := poker.NewPokerCLI(dummyPlayerStore, dummyStdIn, stdout, dummyBlindAlerter)
+    cli.PlayPoker()
+
+    got :=stdout.String()
+    want := "Please enter the number of players: "
+
+    if got != want {
+        t.Errorf("got '%s', want '%s'", got, want)
+    }
+})
+```
+
+We pass in what will be `os.Stdout` in `main` and see what is written.
+
+## Try to run the test
+
+```
+./PokerCLI_test.go:38:27: too many arguments in call to poker.NewPokerCLI
+	have (*poker.StubPlayerStore, *bytes.Buffer, *bytes.Buffer, *SpyBlindAlerter)
+	want (poker.PlayerStore, io.Reader, poker.BlindAlerter)
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+We have a new dependency so we'll have to update `NewPokerCLI`
+
+```go
+func NewPokerCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *PokerCLI
+```
+
+Now the _other_ tests will fail to compile because they dont have an `io.Writer` being passed into `NewPokerCLI`. Add `dummyStdout` for the other tests.
+
+The new test should fail like so
+
+```
+=== RUN   TestCLI
+--- FAIL: TestCLI (0.00s)
+=== RUN   TestCLI/it_prompts_the_user_to_enter_the_number_of_players
+    --- FAIL: TestCLI/it_prompts_the_user_to_enter_the_number_of_players (0.00s)
+    	PokerCLI_test.go:46: got '', want 'Please enter the number of players: '
+FAIL
+```
+
+## Write enough code to make it pass
+
+We need to add our new dependency to our `PokerCLI` so we can reference it in `PlayPoker`
+
+```go
+type PokerCLI struct {
+	playerStore PlayerStore
+	in          *bufio.Reader
+	out         io.Writer
+	alerter     BlindAlerter
+}
+
+func NewPokerCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *PokerCLI {
+	return &PokerCLI{
+		playerStore: store,
+		in:          bufio.NewReader(in),
+		out:         out,
+		alerter:     alerter,
+	}
+}
+```
+
+Then finally we can write our prompt at the start of the game
+
+```go
+func (cli *PokerCLI) PlayPoker() {
+	fmt.Fprint(cli.out, "Please enter the number of players: ")
+	cli.scheduleBlindAlerts()
+	userInput, _ := cli.in.ReadString('\n')
+	cli.playerStore.RecordWin(extractWinner(userInput))
+}
+```
+
+## Refactor
+
+We have a duplicate string for the prompt which we should extract into a constant
+
+```go
+const PlayerPrompt = "Please enter the number of players: "
+```
+
+Use this in both the test code and `PokerCLI`.
+
+Now we need to send in a number and extract it out. The only way we'll know if it has had the desired effect is by seeing what blind alerts were scheduled.
+
+## Write the test first
+
+```go
+t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
+    stdout := &bytes.Buffer{}
+    in := strings.NewReader("7\n")
+    blindAlerter := &SpyBlindAlerter{}
+
+    cli := poker.NewPokerCLI(dummyPlayerStore, in, stdout, blindAlerter)
+    cli.PlayPoker()
+
+    got :=stdout.String()
+    want := poker.PlayerPrompt
+
+    if got != want {
+        t.Errorf("got '%s', want '%s'", got, want)
+    }
+
+    cases := []scheduledAlert{
+        {0 * time.Second, 100},
+        {12 * time.Minute, 200},
+        {24 * time.Minute, 300},
+        {36 * time.Minute, 400},
+    }
+
+    for i, want := range cases {
+        t.Run(fmt.Sprint(want), func(t *testing.T) {
+
+            if len(blindAlerter.alerts) <= i {
+                t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
+            }
+
+            got := blindAlerter.alerts[i]
+            assertScheduledAlert(t, got, want)
+        })
+    }
+})
+```
+
+Ouch! A lot of changes. 
+
+- We remove our dummy for StdIn and instead send in a mocked version representing our user entering 7
+- We also remove our dummy on the blind alerter so we can see that the number of players has had an effect on the scheduling
+- We test what alerts are scheduled
+
+## Try to run the test
+
+The test should still compile and fail reporting that the scheduled times are wrong because we've hard-coded for the game to be based on having 5 players
+
+```
+=== RUN   TestCLI
+--- FAIL: TestCLI (0.00s)
+=== RUN   TestCLI/it_prompts_the_user_to_enter_the_number_of_players
+    --- FAIL: TestCLI/it_prompts_the_user_to_enter_the_number_of_players (0.00s)
+=== RUN   TestCLI/it_prompts_the_user_to_enter_the_number_of_players/100_chips_at_0s
+        --- PASS: TestCLI/it_prompts_the_user_to_enter_the_number_of_players/100_chips_at_0s (0.00s)
+=== RUN   TestCLI/it_prompts_the_user_to_enter_the_number_of_players/200_chips_at_12m0s
+```
+
+## Write enough code to make it pass
+
+Remember, we are free to commit whatever sins we need to make this work. Once we have working software we can then work on refactoring the mess we're about to make!
+
+
+```go
+func (cli *PokerCLI) PlayPoker() {
+	fmt.Fprint(cli.out, PlayerPrompt)
+	
+	numberOfPlayersInput, _ := cli.in.ReadString('\n')
+	numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
+
+	cli.scheduleBlindAlerts(numberOfPlayers)
+
+	userInput, _ := cli.in.ReadString('\n')
+	cli.playerStore.RecordWin(extractWinner(userInput))
+}
+
+func (cli *PokerCLI) scheduleBlindAlerts(numberOfPlayers int) {
+	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
+
+	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
+	blindTime := 0 * time.Second
+	for _, blind := range blinds {
+		cli.alerter.ScheduleAlertAt(blindTime, blind)
+		blindTime = blindTime + blindIncrement
+	}
+}
+```
+
+- We read in the `numberOfPlayersInput` into a string
+- We `Trim` the string of the newline entered and use `Atoi` to convert it into an integer - ignoring any error scenarios. We'll need to write a test for that scenario later.
+- From here we change `scheduleBlindAlerts` to accept a number of players. We then calculate a `blindIncrement` time to use to add to `blindTime` as we iterate over the blind amounts
+
+## Refactor
+
+Let's _listen to our tests_. 
+
+- In order to test that we are scheduling some alerts we set up 4 different dependencies. Whenever you have a lot of dependencies for a _thing_ in your system, it implies it's doing too much. Visually we can see it in how cluttered our test is.
+- To me it feels like **we need to make a cleaner abstraction between reading user input and the business logic we want to do** 
+- A better test would be _given this user input, do we call the `BlindAlerter` with the correct number of players_. 
+- We would then extract the testing of the scheduling into the tests for our new `BlindAlerter`.
+
+We can refactor our `BlindAlerter` first and our test should continue to pass. Once we've made the structural changes we want we can think about how we can refactor the tests to reflect our new separation of concerns
 
