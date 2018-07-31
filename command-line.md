@@ -1224,8 +1224,88 @@ Let's _listen to our tests_.
 
 - In order to test that we are scheduling some alerts we set up 4 different dependencies. Whenever you have a lot of dependencies for a _thing_ in your system, it implies it's doing too much. Visually we can see it in how cluttered our test is.
 - To me it feels like **we need to make a cleaner abstraction between reading user input and the business logic we want to do** 
-- A better test would be _given this user input, do we call the `BlindAlerter` with the correct number of players_. 
-- We would then extract the testing of the scheduling into the tests for our new `BlindAlerter`.
+- A better test would be _given this user input, do we call `PokerGame` with the correct number of players_. 
+- We would then extract the testing of the scheduling into the tests for our new `PokerGame`.
 
-We can refactor our `BlindAlerter` first and our test should continue to pass. Once we've made the structural changes we want we can think about how we can refactor the tests to reflect our new separation of concerns
+We can refactor our `PokerGame` first and our test should continue to pass. Once we've made the structural changes we want we can think about how we can refactor the tests to reflect our new separation of concerns
 
+Remember when making changes in refactoring try to keep them as small as possible and keep re-running the tests.
+
+Try it yourself first. Think about the boundaries of what a `PokerGame` would offer and what our `PokerCLI` should be doing. For now don't change the external interface of `NewPokerCLI` as we dont want to have to change the tests.
+
+This is what I came up with:
+
+```go
+
+type PokerGame struct {
+	alerter BlindAlerter
+	store   PlayerStore
+}
+
+func (p *PokerGame) Start(numberOfPlayers int) {
+	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
+
+	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
+	blindTime := 0 * time.Second
+	for _, blind := range blinds {
+		p.alerter.ScheduleAlertAt(blindTime, blind)
+		blindTime = blindTime + blindIncrement
+	}
+}
+
+func (p *PokerGame) Finish(winner string) {
+	p.store.RecordWin(winner)
+}
+
+type PokerCLI struct {
+	playerStore PlayerStore
+	in          *bufio.Reader
+	out         io.Writer
+	game        *PokerGame
+}
+
+func NewPokerCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *PokerCLI {
+	return &PokerCLI{
+		in:  bufio.NewReader(in),
+		out: out,
+		game: &PokerGame{
+			alerter: alerter,
+			store:   store,
+		},
+	}
+}
+
+const PlayerPrompt = "Please enter the number of players: "
+
+// PlayPoker starts the game
+func (cli *PokerCLI) PlayPoker() {
+	fmt.Fprint(cli.out, PlayerPrompt)
+
+	numberOfPlayersInput, _ := cli.in.ReadString('\n')
+	numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
+
+	cli.game.Start(numberOfPlayers)
+
+	winnerInput, _ := cli.in.ReadString('\n')
+	winner := extractWinner(winnerInput)
+
+	cli.game.Finish(winner)
+}
+
+func extractWinner(userInput string) string {
+	return strings.Replace(userInput, " wins\n", "", 1)
+}
+```
+
+From a "domain" perspective:
+- We want to `Start` a game, indicating how many people are playing
+- We want to `Finish` a game, declaring the winner
+
+The new `PokerGame` type encapsulates this for us. 
+
+With this change we've passed `BlindAlerter` and `PlayerStore` to `PokerGame` as it is now responsible for alerting and storing results. 
+
+Our `PokerCLI` is now just concerned with:
+
+- Constructing `PokerGame` with its existing dependencies (which we'll refactor next)
+- Interpreting user input as method invocations for `PokerGame`
