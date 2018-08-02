@@ -570,7 +570,7 @@ t.Run("new word", func(t *testing.T) {
     definition := "this is just a test"
     dictionary := Dictionary{}
 
-    err := dictionary.Update(dictionaryword, definition)
+    err := dictionary.Update(word, definition)
 
     assertError(t, err, ErrWordDoesNotExist)
 })
