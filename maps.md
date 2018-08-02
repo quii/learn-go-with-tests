@@ -616,7 +616,7 @@ dictionary_test.go:66: got error '%!s(<nil>)' want 'cannot update word because i
 
 ```go
 func (d Dictionary) Update(word, definition string) error {
-    _, err := dictionary.Search(word)
+    _, err := d.Search(word)
     switch err {
     case ErrNotFound:
         return ErrWordDoesNotExist
