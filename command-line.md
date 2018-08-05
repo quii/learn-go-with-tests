@@ -1310,3 +1310,55 @@ Our `CLI` is now just concerned with:
 
 - Constructing `Game` with its existing dependencies (which we'll refactor next)
 - Interpreting user input as method invocations for `Game`
+
+We want to try to avoid doing "big" refactors which leave us in a state of failing tests for extended periods as that increases the chances of mistakes.
+
+The first thing we'll do is refactor `Game` so that we inject it into `CLI`. We'll do the smallest changes in our tests to facilitate that and then we'll see how we can break up the tests into the themes of parsing user input and game management.
+
+All we need to do right now is change `NewCLI`
+
+```go
+func NewCLI(in io.Reader, out io.Writer, game *Game) *CLI {
+	return &CLI{
+		in:  bufio.NewReader(in),
+		out: out,
+		game: game,
+	}
+}
+```
+
+This feels like an improvement already. We have less dependencies and our dependency list is reflecting our overall design goal of CLI being concerned with input/output and delegating game specific actions to a `Game`.
+
+If you try and compile there are problems. You should be able to fix these problems yourself. Don't worry about making any mocks for `Game` right now, just initialise _real_ `Game`s just to get everything compiling and tests green.
+
+To do this you'll need to make a constructor
+
+```go
+func NewGame(alerter BlindAlerter, store PlayerStore) *Game {
+	return &Game{
+		alerter:alerter,
+		store:store,
+	}
+}
+```
+
+Here's an example of one of the setups for the tests being fixed
+
+```go
+stdout := &bytes.Buffer{}
+in := strings.NewReader("7\n")
+blindAlerter := &SpyBlindAlerter{}
+game := poker.NewGame(blindAlerter, dummyPlayerStore)
+
+cli := poker.NewCLI(in, stdout, game)
+cli.PlayPoker()
+```
+
+It shouldn't take much effort to fix the tests and be back to green again (that's the point!) but make sure you fix `main.go` too before the next stage.
+
+```go
+// main.go
+game := poker.NewGame(poker.BlindAlerterFunc(poker.StdOutAlerter), store)
+cli := poker.NewCLI(os.Stdin, os.Stdout, game)
+cli.PlayPoker()
+```

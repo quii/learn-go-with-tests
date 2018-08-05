@@ -38,8 +38,9 @@ func TestCLI(t *testing.T) {
 		stdout := &bytes.Buffer{}
 		in := strings.NewReader("7\n")
 		blindAlerter := &SpyBlindAlerter{}
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
 
-		cli := poker.NewCLI(dummyPlayerStore, in, stdout, blindAlerter)
+		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
 
 		got := stdout.String()
@@ -71,10 +72,10 @@ func TestCLI(t *testing.T) {
 
 	t.Run("it schedules printing of blind values", func(t *testing.T) {
 		in := strings.NewReader("5\n")
-		playerStore := &poker.StubPlayerStore{}
 		blindAlerter := &SpyBlindAlerter{}
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
+		cli := poker.NewCLI(in, dummyStdOut, game)
 
-		cli := poker.NewCLI(playerStore, in, dummyStdOut, blindAlerter)
 		cli.PlayPoker()
 
 		cases := []scheduledAlert{
@@ -107,8 +108,9 @@ func TestCLI(t *testing.T) {
 	t.Run("record chris win from user input", func(t *testing.T) {
 		in := strings.NewReader("1\nChris wins\n")
 		playerStore := &poker.StubPlayerStore{}
+		game := poker.NewGame(dummyBlindAlerter, playerStore)
+		cli := poker.NewCLI(in, dummyStdOut, game)
 
-		cli := poker.NewCLI(playerStore, in, dummyStdOut, dummyBlindAlerter)
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Chris")
@@ -117,8 +119,9 @@ func TestCLI(t *testing.T) {
 	t.Run("record cleo win from user input", func(t *testing.T) {
 		in := strings.NewReader("1\nCleo wins\n")
 		playerStore := &poker.StubPlayerStore{}
+		game := poker.NewGame(dummyBlindAlerter, playerStore)
 
-		cli := poker.NewCLI(playerStore, in, dummyStdOut, dummyBlindAlerter)
+		cli := poker.NewCLI(in, dummyStdOut, game)
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Cleo")
@@ -130,9 +133,9 @@ func TestCLI(t *testing.T) {
 			strings.NewReader("1\nChris wins\n hello there"),
 		}
 
-		playerStore := &poker.StubPlayerStore{}
+		game := poker.NewGame(dummyBlindAlerter, dummyPlayerStore)
 
-		cli := poker.NewCLI(playerStore, in, dummyStdOut, dummyBlindAlerter)
+		cli := poker.NewCLI(in, dummyStdOut, game)
 		cli.PlayPoker()
 	})
 
