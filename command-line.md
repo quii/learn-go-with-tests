@@ -1021,7 +1021,7 @@ The game wont always be played with 5 people so we need to prompt the user to en
 
 We'll want to record what is written to StdOut. We've done this a few times now, we know that `os.Stdout` is an `io.Writer` so we can check what is written if we use dependency injection to pass in a `bytes.Buffer` in our test and see what our code will write.
 
-We don't care about our other collaborators in this test just yet so we've made some dummies in our test file. We should be a little wary that we now have 4 dependencies for `CLI`, that feels like maybe it is starting to have too many responsiblities. Let's live with it for now and see if a refactoring emerges as we add this new functionality.
+We don't care about our other collaborators in this test just yet so we've made some dummies in our test file. We should be a little wary that we now have 4 dependencies for `CLI`, that feels like maybe it is starting to have too many responsibilities. Let's live with it for now and see if a refactoring emerges as we add this new functionality.
 
 ```go
 var dummyBlindAlerter = &SpyBlindAlerter{}
