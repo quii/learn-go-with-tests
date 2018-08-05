@@ -7,7 +7,7 @@ import (
 func TestCLI(t *testing.T) {
 	playerStore := &StubPlayerStore{}
 
-	cli := &PokerCLI{playerStore}
+	cli := &CLI{playerStore}
 	cli.PlayPoker()
 
 	if len(playerStore.winCalls) < 1 {

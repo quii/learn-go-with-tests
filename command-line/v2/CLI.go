@@ -1,11 +1,11 @@
 package poker
 
-// PokerCLI helps players through a game of poker
-type PokerCLI struct {
+// CLI helps players through a game of poker
+type CLI struct {
 	playerStore PlayerStore
 }
 
 // PlayPoker starts the game
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	cli.playerStore.RecordWin("Cleo")
 }

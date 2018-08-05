@@ -139,16 +139,16 @@ The first requirement we'll tackle is recording a win when the user types `{Play
 
 ## Write the test first
 
-Inside `PokerCLI_test.go` (in the root of the project, not inside `cmd`)
+Inside `CLI_test.go` (in the root of the project, not inside `cmd`)
 
-We know we need to make something called `PokerCLI` which will allow us to `Play` poker. It'll need to read user input and then record wins to a `PlayerStore`.
+We know we need to make something called `CLI` which will allow us to `Play` poker. It'll need to read user input and then record wins to a `PlayerStore`.
 
 Before we jump too far ahead though, let's just write a test to check it integrates with the `PlayerStore` how we'd like
 
 ```go
 func TestCLI(t *testing.T) {
 	playerStore := &StubPlayerStore{}
-	cli := &PokerCLI{playerStore}
+	cli := &CLI{playerStore}
 	cli.PlayPoker()
 
 	if len(playerStore.winCalls) !=1 {
@@ -158,7 +158,7 @@ func TestCLI(t *testing.T) {
 ```
 
 - We can use our `StubPlayerStore` from other tests. 
-- We pass in our dependency into our not yet existing `PokerCLI` type
+- We pass in our dependency into our not yet existing `CLI` type
 - Trigger the game by an unwritten `PlayPoker` method
 - Check that a win is recorded
 
@@ -176,7 +176,7 @@ At this point you should be comfortable enough to create our new `CLI` struct wi
 You should end up with code like this
 
 ```go
-type PokerCLI struct {
+type CLI struct {
 	playerStore PlayerStore
 }
 
@@ -212,7 +212,7 @@ func TestCLI(t *testing.T) {
 	in := strings.NewReader("Chris wins\n")
 	playerStore := &StubPlayerStore{}
 
-	cli := &PokerCLI{playerStore, in}
+	cli := &CLI{playerStore, in}
 	cli.PlayPoker()
 
 	if len(playerStore.winCalls) < 1 {
@@ -234,14 +234,14 @@ We create a `io.Reader` in our test using the handy `strings.NewReader`, filling
 
 ## Try to run the test
 
-`./PokerCLI_test.go:12:32: too many values in struct initializer`
+`./CLI_test.go:12:32: too many values in struct initializer`
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-We need to add our new dependency into `PokerCLI`.
+We need to add our new dependency into `CLI`.
 
 ```go
-type PokerCLI struct {
+type CLI struct {
 	playerStore PlayerStore
 	in io.Reader
 }
@@ -251,14 +251,14 @@ type PokerCLI struct {
 
 ```
 --- FAIL: TestCLI (0.00s)
-	PokerCLI_test.go:23: didnt record correct winner, got 'Cleo', want 'Chris'
+	CLI_test.go:23: didnt record correct winner, got 'Cleo', want 'Chris'
 FAIL
 ```
 
 Remember to do the strictly easiest thing first
 
 ```go
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	cli.playerStore.RecordWin("Chris")
 }
 ```
@@ -283,7 +283,7 @@ func assertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
 }
 ```
 
-Now replace the assertions in both `server_test.go` and `PokerCLI_test.go`
+Now replace the assertions in both `server_test.go` and `CLI_test.go`
 
 The test should now read like so
 
@@ -292,7 +292,7 @@ func TestCLI(t *testing.T) {
 	in := strings.NewReader("Chris wins\n")
 	playerStore := &StubPlayerStore{}
 
-	cli := &PokerCLI{playerStore, in}
+	cli := &CLI{playerStore, in}
 	cli.PlayPoker()
 
 	assertPlayerWin(t, playerStore, "Chris")
@@ -310,7 +310,7 @@ func TestCLI(t *testing.T) {
 		in := strings.NewReader("Chris wins\n")
 		playerStore := &StubPlayerStore{}
 
-		cli := &PokerCLI{playerStore, in}
+		cli := &CLI{playerStore, in}
 		cli.PlayPoker()
 
 		assertPlayerWin(t, playerStore, "Chris")
@@ -320,7 +320,7 @@ func TestCLI(t *testing.T) {
 		in := strings.NewReader("Cleo wins\n")
 		playerStore := &StubPlayerStore{}
 
-		cli := &PokerCLI{playerStore, in}
+		cli := &CLI{playerStore, in}
 		cli.PlayPoker()
 
 		assertPlayerWin(t, playerStore, "Cleo")
@@ -338,14 +338,14 @@ func TestCLI(t *testing.T) {
     --- PASS: TestCLI/record_chris_win_from_user_input (0.00s)
 === RUN   TestCLI/record_cleo_win_from_user_input
     --- FAIL: TestCLI/record_cleo_win_from_user_input (0.00s)
-    	PokerCLI_test.go:27: did not store correct winner got 'Chris' want 'Cleo'
+    	CLI_test.go:27: did not store correct winner got 'Chris' want 'Cleo'
 FAIL
 ```
 
 ## Write enough code to make it pass
 
 ```go
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	userInput, _ := ioutil.ReadAll(cli.in)
 
 	winner := strings.Replace(string(userInput), " wins\n", "", -1)
@@ -362,7 +362,7 @@ The easiest way to make this test pass is:
 We can extract getting the winner's name into a meaningful function
 
 ```go
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	userInput, _ := ioutil.ReadAll(cli.in)
 
 	cli.playerStore.RecordWin(extractWinner(userInput))
@@ -409,7 +409,7 @@ func main() {
 		log.Fatalf("problem creating ")
 	}
 	
-	game := poker.PokerCLI{store, os.Stdin}
+	game := poker.CLI{store, os.Stdin}
 	game.PlayPoker()
 }
 ```
@@ -417,11 +417,11 @@ func main() {
 You should get an error
 
 ```
-command-line/v3/cmd/cli/main.go:32:25: implicit assignment of unexported field 'playerStore' in poker.PokerCLI literal
-command-line/v3/cmd/cli/main.go:32:34: implicit assignment of unexported field 'in' in poker.PokerCLI literal
+command-line/v3/cmd/cli/main.go:32:25: implicit assignment of unexported field 'playerStore' in poker.CLI literal
+command-line/v3/cmd/cli/main.go:32:34: implicit assignment of unexported field 'in' in poker.CLI literal
 ```
 
-This highlights the importance of _integrating your work_. We rightfully made the dependencies of our `PokerCLI` private but haven't made a way for users to construct it.
+This highlights the importance of _integrating your work_. We rightfully made the dependencies of our `CLI` private but haven't made a way for users to construct it.
 
 Is there a way to have caught this problem earlier?
 
@@ -437,20 +437,20 @@ When you're writing a project with multiple packages I would strongly recommend 
 
 An adage with TDD is that if you cannot test your code then it is probably hard for users of your code to integrate with it. Using `package foo_test` will help with this by forcing you to test your code as if you are importing it like users of your package will.
 
-Before fixing `main` let's change the package of our test inside `PokerCLI_test` to `poker_test`.
+Before fixing `main` let's change the package of our test inside `CLI_test` to `poker_test`.
 
 If you have a well configured IDE you will suddenly see a lot of red! If you run the compiler you'll get the following errors
 
 ```
-./PokerCLI_test.go:12:19: undefined: StubPlayerStore
-./PokerCLI_test.go:14:11: undefined: PokerCLI
-./PokerCLI_test.go:17:3: undefined: assertPlayerWin
-./PokerCLI_test.go:22:19: undefined: StubPlayerStore
-./PokerCLI_test.go:24:11: undefined: PokerCLI
-./PokerCLI_test.go:27:3: undefined: assertPlayerWin
+./CLI_test.go:12:19: undefined: StubPlayerStore
+./CLI_test.go:14:11: undefined: CLI
+./CLI_test.go:17:3: undefined: assertPlayerWin
+./CLI_test.go:22:19: undefined: StubPlayerStore
+./CLI_test.go:24:11: undefined: CLI
+./CLI_test.go:27:3: undefined: assertPlayerWin
 ```
 
-We have now stumbled into more questions on package design. In order to test our software we made unexported stubs and helper functions which are no longer available for us to use in our `PokerCLI_test`.
+We have now stumbled into more questions on package design. In order to test our software we made unexported stubs and helper functions which are no longer available for us to use in our `CLI_test`.
 
 #### `Do we want to have our stubs and helpers 'public' ?`
 
@@ -512,7 +512,7 @@ func TestCLI(t *testing.T) {
 		in := strings.NewReader("Chris wins\n")
 		playerStore := &poker.StubPlayerStore{}
 
-		cli := &poker.PokerCLI{playerStore, in}
+		cli := &poker.CLI{playerStore, in}
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Chris")
@@ -522,7 +522,7 @@ func TestCLI(t *testing.T) {
 		in := strings.NewReader("Cleo wins\n")
 		playerStore := &poker.StubPlayerStore{}
 
-		cli := &poker.PokerCLI{playerStore, in}
+		cli := &poker.CLI{playerStore, in}
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Cleo")
@@ -534,17 +534,17 @@ func TestCLI(t *testing.T) {
 You'll now see we have the same problems as we had in `main`
 
 ```
-./PokerCLI_test.go:15:26: implicit assignment of unexported field 'playerStore' in poker.PokerCLI literal
-./PokerCLI_test.go:15:39: implicit assignment of unexported field 'in' in poker.PokerCLI literal
-./PokerCLI_test.go:25:26: implicit assignment of unexported field 'playerStore' in poker.PokerCLI literal
-./PokerCLI_test.go:25:39: implicit assignment of unexported field 'in' in poker.PokerCLI literal
+./CLI_test.go:15:26: implicit assignment of unexported field 'playerStore' in poker.CLI literal
+./CLI_test.go:15:39: implicit assignment of unexported field 'in' in poker.CLI literal
+./CLI_test.go:25:26: implicit assignment of unexported field 'playerStore' in poker.CLI literal
+./CLI_test.go:25:39: implicit assignment of unexported field 'in' in poker.CLI literal
 ```
 
 The easiest way to get around this is to make a constructor as we have for other types
 
 ```go
-func NewPokerCLI(store PlayerStore, in io.Reader) *PokerCLI {
-	return &PokerCLI{
+func NewCLI(store PlayerStore, in io.Reader) *CLI {
+	return &CLI{
 		playerStore:store,
 		in:in,
 	}
@@ -556,7 +556,7 @@ Change the test to use the constructor instead and we should be back to the test
 Finally, we can go back to our new `main.go` and use the constructor we just made
 
 ```go
-game := poker.NewPokerCLI(store, os.Stdin)
+game := poker.NewCLI(store, os.Stdin)
 ```
  
 Try and run it, type "Bob wins".
@@ -568,7 +568,7 @@ Nothing happens! You'll have to force the process to quit. What's going on?
 As an experiment change the code to the following
 
 ```go
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	log.Println("1")
 	userInput, _ := ioutil.ReadAll(cli.in)
 	log.Println("2")
@@ -611,7 +611,7 @@ t.Run("do not read beyond the first newline", func(t *testing.T) {
 
     playerStore := &poker.StubPlayerStore{}
 
-    cli := poker.NewPokerCLI(playerStore, in)
+    cli := poker.NewCLI(playerStore, in)
     cli.PlayPoker()
 })
 ```
@@ -621,7 +621,7 @@ It fails with
 ```
 === RUN   TestCLI/do_not_read_beyond_the_first_newline
     --- FAIL: TestCLI/do_not_read_beyond_the_first_newline (0.00s)
-    	PokerCLI_test.go:56: Read to the end when you shouldn't have
+    	CLI_test.go:56: Read to the end when you shouldn't have
 ```
 
 To fix it, we cant use `io.ReadAll`. Instead we'll use a [`bufio.Reader`](https://golang.org/pkg/bufio/).
@@ -631,19 +631,19 @@ To fix it, we cant use `io.ReadAll`. Instead we'll use a [`bufio.Reader`](https:
 Update the code to the following
 
 ```go
-type PokerCLI struct {
+type CLI struct {
 	playerStore PlayerStore
 	in          *bufio.Reader
 }
 
-func NewPokerCLI(store PlayerStore, in io.Reader) *PokerCLI {
-	return &PokerCLI{
+func NewCLI(store PlayerStore, in io.Reader) *CLI {
+	return &CLI{
 		playerStore: store,
 		in:          bufio.NewReader(in),
 	}
 }
 
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	userInput, _ := cli.in.ReadString('\n')
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
@@ -683,7 +683,7 @@ t.Run("it schedules printing of blind values", func(t *testing.T) {
     playerStore := &poker.StubPlayerStore{}
     blindAlerter := &SpyBlindAlerter{}
 
-    cli := poker.NewPokerCLI(playerStore, in, blindAlerter)
+    cli := poker.NewCLI(playerStore, in, blindAlerter)
     cli.PlayPoker()
     
     if len(blindAlerter.alerts) != 1 {
@@ -692,7 +692,7 @@ t.Run("it schedules printing of blind values", func(t *testing.T) {
 })
 ```
 
-You'll notice we've made a `SpyBlindAlerter` which we are trying to inject into our `PokerCLI` and then checking that after we call `PlayerPoker` that an alert is scheduled.
+You'll notice we've made a `SpyBlindAlerter` which we are trying to inject into our `CLI` and then checking that after we call `PlayerPoker` that an alert is scheduled.
 
 (Remember we are just going for the simplest scenario first and then we'll iterate.)
 
@@ -719,14 +719,14 @@ func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
 ## Try to run the test
 
 ```
-./PokerCLI_test.go:32:27: too many arguments in call to poker.NewPokerCLI
+./CLI_test.go:32:27: too many arguments in call to poker.NewCLI
 	have (*poker.StubPlayerStore, *strings.Reader, *SpyBlindAlerter)
 	want (poker.PlayerStore, io.Reader)
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-We have added a new argument and the compiler is complaining. _Strictly speaking_ the minimal amount of code is to make `NewPokerCLI` accept a `*SpyBlindAlerter` but let's cheat a little and just define the dependency as an interface.
+We have added a new argument and the compiler is complaining. _Strictly speaking_ the minimal amount of code is to make `NewCLI` accept a `*SpyBlindAlerter` but let's cheat a little and just define the dependency as an interface.
 
 ```go
 type BlindAlerter interface {
@@ -737,10 +737,10 @@ type BlindAlerter interface {
 And then add it to the constructor
 
 ```go
-func NewPokerCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *PokerCLI
+func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI
 ```
 
-Your other tests will now fail as they dont have a `BlindAlerter` passed in to `NewPokerCLI`. 
+Your other tests will now fail as they dont have a `BlindAlerter` passed in to `NewCLI`. 
 
 Spying on BlindAlerter is not relevant for the other tests so in the test file so add
 
@@ -757,22 +757,22 @@ The tests should now compile and our new test fails
 === RUN   TestCLI/it_schedules_printing_of_blind_values
 --- FAIL: TestCLI (0.00s)
     --- FAIL: TestCLI/it_schedules_printing_of_blind_values (0.00s)
-    	PokerCLI_test.go:38: expected a blind alert to be scheduled
+    	CLI_test.go:38: expected a blind alert to be scheduled
 ```
 
 ## Write enough code to make it pass
 
-We'll need to add the `BlindAlerter` as a field on our `PokerCLI` so we can reference it in our `PlayPoker` method.
+We'll need to add the `BlindAlerter` as a field on our `CLI` so we can reference it in our `PlayPoker` method.
 
 ```go
-type PokerCLI struct {
+type CLI struct {
 	playerStore PlayerStore
 	in          *bufio.Reader
 	alerter     BlindAlerter
 }
 
-func NewPokerCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *PokerCLI {
-	return &PokerCLI{
+func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
+	return &CLI{
 		playerStore: store,
 		in:          bufio.NewReader(in),
 		alerter:     alerter,
@@ -783,7 +783,7 @@ func NewPokerCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *PokerCL
 To make the test pass, we can call our `BlindAlerter` with anything we like
 
 ```go
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	cli.alerter.ScheduleAlertAt(5 * time.Second, 100)
 	userInput, _ := cli.in.ReadString('\n')
 	cli.playerStore.RecordWin(extractWinner(userInput))
@@ -800,7 +800,7 @@ Next we'll want to check it schedules all the alerts we'd hope for, for 5 player
 		playerStore := &poker.StubPlayerStore{}
 		blindAlerter := &SpyBlindAlerter{}
 
-		cli := poker.NewPokerCLI(playerStore, in, blindAlerter)
+		cli := poker.NewCLI(playerStore, in, blindAlerter)
 		cli.PlayPoker()
 
 		cases := []struct{
@@ -856,16 +856,16 @@ You should have a lot of failures looking like this
     --- FAIL: TestCLI/it_schedules_printing_of_blind_values (0.00s)
 === RUN   TestCLI/it_schedules_printing_of_blind_values/100_scheduled_for_0s
         --- FAIL: TestCLI/it_schedules_printing_of_blind_values/100_scheduled_for_0s (0.00s)
-        	PokerCLI_test.go:71: got scheduled time of 5s, want 0s
+        	CLI_test.go:71: got scheduled time of 5s, want 0s
 === RUN   TestCLI/it_schedules_printing_of_blind_values/200_scheduled_for_10m0s
         --- FAIL: TestCLI/it_schedules_printing_of_blind_values/200_scheduled_for_10m0s (0.00s)
-        	PokerCLI_test.go:59: alert 1 was not scheduled [{5000000000 100}]
+        	CLI_test.go:59: alert 1 was not scheduled [{5000000000 100}]
 ```
 
 ## Write enough code to make it pass
 
 ```go
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 
 	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
 	blindTime := 0 * time.Second
@@ -886,13 +886,13 @@ It's not a lot more complicated than what we already had. We're just now iterati
 We can encapsulate our scheduled alerts into a method just to make `PlayPoker` read a little clearer.
 
 ```go
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	cli.scheduleBlindAlerts()
 	userInput, _ := cli.in.ReadString('\n')
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
-func (cli *PokerCLI) scheduleBlindAlerts() {
+func (cli *CLI) scheduleBlindAlerts() {
 	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
 	blindTime := 0 * time.Second
 	for _, blind := range blinds {
@@ -933,7 +933,7 @@ t.Run("it schedules printing of blind values", func(t *testing.T) {
     playerStore := &poker.StubPlayerStore{}
     blindAlerter := &SpyBlindAlerter{}
 
-    cli := poker.NewPokerCLI(playerStore, in, blindAlerter)
+    cli := poker.NewCLI(playerStore, in, blindAlerter)
     cli.PlayPoker()
 
     cases := []scheduledAlert {
@@ -968,7 +968,7 @@ Implement `assertScheduledAlert` yourself.
 
 We've spent a fair amount of time here writing tests and have been somewhat naughty not integrating with our application. Let's address that before we pile on any more requirements.
 
-Try running the app and it wont compile, complaining about not enough args to `NewPokerCLI`.
+Try running the app and it wont compile, complaining about not enough args to `NewCLI`.
 
 Let's create an implementation of `BlindAlerter` that we can use in our application.
 
@@ -1005,13 +1005,13 @@ Remember that any _type_ can implement an interface, not just `structs`. If you 
 
 We then create the function `StdOutAlerter` which has the same signature as the function and just use `time.AfterFunc` to schedule it to print to `os.Stdout`.
 
-Update `main` where we create `NewPokerCLI` to see this in action
+Update `main` where we create `NewCLI` to see this in action
 
 ```go
-game := poker.NewPokerCLI(store, os.Stdin, poker.BlindAlerterFunc(poker.StdOutAlerter))
+game := poker.NewCLI(store, os.Stdin, poker.BlindAlerterFunc(poker.StdOutAlerter))
 ```
 
-Before running you might want to change the `blindTime` increment in `PokerCLI` to be 10 seconds rather than 10 minutes just so you can see it in action.
+Before running you might want to change the `blindTime` increment in `CLI` to be 10 seconds rather than 10 minutes just so you can see it in action.
 
 You should see it print the blind values as we'd expect every 10 seconds. Notice how you can still type "Shaun wins" into the CLI and it will stop the program how we'd expect.
 
@@ -1021,7 +1021,7 @@ The game wont always be played with 5 people so we need to prompt the user to en
 
 We'll want to record what is written to StdOut. We've done this a few times now, we know that `os.Stdout` is an `io.Writer` so we can check what is written if we use dependency injection to pass in a `bytes.Buffer` in our test and see what our code will write.
 
-We don't care about our other collaborators in this test just yet so we've made some dummies in our test file. We should be a little wary that we now have 4 dependencies for `PokerCLI`, that feels like maybe it is starting to have too many responsiblities. Let's live with it for now and see if a refactoring emerges as we add this new functionality.
+We don't care about our other collaborators in this test just yet so we've made some dummies in our test file. We should be a little wary that we now have 4 dependencies for `CLI`, that feels like maybe it is starting to have too many responsiblities. Let's live with it for now and see if a refactoring emerges as we add this new functionality.
 
 ```go
 var dummyBlindAlerter = &SpyBlindAlerter{}
@@ -1035,7 +1035,7 @@ And here is our new test
 ```go
 t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
     stdout := &bytes.Buffer{}
-    cli := poker.NewPokerCLI(dummyPlayerStore, dummyStdIn, stdout, dummyBlindAlerter)
+    cli := poker.NewCLI(dummyPlayerStore, dummyStdIn, stdout, dummyBlindAlerter)
     cli.PlayPoker()
 
     got :=stdout.String()
@@ -1052,20 +1052,20 @@ We pass in what will be `os.Stdout` in `main` and see what is written.
 ## Try to run the test
 
 ```
-./PokerCLI_test.go:38:27: too many arguments in call to poker.NewPokerCLI
+./CLI_test.go:38:27: too many arguments in call to poker.NewCLI
 	have (*poker.StubPlayerStore, *bytes.Buffer, *bytes.Buffer, *SpyBlindAlerter)
 	want (poker.PlayerStore, io.Reader, poker.BlindAlerter)
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-We have a new dependency so we'll have to update `NewPokerCLI`
+We have a new dependency so we'll have to update `NewCLI`
 
 ```go
-func NewPokerCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *PokerCLI
+func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI
 ```
 
-Now the _other_ tests will fail to compile because they dont have an `io.Writer` being passed into `NewPokerCLI`. Add `dummyStdout` for the other tests.
+Now the _other_ tests will fail to compile because they dont have an `io.Writer` being passed into `NewCLI`. Add `dummyStdout` for the other tests.
 
 The new test should fail like so
 
@@ -1074,24 +1074,24 @@ The new test should fail like so
 --- FAIL: TestCLI (0.00s)
 === RUN   TestCLI/it_prompts_the_user_to_enter_the_number_of_players
     --- FAIL: TestCLI/it_prompts_the_user_to_enter_the_number_of_players (0.00s)
-    	PokerCLI_test.go:46: got '', want 'Please enter the number of players: '
+    	CLI_test.go:46: got '', want 'Please enter the number of players: '
 FAIL
 ```
 
 ## Write enough code to make it pass
 
-We need to add our new dependency to our `PokerCLI` so we can reference it in `PlayPoker`
+We need to add our new dependency to our `CLI` so we can reference it in `PlayPoker`
 
 ```go
-type PokerCLI struct {
+type CLI struct {
 	playerStore PlayerStore
 	in          *bufio.Reader
 	out         io.Writer
 	alerter     BlindAlerter
 }
 
-func NewPokerCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *PokerCLI {
-	return &PokerCLI{
+func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
+	return &CLI{
 		playerStore: store,
 		in:          bufio.NewReader(in),
 		out:         out,
@@ -1103,7 +1103,7 @@ func NewPokerCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAl
 Then finally we can write our prompt at the start of the game
 
 ```go
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, "Please enter the number of players: ")
 	cli.scheduleBlindAlerts()
 	userInput, _ := cli.in.ReadString('\n')
@@ -1119,7 +1119,7 @@ We have a duplicate string for the prompt which we should extract into a constan
 const PlayerPrompt = "Please enter the number of players: "
 ```
 
-Use this in both the test code and `PokerCLI`.
+Use this in both the test code and `CLI`.
 
 Now we need to send in a number and extract it out. The only way we'll know if it has had the desired effect is by seeing what blind alerts were scheduled.
 
@@ -1131,7 +1131,7 @@ t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
     in := strings.NewReader("7\n")
     blindAlerter := &SpyBlindAlerter{}
 
-    cli := poker.NewPokerCLI(dummyPlayerStore, in, stdout, blindAlerter)
+    cli := poker.NewCLI(dummyPlayerStore, in, stdout, blindAlerter)
     cli.PlayPoker()
 
     got :=stdout.String()
@@ -1188,7 +1188,7 @@ Remember, we are free to commit whatever sins we need to make this work. Once we
 
 
 ```go
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 	
 	numberOfPlayersInput, _ := cli.in.ReadString('\n')
@@ -1200,7 +1200,7 @@ func (cli *PokerCLI) PlayPoker() {
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
-func (cli *PokerCLI) scheduleBlindAlerts(numberOfPlayers int) {
+func (cli *CLI) scheduleBlindAlerts(numberOfPlayers int) {
 	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
 
 	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
@@ -1224,25 +1224,25 @@ Let's _listen to our tests_.
 
 - In order to test that we are scheduling some alerts we set up 4 different dependencies. Whenever you have a lot of dependencies for a _thing_ in your system, it implies it's doing too much. Visually we can see it in how cluttered our test is.
 - To me it feels like **we need to make a cleaner abstraction between reading user input and the business logic we want to do** 
-- A better test would be _given this user input, do we call `PokerGame` with the correct number of players_. 
-- We would then extract the testing of the scheduling into the tests for our new `PokerGame`.
+- A better test would be _given this user input, do we call `Game` with the correct number of players_. 
+- We would then extract the testing of the scheduling into the tests for our new `Game`.
 
-We can refactor our `PokerGame` first and our test should continue to pass. Once we've made the structural changes we want we can think about how we can refactor the tests to reflect our new separation of concerns
+We can refactor our `Game` first and our test should continue to pass. Once we've made the structural changes we want we can think about how we can refactor the tests to reflect our new separation of concerns
 
 Remember when making changes in refactoring try to keep them as small as possible and keep re-running the tests.
 
-Try it yourself first. Think about the boundaries of what a `PokerGame` would offer and what our `PokerCLI` should be doing. For now don't change the external interface of `NewPokerCLI` as we dont want to have to change the tests.
+Try it yourself first. Think about the boundaries of what a `Game` would offer and what our `CLI` should be doing. For now don't change the external interface of `NewCLI` as we dont want to have to change the tests.
 
 This is what I came up with:
 
 ```go
-
-type PokerGame struct {
+// game.go
+type Game struct {
 	alerter BlindAlerter
 	store   PlayerStore
 }
 
-func (p *PokerGame) Start(numberOfPlayers int) {
+func (p *Game) Start(numberOfPlayers int) {
 	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
 
 	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
@@ -1253,22 +1253,23 @@ func (p *PokerGame) Start(numberOfPlayers int) {
 	}
 }
 
-func (p *PokerGame) Finish(winner string) {
+func (p *Game) Finish(winner string) {
 	p.store.RecordWin(winner)
 }
 
-type PokerCLI struct {
+// cli.go
+type CLI struct {
 	playerStore PlayerStore
 	in          *bufio.Reader
 	out         io.Writer
-	game        *PokerGame
+	game        *Game
 }
 
-func NewPokerCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *PokerCLI {
-	return &PokerCLI{
+func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
+	return &CLI{
 		in:  bufio.NewReader(in),
 		out: out,
-		game: &PokerGame{
+		game: &Game{
 			alerter: alerter,
 			store:   store,
 		},
@@ -1278,7 +1279,7 @@ func NewPokerCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAl
 const PlayerPrompt = "Please enter the number of players: "
 
 // PlayPoker starts the game
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 
 	numberOfPlayersInput, _ := cli.in.ReadString('\n')
@@ -1298,14 +1299,14 @@ func extractWinner(userInput string) string {
 ```
 
 From a "domain" perspective:
-- We want to `Start` a game, indicating how many people are playing
-- We want to `Finish` a game, declaring the winner
+- We want to `Start` a `Game`, indicating how many people are playing
+- We want to `Finish` a `Game`, declaring the winner
 
-The new `PokerGame` type encapsulates this for us. 
+The new `Game` type encapsulates this for us. 
 
-With this change we've passed `BlindAlerter` and `PlayerStore` to `PokerGame` as it is now responsible for alerting and storing results. 
+With this change we've passed `BlindAlerter` and `PlayerStore` to `Game` as it is now responsible for alerting and storing results. 
 
-Our `PokerCLI` is now just concerned with:
+Our `CLI` is now just concerned with:
 
-- Constructing `PokerGame` with its existing dependencies (which we'll refactor next)
-- Interpreting user input as method invocations for `PokerGame`
+- Constructing `Game` with its existing dependencies (which we'll refactor next)
+- Interpreting user input as method invocations for `Game`

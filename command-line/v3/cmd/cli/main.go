@@ -29,6 +29,6 @@ func main() {
 		log.Fatalf("problem creating ")
 	}
 
-	game := poker.NewPokerCLI(store, os.Stdin)
+	game := poker.NewCLI(store, os.Stdin)
 	game.PlayPoker()
 }

@@ -73,7 +73,7 @@ func TestStoreWins(t *testing.T) {
 
 func TestLeague(t *testing.T) {
 
-	t.Run("it returns the league table as JSON", func(t *testing.T) {
+	t.Run("it returns the League table as JSON", func(t *testing.T) {
 		wantedLeague := []Player{
 			{"Cleo", 32},
 			{"Chris", 20},
@@ -130,7 +130,7 @@ func assertStatus(t *testing.T, got, want int) {
 }
 
 func newLeagueRequest() *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, "/league", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/League", nil)
 	return req
 }
 
