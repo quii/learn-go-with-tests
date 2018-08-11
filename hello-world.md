@@ -81,17 +81,16 @@ Writing a test is just like writing a function, with a few rules
 
 For now it's enough to know that your `t` of type `*testing.T` is your "hook" into the testing framework so you can do things like `t.Fail()` when you want to fail.
 
-#### New things
+We've covered some new topics:
 
-**if**
-
+#### `if`
 If statements in Go are very much like other programming languages.
 
-**Declaring variables**
+#### Declaring variables
 
 We're declaring some variables with the syntax `varName := value`, which lets us re-use some values in our test for readability.
 
-**t.Errorf**
+#### `t.Errorf`
 
 We are calling the `Errorf` _method_ on our `t` which will print out a message and fail the test. The `f` stands for format which allows us to build a string with values inserted into the placeholder values `%s`. When you made the test fail it should be clear how it works.
 
@@ -218,7 +217,7 @@ func TestHello(t *testing.T) {
         }
     })
 
-    t.Run("say hello world when an empty string is supplied", func(t *testing.T) {
+    t.Run("say 'Hello, World' when an empty string is supplied", func(t *testing.T) {
         got := Hello("")
         want := "Hello, World"
 
@@ -258,7 +257,7 @@ func TestHello(t *testing.T) {
         assertCorrectMessage(t, got, want)
     })
 
-    t.Run("empty string defaults to 'world'", func(t *testing.T) {
+    t.Run("empty string defaults to 'World'", func(t *testing.T) {
         got := Hello("")
         want := "Hello, World"
         assertCorrectMessage(t, got, want)
@@ -480,7 +479,7 @@ A few new concepts:
     * You can return whatever it's set to by just calling `return` rather than `return prefix`.
   * This will display in the Go Doc for your function so it can make the intent of your code clearer.
 * `default` in the switch case will be branched to if none of the other `case` statements match.
-* The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposes to the world so we made this function private.
+* The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposed to the world, so we made this function private.
 
 ## Wrapping up
 

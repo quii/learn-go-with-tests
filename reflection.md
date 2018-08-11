@@ -733,10 +733,49 @@ func walk(x interface{}, fn func(input string)) {
 
 We've introduced `walkValue` which DRYs up the calls to `walk` inside our `switch` so that they only have to extract out the `reflect.Value`s from `val`.
 
+### One final problem
+
+Remember that maps in Go do not guarantee order. So your tests will sometimes fail because we assert that the calls to `fn` are done in a particular order. 
+
+To fix this, we'll need to move our assertion with the maps to a new test where we do not care about the order. 
+
+```go
+t.Run("with maps", func(t *testing.T) {
+    aMap := map[string]string{
+        "Foo": "Bar",
+        "Baz": "Boz",
+    }
+
+    var got []string
+    walk(aMap, func(input string) {
+        got = append(got, input)
+    })
+
+    assertContains(t, got, "Bar")
+    assertContains(t, got, "Boz")
+})
+```
+
+Here is how `assertContains` is defined
+
+```go
+func assertContains(t *testing.T, haystack []string, needle string)  {
+	contains := false
+	for _, x := range haystack {
+		if x == needle {
+			contains = true
+		}
+	}
+	if !contains {
+		t.Errorf("expected %+v to contain '%s' but it didnt", haystack, needle)
+	}
+}
+```
+
 ## Wrapping up
 
 - Introduced some of the concepts from the `reflect` package.
 - Used recursion to traverse arbitrary data structures.
 - Did an in retrospect bad refactor but didn't get too upset about it. By working iteratively with tests it's not such a big deal.
 - This only covered a small aspect of reflection. [The Go blog has an excellent post covering more details](https://blog.golang.org/laws-of-reflection).
-- Now that you know about reflection, do you best to avoid using it.
+- Now that you know about reflection, do your best to avoid using it.

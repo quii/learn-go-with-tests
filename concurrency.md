@@ -107,7 +107,7 @@ a new fake implementation of `WebsiteChecker`. `slowStubWebsiteChecker` is
 deliberately slow. It uses `time.Sleep` to wait exactly twenty milliseconds and
 then it returns true.
 
-When we run the benchmark using `go test -bench=.`:
+When we run the benchmark using `go test -bench=.` (or if you're in Windows Powershell `go test -bench="."`):
 
 ```sh
 pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v0
@@ -299,7 +299,7 @@ PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v1        2.012s
 ```
 
-But if you're unlucky (this is more likely if you run them with `go test -bench=.`)
+But if you're unlucky (this is more likely if you run them with the benchmark as you'll get more tries)
 
 ```sh
 fatal error: concurrent map writes

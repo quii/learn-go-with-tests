@@ -1,31 +1,12 @@
-# Command line (WIP)
+# Command line and project structure
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/command-line)**
 
-Our product owner now wants to _pivot_ by introducing a second application. This will be a command line app which helps a group of people play Texas-Holdem Poker.
+Our product owner now wants to _pivot_ by introducing a second application - a command line application.
 
-## Just enough information on poker
+For now it will just need to be able to record a player's win when the user types `Ruth wins`. The intention is to eventually be a tool for helping users play poker.
 
-- N number of players sit in a circle.
-- There is a dealer button, which gets passed to the left every round.
-- To the left of the dealer there is the "small blind".
-- To the left of the small blind there is the big blind (or just blind).
-- These players *have* to contribute chips to the "pot". The big blind contributing twice as much as the small.
-- This way, every player has to contribute money to the pot, forcing people to play the game rather than "folding" all the time.
-- The amount of chips the player has to contribute as a blind bet increases over time to ensure the game doesn't last too long.
-
-Our application will help keep track of when the blind should go up, and how much it should be.
-
-- Create a command line app.
-- When it starts it asks how many players are playing. This determines the amount of time there is before the "blind" bet goes up.
-  - There is a base amount of time of 15 minutes.
-  - For every player, 1 minute is added.
-  - e.g 6 players equals 21 minutes for the blind.
-- After the blind time expires the game should alert the players the new amount the blind bet is.
-- The blind starts at 100 chips, then 200, 400, 600, 1000, 2000 and continue to double until the game ends.
-- When the game ends the user should be able to type "Chris wins" and that will record a win for the player in our existing database. This should then exit the program.
-
-The product owner wants the database to be shared amongst the two applications so that the league update according to wins recorded in the new application.
+The product owner wants the database to be shared amongst the two applications so that the league updates according to wins recorded in the new application.
 
 ## A reminder of the code
 
@@ -47,11 +28,15 @@ Our project now needs to create two binaries, our existing web server and the co
 
 Before we get stuck in to our new work we should structure our project to accommodate this.
 
-So far all the work has lived in one folder, and we'll assume the code on your computer is living somewhere like
+So far all the code has lived in one folder, in a path looking like this
 
 `$GOPATH/src/github.com/your-name/my-app`
 
-It is good practice not to go over-the-top with package structure and thankfully it's pretty straightforward to add structure _when you need it_.
+In order for you to make an application in Go you need a `main` function inside a `package main`. So far all of our "domain" code has lived inside `package main` and our `func main` can reference everything.
+
+This was fine so far and it is good practice not to go over-the-top with package structure. If you take the time to look through the standard library you will see very little in the way of lots of folders and structure. 
+
+Thankfully it's pretty straightforward to add structure _when you need it_.
 
 Inside the existing project create a `cmd` directory with a `webserver` directory inside that (e.g `mkdir -p cmd/webserver`).
 
@@ -115,6 +100,12 @@ func main() {
 }
 ```
 
+The full path may seem a bit jarring, but this is how you can import _any_ publicly available library into your code. 
+
+By separating our domain code into a separate package and committing it to a public repo like Github any Go developer can write their own code which imports that package the features we've written available. The first time you try and run it will complain it not existing but all you need to do is run `go get`.
+
+[In addition users can view the documentation at godoc.org](https://godoc.org/github.com/quii/learn-go-with-tests/command-line/v1)
+
 ### Final checks
 
 - Inside the root run `go test` and check they're still passing
@@ -139,16 +130,16 @@ The first requirement we'll tackle is recording a win when the user types `{Play
 
 ## Write the test first
 
-Inside `PokerCLI_test.go` (in the root of the project, not inside `cmd`)
+We know we need to make something called `CLI` which will allow us to `Play` poker. It'll need to read user input and then record wins to a `PlayerStore`.
 
-We know we need to make something called `PokerCLI` which will allow us to `Play` poker. It'll need to read user input and then record wins to a `PlayerStore`.
+Before we jump too far ahead though, let's just write a test to check it integrates with the `PlayerStore` how we'd like.
 
-Before we jump too far ahead though, let's just write a test to check it integrates with the `PlayerStore` how we'd like
+Inside `CLI_test.go` (in the root of the project, not inside `cmd`)
 
 ```go
 func TestCLI(t *testing.T) {
 	playerStore := &StubPlayerStore{}
-	cli := &PokerCLI{playerStore}
+	cli := &CLI{playerStore}
 	cli.PlayPoker()
 
 	if len(playerStore.winCalls) !=1 {
@@ -158,7 +149,7 @@ func TestCLI(t *testing.T) {
 ```
 
 - We can use our `StubPlayerStore` from other tests. 
-- We pass in our dependency into our not yet existing `PokerCLI` type
+- We pass in our dependency into our not yet existing `CLI` type
 - Trigger the game by an unwritten `PlayPoker` method
 - Check that a win is recorded
 
@@ -176,7 +167,7 @@ At this point you should be comfortable enough to create our new `CLI` struct wi
 You should end up with code like this
 
 ```go
-type PokerCLI struct {
+type CLI struct {
 	playerStore PlayerStore
 }
 
@@ -212,7 +203,7 @@ func TestCLI(t *testing.T) {
 	in := strings.NewReader("Chris wins\n")
 	playerStore := &StubPlayerStore{}
 
-	cli := &PokerCLI{playerStore, in}
+	cli := &CLI{playerStore, in}
 	cli.PlayPoker()
 
 	if len(playerStore.winCalls) < 1 {
@@ -234,14 +225,14 @@ We create a `io.Reader` in our test using the handy `strings.NewReader`, filling
 
 ## Try to run the test
 
-`./PokerCLI_test.go:12:32: too many values in struct initializer`
+`./CLI_test.go:12:32: too many values in struct initializer`
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-We need to add our new dependency into `PokerCLI`.
+We need to add our new dependency into `CLI`.
 
 ```go
-type PokerCLI struct {
+type CLI struct {
 	playerStore PlayerStore
 	in io.Reader
 }
@@ -251,14 +242,14 @@ type PokerCLI struct {
 
 ```
 --- FAIL: TestCLI (0.00s)
-	PokerCLI_test.go:23: didnt record correct winner, got 'Cleo', want 'Chris'
+	CLI_test.go:23: didnt record correct winner, got 'Cleo', want 'Chris'
 FAIL
 ```
 
 Remember to do the strictly easiest thing first
 
 ```go
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	cli.playerStore.RecordWin("Chris")
 }
 ```
@@ -283,7 +274,7 @@ func assertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
 }
 ```
 
-Now replace the assertions in both `server_test.go` and `PokerCLI_test.go`
+Now replace the assertions in both `server_test.go` and `CLI_test.go`
 
 The test should now read like so
 
@@ -292,7 +283,7 @@ func TestCLI(t *testing.T) {
 	in := strings.NewReader("Chris wins\n")
 	playerStore := &StubPlayerStore{}
 
-	cli := &PokerCLI{playerStore, in}
+	cli := &CLI{playerStore, in}
 	cli.PlayPoker()
 
 	assertPlayerWin(t, playerStore, "Chris")
@@ -310,7 +301,7 @@ func TestCLI(t *testing.T) {
 		in := strings.NewReader("Chris wins\n")
 		playerStore := &StubPlayerStore{}
 
-		cli := &PokerCLI{playerStore, in}
+		cli := &CLI{playerStore, in}
 		cli.PlayPoker()
 
 		assertPlayerWin(t, playerStore, "Chris")
@@ -320,7 +311,7 @@ func TestCLI(t *testing.T) {
 		in := strings.NewReader("Cleo wins\n")
 		playerStore := &StubPlayerStore{}
 
-		cli := &PokerCLI{playerStore, in}
+		cli := &CLI{playerStore, in}
 		cli.PlayPoker()
 
 		assertPlayerWin(t, playerStore, "Cleo")
@@ -338,44 +329,55 @@ func TestCLI(t *testing.T) {
     --- PASS: TestCLI/record_chris_win_from_user_input (0.00s)
 === RUN   TestCLI/record_cleo_win_from_user_input
     --- FAIL: TestCLI/record_cleo_win_from_user_input (0.00s)
-    	PokerCLI_test.go:27: did not store correct winner got 'Chris' want 'Cleo'
+    	CLI_test.go:27: did not store correct winner got 'Chris' want 'Cleo'
 FAIL
 ```
 
 ## Write enough code to make it pass
 
-```go
-func (cli *PokerCLI) PlayPoker() {
-	userInput, _ := ioutil.ReadAll(cli.in)
+We'll use a [`bufio.Scanner`](https://golang.org/pkg/bufio/). to read the input from the `io.Reader`. 
 
-	winner := strings.Replace(string(userInput), " wins\n", "", -1)
-	cli.playerStore.RecordWin(winner)
+> Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer object, creating another object (Reader or Writer) that also implements the interface but provides buffering and some help for textual I/O. 
+
+Update the code to the following
+
+```go
+type CLI struct {
+	playerStore PlayerStore
+	in          *bufio.Scanner
 }
-```
 
-The easiest way to make this test pass is: 
-- Read all the contents of the string
-- Extract out the winner by using `strings.Replace` which takes the string to replace, what string to replace, its replacement and finally a flag to say how many instances to replace
+func NewCLI(store PlayerStore, in io.Reader) *CLI {
+	return &CLI{
+		playerStore: store,
+		in:          bufio.NewScanner(in),
+	}
+}
 
-## Refactor
-
-We can extract getting the winner's name into a meaningful function
-
-```go
-func (cli *PokerCLI) PlayPoker() {
-	userInput, _ := ioutil.ReadAll(cli.in)
-
+func (cli *CLI) PlayPoker() {
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
-func extractWinner(userInput []byte) string {
-	return strings.Replace(string(userInput), " wins\n", "", 1)
+func extractWinner(userInput string) string {
+	return strings.Replace(userInput, " wins", "", 1)
+}
+
+func (cli *CLI) readLine() string {
+	cli.in.Scan()
+	return cli.in.Text()
 }
 ```
 
-Now that we have some working(ish) software, we should wire this up into `main`. Remember we should always strive to have fully-integrated working software as quickly as we can.
+The tests will now pass.
 
-In `main.go` add the following and run it.
+- `Scanner.Scan()` will read up to a newline.
+- We then use `Scanner.Text()` to return the `string` the scanner read to. 
+- We have encapsulated this into a function called `readLine()`.
+
+Now that we have some passing tests, we should wire this up into `main`. Remember we should always strive to have fully-integrated working software as quickly as we can.
+
+In `main.go` add the following and run it. (you may have to adjust the path of the second dependency to match what's on your computer)
 
 ```go
 package main
@@ -404,12 +406,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("problem creating file system player store, %v ", err)
 	}
-
-	if err != nil{
-		log.Fatalf("problem creating ")
-	}
 	
-	game := poker.PokerCLI{store, os.Stdin}
+	game := poker.CLI{store, os.Stdin}
 	game.PlayPoker()
 }
 ```
@@ -417,11 +415,13 @@ func main() {
 You should get an error
 
 ```
-command-line/v3/cmd/cli/main.go:32:25: implicit assignment of unexported field 'playerStore' in poker.PokerCLI literal
-command-line/v3/cmd/cli/main.go:32:34: implicit assignment of unexported field 'in' in poker.PokerCLI literal
+command-line/v3/cmd/cli/main.go:32:25: implicit assignment of unexported field 'playerStore' in poker.CLI literal
+command-line/v3/cmd/cli/main.go:32:34: implicit assignment of unexported field 'in' in poker.CLI literal
 ```
 
-This highlights the importance of _integrating your work_. We rightfully made the dependencies of our `PokerCLI` private but haven't made a way for users to construct it.
+What's happening here is because we are trying to assign to the fields `playerStore` and `in` in `CLI`. These are unexported (private) fields. We _could_ do this in our test code because our test is in the same package as `CLI` (`poker`). But our `main` is in package `main` so it does not have access.
+
+This highlights the importance of _integrating your work_. We rightfully made the dependencies of our `CLI` private (because we dont want them exposed to users of `CLI`s) but haven't made a way for users to construct it.
 
 Is there a way to have caught this problem earlier?
 
@@ -433,28 +433,26 @@ This is fine and it means on the odd occasion where we want to test something in
 
 But given we have advocated for _not_ testing internal things _generally_, can Go help enforce that? What if we could test our code where we only have access to the exported types (like our `main` does)?
 
-When you're writing a project with different packages I would strongly recommend that your test package name has `_test` at the end. When you do this you will only be able to have access to the public types in your package. This would help with this specific case but also helps enforce the discipline of only testing public APIs. 
+When you're writing a project with multiple packages I would strongly recommend that your test package name has `_test` at the end. When you do this you will only be able to have access to the public types in your package. This would help with this specific case but also helps enforce the discipline of only testing public APIs. If you still wish to test internals you can make a separate test with the package you want to test.
 
-An adage with TDD is that if you cannot test your code then it is probably poor code to work with. Using `package foo_test` will help with this.
+An adage with TDD is that if you cannot test your code then it is probably hard for users of your code to integrate with it. Using `package foo_test` will help with this by forcing you to test your code as if you are importing it like users of your package will.
 
-Before fixing `main` let's change the package of our test inside `PokerCLI_test` to `poker_test`
+Before fixing `main` let's change the package of our test inside `CLI_test.go` to `poker_test`.
 
 If you have a well configured IDE you will suddenly see a lot of red! If you run the compiler you'll get the following errors
 
 ```
-./PokerCLI_test.go:12:19: undefined: StubPlayerStore
-./PokerCLI_test.go:14:11: undefined: PokerCLI
-./PokerCLI_test.go:17:3: undefined: assertPlayerWin
-./PokerCLI_test.go:22:19: undefined: StubPlayerStore
-./PokerCLI_test.go:24:11: undefined: PokerCLI
-./PokerCLI_test.go:27:3: undefined: assertPlayerWin
+./CLI_test.go:12:19: undefined: StubPlayerStore
+./CLI_test.go:17:3: undefined: assertPlayerWin
+./CLI_test.go:22:19: undefined: StubPlayerStore
+./CLI_test.go:27:3: undefined: assertPlayerWin
 ```
 
-We have now stumbled into more questions on package design. 
+We have now stumbled into more questions on package design. In order to test our software we made unexported stubs and helper functions which are no longer available for us to use in our `CLI_test` because the helpers are defined in the `_test.go` files in the `poker` package.
 
-#### `Do we want to have our stubs and helpers 'public' ?`
+#### Do we want to have our stubs and helpers 'public' ?
 
-This is a subjective discussion. One could definitely argue that you do not want to pollute your package's API with code to facilitate tests.
+This is a subjective discussion. One could argue that you do not want to pollute your package's API with code to facilitate tests.
 
 In the presentation ["Advanced Testing with Go"](https://speakerdeck.com/mitchellh/advanced-testing-with-go?slide=53) by Mitchell Hashimoto it is described how at HashiCorp they advocate doing this so that users of the package can write tests without having to re-invent the wheel writing stubs. In our case this would mean anyone using our poker package wont have to create their own stub `PlayerStore` if they wish to work with our code.
 
@@ -512,7 +510,7 @@ func TestCLI(t *testing.T) {
 		in := strings.NewReader("Chris wins\n")
 		playerStore := &poker.StubPlayerStore{}
 
-		cli := &poker.PokerCLI{playerStore, in}
+		cli := &poker.CLI{playerStore, in}
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Chris")
@@ -522,7 +520,7 @@ func TestCLI(t *testing.T) {
 		in := strings.NewReader("Cleo wins\n")
 		playerStore := &poker.StubPlayerStore{}
 
-		cli := &poker.PokerCLI{playerStore, in}
+		cli := &poker.CLI{playerStore, in}
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Cleo")
@@ -534,17 +532,17 @@ func TestCLI(t *testing.T) {
 You'll now see we have the same problems as we had in `main`
 
 ```
-./PokerCLI_test.go:15:26: implicit assignment of unexported field 'playerStore' in poker.PokerCLI literal
-./PokerCLI_test.go:15:39: implicit assignment of unexported field 'in' in poker.PokerCLI literal
-./PokerCLI_test.go:25:26: implicit assignment of unexported field 'playerStore' in poker.PokerCLI literal
-./PokerCLI_test.go:25:39: implicit assignment of unexported field 'in' in poker.PokerCLI literal
+./CLI_test.go:15:26: implicit assignment of unexported field 'playerStore' in poker.CLI literal
+./CLI_test.go:15:39: implicit assignment of unexported field 'in' in poker.CLI literal
+./CLI_test.go:25:26: implicit assignment of unexported field 'playerStore' in poker.CLI literal
+./CLI_test.go:25:39: implicit assignment of unexported field 'in' in poker.CLI literal
 ```
 
 The easiest way to get around this is to make a constructor as we have for other types
 
 ```go
-func NewPokerCLI(store PlayerStore, in io.Reader) *PokerCLI {
-	return &PokerCLI{
+func NewCLI(store PlayerStore, in io.Reader) *CLI {
+	return &CLI{
 		playerStore:store,
 		in:in,
 	}
@@ -556,105 +554,106 @@ Change the test to use the constructor instead and we should be back to the test
 Finally, we can go back to our new `main.go` and use the constructor we just made
 
 ```go
-game := poker.NewPokerCLI(store, os.Stdin)
+game := poker.NewCLI(store, os.Stdin)
 ```
  
 Try and run it, type "Bob wins".
 
-### You cannot read "all" of os.Stdin
+### Refactor
 
-Nothing happens! You'll have to force the process to quit. What's going on? 
-
-As an experiment change the code to the following
+We have some repetition in our respective applications where we are opening a file and creating a `FileSystemStore` from its contents. This feels like a slight weakness in our package's design so we should make a function in it to encapsulate opening a file from a path and returning you the `PlayerStore`.
 
 ```go
-func (cli *PokerCLI) PlayPoker() {
-	log.Println("1")
-	userInput, _ := ioutil.ReadAll(cli.in)
-	log.Println("2")
-	cli.playerStore.RecordWin(extractWinner(userInput))
-}
-```
+func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, error) {
+	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
 
-No matter what you type, you never see `2` logged. The reason is the `ReadAll`, we cant read "all" of `os.Stdin`, as you can just keep typing stuff in! The `os.Stdin` is attached to our process and is a stream that wont finish.
-
-We want to test that if we read _more_ than beyond the first newline that we fail.
-
-```go
-type failOnEndReader struct {
-	t *testing.T
-	rdr io.Reader
-}
-
-func (m failOnEndReader) Read(p []byte) (n int, err error) {
-
-	n, err = m.rdr.Read(p)
-
-	if n == 0 || err == io.EOF {
-		m.t.Fatal("Read to the end when you shouldn't have")
+	if err != nil {
+		return nil, fmt.Errorf("problem opening %s %v", path, err)
 	}
 
-	return n, err
+	store, err := NewFileSystemPlayerStore(db)
+
+	if err != nil {
+		return nil, fmt.Errorf("problem creating file system player store, %v ", err)
+	}
+
+	return store, nil
 }
 ```
 
-We've created a custom `io.Reader` wrapping around another and if we get to the end of the reader then we fail the test
+Now refactor both of our applications to use this function to create the store. 
 
-We can now create a new test to try it out
-
-```go
-t.Run("do not read beyond the first newline", func(t *testing.T) {
-    in := failOnEndReader{
-        t,
-        strings.NewReader("Chris wins\n hello there"),
-    }
-
-    playerStore := &poker.StubPlayerStore{}
-
-    cli := poker.NewPokerCLI(playerStore, in)
-    cli.PlayPoker()
-})
-```
-
-It fails with
-
-```
-=== RUN   TestCLI/do_not_read_beyond_the_first_newline
-    --- FAIL: TestCLI/do_not_read_beyond_the_first_newline (0.00s)
-    	PokerCLI_test.go:56: Read to the end when you shouldn't have
-```
-
-To fix it, we cant use `io.ReadAll`. Instead we'll use a [`bufio.Reader`](https://golang.org/pkg/bufio/).
-
-> Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer object, creating another object (Reader or Writer) that also implements the interface but provides buffering and some help for textual I/O. 
-
-Update the code to the following
+#### CLI application code
 
 ```go
-type PokerCLI struct {
-	playerStore PlayerStore
-	in          *bufio.Reader
+package main
+
+import (
+		"github.com/quii/learn-go-with-tests/command-line/v3"
+	"log"
+	"os"
+	"fmt"
+)
+
+const dbFileName = "game.db.json"
+
+func main() {
+	store, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Let's play poker")
+	fmt.Println("Type {Name} wins to record a win")
+	poker.NewCLI(store, os.Stdin).PlayPoker()
 }
+```
 
-func NewPokerCLI(store PlayerStore, in io.Reader) *PokerCLI {
-	return &PokerCLI{
-		playerStore: store,
-		in:          bufio.NewReader(in),
+#### Web server application code
+
+````go
+package main
+
+import (
+	"github.com/quii/learn-go-with-tests/command-line/v3"
+	"log"
+	"net/http"
+)
+
+const dbFileName = "game.db.json"
+
+func main() {
+	store, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	server := poker.NewPlayerServer(store)
+
+	if err := http.ListenAndServe(":5000", server); err != nil {
+		log.Fatalf("could not listen on port 5000 %v", err)
 	}
 }
+````
 
-func (cli *PokerCLI) PlayPoker() {
-	userInput, _ := cli.in.ReadString('\n')
-	cli.playerStore.RecordWin(extractWinner(userInput))
-}
+Notice the symmetry; despite being different user interfaces the setup is almost identical.
 
-func extractWinner(userInput string) string {
-	return strings.Replace(userInput, " wins\n", "", 1)
-}
-```
+## Wrapping up 
 
-The tests will now pass.
+### Package structure 
 
-Now try to run the application in `main.go` again and it should work how we expect.
+This chapter meant we wanted to create two applications, re-using the domain code we've written so far. In order to do this we needed to update our package structure so that we had separate folders for our respective `main`s.
 
-We will probably end up deleting this test in time as definitely _will_ want to read beyond the first line as we evaluate multiple commands from the user; but it was helpful to drive out a better solution and we didn't want to add new features while our application was not working properly.
+By doing this we ran into integration problems due to unexported values so this further demonstrates the value of working in small "slices" and integrating often.
+
+We learned how `mypackage_test` helps us create a testing environment which is the same experience for other packages integrating with your code, to help you catch integration problems and see how easy (or not!) your code is to work with.
+
+### Reading user input
+
+We saw how reading from `os.Stdin` is very easy for us to work with as it implements `io.Reader`. We used `bufio.Scanner` to easily read line by line user input.
+
+### Simple abstractions leads to simpler code re-use
+
+It was almost no effort to integrate `PlayerStore` into our new application (once we had made the package adjustmements) and subsequently testing was very easy too because we decided to expose our stub version too.

@@ -24,8 +24,8 @@
 * [HTTP server](http-server.md)
 * [JSON, routing and embedding](json.md)
 * [IO and sorting](io.md)
-* [Command line (todo)](command-line.md)
-* `time` (todo)
+* [Command line & package structure](command-line.md)
+* [Time](time.md)
 
 ## Meta
 

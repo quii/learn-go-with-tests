@@ -508,7 +508,7 @@ It's not immediately clear what all the numbers represent and you should be aimi
 
 So far you've only been shown one syntax for creating instances of structs `MyStruct{val1, val2}` but you can optionally name the fields.
 
-Let's see what looks like
+Let's see what it looks like
 
 ```go
         {shape: Rectangle{Width: 12, Height: 6}, want: 72.0},
