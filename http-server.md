@@ -2,20 +2,20 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/http-server)**
 
-You have been asked to create a web server where users can track how many games players have won
+You have been asked to create a web server where users can track how many games players have won.
 
-- `GET /players/{name}` should return a number indicating total number of wins
+- `GET /players/{name}` should return a number indicating the total number of wins
 - `POST /players/{name}` should record a win for that name, incrementing for every subsequent `POST`
 
 We will follow the TDD approach, getting working software as quickly as we can and then making small iterative improvements until we have the solution. By taking this approach we
 
 - Keep the problem space small at any given time
 - Don't go down rabbit holes
-- If we ever get stuck/lost doing a revert wouldn't lose loads of work.
+- If we ever get stuck/lost, doing a revert wouldn't lose loads of work.
 
 ## Red, green, refactor
 
-Throughout this book we have emphasised the TDD process of write a test & watch it fail (red), write the _minimal_ amount of code to make it work (green) and then refactor.
+Throughout this book, we have emphasised the TDD process of write a test & watch it fail (red), write the _minimal_ amount of code to make it work (green) and then refactor.
 
 This discipline of writing the minimal amount of code is important in terms of the safety TDD gives you. You should be striving to get out of "red" as soon as you can.
 
@@ -33,7 +33,7 @@ The idea is to be iteratively writing useful code with small steps, driven by te
 
 ### Chicken and egg
 
-How can we incrementally build this? We cant `GET` a player without having stored something and it seems hard to know if `POST` has worked without the `GET` endpoint already existing.
+How can we incrementally build this? We can't `GET` a player without having stored something and it seems hard to know if `POST` has worked without the `GET` endpoint already existing.
 
 This is where _mocking_ shines.
 
@@ -47,7 +47,7 @@ We can write a test and make it pass by returning a hard-coded value to get us s
 
 By doing this very small step, we can make the important start of getting an overall project structure working correctly without having to worry too much about our application logic.
 
-To create a web server in Go you will typically call [ListenAndServe](https://golang.org/pkg/net/http/#ListenAndServe)
+To create a web server in Go you will typically call [ListenAndServe](https://golang.org/pkg/net/http/#ListenAndServe).
 
 ```go
 func ListenAndServe(addr string, handler Handler) error
@@ -128,7 +128,7 @@ The code now compiles and the test fails
 
 ## Write enough code to make it pass
 
-From the DI chapter we touched on HTTP servers with a `Greet` function. We learned that net/http's `ResponseWriter` also implements io `Writer` so we can use `fmt.Fprint` to send strings as HTTP responses
+From the DI chapter, we touched on HTTP servers with a `Greet` function. We learned that net/http's `ResponseWriter` also implements io `Writer` so we can use `fmt.Fprint` to send strings as HTTP responses.
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
@@ -163,7 +163,7 @@ func main() {
 }
 ```
 
-So far all of our application code has been in one file, however this isn't best practice for larger projects where you'll want to separate things into different files.
+So far all of our application code has been in one file, however, this isn't best practice for larger projects where you'll want to separate things into different files.
 
 To run this, do `go build` which will take all the `.go` files in the directory and build you a program. You can then execute it with `./myprogram`.
 
@@ -181,9 +181,9 @@ type HandlerFunc func(ResponseWriter, *Request)
 
 So we use this to wrap our `PlayerServer` function so that it now conforms to `Handler`.
 
-### `http.ListenAndServe(":5000"...`
+### `http.ListenAndServe(":5000"...)`
 
-ListenAndServer takes a port to listen on and a `Handler`. If the port is already being listened to it will return an `error` so we are using an `if` statement to capture that scenario and log the problem to the user.
+`ListenAndServe` takes a port to listen on a `Handler`. If the port is already being listened to it will return an `error` so we are using an `if` statement to capture that scenario and log the problem to the user.
 
 What we're going to do now is write _another_ test to force us into making a positive change to try and move away from the hard-coded value.
 
@@ -241,7 +241,7 @@ func PlayerServer(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-This test has forced us to actually look at the request's URL and make a decision. So whilst in our heads we may have been worrying about player stores and interfaces the next logical step actually seems to be about _routing_.
+This test has forced us to actually look at the request's URL and make a decision. So whilst in our heads, we may have been worrying about player stores and interfaces the next logical step actually seems to be about _routing_.
 
 If we had started with the store code the amount of changes we'd have to do would be very large compared to this. **This is a smaller step towards our final goal and was driven by tests**.
 
@@ -309,7 +309,7 @@ func assertResponseBody(t *testing.T, got, want string) {
 }
 ```
 
-However we still shouldn't be happy. It doesn't feel right that our server knows the scores.
+However, we still shouldn't be happy. It doesn't feel right that our server knows the scores.
 
 Our refactoring has made it pretty clear what to do.
 
@@ -323,7 +323,7 @@ type PlayerStore interface {
 }
 ```
 
-For our `PlayerServer` to be able to use a `PlayerStore`, it will need a reference to one. Now feels like the right time to change our architecture so that our `PlayerServer` is now a `struct`
+For our `PlayerServer` to be able to use a `PlayerStore`, it will need a reference to one. Now feels like the right time to change our architecture so that our `PlayerServer` is now a `struct`.
 
 ```go
 type PlayerServer struct {
@@ -331,7 +331,7 @@ type PlayerServer struct {
 }
 ```
 
-Finally, we will now implement the `Handler` interface by adding a method to our new struct and putting in our existing handler code
+Finally, we will now implement the `Handler` interface by adding a method to our new struct and putting in our existing handler code.
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -361,7 +361,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 ### Fix the issues
 
-This was quite a few changes and we know our tests and application will no longer compile but just relax and let the compiler work through it
+This was quite a few changes and we know our tests and application will no longer compile, but just relax and let the compiler work through it.
 
 `./main.go:9:58: type PlayerServer is not an expression`
 
@@ -395,7 +395,7 @@ Notice we're still not worrying about making stores _just yet_, we just want the
 
 You should be in the habit of prioritising having code that compiles and then code that passes the tests.
 
-By adding more functionality (like stub stores) whilst the code isn't compiling we are opening ourselves up to potentially _more_ compilation problems.
+By adding more functionality (like stub stores) whilst the code isn't compiling, we are opening ourselves up to potentially _more_ compilation problems.
 
 Now `main.go` won't compile for the same reason.
 
@@ -409,7 +409,7 @@ func main() {
 }
 ```
 
-Finally everything is compiling but the tests are failing
+Finally, everything is compiling but the tests are failing
 
 ```
 === RUN   TestGETPlayers/returns_the_Pepper's_score
@@ -430,7 +430,7 @@ func (s *StubPlayerStore) GetPlayerScore(name string) int {
 }
 ```
 
-A `map` is a quick and easy way of making a stub key/value store for our tests. Now let's create one of these stores for our tests and send it into our `PlayerServer`
+A `map` is a quick and easy way of making a stub key/value store for our tests. Now let's create one of these stores for our tests and send it into our `PlayerServer`.
 
 ```go
 func TestGETPlayers(t *testing.T) {
@@ -466,7 +466,7 @@ Our tests now pass and are looking better. The _intent_ behind our code is clear
 
 ### Run the application
 
-Now our tests are passing the last thing we need to do to complete this refactor is to check our application is working. The program should start up but you'll get a horrible response if you try and hit the server at `http://localhost:5000/players/Pepper`.
+Now our tests are passing the last thing we need to do to complete this refactor is to check if our application is working. The program should start up but you'll get a horrible response if you try and hit the server at `http://localhost:5000/players/Pepper`.
 
 The reason for this is that we have not passed in a `PlayerStore`.
 
@@ -488,7 +488,7 @@ func main() {
 }
 ```
 
-If you `go build` again and hit the same URL you should get `"123"`. Not great, but until we store data that's the best we can do.
+If you run `go build` again and hit the same URL you should get `"123"`. Not great, but until we store data that's the best we can do.
 
 We have a few options as to what to do next
 
@@ -542,7 +542,7 @@ Sometimes I heavily roll my eyes when TDD advocates say "make sure you just writ
 
 But this scenario illustrates the example well. I have done the bare minimum (knowing it is not correct), which is write a `StatusNotFound` on **all responses** but all our tests are passing!
 
-**By doing the bare minimum to make the tests pass it can highlight gaps in your tests**. In our case we are not asserting that we should be getting a `StatusOK` when players _do_ exist in the store.
+**By doing the bare minimum to make the tests pass it can highlight gaps in your tests**. In our case, we are not asserting that we should be getting a `StatusOK` when players _do_ exist in the store.
 
 Update the other two tests to assert on the status and fix the code.
 
@@ -719,11 +719,11 @@ func (p *PlayerServer) processWin(w http.ResponseWriter) {
 
 This makes the routing aspect of `ServeHTTP` a bit clearer and means our next iterations on storing can just be inside `processWin`.
 
-Next we want to check that when we do our `POST /players/{name}` that our `PlayerStore` is told to record the win.
+Next, we want to check that when we do our `POST /players/{name}` that our `PlayerStore` is told to record the win.
 
 ## Write the test first
 
-We can accomplish this by extending our `StubPlayerScore` with a new `RecordWin` method and then spy on its invocations.
+We can accomplish this by extending our `StubPlayerStore` with a new `RecordWin` method and then spy on its invocations.
 
 ```go
 type StubPlayerStore struct {
@@ -798,7 +798,7 @@ store := StubPlayerStore{
 
 As we're only asserting the number of calls rather than the specific values it makes our initial iteration a little smaller.
 
-We need to update `PlayerServer`'s idea of what a `PlayerStore` is by changing the interface if we're going to be able to call `RecordWin`
+We need to update `PlayerServer`'s idea of what a `PlayerStore` is by changing the interface if we're going to be able to call `RecordWin`.
 
 ```go
 type PlayerStore interface {
@@ -923,7 +923,7 @@ What we'll do for now is write an _integration test_ between our `PlayerServer` 
 Integration tests can be useful for testing that larger areas of your system work but you must bear in mind:
 
 - They are harder to write
-- When they fail, it can be difficult to know why (as usually it's a bug within a component of the integration test) and so can be harder to fix
+- When they fail, it can be difficult to know why (usually it's a bug within a component of the integration test) and so can be harder to fix
 - They are sometimes slower to run (as they often are used with "real" components, like a database)
 
 For that reason, it is recommended that you research _The Test Pyramid_.
@@ -950,7 +950,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 }
 ```
 
-- We are creating our two components we are trying to integrate with; `InMemoryPlayerStore` and `PlayerServer`.
+- We are creating our two components we are trying to integrate with: `InMemoryPlayerStore` and `PlayerServer`.
 - We then fire off 3 requests to record 3 wins for `player`. We're not too concerned about the status codes in this test as it's not relevant to whether they are integrating well.
 - The next response we do care about (so we store a variable `response`) because we are going to try and get the `player`'s score.
 
@@ -967,7 +967,7 @@ I am going to take some liberties here and write more code than you may be comfo
 
 _This is allowed_! We still have a test checking things should be working correctly but it is not around the specific unit we're working with (`InMemoryPlayerStore`).
 
-If i were to get stuck in this scenario, I would revert my changes back to the failing test and then write more specific unit tests around `InMemoryPlayerStore` to help me drive out a solution.
+If I were to get stuck in this scenario, I would revert my changes back to the failing test and then write more specific unit tests around `InMemoryPlayerStore` to help me drive out a solution.
 
 ```go
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
@@ -1010,7 +1010,7 @@ func main() {
 }
 ```
 
-Build it, run it and then use CURL to test it out.
+Build it, run it and then use `curl` to test it out.
 
 - Run this a few times, change the player names if you like `curl -X POST http://localhost:5000/players/Pepper`
 - Check scores with `curl http://localhost:5000/players/Pepper`
@@ -1040,7 +1040,7 @@ Great! You've made a REST-ish service. To take this forward you'd want to pick a
 
 ### Commit sins, then refactor (and then commit to source control)
 
-- You need to treat having failing compilation or failing tests as a red situation that you need to get out of as soon as you can
+- You need to treat having failing compilation or failing tests as a red situation that you need to get out of as soon as you can.
 - Write just the necessary code to get there. _Then_ refactor and make the code nice.
-- By trying to do too many changes whilst the code isn't compiling or the tests are failing puts you at risk of compounding the problems
-- Sticking to this approach forces you to write small tests, which means small changes, which helps keep working on complex systems manageable
+- By trying to do too many changes whilst the code isn't compiling or the tests are failing puts you at risk of compounding the problems.
+- Sticking to this approach forces you to write small tests, which means small changes, which helps keep working on complex systems manageable.

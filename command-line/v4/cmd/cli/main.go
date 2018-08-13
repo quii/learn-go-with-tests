@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/quii/learn-go-with-tests/command-line/v3"
+	"github.com/quii/learn-go-with-tests/command-line/v4"
 	"log"
 	"os"
 )
@@ -29,6 +29,6 @@ func main() {
 		log.Fatalf("problem creating ")
 	}
 
-	game := poker.NewCLI(store, os.Stdin)
+	game := poker.NewCLI(store, os.Stdin, poker.BlindAlerterFunc(poker.StdOutAlerter))
 	game.PlayPoker()
 }

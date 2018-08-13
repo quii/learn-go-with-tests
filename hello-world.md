@@ -2,7 +2,15 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/hello-world)**
 
-It is traditional for your first program in a new language to be Hello, world. Create a file called `hello.go` and write this code. To run it type `go run hello.go`.
+It is traditional for your first program in a new language to be Hello, world.
+
+In the previous chapter we discussed how Go is opinionated as to where you put your files.
+
+Make a directory in the following path `$GOPATH/src/github.com/{your-user-id}/hello`.
+
+So if you're on a unix based OS and your username is "bob" and you are happy to stick with Go's conventions about `$GOPATH` (which is the easiest way of setting up) you could run `mkdir -p ~/go/src/github.com/bob/hello`.
+
+Create a file in this directory called `hello.go` and write this code. To run it type `go run hello.go`.
 
 ```go
 package main
@@ -61,7 +69,7 @@ func TestHello(t *testing.T) {
 
 Before explaining, let's just run the code. Run `go test` in your terminal. It should've passed! Just to check, try deliberately breaking the test by changing the `want` string.
 
-Notice how you have not had to pick between multiple testing frameworks or decipher a testing DSL to write a test. Everything you need is built in to the language and the syntax is the same as the rest of the code you will write.
+Notice how you have not had to pick between multiple testing frameworks and then figure out how to install. Everything you need is built in to the language and the syntax is the same as the rest of the code you will write.
 
 ### Writing tests
 
@@ -73,17 +81,16 @@ Writing a test is just like writing a function, with a few rules
 
 For now it's enough to know that your `t` of type `*testing.T` is your "hook" into the testing framework so you can do things like `t.Fail()` when you want to fail.
 
-#### New things
+We've covered some new topics:
 
-**if**
-
+#### `if`
 If statements in Go are very much like other programming languages.
 
-**Declaring variables**
+#### Declaring variables
 
 We're declaring some variables with the syntax `varName := value`, which lets us re-use some values in our test for readability.
 
-**t.Errorf**
+#### `t.Errorf`
 
 We are calling the `Errorf` _method_ on our `t` which will print out a message and fail the test. The `f` stands for format which allows us to build a string with values inserted into the placeholder values `%s`. When you made the test fail it should be clear how it works.
 

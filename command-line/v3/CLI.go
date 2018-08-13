@@ -6,21 +6,22 @@ import (
 	"strings"
 )
 
-// PokerCLI helps players through a game of poker
-type PokerCLI struct {
+// CLI helps players through a game of poker
+type CLI struct {
 	playerStore PlayerStore
 	in          *bufio.Reader
 }
 
-func NewPokerCLI(store PlayerStore, in io.Reader) *PokerCLI {
-	return &PokerCLI{
+// NewCLI creates a CLI for playing poker
+func NewCLI(store PlayerStore, in io.Reader) *CLI {
+	return &CLI{
 		playerStore: store,
 		in:          bufio.NewReader(in),
 	}
 }
 
 // PlayPoker starts the game
-func (cli *PokerCLI) PlayPoker() {
+func (cli *CLI) PlayPoker() {
 	userInput, _ := cli.in.ReadString('\n')
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }

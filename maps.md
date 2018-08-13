@@ -160,14 +160,14 @@ func TestSearch(t *testing.T) {
     })
 
     t.Run("unknown word", func(t *testing.T) {
-        _, err := dictionary.Search("test")
+        _, err := dictionary.Search("unknown")
         want := "could not find the word you were looking for"
 
         if err == nil {
-            t.Error("expected to get an error.")
+            t.Fatal("expected to get an error.")
         }
 
-        assertStrings(t, got.Error(), want)
+        assertStrings(t, err.Error(), want)
     })
 }
 ```
@@ -409,14 +409,14 @@ func TestAdd(t *testing.T) {
         dictionary := Dictionary{word: definition}
         err := dictionary.Add(word, "new test")
 
-        assertError(t, err, WordExistsError)
+        assertError(t, err, ErrWordExists)
         assertDefinition(t, dictionary, word, definition)
     })
 }
 ```
 
 For this test we modified `Add` to return an error, which we are
-validating against a new error variable, `WordExistsError`. We also modified
+validating against a new error variable, `ErrWordExists`. We also modified
 the previous test to check for a `nil` error.
 
 ## Try to run test
@@ -435,7 +435,7 @@ In `dictionary.go`
 ```go
 var (
     ErrNotFound   = errors.New("could not find the word you were looking for")
-    WordExistsError = errors.New("cannot add word because it already exists")
+    ErrWordExists = errors.New("cannot add word because it already exists")
 )
 
 func (d Dictionary) Add(word, definition string) error {
@@ -462,7 +462,7 @@ func (d Dictionary) Add(word, definition string) error {
     case ErrNotFound:
         d[word] = definition
     case nil:
-        return WordExistsError
+        return ErrWordExists
     default:
         return err
 
@@ -504,7 +504,7 @@ func TestUpdate(t *testing.T) {
     dictionary := Dictionary{word: definition}
     newDefinition := "new definition"
 
-    dictionary.Update(dictionaryword, newDefinition)
+    dictionary.Update(word, newDefinition)
 
     assertDefinition(t, dictionary, word, newDefinition)
 }
@@ -570,7 +570,7 @@ t.Run("new word", func(t *testing.T) {
     definition := "this is just a test"
     dictionary := Dictionary{}
 
-    err := dictionary.Update(dictionaryword, definition)
+    err := dictionary.Update(word, definition)
 
     assertError(t, err, ErrWordDoesNotExist)
 })
@@ -616,7 +616,7 @@ dictionary_test.go:66: got error '%!s(<nil>)' want 'cannot update word because i
 
 ```go
 func (d Dictionary) Update(word, definition string) error {
-    _, err := dictionary.Search(word)
+    _, err := d.Search(word)
     switch err {
     case ErrNotFound:
         return ErrWordDoesNotExist
@@ -712,5 +712,5 @@ dictionary. Throughout the process we learned how to:
 * Update items in maps
 * Delete items from a map
 * Learned more about errors
-** How to create errors that are constants
-** Writing error wrappers
+  * How to create errors that are constants
+  * Writing error wrappers

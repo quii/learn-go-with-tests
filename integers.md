@@ -134,6 +134,12 @@ Please note that the example function will not be executed if you remove the com
 
 By adding this code in the example will appear in the documentation inside `godoc` making your code even more accessible.
 
+To try this out, run `godoc -http=:6060` and navigate to `http://localhost:6060/pkg/`
+
+Inside here you'll see a list of all the packages in your `$GOPATH`, so assuming you wrote this code in somewhere like `$GOPATH/src/github.com/{your_id}` you'll be able to find your example documentation.
+
+If you publish your code with examples to a public URL, you can share the documentation of your code at [godoc.org](https://godoc.org). For example, here is the finalised API for this chapter [https://godoc.org/github.com/quii/learn-go-with-tests/integers/v2](https://godoc.org/github.com/quii/learn-go-with-tests/integers/v2).
+
 ## Wrapping up
 
 What we have covered:

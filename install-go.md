@@ -32,7 +32,7 @@ If you are going to deploy your programs to Linux based servers, you should enab
 brew install go --cross-compile-common
 ```
 
-*You should follow any instructions recommended by your package manager, not these may be host os specific*.
+*You should follow any instructions recommended by your package manager. **Note** these may be host os specific*.
 
 You can verify the installation with:
 
@@ -93,7 +93,7 @@ code .
 VS Code is shipped with very little software enabled, you can enable new software by installing extensions. To add Go support you must install an extension, there are a variety available for VS Code, an exceptional one is [Luke Hoban's package](https://github.com/Microsoft/vscode-go). This can be installed as follows:
 
 ```sh
-code --install-extension lukehoban.Go
+code --install-extension ms-vscode.go
 ```
 
 When you open a Go file for the first time in VS Code, it will indicate that the Analysis tools are missing, you should click the button to install these. The list of tools that gets installed (and used) by VS Code are available [here](https://github.com/Microsoft/vscode-go/wiki/Go-tools-that-the-Go-extension-depends-on).

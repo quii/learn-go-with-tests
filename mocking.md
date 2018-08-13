@@ -338,7 +338,7 @@ The test is now compiling but not passing because we're still calling the `time.
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
     for i := countdownStart; i > 0; i-- {
-        sleeper.sleep()
+        sleeper.Sleep()
         fmt.Fprintln(out, i)
     }
 
