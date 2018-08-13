@@ -24,7 +24,7 @@
 ## 构建应用程序
 
 * [x] [入门](app-intro.md)
-* [ ] [HTTP server](http-server.md)
+* [x] [HTTP 服务器](http-server.md)
 * [x] [JSON，路由和嵌入](json.md)
 * [x] [IO 和排序](io.md)
 * [ ] [Command line (todo)](command-line.md)
