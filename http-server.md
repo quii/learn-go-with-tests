@@ -667,7 +667,7 @@ Remember we are deliberately committing sins, so an `if` statement based on the 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-    if r.Method==http.MethodPost {
+    if r.Method == http.MethodPost {
         w.WriteHeader(http.StatusAccepted)
         return
     }
