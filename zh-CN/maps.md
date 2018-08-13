@@ -139,14 +139,14 @@ func TestSearch(t *testing.T) {
     })
 
     t.Run("unknown word", func(t *testing.T) {
-        _, err := dictionary.Search("test")
+        _, err := dictionary.Search("unknown")
         want := "could not find the word you were looking for"
 
         if err == nil {
-            t.Error("expected to get an error.")
+            t.Fatal("expected to get an error.")
         }
 
-        assertStrings(t, got.Error(), want)
+        assertStrings(t, err.Error(), want)
     })
 }
 ```
@@ -262,8 +262,7 @@ func (d Dictionary) Add(word, definition string) {
 测试现在应该会失败：
 
 ```
-dictionary_test.go:31: should find added word: could not find the word you were
-looking for
+dictionary_test.go:31: should find added word: could not find the word you were looking for
 ```
 
 ## 编写足够的代码使测试通过
@@ -358,7 +357,7 @@ func TestAdd(t *testing.T) {
         dictionary := Dictionary{word: definition}
         err := dictionary.Add(word, "new test")
 
-        assertError(t, err, WordExistsError)
+        assertError(t, err, ErrWordExists)
         assertDefinition(t, dictionary, word, definition)
     })
 }
@@ -382,7 +381,7 @@ func TestAdd(t *testing.T) {
 ```go
 var (
     ErrNotFound   = errors.New("could not find the word you were looking for")
-    WordExistsError = errors.New("cannot add word because it already exists")
+    ErrWordExists = errors.New("cannot add word because it already exists")
 )
 
 func (d Dictionary) Add(word, definition string) error {
@@ -394,8 +393,7 @@ func (d Dictionary) Add(word, definition string) error {
 现在我们又得到两个错误。我们仍在修改值，并返回 `nil` 错误。
 
 ```
-dictionary_test.go:43: got error '%!s(<nil>)' want 'cannot add word because
-it already exists'
+dictionary_test.go:43: got error '%!s(<nil>)' want 'cannot add word because it already exists'
 dictionary_test.go:44: got 'new test' want 'this is just a test'
 ```
 
@@ -404,14 +402,14 @@ dictionary_test.go:44: got 'new test' want 'this is just a test'
 ```go
 func (d Dictionary) Add(word, definition string) error {
     _, err := d.Search(word)
+
     switch err {
     case ErrNotFound:
         d[word] = definition
     case nil:
-        return WordExistsError
+        return ErrWordExists
     default:
         return err
-
     }
 
     return nil
@@ -448,7 +446,7 @@ func TestUpdate(t *testing.T) {
     dictionary := Dictionary{word: definition}
     newDefinition := "new definition"
 
-    dictionary.Update(dictionaryword, newDefinition)
+    dictionary.Update(word, newDefinition)
 
     assertDefinition(t, dictionary, word, newDefinition)
 }
@@ -473,7 +471,7 @@ func (d Dictionary) Update(word, definition string) {}
 有了这个，就会看到我们需要改变这个词的定义。
 
 ```
- dictionary_test.go:55: got 'this is just a test' want 'new definition'
+dictionary_test.go:55: got 'this is just a test' want 'new definition'
 ```
 
 ## 编写足够的代码使测试通过
@@ -508,7 +506,7 @@ t.Run("new word", func(t *testing.T) {
     definition := "this is just a test"
     dictionary := Dictionary{}
 
-    err := dictionary.Update(dictionaryword, definition)
+    err := dictionary.Update(word, definition)
 
     assertError(t, err, ErrWordDoesNotExist)
 })
@@ -553,7 +551,8 @@ dictionary_test.go:66: got error '%!s(<nil>)' want 'cannot update word because i
 
 ```go
 func (d Dictionary) Update(word, definition string) error {
-    _, err := dictionary.Search(word)
+    _, err := d.Search(word)
+
     switch err {
     case ErrNotFound:
         return ErrWordDoesNotExist
@@ -561,7 +560,6 @@ func (d Dictionary) Update(word, definition string) error {
         d[word] = definition
     default:
         return err
-
     }
 
     return nil
