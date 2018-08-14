@@ -26,7 +26,7 @@ _或者通过 Go 语言学习测试驱动开发_
 5. [数组与切片](arrays-and-slices.md) - 学习数组、切片、`len`、可变参数、`range` 和测试覆盖率。
 6. [结构体，方法和接口](structs-methods-and-interfaces.md) - 学习 `struct`、方法、接口和表驱动测试。
 7. [指针和错误](pointers-and-errors.md) - 学习指针和错误处理。
-8. [Maps](maps.md) - Learn about storing values in the map data structure.
+8. [Maps](maps.md) - 学习使用 map 的数据结构存储值.
 9. [依赖注入](dependency-injection.md) - 学习依赖注入、它与使用接口的关系和 io 的入门。
 10. [Mocking](mocking.md) - 使用 DI 测试现有的未经测试的代码。
 11. [并发](concurrency.md) - 学习如何编写并发代码以加快软件运行速度。

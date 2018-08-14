@@ -14,7 +14,7 @@
 * [x] [数组与切片](arrays-and-slices.md)
 * [x] [结构体，方法和接口](structs-methods-and-interfaces.md)
 * [x] [指针和错误](pointers-and-errors.md)
-* [ ] [Maps](maps.md)
+* [x] [Maps](maps.md)
 * [x] [依赖注入](dependency-injection.md)
 * [x] [Mocking](mocking.md)
 * [x] [并发](concurrency.md)
