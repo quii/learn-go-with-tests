@@ -624,7 +624,7 @@ It fails with
     	CLI_test.go:56: Read to the end when you shouldn't have
 ```
 
-To fix it, we cant use `io.ReadAll`. Instead we'll use a [`bufio.Reader`](https://golang.org/pkg/bufio/).
+To fix it, we cant use `io.ReadAll`. Instead we'll use a [`bufio.Scanner`](https://golang.org/pkg/bufio/).
 
 > Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer object, creating another object (Reader or Writer) that also implements the interface but provides buffering and some help for textual I/O. 
 
@@ -633,29 +633,40 @@ Update the code to the following
 ```go
 type CLI struct {
 	playerStore PlayerStore
-	in          *bufio.Reader
+	in          *bufio.Scanner
 }
 
 func NewCLI(store PlayerStore, in io.Reader) *CLI {
 	return &CLI{
 		playerStore: store,
-		in:          bufio.NewReader(in),
+		in:          bufio.NewScanner(in),
 	}
 }
 
 func (cli *CLI) PlayPoker() {
-	userInput, _ := cli.in.ReadString('\n')
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
 func extractWinner(userInput string) string {
-	return strings.Replace(userInput, " wins\n", "", 1)
+	return strings.Replace(userInput, " wins", "", 1)
+}
+
+func (cli *CLI) readLine() string {
+	cli.in.Scan()
+	return cli.in.Text()
 }
 ```
 
 The tests will now pass.
 
-Now try to run the application in `main.go` again and it should work how we expect.
+- `Scanner.Scan()` will read up to a newline
+- We then use `Scanner.Text()` to return the `string` it read to. 
+- We have encapsulated this into a function called `readLine()`
+
+One thing we have not covered is that `Scanner.Scan()` can return an `error`. We'll need to revisit this.
+
+Run the application in `main.go` again and it should work how we expect.
 
 We will probably end up deleting this test in time as definitely _will_ want to read beyond the first line as we evaluate multiple commands from the user; but it was helpful to drive out a better solution and we didn't want to add new features while our application was not working properly.
 

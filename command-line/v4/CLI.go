@@ -10,7 +10,7 @@ import (
 // CLI helps players through a game of poker
 type CLI struct {
 	playerStore PlayerStore
-	in          *bufio.Reader
+	in          *bufio.Scanner
 	alerter     BlindAlerter
 }
 
@@ -18,7 +18,7 @@ type CLI struct {
 func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
 	return &CLI{
 		playerStore: store,
-		in:          bufio.NewReader(in),
+		in:          bufio.NewScanner(in),
 		alerter:     alerter,
 	}
 }
@@ -26,7 +26,7 @@ func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
 // PlayPoker starts the game
 func (cli *CLI) PlayPoker() {
 	cli.scheduleBlindAlerts()
-	userInput, _ := cli.in.ReadString('\n')
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
@@ -40,5 +40,10 @@ func (cli *CLI) scheduleBlindAlerts() {
 }
 
 func extractWinner(userInput string) string {
-	return strings.Replace(userInput, " wins\n", "", 1)
+	return strings.Replace(userInput, " wins", "", 1)
+}
+
+func (cli *CLI) readLine() string {
+	cli.in.Scan()
+	return cli.in.Text()
 }
