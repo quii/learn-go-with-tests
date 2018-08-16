@@ -100,6 +100,12 @@ func main() {
 }
 ```
 
+The full path may seem a bit jarring, but this is how you can import _any_ publicly available library into your code. 
+
+By separating our domain code into a separate package and committing it to a public repo like Github any Go developer can write their own code which imports that package the features we've written available. The first time you try and run it will complain it not existing but all you need to do is run `go get`.
+
+[In addition users can view the documentation at godoc.org](https://godoc.org/github.com/quii/learn-go-with-tests/command-line/v1)
+
 ### Final checks
 
 - Inside the root run `go test` and check they're still passing
