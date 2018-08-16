@@ -4,7 +4,7 @@
 
 Our product owner now wants to _pivot_ by introducing a second application - a command line application.
 
-For now it will just need to be able to record a player's win when the user types `Ruth wins`.
+For now it will just need to be able to record a player's win when the user types `Ruth wins`. The intention is to eventually be a tool for helping users play poker.
 
 The product owner wants the database to be shared amongst the two applications so that the league updates according to wins recorded in the new application.
 
@@ -377,7 +377,7 @@ The tests will now pass.
 
 Now that we have some passing tests, we should wire this up into `main`. Remember we should always strive to have fully-integrated working software as quickly as we can.
 
-In `main.go` add the following and run it.
+In `main.go` add the following and run it. (you may have to adjust the path of the second dependency to match what's on your computer)
 
 ```go
 package main
@@ -450,7 +450,7 @@ If you have a well configured IDE you will suddenly see a lot of red! If you run
 
 We have now stumbled into more questions on package design. In order to test our software we made unexported stubs and helper functions which are no longer available for us to use in our `CLI_test` because the helpers are defined in the `_test.go` files in the `poker` package.
 
-#### `Do we want to have our stubs and helpers 'public' ?`
+#### Do we want to have our stubs and helpers 'public' ?
 
 This is a subjective discussion. One could argue that you do not want to pollute your package's API with code to facilitate tests.
 
@@ -589,24 +589,23 @@ Now refactor both of our applications to use this function to create the store.
 package main
 
 import (
-	"fmt"
-	"github.com/quii/learn-go-with-tests/command-line/v3"
+		"github.com/quii/learn-go-with-tests/command-line/v3"
 	"log"
 	"os"
+	"fmt"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-	fmt.Println("Let's play poker")
-	fmt.Println("Type {Name} wins to record a win")
-
 	store, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	fmt.Println("Let's play poker")
+	fmt.Println("Type {Name} wins to record a win")
 	poker.NewCLI(store, os.Stdin).PlayPoker()
 }
 ```
