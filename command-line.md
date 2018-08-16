@@ -28,13 +28,15 @@ Our project now needs to create two binaries, our existing web server and the co
 
 Before we get stuck in to our new work we should structure our project to accommodate this.
 
-So far all the work has lived in one folder, and we'll assume the code on your computer is living somewhere like
+So far all the code has lived in one folder, in a path looking like this
 
 `$GOPATH/src/github.com/your-name/my-app`
 
-In order for you to make an application in Go you need a `main` function inside a `package main`. So far all of our "domain" code has lived inside `package main` so that our `main` func can easily reference it.
+In order for you to make an application in Go you need a `main` function inside a `package main`. So far all of our "domain" code has lived inside `package main` and our `func main` can reference everything.
 
-This was fine so far and it is good practice not to go over-the-top with package structure. Thankfully it's pretty straightforward to add structure _when you need it_.
+This was fine so far and it is good practice not to go over-the-top with package structure. If you take the time to look through the standard library you will see very little in the way of lots of folders and structure. 
+
+Thankfully it's pretty straightforward to add structure _when you need it_.
 
 Inside the existing project create a `cmd` directory with a `webserver` directory inside that (e.g `mkdir -p cmd/webserver`).
 
