@@ -560,16 +560,16 @@ func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, error) 
 	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		log.Fatalf("problem opening %s %v", path, err)
+		return nil, fmt.Errorf("problem opening %s %v", path, err)
 	}
 
 	store, err := NewFileSystemPlayerStore(db)
 
 	if err != nil {
-		err = fmt.Errorf("problem creating file system player store, %v ", err)
+		return nil, fmt.Errorf("problem creating file system player store, %v ", err)
 	}
 
-	return store, err
+	return store, nil
 }
 ```
 
