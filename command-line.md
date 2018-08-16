@@ -2,9 +2,9 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/command-line)**
 
-Our product owner now wants to _pivot_ by introducing a second application, being a command line application.
+Our product owner now wants to _pivot_ by introducing a second application - a command line application.
 
-For now it will just need to be able to record a player's win when the user types `Ruth wins`
+For now it will just need to be able to record a player's win when the user types `Ruth wins`.
 
 The product owner wants the database to be shared amongst the two applications so that the league updates according to wins recorded in the new application.
 
@@ -32,7 +32,9 @@ So far all the work has lived in one folder, and we'll assume the code on your c
 
 `$GOPATH/src/github.com/your-name/my-app`
 
-It is good practice not to go over-the-top with package structure and thankfully it's pretty straightforward to add structure _when you need it_.
+In order for you to make an application in Go you need a `main` function inside a `package main`. So far all of our "domain" code has lived inside `package main` so that our `main` func can easily reference it.
+
+This was fine so far and it is good practice not to go over-the-top with package structure. Thankfully it's pretty straightforward to add structure _when you need it_.
 
 Inside the existing project create a `cmd` directory with a `webserver` directory inside that (e.g `mkdir -p cmd/webserver`).
 
@@ -120,11 +122,11 @@ The first requirement we'll tackle is recording a win when the user types `{Play
 
 ## Write the test first
 
-Inside `CLI_test.go` (in the root of the project, not inside `cmd`)
-
 We know we need to make something called `CLI` which will allow us to `Play` poker. It'll need to read user input and then record wins to a `PlayerStore`.
 
-Before we jump too far ahead though, let's just write a test to check it integrates with the `PlayerStore` how we'd like
+Before we jump too far ahead though, let's just write a test to check it integrates with the `PlayerStore` how we'd like.
+
+Inside `CLI_test.go` (in the root of the project, not inside `cmd`)
 
 ```go
 func TestCLI(t *testing.T) {
