@@ -437,16 +437,14 @@ When you're writing a project with multiple packages I would strongly recommend 
 
 An adage with TDD is that if you cannot test your code then it is probably hard for users of your code to integrate with it. Using `package foo_test` will help with this by forcing you to test your code as if you are importing it like users of your package will.
 
-Before fixing `main` let's change the package of our test inside `CLI_test` to `poker_test`.
+Before fixing `main` let's change the package of our test inside `CLI_test.go` to `poker_test`.
 
 If you have a well configured IDE you will suddenly see a lot of red! If you run the compiler you'll get the following errors
 
 ```
 ./CLI_test.go:12:19: undefined: StubPlayerStore
-./CLI_test.go:14:11: undefined: CLI
 ./CLI_test.go:17:3: undefined: assertPlayerWin
 ./CLI_test.go:22:19: undefined: StubPlayerStore
-./CLI_test.go:24:11: undefined: CLI
 ./CLI_test.go:27:3: undefined: assertPlayerWin
 ```
 
@@ -742,15 +740,15 @@ func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI
 
 Your other tests will now fail as they dont have a `BlindAlerter` passed in to `NewCLI`. 
 
-Spying on BlindAlerter is not relevant for the other tests so in the test file so add
+Spying on BlindAlerter is not relevant for the other tests so in the test file add
 
 ```go
 var dummySpyAlerter = &SpyBlindAlerter{}
 ```
 
-Then passed that into the other tests.
+Then use that in the other tests to fix the compilation problems. By labelling it as a "dummy" it is clear to the reader of the test that it is not important.
 
-The tests should now compile and our new test fails
+The tests should now compile and our new test fails.
 
 ```
 === RUN   TestCLI
@@ -902,7 +900,7 @@ func (cli *CLI) scheduleBlindAlerts() {
 }
 ```
 
-Finally our tests are looking a little clunky. We have two anonymous structs representing the same thing, a `ScheduledAlert`. Let's refactor that into a new type and then make some helps to compare them.
+Finally our tests are looking a little clunky. We have two anonymous structs representing the same thing, a `ScheduledAlert`. Let's refactor that into a new type and then make some helpers to compare them.
 
 ```go
 type scheduledAlert struct {
@@ -983,7 +981,6 @@ import (
 	"os"
 )
 
-// BlindAlerter schedules alerts for blind amounts
 type BlindAlerter interface {
 	ScheduleAlertAt(duration time.Duration, amount int)
 }
@@ -1013,7 +1010,7 @@ game := poker.NewCLI(store, os.Stdin, poker.BlindAlerterFunc(poker.StdOutAlerter
 
 Before running you might want to change the `blindTime` increment in `CLI` to be 10 seconds rather than 10 minutes just so you can see it in action.
 
-You should see it print the blind values as we'd expect every 10 seconds. Notice how you can still type "Shaun wins" into the CLI and it will stop the program how we'd expect.
+You should see it print the blind values as we'd expect every 10 seconds. Notice how you can still type `Shaun wins` into the CLI and it will stop the program how we'd expect.
 
 The game wont always be played with 5 people so we need to prompt the user to enter a number of players before the game starts. 
 
@@ -1231,7 +1228,9 @@ We can refactor our `Game` first and our test should continue to pass. Once we'v
 
 Remember when making changes in refactoring try to keep them as small as possible and keep re-running the tests.
 
-Try it yourself first. Think about the boundaries of what a `Game` would offer and what our `CLI` should be doing. For now don't change the external interface of `NewCLI` as we dont want to have to change the tests.
+Try it yourself first. Think about the boundaries of what a `Game` would offer and what our `CLI` should be doing. 
+
+For now **don't** change the external interface of `NewCLI` as we don't want to change the test code and the client code at the same time as that is too much to juggle and we could end up breaking things.
 
 This is what I came up with:
 
