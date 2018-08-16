@@ -404,10 +404,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("problem creating file system player store, %v ", err)
 	}
-
-	if err != nil{
-		log.Fatalf("problem creating ")
-	}
 	
 	game := poker.CLI{store, os.Stdin}
 	game.PlayPoker()
@@ -420,6 +416,8 @@ You should get an error
 command-line/v3/cmd/cli/main.go:32:25: implicit assignment of unexported field 'playerStore' in poker.CLI literal
 command-line/v3/cmd/cli/main.go:32:34: implicit assignment of unexported field 'in' in poker.CLI literal
 ```
+
+What's happening here is because we are trying to assign to the fields `playerStore` and `in` in `CLI`. These are unexported (private) fields. We _could_ do this in our test code because our test is in the same package as `CLI` (`poker`). But our `main` is in package `main` so it does not have access.
 
 This highlights the importance of _integrating your work_. We rightfully made the dependencies of our `CLI` private but haven't made a way for users to construct it.
 
@@ -448,7 +446,7 @@ If you have a well configured IDE you will suddenly see a lot of red! If you run
 ./CLI_test.go:27:3: undefined: assertPlayerWin
 ```
 
-We have now stumbled into more questions on package design. In order to test our software we made unexported stubs and helper functions which are no longer available for us to use in our `CLI_test`.
+We have now stumbled into more questions on package design. In order to test our software we made unexported stubs and helper functions which are no longer available for us to use in our `CLI_test` because the helpers are defined in the `_test.go` files in the `poker` package.
 
 #### `Do we want to have our stubs and helpers 'public' ?`
 
@@ -558,6 +556,10 @@ game := poker.NewCLI(store, os.Stdin)
 ```
  
 Try and run it, type "Bob wins".
+
+And wait...
+
+And wait.....
 
 ### You cannot read "all" of os.Stdin
 
