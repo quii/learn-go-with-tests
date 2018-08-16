@@ -325,34 +325,45 @@ FAIL
 
 ## Write enough code to make it pass
 
-```go
-func (cli *CLI) PlayPoker() {
-	userInput, _ := ioutil.ReadAll(cli.in)
+We'll use a [`bufio.Scanner`](https://golang.org/pkg/bufio/). to read the input from the `io.Reader`. 
 
-	winner := strings.Replace(string(userInput), " wins\n", "", -1)
-	cli.playerStore.RecordWin(winner)
+> Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer object, creating another object (Reader or Writer) that also implements the interface but provides buffering and some help for textual I/O. 
+
+Update the code to the following
+
+```go
+type CLI struct {
+	playerStore PlayerStore
+	in          *bufio.Scanner
 }
-```
 
-The easiest way to make this test pass is: 
-- Read everything from our `cli.in` to a string
-- Extract out the winner by using `strings.Replace` which takes the string to replace, what substring to replace, its replacement and finally a flag to say how many instances to replace (`-1` means replace all).
+func NewCLI(store PlayerStore, in io.Reader) *CLI {
+	return &CLI{
+		playerStore: store,
+		in:          bufio.NewScanner(in),
+	}
+}
 
-## Refactor
-
-We can extract getting the winner's name into a meaningful function
-
-```go
 func (cli *CLI) PlayPoker() {
-	userInput, _ := ioutil.ReadAll(cli.in)
-
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
-func extractWinner(userInput []byte) string {
-	return strings.Replace(string(userInput), " wins\n", "", 1)
+func extractWinner(userInput string) string {
+	return strings.Replace(userInput, " wins", "", 1)
+}
+
+func (cli *CLI) readLine() string {
+	cli.in.Scan()
+	return cli.in.Text()
 }
 ```
+
+The tests will now pass.
+
+- `Scanner.Scan()` will read up to a newline.
+- We then use `Scanner.Text()` to return the `string` the scanner read to. 
+- We have encapsulated this into a function called `readLine()`.
 
 Now that we have some passing tests, we should wire this up into `main`. Remember we should always strive to have fully-integrated working software as quickly as we can.
 
@@ -400,7 +411,7 @@ command-line/v3/cmd/cli/main.go:32:34: implicit assignment of unexported field '
 
 What's happening here is because we are trying to assign to the fields `playerStore` and `in` in `CLI`. These are unexported (private) fields. We _could_ do this in our test code because our test is in the same package as `CLI` (`poker`). But our `main` is in package `main` so it does not have access.
 
-This highlights the importance of _integrating your work_. We rightfully made the dependencies of our `CLI` private but haven't made a way for users to construct it.
+This highlights the importance of _integrating your work_. We rightfully made the dependencies of our `CLI` private (because we dont want them exposed to users of `CLI`s) but haven't made a way for users to construct it.
 
 Is there a way to have caught this problem earlier?
 
@@ -538,119 +549,20 @@ game := poker.NewCLI(store, os.Stdin)
  
 Try and run it, type "Bob wins".
 
-And wait...
-
-And wait.....
-
-### You cannot read "all" of os.Stdin
-
-Nothing happens! You'll have to force the process to quit. What's going on? 
-
-As an experiment change the code to the following
-
-```go
-func (cli *CLI) PlayPoker() {
-	log.Println("1")
-	userInput, _ := ioutil.ReadAll(cli.in)
-	log.Println("2")
-	cli.playerStore.RecordWin(extractWinner(userInput))
-}
-```
-
-No matter what you type, you never see `2` logged. The reason is the `ReadAll`, we cant read "all" of `os.Stdin`, as you can just keep typing stuff in! The `os.Stdin` is attached to our process and is a stream that wont finish until the process finishes.
-
-We want to test that if we read _more_ than beyond the first newline that we fail. This would mean a user could type `Bob wins` followed by a newline and it will be recorded, thus fixing the application.
-
-```go
-type failOnEndReader struct {
-	t *testing.T
-	rdr io.Reader
-}
-
-func (m failOnEndReader) Read(p []byte) (n int, err error) {
-
-	n, err = m.rdr.Read(p)
-
-	if n == 0 || err == io.EOF {
-		m.t.Fatal("Read to the end when you shouldn't have")
-	}
-
-	return n, err
-}
-```
-
-We've created a custom `io.Reader` wrapping around another and if we get to the end of the reader then we fail the test
-
-We can now create a new test to try it out
-
-```go
-t.Run("do not read beyond the first newline", func(t *testing.T) {
-    in := failOnEndReader{
-        t,
-        strings.NewReader("Chris wins\n hello there"),
-    }
-
-    playerStore := &poker.StubPlayerStore{}
-
-    cli := poker.NewCLI(playerStore, in)
-    cli.PlayPoker()
-})
-```
-
-It fails with
-
-```
-=== RUN   TestCLI/do_not_read_beyond_the_first_newline
-    --- FAIL: TestCLI/do_not_read_beyond_the_first_newline (0.00s)
-    	CLI_test.go:56: Read to the end when you shouldn't have
-```
-
-To fix it, we cant use `io.ReadAll`. Instead we'll use a [`bufio.Scanner`](https://golang.org/pkg/bufio/).
-
-> Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer object, creating another object (Reader or Writer) that also implements the interface but provides buffering and some help for textual I/O. 
-
-Update the code to the following
-
-```go
-type CLI struct {
-	playerStore PlayerStore
-	in          *bufio.Scanner
-}
-
-func NewCLI(store PlayerStore, in io.Reader) *CLI {
-	return &CLI{
-		playerStore: store,
-		in:          bufio.NewScanner(in),
-	}
-}
-
-func (cli *CLI) PlayPoker() {
-	userInput := cli.readLine()
-	cli.playerStore.RecordWin(extractWinner(userInput))
-}
-
-func extractWinner(userInput string) string {
-	return strings.Replace(userInput, " wins", "", 1)
-}
-
-func (cli *CLI) readLine() string {
-	cli.in.Scan()
-	return cli.in.Text()
-}
-```
-
-The tests will now pass.
-
-- `Scanner.Scan()` will read up to a newline
-- We then use `Scanner.Text()` to return the `string` it read to. 
-- We have encapsulated this into a function called `readLine()`
-
-One thing we have not covered is that `Scanner.Scan()` can return an `error`. We'll need to revisit this.
-
-Run the application in `main.go` again and it should work how we expect.
-
-We will probably end up deleting this test in time as definitely _will_ want to read beyond the first line as we evaluate multiple commands from the user; but it was helpful to drive out a better solution and we didn't want to add new features while our application was not working properly.
-
 ## Wrapping up 
 
-todo
+### Package structure 
+
+This chapter meant we wanted to create two applications, re-using the domain code we've written so far. In order to do this we needed to update our package structure so that we had separate folders for our respective `main`s.
+
+By doing this we ran into integration problems due to unexported values so this further demonstrates the value of working in small "slices" and integrating often.
+
+We learned how `mypackage_test` helps us create a testing environment which is the same experience for other packages integrating with your code, to help you catch integration problems and see how easy (or not!) your code is to work with.
+
+### Reading user input
+
+We saw how reading from `os.Stdin` is very easy for us to work with as it implements `io.Reader`. We used `bufio.Scanner` to easily read line by line user input.
+
+### Simple abstractions leads to simpler code re-use
+
+It was almost no effort to integrate `PlayerStore` into our new application (once we had made the package adjustmements) and subsequently testing was very easy too because we decided to expose our stub version too.
