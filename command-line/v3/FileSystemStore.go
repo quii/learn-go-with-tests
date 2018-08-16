@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"log"
 )
 
 // FileSystemPlayerStore stores players in the filesystem
@@ -32,6 +33,23 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 		database: json.NewEncoder(&tape{file}),
 		league:   league,
 	}, nil
+}
+
+// FileSystemPlayerStoreFromFile creates a PlayerStore from the contents of a JSON file found at path
+func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, error) {
+	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
+
+	if err != nil {
+		log.Fatalf("problem opening %s %v", path, err)
+	}
+
+	store, err := NewFileSystemPlayerStore(db)
+
+	if err != nil {
+		err = fmt.Errorf("problem creating file system player store, %v ", err)
+	}
+
+	return store, err
 }
 
 func initialisePlayerDBFile(file *os.File) error {

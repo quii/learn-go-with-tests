@@ -551,6 +551,88 @@ game := poker.NewCLI(store, os.Stdin)
  
 Try and run it, type "Bob wins".
 
+### Refactor
+
+We have some repetition in our respective applications where we are opening a file and creating a `FileSystemStore` from its contents. This feels like a slight weakness in our package's design so we should make a function in it to encapsulate opening a file from a path and returning you the `PlayerStore`.
+
+```go
+func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, error) {
+	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
+
+	if err != nil {
+		log.Fatalf("problem opening %s %v", path, err)
+	}
+
+	store, err := NewFileSystemPlayerStore(db)
+
+	if err != nil {
+		err = fmt.Errorf("problem creating file system player store, %v ", err)
+	}
+
+	return store, err
+}
+```
+
+Now refactor both of our applications to use this function to create the store. 
+
+#### CLI application code
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/quii/learn-go-with-tests/command-line/v3"
+	"log"
+	"os"
+)
+
+const dbFileName = "game.db.json"
+
+func main() {
+	fmt.Println("Let's play poker")
+	fmt.Println("Type {Name} wins to record a win")
+
+	store, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poker.NewCLI(store, os.Stdin).PlayPoker()
+}
+```
+
+#### Web server application code
+
+````go
+package main
+
+import (
+	"github.com/quii/learn-go-with-tests/command-line/v3"
+	"log"
+	"net/http"
+)
+
+const dbFileName = "game.db.json"
+
+func main() {
+	store, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	server := poker.NewPlayerServer(store)
+
+	if err := http.ListenAndServe(":5000", server); err != nil {
+		log.Fatalf("could not listen on port 5000 %v", err)
+	}
+}
+````
+
+Notice the symmetry; despite being different user interfaces the setup is almost identical.
+
 ## Wrapping up 
 
 ### Package structure 
