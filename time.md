@@ -10,14 +10,12 @@ You wont need to know much about poker, only that at certain time intervals all 
 
 Our application will help keep track of when the blind should go up, and how much it should be.
 
-- Create a command line app.
 - When it starts it asks how many players are playing. This determines the amount of time there is before the "blind" bet goes up.
   - There is a base amount of time of 5 minutes.
   - For every player, 1 minute is added.
   - e.g 6 players equals 11 minutes for the blind.
 - After the blind time expires the game should alert the players the new amount the blind bet is.
-- The blind starts at 100 chips, then 200, 400, 600, 1000, 2000 and continue to double until the game ends.
-- When the game ends the user should be able to type "Chris wins" and that will record a win for the player in our existing database. This should then exit the program.
+- The blind starts at 100 chips, then 200, 400, 600, 1000, 2000 and continue to double until the game ends (our previous functionality of "Ruth wins" should still finish the game)
 
 ## Reminder of the code
 
@@ -672,16 +670,15 @@ func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter
 
 const PlayerPrompt = "Please enter the number of players: "
 
-// PlayPoker starts the game
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 
-	numberOfPlayersInput, _ := cli.in.ReadString('\n')
+	numberOfPlayersInput := cli.readLine()
 	numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
 
 	cli.game.Start(numberOfPlayers)
 
-	winnerInput, _ := cli.in.ReadString('\n')
+	winnerInput := cli.readLine()
 	winner := extractWinner(winnerInput)
 
 	cli.game.Finish(winner)
@@ -689,6 +686,11 @@ func (cli *CLI) PlayPoker() {
 
 func extractWinner(userInput string) string {
 	return strings.Replace(userInput, " wins\n", "", 1)
+}
+
+func (cli *CLI) readLine() string {
+	cli.in.Scan()
+	return cli.in.Text()
 }
 ```
 
