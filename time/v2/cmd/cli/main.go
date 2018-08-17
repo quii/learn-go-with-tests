@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/quii/learn-go-with-tests/time/v2"
 	"log"
 	"os"
-	"fmt"
 )
 
 const dbFileName = "game.db.json"
@@ -16,7 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	game := poker.NewGame(poker.BlindAlerterFunc(poker.StdOutAlerter), store)
+	game := poker.NewTexasHoldem(poker.BlindAlerterFunc(poker.StdOutAlerter), store)
 	cli := poker.NewCLI(os.Stdin, os.Stdout, game)
 
 	fmt.Println("Let's play poker")

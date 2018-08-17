@@ -758,3 +758,44 @@ game := poker.NewGame(poker.BlindAlerterFunc(poker.StdOutAlerter), store)
 cli := poker.NewCLI(os.Stdin, os.Stdout, game)
 cli.PlayPoker()
 ```
+
+Now that we have extracted out `Game` we should move our game specific assertions into tests separate from CLI. 
+
+This should just be an exercise in copying the tests from the `CLI_test` into a new set but with less dependencies to set up; so we wont show all the code here ([you can always check the full source here](https://github.com/quii/learn-go-with-tests/tree/master/time)) but here is an example of one of the moved tests for reference.
+
+```go
+t.Run("schedules alerts on game start for 7 players", func(t *testing.T) {
+    blindAlerter := &poker.SpyBlindAlerter{}
+    game := poker.NewGame(blindAlerter, dummyPlayerStore)
+
+    game.Start(7)
+
+    cases := []poker.ScheduledAlert{
+        {At: 0 * time.Second, Amount: 100},
+        {At: 12 * time.Minute, Amount: 200},
+        {At: 24 * time.Minute, Amount: 300},
+        {At: 36 * time.Minute, Amount: 400},
+    }
+
+    checkSchedulingCases(cases, t, blindAlerter)
+})
+```
+
+The intent behind what happens when a game of poker starts is now much clearer. 
+
+As well as our test for when the game starts, make sure to also move over the test for when the game ends. 
+
+Once we are happy we have moved the tests over for game logic we can simplify our CLI tests. Remember all it is in charge of now is IO and calling `Game` when needed.
+
+To do this we'll have to make it so `CLI` no longer relies on a concrete `Game` type but instead accepts an interface with `Start(numberOfPlayers)` and `Finish(winner)`. We can then create a spy of that type and verify the correct calls are made.
+
+It's here we realise that naming is awkward sometimes. Rename `Game` to `TexasHoldem` (as that's the _kind_ of game we're playing) and the new interface will be called `Game`. This keeps faithful to the notion that our CLI is oblivious to the actual game we're playing and what happens when you `Start` and `Finish`.
+
+```go
+type Game interface {
+	Start(numberOfPlayers int)
+	Finish(winner string)
+}
+```
+
+Replace all references to `*Game` inside `CLI` and replace them with `Game` (our new interface). As always keep re-running tests to check everything is green while we are refactoring.
