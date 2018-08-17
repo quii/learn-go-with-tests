@@ -1,4 +1,5 @@
 // +build js,wasm
+
 package main
 
 import "fmt"

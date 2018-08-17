@@ -5,14 +5,19 @@ import (
 	"net/http"
 )
 
-func main() {
+func wasmFileServer() http.HandlerFunc {
 	fs := http.FileServer(http.Dir("./html"))
-	log.Print("Serving on http://localhost:8080")
-	http.ListenAndServe(":8080", http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+
+	return func(res http.ResponseWriter, req *http.Request) {
 		if req.URL.Path == "/test.wasm" {
-			resp.Header().Set("content-type", "application/wasm")
+			res.Header().Set("content-type", "application/wasm")
 		}
 
-		fs.ServeHTTP(resp, req)
-	}))
+		fs.ServeHTTP(res, req)
+	}
+}
+
+func main() {
+	log.Print("Serving on http://localhost:8080")
+	http.ListenAndServe(":8080", wasmFileServer())
 }

@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/quii/learn-go-with-tests/time/v2"
 	"log"
 	"os"
-	"fmt"
 )
 
 const dbFileName = "game.db.json"
