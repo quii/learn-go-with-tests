@@ -217,7 +217,7 @@ func TestHello(t *testing.T) {
         }
     })
 
-    t.Run("say hello world when an empty string is supplied", func(t *testing.T) {
+    t.Run("say 'Hello, World' when an empty string is supplied", func(t *testing.T) {
         got := Hello("")
         want := "Hello, World"
 
@@ -257,7 +257,7 @@ func TestHello(t *testing.T) {
         assertCorrectMessage(t, got, want)
     })
 
-    t.Run("empty string defaults to 'world'", func(t *testing.T) {
+    t.Run("empty string defaults to 'World'", func(t *testing.T) {
         got := Hello("")
         want := "Hello, World"
         assertCorrectMessage(t, got, want)
@@ -479,7 +479,7 @@ A few new concepts:
     * You can return whatever it's set to by just calling `return` rather than `return prefix`.
   * This will display in the Go Doc for your function so it can make the intent of your code clearer.
 * `default` in the switch case will be branched to if none of the other `case` statements match.
-* The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposes to the world so we made this function private.
+* The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposed to the world, so we made this function private.
 
 ## Wrapping up
 
