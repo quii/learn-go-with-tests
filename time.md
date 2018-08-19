@@ -799,3 +799,79 @@ type Game interface {
 ```
 
 Replace all references to `*Game` inside `CLI` and replace them with `Game` (our new interface). As always keep re-running tests to check everything is green while we are refactoring.
+
+Now that we have decoupled `CLI` from `TexasHoldem` we can use spies to check that `Start` and `Finish` are called when we expect them to, with the correct arguments.
+
+Create a spy that implements `Game`
+
+```go
+type GameSpy struct {
+	StartedWith  int
+	FinishedWith string
+}
+
+func (g *GameSpy) Start(numberOfPlayers int) {
+	g.StartedWith = numberOfPlayers
+}
+
+func (g *GameSpy) Finish(winner string) {
+	g.FinishedWith = winner
+}
+```
+
+Replace any `CLI` test which is testing any game specific logic with checks on how our `GameSpy` is called. This will then reflect the responsibilities of CLI in our tests clearly.
+
+Here is an example of one of the tests being fixed; try and do the rest yourself and check the source code if you get stuck.
+
+```go
+	t.Run("it prompts the user to enter the number of players and starts the game", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		in := strings.NewReader("7\n")
+		game := &GameSpy{}
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+
+		gotPrompt := stdout.String()
+		wantPrompt := poker.PlayerPrompt
+
+		if gotPrompt != wantPrompt {
+			t.Errorf("got '%s', want '%s'", gotPrompt, wantPrompt)
+		}
+
+		if game.StartCalledWith != 7 {
+			t.Errorf("wanted Start called with 7 but got %d", game.StartCalledWith)
+		}
+	})
+```
+
+## Wrapping up
+
+### A quick project recap
+
+For the past 5 chapters we have slowly TDD'd a fair amount of code
+
+- We have two applications, a command line application and a web server. 
+- Both these applications rely on a `PlayerStore` to record winners
+- The web server can also display a league table of who is winning the most games
+- The command line app helps players play a game of poker by tracking what the current blind value is.
+
+### time.Afterfunc
+
+A very handy way of scheduling a function call after a specific duration
+
+### More examples of good separation of concerns
+
+_Generally_ it is good practice to separate the responsibilities of dealing with user input and responses away from domain code. You see that here in our command line application and also our web server. 
+
+Our tests got messy. We had too many assertions (check this input, schedules these alerts, etc) and too many dependencies. We could visually see it was cluttered; it is **so important to listen to your tests**. 
+
+- If your tests look messy try and refactor them.
+- If you've done this and they're still a mess it is very likely pointing to a flaw in your design
+- This is one of the real strengths of tests.
+
+Even though the tests and the production code was a bit cluttered we could freely refactor backed by our tests. 
+
+Remember when you get in to these situations to always take small steps and re-run the tests after every change. 
+
+It would've been dangerous to refactor both the test code _and_ the production code at the same time, so we first refactored the production code (in the current state we couldn't improve the tests much) without changing its interface so we could rely on our tests as much as we could while changing things. _Then_ we refactored the tests after the design improved.
