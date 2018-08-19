@@ -6,6 +6,8 @@ In [arrays & slices](arrays-and-slices.md), you saw how to store values in order
 
 Maps allow you to store items in a manner similar to a dictionary. You can think of the `key` as the word and the `value` as the definition. And what better way is there to learn about Maps than to build our own dictionary?
 
+First, assuming we already some words with their definitions in the dictionary, if we search for a word, it should return the definition of it.
+
 ## Write the test first
 
 In `dictionary_test.go`
@@ -437,6 +439,8 @@ func (e DictionaryErr) Error() string {
 
 We made the errors constant; this required us to create our own `DictionaryErr` type which implements the `error` interface. You can read more about the details in [this excellent article by Dave Cheney](https://dave.cheney.net/2016/04/07/constant-errors). Simply put, it makes the errors more reusable and immutable.
 
+Next, let's create a function to `Update` the definition of a word.
+
 ## Write the test first
 
 ```go
@@ -576,6 +580,8 @@ Having specific errors gives you more information about what went wrong. Here is
 
 > You can redirect the user when `ErrNotFound` is encountered, but display an error message when `ErrWordDoesNotExist` is encountered.
 
+Next, let's create a function to `Delete` a word in the dictionary.
+
 ## Write the test first
 
 ```go
@@ -630,7 +636,7 @@ The `delete` function returns nothing, and we based our `Delete` method on the s
 
 ## Wrapping up
 
-In this section, we covered a lot. We made a full CRUD API for our dictionary. Throughout the process we learned how to:
+In this section, we covered a lot. We made a full CRUD (Create, Read, Update and Delete) API for our dictionary. Throughout the process we learned how to:
 
 * Create maps
 * Search for items in maps
