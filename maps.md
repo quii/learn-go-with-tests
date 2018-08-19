@@ -452,7 +452,7 @@ func TestUpdate(t *testing.T) {
 }
 ```
 
-`Update` is very closely related to `Create` and will be our next implementation.
+`Update` is very closely related to `Add` and will be our next implementation.
 
 ## Try and run the test
 
@@ -476,7 +476,7 @@ dictionary_test.go:55: got 'this is just a test' want 'new definition'
 
 ## Write enough code to make it pass
 
-We already saw how to do this when we fixed the issue with `Create`. So let's implement something really similar to `Create`.
+We already saw how to do this when we fixed the issue with `Add`. So let's implement something really similar to `Add`.
 
 ```go
 func (d Dictionary) Update(word, definition string) {
@@ -484,7 +484,7 @@ func (d Dictionary) Update(word, definition string) {
 }
 ```
 
-There is no refactoring we need to do on this since it was a simple change. However, we now have the same issue as with `Create`. If we pass in a new word, `Update` will add it to the dictionary.
+There is no refactoring we need to do on this since it was a simple change. However, we now have the same issue as with `Add`. If we pass in a new word, `Update` will add it to the dictionary.
 
 ## Write the test first
 
@@ -626,7 +626,7 @@ func (d Dictionary) Delete(word string) {
 
 Go has a built-in function `delete` that works on maps. It takes two arguments. The first is the map and the second is the key to be removed.
 
-The `delete` function returns nothing, and we based our `Delete` method on the same notion. Since deleting a value that's not there has no effect, unlike our `Update` and `Create**` methods, we don't need to complicate the API with errors.
+The `delete` function returns nothing, and we based our `Delete` method on the same notion. Since deleting a value that's not there has no effect, unlike our `Update` and `Add**` methods, we don't need to complicate the API with errors.
 
 ## Wrapping up
 
