@@ -8,18 +8,23 @@ import (
 	"strings"
 )
 
+type Game interface {
+	Start(numberOfPlayers int)
+	Finish(winner string)
+}
+
 // CLI helps players through a game of poker
 type CLI struct {
 	playerStore PlayerStore
-	in          *bufio.Reader
+	in          *bufio.Scanner
 	out         io.Writer
-	game        *Game
+	game        Game
 }
 
 // NewCLI creates a CLI for playing poker
-func NewCLI(in io.Reader, out io.Writer, game *Game) *CLI {
+func NewCLI(in io.Reader, out io.Writer, game Game) *CLI {
 	return &CLI{
-		in:   bufio.NewReader(in),
+		in:   bufio.NewScanner(in),
 		out:  out,
 		game: game,
 	}
@@ -32,17 +37,22 @@ const PlayerPrompt = "Please enter the number of players: "
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 
-	numberOfPlayersInput, _ := cli.in.ReadString('\n')
+	numberOfPlayersInput := cli.readLine()
 	numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
 
 	cli.game.Start(numberOfPlayers)
 
-	winnerInput, _ := cli.in.ReadString('\n')
+	winnerInput := cli.readLine()
 	winner := extractWinner(winnerInput)
 
 	cli.game.Finish(winner)
 }
 
 func extractWinner(userInput string) string {
-	return strings.Replace(userInput, " wins\n", "", 1)
+	return strings.Replace(userInput, " wins", "", 1)
+}
+
+func (cli *CLI) readLine() string {
+	cli.in.Scan()
+	return cli.in.Text()
 }
