@@ -6,6 +6,8 @@ In [arrays & slices](arrays-and-slices.md), you saw how to store values in order
 
 Maps allow you to store items in a manner similar to a dictionary. You can think of the `key` as the word and the `value` as the definition. And what better way is there to learn about Maps than to build our own dictionary?
 
+First, assuming we already some words with their definitions in the dictionary, if we search for a word, it should return the definition of it.
+
 ## Write the test first
 
 In `dictionary_test.go`
@@ -437,6 +439,8 @@ func (e DictionaryErr) Error() string {
 
 We made the errors constant; this required us to create our own `DictionaryErr` type which implements the `error` interface. You can read more about the details in [this excellent article by Dave Cheney](https://dave.cheney.net/2016/04/07/constant-errors). Simply put, it makes the errors more reusable and immutable.
 
+Next, let's create a function to `Update` the definition of a word.
+
 ## Write the test first
 
 ```go
@@ -452,7 +456,7 @@ func TestUpdate(t *testing.T) {
 }
 ```
 
-`Update` is very closely related to `Create` and will be our next implementation.
+`Update` is very closely related to `Add` and will be our next implementation.
 
 ## Try and run the test
 
@@ -476,7 +480,7 @@ dictionary_test.go:55: got 'this is just a test' want 'new definition'
 
 ## Write enough code to make it pass
 
-We already saw how to do this when we fixed the issue with `Create`. So let's implement something really similar to `Create`.
+We already saw how to do this when we fixed the issue with `Add`. So let's implement something really similar to `Add`.
 
 ```go
 func (d Dictionary) Update(word, definition string) {
@@ -484,7 +488,7 @@ func (d Dictionary) Update(word, definition string) {
 }
 ```
 
-There is no refactoring we need to do on this since it was a simple change. However, we now have the same issue as with `Create`. If we pass in a new word, `Update` will add it to the dictionary.
+There is no refactoring we need to do on this since it was a simple change. However, we now have the same issue as with `Add`. If we pass in a new word, `Update` will add it to the dictionary.
 
 ## Write the test first
 
@@ -576,6 +580,8 @@ Having specific errors gives you more information about what went wrong. Here is
 
 > You can redirect the user when `ErrNotFound` is encountered, but display an error message when `ErrWordDoesNotExist` is encountered.
 
+Next, let's create a function to `Delete` a word in the dictionary.
+
 ## Write the test first
 
 ```go
@@ -626,11 +632,11 @@ func (d Dictionary) Delete(word string) {
 
 Go has a built-in function `delete` that works on maps. It takes two arguments. The first is the map and the second is the key to be removed.
 
-The `delete` function returns nothing, and we based our `Delete` method on the same notion. Since deleting a value that's not there has no effect, unlike our `Update` and `Create**` methods, we don't need to complicate the API with errors.
+The `delete` function returns nothing, and we based our `Delete` method on the same notion. Since deleting a value that's not there has no effect, unlike our `Update` and `Add**` methods, we don't need to complicate the API with errors.
 
 ## Wrapping up
 
-In this section, we covered a lot. We made a full CRUD API for our dictionary. Throughout the process we learned how to:
+In this section, we covered a lot. We made a full CRUD (Create, Read, Update and Delete) API for our dictionary. Throughout the process we learned how to:
 
 * Create maps
 * Search for items in maps

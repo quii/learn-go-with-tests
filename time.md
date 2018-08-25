@@ -10,14 +10,12 @@ You wont need to know much about poker, only that at certain time intervals all 
 
 Our application will help keep track of when the blind should go up, and how much it should be.
 
-- Create a command line app.
 - When it starts it asks how many players are playing. This determines the amount of time there is before the "blind" bet goes up.
   - There is a base amount of time of 5 minutes.
   - For every player, 1 minute is added.
   - e.g 6 players equals 11 minutes for the blind.
 - After the blind time expires the game should alert the players the new amount the blind bet is.
-- The blind starts at 100 chips, then 200, 400, 600, 1000, 2000 and continue to double until the game ends.
-- When the game ends the user should be able to type "Chris wins" and that will record a win for the player in our existing database. This should then exit the program.
+- The blind starts at 100 chips, then 200, 400, 600, 1000, 2000 and continue to double until the game ends (our previous functionality of "Ruth wins" should still finish the game)
 
 ## Reminder of the code
 
@@ -672,16 +670,15 @@ func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter
 
 const PlayerPrompt = "Please enter the number of players: "
 
-// PlayPoker starts the game
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 
-	numberOfPlayersInput, _ := cli.in.ReadString('\n')
+	numberOfPlayersInput := cli.readLine()
 	numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
 
 	cli.game.Start(numberOfPlayers)
 
-	winnerInput, _ := cli.in.ReadString('\n')
+	winnerInput := cli.readLine()
 	winner := extractWinner(winnerInput)
 
 	cli.game.Finish(winner)
@@ -689,6 +686,11 @@ func (cli *CLI) PlayPoker() {
 
 func extractWinner(userInput string) string {
 	return strings.Replace(userInput, " wins\n", "", 1)
+}
+
+func (cli *CLI) readLine() string {
+	cli.in.Scan()
+	return cli.in.Text()
 }
 ```
 
@@ -756,3 +758,120 @@ game := poker.NewGame(poker.BlindAlerterFunc(poker.StdOutAlerter), store)
 cli := poker.NewCLI(os.Stdin, os.Stdout, game)
 cli.PlayPoker()
 ```
+
+Now that we have extracted out `Game` we should move our game specific assertions into tests separate from CLI. 
+
+This should just be an exercise in copying the tests from the `CLI_test` into a new set but with less dependencies to set up; so we wont show all the code here ([you can always check the full source here](https://github.com/quii/learn-go-with-tests/tree/master/time)) but here is an example of one of the moved tests for reference.
+
+```go
+t.Run("schedules alerts on game start for 7 players", func(t *testing.T) {
+    blindAlerter := &poker.SpyBlindAlerter{}
+    game := poker.NewGame(blindAlerter, dummyPlayerStore)
+
+    game.Start(7)
+
+    cases := []poker.ScheduledAlert{
+        {At: 0 * time.Second, Amount: 100},
+        {At: 12 * time.Minute, Amount: 200},
+        {At: 24 * time.Minute, Amount: 300},
+        {At: 36 * time.Minute, Amount: 400},
+    }
+
+    checkSchedulingCases(cases, t, blindAlerter)
+})
+```
+
+The intent behind what happens when a game of poker starts is now much clearer. 
+
+As well as our test for when the game starts, make sure to also move over the test for when the game ends. 
+
+Once we are happy we have moved the tests over for game logic we can simplify our CLI tests. Remember all it is in charge of now is IO and calling `Game` when needed.
+
+To do this we'll have to make it so `CLI` no longer relies on a concrete `Game` type but instead accepts an interface with `Start(numberOfPlayers)` and `Finish(winner)`. We can then create a spy of that type and verify the correct calls are made.
+
+It's here we realise that naming is awkward sometimes. Rename `Game` to `TexasHoldem` (as that's the _kind_ of game we're playing) and the new interface will be called `Game`. This keeps faithful to the notion that our CLI is oblivious to the actual game we're playing and what happens when you `Start` and `Finish`.
+
+```go
+type Game interface {
+	Start(numberOfPlayers int)
+	Finish(winner string)
+}
+```
+
+Replace all references to `*Game` inside `CLI` and replace them with `Game` (our new interface). As always keep re-running tests to check everything is green while we are refactoring.
+
+Now that we have decoupled `CLI` from `TexasHoldem` we can use spies to check that `Start` and `Finish` are called when we expect them to, with the correct arguments.
+
+Create a spy that implements `Game`
+
+```go
+type GameSpy struct {
+	StartedWith  int
+	FinishedWith string
+}
+
+func (g *GameSpy) Start(numberOfPlayers int) {
+	g.StartedWith = numberOfPlayers
+}
+
+func (g *GameSpy) Finish(winner string) {
+	g.FinishedWith = winner
+}
+```
+
+Replace any `CLI` test which is testing any game specific logic with checks on how our `GameSpy` is called. This will then reflect the responsibilities of CLI in our tests clearly.
+
+Here is an example of one of the tests being fixed; try and do the rest yourself and check the source code if you get stuck.
+
+```go
+	t.Run("it prompts the user to enter the number of players and starts the game", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		in := strings.NewReader("7\n")
+		game := &GameSpy{}
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+
+		gotPrompt := stdout.String()
+		wantPrompt := poker.PlayerPrompt
+
+		if gotPrompt != wantPrompt {
+			t.Errorf("got '%s', want '%s'", gotPrompt, wantPrompt)
+		}
+
+		if game.StartCalledWith != 7 {
+			t.Errorf("wanted Start called with 7 but got %d", game.StartCalledWith)
+		}
+	})
+```
+
+## Wrapping up
+
+### A quick project recap
+
+For the past 5 chapters we have slowly TDD'd a fair amount of code
+
+- We have two applications, a command line application and a web server. 
+- Both these applications rely on a `PlayerStore` to record winners
+- The web server can also display a league table of who is winning the most games
+- The command line app helps players play a game of poker by tracking what the current blind value is.
+
+### time.Afterfunc
+
+A very handy way of scheduling a function call after a specific duration
+
+### More examples of good separation of concerns
+
+_Generally_ it is good practice to separate the responsibilities of dealing with user input and responses away from domain code. You see that here in our command line application and also our web server. 
+
+Our tests got messy. We had too many assertions (check this input, schedules these alerts, etc) and too many dependencies. We could visually see it was cluttered; it is **so important to listen to your tests**. 
+
+- If your tests look messy try and refactor them.
+- If you've done this and they're still a mess it is very likely pointing to a flaw in your design
+- This is one of the real strengths of tests.
+
+Even though the tests and the production code was a bit cluttered we could freely refactor backed by our tests. 
+
+Remember when you get in to these situations to always take small steps and re-run the tests after every change. 
+
+It would've been dangerous to refactor both the test code _and_ the production code at the same time, so we first refactored the production code (in the current state we couldn't improve the tests much) without changing its interface so we could rely on our tests as much as we could while changing things. _Then_ we refactored the tests after the design improved.

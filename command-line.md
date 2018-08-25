@@ -1,4 +1,4 @@
-# Command line and project structure (WIP)
+# Command line and project structure
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/command-line)**
 
