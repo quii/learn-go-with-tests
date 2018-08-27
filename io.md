@@ -630,7 +630,7 @@ We now need to handle the scenario of recording wins of new players.
 ## Write the test first
 
 ```go
-t.Run("store wins for existing players", func(t *testing.T) {
+t.Run("store wins for new players", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
         {"Name": "Chris", "Wins": 33}]`)
@@ -649,8 +649,8 @@ t.Run("store wins for existing players", func(t *testing.T) {
 ## Try to run the test
 
 ```
-=== RUN   TestFileSystemStore/store_wins_for_existing_players#01
-    --- FAIL: TestFileSystemStore/store_wins_for_existing_players#01 (0.00s)
+=== RUN   TestFileSystemStore/store_wins_for_new_players#01
+    --- FAIL: TestFileSystemStore/store_wins_for_new_players#01 (0.00s)
         FileSystemStore_test.go:86: got 0 want 1
 ```
 
