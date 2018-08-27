@@ -844,6 +844,173 @@ Here is an example of one of the tests being fixed; try and do the rest yourself
 	})
 ```
 
+Now that we have a clean separation of concerns, checking edge cases around IO in our `CLI` should be easier. 
+
+We need to address the scenario where a user puts a non numeric value when prompted for the number of players:
+
+Our code should not start the game and it should print a handy error to the user and then exit. 
+
+## Write the test first
+
+We'll start by making sure the game doesn't start
+
+```go
+t.Run("it prints an error when a non numeric value is entered and does not start the game", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		in := strings.NewReader("Pies\n")
+		game := &GameSpy{}
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+		
+		if game.StartCalled {
+			t.Errorf("game should not have started")
+		}
+	})
+```
+
+You'll need to add to our `GameSpy` a field `StartCalled` which only gets set if `Start` is called
+
+## Try to run the test
+```
+=== RUN   TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game
+    --- FAIL: TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game (0.00s)
+        CLI_test.go:62: game should not have started
+```
+
+## Write enough code to make it pass
+
+Around where we call `Atoi` we just need to check for the error
+
+```go
+numberOfPlayers, err := strconv.Atoi(cli.readLine())
+
+if err != nil {
+    return
+}
+```
+
+Next we need to inform the user of what they did wrong, so we can assert on what is printed to `stdout`. 
+
+## Write the test first
+
+We've asserted on what was printed to `stdout` before so we can copy that code for now
+
+```go
+gotPrompt := stdout.String()
+
+wantPrompt := poker.PlayerPrompt + "you're so silly"
+
+if gotPrompt != wantPrompt {
+    t.Errorf("got '%s', want '%s'", gotPrompt, wantPrompt)
+}
+```
+
+We are storing _everything_ that gets written to stdout into the `stdout` in our tests so we still expect the `poker.PlayerPrompt`. We then just check an additional thing gets printed. We're not too bothered about the exact wording for now, we'll address it when we refactor.
+
+## Try to run the test
+
+```
+=== RUN   TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game
+    --- FAIL: TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game (0.00s)
+        CLI_test.go:70: got 'Please enter the number of players: ', want 'Please enter the number of players: you're so silly'
+```
+
+## Write enough code to make it pass
+
+Change the error handling code
+
+```go
+if err != nil {
+		fmt.Fprint(cli.out, "you're so silly")
+		return
+}
+```
+
+## Refactor
+
+Now refactor the message into a constant like `PlayerPrompt` 
+
+```go
+wantPrompt := poker.PlayerPrompt + poker.BadPlayerInputErrMsg
+```
+
+and put in a more appropriate message
+
+```go
+const BadPlayerInputErrMsg = "Bad value received for number of players, please try again with a number"
+```
+
+Finally our testing around what has been sent to `stdout` feels a bit verbose a clunky, let's write an assert function to clean it up.
+
+```go
+func assertMessagesSentToUser(t *testing.T, stdout *bytes.Buffer, messages ...string) {
+	t.Helper()
+	want := strings.Join(messages, "")
+	got := stdout.String()
+	if got != want {
+		t.Errorf("got '%s' sent to stdout but expected %+v", got, messages)
+	}
+}
+```
+
+Using the vararg syntax (`...string`) is handy here because we need to assert on varying amounts of messages.
+
+Use this helper in both of the tests where we assert on messages sent to the user.
+
+There are a number of tests that could be helped with some `assertX` functions so practice your refactoring by cleaning up our tests so they read nicely. Take some time and think about the value of some of the tests we've driven out. Remember we don't want more tests than necessary, can you refactor/remove some of them _and still be confident it all works_ ?
+
+Here is what I came up with
+
+```go
+func TestCLI(t *testing.T) {
+
+	t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t *testing.T) {
+		game := &GameSpy{}
+		stdout := &bytes.Buffer{}
+
+		in := userSends("3", "Chris wins")
+		cli := poker.NewCLI(in, stdout, game)
+
+		cli.PlayPoker()
+
+		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt)
+		assertGameStartedWith(t, game, 3)
+		assertFinishCalledWith(t, game, "Chris")
+	})
+
+	t.Run("start game with 8 players and record 'Cleo' as winner", func(t *testing.T) {
+		game := &GameSpy{}
+
+		in := userSends("8", "Cleo wins")
+		cli := poker.NewCLI(in, dummyStdOut, game)
+
+		cli.PlayPoker()
+
+		assertGameStartedWith(t, game, 8)
+		assertFinishCalledWith(t, game, "Cleo")
+	})
+
+	t.Run("it prints an error when a non numeric value is entered and does not start the game", func(t *testing.T) {
+		game := &GameSpy{}
+
+		stdout := &bytes.Buffer{}
+		in := userSends("pies")
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+
+		assertGameNotStarted(t, game)
+		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, poker.BadPlayerInputErrMsg)
+	})
+}
+```
+The tests now reflect the main capabilities of CLI, it is able to read user input in terms of how many people are playing and who won and handles when a bad value is entered for number of players. By doing this it is clear to the reader what `CLI` does, but also what it doesn't do. 
+
+What happens if instead of putting `Ruth wins` the user puts in `Lloyd is a killer` ?
+
+Finish this chapter by writing the test and making it pass.
+
 ## Wrapping up
 
 ### A quick project recap

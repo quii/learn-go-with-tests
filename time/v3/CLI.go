@@ -2,6 +2,7 @@ package poker
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -34,25 +35,41 @@ func NewCLI(in io.Reader, out io.Writer, game Game) *CLI {
 // PlayerPrompt is the text asking the user for the number of players
 const PlayerPrompt = "Please enter the number of players: "
 
-// ErrorPlayerNumberPrompt tells the user they entered in the value wrong
-const ErrorPlayerNumberPrompt = "ERROR: Please enter the number of players as a number: "
+// BadPlayerInputErrMsg is the text telling the user they did bad things
+const BadPlayerInputErrMsg = "Bad value received for number of players, please try again with a number"
+
+// BadWinnerInputMsg is the text telling the user they declared the winner wrong
+const BadWinnerInputMsg = "invalid winner input, expect format of 'PlayerName wins'"
 
 // PlayPoker starts the game
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 
-	numberOfPlayers, _ := strconv.Atoi(cli.readLine())
+	numberOfPlayers, err := strconv.Atoi(cli.readLine())
+
+	if err != nil {
+		fmt.Fprint(cli.out, BadPlayerInputErrMsg)
+		return
+	}
 
 	cli.game.Start(numberOfPlayers)
 
 	winnerInput := cli.readLine()
-	winner := extractWinner(winnerInput)
+	winner, err := extractWinner(winnerInput)
+
+	if err != nil {
+		fmt.Fprint(cli.out, BadWinnerInputMsg)
+		return
+	}
 
 	cli.game.Finish(winner)
 }
 
-func extractWinner(userInput string) string {
-	return strings.Replace(userInput, " wins", "", 1)
+func extractWinner(userInput string) (string, error) {
+	if !strings.Contains(userInput, " wins") {
+		return "", errors.New(BadWinnerInputMsg)
+	}
+	return strings.Replace(userInput, " wins", "", 1), nil
 }
 
 func (cli *CLI) readLine() string {
