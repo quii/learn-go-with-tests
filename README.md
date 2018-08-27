@@ -53,7 +53,7 @@ By the end of this, you should have a strong grasp as to how to iteratively writ
 * [JSON, routing and embedding](json.md) - We will make our endpoints return JSON and explore how to do routing.
 * [IO and sorting](io.md) - We will persist and read our data from disk and we'll cover sorting data.
 * [Command line & project structure](command-line.md) - Support multiple applications from one code base and read input from command line
-* [Time (WIP)](time.md) - using the `time` package to schedule activities
+* [Time](time.md) - using the `time` package to schedule activities
 
 ## Contributing
 

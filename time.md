@@ -1,4 +1,4 @@
-# Time (WIP)
+# Time
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/time)**
 
