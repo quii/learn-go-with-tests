@@ -60,6 +60,16 @@ As usual the standard library has us covered with [`func AfterFunc(d Duration, f
 
 > `AfterFunc` waits for the duration to elapse and then calls f in its own goroutine. It returns a `Timer` that can be used to cancel the call using its Stop method.
 
+### [`time.Duration`](https://golang.org/pkg/time/#Duration)
+
+> A Duration represents the elapsed time between two instants as an int64 nanosecond count.
+
+The time library has a number of constants to let you multiply those nanoseconds so they're a bit more readable for the kind of scenarios we'll be doing
+
+```go
+5 * time.Second
+```
+
 When we call `PlayPoker` we'll schedule all of our blind alerts.
 
 Testing this may be a little tricky though. We'll want to verify that each time period is scheduled with the correct blind amount but if you look at the signature of `time.AfterFunc` its second argument is the function it will run. You cannot compare functions in Go so we'd be unable to test what function has been sent in. So we'll need to write some kind of wrapper around `time.AfterFunc` which will take the time to run and the amount to print so we can spy on that.
@@ -1026,7 +1036,12 @@ For the past 5 chapters we have slowly TDD'd a fair amount of code
 
 ### time.Afterfunc
 
-A very handy way of scheduling a function call after a specific duration
+A very handy way of scheduling a function call after a specific duration. It is well worth investing time [looking at the documentation for `time`](https://golang.org/pkg/time/) as it has a lot of time saving functions and methods for you to work with.
+
+Some of my favourites are
+
+- `time.After(duration)` which return you a `chan Time` when the duration has expired. So if you wish to do something _after_ a specific time, this can help. 
+- `time.NewTicker(duration)` returns a `Ticker` which is similar to the above in that it returns a channel but this one "ticks" every duration, rather than just once. This is very handy if you want to execute some code every `N duration`.  
 
 ### More examples of good separation of concerns
 
@@ -1044,4 +1059,4 @@ Remember when you get in to these situations to always take small steps and re-r
 
 It would've been dangerous to refactor both the test code _and_ the production code at the same time, so we first refactored the production code (in the current state we couldn't improve the tests much) without changing its interface so we could rely on our tests as much as we could while changing things. _Then_ we refactored the tests after the design improved.
 
-We saw how after our refactoring, our dependency list reflected our design goal. This is another benefit of DI in that it often documents intent. When you rely on global variables responsibilities become very unclear.
+After refactoring the dependency list reflected our design goal. This is another benefit of DI in that it often documents intent. When you rely on global variables responsibilities become very unclear.
