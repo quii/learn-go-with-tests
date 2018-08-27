@@ -176,7 +176,7 @@ To make the test pass, we can call our `BlindAlerter` with anything we like
 ```go
 func (cli *CLI) PlayPoker() {
 	cli.alerter.ScheduleAlertAt(5 * time.Second, 100)
-	userInput := cli.in.readLine()
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 ```
@@ -265,7 +265,7 @@ func (cli *CLI) PlayPoker() {
 		blindTime = blindTime + 10*time.Minute
 	}
 
-	userInput, _ := cli.in.ReadString('\n')
+	userInput, _ := cli.ReadString('\n')
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 ```
@@ -279,7 +279,7 @@ We can encapsulate our scheduled alerts into a method just to make `PlayPoker` r
 ```go
 func (cli *CLI) PlayPoker() {
 	cli.scheduleBlindAlerts()
-	userInput, _ := cli.in.ReadString('\n')
+	userInput, _ := cli.ReadString('\n')
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
@@ -496,7 +496,7 @@ Then finally we can write our prompt at the start of the game
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, "Please enter the number of players: ")
 	cli.scheduleBlindAlerts()
-	userInput, _ := cli.in.ReadString('\n')
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 ```
@@ -581,12 +581,11 @@ Remember, we are free to commit whatever sins we need to make this work. Once we
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 	
-	numberOfPlayersInput := cli.in.readLine()
-	numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
+    numberOfPlayers, _ := strconv.Atoi(cli.readLine())
 
 	cli.scheduleBlindAlerts(numberOfPlayers)
 
-	userInput := cli.in.readLine()
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
@@ -603,14 +602,14 @@ func (cli *CLI) scheduleBlindAlerts(numberOfPlayers int) {
 ```
 
 - We read in the `numberOfPlayersInput` into a string
-- We `Trim` the string of the newline entered and use `Atoi` to convert it into an integer - ignoring any error scenarios. We'll need to write a test for that scenario later.
+- We use `cli.readLine()` to get the input from the user and then call `Atoi` to convert it into an integer - ignoring any error scenarios. We'll need to write a test for that scenario later.
 - From here we change `scheduleBlindAlerts` to accept a number of players. We then calculate a `blindIncrement` time to use to add to `blindTime` as we iterate over the blind amounts
 
 While our new test has been fixed, a lot of others have failed because now our system only works if the game starts with a user entering a number. You'll need to fix the tests by changing the user inputs so that a number followed by a newline is added (this is highlighting yet more flaws in our approach right now).
 
 ## Refactor
 
-Let's _listen to our tests_. 
+Let's **listen to our tests**. 
 
 - In order to test that we are scheduling some alerts we set up 4 different dependencies. Whenever you have a lot of dependencies for a _thing_ in your system, it implies it's doing too much. Visually we can see it in how cluttered our test is.
 - To me it feels like **we need to make a cleaner abstraction between reading user input and the business logic we want to do** 
@@ -707,7 +706,7 @@ Our `CLI` is now just concerned with:
 - Constructing `Game` with its existing dependencies (which we'll refactor next)
 - Interpreting user input as method invocations for `Game`
 
-We want to try to avoid doing "big" refactors which leave us in a state of failing tests for extended periods as that increases the chances of mistakes.
+We want to try to avoid doing "big" refactors which leave us in a state of failing tests for extended periods as that increases the chances of mistakes. (If you are working in a large/distributed team this is extra important)
 
 The first thing we'll do is refactor `Game` so that we inject it into `CLI`. We'll do the smallest changes in our tests to facilitate that and then we'll see how we can break up the tests into the themes of parsing user input and game management.
 
@@ -723,7 +722,7 @@ func NewCLI(in io.Reader, out io.Writer, game *Game) *CLI {
 }
 ```
 
-This feels like an improvement already. We have less dependencies and our dependency list is reflecting our overall design goal of CLI being concerned with input/output and delegating game specific actions to a `Game`.
+This feels like an improvement already. We have less dependencies and _our dependency list is reflecting our overall design goal_ of CLI being concerned with input/output and delegating game specific actions to a `Game`.
 
 If you try and compile there are problems. You should be able to fix these problems yourself. Don't worry about making any mocks for `Game` right now, just initialise _real_ `Game`s just to get everything compiling and tests green.
 
@@ -783,7 +782,7 @@ t.Run("schedules alerts on game start for 7 players", func(t *testing.T) {
 
 The intent behind what happens when a game of poker starts is now much clearer. 
 
-As well as our test for when the game starts, make sure to also move over the test for when the game ends. 
+Make sure to also move over the test for when the game ends. 
 
 Once we are happy we have moved the tests over for game logic we can simplify our CLI tests. Remember all it is in charge of now is IO and calling `Game` when needed.
 
@@ -875,3 +874,5 @@ Even though the tests and the production code was a bit cluttered we could freel
 Remember when you get in to these situations to always take small steps and re-run the tests after every change. 
 
 It would've been dangerous to refactor both the test code _and_ the production code at the same time, so we first refactored the production code (in the current state we couldn't improve the tests much) without changing its interface so we could rely on our tests as much as we could while changing things. _Then_ we refactored the tests after the design improved.
+
+We saw how after our refactoring, our dependency list reflected our design goal. This is another benefit of DI in that it often documents intent. When you rely on global variables responsibilities become very unclear.

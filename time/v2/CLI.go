@@ -37,8 +37,7 @@ const PlayerPrompt = "Please enter the number of players: "
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 
-	numberOfPlayersInput := cli.readLine()
-	numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
+	numberOfPlayers, _ := strconv.Atoi(cli.readLine())
 
 	cli.game.Start(numberOfPlayers)
 
