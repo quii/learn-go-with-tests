@@ -890,7 +890,7 @@ if err != nil {
 }
 ```
 
-Next we need to inform the user of what they did wrong, so we can assert on what is printed to `stdout`. 
+Next we need to inform the user of what they did wrong so we'll assert on what is printed to `stdout`. 
 
 ## Write the test first
 
@@ -906,7 +906,7 @@ if gotPrompt != wantPrompt {
 }
 ```
 
-We are storing _everything_ that gets written to stdout into the `stdout` in our tests so we still expect the `poker.PlayerPrompt`. We then just check an additional thing gets printed. We're not too bothered about the exact wording for now, we'll address it when we refactor.
+We are storing _everything_ that gets written to stdout so we still expect the `poker.PlayerPrompt`. We then just check an additional thing gets printed. We're not too bothered about the exact wording for now, we'll address it when we refactor.
 
 ## Try to run the test
 
@@ -922,8 +922,8 @@ Change the error handling code
 
 ```go
 if err != nil {
-		fmt.Fprint(cli.out, "you're so silly")
-		return
+    fmt.Fprint(cli.out, "you're so silly")
+    return
 }
 ```
 
@@ -941,7 +941,7 @@ and put in a more appropriate message
 const BadPlayerInputErrMsg = "Bad value received for number of players, please try again with a number"
 ```
 
-Finally our testing around what has been sent to `stdout` feels a bit verbose a clunky, let's write an assert function to clean it up.
+Finally our testing around what has been sent to `stdout` is quite verbose, let's write an assert function to clean it up.
 
 ```go
 func assertMessagesSentToUser(t *testing.T, stdout *bytes.Buffer, messages ...string) {
@@ -958,7 +958,9 @@ Using the vararg syntax (`...string`) is handy here because we need to assert on
 
 Use this helper in both of the tests where we assert on messages sent to the user.
 
-There are a number of tests that could be helped with some `assertX` functions so practice your refactoring by cleaning up our tests so they read nicely. Take some time and think about the value of some of the tests we've driven out. Remember we don't want more tests than necessary, can you refactor/remove some of them _and still be confident it all works_ ?
+There are a number of tests that could be helped with some `assertX` functions so practice your refactoring by cleaning up our tests so they read nicely. 
+
+Take some time and think about the value of some of the tests we've driven out. Remember we don't want more tests than necessary, can you refactor/remove some of them _and still be confident it all works_ ?
 
 Here is what I came up with
 
@@ -1009,7 +1011,7 @@ The tests now reflect the main capabilities of CLI, it is able to read user inpu
 
 What happens if instead of putting `Ruth wins` the user puts in `Lloyd is a killer` ?
 
-Finish this chapter by writing the test and making it pass.
+Finish this chapter by writing a test for this scenario and making it pass.
 
 ## Wrapping up
 
