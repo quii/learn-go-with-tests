@@ -176,7 +176,7 @@ To make the test pass, we can call our `BlindAlerter` with anything we like
 ```go
 func (cli *CLI) PlayPoker() {
 	cli.alerter.ScheduleAlertAt(5 * time.Second, 100)
-	userInput, _ := cli.in.readLine()
+	userInput := cli.in.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 ```
@@ -581,12 +581,12 @@ Remember, we are free to commit whatever sins we need to make this work. Once we
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 	
-	numberOfPlayersInput, _ := cli.in.ReadString('\n')
+	numberOfPlayersInput := cli.in.readLine()
 	numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
 
 	cli.scheduleBlindAlerts(numberOfPlayers)
 
-	userInput, _ := cli.in.ReadString('\n')
+	userInput := cli.in.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
