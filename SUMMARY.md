@@ -25,7 +25,7 @@
 * [JSON, routing and embedding](json.md)
 * [IO and sorting](io.md)
 * [Command line & package structure](command-line.md)
-* [Time (WIP)](time.md)
+* [Time](time.md)
 
 ## Meta
 

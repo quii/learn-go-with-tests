@@ -1,4 +1,4 @@
-# Time (WIP)
+# Time
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/time)**
 
@@ -59,6 +59,16 @@ To limit the scope of what we need to do, we'll forget about the number of playe
 As usual the standard library has us covered with [`func AfterFunc(d Duration, f func()) *Timer`](https://golang.org/pkg/time/#AfterFunc)
 
 > `AfterFunc` waits for the duration to elapse and then calls f in its own goroutine. It returns a `Timer` that can be used to cancel the call using its Stop method.
+
+### [`time.Duration`](https://golang.org/pkg/time/#Duration)
+
+> A Duration represents the elapsed time between two instants as an int64 nanosecond count.
+
+The time library has a number of constants to let you multiply those nanoseconds so they're a bit more readable for the kind of scenarios we'll be doing
+
+```go
+5 * time.Second
+```
 
 When we call `PlayPoker` we'll schedule all of our blind alerts.
 
@@ -176,7 +186,7 @@ To make the test pass, we can call our `BlindAlerter` with anything we like
 ```go
 func (cli *CLI) PlayPoker() {
 	cli.alerter.ScheduleAlertAt(5 * time.Second, 100)
-	userInput, _ := cli.in.ReadString('\n')
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 ```
@@ -265,7 +275,7 @@ func (cli *CLI) PlayPoker() {
 		blindTime = blindTime + 10*time.Minute
 	}
 
-	userInput, _ := cli.in.ReadString('\n')
+	userInput, _ := cli.ReadString('\n')
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 ```
@@ -279,7 +289,7 @@ We can encapsulate our scheduled alerts into a method just to make `PlayPoker` r
 ```go
 func (cli *CLI) PlayPoker() {
 	cli.scheduleBlindAlerts()
-	userInput, _ := cli.in.ReadString('\n')
+	userInput, _ := cli.ReadString('\n')
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
@@ -496,7 +506,7 @@ Then finally we can write our prompt at the start of the game
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, "Please enter the number of players: ")
 	cli.scheduleBlindAlerts()
-	userInput, _ := cli.in.ReadString('\n')
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 ```
@@ -581,12 +591,11 @@ Remember, we are free to commit whatever sins we need to make this work. Once we
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 	
-	numberOfPlayersInput, _ := cli.in.ReadString('\n')
-	numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
+    numberOfPlayers, _ := strconv.Atoi(cli.readLine())
 
 	cli.scheduleBlindAlerts(numberOfPlayers)
 
-	userInput, _ := cli.in.ReadString('\n')
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
@@ -603,14 +612,14 @@ func (cli *CLI) scheduleBlindAlerts(numberOfPlayers int) {
 ```
 
 - We read in the `numberOfPlayersInput` into a string
-- We `Trim` the string of the newline entered and use `Atoi` to convert it into an integer - ignoring any error scenarios. We'll need to write a test for that scenario later.
+- We use `cli.readLine()` to get the input from the user and then call `Atoi` to convert it into an integer - ignoring any error scenarios. We'll need to write a test for that scenario later.
 - From here we change `scheduleBlindAlerts` to accept a number of players. We then calculate a `blindIncrement` time to use to add to `blindTime` as we iterate over the blind amounts
 
 While our new test has been fixed, a lot of others have failed because now our system only works if the game starts with a user entering a number. You'll need to fix the tests by changing the user inputs so that a number followed by a newline is added (this is highlighting yet more flaws in our approach right now).
 
 ## Refactor
 
-Let's _listen to our tests_. 
+Let's **listen to our tests**. 
 
 - In order to test that we are scheduling some alerts we set up 4 different dependencies. Whenever you have a lot of dependencies for a _thing_ in your system, it implies it's doing too much. Visually we can see it in how cluttered our test is.
 - To me it feels like **we need to make a cleaner abstraction between reading user input and the business logic we want to do** 
@@ -707,7 +716,7 @@ Our `CLI` is now just concerned with:
 - Constructing `Game` with its existing dependencies (which we'll refactor next)
 - Interpreting user input as method invocations for `Game`
 
-We want to try to avoid doing "big" refactors which leave us in a state of failing tests for extended periods as that increases the chances of mistakes.
+We want to try to avoid doing "big" refactors which leave us in a state of failing tests for extended periods as that increases the chances of mistakes. (If you are working in a large/distributed team this is extra important)
 
 The first thing we'll do is refactor `Game` so that we inject it into `CLI`. We'll do the smallest changes in our tests to facilitate that and then we'll see how we can break up the tests into the themes of parsing user input and game management.
 
@@ -723,7 +732,7 @@ func NewCLI(in io.Reader, out io.Writer, game *Game) *CLI {
 }
 ```
 
-This feels like an improvement already. We have less dependencies and our dependency list is reflecting our overall design goal of CLI being concerned with input/output and delegating game specific actions to a `Game`.
+This feels like an improvement already. We have less dependencies and _our dependency list is reflecting our overall design goal_ of CLI being concerned with input/output and delegating game specific actions to a `Game`.
 
 If you try and compile there are problems. You should be able to fix these problems yourself. Don't worry about making any mocks for `Game` right now, just initialise _real_ `Game`s just to get everything compiling and tests green.
 
@@ -783,7 +792,7 @@ t.Run("schedules alerts on game start for 7 players", func(t *testing.T) {
 
 The intent behind what happens when a game of poker starts is now much clearer. 
 
-As well as our test for when the game starts, make sure to also move over the test for when the game ends. 
+Make sure to also move over the test for when the game ends. 
 
 Once we are happy we have moved the tests over for game logic we can simplify our CLI tests. Remember all it is in charge of now is IO and calling `Game` when needed.
 
@@ -845,6 +854,175 @@ Here is an example of one of the tests being fixed; try and do the rest yourself
 	})
 ```
 
+Now that we have a clean separation of concerns, checking edge cases around IO in our `CLI` should be easier. 
+
+We need to address the scenario where a user puts a non numeric value when prompted for the number of players:
+
+Our code should not start the game and it should print a handy error to the user and then exit. 
+
+## Write the test first
+
+We'll start by making sure the game doesn't start
+
+```go
+t.Run("it prints an error when a non numeric value is entered and does not start the game", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		in := strings.NewReader("Pies\n")
+		game := &GameSpy{}
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+		
+		if game.StartCalled {
+			t.Errorf("game should not have started")
+		}
+	})
+```
+
+You'll need to add to our `GameSpy` a field `StartCalled` which only gets set if `Start` is called
+
+## Try to run the test
+```
+=== RUN   TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game
+    --- FAIL: TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game (0.00s)
+        CLI_test.go:62: game should not have started
+```
+
+## Write enough code to make it pass
+
+Around where we call `Atoi` we just need to check for the error
+
+```go
+numberOfPlayers, err := strconv.Atoi(cli.readLine())
+
+if err != nil {
+    return
+}
+```
+
+Next we need to inform the user of what they did wrong so we'll assert on what is printed to `stdout`. 
+
+## Write the test first
+
+We've asserted on what was printed to `stdout` before so we can copy that code for now
+
+```go
+gotPrompt := stdout.String()
+
+wantPrompt := poker.PlayerPrompt + "you're so silly"
+
+if gotPrompt != wantPrompt {
+    t.Errorf("got '%s', want '%s'", gotPrompt, wantPrompt)
+}
+```
+
+We are storing _everything_ that gets written to stdout so we still expect the `poker.PlayerPrompt`. We then just check an additional thing gets printed. We're not too bothered about the exact wording for now, we'll address it when we refactor.
+
+## Try to run the test
+
+```
+=== RUN   TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game
+    --- FAIL: TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game (0.00s)
+        CLI_test.go:70: got 'Please enter the number of players: ', want 'Please enter the number of players: you're so silly'
+```
+
+## Write enough code to make it pass
+
+Change the error handling code
+
+```go
+if err != nil {
+    fmt.Fprint(cli.out, "you're so silly")
+    return
+}
+```
+
+## Refactor
+
+Now refactor the message into a constant like `PlayerPrompt` 
+
+```go
+wantPrompt := poker.PlayerPrompt + poker.BadPlayerInputErrMsg
+```
+
+and put in a more appropriate message
+
+```go
+const BadPlayerInputErrMsg = "Bad value received for number of players, please try again with a number"
+```
+
+Finally our testing around what has been sent to `stdout` is quite verbose, let's write an assert function to clean it up.
+
+```go
+func assertMessagesSentToUser(t *testing.T, stdout *bytes.Buffer, messages ...string) {
+	t.Helper()
+	want := strings.Join(messages, "")
+	got := stdout.String()
+	if got != want {
+		t.Errorf("got '%s' sent to stdout but expected %+v", got, messages)
+	}
+}
+```
+
+Using the vararg syntax (`...string`) is handy here because we need to assert on varying amounts of messages.
+
+Use this helper in both of the tests where we assert on messages sent to the user.
+
+There are a number of tests that could be helped with some `assertX` functions so practice your refactoring by cleaning up our tests so they read nicely. 
+
+Take some time and think about the value of some of the tests we've driven out. Remember we don't want more tests than necessary, can you refactor/remove some of them _and still be confident it all works_ ?
+
+Here is what I came up with
+
+```go
+func TestCLI(t *testing.T) {
+
+	t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t *testing.T) {
+		game := &GameSpy{}
+		stdout := &bytes.Buffer{}
+
+		in := userSends("3", "Chris wins")
+		cli := poker.NewCLI(in, stdout, game)
+
+		cli.PlayPoker()
+
+		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt)
+		assertGameStartedWith(t, game, 3)
+		assertFinishCalledWith(t, game, "Chris")
+	})
+
+	t.Run("start game with 8 players and record 'Cleo' as winner", func(t *testing.T) {
+		game := &GameSpy{}
+
+		in := userSends("8", "Cleo wins")
+		cli := poker.NewCLI(in, dummyStdOut, game)
+
+		cli.PlayPoker()
+
+		assertGameStartedWith(t, game, 8)
+		assertFinishCalledWith(t, game, "Cleo")
+	})
+
+	t.Run("it prints an error when a non numeric value is entered and does not start the game", func(t *testing.T) {
+		game := &GameSpy{}
+
+		stdout := &bytes.Buffer{}
+		in := userSends("pies")
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+
+		assertGameNotStarted(t, game)
+		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, poker.BadPlayerInputErrMsg)
+	})
+}
+```
+The tests now reflect the main capabilities of CLI, it is able to read user input in terms of how many people are playing and who won and handles when a bad value is entered for number of players. By doing this it is clear to the reader what `CLI` does, but also what it doesn't do. 
+
+What happens if instead of putting `Ruth wins` the user puts in `Lloyd is a killer` ?
+
+Finish this chapter by writing a test for this scenario and making it pass.
+
 ## Wrapping up
 
 ### A quick project recap
@@ -858,7 +1036,12 @@ For the past 5 chapters we have slowly TDD'd a fair amount of code
 
 ### time.Afterfunc
 
-A very handy way of scheduling a function call after a specific duration
+A very handy way of scheduling a function call after a specific duration. It is well worth investing time [looking at the documentation for `time`](https://golang.org/pkg/time/) as it has a lot of time saving functions and methods for you to work with.
+
+Some of my favourites are
+
+- `time.After(duration)` which return you a `chan Time` when the duration has expired. So if you wish to do something _after_ a specific time, this can help. 
+- `time.NewTicker(duration)` returns a `Ticker` which is similar to the above in that it returns a channel but this one "ticks" every duration, rather than just once. This is very handy if you want to execute some code every `N duration`.  
 
 ### More examples of good separation of concerns
 
@@ -875,3 +1058,5 @@ Even though the tests and the production code was a bit cluttered we could freel
 Remember when you get in to these situations to always take small steps and re-run the tests after every change. 
 
 It would've been dangerous to refactor both the test code _and_ the production code at the same time, so we first refactored the production code (in the current state we couldn't improve the tests much) without changing its interface so we could rely on our tests as much as we could while changing things. _Then_ we refactored the tests after the design improved.
+
+After refactoring the dependency list reflected our design goal. This is another benefit of DI in that it often documents intent. When you rely on global variables responsibilities become very unclear.
