@@ -34,7 +34,7 @@ func TestSum(t *testing.T) {
 ```
 
 Arrays have a _fixed capacity_ which you define when you declare the variable.
-We can initialize array in two ways:
+We can initialize an array in two ways:
 
 * \[N\]type{value1, value2, ..., valueN} e.g. `numbers := [5]int{1, 2, 3, 4, 5}`
 * \[...\]type{value1, value2, ..., valueN} e.g. `numbers := [...]int{1, 2, 3, 4, 5}`
@@ -120,7 +120,7 @@ to pass an `[4]int` into a function that expects `[5]int`, it won't compile.
 They are different types so it's just the same as trying to pass a `string` into
 a function that wants an `int`.
 
-You may be thinking it's quite cumbersome that arrays are fixed length and most
+You may be thinking it's quite cumbersome that arrays have a fixed length, and most
 of the time you probably won't be using them!
 
 Go has _slices_ which do not encode the size of the collection and instead can
@@ -262,7 +262,7 @@ Now that we are happy we have a well-tested function you should commit your
 great work before taking on the next challenge.
 
 We need a new function called `SumAll` which will take a varying number of
-slices, returning a new slice containing the totals for each slice pass in.
+slices, returning a new slice containing the totals for each slice passed in.
 
 For example
 
@@ -444,7 +444,7 @@ func SumAllTails(numbersToSum ...[]int) []int {
 
 Slices can be sliced! The syntax is `slice[low:high]` If you omit the value on
 one of the sides of the `:` it captures everything to the side of it. In our
-case, we are saying take from 1 to the end with `numbers[1:]`. You might want to
+case, we are saying "take from 1 to the end" with `numbers[1:]`. You might want to
 invest some time in writing other tests around slices and experimenting with the
 slice operator so you can be familiar with it.
 
@@ -454,7 +454,7 @@ Not a lot to refactor this time.
 
 What do you think would happen if you passed in an empty array into our
 function? What is the "tail" of an empty array? What happens when you tell Go to
-capture all elements from `myEmptySlice[1:]`. ?
+capture all elements from `myEmptySlice[1:]`?
 
 ## Write the test first
 
