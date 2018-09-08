@@ -4,13 +4,13 @@
 
 Our product owner now wants to _pivot_ by introducing a second application - a command line application.
 
-For now it will just need to be able to record a player's win when the user types `Ruth wins`. The intention is to eventually be a tool for helping users play poker.
+For now, it will just need to be able to record a player's win when the user types `Ruth wins`. The intention is to eventually be a tool for helping users play poker.
 
 The product owner wants the database to be shared amongst the two applications so that the league updates according to wins recorded in the new application.
 
 ## A reminder of the code
 
-We have an application with a `main.go` file that launches a HTTP server. The HTTP server wont be interesting to us for this exercise but the abstraction it uses will. It depends on a `PlayerStore`.
+We have an application with a `main.go` file that launches an HTTP server. The HTTP server won't be interesting to us for this exercise but the abstraction it uses will. It depends on a `PlayerStore`.
 
 ```go
 type PlayerStore interface {
@@ -20,19 +20,19 @@ type PlayerStore interface {
 }
 ```
 
-In the previous chapter we made a `FileSystemPlayerStore` which implements that interface. We should be able to re-use some of this for our new application
+In the previous chapter, we made a `FileSystemPlayerStore` which implements that interface. We should be able to re-use some of this for our new application.
 
 ## Some project refactoring first
 
 Our project now needs to create two binaries, our existing web server and the command line app.
 
-Before we get stuck in to our new work we should structure our project to accommodate this.
+Before we get stuck into our new work we should structure our project to accommodate this.
 
 So far all the code has lived in one folder, in a path looking like this
 
 `$GOPATH/src/github.com/your-name/my-app`
 
-In order for you to make an application in Go you need a `main` function inside a `package main`. So far all of our "domain" code has lived inside `package main` and our `func main` can reference everything.
+In order for you to make an application in Go, you need a `main` function inside a `package main`. So far all of our "domain" code has lived inside `package main` and our `func main` can reference everything.
 
 This was fine so far and it is good practice not to go over-the-top with package structure. If you take the time to look through the standard library you will see very little in the way of lots of folders and structure.
 
@@ -59,11 +59,11 @@ If you have `tree` installed you should run it and your structure should look li
 └── tape_test.go
 ```
 
-We now effectively have a separation between our application and the library code but we now need to change some package names. Remember when you build a Go application it's package _must_ be `main`.
+We now effectively have a separation between our application and the library code but we now need to change some package names. Remember when you build a Go application its package _must_ be `main`.
 
 Change all the other code to have a package called `poker`.
 
-Finally we need to import this package into `main.go` so we can use it to create our web server. Then we can use our library code by using `poker.FunctionName`
+Finally, we need to import this package into `main.go` so we can use it to create our web server. Then we can use our library code by using `poker.FunctionName`.
 
 The paths will be different on your computer, but it should be similar to this:
 
@@ -102,9 +102,9 @@ func main() {
 
 The full path may seem a bit jarring, but this is how you can import _any_ publicly available library into your code.
 
-By separating our domain code into a separate package and committing it to a public repo like Github any Go developer can write their own code which imports that package the features we've written available. The first time you try and run it will complain it not existing but all you need to do is run `go get`.
+By separating our domain code into a separate package and committing it to a public repo like GitHub any Go developer can write their own code which imports that package the features we've written available. The first time you try and run it will complain it is not existing but all you need to do is run `go get`.
 
-[In addition users can view the documentation at godoc.org](https://godoc.org/github.com/quii/learn-go-with-tests/command-line/v1)
+[In addition, users can view the documentation at godoc.org](https://godoc.org/github.com/quii/learn-go-with-tests/command-line/v1).
 
 ### Final checks
 
@@ -114,7 +114,7 @@ By separating our domain code into a separate package and committing it to a pub
 
 ### Walking skeleton
 
-Before we get stuck in to writing tests, let's add a new application that our project will build. Create another directory inside `cmd` called `cli` (command line interface) and add a `main.go` with the following
+Before we get stuck into writing tests, let's add a new application that our project will build. Create another directory inside `cmd` called `cli` (command line interface) and add a `main.go` with the following
 
 ```go
 package main
@@ -126,7 +126,7 @@ func main() {
 }
 ```
 
-The first requirement we'll tackle is recording a win when the user types `{PlayerName} wins`
+The first requirement we'll tackle is recording a win when the user types `{PlayerName} wins`.
 
 ## Write the test first
 
@@ -143,12 +143,12 @@ func TestCLI(t *testing.T) {
     cli.PlayPoker()
 
     if len(playerStore.winCalls) !=1 {
-        t.Fatal("expected a win call but didnt get any")
+        t.Fatal("expected a win call but didn't get any")
     }
 }
 ```
 
-- We can use our `StubPlayerStore` from other tests.
+- We can use our `StubPlayerStore` from other tests
 - We pass in our dependency into our not yet existing `CLI` type
 - Trigger the game by an unwritten `PlayPoker` method
 - Check that a win is recorded
@@ -162,7 +162,7 @@ func TestCLI(t *testing.T) {
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-At this point you should be comfortable enough to create our new `CLI` struct with the respective field for our dependency and add a method.
+At this point, you should be comfortable enough to create our new `CLI` struct with the respective field for our dependency and add a method.
 
 You should end up with code like this
 
@@ -178,7 +178,7 @@ Remember we're just trying to get the test running so we can check the test fail
 
 ```
 --- FAIL: TestCLI (0.00s)
-    cli_test.go:30: expected a win call but didnt get any
+    cli_test.go:30: expected a win call but didn't get any
 FAIL
 ```
 
@@ -192,9 +192,9 @@ func (cli *CLI) PlayPoker() {
 
 That should make it pass.
 
-Next we need to simulate reading from `Stdin` (the input from the user) so that we can record wins for specific players.
+Next, we need to simulate reading from `Stdin` (the input from the user) so that we can record wins for specific players.
 
-Let's extend our test to exercise this
+Let's extend our test to exercise this.
 
 ## Write the test first
 
@@ -207,21 +207,21 @@ func TestCLI(t *testing.T) {
     cli.PlayPoker()
 
     if len(playerStore.winCalls) < 1 {
-        t.Fatal("expected a win call but didnt get any")
+        t.Fatal("expected a win call but didn't get any")
     }
 
     got := playerStore.winCalls[0]
     want := "Chris"
 
     if got != want {
-        t.Errorf("didnt record correct winner, got '%s', want '%s'", got, want)
+        t.Errorf("didn't record correct winner, got '%s', want '%s'", got, want)
     }
 }
 ```
 
 `os.Stdin` is what we'll use in `main` to capture the user's input. It is a `*File` under the hood which means it implements `io.Reader` which as we know by now is a handy way of capturing text.
 
-We create a `io.Reader` in our test using the handy `strings.NewReader`, filling it with what we expect the user to type.
+We create an `io.Reader` in our test using the handy `strings.NewReader`, filling it with what we expect the user to type.
 
 ## Try to run the test
 
@@ -242,7 +242,7 @@ type CLI struct {
 
 ```
 --- FAIL: TestCLI (0.00s)
-    CLI_test.go:23: didnt record correct winner, got 'Cleo', want 'Chris'
+    CLI_test.go:23: didn't record the correct winner, got 'Cleo', want 'Chris'
 FAIL
 ```
 
@@ -254,11 +254,11 @@ func (cli *CLI) PlayPoker() {
 }
 ```
 
-The test passes. We'll add another test to force us to write some real code next, but first let's refactor
+The test passes. We'll add another test to force us to write some real code next, but first, let's refactor.
 
 ## Refactor
 
-In `server_test` we earlier did checks to see if wins are recorded like we have here. Let's DRY that assertion up into a helper
+In `server_test` we earlier did checks to see if wins are recorded as we have here. Let's DRY that assertion up into a helper
 
 ```go
 func assertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
@@ -274,7 +274,7 @@ func assertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
 }
 ```
 
-Now replace the assertions in both `server_test.go` and `CLI_test.go`
+Now replace the assertions in both `server_test.go` and `CLI_test.go`.
 
 The test should now read like so
 
@@ -335,7 +335,7 @@ FAIL
 
 ## Write enough code to make it pass
 
-We'll use a [`bufio.Scanner`](https://golang.org/pkg/bufio/). to read the input from the `io.Reader`.
+We'll use a [`bufio.Scanner`](https://golang.org/pkg/bufio/) to read the input from the `io.Reader`.
 
 > Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer object, creating another object (Reader or Writer) that also implements the interface but provides buffering and some help for textual I/O.
 
@@ -421,13 +421,13 @@ command-line/v3/cmd/cli/main.go:32:34: implicit assignment of unexported field '
 
 What's happening here is because we are trying to assign to the fields `playerStore` and `in` in `CLI`. These are unexported (private) fields. We _could_ do this in our test code because our test is in the same package as `CLI` (`poker`). But our `main` is in package `main` so it does not have access.
 
-This highlights the importance of _integrating your work_. We rightfully made the dependencies of our `CLI` private (because we dont want them exposed to users of `CLI`s) but haven't made a way for users to construct it.
+This highlights the importance of _integrating your work_. We rightfully made the dependencies of our `CLI` private (because we don't want them exposed to users of `CLI`s) but haven't made a way for users to construct it.
 
 Is there a way to have caught this problem earlier?
 
 ### `package mypackage_test`
 
-In all other examples so far when we make a test file we declare it as being in the same package that we are testing.
+In all other examples so far, when we make a test file we declare it as being in the same package that we are testing.
 
 This is fine and it means on the odd occasion where we want to test something internal to the package we have access to the unexported types.
 
@@ -439,7 +439,7 @@ An adage with TDD is that if you cannot test your code then it is probably hard 
 
 Before fixing `main` let's change the package of our test inside `CLI_test.go` to `poker_test`.
 
-If you have a well configured IDE you will suddenly see a lot of red! If you run the compiler you'll get the following errors
+If you have a well-configured IDE you will suddenly see a lot of red! If you run the compiler you'll get the following errors
 
 ```
 ./CLI_test.go:12:19: undefined: StubPlayerStore
@@ -454,7 +454,7 @@ We have now stumbled into more questions on package design. In order to test our
 
 This is a subjective discussion. One could argue that you do not want to pollute your package's API with code to facilitate tests.
 
-In the presentation ["Advanced Testing with Go"](https://speakerdeck.com/mitchellh/advanced-testing-with-go?slide=53) by Mitchell Hashimoto it is described how at HashiCorp they advocate doing this so that users of the package can write tests without having to re-invent the wheel writing stubs. In our case this would mean anyone using our poker package wont have to create their own stub `PlayerStore` if they wish to work with our code.
+In the presentation ["Advanced Testing with Go"](https://speakerdeck.com/mitchellh/advanced-testing-with-go?slide=53) by Mitchell Hashimoto, it is described how at HashiCorp they advocate doing this so that users of the package can write tests without having to re-invent the wheel writing stubs. In our case, this would mean anyone using our `poker` package won't have to create their own stub `PlayerStore` if they wish to work with our code.
 
 Anecdotally I have used this technique in other shared packages and it has proved extremely useful in terms of users saving time when integrating with our packages.
 
@@ -501,7 +501,7 @@ func AssertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
 
 You'll need to make the helpers public (remember exporting is done with a capital letter at the start) if you want them to be exposed to importers of our package.
 
-In our CLI test you'll need to call the code as if you were using it within a different package.
+In our `CLI` test you'll need to call the code as if you were using it within a different package.
 
 ```go
 func TestCLI(t *testing.T) {
@@ -543,13 +543,13 @@ The easiest way to get around this is to make a constructor as we have for other
 ```go
 func NewCLI(store PlayerStore, in io.Reader) *CLI {
     return &CLI{
-        playerStore:store,
-        in:in,
+        playerStore: store,
+        in:          in,
     }
 }
 ```
 
-Change the test to use the constructor instead and we should be back to the tests passing
+Change the test to use the constructor instead and we should be back to the tests passing.
 
 Finally, we can go back to our new `main.go` and use the constructor we just made
 
@@ -589,7 +589,7 @@ Now refactor both of our applications to use this function to create the store.
 package main
 
 import (
-        "github.com/quii/learn-go-with-tests/command-line/v3"
+    "github.com/quii/learn-go-with-tests/command-line/v3"
     "log"
     "os"
     "fmt"
@@ -638,13 +638,13 @@ func main() {
 }
 ```
 
-Notice the symmetry; despite being different user interfaces the setup is almost identical.
+Notice the symmetry: despite being different user interfaces the setup is almost identical.
 
 ## Wrapping up
 
 ### Package structure
 
-This chapter meant we wanted to create two applications, re-using the domain code we've written so far. In order to do this we needed to update our package structure so that we had separate folders for our respective `main`s.
+This chapter meant we wanted to create two applications, re-using the domain code we've written so far. In order to do this, we needed to update our package structure so that we had separate folders for our respective `main`s.
 
 By doing this we ran into integration problems due to unexported values so this further demonstrates the value of working in small "slices" and integrating often.
 
@@ -656,4 +656,4 @@ We saw how reading from `os.Stdin` is very easy for us to work with as it implem
 
 ### Simple abstractions leads to simpler code re-use
 
-It was almost no effort to integrate `PlayerStore` into our new application (once we had made the package adjustmements) and subsequently testing was very easy too because we decided to expose our stub version too.
+It was almost no effort to integrate `PlayerStore` into our new application (once we had made the package adjustments) and subsequently testing was very easy too because we decided to expose our stub version too.
