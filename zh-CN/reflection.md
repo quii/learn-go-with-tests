@@ -22,10 +22,9 @@ Go 允许我们使用类型 `interface{}` 来解决这个问题，你可以将�
 
 所以 `walk(x interface{}, fn func(string))` 的 `x` 参数可以接收任何的值。
 
-### 那么为什么不将所有参数都定义为 `interface` 类型，并得到真正灵活的函数呢？
+### 那么为什么不通过将所有参数都定义为 `interface` 类型来得到真正灵活的函数呢？
 
-- 作为函数的使用者，使用 `interface` 将失去对类型安全的检查。如果你想传入 `string` 类型的 `Foo.bar` 但是传入的是 `int` 类型的 `Foo.baz`，编译器将无法通知你这个错误。你也搞不清楚函数允许传递什么类型的参数。知道一个函数接收什么类型，例如 `UserService` ，是非常有用的。
-
+- 作为函数的使用者，使用 `interface` 将失去对类型安全的检查。如果你想传入 `string` 类型的 `Foo.bar` 但是传入的是 `int` 类型的 `Foo.baz`，编译器将无法通知你这个错误。你也搞不清楚函数允许传递什么类型的参数。知道一个函数接收什么类型，例如 `UserService`，是非常有用的。
 - 作为这样一个函数的作者，你必须检查传入的 _所有_ 参数，并尝试断定参数类型以及如何处理它们。这是通过 _反射_ 实现的。这种方式可能相当笨拙且难以阅读，而且一般性能比较差（因为程序必须在运行时执行检查）。
 
 简而言之，除非真的需要否则不要使用反射。
@@ -36,7 +35,7 @@ Go 允许我们使用类型 `interface{}` 来解决这个问题，你可以将�
 
 ## 首先编写测试
 
-我们想用一个 `struct` 来调用我们的函数，这个 `struct` 中有一个字符串字段（`x`），然后我们可以监视传入的函数(`fn`)，看看它是否被调用。
+我们想用一个 `struct` 来调用我们的函数，这个 `struct` 中有一个字符串字段（`x`），然后我们可以监视传入的函数（`fn`），看看它是否被调用。
 
 ```go
 func TestWalk(t *testing.T) {
@@ -58,7 +57,7 @@ func TestWalk(t *testing.T) {
 }
 ```
 
-- 我们想存储一个字符串切片（`got`），字符串通过 `walk` 传递到 `fn`。通常在前面的章节中，我们会专门为函数或方法调用指定类型，但在这种情况下，我们可以传递一个匿名函数给 `fn`，它会隐藏 `got`。
+- 我们想存储一个字符串切片（`got`），字符串通过 `walk` 传递到 `fn`。在前面的章节中，通常我们会专门为函数或方法调用指定类型，但在这种情况下，我们可以传递一个匿名函数给 `fn`，它会隐藏 `got`。
 - 我们使用带有 `string` 类型的 `Name` 字段的匿名 `struct`，以此得到最简单的实现路径。
 - 最后调用 `walk` 并传入 `x` 参数，现在只检查 `got` 的长度，一旦有了基本的可以运行的程序，我们的断言就会更加具体。
 
@@ -89,6 +88,8 @@ FAIL
 
 ## 编写足够的代码使测试通过
 
+我们可以使用任意的字符串调用 `fn` 函数来使测试通过。
+
 ```go
 func walk(x interface{}, fn func(input string)) {
     fn("I still can't believe South Korea beat Germany 2-0 to put them last in their group")
@@ -96,6 +97,16 @@ func walk(x interface{}, fn func(input string)) {
 ```
 
 现在测试应该通过了。接下来我们需要做的是对我们的 `fn` 是如何被调用的做一个更具体的断言。
+
+## 首先编写测试
+
+在之前的测试中添加以下代码，检查传入 `fn` 函数的字符串是否正确。
+
+```go
+if got[0] != expected {
+    t.Errorf("got '%s', want '%s'", got[0], expected)
+}
+```
 
 ## 尝试运行测试
 
@@ -137,7 +148,7 @@ func walk(x interface{}, fn func(input string)) {
 
 ```go
 func TestWalk(t *testing.T) {
-​
+
     cases := []struct{
         Name string
         Input interface{}
@@ -151,14 +162,14 @@ func TestWalk(t *testing.T) {
             []string{"Chris"},
         },
     }
-​
+
     for _, test := range cases {
         t.Run(test.Name, func(t *testing.T) {
             var got []string
             walk(test.Input, func(input string) {
                 got = append(got, input)
             })
-​
+
             if !reflect.DeepEqual(got, test.ExpectedCalls) {
                 t.Errorf("got %v, want %v", got, test.ExpectedCalls)
             }
@@ -197,7 +208,7 @@ func TestWalk(t *testing.T) {
 ```go
 func walk(x interface{}, fn func(input string)) {
     val := reflect.ValueOf(x)
-​
+
     for i:=0; i<val.NumField(); i++ {
         field := val.Field(i)
         fn(field.String())
@@ -260,11 +271,11 @@ func walk(x interface{}, fn func(input string)) {
 
 现在看起来代码已经足够合理了。
 
-下一个场景是，如果它不是一个 「平的」`struct` 怎么办？换句话说，如果我们有一个包含嵌套字段的 `struct` 会发生什么？
+下一个场景是，如果它不是一个「平的」`struct` 怎么办？换句话说，如果我们有一个包含嵌套字段的 `struct` 会发生什么？
 
 ## 首先编写测试
 
-我们一直在使用匿名结构体语法为我们的测试声明类型，所以我们可以继续这样做
+我们临时使用匿名结构体语法为我们的测试声明类型，所以我们可以继续这样做
 
 ```go
 {
@@ -322,7 +333,7 @@ type Profile struct {
         reflection_test.go:54: got [Chris], want [Chris London]
 ```
 
-问题是我们只在类型层次结构的第一级上迭代字段。
+这个问题是我们只在类型层次结构的第一级上迭代字段导致的。
 
 ## 编写足够的代码使测试通过
 
@@ -415,7 +426,7 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-不能对指针 `Value` 使用 `NumField`，我们需要在使用 `Elem()` 之前提取底层值。
+指针类型的 `Value` 不能使用 `NumField` 方法，在执行此方法前需要调用 `Elem()` 提取底层值。
 
 ## 重构
 
@@ -510,12 +521,12 @@ func walk(x interface{}, fn func(input string)) {
 
 这招很管用，但很恶心。不过不用担心，我们有测试支持的工作代码，所以我们可以随意修改我们喜欢的代码。
 
-如果你抽象地想一下，我们想要在其中任意一个上调用 `walk`
+如果你抽象地想一下，我们想要针对下面的对象调用 `walk`
 
 - 结构体中的每个字段
 - 切片中的每一项
 
-我们目前的代码可以做到这一点，但不能很好地反射。我们只是在一开始检查它是否是切片（通过 `return` 来停止执行剩余的代码），如果不是，我们就假设它是 `struct`。
+我们目前的代码可以做到这一点，但反射用得不太好。我们只是在一开始检查它是否是切片（通过 `return` 来停止执行剩余的代码），如果不是，我们就假设它是 `struct`。
 
 让我们重新编写代码，先检查类型，再执行我们的逻辑代码。
 
@@ -538,9 +549,9 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-看起来好多了！如果是 `struct` 或切片，我们会遍历它的值，并对每个值调用 `walk` 函数。否则如果是 `reflect.String`，我们可以调用 `fn`。
+看起来好多了！如果是 `struct` 或切片，我们会遍历它的值，并对每个值调用 `walk` 函数。如果是 `reflect.String`，我们就调用 `fn`。
 
-不过，对我来说，感觉还可以更好。这里有重复操作遍历字段、值，然后调用 `walk`，但概念上它们是相同的。
+不过，对我来说，感觉还可以更好。这里有遍历字段、值，然后调用 `walk` 的重复操作，但概念上它们是相同的。
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -566,20 +577,20 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-如果 `value` 是一个 `reflect.String`。然后我们就像平常一样调用 `fn`。
+如果 `value` 是一个 `reflect.String`，我们就像平常一样调用 `fn`。
 
 否则，我们的 `switch` 将根据类型提取两个内容
 
 - 有多少字段
 - 如何提取 `Value`（`Field` 或 `Index`）
 
-一旦我们确定了这些东西，我们就可以遍历 `numberOfValues`，使用 `getField` 函数的结果调用 `walk` 函数。
+一旦确定了这些东西，我们就可以遍历 `numberOfValues`，使用 `getField` 函数的结果调用 `walk` 函数。
 
 现在我们已经完成了，处理数组应该很简单了。
 
 ## 首先编写测试
 
-添加到测试用例中
+添加以下代码到测试用例中：
 
 ```go
 {
@@ -689,7 +700,7 @@ func walk(x interface{}, fn func(input string)) {
 
 你现在感觉怎么样？这在当时可能是一个很好的抽象，但现在代码感觉有点不稳定。
 
-_这是好的！_ 重构是一段旅程，有时我们会犯错误。TDD 的一个主要观点是它给了我们尝试这些东西的自由。
+_这没问题！_ 重构是一段旅程，有时我们会犯错误。TDD 的一个主要观点是它给了我们尝试这些东西的自由。
 
 通过步步为营的原则就不会发生不可逆转的局面。让我们把它恢复到重构之前的状态。
 
@@ -726,7 +737,7 @@ func walk(x interface{}, fn func(input string)) {
 
 记住，Go 中的 `map` 不能保证顺序一致。因此，你的测试有时会失败，因为我们断言对 `fn` 的调用是以特定的顺序完成的。
 
-为了解决这个问题，我们需要将带有映射的断言移动到一个新的测试中，在这个测试中我们不关心顺序。
+为了解决这个问题，我们需要将带有 `map` 的断言移动到一个新的测试中，在这个测试中我们不关心顺序。
 
 ```go
 t.Run("with maps", func(t *testing.T) {
@@ -765,7 +776,7 @@ func assertContains(t *testing.T, haystack []string, needle string)  {
 
 - 介绍了 `reflect` 包中的一些概念。
 - 使用递归遍历任意数据结构。
-- 在回顾中做了一个糟糕的重构，但并不会对此感到太沮丧。通过迭代地进行测试，这并不是什么大问题。
+- 在回顾中做了一个糟糕的重构，但不用对此感到太沮丧。通过迭代地进行测试，这并不是什么大问题。
 - 这只是 `reflection` 的一个小方面。[Go 博客上有一篇精彩的文章介绍了更多细节](https://blog.golang.org/laws-of-reflection)。
 - 现在你已经了解了反射，请尽量避免使用它。
 
