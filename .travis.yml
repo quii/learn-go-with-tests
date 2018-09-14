@@ -21,6 +21,9 @@ jobs:
       script:
         - go get -u github.com/client9/misspell/cmd/misspell
         - misspell -error .
+    - stage: epub
+      script:
+        - ./build-epub.sh
 #    - stage: markdownlint
 #      script:
 #        - gem install mdl
