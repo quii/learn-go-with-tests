@@ -1,30 +1,37 @@
-matrix:
+sudo: required
+language: go
+go:
+- 1.10.x
+install: true
+services:
+- docker
+before_install:
+- docker pull jagregory/pandoc
+stages:
+- build
+- spelling
+- epub
+jobs:
   include:
-  - language: go
-    go:
-    - 1.10.x
-    install: true
-    stages:
-    - build
-    - spelling
-    jobs:
-      include:
-      - stage: build
-        script:
-        - go get github.com/quii/learn-go-with-tests/command-line/v1
-        - go get -u golang.org/x/lint/golint
-        - "./build.sh"
-      - stage: spelling
-        script:
-        - go get -u github.com/client9/misspell/cmd/misspell
-        - misspell -error .
-  - language: r
+  - stage: build
     script:
-    - ./build.epub.sh"
-    deploy:
-      provider: releases
-      api_key:
-        secure: adufxs/W1nYNVqUCHOtZp+aX4VluHyu5WVEirYg9wFh6TjKW3+n5oukcIYyP5jZJ+IowvLsQNAztET4jh5PHzwyMZLwr78p7hRKtmAX18qODpVE5x7YoocYp1628eBbHKutQOOo/UvqDWjBYJwm/1qMu+cdNlty5LQPkDSEHzzk+XBIRTLDBcA5oRylmU1yPbhuHCo00Zb/yUX39+5UqnJ+ZLLjZcgt9R6flO7NhYvYdQP9pGRcigaYA9f5Y1NKdn5wfe94byOgR4Y6YR/SvxzMNsjliTCXGWdXs4VTLwLevd99eoxBV7ArOAeB7bC7EVxqWXUj+b5zZ/KmnsASsCV+0WMUPQwYXk6nq80VeLB48/cO/MfHy1ZRk7Xv7z21OwVq90iow2HBJz8JfR/Y9dxjzPZN/OLw/WxgBrevejyG1dcwybm0onzWwglePb8G2R7RWPIFqAL/krm8ALR29GiFZiakmyfT/gweWfFXk6RkX7GGWie5j3Y6/Xv3MvgI0ko+JwBzydYlVuvWAxhclVODRaJkkuYFg9Vsp6lkN0ieOwS5Vn5/iCHkjvfuO88yeFXEYGUBSeEJSo6YflY50+zGSoDW3QzMp6th0/q502NuW6kdupsWhROqBln4lVDBTTa9Lb65t+So7FUl6H1KLrK8f8VNk9dX74ikOGrPuxx8=
-      file: learn-go-with-tests.epub
-      on:
-        repo: quii/learn-go-with-tests
+    - go get github.com/quii/learn-go-with-tests/command-line/v1
+    - go get -u golang.org/x/lint/golint
+    - "./build.sh"
+  - stage: spelling
+    script:
+    - go get -u github.com/client9/misspell/cmd/misspell
+    - misspell -error .
+  - stage: epub
+    script:
+    - "./build-epub.sh"
+  - stage: epub
+    script:
+    - "./build.epub.sh"
+deploy:
+  provider: releases
+  api_key:
+    secure: q58oofLU1tCcO618axSmlc3eOf6f/QtP/XORtn0o7z/1O6AENlWAIn0RYetHEp0JNYQfS4sqgy34gAy2H6BpZURaHc1muW0fhwRndBjrbU5DviflOc9lH8pLzDZpzhKdBiCMoZpDs+Gp27PmZn62vHSZkiR3EMdrJFoDV8/fUCy4UYs/U3/QiG/Qv/DnKM0GI5LfNWGtD0dzbe1z4qVEfUXk44CnxEJZoaSEx6e0zrP9QHreUGpADB4syzgSW/Q8RwmyZIWPZrmmBu8qzrmpJtcjNaUllx4VAIB86U5fZaUIEoAodGf7+3Ut8K5oI+eBo5HkAYShwrzXRs6gQWp8nwEWyxzEvLwf4949llnC0ez6qvSf7prXJKK2Rmvid7xZt51eMglBDatAFaprmdM4AZeWibUpVP2QbzYAqpkd8SZazmjYzRJPeduNzGoOOsHuqIWdmKHthQEMZXiXSDy4HWP9A085/+i45pK6jf1Bfu2XbCW+Yh3d1uTUCSStPMgVOLbTL8YGaKpnpO6TAo0/vAEiO4//lZeodx/w7s8zTDPVPpb9hDFbcwQfWZarPTzVQuUKrVagFlLooTpzJ2sU7I7Q45O6vvDvhZzj2gM+/gXtbS8CKwUNEOsJubprGksW5254vMRayTUVXXeHcrAIMcCdW0D9+YbXifmJvcc1LYk=
+  file: learn-go-with-tests.epub
+  on:
+    repo: quii/learn-go-with-tests
