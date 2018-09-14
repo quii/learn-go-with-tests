@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-docker run -v `pwd`:/source jagregory/pandoc -o learn-go-with-tests.epub --toc-depth=1 title.txt \
+set -e
+
+pandoc -o learn-go-with-tests.epub --toc-depth=1 title.txt \
     gb-readme.md \
     hello-world.md \
     integers.md \
