@@ -1,30 +1,28 @@
 language: go
-
 go:
-  - "1.10.x"
-
+- 1.10.x
 install: true
-
 stages:
-  - build
-  - spelling
-  - markdownlint
-
+- build
+- spelling
 jobs:
   include:
-    - stage: build
-      script:
-        - go get github.com/quii/learn-go-with-tests/command-line/v1
-        - go get -u golang.org/x/lint/golint
-        - ./build.sh
-    - stage: spelling
-      script:
-        - go get -u github.com/client9/misspell/cmd/misspell
-        - misspell -error .
-    - stage: epub
-      script:
-        - ./build-epub.sh
-#    - stage: markdownlint
-#      script:
-#        - gem install mdl
-#        - mdl .
+  - stage: build
+    script:
+    - go get github.com/quii/learn-go-with-tests/command-line/v1
+    - go get -u golang.org/x/lint/golint
+    - "./build.sh"
+  - stage: spelling
+    script:
+    - go get -u github.com/client9/misspell/cmd/misspell
+    - misspell -error .
+  - stage: epub
+    script:
+    - "./build-epub.sh"
+deploy:
+  provider: releases
+  api_key:
+    secure: adufxs/W1nYNVqUCHOtZp+aX4VluHyu5WVEirYg9wFh6TjKW3+n5oukcIYyP5jZJ+IowvLsQNAztET4jh5PHzwyMZLwr78p7hRKtmAX18qODpVE5x7YoocYp1628eBbHKutQOOo/UvqDWjBYJwm/1qMu+cdNlty5LQPkDSEHzzk+XBIRTLDBcA5oRylmU1yPbhuHCo00Zb/yUX39+5UqnJ+ZLLjZcgt9R6flO7NhYvYdQP9pGRcigaYA9f5Y1NKdn5wfe94byOgR4Y6YR/SvxzMNsjliTCXGWdXs4VTLwLevd99eoxBV7ArOAeB7bC7EVxqWXUj+b5zZ/KmnsASsCV+0WMUPQwYXk6nq80VeLB48/cO/MfHy1ZRk7Xv7z21OwVq90iow2HBJz8JfR/Y9dxjzPZN/OLw/WxgBrevejyG1dcwybm0onzWwglePb8G2R7RWPIFqAL/krm8ALR29GiFZiakmyfT/gweWfFXk6RkX7GGWie5j3Y6/Xv3MvgI0ko+JwBzydYlVuvWAxhclVODRaJkkuYFg9Vsp6lkN0ieOwS5Vn5/iCHkjvfuO88yeFXEYGUBSeEJSo6YflY50+zGSoDW3QzMp6th0/q502NuW6kdupsWhROqBln4lVDBTTa9Lb65t+So7FUl6H1KLrK8f8VNk9dX74ikOGrPuxx8=
+  file: learn-go-with-tests.epub
+  on:
+    repo: quii/learn-go-with-tests
