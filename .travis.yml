@@ -32,4 +32,4 @@ jobs:
       file: learn-go-with-tests.epub
       skip_cleanup: true
       on:
-        repo: quii/learn-go-with-tests
+        tags: true
