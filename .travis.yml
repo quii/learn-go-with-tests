@@ -24,7 +24,7 @@ jobs:
     - misspell -error .
   - stage: epub
     script:
-    - "./build-epub.sh"
+    - "./build.epub.sh"
 deploy:
   provider: releases
   api_key:
