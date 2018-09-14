@@ -25,9 +25,6 @@ jobs:
   - stage: epub
     script:
     - "./build-epub.sh"
-  - stage: epub
-    script:
-    - "./build.epub.sh"
 deploy:
   provider: releases
   api_key:
