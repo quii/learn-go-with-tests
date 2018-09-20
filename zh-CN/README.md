@@ -31,7 +31,7 @@ _或者通过 Go 语言学习测试驱动开发_
 10. [Mocking](mocking.md) - 使用 DI 测试现有的未经测试的代码。
 11. [并发](concurrency.md) - 学习如何编写并发代码以加快软件运行速度。
 12. [Select](select.md) - 学习如何优雅地处理同步、异步进程。
-13. [Reflection](reflection.md) - Learn about reflection
+13. [反射](reflection.md) - 学习反射机制
 
 基于属性的测试（todo）
 
