@@ -784,6 +784,6 @@ func assertContains(t *testing.T, haystack []string, needle string)  {
 
 作者：[Chris James](https://dev.to/quii)
 译者：[Donng](https://github.com/Donng)
-校对：
+校对：[pityonline](https://github.com/pityonline)
 
 本文由 [GCTT](https://github.com/studygolang/GCTT) 原创编译，[Go 中文网](https://studygolang.com/) 荣誉推出
