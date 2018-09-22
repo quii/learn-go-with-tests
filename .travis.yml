@@ -5,8 +5,6 @@ go:
 install: true
 services:
 - docker
-before_install:
-- docker pull jagregory/pandoc
 stages:
 - build
 - spelling
@@ -24,6 +22,7 @@ jobs:
     - misspell -error .
   - stage: epub
     script:
+    - docker pull jagregory/pandoc
     - "./build.epub.sh"
     deploy:
       provider: releases
