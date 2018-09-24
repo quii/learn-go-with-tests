@@ -92,7 +92,7 @@ func TestStoreWins(t *testing.T) {
 		}
 
 		if store.winCalls[0] != player {
-			t.Errorf("did not store correct winner got '%s' want '%s'", store.winCalls[0], player)
+			t.Errorf("did not store the correct winner got '%s' want '%s'", store.winCalls[0], player)
 		}
 	})
 }
