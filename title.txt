@@ -1,0 +1,6 @@
+---
+title: Learn Go with tests
+author: Chris James
+rights:  Creative Commons Non-Commercial Share Alike 3.0
+language: en-UK
+...
