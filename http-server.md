@@ -66,19 +66,21 @@ It has one function which expects two arguments, the first being where we _write
 Let's write a test for a function `PlayerServer` that takes in those two arguments. The request sent in will be to get a player's score, which we expect to be `"20"`.
 
 ```go
-t.Run("returns Pepper's score", func(t *testing.T) {
-    request, _ := http.NewRequest(http.MethodGet, "/players/Pepper", nil)
-    response := httptest.NewRecorder()
+func TestGETPlayers(t *testing.T) {
+    t.Run("returns Pepper's score", func(t *testing.T) {
+        request, _ := http.NewRequest(http.MethodGet, "/players/Pepper", nil)
+        response := httptest.NewRecorder()
 
-    PlayerServer(response, request)
+        PlayerServer(response, request)
 
-    got := response.Body.String()
-    want := "20"
+        got := response.Body.String()
+        want := "20"
 
-    if got != want {
-        t.Errorf("got '%s', want '%s'", got, want)
-    }
-})
+        if got != want {
+            t.Errorf("got '%s', want '%s'", got, want)
+        }
+    })
+}
 ```
 
 In order to test our server, we will need a `Request` to send in and we'll want to _spy_ on what our handler writes to the `ResponseWriter`.
