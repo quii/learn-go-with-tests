@@ -50,7 +50,7 @@ _或者通过 Go 语言学习测试驱动开发_
 * [HTTP 服务器](http-server.md) - 我们将创建一个应用程序来监听 HTTP 请求并对其作出响应。
 * [JSON, routing and embedding](json.md) - 我们将生成端点（endpoint）返回 JSON 并探索如何分发路由。
 * [IO 和排序](io.md) - 我们将从磁盘持久化和读取数据，并介绍数据排序。
-* [命令行（TODO）](command-line.md) - 使用 flags 并响应用户在命令行中的输入。
+* [命令行和项目结构](command-line.md) - 使用 flags 并响应用户在命令行中的输入。
 
 ## 参与贡献
 
