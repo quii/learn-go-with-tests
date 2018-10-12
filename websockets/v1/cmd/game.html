@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lets play poker</title>
+</head>
+<body>
+
+    <div id="game-start">
+        <label for="player-count">Number of players</label>
+        <input type="number" id="player-count"/>
+        <button id="start-game">Start</button>
+    </div>
+
+    <form method="post" id="declare-winner">
+        <label for="winner">Winner</label>
+        <input type="text" id="winner" disabled />
+        <input type="submit" id="winner-button" disabled />
+    </form>
+
+    <div id="blind-value" />
+
+</body>
+<script type="application/javascript">
+    const startGame = document.getElementById("game-start")
+    const declareWinnerInput = document.getElementById("winner")
+    const declareWinnerButton = document.getElementById("winner-button")
+    const blindContainer = document.getElementById("blind-value")
+
+    document.getElementById("start-game").addEventListener('click', event => {
+        startGame.hidden = true
+        declareWinnerInput.removeAttribute('disabled')
+        declareWinnerButton.removeAttribute('disabled')
+
+        const players = document.getElementById('player-count').value
+
+        console.log('starting game with', players, 'players')
+
+        if (window["WebSocket"]) {
+            const uri = "ws://" + document.location.host + "/ws"
+            const conn = new WebSocket(uri);
+
+
+            conn.onclose = evt => {
+                blindContainer.innerText = "Connection closed"
+            };
+            conn.onmessage = evt => {
+                console.log('got a message?')
+                var messages = evt.data.split('\n');
+                for (var i = 0; i < messages.length; i++) {
+                    blindContainer.innerText = messages[i];
+                }
+            };
+
+            conn.onopen = function () {
+                conn.send('hello, world');
+            }
+
+
+        }
+    })
+</script>
+</html>
