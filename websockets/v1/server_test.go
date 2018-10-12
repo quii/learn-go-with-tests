@@ -101,7 +101,7 @@ func TestGame(t *testing.T) {
 	t.Run("GET /game returns 200", func(t *testing.T) {
 		server := NewPlayerServer(&StubPlayerStore{})
 
-		request :=  newGameRequest()
+		request := newGameRequest()
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)

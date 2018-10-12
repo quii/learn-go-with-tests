@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/quii/learn-go-with-tests/websockets/v1"
 	"log"
 	"os"
-	"github.com/quii/learn-go-with-tests/websockets/v1"
 )
 
 const dbFileName = "game.db.json"

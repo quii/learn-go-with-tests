@@ -2,9 +2,9 @@ package poker_test
 
 import (
 	"fmt"
+	"github.com/quii/learn-go-with-tests/websockets/v1"
 	"testing"
 	"time"
-	"github.com/quii/learn-go-with-tests/websockets/v1"
 )
 
 func TestGame_Start(t *testing.T) {
