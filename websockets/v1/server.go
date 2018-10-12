@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"html/template"
 	"github.com/gorilla/websocket"
+	"strconv"
+	"time"
 	)
 
 // PlayerStore stores score information about players
@@ -56,19 +58,34 @@ func (p *PlayerServer) websocket(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		// Read message from browser
-		msgType, msg, err := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			return
 		}
+
+		numberOfPlayers, _ := strconv.Atoi(string(msg))
+
+		game := NewTexasHoldem(&WebSocketBlindAlerter{conn}, p.store)
+		game.Start(numberOfPlayers)
 
 		// Print the message to the console
 		fmt.Printf("%s sent: %s\n", conn.RemoteAddr(), string(msg))
 
 		// Write message back to browser
-		if err = conn.WriteMessage(msgType, msg); err != nil {
+		if err = conn.WriteMessage(1, msg); err != nil {
 			return
 		}
 	}
+}
+
+type WebSocketBlindAlerter struct {
+	*websocket.Conn
+}
+
+func (w *WebSocketBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
+	time.AfterFunc(duration, func() {
+		w.WriteMessage(1, []byte(fmt.Sprintf("The blind is now %d", amount)))
+	})
 }
 
 func (p *PlayerServer) gameHandler(w http.ResponseWriter, r *http.Request) {

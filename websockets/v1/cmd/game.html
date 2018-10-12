@@ -14,8 +14,8 @@
 
     <form method="post" id="declare-winner">
         <label for="winner">Winner</label>
-        <input type="text" id="winner" disabled />
-        <input type="submit" id="winner-button" disabled />
+        <input type="text" id="winner" />
+        <input type="submit" id="winner-button" />
     </form>
 
     <div id="blind-value" />
@@ -23,40 +23,31 @@
 </body>
 <script type="application/javascript">
     const startGame = document.getElementById("game-start")
-    const declareWinnerInput = document.getElementById("winner")
-    const declareWinnerButton = document.getElementById("winner-button")
+    const declareWinner = document.getElementById("declare-winner")
     const blindContainer = document.getElementById("blind-value")
+
+    declareWinner.hidden = true
 
     document.getElementById("start-game").addEventListener('click', event => {
         startGame.hidden = true
-        declareWinnerInput.removeAttribute('disabled')
-        declareWinnerButton.removeAttribute('disabled')
+        declareWinner.hidden = false
 
-        const players = document.getElementById('player-count').value
-
-        console.log('starting game with', players, 'players')
+        const numberOfPlayers = document.getElementById('player-count').value
 
         if (window["WebSocket"]) {
-            const uri = "ws://" + document.location.host + "/ws"
-            const conn = new WebSocket(uri);
-
+            const conn = new WebSocket("ws://" + document.location.host + "/ws");
 
             conn.onclose = evt => {
                 blindContainer.innerText = "Connection closed"
             };
+
             conn.onmessage = evt => {
-                console.log('got a message?')
-                var messages = evt.data.split('\n');
-                for (var i = 0; i < messages.length; i++) {
-                    blindContainer.innerText = messages[i];
-                }
+                blindContainer.innerText = evt.data
             };
 
             conn.onopen = function () {
-                conn.send('hello, world');
+                conn.send(numberOfPlayers);
             }
-
-
         }
     })
 </script>
