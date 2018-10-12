@@ -9,12 +9,6 @@ import (
 	"strings"
 )
 
-// Game manages the state of a game
-type Game interface {
-	Start(numberOfPlayers int)
-	Finish(winner string)
-}
-
 // CLI helps players through a game of poker
 type CLI struct {
 	playerStore PlayerStore
