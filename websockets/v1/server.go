@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/websocket"
 	"strconv"
 	"time"
-	)
+)
 
 // PlayerStore stores score information about players
 type PlayerStore interface {
@@ -46,36 +46,34 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 	router.Handle("/league", http.HandlerFunc(p.leagueHandler))
 	router.Handle("/players/", http.HandlerFunc(p.playersHandler))
 	router.Handle("/game", http.HandlerFunc(p.gameHandler))
-	router.Handle("/ws", http.HandlerFunc(p.websocket))
+	router.Handle("/ws", http.HandlerFunc(p.webSocket))
 
 	p.Handler = router
 
 	return p
 }
 
-func (p *PlayerServer) websocket(w http.ResponseWriter, r *http.Request) {
+func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 	conn, _ := upgrader.Upgrade(w, r, nil) // error ignored for sake of simplicity
+	p.playGame(conn)
+}
 
-	for {
-		// Read message from browser
-		_, msg, err := conn.ReadMessage()
-		if err != nil {
-			return
-		}
-
-		numberOfPlayers, _ := strconv.Atoi(string(msg))
-
-		game := NewTexasHoldem(&WebSocketBlindAlerter{conn}, p.store)
-		game.Start(numberOfPlayers)
-
-		// Print the message to the console
-		fmt.Printf("%s sent: %s\n", conn.RemoteAddr(), string(msg))
-
-		// Write message back to browser
-		if err = conn.WriteMessage(1, msg); err != nil {
-			return
-		}
+func (p *PlayerServer) playGame(conn *websocket.Conn) {
+	_, numberOfPlayersMsg, err := conn.ReadMessage()
+	if err != nil {
+		return
 	}
+
+	numberOfPlayers, _ := strconv.Atoi(string(numberOfPlayersMsg))
+	game := NewTexasHoldem(&WebSocketBlindAlerter{conn}, p.store)
+	game.Start(numberOfPlayers)
+
+	_, winner, err := conn.ReadMessage()
+	if err != nil {
+		return
+	}
+
+	game.Finish(string(winner))
 }
 
 type WebSocketBlindAlerter struct {
