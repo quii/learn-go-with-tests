@@ -103,8 +103,8 @@ Taking my experience of learning with a group and my own personal way I am going
 
 ## Who this is for
 
-* People who are interested in picking up Go
-* People who already know some Go, but want to explore testing more
+* People who are interested in picking up Go.
+* People who already know some Go, but want to explore testing with TDD.
 
 ## What you'll need
 
