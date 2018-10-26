@@ -10,8 +10,7 @@ So why are we so bad at it? How many projects do you hear about that outright fa
 
 How does a software system "fail" anyway? Cant it just be changed until it's correct? That's what we're promised!
 
-In 1974, a long time before I was born a clever software engineer called Manny
-Lehman wrote something called
+In 1974, a long time before I was born a clever software engineer called Manny Lehman described
 
 ## The Law of Continuous Change
 
@@ -90,6 +89,7 @@ Those who choose not to write tests will typically be reliaint on manual testing
 Some people might take Lehman's quotes about how software has to change and overthink elaborate designs, wasting lots of time upfront trying to create the "perfect" extensible system and end up getting it wrong and going nowhere. 
 
 This is the bad old days of software where an analyst team would spend 6 months writing a requirements document and an architect team would spend another 6 months coming up with a design and a few years later the whole project fails.
+
 I say bad old days but this still happpens! 
 
 Agile teaches us that we need to work iteratively, starting small and evolving the software so that we get fast feedback on the design of our software and how it works with real users;  TDD enforces this approach.
@@ -143,9 +143,7 @@ Too much of my career has been wasted debugging tests that fail with `false was 
 ### It takes too long
 
 You should read [GeePaw's TDD & The Lump of Coding
-Fallacy](http://geepawhill.org/tdd-and-the-lump-of-coding-fallacy/) as it
-explains brilliantly why this line of thinking is wrong (at least once you
-become proficient with TDD).
+Fallacy](http://geepawhill.org/tdd-and-the-lump-of-coding-fallacy/) as it explains brilliantly why this line of thinking is wrong (at least once you become proficient with TDD).
 
 If you're too lazy my TL;DR version is
 
