@@ -167,8 +167,7 @@ feedback from your tests.
 
 ## Common objections with pithy responses
 
-###  Tests _dont_ help me refactor. Every time i refactor loads of tests stop
-passing/compiling
+###  Tests _dont_ help me refactor. Every time i refactor loads of tests stop passing/compiling
 
 Remember what refactoring is _supposed_ to be? Just changing the way your
 program is expressed, not changing behaviour. Now ask yourself why your tests
@@ -176,22 +175,22 @@ are failing. It will be because your tests are **too coupled to implementation
 details**. 
 
 You're _probably_ mocking too much and testing irrelevant detail. Remember
-a unit test is _not_ only on functions/classes/whatever. A unit of behaviour
-can be tested and it may have a number of internal collaborators to make that
-behaviour work; just dont test them!
+a unit test is _not_ only on functions/classes/whatever. 
+
+A unit of behaviour can be tested and it may have a number of internal
+collaborators to make that behaviour work; just dont test them!
 
 Listen to your tests and act on what they're telling you.
 
-### I dont like writing tests as I want to explore the design first, then
-I write my tests afterward.
+### I dont like writing tests as I want to explore the design first, then I write my tests afterward.
 
-It is hard/time-consuming to write your first test; if your first test is "make
+It is hard/time-consuming to write your first test; _if_ your first test is "make
 a website to rival twitter". 
 
 Irrespective of whether you practice TDD or not it is an important skill as
 a software developer to be able to break problems down into small pieces. This
 lets us work in a smaller problem space and deliver small pieces of value
-quickly, letting us validate our design assumptions as we work. This is all
+quickly, letting us validate our assumptions as we work. This is all
 about learning from the mistakes of the past with too much work on upfront
 design.
 
@@ -199,10 +198,10 @@ The beauty of TDD is it forces us to start small - unless you enjoy spending
 loads of time writing a big test without the endorphin rush of seeing a test
 pass. 
 
-By starting small it will challenge your assumptions because you'll get
-feedback quicker. 
+With the constaint of starting small it will challenge your assumptions because
+you'll get feedback quicker. 
 
-Writing tests after the fact is usually harder and more error prone.  You are
+Writing tests after the fact is usually harder and more error prone. You are
 more likely to write code that isn't easy to test because your code has been
 driven by assumptions in your head rather than tests demanding a specific
 behaviour. 
@@ -245,7 +244,7 @@ TDD and software development you'll learn how to break down problems so that
 they look like the simple examples you learned with.
 
 _Generally_ if your code is too hard to test; it's not "realistic" - it's
-poorly written 
+poorly written. 
 
 ## Wrapping up
 
