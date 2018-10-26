@@ -1,11 +1,4 @@
-#> **All the examples are unrealistic compared to "real" software**
-
-This comes back to being able to break problems down. As you gain
-practice with TDD and software development you'll learn how to break down
-problems so that they look like the simple examples you learned with.
-
-If a section of your code is too hard to test; it's not "realistic" - it's
-poorly written Why TDD?
+# Why TDD?
 
 It's difficult to write about TDD without rehashing what others have said but
 it helps _me_ to organise my thoughts around the matter. So in a way this is
@@ -71,16 +64,19 @@ There are _many_ facets of software engineering that keeps software malleable,
 such as:
 
 - Developer empowerment
+- Generally "good" code. Sensible separation of concerns, etc etc
 - Communication skills
 - Architecture
 - Observability
 - Deployability
+- Automated tests
 - Feedback loops
 
 I am going to focus on refactoring. It's a phrase that get's thrown around
-a lot "we need to refactor this" said to a developer on their first day of
-programming without a second thought. Where does the phrase come from? How is
-refactoring just different from writing code?
+a lot "we need to refactor this" - said to a developer on their first day of
+programming without a second thought. 
+
+Where does the phrase come from? How is refactoring just different from writing code?
 
 ### Factorisation
 
@@ -122,7 +118,7 @@ Those who choose not to write tests will typically be reliaint on manual
 testing. For anything other than a small project this will be a tremendous
 time-sink and doesn't scale in the long run. 
 
-**In order to safely refactor you need automated tests**, they provide
+**In order to safely refactor you need automated tests** because they provide
 
 - Confidence you can reshape code without worrying about changing behaviour
 - Documentation for humans as to how the system should behave
@@ -233,9 +229,18 @@ happens (e.g spin up the server and see what happens, debugging, etc)
 - The premise is the tests you write basically are a part of 2 and 3, but make
   it structured and quicker.
 
-People who enjoy TDD will rarely touch a debugger and dont need to spend too
-much time spinning up the software and testing it because they have confidence
-it works how it should. 
+P> **All the examples are unrealistic compared to "real" software**
+
+This comes back to being able to break problems down. As you gain
+practice with TDD and software development you'll learn how to break down
+problems so that they look like the simple examples you learned with.
+
+If a section of your code is too hard to test; it's not "realistic" - it's
+poorly writteneople who enjoy TDD will rarely touch a debugger because it is simpler just to
+write a test. 
+
+Tests mean we dont need to spend time spinning up the software and
+manually testing it because it's all automated. 
 
 The "studying" part becomes easier because as GeePaw says
 
