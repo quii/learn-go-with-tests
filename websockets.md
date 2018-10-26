@@ -336,6 +336,50 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
+Our call to `template.ParseFiles("game.html")` will run on every `GET /game` which means we'll go to the file system on every request even though we have no need to re-parse the template. Let's refactor our code so that we parse the template once in `NewPlayerServer` instead. We'll have to make it so this function can now return an error in case we have problems fetching the template from disk or parsing it.
+
+Here's the relevant changes to `PlayerServer`
+
+```go
+type PlayerServer struct {
+	store PlayerStore
+	http.Handler
+	template *template.Template
+}
+
+const htmlTemplatePath = "game.html"
+
+// NewPlayerServer creates a PlayerServer with routing configured
+func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
+	p := new(PlayerServer)
+
+	tmpl, err := template.ParseFiles("game.html")
+
+	if err != nil {
+		return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
+	}
+
+	p.template = tmpl
+	p.store = store
+
+	router := http.NewServeMux()
+	router.Handle("/league", http.HandlerFunc(p.leagueHandler))
+	router.Handle("/players/", http.HandlerFunc(p.playersHandler))
+	router.Handle("/game", http.HandlerFunc(p.game))
+	router.Handle("/ws", http.HandlerFunc(p.webSocket))
+
+	p.Handler = router
+
+	return p, nil
+}
+
+func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
+	p.template.Execute(w, nil)
+}
+```
+
+By changing the signature of `NewPlayerServer` we now have compilation problems. Try and fix them yourself or refer to the source code if you struggle. For the test code i made a helper called `mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer` so that I could hide the error noise away from the tests. 
+
 Finally in our test code we can create a helper to tidy up sending messages
 
 ```go
@@ -348,16 +392,11 @@ func writeWSMessage(t *testing.T, conn *websocket.Conn, message string) {
 
 Now the tests are passing try running the server and declare some winners in `/game`. You should see them recorded in `/league`. Remember that every time we get a winner we _close the connection_, you will need to refresh the page to open the connection again.
 
+We've made a trivial web form that lets users record the winner of a game. Let's iterate on it to make it so the user can start a game by providing a number of players and the server will push messages to the client informing them of what the blind value is as time passes.
 
--------
-
-note to self: The key is to refactor `game` so that start takes a destination as to where to write the blind things
-
-
-final markup..
+First of all update `game.html` to update our client side code for the new requirements
 
 ```html
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -433,3 +472,9 @@ final markup..
 </script>
 </html>
 ```
+
+The main changes is bringing in a section to enter the number of players and a section to display the blind value. We have a little logic to show/hide the user interface depending on the stage of the game. You can see how we simply put whatever message our server gets with the `onmessage` handler.
+
+-------
+
+note to self: The key is to refactor `game` so that start takes a destination as to where to write the blind things
