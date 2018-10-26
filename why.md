@@ -14,8 +14,10 @@ to keep delivering value.
 
 So why are we so bad at it? How many projects do you hear about that outright
 fail? Or become "legacy" and have to be entirely re-written (and the re-writes
-often fail too!) How does a software system "fail" anyway? Cant it just be
-changed until it's correct? That's what we're promised! 
+often fail too!) 
+
+How does a software system "fail" anyway? Cant it just be changed until it's
+correct? That's what we're promised!
 
 In 1974, a long time before I was born a clever software engineer called Manny
 Lehman wrote something called
