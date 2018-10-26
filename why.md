@@ -231,19 +231,6 @@ happens (e.g spin up the server and see what happens, debugging, etc)
 - The premise is the tests you write basically are a part of 2 and 3, but make
   it structured and quicker.
 
-P> **All the examples are unrealistic compared to "real" software**
-
-This comes back to being able to break problems down. As you gain
-practice with TDD and software development you'll learn how to break down
-problems so that they look like the simple examples you learned with.
-
-If a section of your code is too hard to test; it's not "realistic" - it's
-poorly writteneople who enjoy TDD will rarely touch a debugger because it is simpler just to
-write a test. 
-
-Tests mean we dont need to spend time spinning up the software and
-manually testing it because it's all automated. 
-
 The "studying" part becomes easier because as GeePaw says
 
 > it’s almost like the test code forms a kind of Cliff’s Notes for the shipping
@@ -257,7 +244,7 @@ This comes back to being able to break problems down. As you gain practice with
 TDD and software development you'll learn how to break down problems so that
 they look like the simple examples you learned with.
 
-If a section of your code is too hard to test; it's not "realistic" - it's
+_Generally_ if your code is too hard to test; it's not "realistic" - it's
 poorly written 
 
 ## Wrapping up
