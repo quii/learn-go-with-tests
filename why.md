@@ -8,9 +8,9 @@ The promise of software is that it can change. This is why it is called _soft_ w
 
 So why are we so bad at it? How many projects do you hear about that outright fail? Or become "legacy" and have to be entirely re-written (and the re-writes often fail too!) 
 
-How does a software system "fail" anyway? Cant it just be changed until it's correct? That's what we're promised!
+How does a software system "fail" anyway? Can't it just be changed until it's correct? That's what we're promised!
 
-In 1974, a long time before I was born a clever software engineer called Manny Lehman described
+In 1974, a long time before I was born, a clever software engineer called Manny Lehman described
 
 ## The Law of Continuous Change
 
@@ -18,11 +18,11 @@ In 1974, a long time before I was born a clever software engineer called Manny L
 
 It feels obvious that a system _has_ to change or it becomes less useful but how often is this ignored? 
 
-Many teams are incentivised to deliver a project on a particular date and then moved on to the next project. If the software is "lucky" there is at least some kind of hand-off to another set of individuals to maintain it, but didn't write it of course. 
+Many teams are incentivised to deliver a project on a particular date and then moved on to the next project. If the software is "lucky" there is at least some kind of hand-off to another set of individuals to maintain it, but they didn't write it of course. 
 
 People often concern themselves with trying to pick a framework which will help them "deliver quickly" but not focusing on the longevity of the system in terms of how it needs to evolve.
 
-Even if you're an incredible software engineer, you will still fall victim of not knowing the future needs of your system. As the business changes some of the brilliant code you wrote is now no longer relevant. **Software must change**
+Even if you're an incredible software engineer, you will still fall victim to not knowing the future needs of your system. As the business changes some of the brilliant code you wrote is now no longer relevant. **Software must change**
 
 Lehman was on a roll in the 70s because he gave us another law to chew on.
 
@@ -32,7 +32,7 @@ Lehman was on a roll in the 70s because he gave us another law to chew on.
 
 (emphasis mine)
 
-What he's saying here is we cant have software teams as blind feature factories, piling more and more features on to software in the hope it will survive in the long run. 
+What he's saying here is we can't have software teams as blind feature factories, piling more and more features on to software in the hope it will survive in the long run. 
 
 We **have** to keep managing the complexity of the system as the knowledge of our domain changes. 
 
@@ -49,7 +49,7 @@ There are _many_ facets of software engineering that keeps software malleable, s
 - Automated tests
 - Feedback loops
 
-I am going to focus on refactoring. It's a phrase that get's thrown around a lot "we need to refactor this" - said to a developer on their first day of programming without a second thought. 
+I am going to focus on refactoring. It's a phrase that gets thrown around a lot "we need to refactor this" - said to a developer on their first day of programming without a second thought. 
 
 Where does the phrase come from? How is refactoring just different from writing code?  
 
@@ -71,11 +71,11 @@ When you refactor your code, you are trying to find ways of making your code eas
 
 This is very important. If you are changing behaviour at the same time you are doing _two_ things at once. As software engineers we learn to break systems up into different files/packages/functions/etc because we know trying to understand a big blob of stuff is hard. 
 
-We dont want to have to be thinking about lots of things at once because that's when we make mistakes. I've witnessed so many refactoring endeavours fail because the developers are biting off more than they can chew.  
+We don't want to have to be thinking about lots of things at once because that's when we make mistakes. I've witnessed so many refactoring endeavours fail because the developers are biting off more than they can chew.  
 
 When I was doing factorisations in maths classes with pen and paper I would have to manually check that I hadn't changed the meaning of the expressions in my head. How do we know we aren't changing behaviour when refactoring when working with code, especially on a system that is non-trivial?
 
-Those who choose not to write tests will typically be reliaint on manual testing. For anything other than a small project this will be a tremendous time-sink and doesn't scale in the long run. 
+Those who choose not to write tests will typically be reliant on manual testing. For anything other than a small project this will be a tremendous time-sink and doesn't scale in the long run. 
  
 **In order to safely refactor you need automated tests** because they provide
 
@@ -104,7 +104,7 @@ TDD addresses the laws that Lehman talks about and other lessons hard learned th
 - Refactor
 - Repeat
 
-As you become profecient, this way of working will become natural and fast.
+As you become proficient, this way of working will become natural and fast.
 
 You'll come to expect this feedback loop to not take very long and feel uneasy if you're in a state where the system isn't "green" because it indicates you may be down a rabbit hole. 
 
@@ -112,17 +112,17 @@ You'll always be driving small & useful functionality comfortably backed by the 
   
 ## Common objections with pithy responses
 
-###  Tests _dont_ help me refactor. Every time i refactor loads of tests stop passing/compiling
+###  Tests _don't_ help me refactor. Every time i refactor loads of tests stop passing/compiling
 
 Remember what refactoring is _supposed_ to be? Just changing the way your program is expressed, not changing behaviour. Now ask yourself why your tests are failing. It will be because your tests are **too coupled to implementation details**. 
 
 You're _probably_ mocking too much and testing irrelevant detail. Remember a unit test is _not_ only on functions/classes/whatever. 
 
-A unit of behaviour can be tested and it may have a number of internal collaborators to make that behaviour work; just dont test them!
+A unit of behaviour can be tested and it may have a number of internal collaborators to make that behaviour work; just don't test them!
 
 Listen to your tests and act on what they're telling you.
 
-### I dont like writing tests as I want to explore the design first, then I write my tests afterward.
+### I don't like writing tests as I want to explore the design first, then I write my tests afterward.
 
 It is hard/time-consuming to write your first test; _if_ your first test is "make a website to rival twitter". 
 
@@ -132,7 +132,7 @@ This lets us work in a smaller problem space and deliver small pieces of value q
 
 The beauty of TDD is it forces us to start small - unless you enjoy spending loads of time writing a big test without the endorphin rush of seeing a test pass. 
 
-With the constaint of starting small it will challenge your assumptions because you'll get feedback quicker. 
+With the constraint of starting small it will challenge your assumptions because you'll get feedback quicker. 
 
 Writing tests after the fact is usually harder and more error prone. You are more likely to write code that isn't easy to test because your code has been driven by assumptions in your head rather than tests demanding a specific behaviour. 
 
@@ -147,7 +147,7 @@ Fallacy](http://geepawhill.org/tdd-and-the-lump-of-coding-fallacy/) as it explai
 
 If you're too lazy my TL;DR version is
 
-- You dont actually arrive at your desk at 9:30 and constantly write code until 5:30
+- You don't actually arrive at your desk at 9:30 and constantly write code until 5:30
 -  What you do is a mixture of. 1) Yes, writing code. 2) Thinking about code, studying existing code. 3) Make a change to the code and run it to see what happens (e.g spin up the server and see what happens, debugging, etc)
 - The premise is the tests you write basically are a part of 2 and 3, but make it structured and quicker.
 
