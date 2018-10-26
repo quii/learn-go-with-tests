@@ -1,9 +1,18 @@
-# Why TDD?
+#> **All the examples are unrealistic compared to "real" software**
+
+This comes back to being able to break problems down. As you gain
+practice with TDD and software development you'll learn how to break down
+problems so that they look like the simple examples you learned with.
+
+If a section of your code is too hard to test; it's not "realistic" - it's
+poorly written Why TDD?
 
 It's difficult to write about TDD without rehashing what others have said but
 it helps _me_ to organise my thoughts around the matter. So in a way this is
 a selfish endeavour but I do hope this will at least get readers thinking about
 TDD and the important role it has in software development. 
+
+## Software 
 
 The promise of software is that it can change. This is why it is called _soft_
 ware, it is malleable compared to hardware. A great engineering team should be
@@ -139,7 +148,24 @@ it works with real users;  TDD enforces this approach.
 
 TDD addresses the laws that Lehman talks about and other lessons hard learned
 through history by encouraging a methodology of constantly refactoring and
-delivering iteratively. 
+delivering iteratively.
+
+### Small steps
+
+- Write a small test for a small amount of desired behaviour
+- Check the test fails with a clear error (red)
+- Write the minimal amount of code to make the test pass (green)
+- Refactor
+- Repeat
+
+As you become profecient, this way of working will become natural and fast.
+
+You'll come to expect this feedback loop to not take very long and feel uneasy
+if you're in a state where the system isn't "green" because it indicates you
+may be down a rabbit hole. 
+
+You'll always be driving small & useful functionality comfortably backed by the
+feedback from your tests.
 
 ## Common objections with pithy responses
 
