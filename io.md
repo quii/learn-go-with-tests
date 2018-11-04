@@ -160,7 +160,7 @@ func TestFileSystemStore(t *testing.T) {
             {"Name": "Cleo", "Wins": 10},
             {"Name": "Chris", "Wins": 33}]`)
 
-        store := FileSystemStore{database}
+        store := FileSystemPlayerStore{database}
 
         got := store.GetLeague()
 
@@ -174,21 +174,21 @@ func TestFileSystemStore(t *testing.T) {
 }
 ```
 
-We're using `strings.NewReader` which will return us a `Reader`, which is what our `FileSystemStore` will use to read data. In `main` we will open a file, which is also a `Reader`.
+We're using `strings.NewReader` which will return us a `Reader`, which is what our `FileSystemPlayerStore` will use to read data. In `main` we will open a file, which is also a `Reader`.
 
 ## Try to run the test
 
 ```
 # github.com/quii/learn-go-with-tests/json-and-io/v7
-./FileSystemStore_test.go:15:12: undefined: FileSystemStore
+./FileSystemStore_test.go:15:12: undefined: FileSystemPlayerStore
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-Let's define `FileSystemStore` in a new file
+Let's define `FileSystemPlayerStore` in a new file
 
 ```go
-type FileSystemStore struct {}
+type FileSystemPlayerStore struct {}
 ```
 
 Try again
@@ -196,17 +196,17 @@ Try again
 ```
 # github.com/quii/learn-go-with-tests/json-and-io/v7
 ./FileSystemStore_test.go:15:28: too many values in struct initializer
-./FileSystemStore_test.go:17:15: store.GetLeague undefined (type FileSystemStore has no field or method GetLeague)
+./FileSystemStore_test.go:17:15: store.GetLeague undefined (type FileSystemPlayerStore has no field or method GetLeague)
 ```
 
 It's complaining because we're passing in a `Reader` but not expecting one and it doesn't have `GetLeague` defined yet.
 
 ```go
-type FileSystemStore struct {
+type FileSystemPlayerStore struct {
     database io.Reader
 }
 
-func (f *FileSystemStore) GetLeague() []Player {
+func (f *FileSystemPlayerStore) GetLeague() []Player {
     return nil
 }
 ```
@@ -224,7 +224,7 @@ One more try...
 We've read JSON from a reader before
 
 ```go
-func (f *FileSystemStore) GetLeague() []Player {
+func (f *FileSystemPlayerStore) GetLeague() []Player {
     var league []Player
     json.NewDecoder(f.database).Decode(&league)
     return league
@@ -256,7 +256,7 @@ func NewLeague(rdr io.Reader) ([]Player, error) {
 Call this in our implementation and in our test helper `getLeagueFromResponse` in `server_test.go`
 
 ```go
-func (f *FileSystemStore) GetLeague() []Player {
+func (f *FileSystemPlayerStore) GetLeague() []Player {
     league, _ := NewLeague(f.database)
     return league
 }
@@ -305,14 +305,14 @@ type Seeker interface {
 }
 ```
 
-This sounds good, can we change `FileSystemStore` to take this interface instead?
+This sounds good, can we change `FileSystemPlayerStore` to take this interface instead?
 
 ```go
-type FileSystemStore struct {
+type FileSystemPlayerStore struct {
     database io.ReadSeeker
 }
 
-func (f *FileSystemStore) GetLeague() []Player {
+func (f *FileSystemPlayerStore) GetLeague() []Player {
     f.database.Seek(0, 0)
     league, _ := NewLeague(f.database)
     return league
