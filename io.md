@@ -968,8 +968,8 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
     }
 
     return &FileSystemPlayerStore{
-        database:&tape{file},
-        league:league,
+        database: json.NewEncoder(&tape{file}),
+        league:   league,
     }, nil
 }
 ```
@@ -1084,8 +1084,8 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
     }
 
     return &FileSystemPlayerStore{
-        database:&tape{file},
-        league:league,
+        database: json.NewEncoder(&tape{file}),
+        league:   league,
     }, nil
 }
 ```
@@ -1131,8 +1131,8 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
     }
 
     return &FileSystemPlayerStore{
-        database:&tape{file},
-        league:league,
+        database: json.NewEncoder(&tape{file}),
+        league:   league,
     }, nil
 }
 ```
