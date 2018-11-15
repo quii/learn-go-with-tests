@@ -1072,7 +1072,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
         return nil, fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
     }
 
-    if info.Size()==0 {
+    if info.Size() == 0 {
         file.Write([]byte("[]"))
         file.Seek(0, 0)
     }
