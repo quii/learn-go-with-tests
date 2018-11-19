@@ -968,8 +968,8 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
     }
 
     return &FileSystemPlayerStore{
-        database:&tape{file},
-        league:league,
+        database: json.NewEncoder(&tape{file}),
+        league:   league,
     }, nil
 }
 ```
@@ -1072,7 +1072,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
         return nil, fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
     }
 
-    if info.Size()==0 {
+    if info.Size() == 0 {
         file.Write([]byte("[]"))
         file.Seek(0, 0)
     }
@@ -1084,8 +1084,8 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
     }
 
     return &FileSystemPlayerStore{
-        database:&tape{file},
-        league:league,
+        database: json.NewEncoder(&tape{file}),
+        league:   league,
     }, nil
 }
 ```
@@ -1131,8 +1131,8 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
     }
 
     return &FileSystemPlayerStore{
-        database:&tape{file},
-        league:league,
+        database: json.NewEncoder(&tape{file}),
+        league:   league,
     }, nil
 }
 ```
