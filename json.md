@@ -463,7 +463,7 @@ func TestLeague(t *testing.T) {
             {"Tiest", 14},
         }
 
-        store := StubPlayerStore{nil, nil, wantedLeague,}
+        store := StubPlayerStore{nil, nil, wantedLeague}
         server := NewPlayerServer(&store)
 
         request, _ := http.NewRequest(http.MethodGet, "/league", nil)
@@ -588,7 +588,7 @@ t.Run("it returns the league table as JSON", func(t *testing.T) {
         {"Tiest", 14},
     }
 
-    store := StubPlayerStore{nil, nil, wantedLeague,}
+    store := StubPlayerStore{nil, nil, wantedLeague}
     server := NewPlayerServer(&store)
 
     request := newLeagueRequest()
