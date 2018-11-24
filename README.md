@@ -7,6 +7,8 @@ _Or learn test-driven development with Go_
 
 [You can read this on Gitbook](https://quii.gitbook.io/learn-go-with-tests)
 
+[You can also get an e-pub](https://github.com/quii/learn-go-with-tests/releases)
+
 Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests)
 
 ## Why
