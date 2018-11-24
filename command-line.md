@@ -369,7 +369,7 @@ func (cli *CLI) readLine() string {
 }
 ```
 
-The tests will now pass.
+After updating the tests with the new CLI constructor, they will pass.
 
 - `Scanner.Scan()` will read up to a newline.
 - We then use `Scanner.Text()` to return the `string` the scanner read to.
