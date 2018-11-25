@@ -347,13 +347,6 @@ type CLI struct {
     in          *bufio.Scanner
 }
 
-func NewCLI(store PlayerStore, in io.Reader) *CLI {
-    return &CLI{
-        playerStore: store,
-        in:          bufio.NewScanner(in),
-    }
-}
-
 func (cli *CLI) PlayPoker() {
     userInput := cli.readLine()
     cli.playerStore.RecordWin(extractWinner(userInput))
@@ -366,6 +359,32 @@ func extractWinner(userInput string) string {
 func (cli *CLI) readLine() string {
     cli.in.Scan()
     return cli.in.Text()
+}
+```
+
+and the tests
+
+```go
+func TestCLI(t *testing.T) {
+    t.Run("record chris win from user input", func(t *testing.T) {
+        in := strings.NewReader("Chris wins\n")
+        playerStore := &StubPlayerStore{}
+
+		cli := &CLI{playerStore, bufio.NewScanner(in)}
+        cli.PlayPoker()
+
+        assertPlayerWin(t, playerStore, "Chris")
+    })
+
+    t.Run("record cleo win from user input", func(t *testing.T) {
+        in := strings.NewReader("Cleo wins\n")
+        playerStore := &StubPlayerStore{}
+
+		cli := &CLI{playerStore, bufio.NewScanner(in)}
+        cli.PlayPoker()
+
+        assertPlayerWin(t, playerStore, "Cleo")
+    })
 }
 ```
 
@@ -510,7 +529,7 @@ func TestCLI(t *testing.T) {
         in := strings.NewReader("Chris wins\n")
         playerStore := &poker.StubPlayerStore{}
 
-        cli := &poker.CLI{playerStore, in}
+        cli := &poker.CLI{playerStore, bufio.NewScanner(in)}
         cli.PlayPoker()
 
         poker.AssertPlayerWin(t, playerStore, "Chris")
@@ -520,7 +539,7 @@ func TestCLI(t *testing.T) {
         in := strings.NewReader("Cleo wins\n")
         playerStore := &poker.StubPlayerStore{}
 
-        cli := &poker.CLI{playerStore, in}
+        cli := &poker.CLI{playerStore, bufio.NewScanner(in)}
         cli.PlayPoker()
 
         poker.AssertPlayerWin(t, playerStore, "Cleo")
