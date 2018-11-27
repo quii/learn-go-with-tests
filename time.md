@@ -408,7 +408,7 @@ We then create the function `StdOutAlerter` which has the same signature as the 
 Update `main` where we create `NewCLI` to see this in action
 
 ```go
-game := poker.NewCLI(store, os.Stdin, poker.BlindAlerterFunc(poker.StdOutAlerter))
+poker.NewCLI(store, os.Stdin, poker.BlindAlerterFunc(poker.StdOutAlerter)).PlayPoker()
 ```
 
 Before running you might want to change the `blindTime` increment in `CLI` to be 10 seconds rather than 10 minutes just so you can see it in action.
