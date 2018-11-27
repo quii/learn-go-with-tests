@@ -275,7 +275,7 @@ func (cli *CLI) PlayPoker() {
 		blindTime = blindTime + 10*time.Minute
 	}
 
-	userInput, _ := cli.ReadString('\n')
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 ```
@@ -289,7 +289,7 @@ We can encapsulate our scheduled alerts into a method just to make `PlayPoker` r
 ```go
 func (cli *CLI) PlayPoker() {
 	cli.scheduleBlindAlerts()
-	userInput, _ := cli.ReadString('\n')
+	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
