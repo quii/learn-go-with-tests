@@ -237,7 +237,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 - `PlayerServer` 现在需要储存一个路由。
 - 我们已经把创建 `ServeHTTP` 路由的动作移到 `NewPlayerServer`，这样只需要完成一次，而不是每次请求都要做。
-- 在所有测试和程序代码中，用到 `PlayerServer{&store}` 的地方你需要更新为 `NewPlayerServer{&store}`。
+- 在所有测试和程序代码中，用到 `PlayerServer{&store}` 的地方你需要更新为 `NewPlayerServer(&store)`。
 
 ### 最后一次重构
 
@@ -411,12 +411,12 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 
 ### 编码和解码
 
-请注意标准库中的的有意思的对称性。
+请注意标准库中的有意思的对称性。
 
 - 要创建一个 `Encoder`，你需要一个 `http.ResponseWriter` 实现的 `io.Writer`。
 - 要创建一个 `Decoder`，你需要一个 `io.Reader`，由我们的响应的 `Body` 字段实现。
 
-在本书中，我们使用了 `io.Writer`，这是它在标准库中流行及许多库如何轻松使用它的的另一个示范。
+在本书中，我们使用了 `io.Writer`，这是它在标准库中流行及许多库如何轻松使用它的另一个示范。
 
 ## 重构
 
