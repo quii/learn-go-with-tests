@@ -344,28 +344,17 @@ Update the code to the following
 ```go
 type CLI struct {
     playerStore PlayerStore
-    in          *bufio.Scanner
-}
-
-func NewCLI(store PlayerStore, in io.Reader) *CLI {
-    return &CLI{
-        playerStore: store,
-        in:          bufio.NewScanner(in),
-    }
+    in          io.Reader
 }
 
 func (cli *CLI) PlayPoker() {
-    userInput := cli.readLine()
-    cli.playerStore.RecordWin(extractWinner(userInput))
+	reader := bufio.NewScanner(cli.in)
+	reader.Scan()
+    cli.playerStore.RecordWin(extractWinner(reader.Text()))
 }
 
 func extractWinner(userInput string) string {
     return strings.Replace(userInput, " wins", "", 1)
-}
-
-func (cli *CLI) readLine() string {
-    cli.in.Scan()
-    return cli.in.Text()
 }
 ```
 
@@ -373,7 +362,6 @@ The tests will now pass.
 
 - `Scanner.Scan()` will read up to a newline.
 - We then use `Scanner.Text()` to return the `string` the scanner read to.
-- We have encapsulated this into a function called `readLine()`.
 
 Now that we have some passing tests, we should wire this up into `main`. Remember we should always strive to have fully-integrated working software as quickly as we can.
 
@@ -538,14 +526,37 @@ You'll now see we have the same problems as we had in `main`
 ./CLI_test.go:25:39: implicit assignment of unexported field 'in' in poker.CLI literal
 ```
 
-The easiest way to get around this is to make a constructor as we have for other types
+The easiest way to get around this is to make a constructor as we have for other types. We'll also change `CLI` so it stores a `bufio.Scanner` instead of the reader as it's now automatically wrapped at construction time.
 
 ```go
+type CLI struct {
+	playerStore PlayerStore
+	in          *bufio.Scanner
+}
+
 func NewCLI(store PlayerStore, in io.Reader) *CLI {
-    return &CLI{
-        playerStore: store,
-        in:          in,
-    }
+	return &CLI{
+		playerStore: store,
+		in:          bufio.NewScanner(in),
+	}
+}
+```
+
+By doing this, we can then simplify and refactor our reading code
+
+```go
+func (cli *CLI) PlayPoker() {
+	userInput := cli.readLine()
+	cli.playerStore.RecordWin(extractWinner(userInput))
+}
+
+func extractWinner(userInput string) string {
+	return strings.Replace(userInput, " wins", "", 1)
+}
+
+func (cli *CLI) readLine() string {
+	cli.in.Scan()
+	return cli.in.Text()
 }
 ```
 
@@ -638,7 +649,7 @@ func main() {
 }
 ```
 
-Notice the symmetry: despite being different user interfaces the setup is almost identical.
+Notice the symmetry: despite being different user interfaces the setup is almost identical. This feels like good validation of our design so far.
 
 ## Wrapping up
 
