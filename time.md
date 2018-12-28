@@ -54,7 +54,7 @@ func (cli *CLI) readLine() string {
 
 We want to be able to schedule our program to print the blind bet values at certain durations dependant on the number of players.
 
-To limit the scope of what we need to do, we'll forget about the number of players part and just assume there are 5 players so we'll test that _every 10 minutes the new value of the blind bet is printed_.
+To limit the scope of what we need to do, we'll forget about the number of players part for now and just assume there are 5 players so we'll test that _every 10 minutes the new value of the blind bet is printed_.
 
 As usual the standard library has us covered with [`func AfterFunc(d Duration, f func()) *Timer`](https://golang.org/pkg/time/#AfterFunc)
 
@@ -150,6 +150,8 @@ var dummySpyAlerter = &SpyBlindAlerter{}
 ```
 
 Then use that in the other tests to fix the compilation problems. By labelling it as a "dummy" it is clear to the reader of the test that it is not important.
+
+[> Dummy objects are passed around but never actually used. Usually they are just used to fill parameter lists.](https://martinfowler.com/articles/mocksArentStubs.html)
 
 The tests should now compile and our new test fails.
 
@@ -272,7 +274,7 @@ func (cli *CLI) PlayPoker() {
 	blindTime := 0 * time.Second
 	for _, blind := range blinds {
 		cli.alerter.ScheduleAlertAt(blindTime, blind)
-		blindTime = blindTime + 10*time.Minute
+		blindTime = blindTime + 10 * time.Minute
 	}
 
 	userInput := cli.readLine()
@@ -401,7 +403,9 @@ func StdOutAlerter(duration time.Duration, amount int) {
 }
 ```
 
-Remember that any _type_ can implement an interface, not just `structs`. If you are making a library that exposes an interface with one function defined it is a common idiom to also expose a `MyInterfaceFunc` type. This type will be a `func` which will also implement your interface. That way users of your interface can convieniently implement your interface with just a function rather than having to create an empty `struct` type.
+Remember that any _type_ can implement an interface, not just `structs`. If you are making a library that exposes an interface with one function defined it is a common idiom to also expose a `MyInterfaceFunc` type. 
+
+This type will be a `func` which will also implement your interface. That way users of your interface have the option to implement your interface with just a function; rather than having to create an empty `struct` type.
 
 We then create the function `StdOutAlerter` which has the same signature as the function and just use `time.AfterFunc` to schedule it to print to `os.Stdout`.
 
@@ -419,9 +423,11 @@ The game wont always be played with 5 people so we need to prompt the user to en
 
 ## Write the test first
 
-We'll want to record what is written to StdOut. We've done this a few times now, we know that `os.Stdout` is an `io.Writer` so we can check what is written if we use dependency injection to pass in a `bytes.Buffer` in our test and see what our code will write.
+To check we are prompting for the number of players we'll want to record what is written to StdOut. We've done this a few times now, we know that `os.Stdout` is an `io.Writer` so we can check what is written if we use dependency injection to pass in a `bytes.Buffer` in our test and see what our code will write.
 
-We don't care about our other collaborators in this test just yet so we've made some dummies in our test file. We should be a little wary that we now have 4 dependencies for `CLI`, that feels like maybe it is starting to have too many responsibilities. Let's live with it for now and see if a refactoring emerges as we add this new functionality.
+We don't care about our other collaborators in this test just yet so we've made some dummies in our test file. 
+
+We should be a little wary that we now have 4 dependencies for `CLI`, that feels like maybe it is starting to have too many responsibilities. Let's live with it for now and see if a refactoring emerges as we add this new functionality.
 
 ```go
 var dummyBlindAlerter = &SpyBlindAlerter{}
@@ -430,7 +436,7 @@ var dummyStdIn = &bytes.Buffer{}
 var dummyStdOut = &bytes.Buffer{}
 ```
 
-And here is our new test
+Here is our new test
 
 ```go
 t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
@@ -438,7 +444,7 @@ t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
     cli := poker.NewCLI(dummyPlayerStore, dummyStdIn, stdout, dummyBlindAlerter)
     cli.PlayPoker()
 
-    got :=stdout.String()
+    got := stdout.String()
     want := "Please enter the number of players: "
 
     if got != want {
@@ -586,7 +592,6 @@ The test should still compile and fail reporting that the scheduled times are wr
 
 Remember, we are free to commit whatever sins we need to make this work. Once we have working software we can then work on refactoring the mess we're about to make!
 
-
 ```go
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
@@ -600,7 +605,7 @@ func (cli *CLI) PlayPoker() {
 }
 
 func (cli *CLI) scheduleBlindAlerts(numberOfPlayers int) {
-	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
+	blindIncrement := time.Duration(5 + numberOfPlayers) * time.Minute
 
 	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
 	blindTime := 0 * time.Second
@@ -619,14 +624,14 @@ While our new test has been fixed, a lot of others have failed because now our s
 
 ## Refactor
 
-Let's **listen to our tests**. 
+This all feels a bit horrible right? Let's **listen to our tests**. 
 
 - In order to test that we are scheduling some alerts we set up 4 different dependencies. Whenever you have a lot of dependencies for a _thing_ in your system, it implies it's doing too much. Visually we can see it in how cluttered our test is.
 - To me it feels like **we need to make a cleaner abstraction between reading user input and the business logic we want to do** 
-- A better test would be _given this user input, do we call `Game` with the correct number of players_. 
+- A better test would be _given this user input, do we call a new type `Game` with the correct number of players_. 
 - We would then extract the testing of the scheduling into the tests for our new `Game`.
 
-We can refactor our `Game` first and our test should continue to pass. Once we've made the structural changes we want we can think about how we can refactor the tests to reflect our new separation of concerns
+We can refactor toward our `Game` first and our test should continue to pass. Once we've made the structural changes we want we can think about how we can refactor the tests to reflect our new separation of concerns
 
 Remember when making changes in refactoring try to keep them as small as possible and keep re-running the tests.
 
