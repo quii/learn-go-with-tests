@@ -75,9 +75,9 @@ The first part is just copying the example from the standard lib.
 
 The second part is where we have our business logic and by looking at the code we can see where the "seam" in our logic starts; it's where we get our `io.ReadCloser`. We can use this existing abstraction to separate concerns and make our code testable.
 
-Our `TestGetData` can act as our integration test between our two concerns so we'll keep hold of that and make sure it keeps working.
-
 **The problem with GetData is the business logic is coupled with the means of getting the XML. To make our design better we need to decouple them**
+
+Our `TestGetData` can act as our integration test between our two concerns so we'll keep hold of that to make sure it keeps working.
 
 Here is what the newly separated code looks like
 
