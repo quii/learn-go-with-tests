@@ -12,7 +12,7 @@
 
 A few things
 
-- When something is difficult to test, it's probably due to the separation of concerns not being quite right
+- When something is difficult to test, it's often due to the separation of concerns not being quite right
 - Dont add "test modes" into your code, instead use [Dependency Injection](/dependency-injection.md) so that you can model your dependencies and separate concerns. 
 
 I have taken the liberty of guessing what the code might look like
@@ -90,7 +90,6 @@ func GetData(data io.Reader) string {
 }
 
 func getXMLFromCommand() io.Reader {
-
 	cmd := exec.Command("cat", "msg.xml")
 	out, _ := cmd.StdoutPipe()
 
@@ -111,7 +110,7 @@ func TestGetDataIntegration(t *testing.T) {
 }
 ```
 
-Now that `GetData` takes it's input from just an `io.Reader` we have made it testable; and people can re-use the function with anything that returns an `io.Reader` (which is extremely common).
+Now that `GetData` takes its input from just an `io.Reader` we have made it testable; and people can re-use the function with anything that returns an `io.Reader` (which is extremely common).
 
 ```go
 func TestGetData(t *testing.T) {
