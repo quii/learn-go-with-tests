@@ -41,7 +41,6 @@ func TestGetDataIntegration(t *testing.T) {
 }
 
 func TestGetData(t *testing.T) {
-
 	input := strings.NewReader(`
 <payload>
     <message>Cats are the best animal</message>

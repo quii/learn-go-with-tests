@@ -116,7 +116,6 @@ Now that `GetData` takes its input from just an `io.Reader` we have made it test
 
 ```go
 func TestGetData(t *testing.T) {
-
 	input := strings.NewReader(`
 <payload>
     <message>Cats are the best animal</message>
