@@ -42,7 +42,8 @@ func GetData() string {
 
 - It uses `exec.Command` which allows you to execute an external command to the process
 - We capture the output in `cmd.StdoutPipe` which returns us a `io.ReadCloser` (this will become important)
-- The rest of the code is more or less copy and pasted from the [excellent documentation](https://golang.org/pkg/os/exec/#example_Cmd_StdoutPipe) 
+- The rest of the code is more or less copy and pasted from the [excellent documentation](https://golang.org/pkg/os/exec/#example_Cmd_StdoutPipe). 
+    - We capture any output from stdout into an `io.ReadCloser` and then we `Start` the command and then wait for all the data to be read by calling `Wait`. In between those two calls we decode the data into our `Payload` struct.
 
 Here is what is contained inside `msg.xml`
 
@@ -72,7 +73,7 @@ Testable code is decoupled and single purpose. To me it feels like there are two
 1. Retrieving the raw XML data
 2. Decoding the XML data and applying our business logic (in this case `strings.ToUpper` on the `<message>`)
 
-The first part is _more or less_ boilerplate, it's just copying the example from the standard lib. 
+The first part is just copying the example from the standard lib. 
 
 The second part is where we have our business logic and by looking at the code we can see where the "seam" in our logic starts; it's where we get our `io.ReadCloser`. We can use this existing abstraction to separate concerns and make our code testable.
 
