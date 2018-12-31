@@ -57,6 +57,16 @@ By the end of this, you should have a strong grasp as to how to iteratively writ
 * [Command line & project structure](command-line.md) - Support multiple applications from one code base and read input from command line
 * [Time (WIP)](time.md) - using the `time` package to schedule activities
 
+### Questions and answers
+
+I often run in to questions on the internets like
+
+> How do I test my amazing function that does x, y and z
+
+If you have such a question raise it as an issue on github and I'll try and find time to write a short chapter to tackle the issue. I feel like content like this is valuable as it is tackling people's _real_ questions around testing.
+
+* [OS exec](os-exec.md) - An example of how we can reach out to the OS to execute commands to fetch data and keep our business logic testable/
+
 ## Contributing
 
 * _This project is work in progress_ If you would like to contribute, please do get in touch.

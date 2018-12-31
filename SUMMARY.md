@@ -27,6 +27,9 @@
 * [Command line & package structure](command-line.md)
 * [Time (WIP)](time.md)
 
+## Questions and answers
+[OS Exec](os-exec.md)
+
 ## Meta
 
 * [Contributing](contributing.md)
