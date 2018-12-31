@@ -1,6 +1,4 @@
-# Q&A: OS Exec
-
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/q-and-a/os-exec)**
+**[You can find all the code for here](https://github.com/quii/learn-go-with-tests/tree/master/q-and-a/os-exec)**
 
 [keith6014](https://www.reddit.com/user/keith6014) asks on [reddit](https://www.reddit.com/r/golang/comments/aaz8ji/testdata_and_function_setup_help/)
 
@@ -78,6 +76,8 @@ The first part is just copying the example from the standard lib.
 The second part is where we have our business logic and by looking at the code we can see where the "seam" in our logic starts; it's where we get our `io.ReadCloser`. We can use this existing abstraction to separate concerns and make our code testable.
 
 Our `TestGetData` can act as our integration test between our two concerns so we'll keep hold of that and make sure it keeps working.
+
+**The problem with GetData is the business logic is coupled with the means of getting the XML. To make our design better we need to decouple them**
 
 Here is what the newly separated code looks like
 
