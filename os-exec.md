@@ -22,7 +22,7 @@ type Payload struct {
 	Message string `xml:"message"`
 }
 
-func KeithCommand() string {
+func GetData() string {
 	cmd := exec.Command("cat", "msg.xml")
 
 	out, _ := cmd.StdoutPipe()
@@ -53,8 +53,8 @@ Here is what is contained inside `msg.xml`
 I wrote a simple test to show it in action
 
 ```go
-func TestKeithCommand(t *testing.T) {
-	got := KeithCommand()
+func TestGetData(t *testing.T) {
+	got := GetData()
 	want := "HAPPY NEW YEAR!"
 
 	if got != want {
@@ -74,7 +74,7 @@ The first part is _more or less_ boilerplate, it's just copying the example from
 
 The second part is where we have our business logic and by looking at the code we can see where the "seam" in our logic starts; it's where we get our `io.ReadCloser`. We can use this existing abstraction to separate concerns and make our code testable.
 
-Our `TestKeithCommand` can act as our integration test between our two concerns so we'll keep hold of that and make sure it keeps working.
+Our `TestGetData` can act as our integration test between our two concerns so we'll keep hold of that and make sure it keeps working.
 
 Here is what the newly separated code looks like
 
@@ -83,7 +83,7 @@ type Payload struct {
 	Message string `xml:"message"`
 }
 
-func KeithCommand(data io.Reader) string {
+func GetData(data io.Reader) string {
 	var payload Payload
 	xml.NewDecoder(data).Decode(&payload)
 	return strings.ToUpper(payload.Message)
@@ -101,8 +101,8 @@ func getXMLFromCommand() io.Reader {
 	return bytes.NewReader(data)
 }
 
-func TestKeithCommandIntegration(t *testing.T) {
-	got := KeithCommand(getXMLFromCommand())
+func TestGetDataIntegration(t *testing.T) {
+	got := GetData(getXMLFromCommand())
 	want := "HAPPY NEW YEAR!"
 
 	if got != want {
@@ -111,10 +111,10 @@ func TestKeithCommandIntegration(t *testing.T) {
 }
 ```
 
-Now that `KeithCommand` takes it's input from just an `io.Reader` we have made it testable; and people can re-use the function with anything that returns an `io.Reader` (which is extremely common).
+Now that `GetData` takes it's input from just an `io.Reader` we have made it testable; and people can re-use the function with anything that returns an `io.Reader` (which is extremely common).
 
 ```go
-func TestKeithCommand(t *testing.T) {
+func TestGetData(t *testing.T) {
 	
 	t.Run("an example", func(t *testing.T) {
 		
@@ -123,7 +123,7 @@ func TestKeithCommand(t *testing.T) {
     <message>Cats are the best animal</message>
 </payload>`)
 
-		got := KeithCommand(input)
+		got := GetData(input)
 		want := "CATS ARE THE BEST ANIMAL"
 
 		if got != want {
@@ -133,6 +133,6 @@ func TestKeithCommand(t *testing.T) {
 }
 ```
 
-Here is an example of a unit test for `KeithCommand`. 
+Here is an example of a unit test for `GetData`. 
 
 By separating the concerns and using existing abstractions within Go testing our important business logic is a breeze.

@@ -14,14 +14,13 @@ type Payload struct {
 	Message string `xml:"message"`
 }
 
-func KeithCommand(data io.Reader) string {
+func GetData(data io.Reader) string {
 	var payload Payload
 	xml.NewDecoder(data).Decode(&payload)
 	return strings.ToUpper(payload.Message)
 }
 
 func getXMLFromCommand() io.Reader {
-
 	cmd := exec.Command("cat", "msg.xml")
 	out, _ := cmd.StdoutPipe()
 
@@ -32,8 +31,8 @@ func getXMLFromCommand() io.Reader {
 	return bytes.NewReader(data)
 }
 
-func TestKeithCommandIntegration(t *testing.T) {
-	got := KeithCommand(getXMLFromCommand())
+func TestGetDataIntegration(t *testing.T) {
+	got := GetData(getXMLFromCommand())
 	want := "HAPPY NEW YEAR!"
 
 	if got != want {
@@ -41,7 +40,7 @@ func TestKeithCommandIntegration(t *testing.T) {
 	}
 }
 
-func TestKeithCommand(t *testing.T) {
+func TestGetData(t *testing.T) {
 
 	t.Run("an example", func(t *testing.T) {
 
@@ -50,7 +49,7 @@ func TestKeithCommand(t *testing.T) {
     <message>Cats are the best animal</message>
 </payload>`)
 
-		got := KeithCommand(input)
+		got := GetData(input)
 		want := "CATS ARE THE BEST ANIMAL"
 
 		if got != want {
