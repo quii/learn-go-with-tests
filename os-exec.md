@@ -1,6 +1,6 @@
 # Q&A: OS Exec
 
-[https://www.reddit.com/user/keith6014](https://www.reddit.com/user/keith6014) asks on [reddit](https://www.reddit.com/r/golang/comments/aaz8ji/testdata_and_function_setup_help/)
+[keith6014](https://www.reddit.com/user/keith6014) asks on [reddit](https://www.reddit.com/r/golang/comments/aaz8ji/testdata_and_function_setup_help/)
 
 > I am executing a command using os/exec.Command() which generated XML data. The command will be executed in a function called GetData().
 
