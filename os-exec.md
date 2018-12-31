@@ -10,7 +10,7 @@
 
 > In my _test.go I have a TestGetData which calls GetData() but that will use os.exec, instead I would like for it to use my testdata.
 
-> What is a good way to acheive this? When calling GetData should I have a "test" flag mode so it will read a file ie GetData(mode string)?
+> What is a good way to achieve this? When calling GetData should I have a "test" flag mode so it will read a file ie GetData(mode string)?
 
 A few things
 
