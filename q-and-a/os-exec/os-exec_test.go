@@ -1,4 +1,4 @@
-package qanda
+package os_exec
 
 import (
 	"bytes"
@@ -42,18 +42,15 @@ func TestGetDataIntegration(t *testing.T) {
 
 func TestGetData(t *testing.T) {
 
-	t.Run("an example", func(t *testing.T) {
-
-		input := strings.NewReader(`
+	input := strings.NewReader(`
 <payload>
     <message>Cats are the best animal</message>
 </payload>`)
 
-		got := GetData(input)
-		want := "CATS ARE THE BEST ANIMAL"
+	got := GetData(input)
+	want := "CATS ARE THE BEST ANIMAL"
 
-		if got != want {
-			t.Errorf("got '%s', want '%s'", got, want)
-		}
-	})
+	if got != want {
+		t.Errorf("got '%s', want '%s'", got, want)
+	}
 }

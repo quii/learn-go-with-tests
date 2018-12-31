@@ -1,5 +1,7 @@
 # Q&A: OS Exec
 
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/q-and-a/os-exec)**
+
 [keith6014](https://www.reddit.com/user/keith6014) asks on [reddit](https://www.reddit.com/r/golang/comments/aaz8ji/testdata_and_function_setup_help/)
 
 > I am executing a command using os/exec.Command() which generated XML data. The command will be executed in a function called GetData().
@@ -114,22 +116,20 @@ Now that `GetData` takes its input from just an `io.Reader` we have made it test
 
 ```go
 func TestGetData(t *testing.T) {
-	
-	t.Run("an example", func(t *testing.T) {
-		
-		input := strings.NewReader(`
+
+	input := strings.NewReader(`
 <payload>
     <message>Cats are the best animal</message>
 </payload>`)
 
-		got := GetData(input)
-		want := "CATS ARE THE BEST ANIMAL"
+	got := GetData(input)
+	want := "CATS ARE THE BEST ANIMAL"
 
-		if got != want {
-			t.Errorf("got '%s', want '%s'", got, want)
-		}
-	})
+	if got != want {
+		t.Errorf("got '%s', want '%s'", got, want)
+	}
 }
+
 ```
 
 Here is an example of a unit test for `GetData`. 
