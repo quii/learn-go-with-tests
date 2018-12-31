@@ -1,4 +1,4 @@
-package os_exec
+package osexec
 
 import (
 	"bytes"
