@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Learn Go with tests](gb-readme.md)
+* [Learn Go with Tests](gb-readme.md)
 
 ## Go fundamentals
 
