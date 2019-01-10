@@ -181,7 +181,7 @@ There are a few ways. As has been emphasised throughout the book, it is importan
 2. Do an exact string match. This _can_ be ok but these kind of tests end up being very brittle. The moment someone changes the markup you will have a test failing when in practice nothing has _actually broken_.
 3. Check we call the correct template. We will be using a templating library from the standard lib to serve the HTML (discussed shortly) and we could inject in the _thing_ to generate the HTML and spy on its call to check we're doing it right. This would have an impact on our code's design but doesn't actually test a great deal; other than we're calling it with the correct template file. Given we will only have the one template in our project the chance of failure here seems low. 
 
-So in the book "Learn Go with tests" for the first time, we're not going to write a test. 
+So in the book "Learn Go with Tests" for the first time, we're not going to write a test. 
 
 Put the markup in a file called `game.html`
 
