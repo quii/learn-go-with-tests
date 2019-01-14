@@ -113,7 +113,7 @@ func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
 
 The server code is already fine due to us slotting in more code into the existing well-factored code very easily. 
 
-We can tidy up the test a little by adding a helper (write this yourself) to make the request to `/game`
+We can tidy up the test a little by adding a helper `newGameRequest` to make the request to `/game`. Try writing this yourself. 
 
 ```go
 func TestGame(t *testing.T) {
@@ -167,7 +167,10 @@ Now we need to make the endpoint return some HTML, here it is
 </html>
 ```
 
-We have a very simple web page with a text input for the user to enter into and a button they can click to declare the winner. 
+We have a very simple web page 
+ 
+ - A text input for the user to enter the winner into
+ - A button they can click to declare the winner. 
 
 `WebSocket` is built into most modern browsers so we don't need to worry about bringing in any libraries. The web page wont work for older browsers, but we're ok with that for this scenario.
 
@@ -258,7 +261,7 @@ Finally we assert on the player store to check the winner was recorded.
         server_test.go:124: could not open a ws connection on ws://127.0.0.1:55838/ws websocket: bad handshake
 ```
 
-We have not changed our server yet to accept WebSocket connections on `/ws`.
+We have not changed our server to accept WebSocket connections on `/ws` so we're not shaking hands yet. 
 
 ## Write enough code to make it pass
 
@@ -280,7 +283,7 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-To accept a WebSocket connection we `Upgrade` it. If you now re-run the test you should move on to the next error.
+To accept a WebSocket connection we `Upgrade` the request. If you now re-run the test you should move on to the next error.
 
 ```
 === RUN   TestGame/when_we_get_a_message_over_a_websocket_it_is_a_winner_of_a_game
@@ -317,7 +320,9 @@ AssertPlayerWin(t, store, winner)
 
 ## Refactor
 
-We committed many sins to make this test work both in the server code and the test code. 
+We committed many sins to make this test work both in the server code and the test code but remember this is the easiest way for us to work. 
+
+We have nasty, horrible, _working_ software backed by a test, so now we are free to make it nice and know we wont break anything accidentally. 
 
 Let's start with the server code.
 
@@ -378,12 +383,25 @@ func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-By changing the signature of `NewPlayerServer` we now have compilation problems. Try and fix them yourself or refer to the source code if you struggle. For the test code i made a helper called `mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer` so that I could hide the error noise away from the tests. 
+By changing the signature of `NewPlayerServer` we now have compilation problems. Try and fix them yourself or refer to the source code if you struggle. 
+
+For the test code I made a helper called `mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer` so that I could hide the error noise away from the tests.
+
+```go
+func mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer {
+	server, err := NewPlayerServer(store)
+	if err != nil {
+		t.Fatal("problem creating player server", err)
+	}
+	return server
+}
+``` 
 
 Finally in our test code we can create a helper to tidy up sending messages
 
 ```go
 func writeWSMessage(t *testing.T, conn *websocket.Conn, message string) {
+	t.Helper()
 	if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
 		t.Fatalf("could not send message over ws connection %v", err)
 	}
