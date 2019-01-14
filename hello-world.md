@@ -4,7 +4,7 @@
 
 It is traditional for your first program in a new language to be Hello, world.
 
-In the previous chapter we discussed how Go is opinionated as to where you put your files.
+In the [previous chapter](install-go.md#go-environment) we discussed how Go is opinionated as to where you put your files.
 
 Make a directory in the following path `$GOPATH/src/github.com/{your-user-id}/hello`.
 
