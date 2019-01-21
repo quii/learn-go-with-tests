@@ -452,8 +452,8 @@ slice operator so you can be familiar with it.
 
 Not a lot to refactor this time.
 
-What do you think would happen if you passed in an empty array into our
-function? What is the "tail" of an empty array? What happens when you tell Go to
+What do you think would happen if you passed in an empty slice into our
+function? What is the "tail" of an empty slice? What happens when you tell Go to
 capture all elements from `myEmptySlice[1:]`?
 
 ## Write the test first
