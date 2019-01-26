@@ -1,5 +1,8 @@
 # Learn Go with Tests
 
+![Red, green & blue gophers by Denise](red-green-blue-gophers-smaller.png)
+[Art by Denise](https://twitter.com/deniseyu21)
+
 _Or learn test-driven development with Go_
 
 ![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)
