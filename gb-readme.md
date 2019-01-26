@@ -1,6 +1,12 @@
 # Learn Go with Tests
 
-_Or learn test-driven development with Go_
+<p align="center">
+  <img src="red-green-blue-gophers-smaller.png" />
+</p>
+
+[Art by Denise](https://twitter.com/deniseyu21)
+
+_Learn test-driven development with Go_
 
 Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests)
 
