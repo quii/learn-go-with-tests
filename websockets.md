@@ -793,4 +793,59 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 
 Once we figure out how to not discard the blind messages we're done. 
 
+### Let's _not_ write a test! 
+
 Sometimes when we're not sure how to do something, it's best just to play around and try things out! Make sure your work is committed first because once we've figured out a way we should drive it through a test. 
+
+The problematic line of code we have is 
+
+```go
+p.game.Start(numberOfPlayers, ioutil.Discard) //todo: Dont discard the blinds messages!
+```
+
+We need to pass in an `io.Writer` for the game to write the blind alerts to. 
+
+Wouldn't it be nice if we could pass in our `playerServerWS` from before? 
+
+Give it a go
+
+```go
+func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
+	ws := newPlayerServerWS(w, r)
+
+	numberOfPlayersMsg := ws.WaitForMsg()
+	numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
+	p.game.Start(numberOfPlayers, ws) 
+	//etc...
+```
+
+The compiler complains
+
+```
+./server.go:71:14: cannot use ws (type *playerServerWS) as type io.Writer in argument to p.game.Start:
+	*playerServerWS does not implement io.Writer (missing Write method)
+```
+
+It seems the obvious thing to do, would be to make it so `playerServerWS` _does_ implement `io.Writer`. To do so we use the underlying `*websocket.Conn` to use `WriteMessage` to send the message down the websocket
+
+```go
+func (w *playerServerWS) Write(p []byte) (n int, err error) {
+	err = w.WriteMessage(1, p)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+```
+
+This seems too easy! Try and run the application and see if it works.
+
+Beforehand edit `TexasHoldem` so that the blind increment time is shorter so you can see it in action
+
+```go
+blindIncrement := time.Duration(5+numberOfPlayers) * time.Second // (rather than a minute)
+```
+
+You should see it working! The blind amount increments in the browser as if by magic. 
