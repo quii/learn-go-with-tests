@@ -493,6 +493,85 @@ First of all update `game.html` to update our client side code for the new requi
 
 The main changes is bringing in a section to enter the number of players and a section to display the blind value. We have a little logic to show/hide the user interface depending on the stage of the game. You can see how we simply put whatever message our server gets with the `onmessage` handler.
 
+How do we go about this? In the previous chapter we introduced the idea of `Game` so our CLI code could call a `Game` and everything else would be taken care of which turned out to be a good separation of concern. 
+
+```go
+type Game interface {
+	Start(numberOfPlayers int)
+	Finish(winner string)
+}
+```
+
+When the user was prompted in the CLI for number of players it would `Start` the game which would kick off the blind alerts and when the user declared the winner they would `Finish`. This is the same requirements we have now, just a different way of getting the inputs; so we should look to re-use this concept if we can.
+
+Our "real" implementation of `Game` is `TexasHoldem`
+
+```go
+type TexasHoldem struct {
+	alerter BlindAlerter
+	store   PlayerStore
+}
+```
+
+By sending in a `BlindAlerter` `TexasHoldem` can scheduler blind alerts to be sent to _wherever_
+
+```go
+type BlindAlerter interface {
+	ScheduleAlertAt(duration time.Duration, amount int)
+}
+```
+
+And as a reminder, here is our implementation of the `BlindAlerter` we use in the CLI.
+
+```go
+func StdOutAlerter(duration time.Duration, amount int) {
+	time.AfterFunc(duration, func() {
+		fmt.Fprintf(os.Stdout, "Blind is now %d\n", amount)
+	})
+}
+```
+
+This works in CLI because we _always know where we want to send the alerts to `os.Stdout`_ but this wont work for our web server. For every request we get a new `http.ResponseWriter` which we then upgrade to `*websocket.Conn`. So we cant know when constructing our dependencies where our alerts need to go. 
+
+For that reason we should do a refactor so that `BlindAlerter.ScheduleAlertAt` also takes a destination so that we can re-use it in our webserver. 
+
+Open BlindAlerter.go and add the paramter as discussed
+
+```go
+type BlindAlerter interface {
+	ScheduleAlertAt(duration time.Duration, amount int, to io.Writer)
+}
+
+type BlindAlerterFunc func(duration time.Duration, amount int, to io.Writer)
+
+func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int, to io.Writer) {
+	a(duration, amount, to)
+}
+
+func Alerter(duration time.Duration, amount int, to io.Writer) {
+	time.AfterFunc(duration, func() {
+		fmt.Fprintf(to, "Blind is now %d\n", amount)
+	})
+}
+```
+
+If you try and compile, it will fail in `TexasHoldem` because it is calling `ScheduleAlertAt` without a destination, to get things compiling again _for now_ hard-code it to `os.Stdout`. Try and run the tests and they will fail because `SpyBlindAlerter` no longer implements `BlindAlerter`, fix this and run the tests and we should still be green. 
+
+It doesn't make any sense for `TexasHoldem` to know where to send blind alerts. Let's now update `Game` so that when you start a game you declare _where_ the alerts should go.
+
+```go
+type Game interface {
+	Start(numberOfPlayers int, alertsDestination io.Writer)
+	Finish(winner string)
+}
+```
+
+Let the compiler tell you what you need to fix. The change isn't so bad:
+
+- Update `TexasHoldem` so it properly implements `Game`
+- In `CLI` when we start the game, pass in our `out` property (`cli.game.Start(numberOfPlayers, cli.out)`)
+- In `TexasHoldem`'s test i use `game.Start(5, ioutil.Discard)` to fix the compilation problem and configure the alert output to be discarded
+
 -------
 
 note to self: The key is to refactor `game` so that start takes a destination as to where to write the blind things
