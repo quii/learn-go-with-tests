@@ -574,6 +574,223 @@ Let the compiler tell you what you need to fix. The change isn't so bad:
 
 If you've got everything right, everything should be green! Now we can try and use `Game` within `Server`.
 
--------
+## Write the test first
 
-note to self: The key is to refactor `game` so that start takes a destination as to where to write the blind things
+The requirements of `CLI` and `Server` are the same! It's just the delivery mechanism is different. 
+
+Let's take a look at our `CLI` test
+
+```go
+t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t *testing.T) {
+    game := &GameSpy{}
+    stdout := &bytes.Buffer{}
+
+    in := userSends("3", "Chris wins")
+    cli := poker.NewCLI(in, stdout, game)
+
+    cli.PlayPoker()
+
+    assertMessagesSentToUser(t, stdout, poker.PlayerPrompt)
+    assertGameStartedWith(t, game, 3)
+    assertFinishCalledWith(t, game, "Chris")
+})
+```
+
+It looks like we should be able to test drive out a similar outcome using `GameSpy`
+
+Replace the old websocket test with the following
+
+```go
+t.Run("start a game with 3 players and declare Ruth the winner", func(t *testing.T) {
+    game := &poker.GameSpy{}
+    winner := "Ruth"
+    server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+    defer server.Close()
+
+    wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
+
+    ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+    if err != nil {
+        t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
+    }
+    defer ws.Close()
+
+    writeWSMessage(t, ws, "3")
+    writeWSMessage(t, ws, winner)
+
+    time.Sleep(10 * time.Millisecond)
+    assertGameStartedWith(t, game, 3)
+    assertFinishCalledWith(t, game, winner)
+})
+```
+
+- As discussed we create a spy `Game` and pass it into `mustMakePlayerServer` (be sure to update the helper to support this).
+- We then send the web socket messages for a game.
+- Finally we assert that the game is started and finished with what we expect. 
+
+## Try to run the test
+
+You'll have a number of compilation errors around `mustMakePlayerServer` in other tests. Introduce an unexported variable `dummyGame` and use it through all the tests that aren't compiling
+
+```go
+var (
+	dummyGame = &GameSpy{}
+)
+```
+
+The final error is where we are trying to pass in `Game` to `NewPlayerServer` but it doesn't support it yet
+
+```
+./server_test.go:21:38: too many arguments in call to "github.com/quii/learn-go-with-tests/websockets/v2".NewPlayerServer
+	have ("github.com/quii/learn-go-with-tests/websockets/v2".PlayerStore, "github.com/quii/learn-go-with-tests/websockets/v2".Game)
+	want ("github.com/quii/learn-go-with-tests/websockets/v2".PlayerStore)
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+Just add it as an argument for now just to get the test running 
+
+```go
+func NewPlayerServer(store PlayerStore, game Game) (*PlayerServer, error) {
+```
+
+Finally! 
+
+```
+=== RUN   TestGame/start_a_game_with_3_players_and_declare_Ruth_the_winner
+--- FAIL: TestGame (0.01s)
+    --- FAIL: TestGame/start_a_game_with_3_players_and_declare_Ruth_the_winner (0.01s)
+    	server_test.go:146: wanted Start called with 3 but got 0
+    	server_test.go:147: expected finish called with 'Ruth' but got ''
+FAIL
+```
+
+## Write enough code to make it pass
+
+We need to add `Game` as a field to `PlayerServer` so that it can use it when it gets requests. 
+
+```go
+type PlayerServer struct {
+	store PlayerStore
+	http.Handler
+	template *template.Template
+	game Game
+}
+```
+
+(We already have a method called `game` so rename that to `playGame`)
+
+Next lets assign it in our constructor
+
+```go
+func NewPlayerServer(store PlayerStore, game Game) (*PlayerServer, error) {
+	p := new(PlayerServer)
+
+	tmpl, err := template.ParseFiles("game.html")
+
+	if err != nil {
+		return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
+	}
+
+	p.game = game
+	
+	// etc
+```
+
+Now we can use our `Game` within `webSocket`.
+
+```go
+func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
+	conn, _ := wsUpgrader.Upgrade(w, r, nil)
+
+	_, numberOfPlayersMsg, _ := conn.ReadMessage()
+	numberOfPlayers, _ := strconv.Atoi(string(numberOfPlayersMsg))
+	p.game.Start(numberOfPlayers, ioutil.Discard) //todo: Dont discard the blinds messages!
+
+	_, winner, _ := conn.ReadMessage()
+	p.game.Finish(string(winner))
+}
+```
+
+Hooray! The tests pass. 
+
+We are not going to send the blind messages anywhere _just yet_ as we need to have a think about that. For now start the web server up. You'll need to update the `main.go` to pass a `Game` to the `PlayerServer`
+
+```go
+func main() {
+	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+
+	if err != nil {
+		log.Fatalf("problem opening %s %v", dbFileName, err)
+	}
+
+	store, err := poker.NewFileSystemPlayerStore(db)
+
+	if err != nil {
+		log.Fatalf("problem creating file system player store, %v ", err)
+	}
+
+	game := poker.NewTexasHoldem(poker.BlindAlerterFunc(poker.Alerter), store)
+
+	server, err := poker.NewPlayerServer(store, game)
+
+	if err != nil {
+		log.Fatalf("problem creating player server %v", err)
+	}
+
+	if err := http.ListenAndServe(":5000", server); err != nil {
+		log.Fatalf("could not listen on port 5000 %v", err)
+	}
+}
+```
+
+Discounting the fact we're not getting blind alerts yet, the app does work! We've managed to re-use `Game` with `PlayerServer` and it has taken care of all the details. Once we figure out how to send our blind alerts through to the web sockets rather than discarding them it _should_ all work. 
+
+Before that though, let's tidy up some code.  
+
+## Refactor
+
+The way we're using websockets is fairly basic and the error handling is fairly naieve, so I wanted to encapsulate that in a type just to remove that messyness from the server code. We may wish to revisit it later but for now this'll tidy things up a bit
+
+```go
+type playerServerWS struct {
+	*websocket.Conn
+}
+
+func newPlayerServerWS(w http.ResponseWriter, r *http.Request) *playerServerWS {
+	conn, err := wsUpgrader.Upgrade(w, r, nil)
+
+	if err != nil {
+		log.Printf("problem upgrading connection to websockets %v\n", err)
+	}
+
+	return &playerServerWS{conn}
+}
+
+func (w *playerServerWS) WaitForMsg() string {
+	_, msg, err := w.ReadMessage()
+	if err != nil {
+		log.Printf("error reading from websocket %v\n", err)
+	}
+	return string(msg)
+}
+```
+
+Now the server code is a bit simplified
+
+```go
+func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
+	ws := newPlayerServerWS(w, r)
+
+	numberOfPlayersMsg := ws.WaitForMsg()
+	numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
+	p.game.Start(numberOfPlayers, ioutil.Discard) //todo: Dont discard the blinds messages!
+
+	winner := ws.WaitForMsg()
+	p.game.Finish(winner)
+}
+```
+
+Once we figure out how to not discard the blind messages we're done. 
+
+Sometimes when we're not sure how to do something, it's best just to play around and try things out! Make sure your work is committed first because once we've figured out a way we should drive it through a test. 

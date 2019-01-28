@@ -1,6 +1,7 @@
-package poker
+package poker_test
 
 import (
+	"github.com/quii/learn-go-with-tests/websockets/v2"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -9,11 +10,11 @@ import (
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	database, cleanDatabase := createTempFile(t, `[]`)
 	defer cleanDatabase()
-	store, err := NewFileSystemPlayerStore(database)
+	store, err := poker.NewFileSystemPlayerStore(database)
 
 	assertNoError(t, err)
 
-	server := mustMakePlayerServer(t, store)
+	server := mustMakePlayerServer(t, store, dummyGame)
 	player := "Pepper"
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -34,8 +35,8 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 		assertStatus(t, response, http.StatusOK)
 
 		got := getLeagueFromResponse(t, response.Body)
-		want := []Player{
-			{"Pepper", 3},
+		want := []poker.Player{
+			{Name: "Pepper", Wins: 3},
 		}
 		assertLeague(t, got, want)
 	})
