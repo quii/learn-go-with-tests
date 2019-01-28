@@ -535,7 +535,7 @@ This works in CLI because we _always know where we want to send the alerts to `o
 
 For that reason we should do a refactor so that `BlindAlerter.ScheduleAlertAt` also takes a destination so that we can re-use it in our webserver. 
 
-Open BlindAlerter.go and add the paramter as discussed
+Open BlindAlerter.go and add the parameter as discussed
 
 ```go
 type BlindAlerter interface {
@@ -571,6 +571,8 @@ Let the compiler tell you what you need to fix. The change isn't so bad:
 - Update `TexasHoldem` so it properly implements `Game`
 - In `CLI` when we start the game, pass in our `out` property (`cli.game.Start(numberOfPlayers, cli.out)`)
 - In `TexasHoldem`'s test i use `game.Start(5, ioutil.Discard)` to fix the compilation problem and configure the alert output to be discarded
+
+If you've got everything right, everything should be green! Now we can try and use `Game` within `Server`.
 
 -------
 
