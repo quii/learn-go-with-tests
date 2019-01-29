@@ -72,6 +72,7 @@ I often run in to questions on the internets like
 If you have such a question raise it as an issue on github and I'll try and find time to write a short chapter to tackle the issue. I feel like content like this is valuable as it is tackling people's _real_ questions around testing.
 
 * [OS exec](os-exec.md) - An example of how we can reach out to the OS to execute commands to fetch data and keep our business logic testable/
+* [Error types (WIP)](error-types.md) - Example of creating your own error types to improve your tests and make your code easier to work with.
 
 ## Contributing
 
