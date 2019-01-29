@@ -66,7 +66,9 @@ This test doesn't feel good:
 - We're constructing the same string as production code does to test it
 - It's annoying to read and write
 
-What does this tell us? The ergonomics of our test would be reflected on another bit of code trying to use our code. How does a user of our code react to the specific kind of errors we return? The best they can do is look at the error string which is extremely error prone and horrible to write.
+What does this tell us? The ergonomics of our test would be reflected on another bit of code trying to use our code. 
+
+How does a user of our code react to the specific kind of errors we return? The best they can do is look at the error string which is extremely error prone and horrible to write.
 
 ## What we should do
 
@@ -74,7 +76,7 @@ When writing tests from a TDD approach we have the benefit of getting into the m
 
 > How would _I_ want to use this code? 
 
-What we could do for `DumbGet` is provide a way for users to use the type system to understand what kind of error has happened. 
+What we could do for `DumbGetter` is provide a way for users to use the type system to understand what kind of error has happened. 
 
 As discussed, let's start with a test.
 
@@ -119,6 +121,10 @@ func (b BadStatusError) Error() string {
 }
 ```
 
+### What does the test do?
+
+Instead of checking the exact string of the error, we are instead doing a type assertion on the error to see if it is a `BadStatusError`. This reflects our desire for the _kind_ of error clearer. Assuming the assertion passes we can then check the properties of the error are correct. 
+
 When we run the test, it tells us we didn't return the right kind of error
 
 ```
@@ -137,8 +143,9 @@ if res.StatusCode != http.StatusOK {
 
 This change has had some _real positive effects_
 
-- Our `DumbGet` function has become simper to write, it's no longer concerned with the intricacies of the error string, it just creates a `BadStatusError`
+- Our `DumbGetter` function has become simper to write, it's no longer concerned with the intricacies of the error string, it just creates a `BadStatusError`
 - Our tests now reflect what a user of our code _could_ do if they decided they wanted to do some more sophisticated error handling than just logging. Just do a type assertion and then you get easy access to the properties of the error. 
+- It is still "just" an `error`, so if they choose to they can pass it up the call stack or log it like any other `error`.
 
 ## Wrapping up
 
