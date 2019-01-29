@@ -57,6 +57,8 @@ t.Run("when you dont get a 200 you get a status error", func(t *testing.T) {
 
 This test creates a server which always returns `StatusTeapot` and then we use its URL as the argument to `DumbGetter` so we can see it handles non `200` responses correctly.
 
+## Problems with this way of testing
+
 This book tries to emphasise _listen to your tests_. 
 
 This test doesn't feel good:
@@ -65,6 +67,8 @@ This test doesn't feel good:
 - It's annoying to read and write
 
 What does this tell us? The ergonomics of our test would be reflected on another bit of code trying to use our code. How does a user of our code react to the specific kind of errors we return? The best they can do is look at the error string which is extremely error prone and horrible to write.
+
+## What we should do
 
 When writing tests from a TDD approach we have the benefit of getting into the mindset of:
 
