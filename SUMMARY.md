@@ -30,6 +30,7 @@
 ## Questions and answers
 
 * [OS Exec](os-exec.md)
+* [Error types](error-types.md)
 
 ## Meta
 
