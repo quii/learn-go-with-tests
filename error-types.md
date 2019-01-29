@@ -79,7 +79,18 @@ With TDD we have the benefit of getting into the mindset of:
 
 What we could do for `DumbGetter` is provide a way for users to use the type system to understand what kind of error has happened. 
 
-Let's start with a test.
+What if `DumbGetter` could return us something like
+
+```go
+type BadStatusError struct {
+	URL    string
+	Status int
+}
+```
+
+Rather than a magical string, we have actual _data_ to work with. 
+
+Let's change our existing test to reflect this need
 
 ```go
 t.Run("when you dont get a 200 you get a status error", func(t *testing.T) {
@@ -109,14 +120,9 @@ t.Run("when you dont get a 200 you get a status error", func(t *testing.T) {
 })
 ```
 
-We've added the type `BadStatusError` which implements the error interface.
+We'll have to make `BadStatusError` implement the error interface.
 
 ```go
-type BadStatusError struct {
-	URL    string
-	Status int
-}
-
 func (b BadStatusError) Error() string {
 	return fmt.Sprintf("did not get 200 from %s, got %d", b.URL, b.Status)
 }
