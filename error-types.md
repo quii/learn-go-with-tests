@@ -123,7 +123,7 @@ func (b BadStatusError) Error() string {
 
 ### What does the test do?
 
-Instead of checking the exact string of the error, we are instead doing a type assertion on the error to see if it is a `BadStatusError`. This reflects our desire for the _kind_ of error clearer. Assuming the assertion passes we can then check the properties of the error are correct. 
+Instead of checking the exact string of the error, we are doing a [type assertion](https://tour.golang.org/methods/15) on the error to see if it is a `BadStatusError`. This reflects our desire for the _kind_ of error clearer. Assuming the assertion passes we can then check the properties of the error are correct. 
 
 When we run the test, it tells us we didn't return the right kind of error
 
@@ -133,7 +133,7 @@ When we run the test, it tells us we didn't return the right kind of error
     	error-types_test.go:56: was not a BadStatusError, got *errors.errorString
 ```
 
-So let's fix `DumbGet` by updating our error handling code to use our type
+Let's fix `DumbGet` by updating our error handling code to use our type
 
 ```go
 if res.StatusCode != http.StatusOK {
@@ -143,7 +143,7 @@ if res.StatusCode != http.StatusOK {
 
 This change has had some _real positive effects_
 
-- Our `DumbGetter` function has become simper to write, it's no longer concerned with the intricacies of the error string, it just creates a `BadStatusError`
+- Our `DumbGetter` function has become simper, it's no longer concerned with the intricacies of an error string, it just creates a `BadStatusError`.
 - Our tests now reflect what a user of our code _could_ do if they decided they wanted to do some more sophisticated error handling than just logging. Just do a type assertion and then you get easy access to the properties of the error. 
 - It is still "just" an `error`, so if they choose to they can pass it up the call stack or log it like any other `error`.
 
