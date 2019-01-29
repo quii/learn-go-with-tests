@@ -135,4 +135,12 @@ This change has had some _real positive effects_
 
 - Our `DumbGet` function has become simper to write, it's no longer concerned with the intricacies of the error string, it just creates a `BadStatusError`
 - Our tests now reflect what a user of our code _could_ do if they decided they wanted to do some more sophisticated error handling than just logging. Just do a type assertion and then you get easy access to the properties of the error. 
+
+## Wrapping up
+
+If you find yourself testing for multiple error conditions dont fall in to the trap of comparing the error messages. 
+
+This leads to flaky and difficult to read/write tests and it reflects the difficulties the users of your code will have if they also need to start doing things differently depending on the kind of errors that have occurred.
+
+Always make sure your tests reflect how _you'd_ like to use your code, so in this respect consider creating an error type to encapsulate your kinds of errors. This makes handling different kinds of errors easier for users of your code and also makes writing your error handling code simpler and easier to read. 
  
