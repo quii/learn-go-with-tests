@@ -2,6 +2,8 @@
 
 **[You can find all the code for here](https://github.com/quii/learn-go-with-tests/tree/master/q-and-a/error-types)**
 
+**Creating your own types for errors can be an elegant way of tidying up your code, making your code easier to use and test.**
+
 Pedro on the Gopher Slack asks
 
 > If I’m creating an error like `fmt.Errorf("%s must be foo, got %s", bar, baz)`, is there a way to test equality without comparing the string value?
