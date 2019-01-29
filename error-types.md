@@ -6,7 +6,7 @@ Pedro on the Gopher Slack asks
 
 > If I’m creating an error like `fmt.Errorf("%s must be foo, got %s", bar, baz)`, is there a way to test equality without comparing the string value?
 
-Let's make up some function to help explore this idea. 
+Let's make up a function to help explore this idea. 
 
 ```go
 // DumbGetter will get the string body of url if it gets a 200
@@ -59,9 +59,9 @@ This test creates a server which always returns `StatusTeapot` and then we use i
 
 This book tries to emphasise _listen to your tests_. 
 
-This test doesn't feel good
+This test doesn't feel good:
 
-- We're constructing the same string are production code does to test it
+- We're constructing the same string as production code does to test it
 - It's annoying to read and write
 
 What does this tell us? The ergonomics of our test would be reflected on another bit of code trying to use our code. How does a user of our code react to the specific kind of errors we return? The best they can do is look at the error string which is extremely error prone and horrible to write.
@@ -102,7 +102,20 @@ t.Run("when you dont get a 200 you get a status error", func(t *testing.T) {
 })
 ```
 
-When we run it, the test tells us we didn't return the right kind of error
+We've added the type `BadStatusError` which implements the error interface
+
+```go
+type BadStatusError struct {
+	URL    string
+	Status int
+}
+
+func (b BadStatusError) Error() string {
+	return fmt.Sprintf("did not get 200 from %s, got %d", b.URL, b.Status)
+}
+```
+
+When we run the test, it tells us we didn't return the right kind of error
 
 ```
 --- FAIL: TestDumbGetter (0.00s)

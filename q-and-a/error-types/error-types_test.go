@@ -1,4 +1,4 @@
-package error_types
+package errortypes
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 )
 
 type BadStatusError struct {
-	URL string
+	URL    string
 	Status int
 }
 
@@ -56,7 +56,7 @@ func TestDumbGetter(t *testing.T) {
 			t.Fatalf("was not a BadStatusError, got %T", err)
 		}
 
-		want := BadStatusError{URL:svr.URL, Status:http.StatusTeapot}
+		want := BadStatusError{URL: svr.URL, Status: http.StatusTeapot}
 
 		if got != want {
 			t.Errorf("got %v, want %v", got, want)
