@@ -121,15 +121,18 @@ func TestGame(t *testing.T) {
 		assertStatus(t, response, http.StatusOK)
 	})
 
-	t.Run("start a game with 3 players and declare Ruth the winner", func(t *testing.T) {
-		game := &GameSpy{}
+	t.Run("start a game with 3 players, send some blind alerts down WS and declare Ruth the winner", func(t *testing.T) {
+		wantedBlindAlert := "Blind is 100"
 		winner := "Ruth"
+
+		game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
 		server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
 		defer server.Close()
 
 		wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
 
 		ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+
 		if err != nil {
 			t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
 		}
@@ -141,6 +144,12 @@ func TestGame(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 		assertGameStartedWith(t, game, 3)
 		assertFinishCalledWith(t, game, winner)
+
+		_, gotBlindAlert, _ := ws.ReadMessage()
+
+		if string(gotBlindAlert) != wantedBlindAlert {
+			t.Errorf("got blind alert '%s', want '%s'", string(gotBlindAlert), wantedBlindAlert)
+		}
 	})
 }
 
