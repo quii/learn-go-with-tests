@@ -849,3 +849,86 @@ blindIncrement := time.Duration(5+numberOfPlayers) * time.Second // (rather than
 ```
 
 You should see it working! The blind amount increments in the browser as if by magic. 
+
+Now let's revert the code and think how to test it. In order to _implement_ it all we did was pass through to `StartGame` was `playerServerWS` rather than `ioutil.Discard` so that might make you think we should perhaps spy on the call to verify it works. 
+
+Spying is great and helps us check implementation details but we should always try and favour testing the _real_ behaviour if we can because when you decide to refactor it's often spy tests that start failing because they are often checking implementation detail. Our test currently opens a websocket connection to our running server and sends messages to make it do things. Equally we should be able to test the messages our server sends back over the websocket connection.
+
+## Write the test first
+
+We'll edit our existing test. 
+
+Currently our `GameSpy` does not send any data to `out` when you call `Start`. We should change it so we can configure it to send a canned message and then we can check that message gets sent to the websocket. This should give us confidence that we have configured things correctly whilst still exercising the real behaviour we want.
+
+```go
+type GameSpy struct {
+	StartCalled     bool
+	StartCalledWith int
+	BlindAlert      []byte
+
+	FinishedCalled   bool
+	FinishCalledWith string
+}
+```
+
+Add `BlindAlert` field.
+
+Update `GameSpy` `Start` to send the canned message to `out`.
+
+```go
+func (g *GameSpy) Start(numberOfPlayers int, out io.Writer) {
+	g.StartCalled = true
+	g.StartCalledWith = numberOfPlayers
+	out.Write(g.BlindAlert)
+}
+```
+
+This now means when we exercise `PlayerServer` when it tries to `Start` the game it should end up sending messages through the websocket if things are working right. 
+
+Finally we can update the test
+
+```go
+t.Run("start a game with 3 players, send some blind alerts down WS and declare Ruth the winner", func(t *testing.T) {
+    wantedBlindAlert := "Blind is 100"
+    winner := "Ruth"
+
+    game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
+    server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+    defer server.Close()
+
+    wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
+
+    ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+
+    if err != nil {
+        t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
+    }
+    defer ws.Close()
+
+    writeWSMessage(t, ws, "3")
+    writeWSMessage(t, ws, winner)
+
+	time.Sleep(10 * time.Millisecond)
+    assertGameStartedWith(t, game, 3)
+    assertFinishCalledWith(t, game, winner)
+
+    _, gotBlindAlert, _ := ws.ReadMessage()
+
+    if string(gotBlindAlert) != wantedBlindAlert {
+        t.Errorf("got blind alert '%s', want '%s'", string(gotBlindAlert), wantedBlindAlert)
+    }
+})
+```
+
+- We've added a `wantedBlindAlert` and configured our `GameSpy` to send it to `out` if `Start` is called.
+- We hope it gets sent in the websocket connection so we've added a call to `ws.ReadMessage()` to wait for a message to be sent and then check it's the one we expected.
+
+## Try to run the test
+
+You should find the test hangs forever. This is because `ws.ReadMessage()` will block until it gets a message, which it never will. 
+
+We should never have tests that hang so let's introduce a timeout. 
+
+## Write the minimal amount of code for the test to run and check the failing test output
+## Write enough code to make it pass
+## Refactor
