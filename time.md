@@ -836,9 +836,9 @@ The intent behind what happens when a game of poker starts is now much clearer.
 
 Make sure to also move over the test for when the game ends. 
 
-Once we are happy we have moved the tests over for game logic we can simplify our CLI tests so they reflect our intended responsiblities clearer
+Once we are happy we have moved the tests over for game logic we can simplify our CLI tests so they reflect our intended responsibilities clearer
 
-- Process user input and call `Game`'s methods when appropiate
+- Process user input and call `Game`'s methods when appropriate
 - Send output
 - Crucially it doesn't know about the actual workings of how games work
 
