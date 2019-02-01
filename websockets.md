@@ -311,7 +311,7 @@ If you try and run the test, it's still failing.
 
 The issue is timing. There is a delay between our WebSocket connection reading the message and recording the win and our test finishes before it happens. You can test this by putting a short `time.Sleep` before the final assertion. 
 
-Let's go with that for now but acknowledge that putting in arbitary sleeps into tests **is very bad practice**.
+Let's go with that for now but acknowledge that putting in arbitrary sleeps into tests **is very bad practice**.
 
 ```go
 time.Sleep(10 * time.Millisecond)
