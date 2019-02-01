@@ -22,4 +22,5 @@ docker run -v `pwd`:/source jagregory/pandoc -o learn-go-with-tests.epub --toc-d
     time.md \
     websockets.md \
     os-exec.md \
-    error-types.md
+    error-types.md \
+    why.md

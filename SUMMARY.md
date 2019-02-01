@@ -34,5 +34,6 @@
 
 ## Meta
 
+* [Why unit tests and how to make them work for you](why.md)
 * [Contributing](contributing.md)
 * [Chapter Template](template.md)
