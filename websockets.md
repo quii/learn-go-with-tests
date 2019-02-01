@@ -15,7 +15,7 @@ The product owner is thrilled with the command line application but would prefer
 
 On the face of it, it sounds quite simple but as always we must emphasise taking an _iterative_ approach to writing software.
 
-First of all we will need to serve HTML. So far all of our HTTP endpoints have returned either plaintext or JSON. We _could_ use the same techniques we know (as they're all ultimately strings) but we can also use the [/html/template](https://golang.org/pkg/html/template/) for a cleaner solution.
+First of all we will need to serve HTML. So far all of our HTTP endpoints have returned either plaintext or JSON. We _could_ use the same techniques we know (as they're all ultimately strings) but we can also use the [html/template](https://golang.org/pkg/html/template/) package for a cleaner solution.
 
 We also need to be able to asynchronously send messages to the user saying `The blind is now *y*` without having to refresh the browser. We can use [websockets](https://en.wikipedia.org/wiki/WebSocket) to facilitate this. 
 
@@ -37,12 +37,11 @@ Sorry folks. Lobby O'Reilly to pay me to make a "Learn JavaScript with tests".
 
 ## Write the test first
 
-First thing we need to do is serve up some HTML to the user when they hit `/game`. 
+First thing we need to do is serve up some HTML to users when they hit `/game`. 
 
 Here's a reminder of the pertinent code in our web server
 
 ```go
-// PlayerServer is a HTTP interface for player information
 type PlayerServer struct {
 	store PlayerStore
 	http.Handler
@@ -50,7 +49,6 @@ type PlayerServer struct {
 
 const jsonContentType = "application/json"
 
-// NewPlayerServer creates a PlayerServer with routing configured
 func NewPlayerServer(store PlayerStore) *PlayerServer {
 	p := new(PlayerServer)
 
@@ -113,7 +111,7 @@ func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
 
 The server code is already fine due to us slotting in more code into the existing well-factored code very easily. 
 
-We can tidy up the test a little by adding a helper `newGameRequest` to make the request to `/game`. Try writing this yourself. 
+We can tidy up the test a little by adding a test helper function `newGameRequest` to make the request to `/game`. Try writing this yourself. 
 
 ```go
 func TestGame(t *testing.T) {
@@ -211,7 +209,7 @@ You _should_ have got an error about not being able to find the template. You ca
 
 If you make this change and run again you should see our UI. 
 
-Now we need to test that when we get a string over a web socket connection to our server that we assume it is a winner of a game.
+Now we need to test that when we get a string over a web socket connection to our server that we declare it as a winner of a game.
 
 ## Write the test first
 
@@ -219,7 +217,7 @@ For the first time we are going to use an external library so that we can work w
 
 Run `go get github.com/gorilla/websocket`
 
-This will fetch the code for the excellent [Gorilla WebSocket](https://github.com/gorilla/websocket) library.
+This will fetch the code for the excellent [Gorilla WebSocket](https://github.com/gorilla/websocket) library. Now we can update our tests for our new requirement.
 
 ```go
 t.Run("when we get a message over a websocket it is a winner of a game", func(t *testing.T) {
@@ -311,7 +309,9 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 
 If you try and run the test, it's still failing. 
 
-The issue is timing. There is a delay between our WebSocket connection reading the message and recording the win and our test finishes before it happens. You can test this by putting a short `time.Sleep` before the final assertion. Let's go with that for now.
+The issue is timing. There is a delay between our WebSocket connection reading the message and recording the win and our test finishes before it happens. You can test this by putting a short `time.Sleep` before the final assertion. 
+
+Let's go with that for now but acknowledge that putting in arbitary sleeps into tests **is very bad practice**.
 
 ```go
 time.Sleep(10 * time.Millisecond)
@@ -354,7 +354,6 @@ type PlayerServer struct {
 
 const htmlTemplatePath = "game.html"
 
-// NewPlayerServer creates a PlayerServer with routing configured
 func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
 	p := new(PlayerServer)
 
@@ -394,6 +393,20 @@ func mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer {
 		t.Fatal("problem creating player server", err)
 	}
 	return server
+}
+``` 
+
+Similarly I created another helper `mustDialWS` so that I could hide nasty error noise when creating the WebSocket connection.
+
+```go
+func mustDialWS(t *testing.T, url string) *websocket.Conn {
+	ws, _, err := websocket.DefaultDialer.Dial(url, nil)
+
+	if err != nil {
+		t.Fatalf("could not open a ws connection on %s %v", url, err)
+	}
+
+	return ws
 }
 ``` 
 
@@ -491,9 +504,11 @@ First of all update `game.html` to update our client side code for the new requi
 </html>
 ```
 
-The main changes is bringing in a section to enter the number of players and a section to display the blind value. We have a little logic to show/hide the user interface depending on the stage of the game. You can see how we simply put whatever message our server gets with the `onmessage` handler.
+The main changes is bringing in a section to enter the number of players and a section to display the blind value. We have a little logic to show/hide the user interface depending on the stage of the game. 
 
-How do we go about this? In the previous chapter we introduced the idea of `Game` so our CLI code could call a `Game` and everything else would be taken care of which turned out to be a good separation of concern. 
+Any message we receive via `conn.onmessage` we assume to be blind alerts and so we set the `blindContainer.innerText` accordingly.
+
+How do we go about sending the blind alerts? In the previous chapter we introduced the idea of `Game` so our CLI code could call a `Game` and everything else would be taken care of which turned out to be a good separation of concern. 
 
 ```go
 type Game interface {
@@ -513,7 +528,7 @@ type TexasHoldem struct {
 }
 ```
 
-By sending in a `BlindAlerter` `TexasHoldem` can scheduler blind alerts to be sent to _wherever_
+By sending in a `BlindAlerter` `TexasHoldem` can schedule blind alerts to be sent to _wherever_
 
 ```go
 type BlindAlerter interface {
@@ -547,7 +562,11 @@ type BlindAlerterFunc func(duration time.Duration, amount int, to io.Writer)
 func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int, to io.Writer) {
 	a(duration, amount, to)
 }
+```
 
+The idea of a `StdoutAlerter` doesn't fit our new model so just rename it to `Alerter`
+
+```go
 func Alerter(duration time.Duration, amount int, to io.Writer) {
 	time.AfterFunc(duration, func() {
 		fmt.Fprintf(to, "Blind is now %d\n", amount)
@@ -555,7 +574,9 @@ func Alerter(duration time.Duration, amount int, to io.Writer) {
 }
 ```
 
-If you try and compile, it will fail in `TexasHoldem` because it is calling `ScheduleAlertAt` without a destination, to get things compiling again _for now_ hard-code it to `os.Stdout`. Try and run the tests and they will fail because `SpyBlindAlerter` no longer implements `BlindAlerter`, fix this and run the tests and we should still be green. 
+If you try and compile, it will fail in `TexasHoldem` because it is calling `ScheduleAlertAt` without a destination, to get things compiling again _for now_ hard-code it to `os.Stdout`. 
+
+Try and run the tests and they will fail because `SpyBlindAlerter` no longer implements `BlindAlerter`, fix this by updating the signature of `ScheduleAlertAt`, run the tests and we should still be green. 
 
 It doesn't make any sense for `TexasHoldem` to know where to send blind alerts. Let's now update `Game` so that when you start a game you declare _where_ the alerts should go.
 
@@ -578,7 +599,7 @@ If you've got everything right, everything should be green! Now we can try and u
 
 The requirements of `CLI` and `Server` are the same! It's just the delivery mechanism is different. 
 
-Let's take a look at our `CLI` test
+Let's take a look at previous our `CLI` test for inspiration.
 
 ```go
 t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t *testing.T) {
@@ -605,14 +626,9 @@ t.Run("start a game with 3 players and declare Ruth the winner", func(t *testing
     game := &poker.GameSpy{}
     winner := "Ruth"
     server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+    ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+
     defer server.Close()
-
-    wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
-
-    ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-    if err != nil {
-        t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
-    }
     defer ws.Close()
 
     writeWSMessage(t, ws, "3")
@@ -805,9 +821,9 @@ p.game.Start(numberOfPlayers, ioutil.Discard) //todo: Dont discard the blinds me
 
 We need to pass in an `io.Writer` for the game to write the blind alerts to. 
 
-Wouldn't it be nice if we could pass in our `playerServerWS` from before? 
+Wouldn't it be nice if we could pass in our `playerServerWS` from before? It's our wrapper around our WebSocket so it _feels_ like we should be able to send that to our `Game` to send messages to. 
 
-Give it a go
+Give it a go:
 
 ```go
 func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
@@ -852,7 +868,9 @@ You should see it working! The blind amount increments in the browser as if by m
 
 Now let's revert the code and think how to test it. In order to _implement_ it all we did was pass through to `StartGame` was `playerServerWS` rather than `ioutil.Discard` so that might make you think we should perhaps spy on the call to verify it works. 
 
-Spying is great and helps us check implementation details but we should always try and favour testing the _real_ behaviour if we can because when you decide to refactor it's often spy tests that start failing because they are often checking implementation detail. Our test currently opens a websocket connection to our running server and sends messages to make it do things. Equally we should be able to test the messages our server sends back over the websocket connection.
+Spying is great and helps us check implementation details but we should always try and favour testing the _real_ behaviour if we can because when you decide to refactor it's often spy tests that start failing because they are usually checking implementation details that you're trying to change. 
+
+Our test currently opens a websocket connection to our running server and sends messages to make it do things. Equally we should be able to test the messages our server sends back over the websocket connection.
 
 ## Write the test first
 
@@ -894,15 +912,9 @@ t.Run("start a game with 3 players, send some blind alerts down WS and declare R
 
     game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
     server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+    ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+
     defer server.Close()
-
-    wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
-
-    ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-
-    if err != nil {
-        t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
-    }
     defer ws.Close()
 
     writeWSMessage(t, ws, "3")
