@@ -26,6 +26,7 @@
 * [IO and sorting](io.md)
 * [Command line & package structure](command-line.md)
 * [Time (WIP)](time.md)
+* [WebSockets (WIP)](websockets.md)
 
 ## Questions and answers
 

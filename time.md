@@ -1,4 +1,4 @@
-# Time (WIP)
+# Time
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/time)**
 
@@ -471,7 +471,9 @@ We have a new dependency so we'll have to update `NewCLI`
 func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI
 ```
 
-Now the _other_ tests will fail to compile because they dont have an `io.Writer` being passed into `NewCLI`. Add `dummyStdout` for the other tests.
+Now the _other_ tests will fail to compile because they dont have an `io.Writer` being passed into `NewCLI`. 
+
+Add `dummyStdout` for the other tests.
 
 The new test should fail like so
 
@@ -775,31 +777,70 @@ cli.PlayPoker()
 
 Now that we have extracted out `Game` we should move our game specific assertions into tests separate from CLI. 
 
-This should just be an exercise in copying the tests from the `CLI_test` into a new set but with less dependencies to set up; so we wont show all the code here ([you can always check the full source here](https://github.com/quii/learn-go-with-tests/tree/master/time)) but here is an example of one of the moved tests for reference.
+This is just an exercise in copying our `CLI` tests but with less dependencies
 
 ```go
-t.Run("schedules alerts on game start for 7 players", func(t *testing.T) {
-    blindAlerter := &poker.SpyBlindAlerter{}
-    game := poker.NewGame(blindAlerter, dummyPlayerStore)
+func TestGame_Start(t *testing.T) {
+	t.Run("schedules alerts on game start for 5 players", func(t *testing.T) {
+		blindAlerter := &poker.SpyBlindAlerter{}
+		game := poker.NewTexasHoldem(blindAlerter, dummyPlayerStore)
 
-    game.Start(7)
+		game.Start(5)
 
-    cases := []poker.ScheduledAlert{
-        {At: 0 * time.Second, Amount: 100},
-        {At: 12 * time.Minute, Amount: 200},
-        {At: 24 * time.Minute, Amount: 300},
-        {At: 36 * time.Minute, Amount: 400},
-    }
+		cases := []poker.ScheduledAlert{
+			{At: 0 * time.Second, Amount: 100},
+			{At: 10 * time.Minute, Amount: 200},
+			{At: 20 * time.Minute, Amount: 300},
+			{At: 30 * time.Minute, Amount: 400},
+			{At: 40 * time.Minute, Amount: 500},
+			{At: 50 * time.Minute, Amount: 600},
+			{At: 60 * time.Minute, Amount: 800},
+			{At: 70 * time.Minute, Amount: 1000},
+			{At: 80 * time.Minute, Amount: 2000},
+			{At: 90 * time.Minute, Amount: 4000},
+			{At: 100 * time.Minute, Amount: 8000},
+		}
 
-    checkSchedulingCases(cases, t, blindAlerter)
-})
+		checkSchedulingCases(cases, t, blindAlerter)
+	})
+
+	t.Run("schedules alerts on game start for 7 players", func(t *testing.T) {
+		blindAlerter := &poker.SpyBlindAlerter{}
+		game := poker.NewTexasHoldem(blindAlerter, dummyPlayerStore)
+
+		game.Start(7)
+
+		cases := []poker.ScheduledAlert{
+			{At: 0 * time.Second, Amount: 100},
+			{At: 12 * time.Minute, Amount: 200},
+			{At: 24 * time.Minute, Amount: 300},
+			{At: 36 * time.Minute, Amount: 400},
+		}
+
+		checkSchedulingCases(cases, t, blindAlerter)
+	})
+
+}
+
+func TestGame_Finish(t *testing.T) {
+	store := &poker.StubPlayerStore{}
+	game := poker.NewTexasHoldem(dummyBlindAlerter, store)
+	winner := "Ruth"
+
+	game.Finish(winner)
+	poker.AssertPlayerWin(t, store, winner)
+}
 ```
 
 The intent behind what happens when a game of poker starts is now much clearer. 
 
 Make sure to also move over the test for when the game ends. 
 
-Once we are happy we have moved the tests over for game logic we can simplify our CLI tests. Remember all it is in charge of now is IO and calling `Game` when needed.
+Once we are happy we have moved the tests over for game logic we can simplify our CLI tests so they reflect our intended responsiblities clearer
+
+- Process user input and call `Game`'s methods when appropiate
+- Send output
+- Crucially it doesn't know about the actual workings of how games work
 
 To do this we'll have to make it so `CLI` no longer relies on a concrete `Game` type but instead accepts an interface with `Start(numberOfPlayers)` and `Finish(winner)`. We can then create a spy of that type and verify the correct calls are made.
 
@@ -1065,3 +1106,21 @@ Remember when you get in to these situations to always take small steps and re-r
 It would've been dangerous to refactor both the test code _and_ the production code at the same time, so we first refactored the production code (in the current state we couldn't improve the tests much) without changing its interface so we could rely on our tests as much as we could while changing things. _Then_ we refactored the tests after the design improved.
 
 After refactoring the dependency list reflected our design goal. This is another benefit of DI in that it often documents intent. When you rely on global variables responsibilities become very unclear.
+
+## An example of a function implementing an interface
+
+When you define an interface with one method in it you might want to consider defining a `MyInterfaceFunc` type to complement it so users can implement your interface with just a function
+
+```go
+type BlindAlerter interface {
+	ScheduleAlertAt(duration time.Duration, amount int)
+}
+
+// BlindAlerterFunc allows you to implement BlindAlerter with a function
+type BlindAlerterFunc func(duration time.Duration, amount int)
+
+// ScheduleAlertAt is BlindAlerterFunc implementation of BlindAlerter
+func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
+	a(duration, amount)
+}
+```
