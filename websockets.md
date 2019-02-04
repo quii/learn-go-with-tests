@@ -939,8 +939,98 @@ t.Run("start a game with 3 players, send some blind alerts down WS and declare R
 
 You should find the test hangs forever. This is because `ws.ReadMessage()` will block until it gets a message, which it never will. 
 
-We should never have tests that hang so let's introduce a timeout. 
 
 ## Write the minimal amount of code for the test to run and check the failing test output
+
+We should never have tests that hang so let's introduce a way of handling code that we want to timeout.
+
+```go
+func within(t *testing.T, d time.Duration, assert func()) {
+	t.Helper()
+
+	done := make(chan struct{}, 1)
+
+	go func() {
+		assert()
+		done <- struct{}{}
+	}()
+
+	select {
+	case <-time.After(d):
+		t.Error("timed out")
+	case <-done:
+	}
+}
+```
+
+What `within` does is take a function `assert` as an argument and then runs it in a go routine. If/When the function finishes it will signal it is done via the `done` channel. 
+
+While that happens we use a `select` statement which lets us wait for a channel to send a message. From here it is a race between the `assert` function and `time.After` which will send a signal when the duration has occurred. 
+
+Finally I made a helper function for our assertion just to make things a bit neater
+
+```go
+func assertWebsocketGotMsg(t *testing.T, ws *websocket.Conn, want string) {
+	_, msg, _ := ws.ReadMessage()
+	if string(msg) != want {
+		t.Errorf(`got "%s", want "%s"`, string(msg), want)
+	}
+}
+```
+
+Here's how the test reads now
+
+```go
+t.Run("start a game with 3 players, send some blind alerts down WS and declare Ruth the winner", func(t *testing.T) {
+    wantedBlindAlert := "Blind is 100"
+    winner := "Ruth"
+
+    game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
+    server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+    ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+
+    defer server.Close()
+    defer ws.Close()
+
+    writeWSMessage(t, ws, "3")
+    writeWSMessage(t, ws, winner)
+
+    time.Sleep(tenMS)
+
+    assertGameStartedWith(t, game, 3)
+    assertFinishCalledWith(t, game, winner)
+    within(t, tenMS, func() { assertWebsocketGotMsg(t, ws, wantedBlindAlert) })
+})
+```
+
+Now if you run the test... 
+
+```
+=== RUN   TestGame
+=== RUN   TestGame/start_a_game_with_3_players,_send_some_blind_alerts_down_WS_and_declare_Ruth_the_winner
+--- FAIL: TestGame (0.02s)
+    --- FAIL: TestGame/start_a_game_with_3_players,_send_some_blind_alerts_down_WS_and_declare_Ruth_the_winner (0.02s)
+    	server_test.go:143: timed out
+    	server_test.go:150: got "", want "Blind is 100"
+```
+
 ## Write enough code to make it pass
+
+Finally we can now change our server code so it sends our WebSocket connection to the game when it starts
+
+```go
+func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
+	ws := newPlayerServerWS(w, r)
+
+	numberOfPlayersMsg := ws.WaitForMsg()
+	numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
+	p.game.Start(numberOfPlayers, ws)
+
+	winner := ws.WaitForMsg()
+	p.game.Finish(winner)
+}
+```
+
 ## Refactor
+
+The server code was a very small change so there's not a lot to change here but the test code still has a `time.Sleep` call because we have to wait for our server to do its work asynchronously. 
