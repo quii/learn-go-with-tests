@@ -608,9 +608,7 @@ t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t
     out := &bytes.Buffer{}
     in := userSends("3", "Chris wins")
     
-    cli := poker.NewCLI(in, out, game)
-
-    cli.PlayPoker()
+    poker.NewCLI(in, out, game).PlayPoker()
 
     assertMessagesSentToUser(t, out, poker.PlayerPrompt)
     assertGameStartedWith(t, game, 3)
