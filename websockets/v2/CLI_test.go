@@ -41,14 +41,14 @@ func TestCLI(t *testing.T) {
 
 	t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t *testing.T) {
 		game := &GameSpy{}
-		stdout := &bytes.Buffer{}
+		out := &bytes.Buffer{}
 
 		in := userSends("3", "Chris wins")
-		cli := poker.NewCLI(in, stdout, game)
+		cli := poker.NewCLI(in, out, game)
 
 		cli.PlayPoker()
 
-		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt)
+		assertMessagesSentToUser(t, out, poker.PlayerPrompt)
 		assertGameStartedWith(t, game, 3)
 		assertFinishCalledWith(t, game, "Chris")
 	})
@@ -68,27 +68,27 @@ func TestCLI(t *testing.T) {
 	t.Run("it prints an error when a non numeric value is entered and does not start the game", func(t *testing.T) {
 		game := &GameSpy{}
 
-		stdout := &bytes.Buffer{}
+		out := &bytes.Buffer{}
 		in := userSends("pies")
 
-		cli := poker.NewCLI(in, stdout, game)
+		cli := poker.NewCLI(in, out, game)
 		cli.PlayPoker()
 
 		assertGameNotStarted(t, game)
-		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, poker.BadPlayerInputErrMsg)
+		assertMessagesSentToUser(t, out, poker.PlayerPrompt, poker.BadPlayerInputErrMsg)
 	})
 
 	t.Run("it prints an error when the winner is declared incorrectly", func(t *testing.T) {
 		game := &GameSpy{}
-		stdout := &bytes.Buffer{}
+		out := &bytes.Buffer{}
 
 		in := userSends("8", "Lloyd is a killer")
-		cli := poker.NewCLI(in, stdout, game)
+		cli := poker.NewCLI(in, out, game)
 
 		cli.PlayPoker()
 
 		assertGameNotFinished(t, game)
-		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, poker.BadWinnerInputMsg)
+		assertMessagesSentToUser(t, out, poker.PlayerPrompt, poker.BadWinnerInputMsg)
 	})
 }
 
