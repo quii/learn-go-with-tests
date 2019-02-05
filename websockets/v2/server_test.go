@@ -136,8 +136,6 @@ func TestGame(t *testing.T) {
 		writeWSMessage(t, ws, "3")
 		writeWSMessage(t, ws, winner)
 
-		time.Sleep(tenMS)
-
 		assertGameStartedWith(t, game, 3)
 		assertFinishCalledWith(t, game, winner)
 		within(t, tenMS, func() { assertWebsocketGotMsg(t, ws, wantedBlindAlert) })
@@ -149,6 +147,16 @@ func assertWebsocketGotMsg(t *testing.T, ws *websocket.Conn, want string) {
 	if string(msg) != want {
 		t.Errorf(`got "%s", want "%s"`, string(msg), want)
 	}
+}
+
+func retryUntil(d time.Duration, f func() bool) bool {
+	deadline := time.Now().Add(d)
+	for time.Now().Before(deadline) {
+		if f() {
+			return true
+		}
+	}
+	return false
 }
 
 func within(t *testing.T, d time.Duration, assert func()) {

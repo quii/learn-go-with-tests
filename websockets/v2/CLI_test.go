@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 )
 
 var dummyBlindAlerter = &poker.SpyBlindAlerter{}
@@ -90,7 +91,12 @@ func TestCLI(t *testing.T) {
 
 func assertGameStartedWith(t *testing.T, game *GameSpy, numberOfPlayersWanted int) {
 	t.Helper()
-	if game.StartCalledWith != numberOfPlayersWanted {
+
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.StartCalledWith == numberOfPlayersWanted
+	})
+
+	if !passed {
 		t.Errorf("wanted Start called with %d but got %d", numberOfPlayersWanted, game.StartCalledWith)
 	}
 }
@@ -111,7 +117,12 @@ func assertGameNotStarted(t *testing.T, game *GameSpy) {
 
 func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
 	t.Helper()
-	if game.FinishCalledWith != winner {
+
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.FinishCalledWith == winner
+	})
+
+	if !passed {
 		t.Errorf("expected finish called with '%s' but got '%s'", winner, game.FinishCalledWith)
 	}
 }
