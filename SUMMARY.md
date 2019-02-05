@@ -25,8 +25,8 @@
 * [JSON, routing and embedding](json.md)
 * [IO and sorting](io.md)
 * [Command line & package structure](command-line.md)
-* [Time (WIP)](time.md)
-* [WebSockets (WIP)](websockets.md)
+* [Time](time.md)
+* [WebSockets](websockets.md)
 
 ## Questions and answers
 

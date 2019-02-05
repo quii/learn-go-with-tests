@@ -63,7 +63,7 @@ By the end of this, you should have a strong grasp as to how to iteratively writ
 * [IO and sorting](io.md) - We will persist and read our data from disk and we'll cover sorting data.
 * [Command line & project structure](command-line.md) - Support multiple applications from one code base and read input from command line.
 * [Time](time.md) - using the `time` package to schedule activities.
-* [WebSockets (WIP)](websockets.md) - learn how to write and test a server that uses WebSockets.
+* [WebSockets](websockets.md) - learn how to write and test a server that uses WebSockets.
 
 ### Questions and answers
 
