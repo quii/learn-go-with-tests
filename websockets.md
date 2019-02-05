@@ -1033,3 +1033,37 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 ## Refactor
 
 The server code was a very small change so there's not a lot to change here but the test code still has a `time.Sleep` call because we have to wait for our server to do its work asynchronously. 
+
+We can refactor our helpers `assertGameStartedWith` and `assertFinishCalledWith` so that they can retry their assertions for a short period before failing.
+
+Here's how you can do it for `assertFinishCalledWith` and you can use the same approach for the other helper.
+
+```go
+func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
+	t.Helper()
+
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.FinishCalledWith == winner
+	})
+
+	if !passed {
+		t.Errorf("expected finish called with '%s' but got '%s'", winner, game.FinishCalledWith)
+	}
+}
+```
+
+Here is how `retryUntil` is defined
+
+```go
+func retryUntil(d time.Duration, f func() bool) bool {
+	deadline := time.Now().Add(d)
+	for time.Now().Before(deadline) {
+		if f() {
+			return true
+		}
+	}
+	return false
+}
+```
+
+## Wrapping up
