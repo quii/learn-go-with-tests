@@ -1,6 +1,6 @@
-# Websockets (WIP)
+# WebSockets (WIP)
 
-In this chapter we'll learn how to use websockets to improve our application. 
+In this chapter we'll learn how to use WebSockets to improve our application. 
 
 ## Project recap
 
@@ -17,13 +17,13 @@ On the face of it, it sounds quite simple but as always we must emphasise taking
 
 First of all we will need to serve HTML. So far all of our HTTP endpoints have returned either plaintext or JSON. We _could_ use the same techniques we know (as they're all ultimately strings) but we can also use the [html/template](https://golang.org/pkg/html/template/) package for a cleaner solution.
 
-We also need to be able to asynchronously send messages to the user saying `The blind is now *y*` without having to refresh the browser. We can use [websockets](https://en.wikipedia.org/wiki/WebSocket) to facilitate this. 
+We also need to be able to asynchronously send messages to the user saying `The blind is now *y*` without having to refresh the browser. We can use [WebSockets](https://en.wikipedia.org/wiki/WebSocket) to facilitate this. 
 
 > WebSocket is a computer communications protocol, providing full-duplex communication channels over a single TCP connection
 
 Given we are taking on a number of techniques it's even more important we do the smallest amount of useful work possible first and then iterate. 
 
-For that reason the first thing we'll do is create a web page with a form for the user to record a winner. Rather than using a plain form, we will use websockets to send that data to our server for it to record. 
+For that reason the first thing we'll do is create a web page with a form for the user to record a winner. Rather than using a plain form, we will use WebSockets to send that data to our server for it to record. 
 
 After that we'll work on the blind alerts by which point we will have a bit of infrastructure code set up. 
 
@@ -138,7 +138,7 @@ Now we need to make the endpoint return some HTML, here it is
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Lets play poker</title>
+    <title>Let's play poker</title>
 </head>
 <body>
 <section id="game">
@@ -169,10 +169,9 @@ We have a very simple web page
  
  - A text input for the user to enter the winner into
  - A button they can click to declare the winner. 
+ - Some JavaScript to open a WebSocket connection to our server and handle the submit button being pressed
 
 `WebSocket` is built into most modern browsers so we don't need to worry about bringing in any libraries. The web page wont work for older browsers, but we're ok with that for this scenario.
-
-Our code uses the `WebSocket` API to open a connection to our server. We then attach an `onclick` handler to our button to send the contents of the input button to the server through the connection.
 
 ### How do we test we return the correct markup?
 
@@ -209,7 +208,7 @@ You _should_ have got an error about not being able to find the template. You ca
 
 If you make this change and run again you should see our UI. 
 
-Now we need to test that when we get a string over a web socket connection to our server that we declare it as a winner of a game.
+Now we need to test that when we get a string over a WebSocket connection to our server that we declare it as a winner of a game.
 
 ## Write the test first
 
@@ -248,7 +247,7 @@ To test what happens from the browser we have to open up our own WebSocket conne
 
 Our previous tests around our server just called methods on our server but now we need to have a persistent connection to our server. To do that we use `httptest.NewServer` which takes a `http.Handler` and will spin it up and listen for connections. 
 
-Using `websocket.DefaultDialer.Dial` we try to dial in to our server and then we'll try and send a message with our `winner`
+Using `websocket.DefaultDialer.Dial` we try to dial in to our server and then we'll try and send a message with our `winner`.
 
 Finally we assert on the player store to check the winner was recorded.
 
@@ -508,7 +507,7 @@ The main changes is bringing in a section to enter the number of players and a s
 
 Any message we receive via `conn.onmessage` we assume to be blind alerts and so we set the `blindContainer.innerText` accordingly.
 
-How do we go about sending the blind alerts? In the previous chapter we introduced the idea of `Game` so our CLI code could call a `Game` and everything else would be taken care of which turned out to be a good separation of concern. 
+How do we go about sending the blind alerts? In the previous chapter we introduced the idea of `Game` so our CLI code could call a `Game` and everything else would be taken care of including scheduling blind alerts. This turned out to be a good separation of concern. 
 
 ```go
 type Game interface {
@@ -546,11 +545,11 @@ func StdOutAlerter(duration time.Duration, amount int) {
 }
 ```
 
-This works in CLI because we _always know where we want to send the alerts to `os.Stdout`_ but this wont work for our web server. For every request we get a new `http.ResponseWriter` which we then upgrade to `*websocket.Conn`. So we cant know when constructing our dependencies where our alerts need to go. 
+This works in CLI because we _always want to send the alerts to `os.Stdout`_ but this wont work for our web server. For every request we get a new `http.ResponseWriter` which we then upgrade to `*websocket.Conn`. So we cant know when constructing our dependencies where our alerts need to go. 
 
-For that reason we should do a refactor so that `BlindAlerter.ScheduleAlertAt` also takes a destination so that we can re-use it in our webserver. 
+For that reason we need to change `BlindAlerter.ScheduleAlertAt` so that it takes a destination for the alerts so that we can re-use it in our webserver. 
 
-Open BlindAlerter.go and add the parameter as discussed
+Open BlindAlerter.go and add the parameter `to io.Writer`
 
 ```go
 type BlindAlerter interface {
@@ -599,7 +598,7 @@ If you've got everything right, everything should be green! Now we can try and u
 
 The requirements of `CLI` and `Server` are the same! It's just the delivery mechanism is different. 
 
-Let's take a look at previous our `CLI` test for inspiration.
+Let's take a look at our `CLI` test for inspiration.
 
 ```go
 t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t *testing.T) {
@@ -656,9 +655,9 @@ var (
 The final error is where we are trying to pass in `Game` to `NewPlayerServer` but it doesn't support it yet
 
 ```
-./server_test.go:21:38: too many arguments in call to "github.com/quii/learn-go-with-tests/websockets/v2".NewPlayerServer
-	have ("github.com/quii/learn-go-with-tests/websockets/v2".PlayerStore, "github.com/quii/learn-go-with-tests/websockets/v2".Game)
-	want ("github.com/quii/learn-go-with-tests/websockets/v2".PlayerStore)
+./server_test.go:21:38: too many arguments in call to "github.com/quii/learn-go-with-tests/WebSockets/v2".NewPlayerServer
+	have ("github.com/quii/learn-go-with-tests/WebSockets/v2".PlayerStore, "github.com/quii/learn-go-with-tests/WebSockets/v2".Game)
+	want ("github.com/quii/learn-go-with-tests/WebSockets/v2".PlayerStore)
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
@@ -729,7 +728,9 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 
 Hooray! The tests pass. 
 
-We are not going to send the blind messages anywhere _just yet_ as we need to have a think about that. For now start the web server up. You'll need to update the `main.go` to pass a `Game` to the `PlayerServer`
+We are not going to send the blind messages anywhere _just yet_ as we need to have a think about that. When we call `game.Start` we send in `ioutil.Discard` which will just discard any messages written to it. 
+
+For now start the web server up. You'll need to update the `main.go` to pass a `Game` to the `PlayerServer`
 
 ```go
 func main() {
@@ -765,7 +766,7 @@ Before that though, let's tidy up some code.
 
 ## Refactor
 
-The way we're using websockets is fairly basic and the error handling is fairly naive, so I wanted to encapsulate that in a type just to remove that messyness from the server code. We may wish to revisit it later but for now this'll tidy things up a bit
+The way we're using WebSockets is fairly basic and the error handling is fairly naive, so I wanted to encapsulate that in a type just to remove that messyness from the server code. We may wish to revisit it later but for now this'll tidy things up a bit
 
 ```go
 type playerServerWS struct {
@@ -776,7 +777,7 @@ func newPlayerServerWS(w http.ResponseWriter, r *http.Request) *playerServerWS {
 	conn, err := wsUpgrader.Upgrade(w, r, nil)
 
 	if err != nil {
-		log.Printf("problem upgrading connection to websockets %v\n", err)
+		log.Printf("problem upgrading connection to WebSockets %v\n", err)
 	}
 
 	return &playerServerWS{conn}
@@ -1067,3 +1068,21 @@ func retryUntil(d time.Duration, f func() bool) bool {
 ```
 
 ## Wrapping up
+
+Our application is now complete. A game of poker can be started via a web browser and the users are informed of the blind bet value as time goes by via WebSockets. When the game finishes they can record the winner which is persisted using code we wrote a few chapters ago. The players can find out who is the best (or luckiest) poker player using the website's `/league` endpoint. 
+
+Through the journey we have made mistakes but with the TDD flow we have never been very far away from working software. We were free to keep iterating and experimenting. 
+
+The final chapter will retrospect on the approach, the design we've arrived at and tie up some loose ends.
+
+We covered a few things in this chapter
+
+### WebSockets
+
+- Convenient way of sending messages between clients and servers that does not require the client to keep polling the server. Both the client and server code we have is very simple. 
+- Trivial to test, but you have to be wary of asynchronicity 
+
+### Handling code in tests that can be delayed or never finish
+
+- Create helper functions to retry assertions and add timeouts. 
+- Using go routines and channels, plus helpful functions from the `time` package make this quite easy
