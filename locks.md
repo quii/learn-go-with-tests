@@ -135,7 +135,7 @@ t.Run("it runs safely concurrently", func(t *testing.T) {
 
 This will loop through our `wantedCount` and fire a go routine to call `counter.Inc()`. 
 
-We are using [`sync.WaitGroup`](https://golang.org/pkg/sync/#WaitGroup) which is a convienient way of synchronising concurrent processes.
+We are using [`sync.WaitGroup`](https://golang.org/pkg/sync/#WaitGroup) which is a convenient way of synchronising concurrent processes.
 
 > A WaitGroup waits for a collection of goroutines to finish. The main goroutine calls Add to set the number of goroutines to wait for. Then each of the goroutines runs and calls Done when finished. At the same time, Wait can be used to block until all goroutines have finished.
 
