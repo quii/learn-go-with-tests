@@ -111,3 +111,41 @@ t.Run("incrementing the counter 3 times leaves it at 3", func(t *testing.T) {
 
 That was easy enough but now we have a requirement that it must be safe to use in a concurrent environment. We will need to write a failing test to exercise this. 
 
+## Write the test first
+
+```go
+	t.Run("it runs safely concurrently", func(t *testing.T) {
+		wantedCount := 10
+		counter := Counter{}
+
+		for i:=0; i<wantedCount; i++ {
+			go func() {
+				counter.Inc()
+			}()
+		}
+
+		assertCounter(t, counter, wantedCount)
+	})
+```
+
+This will loop through our `wantedCount` and fire a go routine to call `counter.Inc()`. 
+
+## Try to run the test
+
+```
+=== RUN   TestCounter/it_runs_safely_in_a_concurrent_envionment
+--- FAIL: TestCounter (0.00s)
+    --- FAIL: TestCounter/it_runs_safely_in_a_concurrent_envionment (0.00s)
+    	sync_test.go:26: got 6, want 10
+FAIL
+```
+
+The test will _probably_ fail with a different number, but nonetheless it demonstrates it does not work when multiple go routines are trying to work with it.
+
+## Write enough code to make it pass
+
+A simple solution is to add a lock to our `Counter`, a [`Mutex`](https://golang.org/pkg/sync/#Mutex)
+
+>A Mutex is a mutual exclusion lock. The zero value for a Mutex is an unlocked mutex.
+
+## Refactor

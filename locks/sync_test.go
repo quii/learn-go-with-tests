@@ -13,6 +13,19 @@ func TestCounter(t *testing.T) {
 		assertCounter(t, counter, 3)
 	})
 
+	t.Run("it runs safely concurrently", func(t *testing.T) {
+		wantedCount := 10
+		counter := Counter{}
+
+		for i:=0; i<wantedCount; i++ {
+			go func() {
+				counter.Inc()
+			}()
+		}
+
+		assertCounter(t, counter, wantedCount)
+	})
+
 }
 
 func assertCounter(t *testing.T, got Counter, want int)  {
