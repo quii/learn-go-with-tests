@@ -26,7 +26,7 @@ jobs:
       script:
         - go get -u github.com/client9/misspell/cmd/misspell
         - misspell -error .
-    - stage: epub
+    - stage: releases
       script:
         - docker pull jagregory/pandoc
         - "./build.epub.sh"

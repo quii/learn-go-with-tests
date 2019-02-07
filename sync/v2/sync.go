@@ -4,8 +4,8 @@ import "sync"
 
 // Counter will increment a number
 type Counter struct {
+	mu    sync.Mutex
 	value int
-	lock  sync.Mutex
 }
 
 // NewCounter returns a new Counter
@@ -15,8 +15,8 @@ func NewCounter() *Counter {
 
 // Inc the count
 func (c *Counter) Inc() {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.value++
 }
 

@@ -166,13 +166,13 @@ A simple solution is to add a lock to our `Counter`, a [`Mutex`](https://golang.
 
 ```go
 type Counter struct {
+	mu sync.Mutex
 	value int
-	lock sync.Mutex
 }
 
 func (c *Counter) Inc() {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.value++
 }
 ```
@@ -187,8 +187,8 @@ You may see examples like this
 
 ```go
 type Counter struct {
-	value int
 	sync.Mutex
+	value int
 }
 ```
 
