@@ -1,10 +1,12 @@
-# Sync (WIP)
+# Sync
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/sync)**
 
 We want to make a counter which is safe to use concurrently. 
 
-We'll start with an unsafe counter with a test, see if we can exercise it's unsafeness via a test and then fix it using locks 
+We'll start with an unsafe counter and verify its behaviour works in a single-threaded environment.
+
+Then we'll exercise it's unsafeness with multiple goroutines trying to use it via a test and fix it.
 
 ## Write the test first
 
@@ -136,13 +138,13 @@ t.Run("it runs safely concurrently", func(t *testing.T) {
 })
 ```
 
-This will loop through our `wantedCount` and fire a go routine to call `counter.Inc()`. 
+This will loop through our `wantedCount` and fire a goroutine to call `counter.Inc()`. 
 
 We are using [`sync.WaitGroup`](https://golang.org/pkg/sync/#WaitGroup) which is a convenient way of synchronising concurrent processes.
 
 > A WaitGroup waits for a collection of goroutines to finish. The main goroutine calls Add to set the number of goroutines to wait for. Then each of the goroutines runs and calls Done when finished. At the same time, Wait can be used to block until all goroutines have finished.
 
-By waiting for `wg.Wait()` to finish before making our assertions we can be sure all of our go routines have attempted to `Inc` the `Counter`,
+By waiting for `wg.Wait()` to finish before making our assertions we can be sure all of our goroutines have attempted to `Inc` the `Counter`,
 
 ## Try to run the test
 
@@ -154,7 +156,7 @@ By waiting for `wg.Wait()` to finish before making our assertions we can be sure
 FAIL
 ```
 
-The test will _probably_ fail with a different number, but nonetheless it demonstrates it does not work when multiple go routines are trying to work with it.
+The test will _probably_ fail with a different number, but nonetheless it demonstrates it does not work when multiple goroutines are trying to mutate the value of the counter at the same time.
 
 ## Write enough code to make it pass
 
@@ -175,7 +177,9 @@ func (c *Counter) Inc() {
 }
 ```
 
-What this means is any go routine calling `Inc` will acquire the lock on `Counter` if they are first. All the other go routines will have to wait for it to be `Unlock`ed before getting access. 
+What this means is any goroutine calling `Inc` will acquire the lock on `Counter` if they are first. All the other goroutines will have to wait for it to be `Unlock`ed before getting access. 
+
+If you now re-run the test it should now pass because each goroutine has to wait its turn before making a change.
 
 ## I've seen other examples where the `sync.Mutex` is embedded into the struct. 
 
@@ -204,7 +208,7 @@ Sometimes people forget that embedding types means the methods of that type beco
 
 Exposing `Lock` and `Unlock` is at best confusing but at worst potentially very harmful to your software if callers of your type start calling these methods.
 
-![This seems like a really bad idea](https://i.imgur.com/SWYNpwm.png)
+![Showing how a user of this API can wrongly change the state of the lock](https://i.imgur.com/SWYNpwm.png)
 
 _This seems like a really bad idea_
 
@@ -246,11 +250,11 @@ Use this function in your tests when initialising `Counter`.
 We've covered a few things from the [sync package](https://golang.org/pkg/sync/)
 
 - `Mutex` allows us to add locks to our data
-- `Waitgroup` is a means of waiting for go routines to finish jobs
+- `Waitgroup` is a means of waiting for goroutines to finish jobs
 
-### When to use locks over channels and go routines?
+### When to use locks over channels and goroutines?
 
-[We've previously covered go routines in the first concurrency chapter](concurrency.md) which let us write safe concurrent code so why would you use locks?   
+[We've previously covered goroutines in the first concurrency chapter](concurrency.md) which let us write safe concurrent code so why would you use locks?   
 [The go wiki has a page dedicated to this topic; Mutex Or Channel](https://github.com/golang/go/wiki/MutexOrChannel)
 
 > A common Go newbie mistake is to over-use channels and goroutines just because it's possible, and/or because it's fun. Don't be afraid to use a sync.Mutex if that fits your problem best. Go is pragmatic in letting you use the tools that solve your problem best and not forcing you into one style of code.
