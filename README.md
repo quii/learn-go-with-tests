@@ -43,6 +43,7 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 11. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
 12. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
 13. [Reflection](reflection.md) - Learn about reflection
+13. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
 
 Property-based tests \(todo\)
 

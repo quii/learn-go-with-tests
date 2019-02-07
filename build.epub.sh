@@ -15,6 +15,8 @@ docker run -v `pwd`:/source jagregory/pandoc -o learn-go-with-tests.epub --toc -
     concurrency.md \
     select.md \
     reflection.md \
+    sync.md \
+    app-intro.md \
     http-server.md \
     json.md \
     io.md \

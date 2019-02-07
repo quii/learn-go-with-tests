@@ -17,6 +17,7 @@
 * [Concurrency](concurrency.md)
 * [Select](select.md)
 * [Reflection](reflection.md)
+* [Sync](sync.md)
 
 ## Build an application
 

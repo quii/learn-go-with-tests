@@ -208,6 +208,39 @@ Exposing `Lock` and `Unlock` is at best confusing but at worst potentially very 
 
 _This seems like a really bad idea_
 
+## Copying mutexes
+
+Our test passes but our code is still a bit dangerous
+
+If you run `go vet` on your code you should get an error like the following
+
+```
+sync/v2/sync_test.go:16: call of assertCounter copies lock value: v1.Counter contains sync.Mutex
+sync/v2/sync_test.go:39: assertCounter passes lock by value: v1.Counter contains sync.Mutex
+```
+
+A look at the documentation of [`sync.Mutex`](https://golang.org/pkg/sync/#Mutex) tells us why
+
+> A Mutex must not be copied after first use.
+
+When we pass our `Counter` (by value) to `assertCounter` it will try and create a copy of the mutex. 
+
+To solve this we should pass in a pointer to our `Counter` instead, so change the signature of `assertCounter`
+
+```go
+func assertCounter(t *testing.T, got *Counter, want int)
+```
+
+Our tests will no longer compile because we are trying to pass in a `Counter` rather than a `*Counter`. To solve this I prefer to create a constructor which shows readers of your API that it would be better to not initialise the type yourself.
+
+```go
+func NewCounter() *Counter {
+	return &Counter{}
+}
+```
+
+Use this function in your tests when initialising `Counter`.
+
 ## Wrapping up
 
 We've covered a few things from the [sync package](https://golang.org/pkg/sync/)
@@ -226,3 +259,7 @@ Paraphrasing:
 
 - **Use channels when passing ownership of data** 
 - **Use mutexes for managing state**
+
+### go vet
+
+Remember to use go vet in your build scripts as it can alert you to some subtle bugs in your code before they hit your poor users.
