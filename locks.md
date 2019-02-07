@@ -114,21 +114,32 @@ That was easy enough but now we have a requirement that it must be safe to use i
 ## Write the test first
 
 ```go
-	t.Run("it runs safely concurrently", func(t *testing.T) {
-		wantedCount := 10
-		counter := Counter{}
+t.Run("it runs safely concurrently", func(t *testing.T) {
+    wantedCount := 1000
+    counter := Counter{}
 
-		for i:=0; i<wantedCount; i++ {
-			go func() {
-				counter.Inc()
-			}()
-		}
+    var wg sync.WaitGroup
+    wg.Add(wantedCount)
 
-		assertCounter(t, counter, wantedCount)
-	})
+    for i:=0; i<wantedCount; i++ {
+        go func(w *sync.WaitGroup) {
+            counter.Inc()
+            w.Done()
+        }(&wg)
+    }
+    wg.Wait()
+
+    assertCounter(t, counter, wantedCount)
+})
 ```
 
 This will loop through our `wantedCount` and fire a go routine to call `counter.Inc()`. 
+
+We are using [`sync.WaitGroup`](https://golang.org/pkg/sync/#WaitGroup) which is a convienient way of synchronising concurrent processes.
+
+> A WaitGroup waits for a collection of goroutines to finish. The main goroutine calls Add to set the number of goroutines to wait for. Then each of the goroutines runs and calls Done when finished. At the same time, Wait can be used to block until all goroutines have finished.
+
+By waiting for `wg.Wait()` to finish before making our assertions we can be sure all of our go routines have attempted to `Inc` the `Counter`,
 
 ## Try to run the test
 
@@ -136,7 +147,7 @@ This will loop through our `wantedCount` and fire a go routine to call `counter.
 === RUN   TestCounter/it_runs_safely_in_a_concurrent_envionment
 --- FAIL: TestCounter (0.00s)
     --- FAIL: TestCounter/it_runs_safely_in_a_concurrent_envionment (0.00s)
-    	sync_test.go:26: got 6, want 10
+    	sync_test.go:26: got 939, want 1000
 FAIL
 ```
 
@@ -148,4 +159,42 @@ A simple solution is to add a lock to our `Counter`, a [`Mutex`](https://golang.
 
 >A Mutex is a mutual exclusion lock. The zero value for a Mutex is an unlocked mutex.
 
-## Refactor
+```go
+type Counter struct {
+	value int
+	lock sync.Mutex
+}
+
+func (c *Counter) Inc() {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.value++
+}
+```
+
+What this means is any go routine calling `Inc` will acquire the lock on `Counter` if they are first. All the other go routines will have to wait for it to be `Unlock`ed before getting access. 
+
+## I've seen other examples where the `sync.Mutex` is embedded into the struct. 
+
+You may see examples like this 
+
+```go
+type Counter struct {
+	value int
+	sync.Mutex
+}
+```
+
+It can be argued that it can make the code a bit more elegant.
+
+```go
+func (c *Counter) Inc() {
+	c.Lock()
+	defer c.Unlock()
+	c.value++
+}
+```
+
+This _looks_ nice but while programming is a hugely subjective discipline, this is **bad and wrong**. 
+
+The problem with embedding types is the type becomes _part of the public interface_. Exposing `Lock` and `Unlock` is at best confusing but at worst potentially very harmful to your software if callers of your type start calling these methods.
