@@ -270,6 +270,6 @@ Remember to use go vet in your build scripts as it can alert you to some subtle 
 
 ### Dont use embedding because it's convienient
 
-- Think about the effect embedding has on your public API
-- Do you _really_ want to expose these methods and have people coupling their own code to them
-- With respect to mutexes, this could be potentially disasterous in very unpredictable and weird ways, so dont do it. 
+- Think about the effect embedding has on your public API.
+- Do you _really_ want to expose these methods and have people coupling their own code to them?
+- With respect to mutexes, this could be potentially disastrous in very unpredictable and weird ways, imagine some nefarious code unlocking a mutex when it shouldn't be; this would cause some very strange bugs that will be hard to track down.
