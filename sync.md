@@ -1,4 +1,6 @@
-# Locks (WIP)
+# Sync (WIP)
+
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/sync)**
 
 We want to make a counter which is safe to use concurrently. 
 
@@ -197,4 +199,29 @@ func (c *Counter) Inc() {
 
 This _looks_ nice but while programming is a hugely subjective discipline, this is **bad and wrong**. 
 
-The problem with embedding types is the type becomes _part of the public interface_. Exposing `Lock` and `Unlock` is at best confusing but at worst potentially very harmful to your software if callers of your type start calling these methods.
+Sometimes people forget that embedding types means the methods of that type becomes _part of the public interface_; and you often will not want that. Remember that we should be very careful with our public APIs, the moment we make something public is the moment other code can couple themselves to it. We always want to avoid unnecessary coupling.  
+
+Exposing `Lock` and `Unlock` is at best confusing but at worst potentially very harmful to your software if callers of your type start calling these methods.
+
+![This seems like a really bad idea](https://i.imgur.com/SWYNpwm.png)
+
+_This seems like a really bad idea_
+
+## Wrapping up
+
+We've covered a few things from the [sync package](https://golang.org/pkg/sync/)
+
+- `Mutex` allows us to add locks to our data
+- `Waitgroup` is a means of waiting for go routines to finish jobs
+
+### When to use locks over channels and go routines?
+
+[We've previously covered go routines in the first concurrency chapter](concurrency.md) which let us write safe concurrent code so why would you use locks?   
+[The go wiki has a page dedicated to this topic; Mutex Or Channel](https://github.com/golang/go/wiki/MutexOrChannel)
+
+> A common Go newbie mistake is to over-use channels and goroutines just because it's possible, and/or because it's fun. Don't be afraid to use a sync.Mutex if that fits your problem best. Go is pragmatic in letting you use the tools that solve your problem best and not forcing you into one style of code.
+
+Paraphrasing:
+
+- **Use channels when passing ownership of data** 
+- **Use mutexes for managing state**
