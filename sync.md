@@ -12,9 +12,7 @@ We want our API to give us a method to increment the counter and then retrieve i
 
 ```go
 func TestCounter(t *testing.T) {
-
 	t.Run("incrementing the counter 3 times leaves it at 3", func(t *testing.T) {
-
 		counter := Counter{}
 		counter.Inc()
 		counter.Inc()
@@ -24,7 +22,6 @@ func TestCounter(t *testing.T) {
 			t.Errorf("got %d, want %d", counter.Value(), 3)
 		}
 	})
-
 }
 ```
 
@@ -48,10 +45,7 @@ Try again and it fails with the following
 
 ```
 ./sync_test.go:14:10: counter.Inc undefined (type Counter has no field or method Inc)
-./sync_test.go:15:10: counter.Inc undefined (type Counter has no field or method Inc)
-./sync_test.go:16:10: counter.Inc undefined (type Counter has no field or method Inc)
 ./sync_test.go:18:13: counter.Value undefined (type Counter has no field or method Value)
-./sync_test.go:19:39: counter.Value undefined (type Counter has no field or method Value)
 ```
 
 So to finally make the test run we can define those methods
@@ -96,7 +90,7 @@ func (c *Counter) Value() int {
 
 ## Refactor
 
-There's not a lot to refactor but given we're going to write more tests around `Counter` try writing a small assertion function `assertCount` so the test reads a bit clearer.
+There's not a lot to refactor but given we're going to write more tests around `Counter` we'll write a small assertion function `assertCount` so the test reads a bit clearer.
 
 ```go
 t.Run("incrementing the counter 3 times leaves it at 3", func(t *testing.T) {
@@ -107,6 +101,13 @@ t.Run("incrementing the counter 3 times leaves it at 3", func(t *testing.T) {
     
     assertCounter(t, counter, 3)
 })
+
+func assertCounter(t *testing.T, got Counter, want int)  {
+	t.Helper()
+	if got.Value() != want {
+		t.Errorf("got %d, want %d", got.Value(), want)
+	}
+}
 ```
 
 ## Next steps
