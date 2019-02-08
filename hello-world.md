@@ -24,7 +24,7 @@ func main() {
 
 ## How it works
 
-When you write a program in Go you will have a `main` package defined with a `main` func inside it. Packages are ways of grouping up related Go code together. 
+When you write a program in Go you will have a `main` package defined with a `main` func inside it. Packages are ways of grouping up related Go code together.
 
 The `func` keyword is how you define a function with a name and a body.
 
@@ -467,7 +467,7 @@ func greetingPrefix(language string) (prefix string) {
     case spanish:
         prefix = spanishHelloPrefix
     default:
-        prefix = englishPrefix
+        prefix = helloPrefix
     }
     return
 }
