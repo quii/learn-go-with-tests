@@ -24,7 +24,7 @@ func main() {
 
 ## How it works
 
-When you write a program in Go you will have a `main` package defined with a `main` func inside it. Packages are ways of grouping up related Go code together. 
+When you write a program in Go you will have a `main` package defined with a `main` func inside it. Packages are ways of grouping up related Go code together.
 
 The `func` keyword is how you define a function with a name and a body.
 
@@ -182,16 +182,16 @@ There's not a lot to refactor here, but we can introduce another language featur
 Constants are defined like so
 
 ```go
-const helloPrefix = "Hello, "
+const englishPrefix = "Hello, "
 ```
 
 We can now refactor our code
 
 ```go
-const helloPrefix = "Hello, "
+const englishPrefix = "Hello, "
 
 func Hello(name string) string {
-    return helloPrefix + name
+    return englishPrefix + name
 }
 ```
 
@@ -277,13 +277,13 @@ We've refactored our assertion into a function. This reduces duplication and imp
 Now that we have a well-written failing test, let's fix the code, using an `if`.
 
 ```go
-const helloPrefix = "Hello, "
+const englishPrefix = "Hello, "
 
 func Hello(name string) string {
     if name == "" {
         name = "World"
     }
-    return helloPrefix + name
+    return englishPrefix + name
 }
 ```
 
@@ -340,7 +340,7 @@ func Hello(name string, language string) string {
     if name == "" {
         name = "World"
     }
-    return helloPrefix + name
+    return englishPrefix + name
 }
 ```
 
@@ -370,7 +370,7 @@ func Hello(name string, language string) string {
         return "Hola, " + name
     }
 
-    return helloPrefix + name
+    return englishPrefix + name
 }
 ```
 
@@ -379,8 +379,8 @@ The tests should now pass.
 Now it is time to _refactor_. You should see some problems in the code, "magic" strings, some of which are repeated. Try and refactor it yourself, with every change make sure you re-run the tests to make sure your refactoring isn't breaking anything.
 
 ```go
+const englishPrefix = "Hello, "
 const spanish = "Spanish"
-const helloPrefix = "Hello, "
 const spanishHelloPrefix = "Hola, "
 
 func Hello(name string, language string) string {
@@ -392,7 +392,7 @@ func Hello(name string, language string) string {
         return spanishHelloPrefix + name
     }
 
-    return helloPrefix + name
+    return englishPrefix + name
 }
 ```
 
@@ -418,7 +418,7 @@ func Hello(name string, language string) string {
         return frenchHelloPrefix + name
     }
 
-    return helloPrefix + name
+    return englishPrefix + name
 }
 ```
 
@@ -432,7 +432,7 @@ func Hello(name string, language string) string {
         name = "World"
     }
 
-    prefix := helloPrefix
+    prefix := englishPrefix
 
     switch language {
     case french:
