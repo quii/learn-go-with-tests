@@ -7,11 +7,10 @@
 [Art by Denise](https://twitter.com/deniseyu21)
 
 ![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests) _Learn test-driven development with Go_
+[![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
-[Gitbook](https://quii.gitbook.io/learn-go-with-tests), [PDF or PDF](https://github.com/quii/learn-go-with-tests/releases)
-
-Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests)
+- Formats: [Gitbook](https://quii.gitbook.io/learn-go-with-tests), [EPUB or PDF](https://github.com/quii/learn-go-with-tests/releases)
+- Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests)
 
 ## Why
 
