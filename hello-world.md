@@ -355,7 +355,7 @@ When you try and run the test again it will complain about not passing through e
 Fix them by passing through empty strings. Now all your tests should compile _and_ pass, apart from our new scenario
 
 ```text
-hello_test.go:29: got 'Hola, Elodie' want 'Hello, Elodie'
+hello_test.go:29: got 'Hello, Elodie' want 'Hola, Elodie'
 ```
 
 We can use `if` here to check the language is equal to "Spanish" and if so change the message
