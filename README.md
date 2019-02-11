@@ -6,14 +6,10 @@
 
 [Art by Denise](https://twitter.com/deniseyu21)
 
-_Learn test-driven development with Go_
-
 ![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
+[![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests) _Learn test-driven development with Go_
 
-[You can read this on Gitbook](https://quii.gitbook.io/learn-go-with-tests)
-
-[You can also get an e-pub](https://github.com/quii/learn-go-with-tests/releases)
+[Gitbook](https://quii.gitbook.io/learn-go-with-tests), [PDF or PDF](https://github.com/quii/learn-go-with-tests/releases)
 
 Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests)
 
@@ -25,8 +21,6 @@ Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests)
 * [Watch a video, or read about why unit testing and TDD is important](why.md)
 
 ## Table of contents
-
-If there's no link, it's not done yet! [why not contribute?](contributing.md)
 
 ### Go fundamentals
 
@@ -44,8 +38,6 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 12. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
 13. [Reflection](reflection.md) - Learn about reflection
 13. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
-
-Property-based tests \(todo\)
 
 ### Build an application
 
