@@ -263,6 +263,10 @@ Does it make sense for our web server to be concerned with manually cancelling `
 
 One of the main points of `context` is that it is a consistent way of offering cancellation. 
 
+[From the go doc](https://golang.org/pkg/context/)
+
+> Incoming requests to a server should create a Context, and outgoing calls to servers should accept a Context. The chain of function calls between them must propagate the Context, optionally replacing it with a derived Context created using WithCancel, WithDeadline, WithTimeout, or WithValue. When a Context is canceled, all Contexts derived from it are also canceled.
+
 From the Google blog again:
 
 > At Google, we require that Go programmers pass a Context parameter as the first argument to every function on the call path between incoming and outgoing requests. This allows Go code developed by many different teams to interoperate well. It provides simple control over timeouts and cancelation and ensures that critical values like security credentials transit Go programs properly.
@@ -271,9 +275,186 @@ From the Google blog again:
 
 Feeling a bit uneasy? Good. Let's try and follow that approach though and instead pass through the `context` to our `Store` and let it be responsible. That way it can also pass the `context` through to it's dependants and they too can be responsible for stopping themselves.
 
-TODO! 
+## Write the test first
+
+We'll have to change our existing tests as their responsibilities are changing. The only thing our handler is responsible for now is making sure it sends a context through to the downstream `Store` and that it handles the error that will come from the `Store` when it is cancelled.
+
+Let's update our `Store` interface to show the new responsibilities. 
+
+```go
+type Store interface {
+	Fetch(ctx context.Context) (string, error)
+}
+```
+
+Delete the code inside our handler for now
+
+```go
+func Server(store Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+	}
+}
+```
+
+Update our `SpyStore`
+
+```go
+type SpyStore struct {
+	response string
+	t        *testing.T
+	ctx      context.Context
+}
+
+func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
+	data := make(chan string, 1)
+
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		data <- s.response
+	}()
+
+	select {
+	case msg := <-data:
+		return msg, nil
+	case <-ctx.Done():
+		return "", ctx.Err()
+	}
+}
+```
+
+We have to make our spy act like a real method that works with `context`. It's similar to our approach from before, we use Go's concurrency primitives to make two asynchronous processes race each other to determine what we return. 
+
+You'll take a similar approach when writing your own functions and methods that accept a `context` so make sure you understand what's going on.
+
+Finally we can update our tests. Comment out our cancellation test so we can fix the happy path test first.
+
+```go
+t.Run("returns data from store", func(t *testing.T) {
+    store := &SpyStore{response: data, t: t}
+    svr := Server(store)
+
+    request := httptest.NewRequest(http.MethodGet, "/", nil)
+    response := httptest.NewRecorder()
+
+    svr.ServeHTTP(response, request)
+
+    if response.Body.String() != data {
+        t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
+    }
+
+    if store.ctx != request.Context() {
+        t.Errorf("store was not passed through a context %v", store.ctx)
+    }
+})
+```
+
+## Try to run the test
+
+```
+=== RUN   TestServer/returns_data_from_store
+--- FAIL: TestServer (0.00s)
+    --- FAIL: TestServer/returns_data_from_store (0.00s)
+    	context_test.go:22: got "", want "hello, world"
+    	context_test.go:26: store was not passed through a context <nil>
+```
+
+## Write enough code to make it pass
+
+```go
+func Server(store Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, _ := store.Fetch(r.Context())
+		fmt.Fprint(w, data)
+	}
+}
+```
+
+Our happy path should be... happy. Now we can fix the other test.
+
+## Write the test first
+
+We need to test that we do not write any kind of response on the error case. Sadly `httptest.ResponseRecorder` doesn't have a way of figuring this out so we'll have to role our own spy to test for this. 
+
+```go
+type SpyResponseWriter struct {
+	written bool
+}
+
+func (s *SpyResponseWriter) Header() http.Header {
+	s.written = true
+	return nil
+}
+
+func (s *SpyResponseWriter) Write([]byte) (int, error) {
+	s.written = true
+	return 0, errors.New("not implemented")
+}
+
+func (s *SpyResponseWriter) WriteHeader(statusCode int) {
+	s.written = true
+}
+```
+
+Our `SpyResponseWriter` implements `http.ResponseWriter` so we can use it in the test.
+
+```go
+t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
+    store := &SpyStore{response: data, t: t}
+    svr := Server(store)
+
+    request := httptest.NewRequest(http.MethodGet, "/", nil)
+
+    cancellingCtx, cancel := context.WithCancel(request.Context())
+    time.AfterFunc(5*time.Millisecond, cancel)
+    request = request.WithContext(cancellingCtx)
+
+    response := &SpyResponseWriter{}
+
+    svr.ServeHTTP(response, request)
+
+    if response.written {
+        t.Error("a response should not have been written")
+    }
+})
+```
+
+## Try to run the test
+
+```
+=== RUN   TestServer
+=== RUN   TestServer/tells_store_to_cancel_work_if_request_is_cancelled
+--- FAIL: TestServer (0.01s)
+    --- FAIL: TestServer/tells_store_to_cancel_work_if_request_is_cancelled (0.01s)
+    	context_test.go:47: a response should not have been written
+```
+
+## Write enough code to make it pass
+
+```go
+func Server(store Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, err := store.Fetch(r.Context())
+
+		if err != nil {
+			return // todo: log error however you like
+		}
+		
+		fmt.Fprint(w, data)
+	}
+}
+```
+
+We can see after this that the server code has become simplified as it's no longer explicitly responsible for cancellation, it simply passes through `context` and relies on the downstream functions to respect any cancellations that may occur. 
 
 ## Wrapping up
+
+### What we've covered
+
+- How to test a HTTP handler that has had the request cancelled by the client.
+- How to use context to manage cancellation.
+- How to write a function that accepts `context` and uses it to cancel itself by using goroutines, `select` and channels.
+- Follow Google's guidelines as to how to manage cancellation by propagating request scoped context through your call-stack.
+- How to roll your own spy for `http.ResponseWriter` if you need it.
 
 ### What about context.Value ?
 
