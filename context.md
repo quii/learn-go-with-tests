@@ -302,7 +302,6 @@ Update our `SpyStore`
 type SpyStore struct {
 	response string
 	t        *testing.T
-	ctx      context.Context
 }
 
 func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
@@ -325,6 +324,8 @@ func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
 We have to make our spy act like a real method that works with `context`. It's similar to our approach from before, we use Go's concurrency primitives to make two asynchronous processes race each other to determine what we return. 
 
 You'll take a similar approach when writing your own functions and methods that accept a `context` so make sure you understand what's going on.
+
+We removed the reference to `ctx` from the `SpyStore`'s fields because it's no longer interesting to us. We're strictly testing behaviour now which we prefer over testing implementation details such as "you passed through a particular value to function `foo`".
 
 Finally we can update our tests. Comment out our cancellation test so we can fix the happy path test first.
 
