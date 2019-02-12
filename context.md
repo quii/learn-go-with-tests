@@ -263,13 +263,30 @@ Does it make sense for our web server to be concerned with manually cancelling `
 
 One of the main points of `context` is that it is a consistent way of offering cancellation. 
 
-From the Google blog again
+From the Google blog again:
 
 > At Google, we require that Go programmers pass a Context parameter as the first argument to every function on the call path between incoming and outgoing requests. This allows Go code developed by many different teams to interoperate well. It provides simple control over timeouts and cancelation and ensures that critical values like security credentials transit Go programs properly.
 
-Maybe it would be better for us to follow that approach and instead pass through the `context` to our `Store` and let it be responsible.
+(Pause for a moment and think of the ramifications of every function having to send in a context, and the ergonomics of that.)
 
+Feeling a bit uneasy? Good. Let's try and follow that approach though and instead pass through the `context` to our `Store` and let it be responsible. That way it can also pass the `context` through to it's dependants and they too can be responsible for stopping themselves.
 
-## notes for later...
+## Wrapping up
 
-- Cover context.value, but warn against putting stupid stuff like databases in it, keep it request scoped. Obscures the inputs and outputs of functions and is not typesafe. 
+### What about context.Value ?
+
+[Michal Štrba](https://faiface.github.io/post/context-should-go-away-go2/) and I have a similar opinion.
+
+> If you use ctx.Value in my (non-existent) company, you’re fired
+
+Some engineers have advocated passing values through `context` as it _feels convenient_. 
+
+Convienience is often the cause of bad code. 
+
+The problem with `context.Values` is that it's just an untyped map so you have no type-safety and you have to handle it not actually containing your value. You have to create a coupling of map keys from one module to another and if someone changes something things start breaking. 
+
+In short, if a function needs some values, put them as typed parameters rather than trying to fetch them from `context.Value`. This makes is statically checked and documented for everyone to see. 
+
+### Additional material
+
+- I really enjoyed reading [Context should go away for Go 2 by Michal Štrba](https://faiface.github.io/post/context-should-go-away-go2/). His argument is that having to pass `context` everywhere is a smell, that it's pointing to a deficiency in the language in respect to cancellation. He says it would better if this was somehow solved at the language level, rather than at a library level. Until that happens, you will need `context` if you want to manage long running processes.
