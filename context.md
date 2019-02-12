@@ -271,6 +271,8 @@ From the Google blog again:
 
 Feeling a bit uneasy? Good. Let's try and follow that approach though and instead pass through the `context` to our `Store` and let it be responsible. That way it can also pass the `context` through to it's dependants and they too can be responsible for stopping themselves.
 
+TODO! 
+
 ## Wrapping up
 
 ### What about context.Value ?
