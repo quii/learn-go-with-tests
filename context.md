@@ -4,9 +4,9 @@ The [Go blog describes the motivation for working with `context` excellently](ht
 
 > In Go servers, each incoming request is handled in its own goroutine. Request handlers often start additional goroutines to access backends such as databases and RPC services. The set of goroutines working on a request typically needs access to request-specific values such as the identity of the end user, authorization tokens, and the request's deadline. When a request is canceled or times out, all the goroutines working on that request should exit quickly so the system can reclaim any resources they are using.
 
-In this chapter we'll cover some usage with some simple examples of how to manage long running processes and how _not_ to use context. 
+In this chapter we'll cover some usage with some simple examples of how to manage long running processes. 
 
-We're voing to start with a classic example of a web server that when hit kicks off a potentially long-running process to fetch some data for it to return in the response. 
+We're going to start with a classic example of a web server that when hit kicks off a potentially long-running process to fetch some data for it to return in the response. 
 
 We will exercise a scenario where a user cancels the request before the data can be retrieved and we'll make sure the process is told to give up. 
 
@@ -87,9 +87,7 @@ func (s *SpyStore) Cancel() {
 }
 ```
 
-Let's add a new test where we cancel the request before 100 milliseconds and check the store to see if it gets cancelled
-
-## Try to run the test
+Let's add a new test where we cancel the request before 100 milliseconds and check the store to see if it gets cancelled.
 
 ```go
 t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
@@ -120,7 +118,7 @@ It's important that you derive your contexts so that cancellations are propegate
 
 What we do is derive a new `cancellingCtx` from our `request` which gives us access to a `cancel` function. We then schedule that function to be called in 5 milliseconds by using `time.AfterFunc`. Finally we use this new context in our request by calling `request.WithContext`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## Try to run the test
 
 The test fails as we'd expect
 
@@ -143,7 +141,7 @@ func Server(store Store) http.HandlerFunc {
 }
 ```
 
-This makes this test pass but it doesn't feel good does it! We surely shouldn't be cancelling every request before we fetch. 
+This makes this test pass but it doesn't feel good does it! We surely shouldn't be cancelling `Store` before we fetch on _every request_. 
 
 By being disciplined it highlighted a flaw in our tests, this is a good thing! 
 
