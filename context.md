@@ -257,14 +257,19 @@ func TestServer(t *testing.T) {
 }
 ```
 
+This approach is ok, but is it idiomatic? 
 
----------
+Does it make sense for our web server to be concerned with manually cancelling `Store`? What if `Store` also happens to depend on other slow-running processes? We'll have to make sure that `Store.Cancel` correctly propagates the cancellation to all of its dependants. 
+
+One of the main points of `context` is that it is a consistent way of offering cancellation. 
+
+From the Google blog again
+
+> At Google, we require that Go programmers pass a Context parameter as the first argument to every function on the call path between incoming and outgoing requests. This allows Go code developed by many different teams to interoperate well. It provides simple control over timeouts and cancelation and ensures that critical values like security credentials transit Go programs properly.
+
+Maybe it would be better for us to follow that approach and instead pass through the `context` to our `Store` and let it be responsible.
+
 
 ## notes for later...
 
-Long running operations should be cancellable and context is a consistent method of doing so
-
 - Cover context.value, but warn against putting stupid stuff like databases in it, keep it request scoped. Obscures the inputs and outputs of functions and is not typesafe. 
-
-
-> At Google, we require that Go programmers pass a Context parameter as the first argument to every function on the call path between incoming and outgoing requests. This allows Go code developed by many different teams to interoperate well. It provides simple control over timeouts and cancelation and ensures that critical values like security credentials transit Go programs properly.
