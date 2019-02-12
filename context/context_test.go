@@ -23,15 +23,29 @@ type Worker interface {
 }
 
 type SpyWorker struct {
-	working bool
+	t         *testing.T
+	cancelled bool
+	started   bool
 }
 
 func (s *SpyWorker) Start() {
-	s.working = true
+	s.started = true
 }
 
 func (s *SpyWorker) Cancel() {
-	s.working = false
+	s.cancelled = true
+}
+
+func (s *SpyWorker) AssertStartCalled() {
+	if !s.cancelled {
+		s.t.Errorf("worker was not started")
+	}
+}
+
+func (s *SpyWorker) AssertCancelCalled() {
+	if !s.cancelled {
+		s.t.Errorf("worker was not cancelled")
+	}
 }
 
 func (s *Server) ServerHTTP(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +62,7 @@ func (s *Server) ServerHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestCancellation(t *testing.T) {
-	worker := &SpyWorker{}
+	worker := &SpyWorker{t: t}
 	svr := NewServer(worker)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	res := httptest.NewRecorder()
@@ -61,7 +75,5 @@ func TestCancellation(t *testing.T) {
 
 	svr.ServerHTTP(res, req)
 
-	if worker.working {
-		t.Errorf("worker shouldn't be working after cancellation")
-	}
+	worker.AssertCancelCalled()
 }
