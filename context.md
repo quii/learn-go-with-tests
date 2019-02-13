@@ -469,7 +469,15 @@ Convienience is often the cause of bad code.
 
 The problem with `context.Values` is that it's just an untyped map so you have no type-safety and you have to handle it not actually containing your value. You have to create a coupling of map keys from one module to another and if someone changes something things start breaking. 
 
-In short, if a function needs some values, put them as typed parameters rather than trying to fetch them from `context.Value`. This makes is statically checked and documented for everyone to see. 
+In short, **if a function needs some values, put them as typed parameters rather than trying to fetch them from `context.Value`**. This makes is statically checked and documented for everyone to see. 
+
+#### But...
+
+On other other hand, it can be helpful to include information that is orthogonal to a request in a context, such as a trace id. Potentially this information would not be needed by every function in your call-stack and would make your functional signatures very messy.
+
+[Jack Lindamood says **Context.Value should inform, not control**](https://medium.com/@cep21/how-to-correctly-use-context-context-in-go-1-7-8f2c0fafdf39)
+
+> The content of context.Value is for maintainers not users. It should never be required input for documented or expected results.
 
 ### Additional material
 
