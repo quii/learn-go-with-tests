@@ -1,16 +1,16 @@
-# Context (WIP)
+# Context
 
-When you make a thing you will often kick off long-running, resource intensive processes (often in goroutines). If the action that caused this gets cancelled or fails for some reason you need to stop these processes in a consistent way through your application. 
+Software often kicks off long-running, resource-intensive processes (often in goroutines). If the action that caused this gets cancelled or fails for some reason you need to stop these processes in a consistent way through your application. 
 
-If you dont manage this your snappy go application that you're so proud of could start having difficult to debug performance problems.  
+If you dont manage this your snappy Go application that you're so proud of could start having difficult to debug performance problems.  
 
-In this chapter we'll use `context` to help us manage long-running processes.
+In this chapter we'll use the package `context` to help us manage long-running processes.
 
 We're going to start with a classic example of a web server that when hit kicks off a potentially long-running process to fetch some data for it to return in the response. 
 
 We will exercise a scenario where a user cancels the request before the data can be retrieved and we'll make sure the process is told to give up. 
 
-I've set up some code on the happy path to get us started. Here is our server code
+I've set up some code on the happy path to get us started. Here is our server code.
 
 ```go
 func NewHandler(store Store) http.HandlerFunc {
@@ -114,13 +114,13 @@ From the google blog again
 
 > The context package provides functions to derive new Context values from existing ones. These values form a tree: when a Context is canceled, all Contexts derived from it are also canceled.
 
-It's important that you derive your contexts so that cancellations are propegated throughout the call stack for a given request. 
+It's important that you derive your contexts so that cancellations are propagated throughout the call stack for a given request. 
 
-What we do is derive a new `cancellingCtx` from our `request` which gives us access to a `cancel` function. We then schedule that function to be called in 5 milliseconds by using `time.AfterFunc`. Finally we use this new context in our request by calling `request.WithContext`
+What we do is derive a new `cancellingCtx` from our `request` which returns us a `cancel` function. We then schedule that function to be called in 5 milliseconds by using `time.AfterFunc`. Finally we use this new context in our request by calling `request.WithContext`.
 
 ## Try to run the test
 
-The test fails as we'd expect
+The test fails as we'd expect.
 
 ```go
 --- FAIL: TestServer (0.00s)
@@ -194,7 +194,7 @@ What have we done here?
 
 `context` has a method `Done()` which returns a channel which gets sent a signal when the context is "done" or "cancelled". We want to listen to that signal and call `store.Cancel` if we get it but we want to ignore it if our `Store` manages to `Fetch` before it.
 
-To manage this we run `Fetch` in a goroutine and it will write the result into a new channel `data`. We then use `select` to effectively race to the two asynchronous processes and then we either write a response or `Cancel`
+To manage this we run `Fetch` in a goroutine and it will write the result into a new channel `data`. We then use `select` to effectively race to the two asynchronous processes and then we either write a response or `Cancel`.
 
 ## Refactor
 

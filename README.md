@@ -37,6 +37,7 @@
 12. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
 13. [Reflection](reflection.md) - Learn about reflection
 13. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
+13. [Context](context.md) - Use the context package to manage and cancel long-running processes
 
 ### Build an application
 
