@@ -1,10 +1,10 @@
 # Context (WIP)
 
-The [Go blog describes the motivation for working with `context` excellently](https://blog.golang.org/context)
+When you make a thing you will often kick off long-running, resource intensive processes (often in goroutines). If the action that caused this gets cancelled or fails for some reason you need to stop these processes in a consistent way through your application. 
 
-> In Go servers, each incoming request is handled in its own goroutine. Request handlers often start additional goroutines to access backends such as databases and RPC services. The set of goroutines working on a request typically needs access to request-specific values such as the identity of the end user, authorization tokens, and the request's deadline. When a request is canceled or times out, all the goroutines working on that request should exit quickly so the system can reclaim any resources they are using.
+If you dont manage this your snappy go application that you're so proud of could start having difficult to debug performance problems.  
 
-In this chapter we'll cover some usage with some simple examples of how to manage long running processes. 
+In this chapter we'll use `context` to help us manage long-running processes.
 
 We're going to start with a classic example of a web server that when hit kicks off a potentially long-running process to fetch some data for it to return in the response. 
 
@@ -474,3 +474,4 @@ In short, if a function needs some values, put them as typed parameters rather t
 ### Additional material
 
 - I really enjoyed reading [Context should go away for Go 2 by Michal Štrba](https://faiface.github.io/post/context-should-go-away-go2/). His argument is that having to pass `context` everywhere is a smell, that it's pointing to a deficiency in the language in respect to cancellation. He says it would better if this was somehow solved at the language level, rather than at a library level. Until that happens, you will need `context` if you want to manage long running processes.
+- The [Go blog further describes the motivation for working with `context` and has some examples](https://blog.golang.org/context)
