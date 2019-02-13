@@ -2,7 +2,7 @@
 
 [From Twitter](https://twitter.com/peterbourgon/status/1011403901419937792?s=09)
 
-> #golang challenge: write a function `walk(x interface{}, fn func(string))` which takes a struct `x` and calls `fn` for all strings fields found inside. difficulty level: recursively.
+> golang challenge: write a function `walk(x interface{}, fn func(string))` which takes a struct `x` and calls `fn` for all strings fields found inside. difficulty level: recursively.
 
 To do this we will need to use _reflection_.
 
