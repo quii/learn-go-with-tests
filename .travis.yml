@@ -29,7 +29,7 @@ jobs:
     - stage: releases
       script:
         - docker pull jagregory/pandoc
-        - "./build.epub.sh"
+        - "./build.books.sh"
       deploy:
         provider: releases
         api_key:
