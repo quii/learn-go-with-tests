@@ -308,20 +308,36 @@ func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
 	data := make(chan string, 1)
 
 	go func() {
-		time.Sleep(100 * time.Millisecond)
-		data <- s.response
+		var result string
+		for _, c := range s.response {
+			select {
+			case <-ctx.Done():
+				s.t.Log("spy store got cancelled")
+				return
+			default:
+				time.Sleep(10 * time.Millisecond)
+				result += string(c)
+			}
+		}
+		data <- result
 	}()
 
 	select {
-	case msg := <-data:
-		return msg, nil
 	case <-ctx.Done():
 		return "", ctx.Err()
+	case res := <-data:
+		return res, nil
 	}
 }
 ```
 
-We have to make our spy act like a real method that works with `context`. It's similar to our approach from before, we use Go's concurrency primitives to make two asynchronous processes race each other to determine what we return. 
+We have to make our spy act like a real method that works with `context`. 
+
+We are simulating a slow process where we build the result slowly by appending the string, character by character in a goroutine. When the goroutine finishes its work it writes the string to the `data` channel. The goroutine listens for the `ctx.Done` and will stop the work if a signal is sent in that channel. 
+
+Finally the code uses another `select` to wait for that goroutine to finish its work or for the cancellation to occur.
+
+It's similar to our approach from before, we use Go's concurrency primitives to make two asynchronous processes race each other to determine what we return. 
 
 You'll take a similar approach when writing your own functions and methods that accept a `context` so make sure you understand what's going on.
 
