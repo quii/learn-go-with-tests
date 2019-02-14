@@ -481,7 +481,7 @@ We can see after this that the server code has become simplified as it's no long
 
 Some engineers have advocated passing values through `context` as it _feels convenient_. 
 
-Convienience is often the cause of bad code. 
+Convenience is often the cause of bad code. 
 
 The problem with `context.Values` is that it's just an untyped map so you have no type-safety and you have to handle it not actually containing your value. You have to create a coupling of map keys from one module to another and if someone changes something things start breaking. 
 
