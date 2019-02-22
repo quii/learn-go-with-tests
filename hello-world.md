@@ -8,7 +8,7 @@ In the [previous chapter](install-go.md#go-environment) we discussed how Go is o
 
 Make a directory in the following path `$GOPATH/src/github.com/{your-user-id}/hello`.
 
-So if you're on a unix based OS and your username is "bob" and you are happy to stick with Go's conventions about `$GOPATH` (which is the easiest way of setting up) you could run `mkdir -p ~/go/src/github.com/bob/hello`.
+So if you're on a unix based OS and your username is "bob" and you are happy to stick with Go's conventions about `$GOPATH` (which is the easiest way of setting up) you could run `mkdir -p $GOPATH/src/github.com/bob/hello`.
 
 Create a file in this directory called `hello.go` and write this code. To run it type `go run hello.go`.
 
