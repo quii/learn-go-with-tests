@@ -26,12 +26,6 @@ At this point you can now install Go:
 brew install go
 ```
 
-If you are going to deploy your programs to Linux based servers, you should enable cross compilation feature. If so, install using the following command:
-
-```sh
-brew install go --cross-compile-common
-```
-
 *You should follow any instructions recommended by your package manager. **Note** these may be host os specific*.
 
 You can verify the installation with:
