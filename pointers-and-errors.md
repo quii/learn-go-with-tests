@@ -49,7 +49,7 @@ Now we've made our wallet, try and run the test again
 ./wallet_test.go:11:15: wallet.Balance undefined (type Wallet has no field or method Balance)
 ```
 
-As expected, we need to define these methods to make the test pass.
+We need to define these methods.
 
 Remember to only do enough to make the tests run. We need to make sure our test fails correctly with a clear error message.
 
@@ -79,7 +79,7 @@ type Wallet struct {
 }
 ```
 
-In Go if a symbol \(so variables, types, functions et al\) starts with a lowercase symbol then it is private _outside the package it's defined in_.
+In Go if a symbol (so variables, types, functions et al) starts with a lowercase symbol then it is private _outside the package it's defined in_.
 
 In our case we want our methods to be able to manipulate this value but no one else.
 
@@ -137,7 +137,7 @@ func (w Wallet) Deposit(amount int) {
 }
 ```
 
-The `\n` escape character, prints new line after outputing the memory address.
+The `\n` escape character, prints new line after outputting the memory address. We get the pointer to a thing with the address of symbol; `&`.
 
 Now re-run the test
 
@@ -209,7 +209,7 @@ func TestWallet(t *testing.T) {
 
 To make `Bitcoin` you just use the syntax `Bitcoin(999)`.
 
-An interesting property of type aliasing is that you can also declare _methods_ on them. This can be very useful when you want to add some domain specific functionality on top of existing types.
+By doing this we're making a new type and we can declare _methods_ on them. This can be very useful when you want to add some domain specific functionality on top of existing types.
 
 Let's implement [Stringer](https://golang.org/pkg/fmt/#Stringer) on Bitcoin
 
