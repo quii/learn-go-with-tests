@@ -72,13 +72,7 @@ At this point you can _go get_ and the src/package/bin will be installed correct
 
 Editor preference is very individualistic, you may already have a preference that supports Go. If you don't you should consider an Editor such as [Visual Studio Code](https://code.visualstudio.com), which has exceptional Go support.
 
-To install VS Code using brew, because this is a GUI application you need an extension to homebrew called cask to support install VS Code.
-
-```sh
-brew tap caskroom/cask
-```
-
-At this point you can now use brew to install VS Code.
+You can install it using the following command:
 
 ```sh
 brew cask install visual-studio-code
