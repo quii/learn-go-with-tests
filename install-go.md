@@ -96,13 +96,12 @@ go get -u github.com/derekparker/delve/cmd/dlv
 
 ## Go Linting
 
-An improvement over the default linter can be configured using [Gometalinter](https://github.com/alecthomas/gometalinter).
+An improvement over the default linter can be configured using [GolangCI-Lint](https://github.com/golangci/golangci-lint).
 
 This can be installed as follows:
 
 ```sh
-go get -u github.com/alecthomas/gometalinter
-gometalinter --install
+go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 ```
 
 ## Refactoring and your tooling
