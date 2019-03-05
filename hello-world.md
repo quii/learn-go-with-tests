@@ -175,6 +175,14 @@ func Hello(name string) string {
 
 When you run the tests they should now pass. Normally as part of the TDD cycle we should now _refactor_.
 
+### A note on source control
+
+At this point, if you are using source control \(which you should!\) I would
+`commit` the code as it is. We have working software backed by a test.
+
+I _wouldn't_ push to master though, because I plan to refactor next. It is nice
+to commit at this point in case you somehow get into a mess with refactoring - you can always go back to the working version.
+
 There's not a lot to refactor here, but we can introduce another language feature _constants_.
 
 ### Constants
@@ -288,6 +296,11 @@ func Hello(name string) string {
 ```
 
 If we run our tests we should see it satisfies the new requirement and we haven't accidentally broken the other functionality.
+
+### Back to source control
+
+Now we are happy with the code I would amend the previous commit so we only
+check in the lovely version of our code with its test.
 
 ### Discipline
 
