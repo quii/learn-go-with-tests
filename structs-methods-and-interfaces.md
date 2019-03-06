@@ -532,7 +532,7 @@ We knew this was in relation to `Triangle` because we were just working with it,
 
 We can change our error message `%#v got %.2f want %.2f`. `%#v` format string will print out our struct with the values in it's field, so the developer can see at a glance the properties that are being tested.
 
-One final tip with table driven tests is to use `t.Run`.
+One final tip with table driven tests is to use `t.Run` and to name the test cases.
 
 By wrapping each case in a `t.Run` you will have clearer test output on failures as it will print the name of the case
 
