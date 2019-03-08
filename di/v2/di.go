@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// Greet sends a personalised greetinb to writer
+// Greet sends a personalised greeting to writer
 func Greet(writer io.Writer, name string) {
 	fmt.Fprintf(writer, "Hello, %s", name)
 }
