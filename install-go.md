@@ -91,7 +91,7 @@ When you open a Go file for the first time in VS Code, it will indicate that the
 A good option for debugging Go (that's integrated with VS Code) is Delve. This can be installed as follows using go get:
 
 ```sh
-go get -u github.com/derekparker/delve/cmd/dlv
+go get -u github.com/go-delve/delve/cmd/dlv
 ```
 
 ## Go Linting
