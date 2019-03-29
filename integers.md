@@ -118,6 +118,8 @@ func ExampleAdd() {
 }
 ```
 
+(If your editor doesn't automatically import packages for you, the compilation step will fail because you will be missing `import "fmt"` in `adder_test.go`. It is strongly recommended you research how to have these kind of errors fixed for you automatically in whatever editor you are using.)
+
 If your code changes so that the example is no longer valid, your build will fail.
 
 Running the package's test suite, we can see the example function is executed with no further arrangement from us:
