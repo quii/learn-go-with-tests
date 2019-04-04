@@ -384,8 +384,7 @@ func SumAll(numbersToSum ...[]int) []int {
 ```
 
 In this implementation, we are worrying less about capacity. We start with an
-empty slice \(defined in the function signature\) and append to it the result of
-`Sum` as we work through the varargs.
+empty slice `sum` and append to it the result of `Sum` as we work through the varargs.
 
 Our next requirement is to change `SumAll` to `SumAllTails`, where it now
 calculates the totals of the "tails" of each slice. The tail of a collection is
