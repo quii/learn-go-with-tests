@@ -2,7 +2,7 @@
 
 For all the power of modern computers to perform huge sums at lightning speed,
 the average developer rarely uses any maths to do their job.  But not in this
-example! Today we'll use mathematics to solve a _real_ problem.  And not boring
+example! Today we'll use mathematics to solve a _real_ problem. And not boring
 mathematics - we're going to use trigonometry and vectors and all sorts of stuff
 that you always said you'd never have to use after highschool.
 
@@ -108,11 +108,11 @@ import (
 	"github.com/gypsydave5/learn-go-with-tests/math/v1/clockface"
 )
 
-func HandsAtTest(t *testing.T) {
-	tm := time.Date(1337, time.January, 1, 6, 0, 0, 0, time.UTC)
+func HandsAtMidnigthTest(t *testing.T) {
+	tm := time.Date(1337, time.January, 1, 0, 0, 0, 0, time.UTC)
 
 	want := Hands{
-		Hour:   Vector{X: 0, Y: -150},
+		Hour:   Vector{X: 0, Y: 150},
 		Minute: Vector{X: 0, Y: 150},
 		Second: Vector{X: 0, Y: 150},
 	}
@@ -166,6 +166,39 @@ func HandsAt(t time.Time) (hands Hands) {
 }
 ```
 
+When we get the expected failure, we can fill in the return value of `HandsAt`:
+
+```go
+func HandsAt(t time.Time) Hands {
+	return Hands{
+		Hour:   Vector{X: 0, Y: 150},
+		Minute: Vector{X: 0, Y: 150},
+		Second: Vector{X: 0, Y: 150},
+	}
+}
+```
+
+To make it pass, and then supply another test to force us to actually do some
+work:
+
+```go
+func TestHandsAtSixOclock(t *testing.T) {
+	tm := time.Date(1337, time.January, 1, 6, 0, 0, 0, time.UTC)
+
+	want := clockface.Hands{
+		Hour:   clockface.Vector{X: 0, Y: -150},
+		Minute: clockface.Vector{X: 0, Y: 150},
+		Second: clockface.Vector{X: 0, Y: 150},
+	}
+
+	got := clockface.HandsAt(tm)
+
+	if got != want {
+		t.Errorf("Got %v, wanted %v", got, want)
+	}
+}
+```
+
 ## Thinking without tests
 
 Let's not rush in and write another test yet. Let's do some thinking first. How
@@ -180,6 +213,73 @@ So if I wanted to think about in what direction the second hand was pointing at,
 say, 37 seconds, I'd want the angle between 12 o'clock and 37/60ths around the
 circle. In degrees this is `(360 / 60 ) * 37 = 222`, but it's easier just to
 remember that it's `37/60` of a complete rotation.
+
+But the angle is only half the story; we need to know the X and Y coordinate
+that the tip of the second hand is pointing at. How can we work that out?
+
+## Math
+
+Imagine a circle with a radius of 1 drawn around the origin - the coordinate `0,
+0`.
+
+![](#todo-circle-picture)
+
+This is called the 'unit circle' because... well, the radius is 1 unit!
+
+The circumference of the circle is made of points on the grid - more
+coordinates. The x and y components of each of these coordinates form
+a triangle, the hypotenuse of which is always 1 - the radius of the circle
+
+![](#todo-circle-picture-triangle)
+
+Now, trigonometry will let us work out the lengths of X and Y for each triangle
+if we know the angle they make with the origin. The X coordinate will be cos(a),
+and the Y coordinate will be sin(a), where a is the angle made between the line
+and the (positive) x axis.
+
+![](#todo-circle-with-maths)
+
+(If you don't believe this, [go and look at Wikipedia...][circle])
+
+One final twist - because we want to measure the angle from 12 o'clock rather
+than from the X axis (3 o'clock), we need to swap the axis around; now
+x = sin(a) and y = cos(a).
+
+So now we know how to get the angle of the second hand (1/60th of a circle for
+each second) and the X and Y coordinates. We'll need functions for both `sin`
+and `cos`.
+
+## `math`
+
+Happily the Go `math` package has both, with one small snag we'll need to get
+our heads around; if we look at the description of [`math.Cos`][mathcos]:
+
+> Cos returns the cosine of the radian argument x.
+
+It wants the angle to be in radians. Instead of breaking a circle up into 360
+degrees as we might be more used to, we break the full turn of the circle into
+2π radians. There are good reasons to do this that we won't go in to.
+
+Now that we've done some reading, some learning and some thinking, we can write
+our next test.
+
+## Second Test
+
+
+
+
+
+
+[circle]: https://en.wikipedia.org/wiki/Sine#Unit_circle_definition
+[mathcos]: https://golang.org/pkg/math/#Cos
+
+
+
+
+
+
+
+
 
 ## Our next test
 
