@@ -597,7 +597,7 @@ Now if anyone has a `League` they can easily find a given player.
 
 Change our `PlayerStore` interface to return `League` rather than `[]Player`. Try and re-run the tests, you'll get a compilation problem because we've changed the interface but it's very easy to fix; just change the return type from `[]Player` to `League`.
 
-This lets us simplify our methods in `FileSystemStore`.
+This lets us simplify our methods in `FileSystemPlayerStore`.
 
 ```go
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
