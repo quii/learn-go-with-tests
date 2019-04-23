@@ -265,31 +265,166 @@ our next test.
 
 ## Second Test
 
-
-
-
-
-
-[circle]: https://en.wikipedia.org/wiki/Sine#Unit_circle_definition
-[mathcos]: https://golang.org/pkg/math/#Cos
-
-
-
-
-
-
-
-
-
-## Our next test
-
-Let's write something that lets us work out the angle of the second hand from
-a time.
+All this maths is hard and confusing. I'm not confident I understand what's
+going on - so let's write a test! We don't need to solve the whole problem in
+one go - let's start off with working out the correct angle, in radians, for the
+second hand at a particular time.
 
 ```go
+package clockface
 
+import (
+	"math"
+	"testing"
+	"time"
+)
+
+func TestSecondsInRadians(t *testing.T) {
+	thirtySeconds := time.Date(312, time.October, 28, 0, 0, 30, 0, time.UTC)
+	want := math.Pi
+	got := secondsInRadians(thirtySeconds)
+
+	if want != got {
+		t.Fatalf("Wanted %v radians, but got %v", want, got)
+	}
+}
 ```
 
+Here we're testing that 30 seconds past the minute should put the second hand at
+halfway around the clock - and it's Our first use of the `math` package;
+f a full turn of a circle is 2π radians, we know that halfway round should just
+be π radians. `math.Pi` provides us with a value for π.
+
+A dumb implementation:
+
+
+```go
+func secondsInRadians(t time.Time) float64 {
+	return math.Pi
+}
+```
+
+Now we can extend the test to cover a few more scenarios.
+
+```go
+func TestSecondsInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(0, 0, 30), math.Pi},
+		{simpleTime(0, 0, 0), 0},
+		{simpleTime(0, 0, 45), (math.Pi / 2) * 3},
+		{simpleTime(0, 0, 7), (math.Pi / 30) * 7},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := secondsInRadians(c.time)
+			if got != c.angle {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+```
+
+I added a couple of helper functions to make writing this table based test
+a little less tedious. `testName` converts a time into a digital watch
+format (HH:MM:SS), and `simpleTime` constructs a `time.Time` using only the
+parts we actually care about (again, hours, minutes and seconds).[^1]
+
+```go
+func simpleTime(hours, minutes, seconds int) time.Time {
+	return time.Date(312, time.October, 28, hours, minutes, seconds, 0, time.UTC)
+}
+
+func testName(t time.Time) string {
+	return t.Format("15:04:05")
+}
+```
+
+These two functions should help make these tests (and future tests) a little
+easier to write and maintain.
+
+This gives us some nice test output:
+
+```
+--- FAIL: TestSecondsInRadians (0.00s)
+    --- FAIL: TestSecondsInRadians/00:00:00 (0.00s)
+        clockface_test.go:24: Wanted 0 radians, but got 3.141592653589793
+    --- FAIL: TestSecondsInRadians/00:00:45 (0.00s)
+        clockface_test.go:24: Wanted 4.71238898038469 radians, but got 3.141592653589793
+    --- FAIL: TestSecondsInRadians/00:00:07 (0.00s)
+        clockface_test.go:24: Wanted 0.7330382858376184 radians, but got 3.141592653589793
+```
+
+Time to implement all of that maths stuff we were talking about above:
+
+```go
+func secondsinradians(t time.time) float64 {
+	return float64(t.second()) * (math.pi / 30)
+}
+```
+
+One second is (2π / 60) radians... cancel out the 2 and we get π/30 radians.
+Multiply that by the number of seconds (as a `float64`) and we should now have
+all the tests passing...
+
+```
+--- FAIL: TestSecondsInRadians (0.00s)
+    --- FAIL: TestSecondsInRadians/00:00:30 (0.00s)
+        clockface_test.go:24: Wanted 3.141592653589793 radians, but got 3.1415926535897936
+```
+
+Wait, what?
+
+### Floats are horrible
+
+Floating point arithmetic is [notoriously inaccurate][floatingpoint]. Computers
+can only really handle integers, and rational numbers to some extent. Decimal
+numbers start to become inaccurate, especially when we factor them up and down
+as we are in the `secondsInRadians` function. By dividing `math.Pi` by 30 and
+then by multiplying it by 30 we've ended up with a number that's no longer the
+same as `math.Pi`.
+
+There are two ways around this:
+
+1. Live with the inaccuracy
+2. Refactor our function by refactoring our equation
+
+Now (1) may not seem all that appealing, but it's often the only way to make
+floating point equality work. B.eing inaccurate by some infinitessimal fraction
+is frankly not going to matter for the purposes of drawing a clockface, so we
+could write a function that defines a 'close enough' equality for our angles.
+But there's a simple way we can get the accuracy back: we rearrange the equation
+so that we're no longer dividing down and then multiplying up. We can do it all
+by just dividing.
+
+So instead of `numberOfSeconds * π / 30`, we can write `π / (30
+/ numberOfSeconds)`, which is equivalent.
+
+In Go:
+
+```go
+func secondsinradians(t time.time) float64 {
+	return (math.Pi / (30 / (float64(t.Second()))))
+}
+```
+
+And we get a pass.
+
+```
+PASS
+ok      github.com/gypsydave5/learn-go-with-tests/math/v2/clockface     0.005s
+```
+
+[^1]: This is a lot easier than writing a name out by hand as a string and then
+  having to keep it in sync with the actual time. Believe me you don't want to
+  do that...
 
 
 [texttemplate]: https://golang.org/pkg/text/template/
+[circle]: https://en.wikipedia.org/wiki/Sine#Unit_circle_definition
+[mathcos]: https://golang.org/pkg/math/#Cos
+[floatingpoint]: https://0.30000000000000004.com/
