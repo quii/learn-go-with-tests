@@ -419,6 +419,90 @@ PASS
 ok      github.com/gypsydave5/learn-go-with-tests/math/v2/clockface     0.005s
 ```
 
+## More tests
+
+This test has definitely boosted my confidence in the maths I'm doing. I hope we
+can see where we're headed now - similar tests for functions called
+`minutesInRadians` and `hoursInRadians`
+
+### Minutes
+
+```go
+func TestMinutesInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(0, 30, 0), math.Pi},
+		{simpleTime(0, 0, 0), 0},
+		{simpleTime(0, 45, 0), (math.Pi / 2) * 3},
+		{simpleTime(0, 7, 0), (math.Pi / 30) * 7},
+		{simpleTime(0, 0, 30), (math.Pi / 60)},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := minutesInRadians(c.time)
+			if got != c.angle {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+```
+
+```go
+func minutesInRadians(t time.Time) float64 {
+	seconds := secondsInRadians(t) / 60
+	minutes := math.Pi / (30 / (float64(t.Minute())))
+	return seconds + minutes
+}
+```
+
+```sh
+--- FAIL: TestMinutesInRadians (0.00s)
+    --- FAIL: TestMinutesInRadians/00:00:30 (0.00s)
+        clockface_test.go:46: Wanted 0.05235987755982989 radians, but got 0.05235987755982988
+```
+
+Again some inaccuracy... one one-hundred-quadrillionth out. Can we fix it the
+same way?
+
+```go
+func minutesInRadians(t time.Time) float64 {
+	return math.Pi / ((30 * 60) / (float64(t.Second()) + (60 * float64(t.Minute()))))
+}
+```
+
+```sh
+--- FAIL: TestMinutesInRadians (0.00s)
+    --- FAIL: TestMinutesInRadians/00:00:30 (0.00s)
+        clockface_test.go:46: Wanted 0.05235987755982989 radians, but got 0.05235987755982988
+```
+
+No. :(
+
+OK - time for the back up plan from above: let's define angle equality to
+a precision that's 'good enough' for a clock face, because what's one
+one-hundred-quadrillionth between friends? A good way of expressing this
+is to say that the difference between the two numbers is less than some small
+number.
+
+```go
+func roughlyEqual(a, b float64) bool {
+	float64EqualityThreshold := 1e-7
+	return math.Abs(a-b) < float64EqualityThreshold
+}
+```
+
+`1e-7` is a floating point literal, meaning `1 x 10⁻⁷` or `0.0000001`. We're
+saying that the two numbers shouldn't differ by more than this.
+
+And look - another useful `math` function: `math.Abs` returns the absolute value
+of a number - or in other words is gets rid of the minus sign if it's present.
+This is a good way of not having to worry about whether `a` is bigger or smaller
+than `b`.
+
 [^1]: This is a lot easier than writing a name out by hand as a string and then
   having to keep it in sync with the actual time. Believe me you don't want to
   do that...
