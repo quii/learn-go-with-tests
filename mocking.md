@@ -353,13 +353,14 @@ The test should pass and no longer taking 4 seconds.
 
 There's still another important property we haven't tested.
 
-`Countdown` should sleep before the first print and then after each one until the last, e.g:
+`Countdown` should sleep before each print, e.g:
 
 - `Sleep`
 - `Print N`
 - `Sleep`
 - `Print N-1`
 - `Sleep`
+- `Print Go!`
 - etc
 
 Our latest change only asserts that it has slept 4 times, but those sleeps could occur out of sequence.
@@ -410,7 +411,7 @@ Our `CountdownOperationsSpy` implements both `io.Writer` and `Sleeper`, recordin
 We can now add a sub-test into our test suite.
 
 ```go
-t.Run("sleep after every print", func(t *testing.T) {
+t.Run("sleep before every print", func(t *testing.T) {
     spySleepPrinter := &CountdownOperationsSpy{}
     Countdown(spySleepPrinter, spySleepPrinter)
 
@@ -453,7 +454,7 @@ Go!`
         }
     })
 
-    t.Run("sleep after every print", func(t *testing.T) {
+    t.Run("sleep before every print", func(t *testing.T) {
         spySleepPrinter := &CountdownOperationsSpy{}
         Countdown(spySleepPrinter, spySleepPrinter)
 
