@@ -25,5 +25,6 @@ func secondsInRadians(t time.Time) float64 {
 }
 
 func minutesInRadians(t time.Time) float64 {
-	return math.Pi / ((30 * 60) / (float64(t.Second()) + (60 * float64(t.Minute()))))
+	return math.Pi / ((30 * 60) / (float64(t.Second()) +
+		(60 * float64(t.Minute()))))
 }
