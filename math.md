@@ -238,7 +238,7 @@ that the tip of the second hand is pointing at. How can we work that out?
 Imagine a circle with a radius of 1 drawn around the origin - the coordinate `0,
 0`.
 
-![](math/images/unit_circle.png)
+![picture of the unit circle](math/images/unit_circle.png)
 
 This is called the 'unit circle' because... well, the radius is 1 unit!
 
@@ -246,20 +246,22 @@ The circumference of the circle is made of points on the grid - more
 coordinates. The x and y components of each of these coordinates form
 a triangle, the hypotenuse of which is always 1 - the radius of the circle
 
-![](math/images/unit_circle_coords.png)
+![picture of the unit circle with a point defined on the circumference](math/images/unit_circle_coords.png)
 
 Now, trigonometry will let us work out the lengths of X and Y for each triangle
 if we know the angle they make with the origin. The X coordinate will be cos(a),
 and the Y coordinate will be sin(a), where a is the angle made between the line
 and the (positive) x axis.
 
-![](math/images/unit_circle_params.png)
+![picture of the unit circle with the x and y elements of a ray defined as cos(a) and sin(a) respectively, where a is the angle made by the ray with the x axis](math/images/unit_circle_params.png)
 
 (If you don't believe this, [go and look at Wikipedia...][circle])
 
 One final twist - because we want to measure the angle from 12 o'clock rather
 than from the X axis (3 o'clock), we need to swap the axis around; now
 x = sin(a) and y = cos(a).
+
+![unit circle ray defined from by angle from y axis](math/images/unit_circle_12_oclock.png)
 
 So now we know how to get the angle of the second hand (1/60th of a circle for
 each second) and the X and Y coordinates. We'll need functions for both `sin`
