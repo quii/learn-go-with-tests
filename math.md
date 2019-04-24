@@ -96,6 +96,8 @@ this would be (a) boring, (b) time consuming and (c) fragile. What would be much
 better would be to test this data structure that I want to pass to the
 template - it's the thing that's doing all of the work after all.
 
+## Write the test first
+
 So my first test looks like this:
 
 ```go
@@ -125,7 +127,9 @@ func HandsAtMidnigthTest(t *testing.T) {
 }
 ```
 
-Which drives out the expected failures
+## Try to run the test
+
+This drives out the expected failures
 
 ```
 # github.com/gypsydave5/learn-go-with-tests/math/v1/clockface_test [github.com/gypsydave5/learn-go-with-tests/math/v1/clockface.test]
@@ -142,6 +146,8 @@ magnitude - i.e. how long the hand is and where it's pointing.
 
 This test might need some refining as we discover more about what we're trying
 to achieve, but it's a good start.
+
+## Write the minimal amount of code for the test to run and check the failing test output
 
 Let's implement those types to get the code to compile
 
@@ -178,8 +184,18 @@ func HandsAt(t time.Time) Hands {
 }
 ```
 
-To make it pass, and then supply another test to force us to actually do some
-work:
+Behold, a passing test.
+
+## Refactor
+
+No need to refactor yet - there's barely enough code!
+
+## Repeat for new requirements
+
+We probably need to do some work here that doesn't just involve returning
+a clock that shows midnight for every time...
+
+## Write the test first
 
 ```go
 func TestHandsAtSixOclock(t *testing.T) {
@@ -222,7 +238,7 @@ that the tip of the second hand is pointing at. How can we work that out?
 Imagine a circle with a radius of 1 drawn around the origin - the coordinate `0,
 0`.
 
-![](#todo-circle-picture)
+![](math/images/unit_circle.png)
 
 This is called the 'unit circle' because... well, the radius is 1 unit!
 
@@ -230,14 +246,14 @@ The circumference of the circle is made of points on the grid - more
 coordinates. The x and y components of each of these coordinates form
 a triangle, the hypotenuse of which is always 1 - the radius of the circle
 
-![](#todo-circle-picture-triangle)
+![](math/images/unit_circle_coords.png)
 
 Now, trigonometry will let us work out the lengths of X and Y for each triangle
 if we know the angle they make with the origin. The X coordinate will be cos(a),
 and the Y coordinate will be sin(a), where a is the angle made between the line
 and the (positive) x axis.
 
-![](#todo-circle-with-maths)
+![](math/images/unit_circle_params.png)
 
 (If you don't believe this, [go and look at Wikipedia...][circle])
 
@@ -482,11 +498,7 @@ func minutesInRadians(t time.Time) float64 {
 
 No. :(
 
-OK - time for the back up plan from above: let's define angle equality to
-a precision that's 'good enough' for a clock face, because what's one
-one-hundred-quadrillionth between friends? A good way of expressing this
-is to say that the difference between the two numbers is less than some small
-number.
+OK - time for the back up plan from above: let's define angle equality to a precision that's 'good enough' for a clock face, because what's one one-hundred-quadrillionth between friends? A good way of expressing this is to say that the difference between the two numbers is less than some small number.
 
 ```go
 func roughlyEqual(a, b float64) bool {
@@ -495,17 +507,11 @@ func roughlyEqual(a, b float64) bool {
 }
 ```
 
-`1e-7` is a floating point literal, meaning `1 x 10⁻⁷` or `0.0000001`. We're
-saying that the two numbers shouldn't differ by more than this.
+`1e-7` is a floating point literal, meaning `1 x 10⁻⁷` or `0.0000001`. We're saying that the two numbers shouldn't differ by more than this.
 
-And look - another useful `math` function: `math.Abs` returns the absolute value
-of a number - or in other words is gets rid of the minus sign if it's present.
-This is a good way of not having to worry about whether `a` is bigger or smaller
-than `b`.
+And look - another useful `math` function: `math.Abs` returns the absolute value of a number - or in other words is gets rid of the minus sign if it's present. This is a good way of not having to worry about whether `a` is bigger or smallerthan `b`.
 
-[^1]: This is a lot easier than writing a name out by hand as a string and then
-  having to keep it in sync with the actual time. Believe me you don't want to
-  do that...
+[^1]: This is a lot easier than writing a name out by hand as a string and then having to keep it in sync with the actual time. Believe me you don't want to do that...
 
 
 [texttemplate]: https://golang.org/pkg/text/template/
