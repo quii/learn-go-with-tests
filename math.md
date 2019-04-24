@@ -274,9 +274,7 @@ our heads around; if we look at the description of [`math.Cos`][mathcos]:
 
 > Cos returns the cosine of the radian argument x.
 
-It wants the angle to be in radians. Instead of breaking a circle up into 360
-degrees as we might be more used to, we break the full turn of the circle into
-2π radians. There are good reasons to do this that we won't go in to.
+It wants the angle to be in radians. So what's a radian? Instead of defining the full turn of a circle to be made up of 360 degrees, we define a full turn as being 2π radians. There are good reasons to do this that we won't go in to.[^2]
 
 Now that we've done some reading, some learning and some thinking, we can write
 our next test.
@@ -513,7 +511,10 @@ func roughlyEqual(a, b float64) bool {
 
 And look - another useful `math` function: `math.Abs` returns the absolute value of a number - or in other words is gets rid of the minus sign if it's present. This is a good way of not having to worry about whether `a` is bigger or smallerthan `b`.
 
+Now the tests pass.
+
 [^1]: This is a lot easier than writing a name out by hand as a string and then having to keep it in sync with the actual time. Believe me you don't want to do that...
+[^2]: In short it makes it easier to do calculus with circles as π just keeps coming up as an angle if you use normal degrees, so if you count your angles in πs it makes all the equations simpler.
 
 
 [texttemplate]: https://golang.org/pkg/text/template/
