@@ -24,7 +24,7 @@ Go!`
 		}
 	})
 
-	t.Run("sleep after every print", func(t *testing.T) {
+	t.Run("sleep before every print", func(t *testing.T) {
 		spySleepPrinter := &CountdownOperationsSpy{}
 		Countdown(spySleepPrinter, spySleepPrinter)
 
