@@ -49,6 +49,30 @@ func TestMinutesInRadians(t *testing.T) {
 	}
 }
 
+func TestHoursInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(6, 0, 0), math.Pi},
+		{simpleTime(18, 0, 0), math.Pi},
+		{simpleTime(0, 0, 0), 0},
+		{simpleTime(12, 0, 0), 0},
+		{simpleTime(3, 0, 0), math.Pi / 2},
+		{simpleTime(7, 0, 0), (math.Pi / 6) * 7},
+		{simpleTime(0, 30, 0), (math.Pi / 60)},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := hoursInRadians(c.time)
+			if !roughlyEqual(got, c.angle) {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+
 func simpleTime(hours, minutes, seconds int) time.Time {
 	return time.Date(312, time.October, 28, hours, minutes, seconds, 0, time.UTC)
 }

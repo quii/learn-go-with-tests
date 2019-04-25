@@ -513,6 +513,75 @@ And look - another useful `math` function: `math.Abs` returns the absolute value
 
 Now the tests pass.
 
+### Hours
+
+```go
+func TestHoursInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(6, 0, 0), math.Pi},
+		{simpleTime(18, 0, 0), math.Pi},
+		{simpleTime(0, 0, 0), 0},
+		{simpleTime(12, 0, 0), 0},
+		{simpleTime(3, 0, 0), math.Pi / 2},
+		{simpleTime(7, 0, 0), (math.Pi / 6) * 7},
+		{simpleTime(0, 30, 0), (math.Pi / 60)},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := hoursInRadians(c.time)
+			if !roughlyEqual(got, c.angle) {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+```
+
+```
+# github.com/gypsydave5/learn-go-with-tests/math/v3/clockface [github.com/gypsydave5/learn-go-with-tests/math/v3/clockface.test]
+./clockface_test.go:68:11: undefined: hoursInRadians
+```
+
+
+```go
+func hoursInRadians(t time.Time) float64 {
+	return 0
+}
+```
+
+```
+--- FAIL: TestHoursInRadians (0.00s)
+    --- FAIL: TestHoursInRadians/06:00:00 (0.00s)
+        clockface_test.go:70: Wanted 3.141592653589793 radians, but got 0
+    --- FAIL: TestHoursInRadians/18:00:00 (0.00s)
+        clockface_test.go:70: Wanted 3.141592653589793 radians, but got 0
+    --- FAIL: TestHoursInRadians/03:00:00 (0.00s)
+        clockface_test.go:70: Wanted 4.71238898038469 radians, but got 0
+    --- FAIL: TestHoursInRadians/07:00:00 (0.00s)
+        clockface_test.go:70: Wanted 0.7330382858376184 radians, but got 0
+    --- FAIL: TestHoursInRadians/00:30:00 (0.00s)
+        clockface_test.go:70: Wanted 0.05235987755982989 radians, but got 0
+```
+
+```go
+func hoursInRadians(t time.Time) float64 {
+	seconds := secondsInRadians(t) / (60 * 60)
+	minutes := minutesInRadians(t) / 60
+	hours := math.Pi / (6 / (float64(t.Hour() % 12)))
+	return seconds + minutes + hours
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface	0.005s
+```
+
+
 [^1]: This is a lot easier than writing a name out by hand as a string and then having to keep it in sync with the actual time. Believe me you don't want to do that...
 [^2]: In short it makes it easier to do calculus with circles as π just keeps coming up as an angle if you use normal degrees, so if you count your angles in πs it makes all the equations simpler.
 
