@@ -35,20 +35,24 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 }
 
 // FileSystemPlayerStoreFromFile creates a PlayerStore from the contents of a JSON file found at path
-func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, error) {
+func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(), error) {
 	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		return nil, fmt.Errorf("problem opening %s %v", path, err)
+		return nil, nil, fmt.Errorf("problem opening %s %v", path, err)
+	}
+
+	closeFunc := func() {
+		db.Close()
 	}
 
 	store, err := NewFileSystemPlayerStore(db)
 
 	if err != nil {
-		return nil, fmt.Errorf("problem creating file system player store, %v ", err)
+		return nil, nil, fmt.Errorf("problem creating file system player store, %v ", err)
 	}
 
-	return store, nil
+	return store, closeFunc, nil
 }
 
 func initialisePlayerDBFile(file *os.File) error {
