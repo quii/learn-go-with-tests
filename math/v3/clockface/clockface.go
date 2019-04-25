@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const secondAngle = math.Pi / 30
+
 type Hands struct {
 	Hour   Vector
 	Minute Vector
@@ -12,8 +14,8 @@ type Hands struct {
 }
 
 type Vector struct {
-	X int
-	Y int
+	X float64
+	Y float64
 }
 
 func HandsAt(t time.Time) (hands Hands) {
@@ -35,4 +37,12 @@ func hoursInRadians(t time.Time) float64 {
 	minutes := minutesInRadians(t) / 60
 	hours := math.Pi / (6 / (float64(t.Hour() % 12)))
 	return seconds + minutes + hours
+}
+
+func secondHandVector(t time.Time) Vector {
+    angle := secondsInRadians(t)
+	x := math.Sin(angle)
+	y := math.Cos(angle)
+
+	return Vector{x, y}
 }

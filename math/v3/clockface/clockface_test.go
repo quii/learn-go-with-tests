@@ -20,7 +20,7 @@ func TestSecondsInRadians(t *testing.T) {
 	for _, c := range cases {
 		t.Run(testName(c.time), func(t *testing.T) {
 			got := secondsInRadians(c.time)
-			if !roughlyEqual(got, c.angle) {
+			if !roughlyEqualFloat64(got, c.angle) {
 				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
 			}
 		})
@@ -42,7 +42,7 @@ func TestMinutesInRadians(t *testing.T) {
 	for _, c := range cases {
 		t.Run(testName(c.time), func(t *testing.T) {
 			got := minutesInRadians(c.time)
-			if !roughlyEqual(got, c.angle) {
+			if !roughlyEqualFloat64(got, c.angle) {
 				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
 			}
 		})
@@ -66,8 +66,30 @@ func TestHoursInRadians(t *testing.T) {
 	for _, c := range cases {
 		t.Run(testName(c.time), func(t *testing.T) {
 			got := hoursInRadians(c.time)
-			if !roughlyEqual(got, c.angle) {
+			if !roughlyEqualFloat64(got, c.angle) {
 				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+
+func TestSecondHandVector(t *testing.T) {
+	cases := []struct {
+		time   time.Time
+		vector Vector
+	}{
+		{simpleTime(0, 0, 30), Vector{0, -1}},
+		{simpleTime(0, 0, 45), Vector{-1, 0}},
+		{simpleTime(0, 0, 15), Vector{1, 0}},
+		{simpleTime(0, 0, 0), Vector{0, 1}},
+		{simpleTime(0, 0, 5), Vector{0.5, 0.5 * math.Sqrt(3)}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := secondHandVector(c.time)
+			if !roughlyEqualVector(got, c.vector) {
+				t.Fatalf("Wanted %v Vector, but got %v", c.vector, got)
 			}
 		})
 	}
@@ -81,7 +103,12 @@ func testName(t time.Time) string {
 	return t.Format("15:04:05")
 }
 
-func roughlyEqual(a, b float64) bool {
-	float64EqualityThreshold := 1e-7
-	return math.Abs(a-b) < float64EqualityThreshold
+func roughlyEqualFloat64(a, b float64) bool {
+	const equalityThreshold = 1e-7
+	return math.Abs(a-b) < equalityThreshold
+}
+
+func roughlyEqualVector(a, b Vector) bool {
+	return roughlyEqualFloat64(a.X, b.X) &&
+		roughlyEqualFloat64(a.Y, b.Y)
 }

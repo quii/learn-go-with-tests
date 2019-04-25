@@ -604,12 +604,199 @@ So we've got the first part covered here - we know what angle the hands will be 
 
 Again, let's keep this as simple as possible and only work with the _unit circle_; the circle with a radius of 1. This means that our hands will all have a length of one but, on the bright side, it means that the maths will be easy for us to swallow.
 
+```go
+func TestSecondHandVector(t *testing.T) {
+	cases := []struct {
+		time   time.Time
+		vector Vector
+	}{
+		{simpleTime(0, 0, 30), Vector{0, -1}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := secondHandVector(c.time)
+			if got != c.vector {
+				t.Fatalf("Wanted %v Vector, but got %v", c.vector, got)
+			}
+		})
+	}
+}
+```
+
+```
+# github.com/gypsydave5/learn-go-with-tests/math/v3/clockface [github.com/gypsydave5/learn-go-with-tests/math/v3/clockface.test]
+./clockface_test.go:86:11: undefined: secondHandVector
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface [build failed]
+go: exit 2
+```
+
+```go
+func secondHandVector(t time.Time) Vector {
+	return Vector{}
+}
+```
 
 
+```
+--- FAIL: TestSecondHandVector (0.00s)
+    --- FAIL: TestSecondHandVector/00:00:30 (0.00s)
+        clockface_test.go:88: Wanted {0 -1} Vector, but got {0 0}
+FAIL
+```
+
+```go
+func secondHandVector(t time.Time) Vector {
+	return Vector{0, -1}
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface	0.005s
+```
+
+```go
+	cases := []struct {
+		time   time.Time
+		vector Vector
+	}{
+		{simpleTime(0, 0, 30), Vector{0, -1}},
+		{simpleTime(0, 0, 45), Vector{-1, 0}},
+	}
+```
+
+
+```
+--- FAIL: TestSecondHandVector (0.00s)
+    --- FAIL: TestSecondHandVector/00:00:45 (0.00s)
+        clockface_test.go:89: Wanted {-1 0} Vector, but got {0 -1}
+FAIL
+```
+
+Phew... now we can do some work!
+
+## Make it pass
+
+Remember our unit circle picture?
+
+![picture of the unit circle with the x and y elements of a ray defined as cos(a) and sin(a) respectively, where a is the angle made by the ray with the x axis](math/images/unit_circle_params.png)
+
+We now want the equation that produces X and Y. Let's write it into seconds:
+
+```go
+func secondHandVector(t time.Time) Vector {
+    angle := secondsInRadians(t)
+	x := math.Sin(angle)
+	y := math.Cos(angle)
+
+	return Vector{x, y}
+}
+```
+
+We run this and we get
+
+```
+./clockface.go:45:16: cannot use x (type float64) as type int in field value
+./clockface.go:45:19: cannot use y (type float64) as type int in field value
+FAIL
+```
+
+Whoops! Looks like I'll need to update the `Vector` type...
+
+```go
+type Vector struct {
+	X float64
+	Y float64
+}
+```
+
+
+Now we get
+
+```
+--- FAIL: TestSecondHandVector (0.00s)
+    --- FAIL: TestSecondHandVector/00:00:30 (0.00s)
+        clockface_test.go:89: Wanted {0 -1} Vector, but got {1.2246467991473515e-16 -1}
+    --- FAIL: TestSecondHandVector/00:00:45 (0.00s)
+        clockface_test.go:89: Wanted {-1 0} Vector, but got {-1 -1.8369701987210272e-16}
+```
+
+Wait, what (again)? Looks like we've been cursed by the floats once again - both of those unexpected numbers are _infinitessimal_ - way down at the 16th decimal place. So again we can either choose to try to increase precision, or to just say that they're roughly equal and get on with our lives.
+
+One option to increase the accuracy of these angles would be to use the rational type `Rat` from the `math/big` package. But given the objective is to draw an SVG and not brain surgery I think we can live with a bit of fuzziness.
+
+```go
+func TestSecondHandVector(t *testing.T) {
+	cases := []struct {
+		time   time.Time
+		vector Vector
+	}{
+		{simpleTime(0, 0, 30), Vector{0, -1}},
+		{simpleTime(0, 0, 45), Vector{-1, 0}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := secondHandVector(c.time)
+			if !roughlyEqualVector(got, c.vector) {
+				t.Fatalf("Wanted %v Vector, but got %v", c.vector, got)
+			}
+		})
+	}
+}
+
+func roughlyEqualFloat64(a, b float64) bool {
+	const equalityThreshold = 1e-7
+	return math.Abs(a-b) < equalityThreshold
+}
+
+func roughlyEqualVector(a, b Vector) bool {
+	return roughlyEqualFloat64(a.X, b.X) &&
+		roughlyEqualFloat64(a.Y, b.Y)
+}
+```
+
+and so
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface	0.006s
+```
+
+Let's throw a few more test cases into the test
+
+```go
+func TestSecondHandVector(t *testing.T) {
+	cases := []struct {
+		time   time.Time
+		vector Vector
+	}{
+		{simpleTime(0, 0, 30), Vector{0, -1}},
+		{simpleTime(0, 0, 45), Vector{-1, 0}},
+		{simpleTime(0, 0, 15), Vector{1, 0}},
+		{simpleTime(0, 0, 0), Vector{0, 1}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := secondHandVector(c.time)
+			if !roughlyEqualVector(got, c.vector) {
+				t.Fatalf("Wanted %v Vector, but got %v", c.vector, got)
+			}
+		})
+	}
+}
+```
+
+```go
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface	0.006s
+```
 
 [^1]: This is a lot easier than writing a name out by hand as a string and then having to keep it in sync with the actual time. Believe me you don't want to do that...
-[^2]: In short it makes it easier to do calculus with circles as π just keeps coming up as an angle if you use normal degrees, so if you count your angles in πs it makes all the equations simpler.
 
+[^2]: In short it makes it easier to do calculus with circles as π just keeps coming up as an angle if you use normal degrees, so if you count your angles in πs it makes all the equations simpler.
 
 [texttemplate]: https://golang.org/pkg/text/template/
 [circle]: https://en.wikipedia.org/wiki/Sine#Unit_circle_definition
