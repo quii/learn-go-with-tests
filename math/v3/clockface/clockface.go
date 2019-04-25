@@ -21,12 +21,13 @@ func HandsAt(t time.Time) (hands Hands) {
 }
 
 func secondsInRadians(t time.Time) float64 {
-	return math.Pi / (30 / (float64(t.Second())))
+	return math.Pi / (30 / float64(t.Second()))
 }
 
 func minutesInRadians(t time.Time) float64 {
-	return math.Pi / ((30 * 60) / (float64(t.Second()) +
-		(60 * float64(t.Minute()))))
+	seconds := secondsInRadians(t) / 60
+	minutes := math.Pi / (30 / float64(t.Minute()))
+	return seconds + minutes
 }
 
 func hoursInRadians(t time.Time) float64 {
@@ -35,5 +36,3 @@ func hoursInRadians(t time.Time) float64 {
 	hours := math.Pi / (6 / (float64(t.Hour() % 12)))
 	return seconds + minutes + hours
 }
-
-

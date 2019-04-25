@@ -581,6 +581,31 @@ PASS
 ok  	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface	0.005s
 ```
 
+### Refactor
+
+I prefer the way the `hoursInRadians` function looks - it's more readable. So I think I'll refactor `minutesInRadians` to look the same.
+
+```go
+func minutesInRadians(t time.Time) float64 {
+	seconds := secondsInRadians(t) / 60
+	minutes := math.Pi / (30 / float64(t.Minute()))
+	return seconds + minutes
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface	0.006
+```
+
+## Next Test
+
+So we've got the first part covered here - we know what angle the hands will be pointing at in radians. Now we need to work out their coordinates.
+
+Again, let's keep this as simple as possible and only work with the _unit circle_; the circle with a radius of 1. This means that our hands will all have a length of one but, on the bright side, it means that the maths will be easy for us to swallow.
+
+
+
 
 [^1]: This is a lot easier than writing a name out by hand as a string and then having to keep it in sync with the actual time. Believe me you don't want to do that...
 [^2]: In short it makes it easier to do calculus with circles as π just keeps coming up as an angle if you use normal degrees, so if you count your angles in πs it makes all the equations simpler.
