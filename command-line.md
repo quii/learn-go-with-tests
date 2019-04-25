@@ -575,20 +575,24 @@ Try and run it, type "Bob wins".
 We have some repetition in our respective applications where we are opening a file and creating a `FileSystemStore` from its contents. This feels like a slight weakness in our package's design so we should make a function in it to encapsulate opening a file from a path and returning you the `PlayerStore`.
 
 ```go
-func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, error) {
-    db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
+func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(), error) {
+	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
 
-    if err != nil {
-        return nil, fmt.Errorf("problem opening %s %v", path, err)
-    }
+	if err != nil {
+		return nil, nil, fmt.Errorf("problem opening %s %v", path, err)
+	}
 
-    store, err := NewFileSystemPlayerStore(db)
+	closeFunc := func() {
+		db.Close()
+	}
 
-    if err != nil {
-        return nil, fmt.Errorf("problem creating file system player store, %v ", err)
-    }
+	store, err := NewFileSystemPlayerStore(db)
 
-    return store, nil
+	if err != nil {
+		return nil, nil, fmt.Errorf("problem creating file system player store, %v ", err)
+	}
+
+	return store, closeFunc, nil
 }
 ```
 
@@ -609,11 +613,12 @@ import (
 const dbFileName = "game.db.json"
 
 func main() {
-    store, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+    store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
 
     if err != nil {
         log.Fatal(err)
     }
+    defer close()
 
     fmt.Println("Let's play poker")
     fmt.Println("Type {Name} wins to record a win")
@@ -635,11 +640,12 @@ import (
 const dbFileName = "game.db.json"
 
 func main() {
-    store, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+    store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
 
     if err != nil {
         log.Fatal(err)
     }
+    defer close()
 
     server := poker.NewPlayerServer(store)
 
@@ -650,6 +656,7 @@ func main() {
 ```
 
 Notice the symmetry: despite being different user interfaces the setup is almost identical. This feels like good validation of our design so far.
+And notice also that `FileSystemPlayerStoreFromFile` returns a closing function, so we can close the underlying file once we are done using the Store.
 
 ## Wrapping up
 

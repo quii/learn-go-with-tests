@@ -1,19 +1,21 @@
 package main
 
 import (
-	"github.com/quii/learn-go-with-tests/command-line/v3"
 	"log"
 	"net/http"
+
+	poker "github.com/quii/learn-go-with-tests/command-line/v3"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-	store, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+	store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
 
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer close()
 
 	server := poker.NewPlayerServer(store)
 
