@@ -13,14 +13,14 @@ We will exercise a scenario where a user cancels the request before the data can
 I've set up some code on the happy path to get us started. Here is our server code.
 
 ```go
-func NewHandler(store Store) http.HandlerFunc {
+func Server(store Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, store.Fetch())
 	}
 }
 ```
 
-The function `NewHandler` takes a `Store` and returns us a `http.HandlerFunc`. Store is defined as:
+The function `Server` takes a `Store` and returns us a `http.HandlerFunc`. Store is defined as:
 
 ```go
 type Store interface {
@@ -43,7 +43,7 @@ func (s *StubStore) Fetch() string {
 
 func TestHandler(t *testing.T) {
 	data := "hello, world"
-	svr := NewHandler(&StubStore{data})
+	svr := Server(&StubStore{data})
 
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
