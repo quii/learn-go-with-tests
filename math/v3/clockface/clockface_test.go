@@ -83,6 +83,7 @@ func TestSecondHandVector(t *testing.T) {
 		{simpleTime(0, 0, 15), Vector{1, 0}},
 		{simpleTime(0, 0, 0), Vector{0, 1}},
 		{simpleTime(0, 0, 5), Vector{0.5, 0.5 * math.Sqrt(3)}},
+		{simpleTime(0, 0, 10), Vector{0.5 * math.Sqrt(3), 0.5}},
 	}
 
 	for _, c := range cases {

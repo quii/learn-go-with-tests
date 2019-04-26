@@ -57,44 +57,55 @@ so they point in the right directions for some time.
 ## An Acceptance Test
 
 Before we get too stuck in, lets think about an acceptance test. We've got an
-example clock, let's turn it into a template using the
-[`text/template`][texttemplate] package:
+example clock, so let's think about what the important parameters are going to be.
 
-```svg
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+```
+<line x1="150" y1="150" x2="114.150000" y2="132.260000"
+        style="fill:none;stroke:#000;stroke-width:7px;"/>
+```
+
+The centre of the clock (the attributes `x1` and `y1` for this line) is the same
+for each hand of the clock. The numbers that need to change for each hand of the
+clock - the parameters to whatever builds the SVG - are the `x2` and `y2`
+attributes. We'll need an X and a Y for each of the hands of the clock.
+
+Another parameter we'll need is some way of describing how large the face of
+the clock is. In the XML this is the `circle` tag:
+
+```xml
+<circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/>
+```
+
+Here it has a radius (the `r` attribute) of 100, and the same centre as each of
+the hands - x = 150, y = 150.
+
+The final parameter we need to consider is the size of the SVG itself:
+
+```xml
 <svg xmlns="http://www.w3.org/2000/svg"
      width="100%"
      height="100%"
      viewBox="0 0 300 300"
      version="2.0">
-
-  <!-- bezel -->
-  <circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/>
-
-  <!-- hour hand -->
-  <line x1="150" y1="150" x2="{{.Hour.X}}" y2="{{.Hour.Y}}"
-        style="fill:none;stroke:#000;stroke-width:7px;"/>
-  <!-- minute hand -->
-  <line x1="150" y1="150" x2="{{.Minute.X}}" y2="{{.Minute.Y}}"
-        style="fill:none;stroke:#000;stroke-width:7px;"/>
-  <!-- second hand -->
-  <line x1="150" y1="150" x2="{{.Second.X}}" y2="{{.Second.Y}}"
-        style="fill:none;stroke:#f00;stroke-width:3px;"/>
-</svg>
 ```
 
-Although I'm ignorant of how I'm going to achieve it, I know that I'm going to
-have to give a coordinate each of where the hour, minute and second hands are
-going to point to. So I'm imagining a data structure with each hand in it -
-`Hour`, `Minute` and `Second` - and each of those hands having a property of `X`
-and `Y`. So if I hand this template the right data structure I'll get a clock
-showing whatever time I like.
+This is the `viewBox` attribute, which is saying that the SVG is 300 by 300 in
+size. It's this number that's determining where the centre of the clock is
+- it's in the middle of the SVG so it's `300/2 = 150` for each coordinate.
+
+So if we have all of these numbers - `x` and `y` for each hand, radius of
+clockface, height/width of SVG - we will be able to construct a clockface SVG.
 
 Now I could write a test that builds an SVG and compares it to another SVG, but
 this would be (a) boring, (b) time consuming and (c) fragile. What would be much
 better would be to test this data structure that I want to pass to the
 template - it's the thing that's doing all of the work after all.
+
+Note: I'm not saying _how_ we'll construct the SVG - we could use a template
+from [`text/template`][texttemplate] package, or we could just send bytes into
+a `bytes.Buffer` or a writer. But we know we'll need those numbers, so let's
+focus on testing something that creates them.
+
 
 ## Write the test first
 
@@ -776,6 +787,8 @@ func TestSecondHandVector(t *testing.T) {
 		{simpleTime(0, 0, 45), Vector{-1, 0}},
 		{simpleTime(0, 0, 15), Vector{1, 0}},
 		{simpleTime(0, 0, 0), Vector{0, 1}},
+		{simpleTime(0, 0, 5), Vector{0.5, 0.5 * math.Sqrt(3)}},
+		{simpleTime(0, 0, 10), Vector{0.5 * math.Sqrt(3), 0.5}},
 	}
 
 	for _, c := range cases {
@@ -793,6 +806,8 @@ func TestSecondHandVector(t *testing.T) {
 PASS
 ok  	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface	0.006s
 ```
+
+
 
 [^1]: This is a lot easier than writing a name out by hand as a string and then having to keep it in sync with the actual time. Believe me you don't want to do that...
 
