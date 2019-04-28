@@ -2,11 +2,11 @@ package main
 
 import "fmt"
 
-const helloPrefix = "Hello, "
+const englishHelloPrefix = "Hello, "
 
 // Hello returns a personalised greeting
 func Hello(name string) string {
-	return helloPrefix + name
+	return englishHelloPrefix + name
 }
 
 func main() {
