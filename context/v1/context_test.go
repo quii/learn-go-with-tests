@@ -1,21 +1,10 @@
-package v1
+package context1
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
-
-type Store interface {
-	Fetch() string
-}
-
-func Server(store Store) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, store.Fetch())
-	}
-}
 
 type StubStore struct {
 	response string
