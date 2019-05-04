@@ -718,12 +718,31 @@ func SecondHand(t time.Time) Point {
 }
 ```
 
+Scale, flip, and translated in exactly that order. Hooray maths!
+
 ```
 PASS
 ok  	github.com/gypsydave5/learn-go-with-tests/math/v5/clockface	0.007s
 ```
 
 ## Refactor
+
+There's a few magic numbers here that should get pulled out as constants, so
+let's do that
+
+```go
+const secondHandLength = 90
+const clockCentreX = 150
+const clockCentreY = 150
+
+func SecondHand(t time.Time) Point {
+	p := secondHandPoint(t)
+	p = Point{p.X * secondHandLength, p.Y * secondHandLength}
+	p = Point{p.X, -p.Y}
+	p = Point{p.X + clockCentreX, p.Y + clockCentreY} //translate
+	return p
+}
+```
 
 ## Write the test first
 ## Try to run the test
