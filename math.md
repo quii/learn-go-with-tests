@@ -661,11 +661,69 @@ ok  	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.007s
 
 I'm still pretty happy with this.
 
-<!--
+
+<!---
 v4 ends
---->
+-->
+
+## Repeat for new requirements
+
+Well, saying _new_ isn't enirely accurate - really what we can do now is get
+that acceptance test passing! Let's remind ourselves of what it looks like:
 
 
+```go
+func TestSecondHandAt30Seconds(t *testing.T) {
+	tm := time.Date(1337, time.January, 1, 0, 0, 30, 0, time.UTC)
+
+	want := clockface.Point{X: 150, Y: 150 + 90}
+	got := clockface.SecondHand(tm)
+
+	if got != want {
+		t.Errorf("Got %v, wanted %v", got, want)
+	}
+}
+```
+
+## Try to run the test
+
+
+```
+--- FAIL: TestSecondHandAt30Seconds (0.00s)
+    clockface_acceptance_test.go:28: Got {150 60}, wanted {150 240}
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v5/clockface	0.007s
+```
+
+## Write enough code to make it pass
+
+We need to do three things to convert our unit vector into a point on the SVG:
+
+1. Scale it to the length of the hand
+2. Flip it over the X axis because to account for the SVG having an origin in
+   the top left hand corner
+3. Translate it to the right position (so that it's coming from an origin of
+   (150,150))
+
+Fun times!
+
+```go
+func SecondHand(t time.Time) Point {
+	p := secondHandPoint(t)
+	p = Point{p.X * 90, p.Y * 90}   // scale
+	p = Point{p.X, -p.Y}            // flip
+	p = Point{p.X + 150, p.Y + 150} //translate
+	return p
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v5/clockface	0.007s
+```
+
+## Refactor
 
 ## Write the test first
 ## Try to run the test
