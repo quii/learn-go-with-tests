@@ -3,8 +3,8 @@ package clockface
 import "time"
 
 type Point struct {
-	X int
-	Y int
+	X float64
+	Y float64
 }
 
 func SecondHand(t time.Time) Point {
