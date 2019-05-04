@@ -132,8 +132,8 @@ package clockface
 import "time"
 
 type Point struct {
-	X int
-	Y int
+	X float64
+	Y float64
 }
 
 func SecondHand(t time.Time) Point {
@@ -342,7 +342,9 @@ Nothing needs refactoring yet
 
 ## Repeat for new requirements
 
-Now we can extend the test to cover a few more scenarios.
+Now we can extend the test to cover a few more scenarios. I'm going to skip
+forward a bit and show some already refactored test code - it should be clear
+enough how I got where I want to.
 
 ```go
 func TestSecondsInRadians(t *testing.T) {
@@ -387,6 +389,7 @@ easier to write and maintain.
 
 This gives us some nice test output:
 
+
 ```
 --- FAIL: TestSecondsInRadians (0.00s)
     --- FAIL: TestSecondsInRadians/00:00:00 (0.00s)
@@ -395,13 +398,16 @@ This gives us some nice test output:
         clockface_test.go:24: Wanted 4.71238898038469 radians, but got 3.141592653589793
     --- FAIL: TestSecondsInRadians/00:00:07 (0.00s)
         clockface_test.go:24: Wanted 0.7330382858376184 radians, but got 3.141592653589793
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface	0.007s
 ```
 
 Time to implement all of that maths stuff we were talking about above:
 
 ```go
-func secondsinradians(t time.time) float64 {
-	return float64(t.second()) * (math.pi / 30)
+func secondsInRadians(t time.Time) float64 {
+	return float64(t.Second()) * (math.Pi / 30)
 }
 ```
 
@@ -409,10 +415,14 @@ One second is (2π / 60) radians... cancel out the 2 and we get π/30 radians.
 Multiply that by the number of seconds (as a `float64`) and we should now have
 all the tests passing...
 
+
 ```
 --- FAIL: TestSecondsInRadians (0.00s)
     --- FAIL: TestSecondsInRadians/00:00:30 (0.00s)
         clockface_test.go:24: Wanted 3.141592653589793 radians, but got 3.1415926535897936
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface	0.006s
 ```
 
 Wait, what?
@@ -456,6 +466,215 @@ And we get a pass.
 PASS
 ok      github.com/gypsydave5/learn-go-with-tests/math/v2/clockface     0.005s
 ```
+
+<!---
+v3 here
+-->
+
+## Repeat for new requirements
+
+So we've got the first part covered here - we know what angle the second hand
+will be pointing at in radians. Now we need to work out the coordinates.
+
+Again, let's keep this as simple as possible and only work with the _unit
+circle_; the circle with a radius of 1. This means that our hands will all have
+a length of one but, on the bright side, it means that the maths will be easy
+for us to swallow.
+
+## Write the test first
+
+```go
+func TestSecondHandVector(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		point Point
+	}{
+		{simpleTime(0, 0, 30), Point{0, -1}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := secondHandPoint(c.time)
+			if got != c.point {
+				t.Fatalf("Wanted %v Point, but got %v", c.point, got)
+			}
+		})
+	}
+}
+```
+
+## Try to run the test
+
+```
+# github.com/gypsydave5/learn-go-with-tests/math/v4/clockface [github.com/gypsydave5/learn-go-with-tests/math/v4/clockface.test]
+./clockface_test.go:40:11: undefined: secondHandPoint
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface [build failed]
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+```go
+func secondHandPoint(t time.Time) Point {
+	return Point{}
+}
+```
+
+```
+--- FAIL: TestSecondHandPoint (0.00s)
+    --- FAIL: TestSecondHandPoint/00:00:30 (0.00s)
+        clockface_test.go:42: Wanted {0 -1} Point, but got {0 0}
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.010s
+```
+
+## Write enough code to make it pass
+
+```go
+func secondHandPoint(t time.Time) Point {
+	return Point{0, -1}
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.007s
+```
+
+## Repeat for new requirements
+
+```go
+func TestSecondHandPoint(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		point Point
+	}{
+		{simpleTime(0, 0, 30), Point{0, -1}},
+		{simpleTime(0, 0, 45), Point{-1, 0}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := secondHandPoint(c.time)
+			if got != c.point {
+				t.Fatalf("Wanted %v Point, but got %v", c.point, got)
+			}
+		})
+	}
+}
+```
+
+## Try to run the test
+
+```
+--- FAIL: TestSecondHandPoint (0.00s)
+    --- FAIL: TestSecondHandPoint/00:00:45 (0.00s)
+        clockface_test.go:43: Wanted {-1 0} Point, but got {0 -1}
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.006s
+```
+
+## Write enough code to make it pass
+
+Remember our unit circle picture?
+
+![picture of the unit circle with the x and y elements of a ray defined as cos(a) and sin(a) respectively, where a is the angle made by the ray with the x axis](math/images/unit_circle_params.png)
+
+We now want the equation that produces X and Y. Let's write it into seconds:
+
+```go
+func secondHandPoint(t time.Time) Point {
+    angle := secondsInRadians(t)
+	x := math.Sin(angle)
+	y := math.Cos(angle)
+
+	return Point{x, y}
+}
+```
+Now we get
+
+
+```
+--- FAIL: TestSecondHandPoint (0.00s)
+    --- FAIL: TestSecondHandPoint/00:00:30 (0.00s)
+        clockface_test.go:43: Wanted {0 -1} Point, but got {1.2246467991473515e-16 -1}
+    --- FAIL: TestSecondHandPoint/00:00:45 (0.00s)
+        clockface_test.go:43: Wanted {-1 0} Point, but got {-1 -1.8369701987210272e-16}
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.007s
+```
+
+Wait, what (again)? Looks like we've been cursed by the floats once again - both
+of those unexpected numbers are _infinitessimal_ - way down at the 16th decimal
+place. So again we can either choose to try to increase precision, or to just
+say that they're roughly equal and get on with our lives.
+
+One option to increase the accuracy of these angles would be to use the rational
+type `Rat` from the `math/big` package. But given the objective is to draw an
+SVG and not brain surgery I think we can live with a bit of fuzziness.
+
+```go
+func TestSecondHandPoint(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		point Point
+	}{
+		{simpleTime(0, 0, 30), Point{0, -1}},
+		{simpleTime(0, 0, 45), Point{-1, 0}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := secondHandPoint(c.time)
+			if !roughlyEqualPoint(got, c.point) {
+				t.Fatalf("Wanted %v Point, but got %v", c.point, got)
+			}
+		})
+	}
+}
+
+func roughlyEqualFloat64(a, b float64) bool {
+	const equalityThreshold = 1e-7
+	return math.Abs(a-b) < equalityThreshold
+}
+
+func roughlyEqualPoint(a, b Point) bool {
+	return roughlyEqualFloat64(a.X, b.X) &&
+		roughlyEqualFloat64(a.Y, b.Y)
+}
+```
+
+We've defined two functions to define approximate equality between two `Points`
+- they'll work if the X and Y elements are within 0.0000001 of each other.
+  That's still pretty accurate.
+
+and now we get
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.007s
+```
+
+## Refactor
+
+I'm still pretty happy with this.
+
+<!--
+v4 ends
+--->
+
+
+
+## Write the test first
+## Try to run the test
+## Write the minimal amount of code for the test to run and check the failing test output
+## Write enough code to make it pass
+## Refactor
+
+## Repeat for new requirements
+## Wrapping up
 
 ## More tests
 
