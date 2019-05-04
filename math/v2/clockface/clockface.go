@@ -5,21 +5,15 @@ import (
 	"time"
 )
 
-type Hands struct {
-	Hour   Vector
-	Minute Vector
-	Second Vector
-}
-
-type Vector struct {
+type Point struct {
 	X int
 	Y int
 }
 
-func HandsAt(t time.Time) (hands Hands) {
-	return
+func SecondHand(t time.Time) Point {
+	return Point{150, 60}
 }
 
 func secondsInRadians(t time.Time) float64 {
-	return (math.Pi / (30 / (float64(t.Second()))))
+	return math.Pi
 }

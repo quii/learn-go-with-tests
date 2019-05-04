@@ -69,43 +69,16 @@ for each hand of the clock. The numbers that need to change for each hand of the
 clock - the parameters to whatever builds the SVG - are the `x2` and `y2`
 attributes. We'll need an X and a Y for each of the hands of the clock.
 
-Another parameter we'll need is some way of describing how large the face of
-the clock is. In the XML this is the `circle` tag:
+Another thing to note about SVGs: the origin - point (0,0) - is at the _top left_ hand corner, not the _bottom left_ as we might expect.
 
-```xml
-<circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/>
-```
+I _could_ think about more parameters - the radius of the clockface circle, the size of the SVG, the colours of the hands, their shape, etc... but it's better to start off by solving a simple, concrete problem with a simple, concrete solution, and then to start adding parameters to make it generalised.
 
-Here it has a radius (the `r` attribute) of 100, and the same centre as each of
-the hands - x = 150, y = 150.
+So we'll say that every clock has a centre of (150,150), and that the hour hand is 50 long, the minute hand is 80 long and the second hand is 90 long.
 
-The final parameter we need to consider is the size of the SVG itself:
-
-```xml
-<svg xmlns="http://www.w3.org/2000/svg"
-     width="100%"
-     height="100%"
-     viewBox="0 0 300 300"
-     version="2.0">
-```
-
-This is the `viewBox` attribute, which is saying that the SVG is 300 by 300 in
-size. It's this number that's determining where the centre of the clock is
-- it's in the middle of the SVG so it's `300/2 = 150` for each coordinate.
-
-So if we have all of these numbers - `x` and `y` for each hand, radius of
-clockface, height/width of SVG - we will be able to construct a clockface SVG.
-
-Now I could write a test that builds an SVG and compares it to another SVG, but
-this would be (a) boring, (b) time consuming and (c) fragile. What would be much
-better would be to test this data structure that I want to pass to the
-template - it's the thing that's doing all of the work after all.
-
-Note: I'm not saying _how_ we'll construct the SVG - we could use a template
-from [`text/template`][texttemplate] package, or we could just send bytes into
+Finally, I'm not deciding _how_ to construct the SVG - we could use a template
+from the [`text/template`][texttemplate] package, or we could just send bytes into
 a `bytes.Buffer` or a writer. But we know we'll need those numbers, so let's
 focus on testing something that creates them.
-
 
 ## Write the test first
 
@@ -121,16 +94,11 @@ import (
 	"github.com/gypsydave5/learn-go-with-tests/math/v1/clockface"
 )
 
-func HandsAtMidnigthTest(t *testing.T) {
+func TestSecondHandAtMidnight(t *testing.T) {
 	tm := time.Date(1337, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-	want := Hands{
-		Hour:   Vector{X: 0, Y: 150},
-		Minute: Vector{X: 0, Y: 150},
-		Second: Vector{X: 0, Y: 150},
-	}
-
-	got := clockface.HandsAt(tm)
+	want := clockface.Point{X: 150, Y: 150 - 90}
+	got := clockface.SecondHand(tm)
 
 	if got != want {
 		t.Errorf("Got %v, wanted %v", got, want)
@@ -138,25 +106,21 @@ func HandsAtMidnigthTest(t *testing.T) {
 }
 ```
 
+Remember how SVGs start with 0 from the top of the Y axis? To place the second hand at midnight we say that it hasn't moved from the centre of the clockface on the X axis - still 150 - and the Y axis is the length of the hand 'up' from the centre; 150 minus 90.
+
 ## Try to run the test
 
-This drives out the expected failures
+This drives out the expected failures around the missing functions and types:
 
 ```
+--- FAIL: TestSecondHandAtMidnight (0.00s)
 # github.com/gypsydave5/learn-go-with-tests/math/v1/clockface_test [github.com/gypsydave5/learn-go-with-tests/math/v1/clockface.test]
-./acceptance_test.go:13:10: undefined: Hands
-./acceptance_test.go:19:9: undefined: clockface.HandsAt
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v1/clockface [build failed]
+./clockface_test.go:13:10: undefined: clockface.Point
+./clockface_test.go:14:9: undefined: clockface.SecondHand
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v1/clockface [build failed]
 ```
 
-We want a type called `Hands` which describes where the end of each hand is
-sitting as a coordinate. I'm thinking of this coordinate as a `Vector` - when we
-think of the centre of the clock as the origin of the hand, each hand becomes a
-vector from that point - a pair of numbers indicating a direction and a
-magnitude - i.e. how long the hand is and where it's pointing.
-
-This test might need some refining as we discover more about what we're trying
-to achieve, but it's a good start.
+So a `Point` where the tip of the hand should go, and a function to get it.
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
@@ -167,35 +131,42 @@ package clockface
 
 import "time"
 
-type Hands struct {
-	Hour   Vector
-	Minute Vector
-	Second Vector
-}
-
-type Vector struct {
+type Point struct {
 	X int
 	Y int
 }
 
-func HandsAt(t time.Time) (hands Hands) {
-	return
+func SecondHand(t time.Time) Point {
+	return Point{}
 }
 ```
+
+and now we get
+
+```
+--- FAIL: TestSecondHandAtMidnight (0.00s)
+    clockface_test.go:17: Got {0 0}, wanted {150 60}
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v1/clockface	0.006s
+```
+
+## Write enough code to make it pass
 
 When we get the expected failure, we can fill in the return value of `HandsAt`:
 
 ```go
-func HandsAt(t time.Time) Hands {
-	return Hands{
-		Hour:   Vector{X: 0, Y: 150},
-		Minute: Vector{X: 0, Y: 150},
-		Second: Vector{X: 0, Y: 150},
-	}
+func SecondHand(t time.Time) Point {
+	return Point{150, 60}
 }
 ```
 
 Behold, a passing test.
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v1/clockface	0.006s
+```
 
 ## Refactor
 
@@ -209,16 +180,11 @@ a clock that shows midnight for every time...
 ## Write the test first
 
 ```go
-func TestHandsAtSixOclock(t *testing.T) {
-	tm := time.Date(1337, time.January, 1, 6, 0, 0, 0, time.UTC)
+func TestSecondHandAt30Seconds(t *testing.T) {
+	tm := time.Date(1337, time.January, 1, 0, 0, 30, 0, time.UTC)
 
-	want := clockface.Hands{
-		Hour:   clockface.Vector{X: 0, Y: -150},
-		Minute: clockface.Vector{X: 0, Y: 150},
-		Second: clockface.Vector{X: 0, Y: 150},
-	}
-
-	got := clockface.HandsAt(tm)
+	want := clockface.Point{X: 150, Y: 150 + 90}
+	got := clockface.SecondHand(tm)
 
 	if got != want {
 		t.Errorf("Got %v, wanted %v", got, want)
@@ -226,15 +192,18 @@ func TestHandsAtSixOclock(t *testing.T) {
 }
 ```
 
-## Thinking without tests
+Same idea, but now the second hand is pointing _downwards_ so we _add_ the
+length to the Y axis.
 
-Let's not rush in and write another test yet. Let's do some thinking first. How
-are we going to solve this problem?
+This will compile... but how do we make it pass?
 
-Let's start with the second hand - it's the easiest hand to reason about. Every
-minute it goes through the same 60 states, pointing in 60 different
-directions. When it's 0 seconds it points to the top of the clockface, when it's
-30 seconds it points to the bottom of the clockface. Easy enough.
+## Thinking time
+
+How are we going to solve this problem?
+
+Every minute the second hand goes through the same 60 states, pointing in 60
+different directions. When it's 0 seconds it points to the top of the clockface,
+when it's 30 seconds it points to the bottom of the clockface. Easy enough.
 
 So if I wanted to think about in what direction the second hand was pointing at,
 say, 37 seconds, I'd want the angle between 12 o'clock and 37/60ths around the
@@ -290,12 +259,20 @@ It wants the angle to be in radians. So what's a radian? Instead of defining the
 Now that we've done some reading, some learning and some thinking, we can write
 our next test.
 
-## Second Test
+## Write the test first
 
 All this maths is hard and confusing. I'm not confident I understand what's
 going on - so let's write a test! We don't need to solve the whole problem in
 one go - let's start off with working out the correct angle, in radians, for the
 second hand at a particular time.
+
+I'm going to write these tests _within_ the `clockface` package; they may never
+get exported, and they may get deleted (or moved) once I have a better grip on
+what's going on.
+
+I'm also going to _comment out_ the acceptance test that I was working on while
+I'm working on these tests - I don't want to get distracted by that test while
+I'm getting this one to pass.
 
 ```go
 package clockface
@@ -322,14 +299,48 @@ halfway around the clock - and it's Our first use of the `math` package;
 f a full turn of a circle is 2π radians, we know that halfway round should just
 be π radians. `math.Pi` provides us with a value for π.
 
-A dumb implementation:
+## Try to run the test
 
+```
+# github.com/gypsydave5/learn-go-with-tests/math/v2/clockface [github.com/gypsydave5/learn-go-with-tests/math/v2/clockface.test]
+./clockface_test.go:12:9: undefined: secondsInRadians
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v2/clockface [build failed]
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+```go
+func secondsInRadians(t time.Time) float64 {
+	return 0
+}
+```
+
+```
+--- FAIL: TestSecondsInRadians (0.00s)
+    clockface_test.go:15: Wanted 3.141592653589793 radians, but got 0
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v2/clockface	0.007s
+```
+
+## Write enough code to make it pass
 
 ```go
 func secondsInRadians(t time.Time) float64 {
 	return math.Pi
 }
 ```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v2/clockface	0.011s
+```
+
+## Refactor
+
+Nothing needs refactoring yet
+
+## Repeat for new requirements
 
 Now we can extend the test to cover a few more scenarios.
 
