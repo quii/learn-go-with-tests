@@ -829,7 +829,187 @@ Here ends v6
 -->
 
 
-## Write the test first
+## Refactor
+
+This stinks. Well, it doesn't quite _stink_ stink, but I'm not happy.
+
+1. That whole `SecondHand` function is _super_ tied to being an SVG... without
+   mentioning SVGs or actually producing an SVG...
+2. ... while at the same time I'm not testing any of my SVG code.
+
+Yeah, I guess I screwed up. This feels wrong. Let's try and recover with a more
+SVG-centric test.
+
+```go
+package clockface_test
+
+import (
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/gypsydave5/learn-go-with-tests/math/v7/clockface"
+)
+
+func TestSVGWriterAtMidnight(t *testing.T) {
+	tm := time.Date(1337, time.January, 1, 0, 0, 0, 0, time.UTC)
+
+	var b strings.Builder
+	clockface.SVGWriter(&b, tm)
+	got := b.String()
+
+	want := `<line x1="150" y1="150" x2="150" y2="60"`
+
+	if !strings.Contains(got, want) {
+		t.Errorf("Expected to find the second hand %v, in the SVG output %v", want, got)
+	}
+}
+
+func TestSVGWriterAt30Seconds(t *testing.T) {
+	tm := time.Date(1337, time.January, 1, 0, 0, 30, 0, time.UTC)
+
+	var b strings.Builder
+	clockface.SVGWriter(&b, tm)
+	got := b.String()
+
+	want := `<line x1="150" y1="150" x2="150" y2="240"`
+
+	if !strings.Contains(got, want) {
+		t.Errorf("Expected to find the second hand %v, in the SVG output %v", want, got)
+	}
+}
+```
+
+These are the same two tests as before, but now we're testing for the presence
+of an the SVG tag of the line we're expecting to get. This is a _little bit_
+fragile - should the SVG have a bit more whitespace in the tag the test will
+fail - and it doesn't _quite_ test whether the SVG is being generated correctly.
+But it's better than it was! And it's going to drive out the writing of a better
+function to write the SVG: `SVGWriter`.
+
+## Try to run the test
+
+```
+# github.com/gypsydave5/learn-go-with-tests/math/v7/clockface_test [github.com/gypsydave5/learn-go-with-tests/math/v7/clockface.test]
+./clockface_acceptance_test.go:15:2: undefined: clockface.SVGWriter
+./clockface_acceptance_test.go:29:2: undefined: clockface.SVGWriter
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v7/clockface [build failed]
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+I made a whole new file called `svgWriter.go` to put all of this logic in:
+
+```go
+package clockface
+
+import (
+	"fmt"
+	"io"
+	"time"
+)
+
+const secondHandLength = 90
+const clockCentreX = 150
+const clockCentreY = 150
+
+func SVGWriter(w io.Writer, t time.Time) {
+	io.WriteString(w, svgStart)
+	io.WriteString(w, bezel)
+	secondHand(w, t)
+	io.WriteString(w, svgEnd)
+}
+
+func secondHand(w io.Writer, t time.Time) {
+	p := secondHandPoint(t)
+	p = Point{p.X * secondHandLength, p.Y * secondHandLength}
+	p = Point{p.X, -p.Y}
+	p = Point{p.X + clockCentreX, p.Y + clockCentreY} //translate
+	s := fmt.Sprintf(`<line x1="150" y1="150" x2="%f" y2="%f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
+	io.WriteString(w, s)
+}
+
+const svgStart = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="100%"
+     height="100%"
+     viewBox="0 0 300 300"
+     version="2.0">`
+
+const bezel = `<circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/>`
+
+const svgEnd = `</svg>`
+```
+
+```
+--- FAIL: TestSVGWriterAtMidnight (0.00s)
+    clockface_acceptance_test.go:21: Expected to find the second hand <line x1="150" y1="150" x2="150" y2="60", in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="100%"
+             height="100%"
+             viewBox="0 0 300 300"
+             version="2.0"><circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/><line x1="150" y1="150" x2="150.000000" y2="60.000000" style="fill:none;stroke:#f00;stroke-width:3px;"/></svg>
+--- FAIL: TestSVGWriterAt30Seconds (0.00s)
+    clockface_acceptance_test.go:35: Expected to find the second hand <line x1="150" y1="150" x2="150" y2="240", in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="100%"
+             height="100%"
+             viewBox="0 0 300 300"
+             version="2.0"><circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/><line x1="150" y1="150" x2="150.000000" y2="240.000000" style="fill:none;stroke:#f00;stroke-width:3px;"/></svg>
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v7/clockface	0.007s
+```
+
+Oooops! The `%f` format directive is printing our coordinates to the default
+level of precision - six decimal places. We should be explicit as to what level
+of precision we're expecting for the coordinates. Let's say three decimal
+places.
+
+```go
+	s := fmt.Sprintf(`<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
+```
+
+```go
+	want := `<line x1="150" y1="150" x2="150.000" y2="60.000"`
+    // ... snip ... and ...
+	want := `<line x1="150" y1="150" x2="150.000" y2="240.000"`
+```
+
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v7/clockface	0.006s
+```
+
+This means that we can now considerably shorten how `main.go` program works when
+it writes the SVG:
+
+```go
+package main
+
+import (
+	"os"
+	"time"
+
+	"github.com/gypsydave5/learn-go-with-tests/math/v7/clockface"
+)
+
+func main() {
+	t := time.Now()
+	clockface.SVGWriter(os.Stdout, t)
+}
+```
+
+Pretty succinct!
+
+<!--
+Herer ends v7
+-->
+
 
 ## Write the test first
 ## Try to run the test
