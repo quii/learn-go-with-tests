@@ -744,6 +744,93 @@ func SecondHand(t time.Time) Point {
 }
 ```
 
+## Draw the clock
+
+Well... the second hand anyway...
+
+Let's do this thing - because there's nothing worse than not delivering some
+value when it's just sitting there waiting to get out into the world to dazzle
+people. Let's draw a second hand!
+
+We're going to stick a new directory under our main `clockface` package
+directory, called (confusingly), `clockface`. In there we'll put the `main`
+package that will create the binary that will build an SVG:
+
+```
+├── clockface
+│   └── main.go
+├── clockface.go
+├── clockface_acceptance_test.go
+└── clockface_test.go
+```
+
+and inside `main.go`
+
+```go
+package main
+
+import (
+	"fmt"
+	"io"
+	"os"
+	"time"
+
+	"github.com/gypsydave5/learn-go-with-tests/math/v6/clockface"
+)
+
+func main() {
+	t := time.Now()
+	sh := clockface.SecondHand(t)
+	io.WriteString(os.Stdout, svgStart)
+	io.WriteString(os.Stdout, bezel)
+	io.WriteString(os.Stdout, secondHandTag(sh))
+	io.WriteString(os.Stdout, svgEnd)
+}
+
+func secondHandTag(p clockface.Point) string {
+	return fmt.Sprintf(`<line x1="150" y1="150" x2="%f" y2="%f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
+}
+
+const svgStart = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="100%"
+     height="100%"
+     viewBox="0 0 300 300"
+     version="2.0">`
+
+const bezel = `<circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/>`
+
+const svgEnd = `</svg>`
+```
+
+Oh boy am I not trying to win any prizes for beautiful code with _this_ mess -
+but it does the job. It's writing an SVG out to `os.Stdout` - one string at
+a time.
+
+If we build this
+
+```
+go build
+```
+
+and run it, sending the output into a file
+
+```
+./clockface > clock.svg
+```
+
+We should see something like
+
+![a clock with only a second hand](/math/v6/clockface/clockface/clock.svg)
+
+<!--
+Here ends v6
+-->
+
+
+## Write the test first
+
 ## Write the test first
 ## Try to run the test
 ## Write the minimal amount of code for the test to run and check the failing test output
