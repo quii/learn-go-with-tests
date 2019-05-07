@@ -6,9 +6,11 @@ import (
 	"time"
 )
 
-const secondHandLength = 90
-const clockCentreX = 150
-const clockCentreY = 150
+const (
+	secondHandLength = 90
+	clockCentreX     = 150
+	clockCentreY     = 150
+)
 
 func SVGWriter(w io.Writer, t time.Time) {
 	io.WriteString(w, svgStart)
@@ -22,8 +24,7 @@ func secondHand(w io.Writer, t time.Time) {
 	p = Point{p.X * secondHandLength, p.Y * secondHandLength}
 	p = Point{p.X, -p.Y}
 	p = Point{p.X + clockCentreX, p.Y + clockCentreY} //translate
-	s := fmt.Sprintf(`<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
-	io.WriteString(w, s)
+	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
 }
 
 const svgStart = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
