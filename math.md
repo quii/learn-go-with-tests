@@ -1195,6 +1195,213 @@ And, frankly, I'm bored of testing that function. So it's on to the next one.
 
 ## Write the test first
 
+```go
+func TestMinuteHandPoint(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		point Point
+	}{
+		{simpleTime(0, 30, 0), Point{0, -1}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := minuteHandPoint(c.time)
+			if !roughlyEqualPoint(got, c.point) {
+				t.Fatalf("Wanted %v Point, but got %v", c.point, got)
+			}
+		})
+	}
+}
+```
+
+## Try to run the test
+
+```
+# github.com/gypsydave5/learn-go-with-tests/math/v9/clockface [github.com/gypsydave5/learn-go-with-tests/math/v9/clockface.test]
+./clockface_test.go:79:11: undefined: minuteHandPoint
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface [build failed]
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+```go
+func minuteHandPoint(t time.Time) Point {
+	return Point{}
+}
+```
+
+```
+--- FAIL: TestMinuteHandPoint (0.00s)
+    --- FAIL: TestMinuteHandPoint/00:30:00 (0.00s)
+        clockface_test.go:80: Wanted {0 -1} Point, but got {0 0}
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
+```
+
+## Write enough code to make it pass
+
+```go
+func minuteHandPoint(t time.Time) Point {
+	return Point{0, -1}
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
+```
+
+## Repeat for new requirements
+
+And now on to the real business of the day...
+
+```go
+func TestMinuteHandPoint(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		point Point
+	}{
+		{simpleTime(0, 30, 0), Point{0, -1}},
+		{simpleTime(0, 45, 0), Point{-1, 0}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := minuteHandPoint(c.time)
+			if !roughlyEqualPoint(got, c.point) {
+				t.Fatalf("Wanted %v Point, but got %v", c.point, got)
+			}
+		})
+	}
+}
+```
+
+```
+--- FAIL: TestMinuteHandPoint (0.00s)
+    --- FAIL: TestMinuteHandPoint/00:45:00 (0.00s)
+        clockface_test.go:81: Wanted {-1 0} Point, but got {0 -1}
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
+```
+
+## Write enough code to make it pass
+
+Quick copy and paste of the `secondHandPoint` function with some minor changes
+ought to do it...
+
+```go
+func minuteHandPoint(t time.Time) Point {
+	angle := minutesInRadians(t)
+	x := math.Sin(angle)
+	y := math.Cos(angle)
+
+	return Point{x, y}
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.009s
+```
+
+## Refactor
+
+We've definitely got a bit of repetition now - let's get rid of it with
+a function.
+
+```go
+func angleToPoint(angle float64) Point {
+	x := math.Sin(angle)
+	y := math.Cos(angle)
+
+	return Point{x, y}
+}
+```
+
+and we can rewrite `minuteHandPoint` and `secondHandPoint` as one liners:
+
+```go
+func minuteHandPoint(t time.Time) Point {
+	return angleToPoint(minutesInRadians(t))
+}
+```
+
+```go
+func secondHandPoint(t time.Time) Point {
+	return angleToPoint(secondsInRadians(t))
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
+```
+
+Now we can uncomment the acceptance test and get to work drawing the minute hand
+
+## Write enough code to make it pass
+
+Another quick copy-and-paste with some minor adjustments
+
+```go
+func minuteHand(w io.Writer, t time.Time) {
+	p := minuteHandPoint(t)
+	p = Point{p.X * secondHandLength, p.Y * secondHandLength}
+	p = Point{p.X, -p.Y}
+	p = Point{p.X + clockCentreX, p.Y + clockCentreY}
+	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#000;stroke-width:3px;"/>`, p.X, p.Y)
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.006s
+```
+
+But the proof of the pudding is in the eating - if we now compile and run our
+`clockface` program, we should see something like
+
+![a clock with only a second hand](/math/v9/clockface/clockface/clock.svg)
+
+## Refactor
+
+Let's remove the duplication from the `secondHand` and `minuteHand` functions,
+putting all of that scale, flip and translate logic all in one place.
+
+```go
+func secondHand(w io.Writer, t time.Time) {
+	p := makeHand(secondHandPoint(t), secondHandLength)
+	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
+}
+
+func minuteHand(w io.Writer, t time.Time) {
+	p := makeHand(minuteHandPoint(t), minuteHandLength)
+	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#000;stroke-width:3px;"/>`, p.X, p.Y)
+}
+
+func makeHand(p Point, length float64) Point {
+	p = Point{p.X * length, p.Y * length}
+	p = Point{p.X, -p.Y}
+	return Point{p.X + clockCentreX, p.Y + clockCentreY}
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
+```
+
+There... now it's just the hour hand to do!
+
+<!--
+v9 ends here
+--->
+
+
+
 ## Write the test first
 ## Try to run the test
 ## Write the minimal amount of code for the test to run and check the failing test output
