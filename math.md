@@ -1032,9 +1032,168 @@ const (
 ```
 
 <!--
-Herer ends v7
+Here ends v7
 -->
+## Write the test first
 
+So that's the second hand done. Now let's get started on the minute hand.
+
+```go
+func TestSVGWriterAt0Minutes(t *testing.T) {
+	tm := time.Date(1337, time.January, 1, 0, 0, 0, 0, time.UTC)
+
+	var b strings.Builder
+	clockface.SVGWriter(&b, tm)
+	got := b.String()
+
+	want := `<line x1="150" y1="150" x2="150.000" y2="70.000"`
+
+	if !strings.Contains(got, want) {
+		t.Errorf("Expected to find the minute hand %v, in the SVG output %v", want, got)
+	}
+}
+```'
+## Try to run the test
+
+```
+--- FAIL: TestSVGWriterAt0Minutes (0.00s)
+go: exit 1
+    clockface_acceptance_test.go:50: Expected to find the minute hand <line x1="150" y1="150" x2="150.000" y2="70.000", in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="100%"
+             height="100%"
+             viewBox="0 0 300 300"
+             version="2.0"><circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/><line x1="150" y1="150" x2="150.000" y2="60.000" style="fill:none;stroke:#f00;stroke-width:3px;"/></svg>
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v8/clockface	0.011s
+```
+
+Cool, well we'd better start building some other clockhands, Much in the same
+way as we produced the tests for the second hand, we can iterate to produce the
+following set of tests. Again we'll comment out our acceptance test while we get
+this working:
+
+```go
+func TestMinutesInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(0, 30, 0), math.Pi},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := minutesInRadians(c.time)
+			if got != c.angle {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+```
+
+## Try to run the test
+
+```
+# github.com/gypsydave5/learn-go-with-tests/math/v8/clockface [github.com/gypsydave5/learn-go-with-tests/math/v8/clockface.test]
+./clockface_test.go:59:11: undefined: minutesInRadians
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v8/clockface [build failed]
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+```go
+func minutesInRadians(t time.Time) float64 {
+	return math.Pi
+}
+```
+
+## Repeat for new requirements
+
+Well, OK - now let's make ourselves do some _real_ work. We could model the
+minute hand as only moving every full minute - so that it 'jumps' from 30 to 31
+minutes past without moving inbetween. But that would look a bit rubbish. What
+we want it to do is move a _tiny little bit_ every second.
+
+```go
+func TestMinutesInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(0, 30, 0), math.Pi},
+		{simpleTime(0, 0, 7), 7 * (math.Pi / (30 * 60))},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := minutesInRadians(c.time)
+			if got != c.angle {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+```
+
+Sixty seconds in a minute - thirty minutes in a half turn (math.Pi)- so 30 * 60
+seconds in a half turn. So if the time is 7 seconds past the hour we're
+expecting to see the minute hand at 7 * (math.Pi / (30 * 60)) radians past the
+12.
+
+## Try to run the test
+
+```go
+--- FAIL: TestMinutesInRadians (0.00s)
+    --- FAIL: TestMinutesInRadians/00:00:07 (0.00s)
+        clockface_test.go:62: Wanted 0.012217304763960306 radians, but got 3.141592653589793
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v8/clockface	0.009s
+```
+
+## Write enough code to make it pass
+
+Here comes the science bit (again)
+
+```go
+func minutesInRadians(t time.Time) float64 {
+	return (secondsInRadians(t) / 60) +
+		(math.Pi / (30 / (float64(t.Minute()))))
+}
+```
+
+rather than working out how far to push the minute hand around the clockface for
+every second from scratch, here we can just leverage the `secondsInRadians`
+function. For every second the minute hand will move 1/60th of the angle the
+second hand moves.
+
+Then we just add on the movement for the minutes - similar to the movement of
+the second hand.
+
+```go
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v8/clockface	0.007s
+```
+
+Nice and easy
+
+## Repeat for new requirements
+
+Should I add more cases to the `minutesInRadians` test? At the moment there are
+only two. How many cases do I need before I move on to the testing the
+`minuteHandPoint` function?
+
+One of my favourite TDD quotes, often attributed to Kent Beck,[^3] is
+
+> Write tests until fear is transformed into boredom
+
+And, frankly, I'm bored of testing that function. So it's on to the next one.
+
+## Write the test first
 
 ## Write the test first
 ## Try to run the test
@@ -1045,13 +1204,15 @@ Herer ends v7
 ## Repeat for new requirements
 ## Wrapping up
 
-
-
 [^1]: This is a lot easier than writing a name out by hand as a string and then having to keep it in sync with the actual time. Believe me you don't want to do that...
 
 [^2]: In short it makes it easier to do calculus with circles as π just keeps coming up as an angle if you use normal degrees, so if you count your angles in πs it makes all the equations simpler.
+
+[^3]: Missattributed because, like all great authors, Kent Beck is more quoted
+  than read. Beck attributes it to [Phlip][phlip].
 
 [texttemplate]: https://golang.org/pkg/text/template/
 [circle]: https://en.wikipedia.org/wiki/Sine#Unit_circle_definition
 [mathcos]: https://golang.org/pkg/math/#Cos
 [floatingpoint]: https://0.30000000000000004.com/
+[phlip]: http://wiki.c2.com/?PhlIp
