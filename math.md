@@ -1400,7 +1400,298 @@ There... now it's just the hour hand to do!
 v9 ends here
 --->
 
+## Write the test first
 
+```go
+func TestSVGWriterAt6oclock(t *testing.T) {
+	tm := time.Date(1337, time.January, 1, 6, 0, 0, 0, time.UTC)
+
+	var b strings.Builder
+	clockface.SVGWriter(&b, tm)
+	got := b.String()
+
+	want := `<line x1="150" y1="150" x2="150.000" y2="200.000"`
+
+	if !strings.Contains(got, want) {
+		t.Errorf("Expected to find the hour hand %v, in the SVG output %v", want, got)
+	}
+}
+```
+
+```
+--- FAIL: TestSVGWriterAt6oclock (0.00s)
+    clockface_acceptance_test.go:63: Expected to find the hour hand <line x1="150" y1="150" x2="150.000" y2="200.000", in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="100%"
+             height="100%"
+             viewBox="0 0 300 300"
+             version="2.0"><circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/><line x1="150" y1="150" x2="150.000" y2="60.000" style="fill:none;stroke:#f00;stroke-width:3px;"/><line x1="150" y1="150" x2="150.000" y2="70.000" style="fill:none;stroke:#000;stroke-width:3px;"/></svg>
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
+```
+
+Again, let's comment this one out until we've got the some coverage with the
+lower level tests:
+
+## Write the test first
+
+```go
+func TestHoursInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(6, 0, 0), math.Pi},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := hoursInRadians(c.time)
+			if got != c.angle {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+```
+
+## Try to run the test
+
+```
+# github.com/gypsydave5/learn-go-with-tests/math/v10/clockface [github.com/gypsydave5/learn-go-with-tests/math/v10/clockface.test]
+./clockface_test.go:97:11: undefined: hoursInRadians
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface [build failed]
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+```go
+func hoursInRadians(t time.Time) float64 {
+	return math.Pi
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
+```
+
+## Repeat for new requirements
+
+```go
+func TestHoursInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(6, 0, 0), math.Pi},
+		{simpleTime(0, 0, 0), 0},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := hoursInRadians(c.time)
+			if got != c.angle {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+```
+
+## Try to run the test
+
+```
+--- FAIL: TestHoursInRadians (0.00s)
+    --- FAIL: TestHoursInRadians/00:00:00 (0.00s)
+        clockface_test.go:100: Wanted 0 radians, but got 3.141592653589793
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
+```
+
+## Write enough code to make it pass
+
+```go
+func hoursInRadians(t time.Time) float64 {
+	return (math.Pi / (6 / (float64(t.Hour()))))
+}
+```
+
+## Repeat for new requirements
+
+func TestHoursInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(6, 0, 0), math.Pi},
+		{simpleTime(0, 0, 0), 0},
+		{simpleTime(21, 0, 0), math.Pi * 1.5},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := hoursInRadians(c.time)
+			if got != c.angle {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+
+## Try to run the test
+
+```
+--- FAIL: TestHoursInRadians (0.00s)
+    --- FAIL: TestHoursInRadians/21:00:00 (0.00s)
+        clockface_test.go:101: Wanted 4.71238898038469 radians, but got 10.995574287564276
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.014s
+```
+
+## Write enough code to make it pass
+
+```go
+func hoursInRadians(t time.Time) float64 {
+	return (math.Pi / (6 / (float64(t.Hour() % 12))))
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.008s
+```
+## Write the test first
+
+```go
+func TestHoursInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(6, 0, 0), math.Pi},
+		{simpleTime(0, 0, 0), 0},
+		{simpleTime(21, 0, 0), math.Pi * 1.5},
+		{simpleTime(0, 1, 30), math.Pi / ((6 * 60 * 60) / 90)},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := hoursInRadians(c.time)
+			if got != c.angle {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+```
+
+## Try to run the test
+
+```
+--- FAIL: TestHoursInRadians (0.00s)
+    --- FAIL: TestHoursInRadians/00:01:30 (0.00s)
+        clockface_test.go:102: Wanted 0.013089969389957472 radians, but got 0
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
+```
+
+## Write enough code to make it pass
+
+Again, a bit of thinking is now required. We need to move the hour hand along
+a little bit for both the minutes and the seconds. Luckily we have an angle
+already to hand for the minutes and the seconds - the one returned by
+`minutesInRadians`. We can reuse it!
+
+So the only question is by what factor to reduce the size of that angle. One
+full turn is one hour for the minute hand, but for the hour hand it's twelve
+hours. So we just divide the angle returned by `minutesInRadians` by twelve:
+
+```go
+func hoursInRadians(t time.Time) float64 {
+	return (minutesInRadians(t) / 12) +
+		(math.Pi / (6 / (float64(t.Hour() % 12))))
+}
+```
+
+and behold:
+
+```
+--- FAIL: TestHoursInRadians (0.00s)
+    --- FAIL: TestHoursInRadians/00:01:30 (0.00s)
+        clockface_test.go:104: Wanted 0.013089969389957472 radians, but got 0.01308996938995747
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
+```
+
+AAAAARGH BLOODY FLOATING POINT ARITHMETIC!
+
+Let's update our test to use `roughlyEqualFloat64` for the comparison of the
+angles.
+
+```go
+func TestHoursInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(6, 0, 0), math.Pi},
+		{simpleTime(0, 0, 0), 0},
+		{simpleTime(21, 0, 0), math.Pi * 1.5},
+		{simpleTime(0, 1, 30), math.Pi / ((6 * 60 * 60) / 90)},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := hoursInRadians(c.time)
+			if !roughlyEqualFloat64(got, c.angle) {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+```
+
+```
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
+```
+
+## Refactor
+
+If we're going to use `roughlyEqualFloat64` in _one_ of our radians tests, we
+should probably use it for _all_ of them. That's a nice and simple refactor.
+
+Right, on to where to
+
+## Write the test first
+
+```go
+func TestHourHandPoint(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		point Point
+	}{
+		{simpleTime(0, 6, 0), Point{0, -1}},
+		{simpleTime(0, 21, 0), Point{-1, 0}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := minuteHandPoint(c.time)
+			if !roughlyEqualPoint(got, c.point) {
+				t.Fatalf("Wanted %v Point, but got %v", c.point, got)
+			}
+		})
+	}
+}
+```
 
 ## Write the test first
 ## Try to run the test
@@ -1416,7 +1707,7 @@ v9 ends here
 [^2]: In short it makes it easier to do calculus with circles as π just keeps coming up as an angle if you use normal degrees, so if you count your angles in πs it makes all the equations simpler.
 
 [^3]: Missattributed because, like all great authors, Kent Beck is more quoted
-  than read. Beck attributes it to [Phlip][phlip].
+  than read. Beck himself attributes it to [Phlip][phlip].
 
 [texttemplate]: https://golang.org/pkg/text/template/
 [circle]: https://en.wikipedia.org/wiki/Sine#Unit_circle_definition
