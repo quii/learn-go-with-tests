@@ -20,7 +20,7 @@ as a series of shapes, described in XML. So this clock:
 
 ![an svg of a clock](math/example_clock.svg)
 
-Is described like this:
+is described like this:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -69,11 +69,16 @@ for each hand of the clock. The numbers that need to change for each hand of the
 clock - the parameters to whatever builds the SVG - are the `x2` and `y2`
 attributes. We'll need an X and a Y for each of the hands of the clock.
 
-Another thing to note about SVGs: the origin - point (0,0) - is at the _top left_ hand corner, not the _bottom left_ as we might expect.
+Another thing to note about SVGs: the origin - point (0,0) - is at the _top
+left_ hand corner, not the _bottom left_ as we might expect.
 
-I _could_ think about more parameters - the radius of the clockface circle, the size of the SVG, the colours of the hands, their shape, etc... but it's better to start off by solving a simple, concrete problem with a simple, concrete solution, and then to start adding parameters to make it generalised.
+I _could_ think about more parameters - the radius of the clockface circle, the
+size of the SVG, the colours of the hands, their shape, etc... but it's better
+to start off by solving a simple, concrete problem with a simple, concrete
+solution, and then to start adding parameters to make it generalised.
 
-So we'll say that every clock has a centre of (150,150), and that the hour hand is 50 long, the minute hand is 80 long and the second hand is 90 long.
+So we'll say that every clock has a centre of (150, 150), and that the hour hand
+is 50 long, the minute hand is 80 long and the second hand is 90 long.
 
 Finally, I'm not deciding _how_ to construct the SVG - we could use a template
 from the [`text/template`][texttemplate] package, or we could just send bytes into
@@ -106,7 +111,10 @@ func TestSecondHandAtMidnight(t *testing.T) {
 }
 ```
 
-Remember how SVGs start with 0 from the top of the Y axis? To place the second hand at midnight we say that it hasn't moved from the centre of the clockface on the X axis - still 150 - and the Y axis is the length of the hand 'up' from the centre; 150 minus 90.
+Remember how SVGs start with 0 from the top of the Y axis? To place the second
+hand at midnight we say that it hasn't moved from the centre of the clockface on
+the X axis - still 150 - and the Y axis is the length of the hand 'up' from the
+centre; 150 minus 90.
 
 ### Try to run the test
 
@@ -1034,6 +1042,151 @@ const (
 <!--
 Here ends v7
 -->
+
+But I'm _still_ not happy. Yes, I know I said that this test was an improvement
+- but it's not really giving me the confidence I need that what I'm writing is
+working. Not only will it still pass if I don't produce a valid SVG (as it's
+only testing that a string appears in the output), but it will also fail if
+I make the smallest, unimportant change to that string - if I add an extra space
+between the attributes, for instance.
+
+The biggest smell is really that I'm testing a data structure - XML - by looking
+at its representation as a series of characters - as a string. This is _never_
+a good idea as it produces problems just like the one I outline above: a test
+that's both too fragile and not sensitive enough. A test that's testing the
+wrong thing!
+
+So the only solution is to test the output _as XML_. And to do that we'll need
+to parse it.
+
+## Parsing XML
+
+[`encoding/xml`][xml] is the Go package that can handle all things to do with
+simple XML parsing.
+
+The function [`xml.Unmarshall`](https://godoc.org/encoding/xml#Unmarshal) takes
+a `[]byte` of XML data and a pointer to a struct for it to get unmarshalled in
+to.
+
+So we'll need a struct to unmarshall our XML into. We could spend some time
+working out what the correct names for all of the nodes and attributes, and how
+to write the correct structure but, happily, someone has written
+[`zek`](https://github.com/miku/zek) a program that will do all of that for us.
+Even better, there's an online version at https://www.onlinetool.io/xmltogo/
+. Just paste the SVG from the top of the file into one box and - bam - out pops:
+
+```go
+type Svg struct {
+	XMLName xml.Name `xml:"svg"`
+	Text    string   `xml:",chardata"`
+	Xmlns   string   `xml:"xmlns,attr"`
+	Width   string   `xml:"width,attr"`
+	Height  string   `xml:"height,attr"`
+	ViewBox string   `xml:"viewBox,attr"`
+	Version string   `xml:"version,attr"`
+	Circle  struct {
+		Text  string `xml:",chardata"`
+		Cx    string `xml:"cx,attr"`
+		Cy    string `xml:"cy,attr"`
+		R     string `xml:"r,attr"`
+		Style string `xml:"style,attr"`
+	} `xml:"circle"`
+	Line []struct {
+		Text  string `xml:",chardata"`
+		X1    string `xml:"x1,attr"`
+		Y1    string `xml:"y1,attr"`
+		X2    string `xml:"x2,attr"`
+		Y2    string `xml:"y2,attr"`
+		Style string `xml:"style,attr"`
+	} `xml:"line"`
+}
+```
+
+We could make adjustments to this if we needed to but it's definitely good
+enough to start us off.
+
+```go
+func TestSVGWriterAtMidnight(t *testing.T) {
+	tm := time.Date(1337, time.January, 1, 0, 0, 0, 0, time.UTC)
+
+	b := bytes.Buffer{}
+	clockface.SVGWriter(&b, tm)
+
+	svg := Svg{}
+	xml.Unmarshal(b.Bytes(), &svg)
+
+	x2 := ""
+	y2 := ""
+
+	for _, line := range svg.Line {
+		if line.X2 == x2 && line.Y2 == y2 {
+			return
+		}
+	}
+
+	t.Errorf("Expected to find the second hand with x2 of %v and y2 of %v, in the SVG output %v", x2, y2, b.String())
+}
+```
+
+This is a rough translation of the earlier test to now use the SVG struct we
+defined above. We write the output of `clockface.SVGWriter` to a `bytes.Buffer`
+and then unmarshall it into an `Svg`. We then look at each `Line` in the `Svg`
+to see if any of them have the expected `X2` and `Y2` values. If we get a match
+we return early (passing the test); if not we fail with a (hopefully)
+informative message.
+
+Note that I'm deliberately setting `x2` and `y2` to empty strings to ensure we
+get a failing test...
+
+--- FAIL: TestSVGWriterAtMidnight (0.00s)
+    clockface_acceptance_test.go:57: Expected to find the second hand with x2 of  and y2 of , in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="100%"
+             height="100%"
+             viewBox="0 0 300 300"
+             version="2.0"><circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/><line x1="150" y1="150" x2="150.000" y2="60.000" style="fill:none;stroke:#f00;stroke-width:3px;"/></svg>
+FAIL
+exit status 1
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface	0.007s
+```
+
+... before setting them to the expected values...
+
+```go
+	x2 := "150.000"
+	y2 := "60.000"
+```
+
+... to see the test pass:
+
+```go
+PASS
+ok  	github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface	0.007s
+```
+
+We can rewrite the other test in the same pattern... but not before...
+
+<!--
+Here ends 7b
+-->
+
+### Refactor _EVEN MORE_
+
+Two things now stick out to me:
+
+1. We're not really testing all of the information we'd like to ensure - what
+   about the `x1` values, for instance?
+2. Also, those attributes for `x1` etc aren't really `strings` are they? They're
+   numbers!
+3. Do I really care about the `style` of the hand? Or, for that matter, the
+   empty `Text` node that's been generated by `zak`?
+
+We can do better. Let's make a few small adjustments to the
+
+
+
+
 ### Write the test first
 
 So that's the second hand done. Now let's get started on the minute hand.
@@ -1881,3 +2034,4 @@ functions, we've built a very reasonable little API for clockface calculations.
 [mathcos]: https://golang.org/pkg/math/#Cos
 [floatingpoint]: https://0.30000000000000004.com/
 [phlip]: http://wiki.c2.com/?PhlIp
+[xml]: https://godoc.org/encoding/xml
