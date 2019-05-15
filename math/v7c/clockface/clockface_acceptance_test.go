@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gypsydave5/learn-go-with-tests/math/v7/clockface"
+	"github.com/gypsydave5/learn-go-with-tests/math/v7c/clockface"
 )
 
 type Svg struct {
@@ -45,7 +45,7 @@ func TestSVGWriterSecondHand(t *testing.T) {
 		},
 		{
 			simpleTime(0, 0, 30),
-			Line{151, 150, 150, 240},
+			Line{150, 150, 150, 240},
 		},
 	}
 
