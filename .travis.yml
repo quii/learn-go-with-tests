@@ -5,6 +5,9 @@ go:
   - 1.10.x
   - 1.11.x
 
+before_install:
+  - go get github.com/quii/learn-go-with-tests/command-line/v1
+
 install: true
 
 services:
@@ -19,7 +22,6 @@ jobs:
   include:
     - stage: build
       script:
-        - go get github.com/quii/learn-go-with-tests/command-line/v1
         - go get -u golang.org/x/lint/golint
         - "./build.sh"
     - stage: spelling
