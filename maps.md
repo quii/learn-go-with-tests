@@ -6,7 +6,7 @@ In [arrays & slices](arrays-and-slices.md), you saw how to store values in order
 
 Maps allow you to store items in a manner similar to a dictionary. You can think of the `key` as the word and the `value` as the definition. And what better way is there to learn about Maps than to build our own dictionary?
 
-First, assuming we already some words with their definitions in the dictionary, if we search for a word, it should return the definition of it.
+First, assuming we already have some words with their definitions in the dictionary, if we search for a word, it should return the definition of it.
 
 ## Write the test first
 
@@ -88,7 +88,7 @@ func assertStrings(t *testing.T, got, want string) {
 }
 ```
 
-I decided to create an `assertStrings` helper and get rid of the `given` piece to make the implementation more general.
+I decided to create an `assertStrings` helper to make the implementation more general.
 
 ### Using a custom type
 
@@ -283,9 +283,9 @@ An interesting property of maps is that you can modify them without passing them
 
 Maps being a reference is really good, because no matter how big a map gets there will only be one copy.
 
-A gotcha that reference types introduce is that maps can be a `nil` value. If you try to use a `nil` map, you will get a `nil pointer exception` which will stop your program's execution in its tracks.
+A gotcha that reference types introduce is that maps can be a `nil` value. A `nil` map behaves like an empty map when reading, but attempts to write to a `nil` map will cause a runtime panic. You can read more about maps [here](https://blog.golang.org/go-maps-in-action).
 
-Because of `nil pointer exceptions`, you should never initialize an empty map variable:
+Therefore, you should never initialize an empty map variable:
 
 ```go
 var m map[string]string
@@ -301,7 +301,7 @@ dictionary = map[string]string{}
 dictionary = make(map[string]string)
 ```
 
-Both approaches create an empty `hash map` and point `dictionary` at it. Which ensures that you will never get a `nil pointer exception`.
+Both approaches create an empty `hash map` and point `dictionary` at it. Which ensures that you will never get a runtime panic.
 
 ## Refactor
 
@@ -632,7 +632,7 @@ func (d Dictionary) Delete(word string) {
 
 Go has a built-in function `delete` that works on maps. It takes two arguments. The first is the map and the second is the key to be removed.
 
-The `delete` function returns nothing, and we based our `Delete` method on the same notion. Since deleting a value that's not there has no effect, unlike our `Update` and `Add**` methods, we don't need to complicate the API with errors.
+The `delete` function returns nothing, and we based our `Delete` method on the same notion. Since deleting a value that's not there has no effect, unlike our `Update` and `Add` methods, we don't need to complicate the API with errors.
 
 ## Wrapping up
 

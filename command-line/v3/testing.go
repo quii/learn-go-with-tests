@@ -34,6 +34,6 @@ func AssertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
 	}
 
 	if store.WinCalls[0] != winner {
-		t.Errorf("did not store correct winner got '%s' want '%s'", store.WinCalls[0], winner)
+		t.Errorf("did not store the correct winner got '%s' want '%s'", store.WinCalls[0], winner)
 	}
 }

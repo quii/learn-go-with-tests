@@ -1,23 +1,25 @@
-# Learn Go with tests
+# Learn Go with Tests
 
-_Or learn test-driven development with Go_
+<p align="center">
+  <img src="red-green-blue-gophers-smaller.png" />
+</p>
+
+[Art by Denise](https://twitter.com/deniseyu21)
 
 ![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
-[You can read this on Gitbook](https://quii.gitbook.io/learn-go-with-tests)
-
-Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests)
+- Formats: [Gitbook](https://quii.gitbook.io/learn-go-with-tests), [EPUB or PDF](https://github.com/quii/learn-go-with-tests/releases)
+- Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests)
 
 ## Why
 
 * Explore the Go language by writing tests
 * **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
 * Be confident that you'll be able to start writing robust, well-tested systems in Go
+* [Watch a video, or read about why unit testing and TDD is important](why.md)
 
 ## Table of contents
-
-If there's no link, it's not done yet! [why not contribute?](contributing.md)
 
 ### Go fundamentals
 
@@ -34,8 +36,8 @@ If there's no link, it's not done yet! [why not contribute?](contributing.md)
 11. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
 12. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
 13. [Reflection](reflection.md) - Learn about reflection
-
-Property-based tests \(todo\)
+13. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
+13. [Context](context.md) - Use the context package to manage and cancel long-running processes
 
 ### Build an application
 
@@ -52,8 +54,20 @@ By the end of this, you should have a strong grasp as to how to iteratively writ
 * [HTTP server](http-server.md) - We will create an application which listens to HTTP requests and responds to them.
 * [JSON, routing and embedding](json.md) - We will make our endpoints return JSON and explore how to do routing.
 * [IO and sorting](io.md) - We will persist and read our data from disk and we'll cover sorting data.
-* [Command line & project structure](command-line.md) - Support multiple applications from one code base and read input from command line
-* [Time](time.md) - using the `time` package to schedule activities
+* [Command line & project structure](command-line.md) - Support multiple applications from one code base and read input from command line.
+* [Time](time.md) - using the `time` package to schedule activities.
+* [WebSockets](websockets.md) - learn how to write and test a server that uses WebSockets.
+
+### Questions and answers
+
+I often run in to questions on the internets like
+
+> How do I test my amazing function that does x, y and z
+
+If you have such a question raise it as an issue on github and I'll try and find time to write a short chapter to tackle the issue. I feel like content like this is valuable as it is tackling people's _real_ questions around testing.
+
+* [OS exec](os-exec.md) - An example of how we can reach out to the OS to execute commands to fetch data and keep our business logic testable/
+* [Error types](error-types.md) - Example of creating your own error types to improve your tests and make your code easier to work with.
 
 ## Contributing
 
@@ -103,8 +117,8 @@ Taking my experience of learning with a group and my own personal way I am going
 
 ## Who this is for
 
-* People who are interested in picking up Go
-* People who already know some Go, but want to explore testing more
+* People who are interested in picking up Go.
+* People who already know some Go, but want to explore testing with TDD.
 
 ## What you'll need
 
@@ -116,7 +130,7 @@ Taking my experience of learning with a group and my own personal way I am going
 
 ## Feedback
 
-* Add issues or [tweet me @quii](https://twitter.com/quii)
+* Add issues/submit PRs [here](https://github.com/quii/learn-go-with-tests) or [tweet me @quii](https://twitter.com/quii)
 
 [MIT license](LICENSE.md)
 

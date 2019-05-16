@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Let's play poker</title>
+</head>
+<body>
+<section id="game">
+    <div id="game-start">
+        <label for="player-count">Number of players</label>
+        <input type="number" id="player-count"/>
+        <button id="start-game">Start</button>
+    </div>
+
+    <div id="declare-winner">
+        <label for="winner">Winner</label>
+        <input type="text" id="winner"/>
+        <button id="winner-button">Declare winner</button>
+    </div>
+
+    <div id="blind-value"/>
+</section>
+
+<section id="game-end">
+    <h1>Another great game of poker everyone!</h1>
+    <p><a href="/league">Go check the league table</a></p>
+</section>
+
+</body>
+<script type="application/javascript">
+    const startGame = document.getElementById('game-start')
+
+    const declareWinner = document.getElementById('declare-winner')
+    const submitWinnerButton = document.getElementById('winner-button')
+    const winnerInput = document.getElementById('winner')
+
+    const blindContainer = document.getElementById('blind-value')
+
+    const gameContainer = document.getElementById('game')
+    const gameEndContainer = document.getElementById('game-end')
+
+    declareWinner.hidden = true
+    gameEndContainer.hidden = true
+
+    document.getElementById('start-game').addEventListener('click', event => {
+        startGame.hidden = true
+        declareWinner.hidden = false
+
+        const numberOfPlayers = document.getElementById('player-count').value
+
+        if (window['WebSocket']) {
+            const conn = new WebSocket('ws://' + document.location.host + '/ws')
+
+            submitWinnerButton.onclick = event => {
+                conn.send(winnerInput.value)
+                gameEndContainer.hidden = false
+                gameContainer.hidden = true
+            }
+
+            conn.onclose = evt => {
+                blindContainer.innerText = 'Connection closed'
+            }
+
+            conn.onmessage = evt => {
+                blindContainer.innerText = evt.data
+            }
+
+            conn.onopen = function () {
+                conn.send(numberOfPlayers)
+            }
+        }
+    })
+</script>
+</html>

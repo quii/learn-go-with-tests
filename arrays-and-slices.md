@@ -34,7 +34,7 @@ func TestSum(t *testing.T) {
 ```
 
 Arrays have a _fixed capacity_ which you define when you declare the variable.
-We can initialize array in two ways:
+We can initialize an array in two ways:
 
 * \[N\]type{value1, value2, ..., valueN} e.g. `numbers := [5]int{1, 2, 3, 4, 5}`
 * \[...\]type{value1, value2, ..., valueN} e.g. `numbers := [...]int{1, 2, 3, 4, 5}`
@@ -81,15 +81,6 @@ To get the value out of an array at a particular index, just use `array[index]`
 syntax. In this case, we are using `for` to iterate 5 times to work through the
 array and add each item onto `sum`.
 
-### A note on source control
-
-At this point, if you are using source control \(which you should!\) I would
-`commit` the code as it is. We have working software backed by a test.
-
-I _wouldn't_ push to master though, because I plan to refactor next. It is nice
-to commit at this point in case you somehow get into a mess with refactoring
-- you can always go back to the working version.
-
 ## Refactor
 
 Let's introduce [`range`](https://gobyexample.com/range) to help clean up our code
@@ -108,11 +99,6 @@ func Sum(numbers [5]int) int {
 values, the index and the value. We are choosing to ignore the index value by
 using `_` [blank identifier](https://golang.org/doc/effective_go.html#blank).
 
-### Back to source control
-
-Now we are happy with the code I would amend the previous commit so we only
-check in the lovely version of our code with its test.
-
 ### Arrays and their type
 
 An interesting property of arrays is the size is encoded in its type. If you try
@@ -120,7 +106,7 @@ to pass an `[4]int` into a function that expects `[5]int`, it won't compile.
 They are different types so it's just the same as trying to pass a `string` into
 a function that wants an `int`.
 
-You may be thinking it's quite cumbersome that arrays are fixed length and most
+You may be thinking it's quite cumbersome that arrays have a fixed length, and most
 of the time you probably won't be using them!
 
 Go has _slices_ which do not encode the size of the collection and instead can
@@ -262,7 +248,7 @@ Now that we are happy we have a well-tested function you should commit your
 great work before taking on the next challenge.
 
 We need a new function called `SumAll` which will take a varying number of
-slices, returning a new slice containing the totals for each slice pass in.
+slices, returning a new slice containing the totals for each slice passed in.
 
 For example
 
@@ -398,8 +384,7 @@ func SumAll(numbersToSum ...[]int) []int {
 ```
 
 In this implementation, we are worrying less about capacity. We start with an
-empty slice \(defined in the function signature\) and append to it the result of
-`Sum` as we work through the varargs.
+empty slice `sums` and append to it the result of `Sum` as we work through the varargs.
 
 Our next requirement is to change `SumAll` to `SumAllTails`, where it now
 calculates the totals of the "tails" of each slice. The tail of a collection is
@@ -444,7 +429,7 @@ func SumAllTails(numbersToSum ...[]int) []int {
 
 Slices can be sliced! The syntax is `slice[low:high]` If you omit the value on
 one of the sides of the `:` it captures everything to the side of it. In our
-case, we are saying take from 1 to the end with `numbers[1:]`. You might want to
+case, we are saying "take from 1 to the end" with `numbers[1:]`. You might want to
 invest some time in writing other tests around slices and experimenting with the
 slice operator so you can be familiar with it.
 
@@ -452,9 +437,9 @@ slice operator so you can be familiar with it.
 
 Not a lot to refactor this time.
 
-What do you think would happen if you passed in an empty array into our
-function? What is the "tail" of an empty array? What happens when you tell Go to
-capture all elements from `myEmptySlice[1:]`. ?
+What do you think would happen if you passed in an empty slice into our
+function? What is the "tail" of an empty slice? What happens when you tell Go to
+capture all elements from `myEmptySlice[1:]`?
 
 ## Write the test first
 
@@ -472,7 +457,7 @@ func TestSumAllTails(t *testing.T) {
 
     t.Run("safely sum empty slices", func(t *testing.T) {
         got := SumAllTails([]int{}, []int{3, 4, 5})
-        want :=[]int{0, 9}
+        want := []int{0, 9}
 
         if !reflect.DeepEqual(got, want) {
             t.Errorf("got %v want %v", got, want)

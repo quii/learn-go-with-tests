@@ -19,6 +19,7 @@ func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func(
 	tmpfile.Write([]byte(initialData))
 
 	removeFile := func() {
+		tmpfile.Close()
 		os.Remove(tmpfile.Name())
 	}
 
@@ -77,7 +78,7 @@ func TestFileSystemStore(t *testing.T) {
 		assertScoreEquals(t, got, want)
 	})
 
-	t.Run("store wins for existing players", func(t *testing.T) {
+	t.Run("store wins for new players", func(t *testing.T) {
 		database, cleanDatabase := createTempFile(t, `[
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)

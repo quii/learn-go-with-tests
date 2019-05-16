@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Learn Go with tests](gb-readme.md)
+* [Learn Go with Tests](gb-readme.md)
 
 ## Go fundamentals
 
@@ -17,6 +17,8 @@
 * [Concurrency](concurrency.md)
 * [Select](select.md)
 * [Reflection](reflection.md)
+* [Sync](sync.md)
+* [Context](context.md)
 
 ## Build an application
 
@@ -26,8 +28,15 @@
 * [IO and sorting](io.md)
 * [Command line & package structure](command-line.md)
 * [Time](time.md)
+* [WebSockets](websockets.md)
+
+## Questions and answers
+
+* [OS Exec](os-exec.md)
+* [Error types](error-types.md)
 
 ## Meta
 
+* [Why unit tests and how to make them work for you](why.md)
 * [Contributing](contributing.md)
 * [Chapter Template](template.md)

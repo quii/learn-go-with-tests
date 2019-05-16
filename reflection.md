@@ -1,8 +1,8 @@
 # Reflection
 
-[From twitter](https://twitter.com/peterbourgon/status/1011403901419937792?s=09)
+[From Twitter](https://twitter.com/peterbourgon/status/1011403901419937792?s=09)
 
-> #golang challenge: write a function `walk(x interface{}, fn func(string))` which takes a struct `x` and calls `fn` for all strings fields found inside.difficulty level: recursively.
+> golang challenge: write a function `walk(x interface{}, fn func(string))` which takes a struct `x` and calls `fn` for all strings fields found inside. difficulty level: recursively.
 
 To do this we will need to use _reflection_.
 
@@ -24,8 +24,8 @@ So `walk(x interface{}, fn func(string))` will accept any value for `x`.
 
 ### So why not use `interface` for everything and have really flexible functions?
 
-- As a user of a function that takes `interface` you lose type safety. What if you meant to pass `Foo.bar` of type `string` into a function but instead did `Foo.baz` which is an `int`? The compiler wont be able to inform you of your mistake. You also have no idea _what_ you're allowed to pass to a function. Knowing that a function takes a `UserService` for instance is very useful.
-- As a writer of such a function you have to be able to inspect _anything_ that has been passed to you and try and figure out what the type is and what you can do with it. This is done using _reflection_. This can be quite clumsy and difficult to read and is generally less performant (as you have to do checks at runtime).
+- As a user of a function that takes `interface` you lose type safety. What if you meant to pass `Foo.bar` of type `string` into a function but instead did `Foo.baz` which is an `int`? The compiler won't be able to inform you of your mistake. You also have no idea _what_ you're allowed to pass to a function. Knowing that a function takes a `UserService` for instance is very useful.
+- As a writer of such a function, you have to be able to inspect _anything_ that has been passed to you and try and figure out what the type is and what you can do with it. This is done using _reflection_. This can be quite clumsy and difficult to read and is generally less performant (as you have to do checks at runtime).
 
 In short only use reflection if you really need to.
 
@@ -35,7 +35,7 @@ Our function will need to be able to work with lots of different things. As alwa
 
 ## Write the test first
 
-We'll want to call our function with a struct that has a string field in it (`x`).Then we can spy on the function (`fn`) passed in to see if it is called.
+We'll want to call our function with a struct that has a string field in it (`x`). Then we can spy on the function (`fn`) passed in to see if it is called.
 
 ```go
 func TestWalk(t *testing.T) {
@@ -57,9 +57,9 @@ func TestWalk(t *testing.T) {
 }
 ```
 
-- We want to store a slice of strings (`got`) which stores which strings were passed into `fn` by `walk`. Often in previous chapters we have made dedicated types for this to spy on function/method invocations but in this case we can just pass in an anonymous function for `fn` that closes over `got`.
+- We want to store a slice of strings (`got`) which stores which strings were passed into `fn` by `walk`. Often in previous chapters, we have made dedicated types for this to spy on function/method invocations but in this case, we can just pass in an anonymous function for `fn` that closes over `got`.
 - We use an anonymous `struct` with a `Name` field of type string to go for the simplest "happy" path.
-- Finally call `walk` with `x` and the spy and for now just check the length of `got`, we'll be more specific with our assertions once we've got something very basic working.
+- Finally, call `walk` with `x` and the spy and for now just check the length of `got`, we'll be more specific with our assertions once we've got something very basic working.
 
 ## Try to run the test
 
@@ -127,13 +127,13 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-This code is _very unsafe and very naive_ but remember our goal when we are in "red" (the tests failing) is to write the smallest amount of code possible. We then write more tests to address our concerns.
+This code is _very unsafe and very naive_ but remembers our goal when we are in "red" (the tests failing) is to write the smallest amount of code possible. We then write more tests to address our concerns.
 
 We need to use reflection to have a look at `x` and try and look at its properties.
 
 The [reflect package](https://godoc.org/reflect) has a function `ValueOf` which returns us a `Value` of a given variable. This has ways for us to inspect a value, including its fields which we use on the next line.
 
-We then make some very optimistic assumptions about the the value passed in
+We then make some very optimistic assumptions about the value passed in
 
 - We look at the first and only field, there may be no fields at all which would cause a panic
 - We then call `String()` which returns the underlying value as a string but we know it would be wrong if the field was something other than a string.
@@ -241,7 +241,7 @@ Add the following case
 
 ## Try to run the test
 
-```go
+```
 === RUN   TestWalk/Struct_with_non_string_field
     --- FAIL: TestWalk/Struct_with_non_string_field (0.00s)
         reflection_test.go:46: got [Chris <int Value>], want [Chris]
@@ -271,7 +271,7 @@ We can do that by checking its [`Kind`](https://godoc.org/reflect#Kind).
 
 Again it looks like the code is reasonable enough for now.
 
-The next scenario is what if it isn't a "flat" `struct`? In other words what happens if we have a `struct` with some nested fields?
+The next scenario is what if it isn't a "flat" `struct`? In other words, what happens if we have a `struct` with some nested fields?
 
 ## Write the test first
 
@@ -430,7 +430,7 @@ You can't use `NumField` on a pointer `Value`, we need to extract the underlying
 
 ## Refactor
 
-Let's encapsulate the responsibility of extracting the `reflect.Value` from a given `interface{}` into a function
+Let's encapsulate the responsibility of extracting the `reflect.Value` from a given `interface{}` into a function.
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -459,12 +459,12 @@ func getValue(x interface{}) reflect.Value {
 }
 ```
 
-This actually adds _more_ code but I feel the abstraction level is right
+This actually adds _more_ code but I feel the abstraction level is right.
 
 - Get the `reflect.Value` of `x` so I can inspect it, I don't care how.
 - Iterate over the fields, doing whatever needs to be done depending on its type.
 
-Next we need to cover slices.
+Next, we need to cover slices.
 
 ## Write the test first
 
@@ -526,7 +526,7 @@ If you think a little abstractly, we want to call `walk` on either
 - Each field in a struct
 - Each _thing_ in a slice
 
-Our code at the moment does this, but doesn't reflect it very well. We just have a check at the start to see if it's a slice (with a `return` to stop the rest of the code executing) and if it's not we just assume it's a struct.
+Our code at the moment does this but doesn't reflect it very well. We just have a check at the start to see if it's a slice (with a `return` to stop the rest of the code executing) and if it's not we just assume it's a struct.
 
 Let's rework the code so instead we check the type _first_ and then do our work.
 
@@ -549,9 +549,9 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-Looking much better! If it's a struct or a slice we iterate over its values calling `walk` on each one. Otherwise if it's a `reflect.String` we can call `fn`.
+Looking much better! If it's a struct or a slice we iterate over its values calling `walk` on each one. Otherwise, if it's a `reflect.String` we can call `fn`.
 
-Still, to me it feels like it could be better. There's repetition the operation of iterating over fields/values and then calling `walk` but conceptually they're the same.
+Still, to me it feels like it could be better. There's repetition of the operation of iterating over fields/values and then calling `walk` but conceptually they're the same.
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -579,7 +579,7 @@ func walk(x interface{}, fn func(input string)) {
 
 If the `value` is a `reflect.String` then we just call `fn` like normal.
 
-Otherwise our `switch` will extract out two things depending on the type
+Otherwise, our `switch` will extract out two things depending on the type
 
 - How many fields there are
 - How to extract the `Value` (`Field` or `Index`)
@@ -664,7 +664,7 @@ The final type we want to handle is `map`.
 
 ## Write enough code to make it pass
 
-Again if you think a little abstractly you can see that `map` is very similar to `struct` it's just the keys are unknown at compile time.
+Again if you think a little abstractly you can see that `map` is very similar to `struct`, it's just the keys are unknown at compile time.
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -694,7 +694,7 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-However by design you cannot get values out of a map by index. It's only done by _key_, so that breaks our abstraction, darn.
+However, by design you cannot get values out of a map by index. It's only done by _key_, so that breaks our abstraction, darn.
 
 ## Refactor
 
@@ -702,7 +702,7 @@ How do you feel right now? It felt like maybe a nice abstraction at the time but
 
 _This is OK!_ Refactoring is a journey and sometimes we will make mistakes. A major point of TDD is it gives us the freedom to try these things out.
 
-By taking small steps backed by steps this is in no way an irreversible situation. Let's just put it back to how it was before the refactor.
+By taking small steps backed by tests this is in no way an irreversible situation. Let's just put it back to how it was before the refactor.
 
 ```go
 func walk(x interface{}, fn func(input string)) {
@@ -735,9 +735,9 @@ We've introduced `walkValue` which DRYs up the calls to `walk` inside our `switc
 
 ### One final problem
 
-Remember that maps in Go do not guarantee order. So your tests will sometimes fail because we assert that the calls to `fn` are done in a particular order. 
+Remember that maps in Go do not guarantee order. So your tests will sometimes fail because we assert that the calls to `fn` are done in a particular order.
 
-To fix this, we'll need to move our assertion with the maps to a new test where we do not care about the order. 
+To fix this, we'll need to move our assertion with the maps to a new test where we do not care about the order.
 
 ```go
 t.Run("with maps", func(t *testing.T) {
@@ -760,15 +760,15 @@ Here is how `assertContains` is defined
 
 ```go
 func assertContains(t *testing.T, haystack []string, needle string)  {
-	contains := false
-	for _, x := range haystack {
-		if x == needle {
-			contains = true
-		}
-	}
-	if !contains {
-		t.Errorf("expected %+v to contain '%s' but it didnt", haystack, needle)
-	}
+    contains := false
+    for _, x := range haystack {
+        if x == needle {
+            contains = true
+        }
+    }
+    if !contains {
+        t.Errorf("expected %+v to contain '%s' but it didnt", haystack, needle)
+    }
 }
 ```
 

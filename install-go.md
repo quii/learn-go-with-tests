@@ -26,12 +26,6 @@ At this point you can now install Go:
 brew install go
 ```
 
-If you are going to deploy your programs to Linux based servers, you should enable cross compilation feature. If so, install using the following command:
-
-```sh
-brew install go --cross-compile-common
-```
-
 *You should follow any instructions recommended by your package manager. **Note** these may be host os specific*.
 
 You can verify the installation with:
@@ -72,13 +66,7 @@ At this point you can _go get_ and the src/package/bin will be installed correct
 
 Editor preference is very individualistic, you may already have a preference that supports Go. If you don't you should consider an Editor such as [Visual Studio Code](https://code.visualstudio.com), which has exceptional Go support.
 
-To install VS Code using brew, because this is a GUI application you need an extension to homebrew called cask to support install VS Code.
-
-```sh
-brew tap caskroom/cask
-```
-
-At this point you can now use brew to install VS Code.
+You can install it using the following command:
 
 ```sh
 brew cask install visual-studio-code
@@ -103,18 +91,17 @@ When you open a Go file for the first time in VS Code, it will indicate that the
 A good option for debugging Go (that's integrated with VS Code) is Delve. This can be installed as follows using go get:
 
 ```sh
-go get -u github.com/derekparker/delve/cmd/dlv
+go get -u github.com/go-delve/delve/cmd/dlv
 ```
 
 ## Go Linting
 
-An improvement over the default linter can be configured using [Gometalinter](https://github.com/alecthomas/gometalinter).
+An improvement over the default linter can be configured using [GolangCI-Lint](https://github.com/golangci/golangci-lint).
 
 This can be installed as follows:
 
 ```sh
-go get -u github.com/alecthomas/gometalinter
-gometalinter --install
+go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 ```
 
 ## Refactoring and your tooling

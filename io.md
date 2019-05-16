@@ -160,7 +160,7 @@ func TestFileSystemStore(t *testing.T) {
             {"Name": "Cleo", "Wins": 10},
             {"Name": "Chris", "Wins": 33}]`)
 
-        store := FileSystemStore{database}
+        store := FileSystemPlayerStore{database}
 
         got := store.GetLeague()
 
@@ -174,21 +174,21 @@ func TestFileSystemStore(t *testing.T) {
 }
 ```
 
-We're using `strings.NewReader` which will return us a `Reader`, which is what our `FileSystemStore` will use to read data. In `main` we will open a file, which is also a `Reader`.
+We're using `strings.NewReader` which will return us a `Reader`, which is what our `FileSystemPlayerStore` will use to read data. In `main` we will open a file, which is also a `Reader`.
 
 ## Try to run the test
 
 ```
 # github.com/quii/learn-go-with-tests/json-and-io/v7
-./FileSystemStore_test.go:15:12: undefined: FileSystemStore
+./FileSystemStore_test.go:15:12: undefined: FileSystemPlayerStore
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-Let's define `FileSystemStore` in a new file
+Let's define `FileSystemPlayerStore` in a new file
 
 ```go
-type FileSystemStore struct {}
+type FileSystemPlayerStore struct {}
 ```
 
 Try again
@@ -196,17 +196,17 @@ Try again
 ```
 # github.com/quii/learn-go-with-tests/json-and-io/v7
 ./FileSystemStore_test.go:15:28: too many values in struct initializer
-./FileSystemStore_test.go:17:15: store.GetLeague undefined (type FileSystemStore has no field or method GetLeague)
+./FileSystemStore_test.go:17:15: store.GetLeague undefined (type FileSystemPlayerStore has no field or method GetLeague)
 ```
 
 It's complaining because we're passing in a `Reader` but not expecting one and it doesn't have `GetLeague` defined yet.
 
 ```go
-type FileSystemStore struct {
+type FileSystemPlayerStore struct {
     database io.Reader
 }
 
-func (f *FileSystemStore) GetLeague() []Player {
+func (f *FileSystemPlayerStore) GetLeague() []Player {
     return nil
 }
 ```
@@ -224,7 +224,7 @@ One more try...
 We've read JSON from a reader before
 
 ```go
-func (f *FileSystemStore) GetLeague() []Player {
+func (f *FileSystemPlayerStore) GetLeague() []Player {
     var league []Player
     json.NewDecoder(f.database).Decode(&league)
     return league
@@ -256,7 +256,7 @@ func NewLeague(rdr io.Reader) ([]Player, error) {
 Call this in our implementation and in our test helper `getLeagueFromResponse` in `server_test.go`
 
 ```go
-func (f *FileSystemStore) GetLeague() []Player {
+func (f *FileSystemPlayerStore) GetLeague() []Player {
     league, _ := NewLeague(f.database)
     return league
 }
@@ -305,14 +305,14 @@ type Seeker interface {
 }
 ```
 
-This sounds good, can we change `FileSystemStore` to take this interface instead?
+This sounds good, can we change `FileSystemPlayerStore` to take this interface instead?
 
 ```go
-type FileSystemStore struct {
+type FileSystemPlayerStore struct {
     database io.ReadSeeker
 }
 
-func (f *FileSystemStore) GetLeague() []Player {
+func (f *FileSystemPlayerStore) GetLeague() []Player {
     f.database.Seek(0, 0)
     league, _ := NewLeague(f.database)
     return league
@@ -433,7 +433,7 @@ It's not too surprising that `strings.Reader` does not implement `ReadWriteSeeke
 We have two choices
 
 - Create a temporary file for each test. `*os.File` implements `ReadWriteSeeker`. The pro of this is it becomes more of an integration test, we're really reading and writing from the file system so it will give us a very high level of confidence. The cons are we prefer unit tests because they are faster and generally simpler. We will also need to do more work around creating temporary files and then making sure they're removed after the test.
-- We could use a third party library. [github.com/mattetti](Mattetti) has written a library [filebuffer](https://github.com/mattetti/filebuffer) which implements the interface we need and doesn't touch the file system.
+- We could use a third party library. [Mattetti](https://github.com/mattetti) has written a library [filebuffer](https://github.com/mattetti/filebuffer) which implements the interface we need and doesn't touch the file system.
 
 I don't think there's an especially wrong answer here, but by choosing to use a third party library I would have to explain dependency management! So we will use files instead.
 
@@ -454,6 +454,7 @@ func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func(
     tmpfile.Write([]byte(initialData))
 
     removeFile := func() {
+    	tmpfile.Close()
         os.Remove(tmpfile.Name())
     }
 
@@ -630,7 +631,7 @@ We now need to handle the scenario of recording wins of new players.
 ## Write the test first
 
 ```go
-t.Run("store wins for existing players", func(t *testing.T) {
+t.Run("store wins for new players", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
         {"Name": "Chris", "Wins": 33}]`)
@@ -649,8 +650,8 @@ t.Run("store wins for existing players", func(t *testing.T) {
 ## Try to run the test
 
 ```
-=== RUN   TestFileSystemStore/store_wins_for_existing_players#01
-    --- FAIL: TestFileSystemStore/store_wins_for_existing_players#01 (0.00s)
+=== RUN   TestFileSystemStore/store_wins_for_new_players#01
+    --- FAIL: TestFileSystemStore/store_wins_for_new_players#01 (0.00s)
         FileSystemStore_test.go:86: got 0 want 1
 ```
 
@@ -968,8 +969,8 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
     }
 
     return &FileSystemPlayerStore{
-        database:&tape{file},
-        league:league,
+        database: json.NewEncoder(&tape{file}),
+        league:   league,
     }, nil
 }
 ```
@@ -1072,7 +1073,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
         return nil, fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
     }
 
-    if info.Size()==0 {
+    if info.Size() == 0 {
         file.Write([]byte("[]"))
         file.Seek(0, 0)
     }
@@ -1084,8 +1085,8 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
     }
 
     return &FileSystemPlayerStore{
-        database:&tape{file},
-        league:league,
+        database: json.NewEncoder(&tape{file}),
+        league:   league,
     }, nil
 }
 ```
@@ -1131,8 +1132,8 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
     }
 
     return &FileSystemPlayerStore{
-        database:&tape{file},
-        league:league,
+        database: json.NewEncoder(&tape{file}),
+        league:   league,
     }, nil
 }
 ```
