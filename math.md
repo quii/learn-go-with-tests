@@ -830,7 +830,7 @@ and run it, sending the output into a file
 
 We should see something like
 
-![a clock with only a second hand](/math/v6/clockface/clockface/clock.svg)
+![a clock with only a second hand](math/v6/clockface/clockface/clock.svg)
 
 <!--
 Here ends v6
@@ -1138,6 +1138,7 @@ informative message.
 Note that I'm deliberately setting `x2` and `y2` to empty strings to ensure we
 get a failing test...
 
+```
 --- FAIL: TestSVGWriterAtMidnight (0.00s)
     clockface_acceptance_test.go:57: Expected to find the second hand with x2 of  and y2 of , in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
         <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -1316,7 +1317,8 @@ func TestSVGWriterMinutedHand(t *testing.T) {
 		})
 	}
 }
-```'
+```
+
 ### Try to run the test
 
 ```
@@ -1622,7 +1624,7 @@ ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.006s
 But the proof of the pudding is in the eating - if we now compile and run our
 `clockface` program, we should see something like
 
-![a clock with only a second hand](/math/v9/clockface/clockface/clock.svg)
+![a clock with only a second hand](math/v9/clockface/clockface/clock.svg)
 
 ### Refactor
 
@@ -2073,7 +2075,7 @@ ok  	github.com/gypsydave5/learn-go-with-tests/math/v12/clockface	0.007s
 
 Let's just check by compiling and running our `clockface` program.
 
-![a clock](/math/v12/clockface/clockface/clock.svg)
+![a clock](math/v12/clockface/clockface/clock.svg)
 
 ### Refactor
 
