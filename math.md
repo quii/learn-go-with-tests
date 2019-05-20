@@ -1948,19 +1948,25 @@ func TestHourHandPoint(t *testing.T) {
 }
 ```
 
+Wait, am I just going to throw _two_ test cases out there in one go?
+
 #### On TDD Zealotry
 
-Look - TDD - it's not a religion, right? I _know_ what the two tests are going
-to be, and I already know what my implementation is going to be - I wrote
-a function for the general case of changing an angle into a point in minute hand
-iteration.
+Look - TDD - it's not a religion. Some people might want it to be. Some people
+might act like it is (usually people who don't use it). But it's not. It's tool.
+
+
+I _know_ what the two tests are going to be, and I already know what my
+implementation is going to be - I wrote a function for the general case of
+changing an angle into a point in minute hand iteration.
 
 I'm not going to just plough through TDD ceremony without thinking about it.
 Tests are a tool to help me write better code. TDD is a technique to help me
 write better code. Neither of them is an end in themselves.
 
-So I'm going to 'skip' a few steps, because I know where I am and I've been down
-this road before.
+My confidence has increased, so I feel I can make larger strides forward. So I'm
+going to 'skip' a few steps, because I know where I am and I've been down this
+road before.
 
 ### Try to run the test
 
@@ -1978,8 +1984,8 @@ func hourHandPoint(t time.Time) Point {
 }
 ```
 
-As I said, I know where I am and I know where I'm going. The tests will validate
-this knowledge.
+As I said, I know where I am and I know where I'm going. Why pretend otherwise?
+The tests will soon tell me if I'm wrong.
 
 ```
 PASS
