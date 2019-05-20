@@ -1690,6 +1690,8 @@ func TestSVGWriterHourHand(t *testing.T) {
 }
 ```
 
+### Try to run the test
+
 ```
 --- FAIL: TestSVGWriterHourHand (0.00s)
     --- FAIL: TestSVGWriterHourHand/06:00:00 (0.00s)
@@ -2001,17 +2003,29 @@ And finally we get to draw in the hour hand. We can bring in that acceptance
 test by uncommenting it:
 
 ```go
-func TestSVGWriterAt6oclock(t *testing.T) {
-	tm := time.Date(1337, time.January, 1, 6, 0, 0, 0, time.UTC)
+func TestSVGWriterHourHand(t *testing.T) {
+	cases := []struct {
+		time time.Time
+		line Line
+	}{
+		{
+			simpleTime(6, 0, 0),
+			Line{150, 150, 150, 200},
+		},
+	}
 
-	var b strings.Builder
-	clockface.SVGWriter(&b, tm)
-	got := b.String()
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			b := bytes.Buffer{}
+			clockface.SVGWriter(&b, c.time)
 
-	want := `<line x1="150" y1="150" x2="150.000" y2="200.000"`
+			svg := Svg{}
+			xml.Unmarshal(b.Bytes(), &svg)
 
-	if !strings.Contains(got, want) {
-		t.Errorf("Expected to find the hour hand %v, in the SVG output %v", want, got)
+			if !containsLine(c.line, svg.Line) {
+				t.Errorf("Expected to find the minute hand line %+v, in the SVG lines %+v", c.line, svg.Line)
+			}
+		})
 	}
 }
 ```
@@ -2019,17 +2033,12 @@ func TestSVGWriterAt6oclock(t *testing.T) {
 ### Try to run the test
 
 ```
---- FAIL: TestSVGWriterAt6oclock (0.00s)
-    clockface_acceptance_test.go:63: Expected to find the hour hand <line x1="150" y1="150" x2="150.000" y2="200.000", in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-        <svg xmlns="http://www.w3.org/2000/svg"
-             width="100%"
-             height="100%"
-             viewBox="0 0 300 300"
-             version="2.0"><circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/><line x1="150" y1="150" x2="150.000" y2="60.000" style="fill:none;stroke:#f00;stroke-width:3px;"/><line x1="150" y1="150" x2="150.000" y2="70.000" style="fill:none;stroke:#000;stroke-width:3px;"/></svg>
+--- FAIL: TestSVGWriterHourHand (0.00s)
+    --- FAIL: TestSVGWriterHourHand/06:00:00 (0.00s)
+        clockface_acceptance_test.go:113: Expected to find the minute hand line {X1:150 Y1:150 X2:150 Y2:200}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
 FAIL
 exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v12/clockface	0.007s
+FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.013s
 ```
 
 ### Write enough code to make it pass
