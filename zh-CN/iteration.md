@@ -105,7 +105,7 @@ func BenchmarkRepeat(b *testing.B) {
 
 代码运行的次数应该不影响你，框架将决定什么是「好」的值，以便让你获得一些得体的结果。
 
-用 `go test -bench=.` 来运行基准测试。
+用 `go test -bench=.` 来运行基准测试。 (如果在 Windows Powershell 环境下使用 `go test -bench="."`)
 
 ```text
 goos: darwin

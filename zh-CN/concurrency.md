@@ -102,7 +102,7 @@ func BenchmarkCheckWebsites(b *testing.B) {
 
 基准测试使用一百个网址的 slice 对 `CheckWebsites` 进行测试，并使用 `WebsiteChecker` 的伪造实现。`slowStubWebsiteChecker` 故意放慢速度。它使用 `time.Sleep` 明确等待 20 毫秒，然后返回 true。
 
-当我们运行基准测试时使用 `go test -bench=.` 命令：
+当我们运行基准测试时使用 `go test -bench=.` 命令 (如果在 Windows Powershell 环境下使用 `go test -bench="."`)：
 
 ```
 pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v0
@@ -239,7 +239,7 @@ PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v1        2.012s
 ```
 
-但是，如果你不走运（如果你运行 `go test -bench =`，这很可能会发生）。
+但是，如果你不走运（如果你运行基准测试，这很可能会发生，因为你将发起多次的尝试）。
 
 ```
 fatal error: concurrent map writes
