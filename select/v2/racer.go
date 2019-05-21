@@ -18,7 +18,7 @@ func ping(url string) chan bool {
 	ch := make(chan bool)
 	go func() {
 		http.Get(url)
-		ch <- true
+		close(ch)
 	}()
 	return ch
 }
