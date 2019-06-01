@@ -1,3 +1,5 @@
+// Package clockface provides functions that calculate the positions of the hands
+// of an analogue clock,
 package clockface
 
 import (

@@ -1,3 +1,4 @@
+// Package svg produces an SVG clockface representation of a time.
 package svg
 
 import (

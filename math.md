@@ -11,8 +11,8 @@ that you always said you'd never have to use after highschool.
 You want to make an SVG of a clock. Not a digital clock - no, that
 would be easy - an _analogue_ clock, with hands. You're not looking for anything
 fancy, just a nice function that takes a `Time` from the `time` package and
-spits out an SVG of a clock with all the hands - hour, minute and second
-- pointing in the right direction. How hard can that be?
+spits out an SVG of a clock with all the hands - hour, minute and second -
+pointing in the right direction. How hard can that be?
 
 First we're going to need an SVG of a clock for us to play with. SVGs are
 a fantastic image format to manipulate programmatically because they're written
@@ -52,7 +52,7 @@ It's a circle with three lines, each of the lines starting in the middle of the
 circle (x=150, y=150), and ending some distance away.
 
 So what we're going to do is reconstruct the above somehow, but change the lines
-so they point in the right directions for some time.
+so they point in the appropriate directions for a given time.
 
 ## An Acceptance Test
 
@@ -69,16 +69,20 @@ for each hand of the clock. The numbers that need to change for each hand of the
 clock - the parameters to whatever builds the SVG - are the `x2` and `y2`
 attributes. We'll need an X and a Y for each of the hands of the clock.
 
-Another thing to note about SVGs: the origin - point (0,0) - is at the _top
-left_ hand corner, not the _bottom left_ as we might expect.
-
 I _could_ think about more parameters - the radius of the clockface circle, the
 size of the SVG, the colours of the hands, their shape, etc... but it's better
 to start off by solving a simple, concrete problem with a simple, concrete
 solution, and then to start adding parameters to make it generalised.
 
-So we'll say that every clock has a centre of (150, 150), and that the hour hand
-is 50 long, the minute hand is 80 long and the second hand is 90 long.
+So we'll say that
+- every clock has a centre of (150, 150)
+- the hour hand is 50 long
+- the minute hand is 80 long
+- the second hand is 90 long.
+
+A thing to note about SVGs: the origin - point (0,0) - is at the _top left_ hand
+corner, not the _bottom left_ as we might expect. It'll be important to remember
+this when we're working out where what numbers to plug in to our lines.
 
 Finally, I'm not deciding _how_ to construct the SVG - we could use a template
 from the [`text/template`][texttemplate] package, or we could just send bytes into
@@ -111,10 +115,10 @@ func TestSecondHandAtMidnight(t *testing.T) {
 }
 ```
 
-Remember how SVGs start with 0 from the top of the Y axis? To place the second
-hand at midnight we say that it hasn't moved from the centre of the clockface on
-the X axis - still 150 - and the Y axis is the length of the hand 'up' from the
-centre; 150 minus 90.
+Remember how SVGs plot their coordinates from the top left hand corner? To place
+the second hand at midnight we expect that it hasn't moved from the centre of
+the clockface on the X axis - still 150 - and the Y axis is the length of the
+hand 'up' from the centre; 150 minus 90.
 
 ### Try to run the test
 
@@ -128,7 +132,7 @@ This drives out the expected failures around the missing functions and types:
 FAIL	github.com/gypsydave5/learn-go-with-tests/math/v1/clockface [build failed]
 ```
 
-So a `Point` where the tip of the hand should go, and a function to get it.
+So a `Point` where the tip of the second hand should go, and a function to get it.
 
 ### Write the minimal amount of code for the test to run and check the failing test output
 
@@ -1044,9 +1048,8 @@ Here ends v7
 -->
 
 But I'm _still_ not happy. Yes, I know I said that this test was an improvement
-- but it's not really giving me the confidence I need that what I'm writing is
-working. Not only will it still pass if I don't produce a valid SVG (as it's
-only testing that a string appears in the output), but it will also fail if
+- but it's not really giving me the confidence I need. Not only will it still pass if I
+ don't produce a valid SVG (as it's only testing that a string appears in the output), but it will also fail if
 I make the smallest, unimportant change to that string - if I add an extra space
 between the attributes, for instance.
 
@@ -1957,7 +1960,6 @@ Wait, am I just going to throw _two_ test cases out there in one go?
 Look - TDD - it's not a religion. Some people might want it to be. Some people
 might act like it is (usually people who don't use it). But it's not. It's tool.
 
-
 I _know_ what the two tests are going to be, and I already know what my
 implementation is going to be - I wrote a function for the general case of
 changing an angle into a point in minute hand iteration.
@@ -2119,12 +2121,36 @@ clockface - but that's fine! Maybe you only _want_ one sort of clockface.
 There's nothing wrong with a program that solves a specific problem and nothing
 else.
 
+### A Program and a Library
+
 But the code we've written _does_ solve a more general set of problems to do
 with drawing a clockface. Because we used tests to think about each small part
 of the problem in isolation, and because we codified that isolation with
 functions, we've built a very reasonable little API for clockface calculations.
 
+We can work on this project and turn it into something more general - a library
+for calculating clockface angles and/or vectors.
 
+In fact, providing the library along with the program is _a really good idea_. It costs
+us nothing, while increasing the utility of our program and helping to document how
+it works.
+
+> APIs should come with programs, and vice versa. An API that you must write C code to use, which cannot be invoked easily from the command line, is harder to learn and use. And contrariwise, it's a royal pain to have interfaces whose only open, documented form is a program, so you cannot invoke them easily from a C program — for example, route(1) in older Linuxes.
+>	-- Henry Spencer, in _The Art of Unix Programming_
+
+### Who knows what about SVGs?
+
+The same goes with the way the SVG is being generated. I'm sure you've noticed
+that the most sophisticated piece of code around SVGs isn't in our application code at
+all; it's in the test code. Should this make us feel uncomfortable - shouldn't we do something
+like
+
+- use a template from `text/template`
+- use an XML library (much as we're doing in our test)
+- use a SVG library
+
+We could do any of these thing, because it doesn't matter _how_ we produce our SVG,
+what's important is _that it's an SVG that we produce_.
 
 ### Write the test first
 ### Try to run the test
