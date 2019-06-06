@@ -14,9 +14,9 @@ fancy, just a nice function that takes a `Time` from the `time` package and
 spits out an SVG of a clock with all the hands - hour, minute and second -
 pointing in the right direction. How hard can that be?
 
-First we're going to need an SVG of a clock for us to play with. SVGs are
-a fantastic image format to manipulate programmatically because they're written
-as a series of shapes, described in XML. So this clock:
+First we're going to need an SVG of a clock for us to play with. SVGs are a
+fantastic image format to manipulate programmatically because they're written as
+a series of shapes, described in XML. So this clock:
 
 ![an svg of a clock](math/example_clock.svg)
 
@@ -1953,20 +1953,20 @@ func TestHourHandPoint(t *testing.T) {
 }
 ```
 
-Wait, am I just going to throw _two_ test cases out there in one go?
+Wait, am I just going to throw _two_ test cases out there in one go? Isn't this _bad TDD_?
 
 #### On TDD Zealotry
 
-Look - TDD - it's not a religion. Some people might want it to be. Some people
-might act like it is (usually people who don't use it). But it's not. It's tool.
+Look - TDD - I like it, I use it - but it's not a religion. Some people might want it to be. Some people
+might act like it is (usually people who don't use it). But it's not a religion. It's tool.
 
 I _know_ what the two tests are going to be, and I already know what my
 implementation is going to be - I wrote a function for the general case of
-changing an angle into a point in minute hand iteration.
+changing an angle into a point in the minute hand iteration.
 
-I'm not going to just plough through TDD ceremony without thinking about it.
+I'm _not_ going to plough through some TDD ceremony for the sake of it.
 Tests are a tool to help me write better code. TDD is a technique to help me
-write better code. Neither of them is an end in themselves.
+write better code. Neither tests nor TDD is an end in themselves.
 
 My confidence has increased, so I feel I can make larger strides forward. So I'm
 going to 'skip' a few steps, because I know where I am and I've been down this
@@ -2121,7 +2121,7 @@ clockface - but that's fine! Maybe you only _want_ one sort of clockface.
 There's nothing wrong with a program that solves a specific problem and nothing
 else.
 
-### A Program and a Library
+### A Program... and a Library
 
 But the code we've written _does_ solve a more general set of problems to do
 with drawing a clockface. Because we used tests to think about each small part
@@ -2131,42 +2131,47 @@ functions, we've built a very reasonable little API for clockface calculations.
 We can work on this project and turn it into something more general - a library
 for calculating clockface angles and/or vectors.
 
-In fact, providing the library along with the program is _a really good idea_. It costs
-us nothing, while increasing the utility of our program and helping to document how
-it works.
+In fact, providing the library along with the program is _a really good idea_.
+It costs us nothing, while increasing the utility of our program and helping to
+document how it works.
 
-> APIs should come with programs, and vice versa. An API that you must write C code to use, which cannot be invoked easily from the command line, is harder to learn and use. And contrariwise, it's a royal pain to have interfaces whose only open, documented form is a program, so you cannot invoke them easily from a C program — for example, route(1) in older Linuxes.
->	-- Henry Spencer, in _The Art of Unix Programming_
+> APIs should come with programs, and vice versa. An API that you must write C
+> code to use, which cannot be invoked easily from the command line, is harder to
+> learn and use. And contrariwise, it's a royal pain to have interfaces whose
+> only open, documented form is a program, so you cannot invoke them easily from
+> a C program — for example, route(1) in older Linuxes.
+>			-- Henry Spencer, in _The Art of Unix Programming_
+
+In my final take on this program, I've made the unexported functions within
+`clockface` into a public API for the library, with functions to calculate the
+angle and unit vector for each of the clock hands. I've also split the SVG
+generation part into its own package, `svg`, which is then used by the
+`clockface` program directly. Naturally I've documented each of the functions
+and packages.
+
+Talking about SVGs...
 
 ### Who knows what about SVGs?
 
-The same goes with the way the SVG is being generated. I'm sure you've noticed
-that the most sophisticated piece of code around SVGs isn't in our application code at
-all; it's in the test code. Should this make us feel uncomfortable - shouldn't we do something
-like
+I'm sure you've noticed that the most sophisticated piece of code around SVGs
+isn't in our application code at all; it's in the test code. Should this make us
+feel uncomfortable - shouldn't we do something like
 
 - use a template from `text/template`
 - use an XML library (much as we're doing in our test)
 - use a SVG library
 
-We could do any of these thing, because it doesn't matter _how_ we produce our SVG,
-what's important is _that it's an SVG that we produce_.
-
-### Write the test first
-### Try to run the test
-### Write the minimal amount of code for the test to run and check the failing test output
-### Write enough code to make it pass
-### Refactor
-
-### Repeat for new requirements
-## Wrapping up
+We could do any of these thing, because it doesn't matter _how_ we produce our
+SVG, what's important is _that it's an SVG that we produce_. As such, the part
+of our system that needs to know the most about SVGs is the test for the SVG
+output; it needs to have enough context and knowledge about SVGs for us to be
+confident that we're outputting an SVG.
 
 [^1]: This is a lot easier than writing a name out by hand as a string and then having to keep it in sync with the actual time. Believe me you don't want to do that...
 
 [^2]: In short it makes it easier to do calculus with circles as π just keeps coming up as an angle if you use normal degrees, so if you count your angles in πs it makes all the equations simpler.
 
-[^3]: Missattributed because, like all great authors, Kent Beck is more quoted
-  than read. Beck himself attributes it to [Phlip][phlip].
+[^3]: Missattributed because, like all great authors, Kent Beck is more quoted than read. Beck himself attributes it to [Phlip][phlip].
 
 [texttemplate]: https://golang.org/pkg/text/template/
 [circle]: https://en.wikipedia.org/wiki/Sine#Unit_circle_definition
