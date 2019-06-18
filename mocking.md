@@ -25,7 +25,7 @@ While this is a pretty trivial program, to test it fully we will need as always 
 
 What do I mean by iterative? We make sure we take the smallest steps we can to have _useful software_.
 
-We dont want to spend a long time with code that will theoretically work after some hacking because that's often how developers fall down rabit holes. **It's an important skill to be able to slice up requirements as small as you can so you can have _working software_.**
+We dont want to spend a long time with code that will theoretically work after some hacking because that's often how developers fall down rabbit holes. **It's an important skill to be able to slice up requirements as small as you can so you can have _working software_.**
 
 Here's how we can divide our work up and iterate on it:
 
