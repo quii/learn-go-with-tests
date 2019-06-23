@@ -42,9 +42,9 @@ func hourHand(w io.Writer, t time.Time) {
 }
 
 func makeHand(p Point, length float64) Point {
-	p = Point{p.X * length, p.Y * length}
-	p = Point{p.X, -p.Y}
-	return Point{p.X + clockCentreX, p.Y + clockCentreY}
+	p = Point{X: p.X * length, Y: p.Y * length}
+	p = Point{X: p.X, Y: -p.Y}
+	return Point{X: p.X + clockCentreX, Y: p.Y + clockCentreY}
 }
 
 const svgStart = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
