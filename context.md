@@ -358,10 +358,6 @@ t.Run("returns data from store", func(t *testing.T) {
     if response.Body.String() != data {
         t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
     }
-
-    if store.ctx != request.Context() {
-        t.Errorf("store was not passed through a context %v", store.ctx)
-    }
 })
 ```
 
