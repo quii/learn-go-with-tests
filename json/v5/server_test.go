@@ -126,8 +126,8 @@ func TestLeague(t *testing.T) {
 
 func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
 	t.Helper()
-	if response.Header().Get("content-type") != want {
-		t.Errorf("response did not have content-type of %s, got %v", want, response.HeaderMap)
+	if response.Result().Header.Get("content-type") != want {
+		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
 	}
 }
 

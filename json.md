@@ -636,8 +636,8 @@ One final thing we need to do for our server to work is make sure we return a `c
 Add this assertion to the existing test
 
 ```go
-if response.Header().Get("content-type") != "application/json" {
-    t.Errorf("response did not have content-type of application/json, got %v", response.HeaderMap)
+if response.Result().Header.Get("content-type") != "application/json" {
+    t.Errorf("response did not have content-type of application/json, got %v", response.Result().Header)
 }
 ```
 
@@ -671,8 +671,8 @@ const jsonContentType = "application/json"
 
 func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
     t.Helper()
-    if response.Header().Get("content-type") != want {
-        t.Errorf("response did not have content-type of %s, got %v", want, response.HeaderMap)
+    if response.Result().Header.Get("content-type") != want {
+        t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
     }
 }
 ```
