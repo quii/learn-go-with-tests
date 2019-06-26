@@ -368,7 +368,6 @@ t.Run("returns data from store", func(t *testing.T) {
 --- FAIL: TestServer (0.00s)
     --- FAIL: TestServer/returns_data_from_store (0.00s)
     	context_test.go:22: got "", want "hello, world"
-    	context_test.go:26: store was not passed through a context <nil>
 ```
 
 ## Write enough code to make it pass
