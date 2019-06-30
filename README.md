@@ -1,10 +1,10 @@
-# Learn Go with Tests
+# Apenda Go com Testes
 
 <p align="center">
   <img src="red-green-blue-gophers-smaller.png" />
 </p>
 
-[Art by Denise](https://twitter.com/deniseyu21)
+[Arte por Denise](https://twitter.com/deniseyu21)
 
 ![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
