@@ -2,7 +2,7 @@ package poker_test
 
 import (
 	"bytes"
-	"github.com/quii/learn-go-with-tests/websockets/v1"
+	"github.com/larien/learn-go-with-tests/websockets/v1"
 	"io"
 	"strings"
 	"testing"

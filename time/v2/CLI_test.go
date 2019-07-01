@@ -2,7 +2,7 @@ package poker_test
 
 import (
 	"bytes"
-	"github.com/quii/learn-go-with-tests/time/v2"
+	"github.com/larien/learn-go-with-tests/time/v2"
 	"io"
 	"strings"
 	"testing"
