@@ -7,9 +7,9 @@
 [Arte por Denise](https://twitter.com/deniseyu21)
 
 ![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
+[![Go Report Card](https://goreportcard.com/badge/github.com/larien/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
--   Formatos: [Gitbook](https://larien.gitbook.io/aprenda-go-com-testes), [EPUB or PDF](https://github.com/quii/learn-go-with-tests/releases)
+-   Formatos: [Gitbook](https://larien.gitbook.io/aprenda-go-com-testes), [EPUB or PDF](https://github.com/larien/learn-go-with-tests/releases)
 -   Versão original: [English](https://quii.gitbook.io/learn-go-with-tests/)
 -   Traduções: [中文](https://studygolang.gitbook.io/learn-go-with-tests)
 
@@ -46,39 +46,40 @@ Agora que você já deu seus _Primeiros Passos com Go_, esperamos que você tenh
 
 Essa seção envolve a criação de uma aplicação.
 
-Cada capítulo é uma continuação do antigo, expandindo as funcionalidades da aplicação conforme nosso Product Owner ditar.
+Cada capítulo é uma continuação do anterior, expandindo as funcionalidades da aplicação conforme nosso "Product Owner" dita.
 
-Novos conceitos serão apresentados para ajudar a facilitar a escrever código de qualidade, mas a maior parte do material novo terá relação com o que pode ser feito com a biblioteca padrão do Go.
+Novos conceitos serão apresentados para ajudar a escrever código de qualidade, mas a maior parte do material novo terá relação com o que pode ser feito com a biblioteca padrão do Go.
 
 No final desse capítulo, você deverá ter uma boa ideia de como escrever uma aplicação em Go testada.
 
--   [Servidor HTTP](http-server.md) - Vamos criar uma aplicação que espera por requisições HTTP e responde a elas.
+-   [Servidor HTTP](http-server.md) - Vamos criar uma aplicação que espera por requisições HTTP e as responde.
 -   [JSON, Routing e Embedding](json.md) - Vamos fazer nossos endpoints retornarem JSON e explorar como trabalhar com rotas.
 -   [IO e Classificação](io.md) - Vamos persistir e ler nossos dados do disco e falar sobre classificação de dados.
 -   [Linha de Comando e Estrutura do Projeto](command-line.md) - Suportar diversas aplicações em uma base de código e ler entradas da linha de comando.
 -   [Tempo](time.md) - Usar o pacote `time` para programar atividades.
--   [Websockets](websockets.md) - Aprenda a escrever e testar um servidor que usa websockets.
+-   [Websockets](websockets.md) - Aprender a escrever e testar um servidor que usa websockets.
 
 ### Dúvidas e respostas
 
-Costumo ver perguntas na Interwebs como:
+Costumo ver perguntas nas Interwebs como:
 
 > Como testo minha função incrível que faz x, y e z?
 
-Se tiver esse tipo de pergunta, crie uma Issue no GitHub e vou tentar achar tempo para escrever um pequeno capítulo para resolver o problema. Acho que conteúdo como esse é valioso, já que está resolvendo problemas `reais` envolvendo testes que as pessoas têm.
+Se tiver esse tipo de dúvida, crie uma Issue no GitHub e vou tentar achar tempo para escrever um pequeno capítulo para resolver o problema. Acho que conteúdo como esse é valioso, já que está resolvendo problemas `reais` envolvendo testes que as pessoas têm.
 
 -   [OS exec](os-exec.md) - Um exemplo de como podemos usar o sistema operacional para executar comandos para buscar dados e manter nossa lógica de negócio testável.
 -   [Tipos de erro](error-types.md) - Exemplo de como criar seus próprios tipos de erro para melhorar seus testes e tornar seu código mais fácil de se trabalhar.
 
 ## Contribuição
 
--   _Esse projeto está em desenvolvimento_. Se tiver interesse em contribuir, por favor entre em contato.
--   Leia [contributing.md](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/contributing.md) por diretrizes [TODO].
--   Tem ideias? Crie uma issue
+-   _Esse projeto está em desenvolvimento_, tanto seu conteúdo original quanto sua tradução. Se tiver interesse em contribuir, por favor entre em contato.
+-   Leia [contributing.md](https://github.com/larien/learn-go-with-tests/blob/master/contributing.md) para algumas diretrizes.
+-   Quer ajudar com a tradução para o português? Leia [translating.md](https://github.com/larien/learn-go-with-tests/blob/master/translating.md) e entenda como o processo de tradução está organizado.
+-   Tem ideias? Crie uma issue!
 
 ## Explicação
 
-Tenho experiência em apresentar Go a times de desenvolvimento e tenho testado abordagens diferentes sobre como evoluir um time de um grupo de pessoas que têm curiosidade sobre Go a criadores extremamente eficazes de sistemas em Go.
+Tenho experiência em apresentar Go a equipes de desenvolvimento e tenho testado abordagens diferentes sobre como evoluir um grupo de pessoas que têm curiosidade sobre Go para criadores extremamente eficazes de sistemas em Go.
 
 ### O que não funcionou
 
@@ -96,21 +97,21 @@ Katas são divertidos, mas geralmente se limitam ao escopo de aprender uma lingu
 
 Outro problema é quando você tem níveis diferentes de entusiasmo. Algumas pessoas aprendem mais da linguagem que outras e, quando demonstram o que já fizeram, confundem essas pessoas apresentando funcionalidades que as outras ainda não conhecem.
 
-Isso acaba tornando o aprendizado bem _desestruturado_ e _específico_\*.
+Isso acaba tornando o aprendizado bem _desestruturado_ e _específico_.
 
 ### O que funcionou
 
 De longe, a forma mais eficaz foi apresentar os conceitos da linguagem aos poucos lendo o [go by example](https://gobyexample.com/), explorando-o com exemplos e discutindo-o como um grupo. Essa abordagem foi bem mais interativa do que "leia o capítulo X como lição de casa".
 
-Com o tempo, a equipe ganhou uma base sólida da _gramátiica_ da linguagem para que conseguíssemos começar a desenvolver sistemas.
+Com o tempo, a equipe ganhou uma base sólida da _gramática_ da linguagem para que conseguíssemos começar a desenvolver sistemas.
 
-Para mim, isso é semelhante à ideia de praticar escalas quando se tenta aprender a tocar violão.
+Para mim, é semelhante à ideia de praticar escalas quando se tenta aprender a tocar violão.
 
 Não importa quão artístico você seja; é improvável que você crie músicas boas sem entender os fundamentos e praticando os mecanismos.
 
 ### O que funcionou para mim
 
-Quando _eu_ aprendo uma nova linguagem de programação, costumo começar brincando em um REPL\*, mas hora ou outra preciso de mais estrutura.
+Quando _eu_ aprendo uma nova linguagem de programação, costumo começar brincando em um REPL, mas hora ou outra preciso de mais estrutura.
 
 O que eu gosto de fazer é explorar conceitos e então solidificar as ideias com testes. Testes certificam de que o código que escrevi está correto e documentam a funcionalidade que aprendi.
 
@@ -137,3 +138,8 @@ Usando minha experiência de aprendizado em grupo e a minha própria, vou tentar
 [MIT license](LICENSE.md)
 
 [Logo criado por egonelbre](https://github.com/egonelbre) Que estrela!
+
+## Pessoas lindas que trabalharam com :blue_heart: na tradução desse conteúdo
+
+Lauren Ferreira
+[site](https://larien.dev) [twitter](https://twitter.com/larienmf) [linkedin](https://www.linkedin.com/in/lauren-ferreira/)
