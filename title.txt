@@ -1,7 +1,7 @@
 ---
-title: Learn Go with Tests
+title: Aprenda Go com Testes
 author: Chris James
 rights:  Creative Commons Non-Commercial Share Alike 3.0
-language: en-UK
+language: pt-BR
 cover-image: epub-cover.png
 ...
