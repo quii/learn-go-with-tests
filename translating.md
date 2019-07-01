@@ -48,7 +48,7 @@ E que comecem as traduções! :))
 -   Lembre-se de utilizar uma linguagem neutra! Se alguma parte do texto especificar algum gênero, reescreva-o para que inclua todo mundo.
 -   Se houver dúvida em alguma palavra ou tradução, coloque um asterico (\*) que o pessoal que for revisar vai tentar te ajudar.
 -   Quando for analisar a submissão de alguma tradução ou revisão, lembre-se de ter a gentileza em primeiro lugar! Todas as pessoas que colaborarem com o projeto querem ter um conteúdo de qualidade na nossa língua e, acima de tudo, querem aprender. Não se esqueça disso :)
--   Leia o [contributing.md](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/contributing.md) :)
+-   Leia o [contributing.md](contributing.md) :)
 
 ## Submetendo sua tradução/revisão
 
