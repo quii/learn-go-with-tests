@@ -6,7 +6,7 @@ Requisitos: [Git](https://git-scm.com/downloads) instalado!
 
 É importante diferenciarmos durante todo o nosso processo quando estamos traduzindo ou estamos revisando.
 As traduções acontecem diretamente relacionadas ao conteúdo original, escrito em inglês. Elas passaram por duas aprovações de outras pessoas envolvidas no projeto e já foram aceitas junto ao conteúdo oficial.
-As revisões acontecem quando alguma melhoria pode ser feita na tradução.
+As revisões acontecem quando alguma melhoria pode ser feita na tradução e passam por somente uma aprovação de outra pessoa envolvida no projeto.
 
 ## Começando a brincadeira
 
@@ -62,4 +62,8 @@ Após fazer sua tradução para a sua própria branch e subi-la para o GitHub:
 
 -   Se for uma revisão, não é necessário linkar nenhuma issue.
 
--   Clique em `Create pull request` e aguarde a aprovação das outras pessoas envolvidas no projeto. Você receberá a notificação por e-mail quando sua PR for aprovada :)
+-   Clique em `Create pull request`
+
+-   Certifique de que sua branch passe na avaliação do Travis CI (muito daora esse carinha aí, né?)
+
+-   Aguarde a aprovação das outras pessoas envolvidas no projeto. Você receberá a notificação por e-mail quando sua PR for aprovada :)
