@@ -6,7 +6,7 @@
 
 [Arte por Denise](https://twitter.com/deniseyu21)
 
-![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)
+![Build Status](https://travis-ci.org/larien/learn-go-with-tests.svg?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/larien/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
 -   Formatos: [Gitbook](https://larien.gitbook.io/aprenda-go-com-testes), [EPUB or PDF](https://github.com/larien/learn-go-with-tests/releases)
@@ -18,7 +18,7 @@
 -   Explore a linguagem Go escrevendo testes
 -   **Tenha uma base com TDD**. O Go é uma boa linguagem para aprender TDD por ser simples de aprender e ter testes nativamente
 -   Tenha confiança de que você será capaz de escrever sistemas robustos e bem testados em Go
--   [Assista a um vídeo ou leia sobre por quê testes unitários e TDD são importantes](why.md)
+-   [Assista a um vídeo ou leia sobre o motivo pelo qual testes unitários e TDD são importantes](why.md)
 
 ## Índice
 
@@ -73,8 +73,8 @@ Se tiver esse tipo de dúvida, crie uma Issue no GitHub e vou tentar achar tempo
 ## Contribuição
 
 -   _Esse projeto está em desenvolvimento_, tanto seu conteúdo original quanto sua tradução. Se tiver interesse em contribuir, por favor entre em contato.
--   Leia [contributing.md](https://github.com/larien/learn-go-with-tests/blob/master/contributing.md) para algumas diretrizes.
--   Quer ajudar com a tradução para o português? Leia [translating.md](https://github.com/larien/learn-go-with-tests/blob/master/translating.md) e entenda como o processo de tradução está organizado.
+-   Leia [contributing.md](contributing.md) para algumas diretrizes.
+-   Quer ajudar com a tradução para o português? Leia [translating.md](translating.md) e entenda como o processo de tradução está organizado.
 -   Tem ideias? Crie uma issue!
 
 ## Explicação
