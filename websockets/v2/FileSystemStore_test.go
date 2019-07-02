@@ -1,7 +1,7 @@
 package poker_test
 
 import (
-	"github.com/quii/learn-go-with-tests/websockets/v2"
+	"github.com/larien/learn-go-with-tests/websockets/v2"
 	"io/ioutil"
 	"os"
 	"testing"
