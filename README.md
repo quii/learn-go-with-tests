@@ -139,7 +139,16 @@ Usando minha experiência de aprendizado em grupo e a minha própria, vou tentar
 
 [Logo criado por egonelbre](https://github.com/egonelbre) Que estrela!
 
-## Pessoas lindas que trabalharam com :blue_heart: na tradução desse conteúdo
+## Traduzido com :blue_heart: por
 
-Lauren Ferreira
+-   Diego Nascimento
+
+[twitter](https://twitter.com/diegonvs97) [linkedin](https://www.linkedin.com/in/dnvs97/)
+
+-   Jéssica Paz
+
+[site](https://jessicapaz.me) [twitter](https://twitter.com/jessicamorim42) [linkedin](https://www.linkedin.com/in/jessica-paz/)
+
+-   Lauren Ferreira
+
 [site](https://larien.dev) [twitter](https://twitter.com/larienmf) [linkedin](https://www.linkedin.com/in/lauren-ferreira/)
