@@ -66,4 +66,4 @@ Após fazer sua tradução para a sua própria branch e subi-la para o GitHub:
 
 -   Certifique de que sua branch passe na avaliação do Travis CI (muito daora esse carinha aí, né?)
 
--   Aguarde a aprovação das outras pessoas envolvidas no projeto. Você receberá a notificação por e-mail quando sua PR for aprovada :)
+-   Aguarde a aprovação das outras pessoas envolvidas no projeto. Você receberá a notificação por e-mail quando sua PR for aprovada :) seu nome também irá para a lista de contribuições na página inicial.
