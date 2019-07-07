@@ -1,6 +1,6 @@
 # Roman Numerals
 
-A number of companies will ask you to do the [Roman Numeral Kata](http://codingdojo.org/kata/RomanNumerals/) as part of the interview process (not to me so far, but this is good practice for myself at least). This chapter will show how you can tackle it with TDD.
+Some companies will ask you to do the [Roman Numeral Kata](http://codingdojo.org/kata/RomanNumerals/) as part of the interview process. This chapter will show how you can tackle it with TDD.
 
 We are going to write a function which converts an Arabic number to a Roman Numeral. 
 
