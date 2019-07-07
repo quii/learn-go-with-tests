@@ -210,7 +210,9 @@ The code looks better to me and describes the domain _as we know it right now_.
 
 ### The Romans were into DRY too...
 
-Things start getting more complicated now. The Romans in their wisdom thought repeating characters would become hard to read and count. So a rule with Roman Numerals is you cant have the same character repeated 3 times. Instead you take the next symbol and then "subtract" by putting a symbol to the left of it. 
+Things start getting more complicated now. The Romans in their wisdom thought repeating characters would become hard to read and count. So a rule with Roman Numerals is you cant have the same character repeated 3 times in a row. 
+
+Instead you take the next highest symbol and then "subtract" by putting a symbol to the left of it. The symbol must be base 10.
 
 For example `5` in Roman Numerals is `V`. To create 4 you do not do `IIII`, instead you do `IV`. 
 
