@@ -382,9 +382,9 @@ Here are a few tests I added as I'm confident up to 39 our code should work
 {"39 gets converted to XXXIX", 39, "XXXIX"},
 ```
 
-If you've ever done OO programming, you'll know that you should view `switch` statements with a bit of suspicion. Usually you are capturing a concept or data inside some imperative code when in fact it could be captured in a class structure instead. Go isn't strictly OO but that doesn't mean we ignore the lessons it offers entirely. Our switch statement is describing some truths about Roman Numerals along with behaviour. 
+If you've ever done OO programming, you'll know that you should view `switch` statements with a bit of suspicion. Usually you are capturing a concept or data inside some imperative code when in fact it could be captured in a class structure instead. Go isn't strictly OO but that doesn't mean we ignore the lessons it offers entirely. Our switch statement is describing some truths about Roman numerals along with behaviour. 
 
-We can refactor this to simplify the code
+We can refactor this to simplify things
 
 ```go
 type RomanNumeral struct {
@@ -415,20 +415,39 @@ func ConvertToRoman(arabic int) string {
 }
 ```
 
+This feels much better. We've declared some rules around the numerals as data rather than hidden in an algorithm and we can see how we just work through the arabic number, trying to add symbols to our result if they fit. 
 
+Does this abstraction work? Extend the test suite so it works for the Roman number for 50 which is `L`. 
 
+Here are some test cases, try and make them pass.
 
-### todooooo
+```go
+{"40 gets converted to XL", 40, "XL"},
+{"47 gets converted to XLVII", 47, "XLVII"},
+{"49 gets converted to XLIX", 49, "XLIX"},
+{"50 gets converted to XLIX", 50, "L"},
+``` 
+
+If you're a cheater, all you needed to add to the `RomanNumerals` array is
+
+```go
+{50, "L"},
+{40, "XL"},
+```
+
+## And the rest!
+
 Here are the remaining symbols
 
 | Arabic        | Roman           |
 | ------------- |:-------------:|
-| 50      | L |
 | 100     | C      |
 | 500 | D      |
 | M | 1000      |
 
-Take the same TDD approach for the remaining symbols
+Take the same approach for the remaining symbols, it should just be a matter of adding data to both the tests are our array of symbols.
+
+Does your code work for `1984`: `MCMLXXXIV` ?
  
 ## TODO Property-based tests
 
