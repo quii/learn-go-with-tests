@@ -270,7 +270,7 @@ func ConvertToRoman(arabic int) string {
 }
 ```
 
-In order for 4 to "fit" with my current thinking I now count down from the arabic number, adding symbols to our string as we progress. Not sure if this will work in the long run but let's see!
+In order for 4 to "fit" with my current thinking I now count down from the Arabic number, adding symbols to our string as we progress. Not sure if this will work in the long run but let's see!
 
 Let's make 5 work
 
@@ -317,7 +317,7 @@ func ConvertToRoman(arabic int) string {
 
 Repetition in loops like this are usually a sign of an abstraction waiting to be called out. Short-circuiting loops can be an effective tool for reabability but it could also be telling you something else.
 
-We are looping over our arabic number and if we hit certain symbols we are calling `break` but what we are _really_ doing is subtracting over `i` in a ham-fisted manner.
+We are looping over our Arabic number and if we hit certain symbols we are calling `break` but what we are _really_ doing is subtracting over `i` in a ham-fisted manner.
 
 ```go
 func ConvertToRoman(arabic int) string {
@@ -426,7 +426,7 @@ func ConvertToRoman(arabic int) string {
 }
 ```
 
-This feels much better. We've declared some rules around the numerals as data rather than hidden in an algorithm and we can see how we just work through the arabic number, trying to add symbols to our result if they fit. 
+This feels much better. We've declared some rules around the numerals as data rather than hidden in an algorithm and we can see how we just work through the Arabic number, trying to add symbols to our result if they fit. 
 
 Does this abstraction work for bigger numbers? Extend the test suite so it works for the Roman number for 50 which is `L`. 
 
