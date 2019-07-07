@@ -818,7 +818,7 @@ func couldBeSubtractive(index int, currentSymbol uint8, roman string) bool {
 }
 ```
 
-Try again, they still fail. However we left a comment earlier 
+Try again, they still fail. However we left a comment earlier...
 
 ```go
 total++ // this is fishy...
@@ -830,7 +830,11 @@ We should never be just increment total as that implies every symbol is a `I`. R
 total += romanNumerals.ValueOf(symbol)
 ```
 
-And all the tests pass! 
+And all the tests pass! Now we have fully working software we can indulge ourselves in some refactoring with confidence
+
+## Refactor
+
+Ehm..
 
 
 ## Wrapping up
