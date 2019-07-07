@@ -72,7 +72,7 @@ Now use that uneasy feeling to write a new test to force us to write slightly le
 
 ## Write the test first
 
-We can use subtests to group our tests nice
+We can use subtests to nicely group our tests
 
 ```go
 func TestRomanNumerals(t *testing.T) {
