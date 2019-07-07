@@ -456,7 +456,7 @@ Here are the remaining symbols
 | 500 | D      |
 | 1000 | M      |
 
-Take the same approach for the remaining symbols, it should just be a matter of adding data to both the tests are our array of symbols.
+Take the same approach for the remaining symbols, it should just be a matter of adding data to both the tests and our array of symbols.
 
 Does your code work for `1984`: `MCMLXXXIV` ?
 
@@ -509,10 +509,10 @@ func TestRomanNumerals(t *testing.T) {
 }
 ```
 
-- I removed `description` as I felt the _data_ described enough of the information. 
-- I added a few other edge cases I found just to give me a little more confidence. With table based tests it's very cheap to do.
+- I removed `description` as I felt the _data_ described enough of the information.
+- I added a few other edge cases I found just to give me a little more confidence. With table based tests this is very cheap to do.
 
-I didn't change the algorithm at all, all I had to do was update the `RomanNumerals` array.
+I didn't change the algorithm, all I had to do was update the `RomanNumerals` array.
 
 ```go
 var RomanNumerals = []RomanNumeral{
@@ -645,7 +645,7 @@ func ConvertToArabic(roman string) int {
 	for i := 0; i < len(roman); i++ {
 		symbol := roman[i]
 
-		// look ahead to next symbol if we can and the current symbol is base 10 (only valid subtractors)
+		// look ahead to next symbol if we can and, the current symbol is base 10 (only valid subtractors)
 		if i+1 < len(roman) && symbol == 'I' {
 			nextSymbol := roman[i+1]
 
@@ -671,7 +671,7 @@ func ConvertToArabic(roman string) int {
 
 This is horrible but it does work. It's so bad I felt the need to add comments. 
 
-- I wanted to be able to look up an integer value for a given roman numeral so I made a type from our array of `RomanNumeral`s and then added a method to it `ValueOf`
+- I wanted to be able to look up an integer value for a given roman numeral so I made a type from our array of `RomanNumeral`s and then added a method to it, `ValueOf`
 - Next in our loop we need to look ahead _if_ the string is big enough _and the current symbol is a valid subtractor_. At the moment it's just `I` (1) but can also be `X` (10) or `C` (100).
     - If it satisfies both of these conditions we need to lookup the value and add it to the total _if_ it is one of the special subtractors, otherwise ignore it
     - Then we need to further increment `i` so we dont count this symbol twice
@@ -735,7 +735,7 @@ func ConvertToArabic(roman string) int {
 	for i := 0; i < len(roman); i++ {
 		symbol := roman[i]
 
-		// look ahead to next symbol if we can and the current symbol is base 10 (only valid subtractors)
+		// look ahead to next symbol if we can and, the current symbol is base 10 (only valid subtractors)
 		if couldBeSubtractive(i, symbol, roman) {
 			nextSymbol := roman[i+1]
 
@@ -773,7 +773,7 @@ func (r RomanNumerals) ValueOf(symbols ...byte) int {
 }
 ```
 
-Then we can just pass in the bytes as is in our function
+Then we can just pass in the bytes as is, to our function
 
 ```go
 func ConvertToArabic(roman string) int {
@@ -813,7 +813,7 @@ If you start moving our `cases[:xx]` number through you'll see that quite a few 
         numeral_test.go:62: got 69, want 49
 ```
 
-I think all we're missing is updating our `couldBeSubtractive` so that it accounts for the other kinds of subtractive symbols
+I think all we're missing is an update to `couldBeSubtractive` so that it accounts for the other kinds of subtractive symbols
 
 ```go
 func couldBeSubtractive(index int, currentSymbol uint8, roman string) bool {
@@ -834,7 +834,7 @@ We should never be just increment total as that implies every symbol is a `I`. R
 total += romanNumerals.ValueOf(symbol)
 ```
 
-And all the tests pass! Now we have fully working software we can indulge ourselves in some refactoring with confidence
+And all the tests pass! Now that we have fully working software we can indulge ourselves in some refactoring, with confidence
 
 ## Refactor
 
@@ -847,10 +847,10 @@ Nothing new in this chapter, just more TDD practice!
 
 Did the thought of writing code that converts 1984 into MCMLXXXIV feel intimidating to you at first? It did to me and I've been writing software for quite a long time. 
 
-The trick, as always is to **get started with something simple** and take **small steps**. 
+The trick, as always, is to **get started with something simple** and take **small steps**. 
 
-At no point in this process did we make any large leaps, do any huge refactorings or get in a mess.
+At no point in this process did we make any large leaps, do any huge refactorings, or get in a mess.
 
-I can hear someone cynically saying "this is just a kata". I cant argue with that, but every project I work on I still take this same approach. I never ship a big distributed system in my first step, I find the simplest thing the team could ship (usually a "Hello world" website) and then iterate on small bits of functionality in manageable chunks, just like how we did here.
+I can hear someone cynically saying "this is just a kata". I cant argue with that, but I still take this same approach for every project I work on. I never ship a big distributed system in my first step, I find the simplest thing the team could ship (usually a "Hello world" website) and then iterate on small bits of functionality in manageable chunks, just like how we did here.
 
 The skill is knowing _how_ to split work up, and that comes with practice and with some lovely TDD to help you on your way.
