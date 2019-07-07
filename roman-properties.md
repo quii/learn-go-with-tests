@@ -382,6 +382,43 @@ Here are a few tests I added as I'm confident up to 39 our code should work
 {"39 gets converted to XXXIX", 39, "XXXIX"},
 ```
 
+If you've ever done OO programming, you'll know that you should view `switch` statements with a bit of suspicion. Usually you are capturing a concept or data inside some imperative code when in fact it could be captured in a class structure instead. Go isn't strictly OO but that doesn't mean we ignore the lessons it offers entirely. Our switch statement is describing some truths about Roman Numerals along with behaviour. 
+
+We can refactor this to simplify the code
+
+```go
+type RomanNumeral struct {
+	Value  int
+	Symbol string
+}
+
+var RomanNumerals = []RomanNumeral{
+	{10, "X"},
+	{9, "IX"},
+	{5, "V"},
+	{4, "IV"},
+	{1, "I"},
+}
+
+func ConvertToRoman(arabic int) string {
+
+	var result strings.Builder
+
+	for _, numeral := range RomanNumerals {
+		for arabic >= numeral.Value {
+			result.WriteString(numeral.Symbol)
+			arabic -= numeral.Value
+		}
+	}
+
+	return result.String()
+}
+```
+
+
+
+
+### todooooo
 Here are the remaining symbols
 
 | Arabic        | Roman           |
