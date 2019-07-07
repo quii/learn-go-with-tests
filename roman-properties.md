@@ -448,12 +448,86 @@ Here are the remaining symbols
 Take the same approach for the remaining symbols, it should just be a matter of adding data to both the tests are our array of symbols.
 
 Does your code work for `1984`: `MCMLXXXIV` ?
+
+Here is my final test suite
+
+```go
+func TestRomanNumerals(t *testing.T) {
+	cases := []struct {
+		Arabic int
+		Roman  string
+	}{
+		{Arabic: 1, Roman: "I"},
+		{Arabic: 2, Roman: "II"},
+		{Arabic: 3, Roman: "III"},
+		{Arabic: 4, Roman: "IV"},
+		{Arabic: 5, Roman: "V"},
+		{Arabic: 6, Roman: "VI"},
+		{Arabic: 7, Roman: "VII"},
+		{Arabic: 8, Roman: "VIII"},
+		{Arabic: 9, Roman: "IX"},
+		{Arabic: 10, Roman: "X"},
+		{Arabic: 14, Roman: "XIV"},
+		{Arabic: 18, Roman: "XVIII"},
+		{Arabic: 20, Roman: "XX"},
+		{Arabic: 39, Roman: "XXXIX"},
+		{Arabic: 40, Roman: "XL"},
+		{Arabic: 47, Roman: "XLVII"},
+		{Arabic: 49, Roman: "XLIX"},
+		{Arabic: 50, Roman: "L"},
+		{Arabic: 100, Roman: "C"},
+		{Arabic: 90, Roman: "XC"},
+		{Arabic: 400, Roman: "CD"},
+		{Arabic: 500, Roman: "D"},
+		{Arabic: 900, Roman: "CM"},
+		{Arabic: 1000, Roman: "M"},
+		{Arabic: 1984, Roman: "MCMLXXXIV"},
+		{Arabic: 3999, Roman: "MMMCMXCIX"},
+		{Arabic: 2014, Roman: "MMXIV"},
+		{Arabic: 1006, Roman: "MVI"},
+		{Arabic: 798, Roman: "DCCXCVIII"},
+	}
+	for _, test := range cases {
+		t.Run(fmt.Sprintf("%d gets converted to '%s", test.Arabic, test.Roman), func(t *testing.T) {
+			got := ConvertToRoman(test.Arabic)
+			if got != test.Roman {
+				t.Errorf("got '%s', want '%s'", got, test.Roman)
+			}
+		})
+	}
+}
+```
+
+- I removed `description` as I felt the _data_ described enough of the information. 
+- I added a few other edge cases I found just to give me a little more confidence. With table based tests it's very cheap to do.
+
+I didn't change the algorithm at all, all I had to do was update the `RomanNumerals` array.
+
+```go
+var RomanNumerals = []RomanNumeral{
+	{1000, "M"},
+	{900, "CM"},
+	{500, "D"},
+	{400, "CD"},
+	{100, "C"},
+	{90, "XC"},
+	{50, "L"},
+	{40, "XL"},
+	{10, "X"},
+	{9, "IX"},
+	{5, "V"},
+	{4, "IV"},
+	{1, "I"},
+}
+```
  
 ## TODO Property-based tests
 
-8 wont be valid because again we will end up with repeating `I`. This is the second time we have come across this "rule" or **property** in our domain and it wont be the last as we work through the numbers. 
+Obviously, there are a lot of numbers in the world and we _could_ add a test suite for every number we support but that would be laborious.
 
-What we'll do is write a special kind of test called a "property based tests" where instead of providing example data, we express our domain rules in code and the test suite will throw random data at our code and see if our code respects these properties.
+Wouldn't it be better if we could tell the test suite what our rules or _properties_ of our domain and then it somehow exercise our code against those properties? 
+
+Property based tests work where instead of providing example data (like our table based test), we express our domain rules in code and the test suite will throw random data at `ConvertToRoman` and see if our code respects these properties.
 
 ```go
 func TestRomanNumeralProperties(t *testing.T) {
