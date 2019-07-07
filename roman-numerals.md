@@ -391,7 +391,7 @@ Here are a few tests I added as I'm confident up to 39 our code should work
 
 If you've ever done OO programming, you'll know that you should view `switch` statements with a bit of suspicion. Usually you are capturing a concept or data inside some imperative code when in fact it could be captured in a class structure instead. 
 
-Go isn't strictly OO but that doesn't mean we ignore the lessons it offers entirely (as much as some would like to tell you). 
+Go isn't strictly OO but that doesn't mean we ignore the lessons OO offers entirely (as much as some would like to tell you). 
 
 Our switch statement is describing some truths about Roman Numerals along with behaviour. 
 
