@@ -200,7 +200,7 @@ func ConvertToRoman(arabic int) string {
 }
 ```
 
-You may not have used [`strings.builder`](https://golang.org/pkg/strings/#Builder) before
+You may not have used [`strings.Builder`](https://golang.org/pkg/strings/#Builder) before
 
 > A Builder is used to efficiently build a string using Write methods. It minimizes memory copying.
 
