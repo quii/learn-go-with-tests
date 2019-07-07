@@ -37,7 +37,7 @@ Let the compiler guide the way
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-Create our function but not make it pass yet, always make sure the tests fails how you expect
+Create our function but don't make it pass yet, always make sure the tests fails how you expect
 
 ```go
 func ConvertToRoman(arabic int) string {
