@@ -4,7 +4,7 @@ Some companies will ask you to do the [Roman Numeral Kata](http://codingdojo.org
 
 We are going to write a function which converts an Arabic number to a Roman Numeral. 
 
-If you haven't heard of [Roman Numerals](https://en.wikipedia.org/wiki/Roman_numerals), it's how the Romans wrote down numbers.
+If you haven't heard of [Roman Numerals](https://en.wikipedia.org/wiki/Roman_numerals) they are how the Romans wrote down numbers.
 
 `MCMLXXXIV` is 1984 for instance.
 
