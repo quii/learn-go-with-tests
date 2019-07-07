@@ -8,7 +8,9 @@ If you haven't heard of [Roman Numerals](https://en.wikipedia.org/wiki/Roman_num
 
 `MCMLXXXIV` is 1984 for instance.
 
-That looks complicated and it's hard to imagine how we can write code to figure this out right from the start but as this book stresses a key skill for software developers is to try and identify "thin vertical slices" of _useful_ functionality and then **iterating**. The TDD workflow shows us a clear path as to how to do this. 
+That looks complicated and it's hard to imagine how we can write code to figure this out right from the start.
+
+As this book stresses, a key skill for software developers is to try and identify "thin vertical slices" of _useful_ functionality and then **iterating**. The TDD workflow helps facilitate iterative development.
 
 So rather than 1984, let's start with 1.
 
