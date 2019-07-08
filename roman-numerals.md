@@ -556,7 +556,7 @@ func TestConvertingToArabic(t *testing.T) {
 }
 ```
 
-Notice I am using the slide functionality to just run one of the tests for now (`cases[:1]`) as trying to make all of those tests pass all at once is too big a leap
+Notice I am using the slice functionality to just run one of the tests for now (`cases[:1]`) as trying to make all of those tests pass all at once is too big a leap
 
 ## Try to run the test
 
