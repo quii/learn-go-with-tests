@@ -12,7 +12,6 @@ func ConvertToArabic(roman string) (total int) {
 
 // ConvertToRoman converts an Arabic number to a Roman Numeral
 func ConvertToRoman(arabic int) string {
-
 	var result strings.Builder
 
 	for _, numeral := range allRomanNumerals {

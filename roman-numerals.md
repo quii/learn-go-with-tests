@@ -838,7 +838,104 @@ And all the tests pass! Now that we have fully working software we can indulge o
 
 ## Refactor
 
-Ehm..
+Here is all the code I finished up with. I had a few failed attempts but as I keep stressing, that's fine and the tests help me play around with the code freely.
+
+```go
+import "strings"
+
+func ConvertToArabic(roman string) (total int) {
+	for _, symbols := range windowedRoman(roman).Symbols() {
+		total += allRomanNumerals.ValueOf(symbols...)
+	}
+	return
+}
+
+func ConvertToRoman(arabic int) string {
+	var result strings.Builder
+
+	for _, numeral := range allRomanNumerals {
+		for arabic >= numeral.Value {
+			result.WriteString(numeral.Symbol)
+			arabic -= numeral.Value
+		}
+	}
+
+	return result.String()
+}
+
+type romanNumeral struct {
+	Value  int
+	Symbol string
+}
+
+type romanNumerals []romanNumeral
+
+func (r romanNumerals) ValueOf(symbols ...byte) int {
+	symbol := string(symbols)
+	for _, s := range r {
+		if s.Symbol == symbol {
+			return s.Value
+		}
+	}
+
+	return 0
+}
+
+func (r romanNumerals) Exists(symbols ...byte) bool {
+	symbol := string(symbols)
+	for _, s := range r {
+		if s.Symbol == symbol {
+			return true
+		}
+	}
+	return false
+}
+
+var allRomanNumerals = romanNumerals{
+	{1000, "M"},
+	{900, "CM"},
+	{500, "D"},
+	{400, "CD"},
+	{100, "C"},
+	{90, "XC"},
+	{50, "L"},
+	{40, "XL"},
+	{10, "X"},
+	{9, "IX"},
+	{5, "V"},
+	{4, "IV"},
+	{1, "I"},
+}
+
+type windowedRoman string
+
+func (w windowedRoman) Symbols() (symbols [][]byte) {
+	for i := 0; i < len(w); i++ {
+		symbol := w[i]
+		notAtEnd := i+1 < len(w)
+
+		if notAtEnd && isSubtractive(symbol) && allRomanNumerals.Exists(symbol, w[i+1]) {
+			symbols = append(symbols, []byte{byte(symbol), byte(w[i+1])})
+			i++
+		} else {
+			symbols = append(symbols, []byte{byte(symbol)})
+		}
+	}
+	return
+}
+
+func isSubtractive(symbol uint8) bool {
+	return symbol == 'I' || symbol == 'X' || symbol == 'C'
+}
+```
+
+My main problem with the previous code is similar to our refactor from earlier. We had too many concerns coupled together. We wrote an algorithm which was trying to extract Roman Numerals from a string _and_ then find their values. 
+
+So I created a new type `windowedRoman` which took care of extracting the numerals, offering a `Symbols` method to retrieve them as a slice. This meant out `ConvertToArabic` function could simply iterate over the symbols and total them.
+
+I broke the code down a bit by extracting some functions, especially around the wonky if statement to figure out if the symbol we are currently dealing with is a two character subtractive symbol.
+
+There's probably a more elegant way but I'm not going to sweat it. The code is there and it works and it is tested. If I (or anyone else) finds a better way they can safely change it - the hard work is done.
 
 
 ## Wrapping up
