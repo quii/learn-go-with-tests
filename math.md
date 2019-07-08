@@ -1,10 +1,11 @@
 # Mathematics
 
-For all the power of modern computers to perform huge sums at lightning speed,
-the average developer rarely uses any maths to do their job.  But not in this
-example! Today we'll use mathematics to solve a _real_ problem. And not boring
-mathematics - we're going to use trigonometry and vectors and all sorts of stuff
-that you always said you'd never have to use after highschool.
+For all the power of modern computers to perform huge sums at
+lightning speed, the average developer rarely uses any mathematics
+to do their job. But not today!  Today we'll use mathematics to
+solve a _real_ problem. And not boring mathematics - we're going
+to use trigonometry and vectors and all sorts of stuff that you
+always said you'd never have to use after highschool.
 
 ## The Problem
 
@@ -306,10 +307,11 @@ func TestSecondsInRadians(t *testing.T) {
 }
 ```
 
-Here we're testing that 30 seconds past the minute should put the second hand at
-halfway around the clock - and it's Our first use of the `math` package;
-f a full turn of a circle is 2π radians, we know that halfway round should just
-be π radians. `math.Pi` provides us with a value for π.
+Here we're testing that 30 seconds past the minute should put the
+second hand at halfway around the clock. And it's our first use of
+the `math` package! If a full turn of a circle is 2π radians, we
+know that halfway round should just be π radians. `math.Pi` provides
+us with a value for π.
 
 ### Try to run the test
 
@@ -445,24 +447,31 @@ Floating point arithmetic is [notoriously inaccurate][floatingpoint]. Computers
 can only really handle integers, and rational numbers to some extent. Decimal
 numbers start to become inaccurate, especially when we factor them up and down
 as we are in the `secondsInRadians` function. By dividing `math.Pi` by 30 and
-then by multiplying it by 30 we've ended up with a number that's no longer the
-same as `math.Pi`.
+then by multiplying it by 30 we've ended up with _a number that's no longer the
+same as `math.Pi`_.
 
 There are two ways around this:
 
-1. Live with the inaccuracy
+1. Live with the it
 2. Refactor our function by refactoring our equation
 
 Now (1) may not seem all that appealing, but it's often the only way to make
-floating point equality work. B.eing inaccurate by some infinitessimal fraction
+floating point equality work. Being inaccurate by some infinitessimal fraction
 is frankly not going to matter for the purposes of drawing a clockface, so we
 could write a function that defines a 'close enough' equality for our angles.
 But there's a simple way we can get the accuracy back: we rearrange the equation
 so that we're no longer dividing down and then multiplying up. We can do it all
 by just dividing.
 
-So instead of `numberOfSeconds * π / 30`, we can write `π / (30
-/ numberOfSeconds)`, which is equivalent.
+So instead of
+
+	numberOfSeconds * π / 30
+
+we can write
+
+	π / (30 / numberOfSeconds)
+
+which is equivalent.
 
 In Go:
 
