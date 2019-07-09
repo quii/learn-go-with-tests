@@ -1023,7 +1023,7 @@ You should see something like this:
 
 Just running this very simple property has exposed a flaw in our implementation. We used `int` as our input but:
 - You cant do negative numbers with Roman Numerals
-- Given our rule of a max of 3 consecutive symbols we cant represent a value greater than 3999 ([well, kinda](https://www.quora.com/Which-is-the-maximum-number-in-Roman-numerals))
+- Given our rule of a max of 3 consecutive symbols we cant represent a value greater than 3999 ([well, kinda](https://www.quora.com/Which-is-the-maximum-number-in-Roman-numerals)) and `int` has a much higher maximum value than 3999.
 
 This is great! We've been forced to think more deeply about our domain which is a real strength of property based tests. 
 
