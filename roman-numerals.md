@@ -1023,7 +1023,7 @@ You should see something like this:
 
 Just running this very simple property has exposed a flaw in our implementation. We used `int` as our input but:
 - You cant do negative numbers with Roman Numerals
-- Given our rule of a max of 3 consecutive symbols we cant represent a value greater than 3999 ([https://www.quora.com/Which-is-the-maximum-number-in-Roman-numerals](well, kinda))
+- Given our rule of a max of 3 consecutive symbols we cant represent a value greater than 3999 ([well, kinda](https://www.quora.com/Which-is-the-maximum-number-in-Roman-numerals))
 
 This is great! We've been forced to think more deeply about our domain which is a real strength of property based tests. 
 
@@ -1083,3 +1083,5 @@ The skill is knowing _how_ to split work up, and that comes with practice and wi
 
 - Built into the standard library
 - If you can think of ways to describe your domain rules in code, they are an excellent tool for giving you more confidence
+- Force you to think about your domain deeply
+- Potentially a nice complement to your test suite
