@@ -941,10 +941,132 @@ I broke the code down a bit by extracting some functions, especially around the 
 
 There's probably a more elegant way but I'm not going to sweat it. The code is there and it works and it is tested. If I (or anyone else) finds a better way they can safely change it - the hard work is done.
 
+## An intro to property based tests
+
+There have been a few rules in the domain of Roman Numerals that we have worked with in this chapter
+
+- Cant have more than 3 consequtive symbols
+- Only base 10 symbols can be "subtractors"
+
+The tests we have written so far can be described as "example" based tests where we provide the tooling some examples around our code to verify.
+
+What if we could take these rules that we know about our domain and somehow exercise them against our code?
+
+Property based tests help you do this by throwing random data at your code and verifying the rules you describe always hold true. A lot of people think property based tests are mainly about random data but they would be mistaken. The real challenge about property based tests is having a _good_ understanding of your domain so you can write these properties. 
+
+Enough words, let's see some code
+
+```go
+func TestPropertiesOfConversion(t *testing.T) {
+	assertion := func(arabic int) bool {
+		roman := ConvertToRoman(arabic)
+		fromRoman := ConvertToArabic(roman)
+		return fromRoman == arabic
+	}
+
+	if err := quick.Check(assertion, nil); err != nil {
+		t.Error("failed checks", err)
+	}
+}
+```
+
+### Rationale of property 
+
+Our first test will check that if we transform a number into Roman, when we use our other function to convert it back to a number that we get what we originally had.
+
+- Given random number (e.g `4`).
+- Call `ConvertToRoman` with random number (should return `IV` if `4`).
+- Take the result of above and pass it to `ConvertToArabic`.
+- The above should give us our original input (`4`).
+
+This feels like a good test to build us confidence because it should break if there's a bug in either. The only way it could pass is if they have the same kind of bug; which isn't impossible but feels unlikely.
+
+### Technical explanation
+
+ We're using the [testing/quick](https://golang.org/pkg/testing/quick/) package from the standard library
+ 
+ Reading from the bottom, we provide `quick.Check` a function that it will run against a number of random inputs, if the function returns `false` it will be seen as failing the check. 
+ 
+ Our `assertion` function above takes a random number and runs our functions to test the property.
+ 
+ ### Run our test
+ 
+ Try running it; your computer may hang for a while, so kill it when you're bored :) 
+ 
+ What's going on? Try adding the following to the assertion code.
+ 
+ ```go
+assertion := func(arabic int) bool {
+    if arabic <0 || arabic > 3999 {
+        log.Println(arabic)
+        return true
+    }
+    roman := ConvertToRoman(arabic)
+    fromRoman := ConvertToArabic(roman)
+    return fromRoman == arabic
+}
+```
+
+You should see something like this:
+
+```
+=== RUN   TestPropertiesOfConversion
+2019/07/09 14:41:27 6849766357708982977
+2019/07/09 14:41:27 -7028152357875163913
+2019/07/09 14:41:27 -6752532134903680693
+2019/07/09 14:41:27 4051793897228170080
+2019/07/09 14:41:27 -1111868396280600429
+2019/07/09 14:41:27 8851967058300421387
+2019/07/09 14:41:27 562755830018219185
+```
+
+Just running this very simple property has exposed a flaw in our implementation. We used `int` as our input but:
+- You cant do negative numbers with Roman Numerals
+- Given our rule of a max of 3 consecutive symbols we cant represent a value greater than 3999 ([https://www.quora.com/Which-is-the-maximum-number-in-Roman-numerals](well, kinda))
+
+This is great! We've been forced to think more deeply about our domain which is a real strength of property based tests. 
+
+Clearly `int` is not a great type. What if we tried something a little more appropriate?
+
+### [`uint16`](https://golang.org/pkg/builtin/#uint16)
+
+Go has types for _unsigned integers_, which means they cannot be negative; so that rules out one class of bug in our code immediately. By adding 16, it means it is a 16 bit integer which can store a max of `65535`, which is still too big but gets us closer to what we need. 
+
+Try updating the code to use `uint16` rather than `int`. I updated `assertion` in the test to give a bit more visibility.
+
+```go
+assertion := func(arabic uint16) bool {
+    if arabic > 3999 {
+        return true
+    }
+    t.Log("testing", arabic)
+    roman := ConvertToRoman(arabic)
+    fromRoman := ConvertToArabic(roman)
+    return fromRoman == arabic
+}
+```
+
+If you run the test they now actually run and you can see what is being tested. You can run multiple times to see our code stands up well to the various values! This gives me a lot of confidence that our code is working how we want. 
+
+The default number of runs `quick.Check` performs is 100 but you can change that with a config.
+
+```go
+if err := quick.Check(assertion, &quick.Config{
+    MaxCount:1000,
+}); err != nil {
+    t.Error("failed checks", err)
+}
+```
+
+### Further work
+
+- Can you write property tests that check the other properties we described?
+- Can you think of a way of making it so it's impossible for someone to call our code with a number greater than 3999?
+    - You could return an error
+    - Or create a new type that cannot represent > 3999
+        - What do you think is best?
 
 ## Wrapping up
-
-Nothing new in this chapter, just more TDD practice! 
 
 Did the thought of writing code that converts 1984 into MCMLXXXIV feel intimidating to you at first? It did to me and I've been writing software for quite a long time. 
 
@@ -955,3 +1077,8 @@ At no point in this process did we make any large leaps, do any huge refactoring
 I can hear someone cynically saying "this is just a kata". I cant argue with that, but I still take this same approach for every project I work on. I never ship a big distributed system in my first step, I find the simplest thing the team could ship (usually a "Hello world" website) and then iterate on small bits of functionality in manageable chunks, just like how we did here.
 
 The skill is knowing _how_ to split work up, and that comes with practice and with some lovely TDD to help you on your way.
+
+### Property based tests
+
+- Built into the standard library
+- If you can think of ways to describe your domain rules in code, they are an excellent tool for giving you more confidence
