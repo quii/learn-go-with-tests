@@ -1071,6 +1071,8 @@ if err := quick.Check(assertion, &quick.Config{
 
 ## Wrapping up
 
+### More TDD practice with iterative development
+
 Did the thought of writing code that converts 1984 into MCMLXXXIV feel intimidating to you at first? It did to me and I've been writing software for quite a long time. 
 
 The trick, as always, is to **get started with something simple** and take **small steps**. 
