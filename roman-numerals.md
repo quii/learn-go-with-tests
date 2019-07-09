@@ -947,6 +947,7 @@ There have been a few rules in the domain of Roman Numerals that we have worked 
 
 - Cant have more than 3 consequtive symbols
 - Only base 10 symbols can be "subtractors"
+- Taking the result of `ConvertToRoman(N)` and passing it to `ConvertToArabic` should return us `N`
 
 The tests we have written so far can be described as "example" based tests where we provide the tooling some examples around our code to verify.
 
