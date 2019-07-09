@@ -77,7 +77,7 @@ func TestPropertiesOfConversion(t *testing.T) {
 	}
 
 	if err := quick.Check(assertion, &quick.Config{
-		MaxCount:1000,
+		MaxCount: 1000,
 	}); err != nil {
 		t.Error("failed checks", err)
 	}

@@ -945,7 +945,7 @@ There's probably a more elegant way but I'm not going to sweat it. The code is t
 
 There have been a few rules in the domain of Roman Numerals that we have worked with in this chapter
 
-- Cant have more than 3 consequtive symbols
+- Cant have more than 3 consecutive symbols
 - Only base 10 symbols can be "subtractors"
 - Taking the result of `ConvertToRoman(N)` and passing it to `ConvertToArabic` should return us `N`
 
