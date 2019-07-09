@@ -4,7 +4,7 @@
 
 Some companies will ask you to do the [Roman Numeral Kata](http://codingdojo.org/kata/RomanNumerals/) as part of the interview process. This chapter will show how you can tackle it with TDD.
 
-We are going to write a function which converts an (Arabic number)[https://en.wikipedia.org/wiki/Arabic_numerals] (numbers 0 to 9) to a Roman Numeral.
+We are going to write a function which converts an [Arabic number](https://en.wikipedia.org/wiki/Arabic_numerals) (numbers 0 to 9) to a Roman Numeral.
 
 If you haven't heard of [Roman Numerals](https://en.wikipedia.org/wiki/Roman_numerals) they are how the Romans wrote down numbers.
 
