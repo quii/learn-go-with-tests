@@ -1,5 +1,7 @@
 # Roman Numerals
 
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/roman-numerals)**
+
 Some companies will ask you to do the [Roman Numeral Kata](http://codingdojo.org/kata/RomanNumerals/) as part of the interview process. This chapter will show how you can tackle it with TDD.
 
 We are going to write a function which converts an (Arabic number)[https://en.wikipedia.org/wiki/Arabic_numerals] (numbers 0 to 9) to a Roman Numeral.
