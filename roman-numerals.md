@@ -2,13 +2,17 @@
 
 Some companies will ask you to do the [Roman Numeral Kata](http://codingdojo.org/kata/RomanNumerals/) as part of the interview process. This chapter will show how you can tackle it with TDD.
 
-We are going to write a function which converts an Arabic number to a Roman Numeral. 
+We are going to write a function which converts an (Arabic number)[https://en.wikipedia.org/wiki/Arabic_numerals] (numbers 0 to 9) to a Roman Numeral.
 
 If you haven't heard of [Roman Numerals](https://en.wikipedia.org/wiki/Roman_numerals) they are how the Romans wrote down numbers.
 
-`MCMLXXXIV` is 1984 for instance.
+You build them by sticking symbols together and those symbols represent numbers
 
-That looks complicated and it's hard to imagine how we can write code to figure this out right from the start.
+So `I` is "one". `III` is three. 
+
+Seems easy but there's a few interesting rules. `V` means five, but `IV` is 4 (not `IIII`). 
+
+`MCMLXXXIV` is 1984. That looks complicated and it's hard to imagine how we can write code to figure this out right from the start.
 
 As this book stresses, a key skill for software developers is to try and identify "thin vertical slices" of _useful_ functionality and then **iterating**. The TDD workflow helps facilitate iterative development.
 
@@ -37,7 +41,7 @@ Let the compiler guide the way
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-Create our function but don't make it pass yet, always make sure the tests fails how you expect
+Create our function but don't make the test pass yet, always make sure the tests fails how you expect
 
 ```go
 func ConvertToRoman(arabic int) string {
