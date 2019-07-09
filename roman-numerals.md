@@ -842,7 +842,7 @@ And all the tests pass! Now that we have fully working software we can indulge o
 
 ## Refactor
 
-Here is all the code I finished up with. I had a few failed attempts but as I keep stressing, that's fine and the tests help me play around with the code freely.
+Here is all the code I finished up with. I had a few failed attempts but as I keep emphasising, that's fine and the tests help me play around with the code freely.
 
 ```go
 import "strings"
