@@ -216,7 +216,9 @@ The code looks better to me and describes the domain _as we know it right now_.
 
 Things start getting more complicated now. The Romans in their wisdom thought repeating characters would become hard to read and count. So a rule with Roman Numerals is you cant have the same character repeated 3 times in a row. 
 
-Instead you take the next highest symbol and then "subtract" by putting a symbol to the left of it. The symbol must be base 10.
+Instead you take the next highest symbol and then "subtract" by putting a symbol to the left of it. Not all symbols can be used as subtractors; only (1), X (10), C (100) and M (1,000).
+
+
 
 For example `5` in Roman Numerals is `V`. To create 4 you do not do `IIII`, instead you do `IV`. 
 
@@ -946,7 +948,7 @@ There's probably a more elegant way but I'm not going to sweat it. The code is t
 There have been a few rules in the domain of Roman Numerals that we have worked with in this chapter
 
 - Cant have more than 3 consecutive symbols
-- Only base 10 symbols can be "subtractors"
+- Only (1), X (10), C (100) and M (1,000) can be "subtractors"
 - Taking the result of `ConvertToRoman(N)` and passing it to `ConvertToArabic` should return us `N`
 
 The tests we have written so far can be described as "example" based tests where we provide the tooling some examples around our code to verify.
