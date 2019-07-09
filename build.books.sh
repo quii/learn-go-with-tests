@@ -18,6 +18,7 @@ docker run -v `pwd`:/source jagregory/pandoc -o learn-go-with-tests.pdf --latex-
     reflection.md \
     sync.md \
     context.md \
+    roman-numerals.md \
     app-intro.md \
     http-server.md \
     json.md \
@@ -44,6 +45,7 @@ docker run -v `pwd`:/source jagregory/pandoc -o learn-go-with-tests.epub --latex
     reflection.md \
     sync.md \
     context.md \
+    roman-numerals.md \
     app-intro.md \
     http-server.md \
     json.md \
