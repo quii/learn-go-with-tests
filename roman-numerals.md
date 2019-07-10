@@ -1094,7 +1094,7 @@ The skill is knowing _how_ to split work up, and that comes with practice and wi
 
 ## Footnote
 
-This book is reliant on valuable feedback from the community. [Dave](http://twitter.com/gypsydave5) is an enourmous help for practically every chapter. He had a real rant about my use of integers in this chapter so here's what he said.
+This book is reliant on valuable feedback from the community. [Dave](http://twitter.com/gypsydave5) is an enormous help for practically every chapter. He had a real rant about my use of integers in this chapter so here's what he said.
 
 Just going to write up why `int` isn’t an arabic number… note that this is me at anal precise level 11 and I completely understand if you just tell me to f off :)
 
