@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gypsydave5/learn-go-with-tests/math/v7/clockface"
+	"github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface"
 )
 
 type Svg struct {
@@ -46,29 +46,6 @@ func TestSVGWriterAtMidnight(t *testing.T) {
 
 	x2 := "150.000"
 	y2 := "60.000"
-
-	for _, line := range svg.Line {
-		if line.X2 == x2 && line.Y2 == y2 {
-			return
-		}
-	}
-
-	t.Errorf("Expected to find the second hand with x2 of %v and y2 of %v, in the SVG output %v", x2, y2, b.String())
-}
-
-func TestSVGWriterAt30Seconds(t *testing.T) {
-	tm := time.Date(1337, time.January, 1, 0, 0, 30, 0, time.UTC)
-
-	b := bytes.Buffer{}
-
-	clockface.SVGWriter(&b, tm)
-
-	svg := Svg{}
-
-	xml.Unmarshal(b.Bytes(), &svg)
-
-	x2 := "150.000"
-	y2 := "240.000"
 
 	for _, line := range svg.Line {
 		if line.X2 == x2 && line.Y2 == y2 {
