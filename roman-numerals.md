@@ -10,9 +10,9 @@ If you haven't heard of [Roman Numerals](https://en.wikipedia.org/wiki/Roman_num
 
 You build them by sticking symbols together and those symbols represent numbers
 
-So `I` is "one". `III` is three. 
+So `I` is "one". `III` is three.
 
-Seems easy but there's a few interesting rules. `V` means five, but `IV` is 4 (not `IIII`). 
+Seems easy but there's a few interesting rules. `V` means five, but `IV` is 4 (not `IIII`).
 
 `MCMLXXXIV` is 1984. That looks complicated and it's hard to imagine how we can write code to figure this out right from the start.
 
@@ -26,7 +26,7 @@ So rather than 1984, let's start with 1.
 func TestRomanNumerals(t *testing.T) {
 	got := ConvertToRoman(1)
 	want := "I"
-	
+
 	if got != want {
 		t.Errorf("got '%s', want '%s'", got, want)
 	}
@@ -70,9 +70,9 @@ func ConvertToRoman(arabic int) string {
 
 ## Refactor
 
-Not much to refactor yet. 
+Not much to refactor yet.
 
-_I know_ it feels weird just to hard-code the result but with TDD we want to stay out of "red" for as long as possible. It may _feel_ like we haven't accomplished much but we've defined our API and got a test capturing one of our rules; even if the "real" code is pretty dumb. 
+_I know_ it feels weird just to hard-code the result but with TDD we want to stay out of "red" for as long as possible. It may _feel_ like we haven't accomplished much but we've defined our API and got a test capturing one of our rules; even if the "real" code is pretty dumb.
 
 Now use that uneasy feeling to write a new test to force us to write slightly less dumb code.
 
@@ -88,7 +88,7 @@ func TestRomanNumerals(t *testing.T) {
 
 		if got != want {
 			t.Errorf("got '%s', want '%s'", got, want)
-		}	
+		}
 	})
 
 	t.Run("2 gets converted to II", func(t *testing.T) {
@@ -187,9 +187,9 @@ func ConvertToRoman(arabic int) string {
 
 ## Refactor
 
-OK so I'm starting to not enjoy these if statements and if you look at the code hard enough you can see that we're building a string of `I` based on the size of `arabic`. 
+OK so I'm starting to not enjoy these if statements and if you look at the code hard enough you can see that we're building a string of `I` based on the size of `arabic`.
 
-We "know" that for more complicated numbers we will be doing some kind of arithmetic and string concatenation.  
+We "know" that for more complicated numbers we will be doing some kind of arithmetic and string concatenation.
 
 Let's try a refactor with these thoughts in mind, it _might not_ be suitable for the end solution but that's OK. We can always throw our code away and start afresh with the tests we have to guide us.
 
@@ -216,13 +216,13 @@ The code looks better to me and describes the domain _as we know it right now_.
 
 ### The Romans were into DRY too...
 
-Things start getting more complicated now. The Romans in their wisdom thought repeating characters would become hard to read and count. So a rule with Roman Numerals is you cant have the same character repeated more than 3 times in a row. 
+Things start getting more complicated now. The Romans in their wisdom thought repeating characters would become hard to read and count. So a rule with Roman Numerals is you cant have the same character repeated more than 3 times in a row.
 
-Instead you take the next highest symbol and then "subtract" by putting a symbol to the left of it. Not all symbols can be used as subtractors; only (1), X (10), C (100) and M (1,000).
+Instead you take the next highest symbol and then "subtract" by putting a symbol to the left of it. Not all symbols can be used as subtractors; only I (1), X (10) and C (100).
 
 
 
-For example `5` in Roman Numerals is `V`. To create 4 you do not do `IIII`, instead you do `IV`. 
+For example `5` in Roman Numerals is `V`. To create 4 you do not do `IIII`, instead you do `IV`.
 
 ## Write the test first
 
@@ -242,7 +242,7 @@ For example `5` in Roman Numerals is `V`. To create 4 you do not do `IIII`, inst
 
 ```go
 func ConvertToRoman(arabic int) string {
-	
+
 	if arabic == 4 {
 		return "IV"
 	}
@@ -257,7 +257,7 @@ func ConvertToRoman(arabic int) string {
 }
 ```
 
-## Refactor  
+## Refactor
 
 I dont "like" that we have broken our string building pattern and I want to carry on with it.
 
@@ -383,7 +383,7 @@ case arabic > 8:
 
 ## Refactor
 
-It _feels_ like the code is still telling us there's a refactor somewhere but it's not totally obvious to me, so let's keep going. 
+It _feels_ like the code is still telling us there's a refactor somewhere but it's not totally obvious to me, so let's keep going.
 
 I'll skip the code for this too, but add to your test cases a test for `10` which should be `X` and make it pass before reading on.
 
@@ -397,11 +397,11 @@ Here are a few tests I added as I'm confident up to 39 our code should work
 {"39 gets converted to XXXIX", 39, "XXXIX"},
 ```
 
-If you've ever done OO programming, you'll know that you should view `switch` statements with a bit of suspicion. Usually you are capturing a concept or data inside some imperative code when in fact it could be captured in a class structure instead. 
+If you've ever done OO programming, you'll know that you should view `switch` statements with a bit of suspicion. Usually you are capturing a concept or data inside some imperative code when in fact it could be captured in a class structure instead.
 
-Go isn't strictly OO but that doesn't mean we ignore the lessons OO offers entirely (as much as some would like to tell you). 
+Go isn't strictly OO but that doesn't mean we ignore the lessons OO offers entirely (as much as some would like to tell you).
 
-Our switch statement is describing some truths about Roman Numerals along with behaviour. 
+Our switch statement is describing some truths about Roman Numerals along with behaviour.
 
 We can refactor this by decoupling the data from the behaviour.
 
@@ -434,9 +434,9 @@ func ConvertToRoman(arabic int) string {
 }
 ```
 
-This feels much better. We've declared some rules around the numerals as data rather than hidden in an algorithm and we can see how we just work through the Arabic number, trying to add symbols to our result if they fit. 
+This feels much better. We've declared some rules around the numerals as data rather than hidden in an algorithm and we can see how we just work through the Arabic number, trying to add symbols to our result if they fit.
 
-Does this abstraction work for bigger numbers? Extend the test suite so it works for the Roman number for 50 which is `L`. 
+Does this abstraction work for bigger numbers? Extend the test suite so it works for the Roman number for 50 which is `L`.
 
 Here are some test cases, try and make them pass.
 
@@ -445,7 +445,7 @@ Here are some test cases, try and make them pass.
 {"47 gets converted to XLVII", 47, "XLVII"},
 {"49 gets converted to XLIX", 49, "XLIX"},
 {"50 gets converted to L", 50, "L"},
-``` 
+```
 
 If you're a cheater, all you needed to add to the `RomanNumerals` array is
 
@@ -677,7 +677,7 @@ func ConvertToArabic(roman string) int {
 }
 ```
 
-This is horrible but it does work. It's so bad I felt the need to add comments. 
+This is horrible but it does work. It's so bad I felt the need to add comments.
 
 - I wanted to be able to look up an integer value for a given roman numeral so I made a type from our array of `RomanNumeral`s and then added a method to it, `ValueOf`
 - Next in our loop we need to look ahead _if_ the string is big enough _and the current symbol is a valid subtractor_. At the moment it's just `I` (1) but can also be `X` (10) or `C` (100).
@@ -937,7 +937,7 @@ func isSubtractive(symbol uint8) bool {
 }
 ```
 
-My main problem with the previous code is similar to our refactor from earlier. We had too many concerns coupled together. We wrote an algorithm which was trying to extract Roman Numerals from a string _and_ then find their values. 
+My main problem with the previous code is similar to our refactor from earlier. We had too many concerns coupled together. We wrote an algorithm which was trying to extract Roman Numerals from a string _and_ then find their values.
 
 So I created a new type `windowedRoman` which took care of extracting the numerals, offering a `Symbols` method to retrieve them as a slice. This meant out `ConvertToArabic` function could simply iterate over the symbols and total them.
 
@@ -950,14 +950,14 @@ There's probably a more elegant way but I'm not going to sweat it. The code is t
 There have been a few rules in the domain of Roman Numerals that we have worked with in this chapter
 
 - Cant have more than 3 consecutive symbols
-- Only (1), X (10), C (100) and M (1,000) can be "subtractors"
+- Only I (1), X (10) and C (100) can be "subtractors"
 - Taking the result of `ConvertToRoman(N)` and passing it to `ConvertToArabic` should return us `N`
 
 The tests we have written so far can be described as "example" based tests where we provide the tooling some examples around our code to verify.
 
 What if we could take these rules that we know about our domain and somehow exercise them against our code?
 
-Property based tests help you do this by throwing random data at your code and verifying the rules you describe always hold true. A lot of people think property based tests are mainly about random data but they would be mistaken. The real challenge about property based tests is having a _good_ understanding of your domain so you can write these properties. 
+Property based tests help you do this by throwing random data at your code and verifying the rules you describe always hold true. A lot of people think property based tests are mainly about random data but they would be mistaken. The real challenge about property based tests is having a _good_ understanding of your domain so you can write these properties.
 
 Enough words, let's see some code
 
@@ -975,7 +975,7 @@ func TestPropertiesOfConversion(t *testing.T) {
 }
 ```
 
-### Rationale of property 
+### Rationale of property
 
 Our first test will check that if we transform a number into Roman, when we use our other function to convert it back to a number that we get what we originally had.
 
@@ -989,17 +989,17 @@ This feels like a good test to build us confidence because it should break if th
 ### Technical explanation
 
  We're using the [testing/quick](https://golang.org/pkg/testing/quick/) package from the standard library
- 
- Reading from the bottom, we provide `quick.Check` a function that it will run against a number of random inputs, if the function returns `false` it will be seen as failing the check. 
- 
+
+ Reading from the bottom, we provide `quick.Check` a function that it will run against a number of random inputs, if the function returns `false` it will be seen as failing the check.
+
  Our `assertion` function above takes a random number and runs our functions to test the property.
- 
+
  ### Run our test
- 
- Try running it; your computer may hang for a while, so kill it when you're bored :) 
- 
+
+ Try running it; your computer may hang for a while, so kill it when you're bored :)
+
  What's going on? Try adding the following to the assertion code.
- 
+
  ```go
 assertion := func(arabic int) bool {
     if arabic <0 || arabic > 3999 {
@@ -1029,13 +1029,13 @@ Just running this very simple property has exposed a flaw in our implementation.
 - You cant do negative numbers with Roman Numerals
 - Given our rule of a max of 3 consecutive symbols we cant represent a value greater than 3999 ([well, kinda](https://www.quora.com/Which-is-the-maximum-number-in-Roman-numerals)) and `int` has a much higher maximum value than 3999.
 
-This is great! We've been forced to think more deeply about our domain which is a real strength of property based tests. 
+This is great! We've been forced to think more deeply about our domain which is a real strength of property based tests.
 
 Clearly `int` is not a great type. What if we tried something a little more appropriate?
 
 ### [`uint16`](https://golang.org/pkg/builtin/#uint16)
 
-Go has types for _unsigned integers_, which means they cannot be negative; so that rules out one class of bug in our code immediately. By adding 16, it means it is a 16 bit integer which can store a max of `65535`, which is still too big but gets us closer to what we need. 
+Go has types for _unsigned integers_, which means they cannot be negative; so that rules out one class of bug in our code immediately. By adding 16, it means it is a 16 bit integer which can store a max of `65535`, which is still too big but gets us closer to what we need.
 
 Try updating the code to use `uint16` rather than `int`. I updated `assertion` in the test to give a bit more visibility.
 
@@ -1051,7 +1051,7 @@ assertion := func(arabic uint16) bool {
 }
 ```
 
-If you run the test they now actually run and you can see what is being tested. You can run multiple times to see our code stands up well to the various values! This gives me a lot of confidence that our code is working how we want. 
+If you run the test they now actually run and you can see what is being tested. You can run multiple times to see our code stands up well to the various values! This gives me a lot of confidence that our code is working how we want.
 
 The default number of runs `quick.Check` performs is 100 but you can change that with a config.
 
@@ -1075,9 +1075,9 @@ if err := quick.Check(assertion, &quick.Config{
 
 ### More TDD practice with iterative development
 
-Did the thought of writing code that converts 1984 into MCMLXXXIV feel intimidating to you at first? It did to me and I've been writing software for quite a long time. 
+Did the thought of writing code that converts 1984 into MCMLXXXIV feel intimidating to you at first? It did to me and I've been writing software for quite a long time.
 
-The trick, as always, is to **get started with something simple** and take **small steps**. 
+The trick, as always, is to **get started with something simple** and take **small steps**.
 
 At no point in this process did we make any large leaps, do any huge refactorings, or get in a mess.
 
