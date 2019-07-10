@@ -1091,3 +1091,17 @@ The skill is knowing _how_ to split work up, and that comes with practice and wi
 - If you can think of ways to describe your domain rules in code, they are an excellent tool for giving you more confidence
 - Force you to think about your domain deeply
 - Potentially a nice complement to your test suite
+
+## Footnote
+
+This book is reliant on valuable feedback from the community. [Dave](http://twitter.com/gypsydave5) is an enourmous help for practically every chapter. He had a real rant about my use of integers in this chapter so here's what he said.
+
+Just going to write up why `int` isn’t an arabic number… note that this is me at anal precise level 11 and I completely understand if you just tell me to f off :)
+
+Arabic digits are `0...9`, Arabic numerals are the use of those digits in a base-10 number system (i.e. what we usually use).
+
+The `int` type in Go is just an integer - it doesn’t matter which number system you use to represent it. As literals in Go, we can write `15`  and `017` and `0xf` - they’re all the same integer. Only the first of these is an Arabic numeral - the other two are an octal numeral using Arabic digits, the second is a hexadecimal numeral using some arabic digits and a few extras on top. But they’re the same number. There’s nothing arabic about integers - they just happen to get displayed using the conventional number system when they get printed out.
+
+Really `ConvertToRoman(arabic int)` isn’t converting anything - it’s representing an integer as a Roman numeral. It’s the equivalent of `itoa` in that it’s turning an integer into a string.
+
+Yes, all of the examples say it’s an ‘arabic number’ - they’re just wrong.
