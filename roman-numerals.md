@@ -216,7 +216,7 @@ The code looks better to me and describes the domain _as we know it right now_.
 
 ### The Romans were into DRY too...
 
-Things start getting more complicated now. The Romans in their wisdom thought repeating characters would become hard to read and count. So a rule with Roman Numerals is you cant have the same character repeated 3 times in a row. 
+Things start getting more complicated now. The Romans in their wisdom thought repeating characters would become hard to read and count. So a rule with Roman Numerals is you cant have the same character repeated more than 3 times in a row. 
 
 Instead you take the next highest symbol and then "subtract" by putting a symbol to the left of it. Not all symbols can be used as subtractors; only (1), X (10), C (100) and M (1,000).
 
@@ -444,7 +444,7 @@ Here are some test cases, try and make them pass.
 {"40 gets converted to XL", 40, "XL"},
 {"47 gets converted to XLVII", 47, "XLVII"},
 {"49 gets converted to XLIX", 49, "XLIX"},
-{"50 gets converted to XLIX", 50, "L"},
+{"50 gets converted to L", 50, "L"},
 ``` 
 
 If you're a cheater, all you needed to add to the `RomanNumerals` array is
