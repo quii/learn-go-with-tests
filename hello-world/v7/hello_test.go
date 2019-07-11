@@ -7,7 +7,7 @@ func TestHello(t *testing.T) {
 	assertCorrectMessage := func(got, want string) {
 		t.Helper()
 		if got != want {
-			t.Errorf("got '%s' want '%s'", got, want)
+			t.Errorf("got %q want %q", got, want)
 		}
 	}
 
