@@ -2,7 +2,7 @@
 
 set -e
 
-docker run -v `pwd`:/source jagregory/pandoc -o learn-go-with-tests.pdf --latex-engine=xelatex --variable urlcolor=blue --toc --toc-depth=1 pdf-cover.md \
+docker run -v `pwd`:/source jagregory/pandoc -o learn-go-with-tests.pdf -H blah.tex --latex-engine=xelatex --variable urlcolor=blue --toc --toc-depth=1 pdf-cover.md \
     gb-readme.md \
     why.md \
     hello-world.md \
