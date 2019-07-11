@@ -9,7 +9,7 @@ import (
 	"github.com/gypsydave5/learn-go-with-tests/math/v7c/clockface"
 )
 
-type Svg struct {
+type SVG struct {
 	XMLName xml.Name `xml:"svg"`
 	Text    string   `xml:",chardata"`
 	Xmlns   string   `xml:"xmlns,attr"`
@@ -54,7 +54,7 @@ func TestSVGWriterSecondHand(t *testing.T) {
 			b := bytes.Buffer{}
 			clockface.SVGWriter(&b, c.time)
 
-			svg := Svg{}
+			svg := SVG{}
 			xml.Unmarshal(b.Bytes(), &svg)
 
 			if !containsLine(c.line, svg.Line) {

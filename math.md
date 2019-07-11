@@ -734,7 +734,7 @@ func SecondHand(t time.Time) Point {
 	p := secondHandPoint(t)
 	p = Point{p.X * 90, p.Y * 90}   // scale
 	p = Point{p.X, -p.Y}            // flip
-	p = Point{p.X + 150, p.Y + 150} //translate
+	p = Point{p.X + 150, p.Y + 150} // translate
 	return p
 }
 ```
@@ -906,13 +906,13 @@ The function [`xml.Unmarshall`](https://godoc.org/encoding/xml#Unmarshal) takes
 a `[]byte` of XML data and a pointer to a struct for it to get unmarshalled in
 to.
 
-So we'll need a struct to unmarshall our XML into. We could spend
-some time working out what the correct names for all of the nodes
-and attributes, and how to write the correct structure but, happily,
-someone has written [`zek`](https://github.com/miku/zek) a program
-that will automate all of that hard work for us.  Even better,
-there's an online version at https://www.onlinetool.io/xmltogo/ .
-Just paste the SVG from the top of the file into one box and - bam
+So we'll need a struct to unmarshall our XML into. We could spend some time
+working out what the correct names for all of the nodes and attributes, and how
+to write the correct structure but, happily, someone has written
+[`zek`](https://github.com/miku/zek) a program that will automate all of that
+hard work for us.  Even better, there's an online version at
+[https://www.onlinetool.io/xmltogo/](https://www.onlinetool.io/xmltogo/). Just
+paste the SVG from the top of the file into one box and - bam
 - out pops:
 
 ```go
@@ -968,9 +968,8 @@ func TestSVGWriterAtMidnight(t *testing.T) {
 }
 ```
 
-This is a rough translation of the earlier test to now use the SVG struct we
-defined above. We write the output of `clockface.SVGWriter` to a `bytes.Buffer`
-and then unmarshall it into an `Svg`. We then look at each `Line` in the `Svg`
+We write the output of `clockface.SVGWriter` to a `bytes.Buffer`
+and then `Unmarshall` it into an `Svg`. We then look at each `Line` in the `Svg`
 to see if any of them have the expected `X2` and `Y2` values. If we get a match
 we return early (passing the test); if not we fail with a (hopefully)
 informative message.
@@ -982,7 +981,7 @@ informative message.
 FAIL	github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface [build failed]
 ```
 
-Looks like we'd better write that SVG writer
+Looks like we'd better write that `SVGWriter`...
 
 ```go
 package clockface
@@ -1008,9 +1007,9 @@ func SVGWriter(w io.Writer, t time.Time) {
 
 func secondHand(w io.Writer, t time.Time) {
 	p := secondHandPoint(t)
-	p = Point{p.X * secondHandLength, p.Y * secondHandLength}
-	p = Point{p.X, -p.Y}
-	p = Point{p.X + clockCentreX, p.Y + clockCentreY} //translate
+	p = Point{p.X * secondHandLength, p.Y * secondHandLength} // scale
+	p = Point{p.X, -p.Y}                                      // flip
+	p = Point{p.X + clockCentreX, p.Y + clockCentreY}         // translate
 	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
 }
 
@@ -1027,6 +1026,8 @@ const bezel = `<circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;st
 const svgEnd = `</svg>`
 ```
 
+The most beautiful SVG writer? No. But hopefully it'll do the job...
+
 ```
 --- FAIL: TestSVGWriterAtMidnight (0.00s)
     clockface_acceptance_test.go:56: Expected to find the second hand with x2 of 150 and y2 of 60, in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -1041,7 +1042,7 @@ exit status 1
 FAIL	github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface	0.008s
 ```
 
-Oooops! The %f format directive is printing our coordinates to the default
+Oooops! The `%f` format directive is printing our coordinates to the default
 level of precision - six decimal places. We should be explicit as to what level
 of precision we're expecting for the coordinates. Let's say three decimal
 places.
@@ -1050,12 +1051,21 @@ places.
 s := fmt.Sprintf(`<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
 ```
 
+And after we update our expectations in the test
+
+```go
+	x2 := "150.000"
+	y2 := "60.000"
+```
+
+We get:
+
 ```
 PASS
 ok  	github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface	0.006s
 ```
 
-This means that we can now considerably shorten how main.go program works when it writes the SVG:
+We can now shorten our `main` function:
 
 ```go
 package main
@@ -1064,7 +1074,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gypsydave5/learn-go-with-tests/math/v7/clockface"
+	"github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface"
 )
 
 func main() {
@@ -1073,25 +1083,26 @@ func main() {
 }
 ```
 
-We can rewrite the other test in the same pattern... but not before...
+And we can write a test for another time following the same pattern, but not
+before...
 
 <!--
 Here ends 7b
 -->
 
-### Refactor _EVEN MORE_
+### Refactor
 
-Two things now stick out to me:
+Three things stick out:
 
-1. We're not really testing all of the information we'd like to ensure - what
-   about the `x1` values, for instance?
-2. Also, those attributes for `x1` etc aren't really `strings` are they? They're
+1. We're not really testing for all of the information we need to ensure is
+   present - what about the `x1` values, for instance?
+2. Also, those attributes for `x1` etc. aren't really `strings` are they? They're
    numbers!
 3. Do I really care about the `style` of the hand? Or, for that matter, the
    empty `Text` node that's been generated by `zak`?
 
-We can do better. Let's make a few adjustments to the `Svg` struct and the
-tests to sharpen everything up a bit.
+We can do better. Let's make a few adjustments to the `Svg` struct, and the
+tests, to sharpen everything up.
 
 ```go
 type SVG struct {
@@ -1136,7 +1147,7 @@ func TestSVGWriterAtMidnight(t *testing.T) {
 
 	clockface.SVGWriter(&b, tm)
 
-	svg := Svg{}
+	svg := SVG{}
 
 	xml.Unmarshal(b.Bytes(), &svg)
 
@@ -1168,7 +1179,7 @@ func TestSVGWriterSecondHand(t *testing.T) {
 		},
 		{
 			simpleTime(0, 0, 30),
-			Line{151, 150, 150, 240},
+			Line{150, 150, 150, 240},
 		},
 	}
 
@@ -1177,7 +1188,7 @@ func TestSVGWriterSecondHand(t *testing.T) {
 			b := bytes.Buffer{}
 			clockface.SVGWriter(&b, c.time)
 
-			svg := Svg{}
+			svg := SVG{}
 			xml.Unmarshal(b.Bytes(), &svg)
 
 			if !containsLine(c.line, svg.Line) {
@@ -1215,7 +1226,7 @@ func TestSVGWriterMinutedHand(t *testing.T) {
 			b := bytes.Buffer{}
 			clockface.SVGWriter(&b, c.time)
 
-			svg := Svg{}
+			svg := SVG{}
 			xml.Unmarshal(b.Bytes(), &svg)
 
 			if !containsLine(c.line, svg.Line) {
@@ -1237,10 +1248,10 @@ exit status 1
 FAIL	github.com/gypsydave5/learn-go-with-tests/math/v8/clockface	0.007s
 ```
 
-Cool, well we'd better start building some other clockhands, Much in the same
-way as we produced the tests for the second hand, we can iterate to produce the
-following set of tests. Again we'll comment out our acceptance test while we get
-this working:
+We'd better start building some other clockhands, Much in the same way as we
+produced the tests for the second hand, we can iterate to produce the following
+set of tests. Again we'll comment out our acceptance test while we get this
+working:
 
 ```go
 func TestMinutesInRadians(t *testing.T) {
@@ -1306,10 +1317,14 @@ func TestMinutesInRadians(t *testing.T) {
 }
 ```
 
-Sixty seconds in a minute - thirty minutes in a half turn (math.Pi)- so 30 * 60
-seconds in a half turn. So if the time is 7 seconds past the hour we're
-expecting to see the minute hand at 7 * (math.Pi / (30 * 60)) radians past the
-12.
+How much is that tiny little bit? Well...
+
+- Sixty seconds in a minute
+- thirty minutes in a half turn of the circle (`math.Pi` radians)
+- so `30 * 60` seconds in a half turn.
+- So if the time is 7 seconds past the hour ...
+- ... we're expecting to see the minute hand at `7 * (math.Pi / (30 * 60))`
+  radians past the 12.
 
 ### Try to run the test
 
@@ -1324,29 +1339,40 @@ FAIL	github.com/gypsydave5/learn-go-with-tests/math/v8/clockface	0.009s
 
 ### Write enough code to make it pass
 
-Here comes the science bit (again)
+In the immortal words of Jennifer Aniston: [Here comes the science
+bit](https://www.youtube.com/watch?v=29Im23SPNok)
 
 ```go
 func minutesInRadians(t time.Time) float64 {
 	return (secondsInRadians(t) / 60) +
-		(math.Pi / (30 / (float64(t.Minute()))))
+		(math.Pi / (30 / float64(t.Minute())))
 }
 ```
 
-rather than working out how far to push the minute hand around the clockface for
+Rather than working out how far to push the minute hand around the clockface for
 every second from scratch, here we can just leverage the `secondsInRadians`
 function. For every second the minute hand will move 1/60th of the angle the
 second hand moves.
 
+```go
+secondsInRadians(t) / 60
+```
+
 Then we just add on the movement for the minutes - similar to the movement of
 the second hand.
+
+```go
+math.Pi / (30 / float64(t.Minute()))
+```
+
+And...
 
 ```go
 PASS
 ok  	github.com/gypsydave5/learn-go-with-tests/math/v8/clockface	0.007s
 ```
 
-Nice and easy
+Nice and easy.
 
 ### Repeat for new requirements
 
@@ -1358,7 +1384,13 @@ One of my favourite TDD quotes, often attributed to Kent Beck,[^3] is
 
 > Write tests until fear is transformed into boredom.
 
-And, frankly, I'm bored of testing that function. So it's on to the next one.
+And, frankly, I'm bored of testing that function. I'm confident I know how it
+works. So it's on to the next one.
+
+
+<!--
+here ends v8
+-->
 
 ### Write the test first
 
@@ -1422,7 +1454,7 @@ ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
 
 ### Repeat for new requirements
 
-And now on to the real business of the day...
+And now for some actual work
 
 ```go
 func TestMinuteHandPoint(t *testing.T) {
@@ -1456,7 +1488,7 @@ FAIL	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
 
 ### Write enough code to make it pass
 
-Quick copy and paste of the `secondHandPoint` function with some minor changes
+A quick copy and paste of the `secondHandPoint` function with some minor changes
 ought to do it...
 
 ```go
@@ -1476,8 +1508,9 @@ ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.009s
 
 ### Refactor
 
-We've definitely got a bit of repetition now - let's get rid of it with
-a function.
+We've definitely got a bit of repetition in the `minuteHandPoint` and
+`secondHandPoint` - I know because we just copied and pasted one to make the
+other. Let's DRY it out with a function.
 
 ```go
 func angleToPoint(angle float64) Point {
@@ -1565,7 +1598,7 @@ There... now it's just the hour hand to do!
 
 <!--
 v9 ends here
---->
+-->
 
 ### Write the test first
 
@@ -1586,7 +1619,7 @@ func TestSVGWriterHourHand(t *testing.T) {
 			b := bytes.Buffer{}
 			clockface.SVGWriter(&b, c.time)
 
-			svg := Svg{}
+			svg := SVG{}
 			xml.Unmarshal(b.Bytes(), &svg)
 
 			if !containsLine(c.line, svg.Line) {
@@ -1692,7 +1725,7 @@ FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
 
 ```go
 func hoursInRadians(t time.Time) float64 {
-	return (math.Pi / (6 / (float64(t.Hour()))))
+	return (math.Pi / (6 / float64(t.Hour())))
 }
 ```
 
@@ -1748,8 +1781,8 @@ ok  	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.008s
 ```
 ### Write the test first
 
-Now let's try and move the hour hand along based on the minutes and the seconds
-that have passed.
+Now let's try and move the hour hand around the clocface based on the minutes
+and the seconds that have passed.
 
 ```go
 func TestHoursInRadians(t *testing.T) {
@@ -1799,7 +1832,7 @@ hours. So we just divide the angle returned by `minutesInRadians` by twelve:
 ```go
 func hoursInRadians(t time.Time) float64 {
 	return (minutesInRadians(t) / 12) +
-		(math.Pi / (6 / (float64(t.Hour() % 12))))
+		(math.Pi / (6 / float64(t.Hour()%12)))
 }
 ```
 
@@ -1819,6 +1852,29 @@ AAAAARGH BLOODY FLOATING POINT ARITHMETIC!
 Let's update our test to use `roughlyEqualFloat64` for the comparison of the
 angles.
 
+```go
+func TestHoursInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(6, 0, 0), math.Pi},
+		{simpleTime(0, 0, 0), 0},
+		{simpleTime(21, 0, 0), math.Pi * 1.5},
+		{simpleTime(0, 1, 30), math.Pi / ((6 * 60 * 60) / 90)},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := hoursInRadians(c.time)
+			if !roughlyEqualFloat64(got, c.angle) {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+```
+
 ```
 PASS
 ok  	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
@@ -1828,6 +1884,10 @@ ok  	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
 
 If we're going to use `roughlyEqualFloat64` in _one_ of our radians tests, we
 should probably use it for _all_ of them. That's a nice and simple refactor.
+
+<!--
+end of v10
+-->
 
 ## Hour Hand Point
 
@@ -1857,24 +1917,29 @@ func TestHourHandPoint(t *testing.T) {
 }
 ```
 
-Wait, am I just going to throw _two_ test cases out there in one go? Isn't this _bad TDD_?
+Wait, am I just going to throw _two_ test cases out there _at once_? Isn't this _bad TDD_?
 
-#### On TDD Zealotry
+### On TDD Zealotry
 
-Look - TDD - I like it, I use it - but it's not a religion. Some people might want it to be. Some people
-might act like it is (usually people who don't use it). But it's not a religion. It's tool.
+Test driven development is not a religion. Some people might
+act like it is - usually people who don't do TDD but who are happy to moan
+on Twitter or Dev.to that it's only done by zealots and that they're 'being
+pragmatic' when they don't write tests. But it's not a religion. It's tool.
 
-I _know_ what the two tests are going to be, and I already know what my
-implementation is going to be - I wrote a function for the general case of
-changing an angle into a point in the minute hand iteration.
+I _know_ what the two tests are going to be - I've tested two other clock hands
+in exactly the same way - and I already know what my implementation is going to
+be - I wrote a function for the general case of changing an angle into a point
+in the minute hand iteration.
 
-I'm _not_ going to plough through some TDD ceremony for the sake of it.
-Tests are a tool to help me write better code. TDD is a technique to help me
-write better code. Neither tests nor TDD is an end in themselves.
+I'm not going to plough through TDD ceremony for the sake of it. Tests are
+a tool to help me write better code. TDD is a technique to help me write better
+code. Neither tests nor TDD are an end in themselves.
 
-My confidence has increased, so I feel I can make larger strides forward. So I'm
-going to 'skip' a few steps, because I know where I am and I've been down this
-road before.
+My confidence has increased, so I feel I can make larger strides forward. I'm
+going to 'skip' a few steps, because I know where I am, I know where I'm going
+and I've been down this road before.
+
+But also note: I'm not skipping writing the tests entirely.
 
 ### Try to run the test
 
@@ -1925,7 +1990,7 @@ func TestSVGWriterHourHand(t *testing.T) {
 			b := bytes.Buffer{}
 			clockface.SVGWriter(&b, c.time)
 
-			svg := Svg{}
+			svg := SVG{}
 			xml.Unmarshal(b.Bytes(), &svg)
 
 			if !containsLine(c.line, svg.Line) {
@@ -2007,7 +2072,7 @@ const (
 ```
 
 Why do this? Well, it makes explicit what each number _means_ in the equation.
-When - if - we come back to this code, these names will help us to understand
+If - _when_ - we come back to this code, these names will help us to understand
 what's going on.
 
 Moreover, should we ever want to make some really, really WEIRD clocks - ones
@@ -2043,33 +2108,45 @@ document how it works.
 > code to use, which cannot be invoked easily from the command line, is harder to
 > learn and use. And contrariwise, it's a royal pain to have interfaces whose
 > only open, documented form is a program, so you cannot invoke them easily from
-> a C program — for example, route(1) in older Linuxes.
+> a C program.
 >			-- Henry Spencer, in _The Art of Unix Programming_
 
-In my final take on this program, I've made the unexported functions within
-`clockface` into a public API for the library, with functions to calculate the
-angle and unit vector for each of the clock hands. I've also split the SVG
-generation part into its own package, `svg`, which is then used by the
-`clockface` program directly. Naturally I've documented each of the functions
-and packages.
+In [my final take on this program](math/vFinal/clockface), I've made the
+unexported functions within `clockface` into a public API for the library, with
+functions to calculate the angle and unit vector for each of the clock hands.
+I've also split the SVG generation part into its own package, `svg`, which is
+then used by the `clockface` program directly. Naturally I've documented each of
+the functions and packages.
 
 Talking about SVGs...
 
-### Who knows what about SVGs?
+### The Most Valuable Test
 
-I'm sure you've noticed that the most sophisticated piece of code around SVGs
-isn't in our application code at all; it's in the test code. Should this make us
-feel uncomfortable - shouldn't we do something like
+I'm sure you've noticed that the most sophisticated piece of code for handling
+SVGs isn't in our application code at all; it's in the test code. Should this
+make us feel uncomfortable? Shouldn't we do something like
 
-- use a template from `text/template`
-- use an XML library (much as we're doing in our test)
-- use a SVG library
+- use a template from `text/template`?
+- use an XML library (much as we're doing in our test)?
+- use an SVG library?
 
-We could do any of these thing, because it doesn't matter _how_ we produce our
-SVG, what's important is _that it's an SVG that we produce_. As such, the part
-of our system that needs to know the most about SVGs is the test for the SVG
-output; it needs to have enough context and knowledge about SVGs for us to be
-confident that we're outputting an SVG.
+We could refactor our code to do any of these things, and we can do so because
+because it doesn't matter _how_ we produce our SVG, what's important is _that
+it's an SVG that we produce_. As such, the part of our system that needs to know
+the most about SVGs - that needs to be the strictest about what constitutes an
+SVG - is the test for the SVG output; it needs to have enough context and
+knowledge about SVGs for us to be confident that we're outputting an SVG.
+
+Wee may have felt odd that we were pouring a lot of time and effort into those
+SVG tests - importing an XML library, parsing XML, refactoring the structs - but
+that test code is a valuable part of our codebase - possibly more valueable than
+the current production code. It will help guarantee that the output is always
+a valid SVG, no matter what we choose to use to produce it.
+
+Tests are not second class citizens - they are not 'throwaway' code. Good tests
+will last a lot longer than the particular version of the code they are
+testing. You should never feel like you're spending 'too much time' writing your
+tests. It's usually a wise investment.
 
 [^1]: This is a lot easier than writing a name out by hand as a string and then having to keep it in sync with the actual time. Believe me you don't want to do that...
 

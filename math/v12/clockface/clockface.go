@@ -20,7 +20,7 @@ type Point struct {
 }
 
 func secondsInRadians(t time.Time) float64 {
-	return (math.Pi / (secondsInHalfClock / (float64(t.Second()))))
+	return (math.Pi / (secondsInHalfClock / float64(t.Second())))
 }
 
 func secondHandPoint(t time.Time) Point {
@@ -29,7 +29,7 @@ func secondHandPoint(t time.Time) Point {
 
 func minutesInRadians(t time.Time) float64 {
 	return (secondsInRadians(t) / minutesInClock) +
-		(math.Pi / (minutesInHalfClock / (float64(t.Minute()))))
+		(math.Pi / (minutesInHalfClock / float64(t.Minute())))
 }
 
 func minuteHandPoint(t time.Time) Point {
@@ -38,7 +38,7 @@ func minuteHandPoint(t time.Time) Point {
 
 func hoursInRadians(t time.Time) float64 {
 	return (minutesInRadians(t) / hoursInClock) +
-		(math.Pi / (hoursInHalfClock / (float64(t.Hour() % hoursInClock))))
+		(math.Pi / (hoursInHalfClock / float64(t.Hour()%hoursInClock)))
 }
 
 func hourHandPoint(t time.Time) Point {

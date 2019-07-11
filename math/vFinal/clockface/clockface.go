@@ -25,7 +25,7 @@ type Point struct {
 
 // SecondsInRadians returns the angle of the second hand from 12 o'clock in radians
 func SecondsInRadians(t time.Time) float64 {
-	return (math.Pi / (secondsInHalfClock / (float64(t.Second()))))
+	return (math.Pi / (secondsInHalfClock / float64(t.Second())))
 }
 
 // SecondHandPoint is the unit vector of the second hand at time `t`,
@@ -37,7 +37,7 @@ func SecondHandPoint(t time.Time) Point {
 // MinutesInRadians returns the angle of the minute hand from 12 o'clock in radians
 func MinutesInRadians(t time.Time) float64 {
 	return (SecondsInRadians(t) / minutesInClock) +
-		(math.Pi / (minutesInHalfClock / (float64(t.Minute()))))
+		(math.Pi / (minutesInHalfClock / float64(t.Minute())))
 }
 
 // MinuteHandPoint is the unit vector of the minute hand at time `t`,
@@ -49,7 +49,7 @@ func MinuteHandPoint(t time.Time) Point {
 // HoursInRadians returns the angle of the hour hand from 12 o'clock in radians
 func HoursInRadians(t time.Time) float64 {
 	return (MinutesInRadians(t) / hoursInClock) +
-		(math.Pi / (hoursInHalfClock / (float64(t.Hour() % hoursInClock))))
+		(math.Pi / (hoursInHalfClock / float64(t.Hour()%hoursInClock)))
 }
 
 // HourHandPoint is the unit vector of the hour hand at time `t`,
