@@ -163,7 +163,7 @@ A unit test for our `Hello` function could look like this
       want := "Hola, Chris"
     
       if got != want {
-         t.Errorf("got '%s' want '%s'", got, want)
+         t.Errorf("got %q want %q", got, want)
       }
     }
 

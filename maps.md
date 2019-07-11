@@ -24,7 +24,7 @@ func TestSearch(t *testing.T) {
     want := "this is just a test"
 
     if got != want {
-        t.Errorf("got '%s' want '%s' given, '%s'", got, want, "test")
+        t.Errorf("got %q want %q given, %q", got, want, "test")
     }
 }
 ```
@@ -83,7 +83,7 @@ func assertStrings(t *testing.T, got, want string) {
     t.Helper()
 
     if got != want {
-        t.Errorf("got '%s' want '%s'", got, want)
+        t.Errorf("got %q want %q", got, want)
     }
 }
 ```
@@ -222,7 +222,7 @@ func assertError(t *testing.T, got, want error) {
     t.Helper()
 
     if got != want {
-        t.Errorf("got error '%s' want '%s'", got, want)
+        t.Errorf("got error %q want %q", got, want)
     }
 }
 ```
@@ -245,7 +245,7 @@ func TestAdd(t *testing.T) {
     }
 
     if want != got {
-        t.Errorf("got '%s' want '%s'", got, want)
+        t.Errorf("got %q want %q", got, want)
     }
 }
 ```
@@ -327,7 +327,7 @@ func assertDefinition(t *testing.T, dictionary Dictionary, word, definition stri
     }
 
     if definition != got {
-        t.Errorf("got '%s' want '%s'", got, definition)
+        t.Errorf("got %q want %q", got, definition)
     }
 }
 ```
@@ -593,7 +593,7 @@ func TestDelete(t *testing.T) {
 
     _, err := dictionary.Search(word)
     if err != ErrNotFound {
-        t.Errorf("Expected '%s' to be deleted", word)
+        t.Errorf("Expected %q to be deleted", word)
     }
 }
 ```

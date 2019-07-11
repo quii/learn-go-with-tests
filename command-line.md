@@ -214,7 +214,7 @@ func TestCLI(t *testing.T) {
     want := "Chris"
 
     if got != want {
-        t.Errorf("didn't record correct winner, got '%s', want '%s'", got, want)
+        t.Errorf("didn't record correct winner, got %q, want %q", got, want)
     }
 }
 ```
@@ -269,7 +269,7 @@ func assertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
     }
 
     if store.winCalls[0] != winner {
-        t.Errorf("did not store correct winner got '%s' want '%s'", store.winCalls[0], winner)
+        t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
     }
 }
 ```
@@ -480,7 +480,7 @@ func AssertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
     }
 
     if store.winCalls[0] != winner {
-        t.Errorf("did not store correct winner got '%s' want '%s'", store.winCalls[0], winner)
+        t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
     }
 }
 

@@ -93,7 +93,7 @@ func TestStoreWins(t *testing.T) {
 		}
 
 		if store.winCalls[0] != player {
-			t.Errorf("did not store correct winner got '%s' want '%s'", store.winCalls[0], player)
+			t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], player)
 		}
 	})
 }
@@ -136,7 +136,7 @@ func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
 	err := json.NewDecoder(body).Decode(&league)
 
 	if err != nil {
-		t.Fatalf("Unable to parse response from server '%s' into slice of Player, '%v'", body, err)
+		t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", body, err)
 	}
 
 	return
@@ -174,6 +174,6 @@ func newPostWinRequest(name string) *http.Request {
 func assertResponseBody(t *testing.T, got, want string) {
 	t.Helper()
 	if got != want {
-		t.Errorf("response body is wrong, got '%s' want '%s'", got, want)
+		t.Errorf("response body is wrong, got %q want %q", got, want)
 	}
 }

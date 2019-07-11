@@ -28,7 +28,7 @@ func TestRomanNumerals(t *testing.T) {
 	want := "I"
 
 	if got != want {
-		t.Errorf("got '%s', want '%s'", got, want)
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 ```
@@ -87,7 +87,7 @@ func TestRomanNumerals(t *testing.T) {
 		want := "I"
 
 		if got != want {
-			t.Errorf("got '%s', want '%s'", got, want)
+			t.Errorf("got %q, want %q", got, want)
 		}
 	})
 
@@ -96,7 +96,7 @@ func TestRomanNumerals(t *testing.T) {
 		want := "II"
 
 		if got != want {
-			t.Errorf("got '%s', want '%s'", got, want)
+			t.Errorf("got %q, want %q", got, want)
 		}
 	})
 }
@@ -144,7 +144,7 @@ func TestRomanNumerals(t *testing.T) {
 		t.Run(test.Description, func(t *testing.T) {
 			got := ConvertToRoman(test.Arabic)
 			if got != test.Want {
-				t.Errorf("got '%s', want '%s'", got, test.Want)
+				t.Errorf("got %q, want %q", got, test.Want)
 			}
 		})
 	}
@@ -507,10 +507,10 @@ func TestRomanNumerals(t *testing.T) {
 		{Arabic: 798, Roman: "DCCXCVIII"},
 	}
 	for _, test := range cases {
-		t.Run(fmt.Sprintf("%d gets converted to '%s", test.Arabic, test.Roman), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%d gets converted to %q", test.Arabic, test.Roman), func(t *testing.T) {
 			got := ConvertToRoman(test.Arabic)
 			if got != test.Roman {
-				t.Errorf("got '%s', want '%s'", got, test.Roman)
+				t.Errorf("got %q, want %q", got, test.Roman)
 			}
 		})
 	}
@@ -554,7 +554,7 @@ Move the `cases` variable outside of the test as a package variable in a `var` b
 ```go
 func TestConvertingToArabic(t *testing.T) {
 	for _, test := range cases[:1] {
-		t.Run(fmt.Sprintf("'%s' gets converted to %d", test.Roman, test.Arabic), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%q gets converted to %d", test.Roman, test.Arabic), func(t *testing.T) {
 			got := ConvertToArabic(test.Roman)
 			if got != test.Arabic {
 				t.Errorf("got %d, want %d", got, test.Arabic)

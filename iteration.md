@@ -20,7 +20,7 @@ func TestRepeat(t *testing.T) {
     expected := "aaaaa"
 
     if repeated != expected {
-        t.Errorf("expected '%s' but got '%s'", expected, repeated)
+        t.Errorf("expected %q but got %q", expected, repeated)
     }
 }
 ```

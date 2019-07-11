@@ -114,7 +114,7 @@ func assertGameNotStarted(t *testing.T, game *GameSpy) {
 func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
 	t.Helper()
 	if game.FinishCalledWith != winner {
-		t.Errorf("expected finish called with '%s' but got '%s'", winner, game.FinishCalledWith)
+		t.Errorf("expected finish called with %q but got %q", winner, game.FinishCalledWith)
 	}
 }
 
@@ -123,7 +123,7 @@ func assertMessagesSentToUser(t *testing.T, stdout *bytes.Buffer, messages ...st
 	want := strings.Join(messages, "")
 	got := stdout.String()
 	if got != want {
-		t.Errorf("got '%s' sent to stdout but expected %+v", got, messages)
+		t.Errorf("got %q sent to stdout but expected %+v", got, messages)
 	}
 }
 

@@ -24,7 +24,7 @@ func TestRacer(t *testing.T) {
     got := Racer(slowURL, fastURL)
 
     if got != want {
-        t.Errorf("got '%s', want '%s'", got, want)
+        t.Errorf("got %q, want %q", got, want)
     }
 }
 ```
@@ -108,7 +108,7 @@ func TestRacer(t *testing.T) {
     got := Racer(slowURL, fastURL)
 
     if got != want {
-        t.Errorf("got '%s', want '%s'", got, want)
+        t.Errorf("got %q, want %q", got, want)
     }
 
     slowServer.Close()
@@ -171,7 +171,7 @@ func TestRacer(t *testing.T) {
     got := Racer(slowURL, fastURL)
 
     if got != want {
-        t.Errorf("got '%s', want '%s'", got, want)
+        t.Errorf("got %q, want %q", got, want)
     }
 }
 
@@ -382,7 +382,7 @@ func TestRacer(t *testing.T) {
         }
 
         if got != want {
-            t.Errorf("got '%s', want '%s'", got, want)
+            t.Errorf("got %q, want %q", got, want)
         }
     })
 

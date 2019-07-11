@@ -40,7 +40,7 @@ func TestCLI(t *testing.T) {
 		wantPrompt := poker.PlayerPrompt
 
 		if gotPrompt != wantPrompt {
-			t.Errorf("got '%s', want '%s'", gotPrompt, wantPrompt)
+			t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
 		}
 
 		if game.StartCalledWith != 7 {
@@ -56,7 +56,7 @@ func TestCLI(t *testing.T) {
 		cli.PlayPoker()
 
 		if game.FinishCalledWith != "Chris" {
-			t.Errorf("expected finish called with 'Chris' but got '%s'", game.FinishCalledWith)
+			t.Errorf("expected finish called with 'Chris' but got %q", game.FinishCalledWith)
 		}
 	})
 
@@ -68,7 +68,7 @@ func TestCLI(t *testing.T) {
 		cli.PlayPoker()
 
 		if game.FinishCalledWith != "Cleo" {
-			t.Errorf("expected finish called with 'Cleo' but got '%s'", game.FinishCalledWith)
+			t.Errorf("expected finish called with 'Cleo' but got %q", game.FinishCalledWith)
 		}
 	})
 

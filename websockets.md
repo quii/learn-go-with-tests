@@ -927,7 +927,7 @@ t.Run("start a game with 3 players, send some blind alerts down WS and declare R
     _, gotBlindAlert, _ := ws.ReadMessage()
 
     if string(gotBlindAlert) != wantedBlindAlert {
-        t.Errorf("got blind alert '%s', want '%s'", string(gotBlindAlert), wantedBlindAlert)
+        t.Errorf("got blind alert %q, want %q", string(gotBlindAlert), wantedBlindAlert)
     }
 })
 ```
@@ -1048,7 +1048,7 @@ func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
 	})
 
 	if !passed {
-		t.Errorf("expected finish called with '%s' but got '%s'", winner, game.FinishCalledWith)
+		t.Errorf("expected finish called with %q but got %q", winner, game.FinishCalledWith)
 	}
 }
 ```

@@ -104,7 +104,7 @@ Add the following to the existing test to check the string passed to `fn` is cor
 
 ```go
 if got[0] != expected {
-    t.Errorf("got '%s', want '%s'", got[0], expected)
+    t.Errorf("got %q, want %q", got[0], expected)
 }
 ```
 
@@ -767,7 +767,7 @@ func assertContains(t *testing.T, haystack []string, needle string)  {
         }
     }
     if !contains {
-        t.Errorf("expected %+v to contain '%s' but it didnt", haystack, needle)
+        t.Errorf("expected %+v to contain %q but it didnt", haystack, needle)
     }
 }
 ```
