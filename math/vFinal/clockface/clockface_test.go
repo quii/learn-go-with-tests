@@ -34,8 +34,8 @@ func TestSecondHandPoint(t *testing.T) {
 		time  time.Time
 		point Point
 	}{
-		{simpleTime(0, 0, 30), Point{0, -1}},
-		{simpleTime(0, 0, 45), Point{-1, 0}},
+		{simpleTime(0, 0, 30), Point{X: 0, Y: -1}},
+		{simpleTime(0, 0, 45), Point{X: -1, Y: 0}},
 	}
 
 	for _, c := range cases {
@@ -72,8 +72,8 @@ func TestMinuteHandPoint(t *testing.T) {
 		time  time.Time
 		point Point
 	}{
-		{simpleTime(0, 30, 0), Point{0, -1}},
-		{simpleTime(0, 45, 0), Point{-1, 0}},
+		{simpleTime(0, 30, 0), Point{X: 0, Y: -1}},
+		{simpleTime(0, 45, 0), Point{X: -1, Y: 0}},
 	}
 
 	for _, c := range cases {
@@ -112,8 +112,8 @@ func TestHourHandPoint(t *testing.T) {
 		time  time.Time
 		point Point
 	}{
-		{simpleTime(6, 0, 0), Point{0, -1}},
-		{simpleTime(21, 0, 0), Point{-1, 0}},
+		{simpleTime(6, 0, 0), Point{X: 0, Y: -1}},
+		{simpleTime(21, 0, 0), Point{X: -1, Y: 0}},
 	}
 
 	for _, c := range cases {
