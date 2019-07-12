@@ -1092,16 +1092,87 @@ The skill is knowing _how_ to split work up, and that comes with practice and wi
 - Force you to think about your domain deeply
 - Potentially a nice complement to your test suite
 
-## Footnote
+## Postscript
 
-This book is reliant on valuable feedback from the community. [Dave](http://twitter.com/gypsydave5) is an enormous help for practically every chapter. He had a real rant about my use of integers in this chapter so here's what he said.
+This book is reliant on valuable feedback from the community.
+[Dave](http://github.com/gypsydave5) is an enormous help in practically every
+chapter. But he had a real rant about my use of 'Arabic numerals' in this
+chapter so, in the interests of full disclosure, here's what he said.
 
-Just going to write up why `int` isn’t an arabic number… note that this is me at anal precise level 11 and I completely understand if you just tell me to f off :)
-
-Arabic digits are `0...9`, Arabic numerals are the use of those digits in a base-10 number system (i.e. what we usually use).
-
-The `int` type in Go is just an integer - it doesn’t matter which number system you use to represent it. As literals in Go, we can write `15`  and `017` and `0xf` - they’re all the same integer. Only the first of these is an Arabic numeral - the other two are an octal numeral using Arabic digits, the second is a hexadecimal numeral using some arabic digits and a few extras on top. But they’re the same number. There’s nothing arabic about integers - they just happen to get displayed using the conventional number system when they get printed out.
-
-Really `ConvertToRoman(arabic int)` isn’t converting anything - it’s representing an integer as a Roman numeral. It’s the equivalent of `itoa` in that it’s turning an integer into a string.
-
-Yes, all of the examples say it’s an ‘arabic number’ - they’re just wrong.
+> Just going to write up why a value of type `int` isn't really an 'arabic
+> numeral'. This might be me being way too precise so I'll completely understand
+> if you tell me to f off.
+>
+> A _digit_ is a character used in the representation of numbers - from the Latin
+> for 'finger', as we usually have ten of them. In the Arabic (also called
+> Hindu-Arabic) number system there are ten of them. These Arabic digits are:
+>
+>     0 1 2 3 4 5 6 7 8 9
+>
+> A _numeral_ is the representation of a number using a collection of digits.
+> An Arabic numeral is a number represented by Arabic digits in a base 10
+> positional number system. We say 'positional' because each digit has
+> a different value based upon its position in the numeral. So
+>
+>     1337
+>
+> The `1` has a value of one thousand because its the first digit in a four
+> digit numeral.
+>
+> Roman are built using a reduced number of digits (`I`, `V` etc...) mainly as
+> values to produce the numeral. There's a bit of positional stuff but it's
+> mostly `I` always representing 'one'.
+>
+> So, given this, is `int` an 'Arabic number'? The idea of a number is not at
+> all tied to its representation - we can see this if we ask ourselves what the
+> correct representation of this number is:
+>
+>     255
+>     11111111
+>     two-hundred and fifty-five
+>     FF
+>     377
+>
+> Yes, this is a trick question. They're all correct. They're the representation
+> of the same number in the decimal,  binary, English, hexadecimal and octal
+> number systems respectively.
+>
+> The representation of a number as a numeral is _independent_ of its properties
+> as a number - and we can see this when we look at integer literals in Go:
+>
+> ```go
+>  0xFF == 255 // true
+> ```
+>
+> And how we can print integers in a format string:
+>
+> ```go
+> n := 255
+> fmt.Printf("%b %c %d %o %q %x %X %U", n, n, n, n, n, n, n, n)
+> // 11111111 ÿ 255 377 'ÿ' ff FF U+00FF
+> ```
+>
+> We can write the same integer both as a hexadecimal and an Arabic (decimal)
+> numeral.
+>
+> So when the function signature looks like `ConvertToRoman(arabic int) string`
+> it's making a bit of an assumption about how it's being called. Because
+> sometimes `arabic` will be written as a decimal integer literal
+>
+> ```go
+> ConvertToRoman(255)
+> ```
+>
+> But it could just as well be written
+>
+> ```go
+> ConvertToRoman(0xFF)
+> ```
+>
+> Really, we're not 'converting' from an Arabic numeral at all, we're 'printing'  -
+> representing - an `int` as a Roman numeral - and `int`s are not numerals,
+> Arabic or otherwise; they're just numbers. The `ConvertToRoman` function is
+> more like `strconv.Itoa` in that it's turning an `int` into a `string`.
+>
+> But every other version of the kata doesn't care about this distinction so
+> :shrug:
