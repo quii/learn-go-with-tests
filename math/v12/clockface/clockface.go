@@ -14,6 +14,7 @@ const (
 	hoursInClock       = 2 * hoursInHalfClock
 )
 
+// A Point represents a two dimensional Cartesian coordinate
 type Point struct {
 	X float64
 	Y float64
