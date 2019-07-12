@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	. "github.com/gypsydave5/learn-go-with-tests/math/vFinal/clockface"
+	cf "github.com/gypsydave5/learn-go-with-tests/math/vFinal/clockface"
 )
 
 const (
@@ -28,24 +28,24 @@ func Write(w io.Writer, t time.Time) {
 }
 
 func secondHand(w io.Writer, t time.Time) {
-	p := makeHand(SecondHandPoint(t), secondHandLength)
+	p := makeHand(cf.SecondHandPoint(t), secondHandLength)
 	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
 }
 
 func minuteHand(w io.Writer, t time.Time) {
-	p := makeHand(MinuteHandPoint(t), minuteHandLength)
+	p := makeHand(cf.MinuteHandPoint(t), minuteHandLength)
 	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#000;stroke-width:3px;"/>`, p.X, p.Y)
 }
 
 func hourHand(w io.Writer, t time.Time) {
-	p := makeHand(HourHandPoint(t), hourHandLength)
+	p := makeHand(cf.HourHandPoint(t), hourHandLength)
 	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#000;stroke-width:3px;"/>`, p.X, p.Y)
 }
 
-func makeHand(p Point, length float64) Point {
-	p = Point{X: p.X * length, Y: p.Y * length}
-	p = Point{X: p.X, Y: -p.Y}
-	return Point{X: p.X + clockCentreX, Y: p.Y + clockCentreY}
+func makeHand(p cf.Point, length float64) cf.Point {
+	p = cf.Point{X: p.X * length, Y: p.Y * length}
+	p = cf.Point{X: p.X, Y: -p.Y}
+	return cf.Point{X: p.X + clockCentreX, Y: p.Y + clockCentreY}
 }
 
 const svgStart = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>

@@ -25,4 +25,3 @@ func secondHandPoint(t time.Time) Point {
 
 	return Point{x, y}
 }
-
