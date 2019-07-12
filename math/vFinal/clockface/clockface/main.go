@@ -10,5 +10,5 @@ import (
 
 func main() {
 	t := time.Now()
-	SVGWriter(os.Stdout, t)
+	Write(os.Stdout, t)
 }

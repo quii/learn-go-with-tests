@@ -17,7 +17,8 @@ const (
 	clockCentreY     = 150
 )
 
-func SVGWriter(w io.Writer, t time.Time) {
+// Write writes an SVG representation of an analogue clock, showing the time t, to the writer w
+func Write(w io.Writer, t time.Time) {
 	io.WriteString(w, svgStart)
 	io.WriteString(w, bezel)
 	secondHand(w, t)
