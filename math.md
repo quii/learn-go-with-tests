@@ -1293,7 +1293,7 @@ func minutesInRadians(t time.Time) float64 {
 
 Well, OK - now let's make ourselves do some _real_ work. We could model the
 minute hand as only moving every full minute - so that it 'jumps' from 30 to 31
-minutes past without moving inbetween. But that would look a bit rubbish. What
+minutes past without moving in between. But that would look a bit rubbish. What
 we want it to do is move a _tiny little bit_ every second.
 
 ```go
@@ -2139,7 +2139,7 @@ knowledge about SVGs for us to be confident that we're outputting an SVG.
 
 Wee may have felt odd that we were pouring a lot of time and effort into those
 SVG tests - importing an XML library, parsing XML, refactoring the structs - but
-that test code is a valuable part of our codebase - possibly more valueable than
+that test code is a valuable part of our codebase - possibly more valuable than
 the current production code. It will help guarantee that the output is always
 a valid SVG, no matter what we choose to use to produce it.
 
