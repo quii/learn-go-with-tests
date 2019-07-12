@@ -150,6 +150,8 @@ type Point struct {
 	Y float64
 }
 
+// SecondHand is the unit vector of the second hand of an analogue clock at time `t`
+// represented as a Point.
 func SecondHand(t time.Time) Point {
 	return Point{}
 }
@@ -170,6 +172,8 @@ FAIL	github.com/gypsydave5/learn-go-with-tests/math/v1/clockface	0.006s
 When we get the expected failure, we can fill in the return value of `HandsAt`:
 
 ```go
+// SecondHand is the unit vector of the second hand of an analogue clock at time `t`
+// represented as a Point.
 func SecondHand(t time.Time) Point {
 	return Point{150, 60}
 }
@@ -731,6 +735,8 @@ We need to do three things to convert our unit vector into a point on the SVG:
 Fun times!
 
 ```go
+// SecondHand is the unit vector of the second hand of an analogue clock at time `t`
+// represented as a Point.
 func SecondHand(t time.Time) Point {
 	p := secondHandPoint(t)
 	p = Point{p.X * 90, p.Y * 90}   // scale
@@ -757,6 +763,8 @@ const secondHandLength = 90
 const clockCentreX = 150
 const clockCentreY = 150
 
+// SecondHand is the unit vector of the second hand of an analogue clock at time `t`
+// represented as a Point.
 func SecondHand(t time.Time) Point {
 	p := secondHandPoint(t)
 	p = Point{p.X * secondHandLength, p.Y * secondHandLength}

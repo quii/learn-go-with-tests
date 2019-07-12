@@ -15,6 +15,8 @@ const secondHandLength = 90
 const clockCentreX = 150
 const clockCentreY = 150
 
+// SecondHand is the unit vector of the second hand of an analogue clock at time `t`
+// represented as a Point.
 func SecondHand(t time.Time) Point {
 	p := secondHandPoint(t)
 	p = Point{p.X * secondHandLength, p.Y * secondHandLength}
