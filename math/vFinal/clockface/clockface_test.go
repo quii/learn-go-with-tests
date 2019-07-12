@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/gypsydave5/learn-go-with-tests/math/vFinal/clockface"
+	. "github.com/quii/learn-go-with-tests/math/vFinal/clockface"
 )
 
 func TestSecondsInRadians(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	cf "github.com/gypsydave5/learn-go-with-tests/math/vFinal/clockface"
+	cf "github.com/quii/learn-go-with-tests/math/vFinal/clockface"
 )
 
 const (
