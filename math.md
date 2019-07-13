@@ -2148,7 +2148,7 @@ the most about SVGs - that needs to be the strictest about what constitutes an
 SVG - is the test for the SVG output; it needs to have enough context and
 knowledge about SVGs for us to be confident that we're outputting an SVG.
 
-Wee may have felt odd that we were pouring a lot of time and effort into those
+We may have felt odd that we were pouring a lot of time and effort into those
 SVG tests - importing an XML library, parsing XML, refactoring the structs - but
 that test code is a valuable part of our codebase - possibly more valuable than
 the current production code. It will help guarantee that the output is always
