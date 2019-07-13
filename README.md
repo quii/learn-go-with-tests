@@ -39,6 +39,7 @@
 13. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
 13. [Context](context.md) - Use the context package to manage and cancel long-running processes
 14. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
+15. [Maths](math.md) - Use the `math` package to draw an SVG clock
 
 ### Build an application
 
