@@ -253,7 +253,7 @@ func (s *SpySleeper) Sleep() {
 }
 ```
 
-_Spies_ are a kind of _mock_ which can record how a dependency is used. They can record the arguments sent in, how many times, etc. In our case, we're keeping track of how many times `Sleep()` is called so we can check it in our test.
+_Spies_ are a kind of _mock_ which can record how a dependency is used. They can record the arguments sent in, how many times it has been called, etc. In our case, we're keeping track of how many times `Sleep()` is called so we can check it in our test.
 
 Update the tests to inject a dependency on our Spy and assert that the sleep has been called 4 times.
 
@@ -408,7 +408,7 @@ const sleep = "sleep"
 
 Our `CountdownOperationsSpy` implements both `io.Writer` and `Sleeper`, recording every call into one slice. In this test we're only concerned about the order of operations, so just recording them as list of named operations is sufficient.
 
-We can now add a sub-test into our test suite.
+We can now add a sub-test into our test suite which verifies our sleeps and prints operate in the order we hope
 
 ```go
 t.Run("sleep before every print", func(t *testing.T) {
@@ -432,7 +432,7 @@ t.Run("sleep before every print", func(t *testing.T) {
 })
 ```
 
-This test should now fail. Revert it back and the new test should pass.
+This test should now fail. Revert `Countdown` back to how it was to fix the test.
 
 We now have two tests spying on the `Sleeper` so we can now refactor our test so one is testing what is being printed and the other one is ensuring we're sleeping in between the prints. Finally we can delete our first spy as it's not used anymore.
 
@@ -578,7 +578,7 @@ People normally get in to a bad state when they don't _listen to their tests_ an
 
 If your mocking code is becoming complicated or you are having to mock out lots of things to test something, you should _listen_ to that bad feeling and think about your code. Usually it is a sign of
 
-- The thing you are testing is having to do too many things
+- The thing you are testing is having to do too many things (because it has too many dependencies to mock)
   - Break the module apart so it does less
 - Its dependencies are too fine-grained
   - Think about how you can consolidate some of these dependencies into one meaningful module
