@@ -559,6 +559,12 @@ Another handy way to experiment with Go other than writing tests is the Go
 playground. You can try most things out and you can easily share your code if
 you need to ask questions. [I have made a go playground with a slice in it for you to experiment with.](https://play.golang.org/p/ICCWcRGIO68)
 
+[Here is an example](https://play.golang.org/p/bTrRmYfNYCp) of slicing an array 
+and how changing the slice affects the original array; but a "copy" of the slice 
+will not affect the original array.
+[Another example](https://play.golang.org/p/Poth8JS28sc) of why it's a good idea 
+to make a copy of a slice after slicing a very large slice.
+
 [for]: ../iteration.md#
 [blog-slice]: https://blog.golang.org/go-slices-usage-and-internals
 [deepEqual]: https://golang.org/pkg/reflect/#DeepEqual
