@@ -167,12 +167,13 @@ Try and re-run the tests and they should pass.
 Now you might wonder, why did they pass? We didn't dereference the pointer in the function, like so:
 
 ```go
-func zeroptr(iptr *int) {
-    *iptr = 0
+func (w *Wallet) Balance() int {
+    return (*w).balance
 }
 ```
 
-As we are making `w` a pointer to a struct, Go creates a _struct pointer_, which is automatically dereferenced.
+and seemingly addressed the object directly. In fact, the code above using `(*w)` is absolutely valid. However, the makers of Go deemed this notation cumbersome, so the language permits us to write `w.balance`, without explicit dereference.
+These pointers to structs even have an own name: _struct pointers_ and they are [automatically dereferenced](https://golang.org/ref/spec#Method_values).
 
 
 ## Refactor
