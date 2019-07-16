@@ -172,7 +172,7 @@ func zeroptr(iptr *int) {
 }
 ```
 
-As we are making w a pointer to a struct, Go creates a _struct pointer_, which is automatically dereferenced.
+As we are making `w` a pointer to a struct, Go creates a _struct pointer_, which is automatically dereferenced.
 
 
 ## Refactor
