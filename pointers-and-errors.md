@@ -164,6 +164,17 @@ The difference is the receiver type is `*Wallet` rather than `Wallet` which you 
 
 Try and re-run the tests and they should pass.
 
+Now you might wonder, why did they pass? We didn't dereference the pointer in the function, like so:
+
+```go
+func zeroptr(iptr *int) {
+    *iptr = 0
+}
+```
+
+As we are making w a pointer to a struct, Go creates a _struct pointer_, which is automatically dereferenced.
+
+
 ## Refactor
 
 We said we were making a Bitcoin wallet but we have not mentioned them so far. We've been using `int` because they're a good type for counting things!
