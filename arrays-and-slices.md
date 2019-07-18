@@ -13,8 +13,7 @@ Let's use our TDD skills
 
 ## Write the test first
 
-In `sum_test.go`
-
+`arrays/sum_test.go`
 ```go
 package main
 

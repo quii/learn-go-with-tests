@@ -10,7 +10,7 @@ First, assuming we already have some words with their definitions in the diction
 
 ## Write the test first
 
-In `dictionary_test.go`
+`maps/dictionary_test.go`
 
 ```go
 package main

@@ -2,7 +2,7 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/integers)**
 
-Integers work as you would expect. Let's write an add function to try things out. Create a test file called `adder_test.go` and write this code.
+Integers work as you would expect. Let's write an add function to try things out. On your project dir, create the folder `integers` and add to it a test file `adder_test.go`. Add the following code.
 
 **note:** Go source files can only have one `package` per directory, make sure that your files are organised separately. [Here is a good explanation on this.](https://dave.cheney.net/2014/12/01/five-suggestions-for-setting-up-a-go-project)
 
