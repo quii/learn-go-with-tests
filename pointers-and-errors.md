@@ -12,6 +12,7 @@ Let's make a `Wallet` struct which let's us deposit `Bitcoin`.
 
 ## Write the test first
 
+`pointers/wallet_test.go`
 ```go
 func TestWallet(t *testing.T) {
 

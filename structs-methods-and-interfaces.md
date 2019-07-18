@@ -8,7 +8,10 @@ The TDD cycle should be pretty familiar to you by now.
 
 ## Write the test first
 
+`structs/shapes_test.go`
 ```go
+package main
+
 func TestPerimeter(t *testing.T) {
     got := Perimeter(10.0, 10.0)
     want := 40.0
@@ -27,13 +30,16 @@ Notice the new format string? The `f` is for our `float64` and the `.2` means pr
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
+`structs/shapes.go`
 ```go
+package main
+
 func Perimeter(width float64, height float64) float64 {
     return 0
 }
 ```
 
-Results in `shapes_test.go:10: got 0 want 40`.
+Results in `shapes_test.go:10: got 0.00 want 40.00`.
 
 ## Write enough code to make it pass
 

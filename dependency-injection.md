@@ -66,6 +66,7 @@ So we know under the covers we're ultimately using `Writer` to send our greeting
 
 ## Write the test first
 
+`dependency-injection/dependency_injection_test.go`
 ```go
 func TestGreet(t *testing.T) {
     buffer := bytes.Buffer{}
@@ -98,6 +99,7 @@ The test will not compile
 
 _Listen to the compiler_ and fix the problem.
 
+`dependency-injection/dependency_injection.md`
 ```go
 func Greet(writer *bytes.Buffer, name string) {
     fmt.Printf("Hello, %s", name)
