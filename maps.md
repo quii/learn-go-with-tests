@@ -294,11 +294,11 @@ var m map[string]string
 Instead, you can initialize an empty map like we were doing above, or use the `make` keyword to create a map for you:
 
 ```go
-dictionary = map[string]string{}
+var dictionary = map[string]string{}
 
 // OR
 
-dictionary = make(map[string]string)
+var dictionary = make(map[string]string)
 ```
 
 Both approaches create an empty `hash map` and point `dictionary` at it. Which ensures that you will never get a runtime panic.
