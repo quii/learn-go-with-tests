@@ -164,6 +164,18 @@ The difference is the receiver type is `*Wallet` rather than `Wallet` which you 
 
 Try and re-run the tests and they should pass.
 
+Now you might wonder, why did they pass? We didn't dereference the pointer in the function, like so:
+
+```go
+func (w *Wallet) Balance() int {
+    return (*w).balance
+}
+```
+
+and seemingly addressed the object directly. In fact, the code above using `(*w)` is absolutely valid. However, the makers of Go deemed this notation cumbersome, so the language permits us to write `w.balance`, without explicit dereference.
+These pointers to structs even have an own name: _struct pointers_ and they are [automatically dereferenced](https://golang.org/ref/spec#Method_values).
+
+
 ## Refactor
 
 We said we were making a Bitcoin wallet but we have not mentioned them so far. We've been using `int` because they're a good type for counting things!
