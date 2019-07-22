@@ -448,7 +448,7 @@ t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
     want := "Please enter the number of players: "
 
     if got != want {
-        t.Errorf("got '%s', want '%s'", got, want)
+        t.Errorf("got %q, want %q", got, want)
     }
 })
 ```
@@ -546,7 +546,7 @@ t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
     want := poker.PlayerPrompt
 
     if got != want {
-        t.Errorf("got '%s', want '%s'", got, want)
+        t.Errorf("got %q, want %q", got, want)
     }
 
     cases := []scheduledAlert{
@@ -891,7 +891,7 @@ Here is an example of one of the tests being fixed; try and do the rest yourself
 		wantPrompt := poker.PlayerPrompt
 
 		if gotPrompt != wantPrompt {
-			t.Errorf("got '%s', want '%s'", gotPrompt, wantPrompt)
+			t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
 		}
 
 		if game.StartCalledWith != 7 {
@@ -958,7 +958,7 @@ gotPrompt := stdout.String()
 wantPrompt := poker.PlayerPrompt + "you're so silly"
 
 if gotPrompt != wantPrompt {
-    t.Errorf("got '%s', want '%s'", gotPrompt, wantPrompt)
+    t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
 }
 ```
 
@@ -1005,7 +1005,7 @@ func assertMessagesSentToUser(t *testing.T, stdout *bytes.Buffer, messages ...st
 	want := strings.Join(messages, "")
 	got := stdout.String()
 	if got != want {
-		t.Errorf("got '%s' sent to stdout but expected %+v", got, messages)
+		t.Errorf("got %q sent to stdout but expected %+v", got, messages)
 	}
 }
 ```

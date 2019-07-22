@@ -338,7 +338,7 @@ func TestLeague(t *testing.T) {
         err := json.NewDecoder(response.Body).Decode(&got)
 
         if err != nil {
-            t.Fatalf ("Unable to parse response from server '%s' into slice of Player, '%v'", response.Body, err)
+            t.Fatalf ("Unable to parse response from server %q into slice of Player, '%v'", response.Body, err)
         }
 
         assertStatus(t, response.Code, http.StatusOK)
@@ -476,7 +476,7 @@ func TestLeague(t *testing.T) {
         err := json.NewDecoder(response.Body).Decode(&got)
 
         if err != nil {
-            t.Fatalf("Unable to parse response from server '%s' into slice of Player, '%v'", response.Body, err)
+            t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", response.Body, err)
         }
 
         assertStatus(t, response.Code, http.StatusOK)
@@ -610,7 +610,7 @@ func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
     err := json.NewDecoder(body).Decode(&league)
 
     if err != nil {
-        t.Fatalf("Unable to parse response from server '%s' into slice of Player, '%v'", body, err)
+        t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", body, err)
     }
 
     return

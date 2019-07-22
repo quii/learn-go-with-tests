@@ -20,6 +20,6 @@ func TestTape_Write(t *testing.T) {
 	want := "abc"
 
 	if got != want {
-		t.Errorf("got '%s' want '%s'", got, want)
+		t.Errorf("got %q want %q", got, want)
 	}
 }

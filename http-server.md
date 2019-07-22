@@ -77,7 +77,7 @@ func TestGETPlayers(t *testing.T) {
         want := "20"
 
         if got != want {
-            t.Errorf("got '%s', want '%s'", got, want)
+            t.Errorf("got %q, want %q", got, want)
         }
     })
 }
@@ -204,7 +204,7 @@ t.Run("returns Floyd's score", func(t *testing.T) {
     want := "10"
 
     if got != want {
-        t.Errorf("got '%s', want '%s'", got, want)
+        t.Errorf("got %q, want %q", got, want)
     }
 })
 ```
@@ -306,7 +306,7 @@ func newGetScoreRequest(name string) *http.Request {
 func assertResponseBody(t *testing.T, got, want string) {
     t.Helper()
     if got != want {
-        t.Errorf("response body is wrong, got '%s' want '%s'", got, want)
+        t.Errorf("response body is wrong, got %q want %q", got, want)
     }
 }
 ```
@@ -605,7 +605,7 @@ func newGetScoreRequest(name string) *http.Request {
 func assertResponseBody(t *testing.T, got, want string) {
     t.Helper()
     if got != want {
-        t.Errorf("response body is wrong, got '%s' want '%s'", got, want)
+        t.Errorf("response body is wrong, got %q want %q", got, want)
     }
 }
 ```
@@ -855,7 +855,7 @@ t.Run("it records wins on POST", func(t *testing.T) {
     }
 
     if store.winCalls[0] != player {
-        t.Errorf("did not store correct winner got '%s' want '%s'", store.winCalls[0], player)
+        t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], player)
     }
 })
 ```

@@ -109,7 +109,7 @@ func getLeagueFromResponse(t *testing.T, body io.Reader) []Player {
 	league, err := NewLeague(body)
 
 	if err != nil {
-		t.Fatalf("Unable to parse response from server '%s' into slice of Player, '%v'", body, err)
+		t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", body, err)
 	}
 
 	return league
@@ -147,6 +147,6 @@ func newPostWinRequest(name string) *http.Request {
 func assertResponseBody(t *testing.T, got, want string) {
 	t.Helper()
 	if got != want {
-		t.Errorf("response body is wrong, got '%s' want '%s'", got, want)
+		t.Errorf("response body is wrong, got %q want %q", got, want)
 	}
 }

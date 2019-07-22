@@ -64,7 +64,7 @@ func TestHello(t *testing.T) {
     want := "Hello, world"
 
     if got != want {
-        t.Errorf("got '%s' want '%s'", got, want)
+        t.Errorf("got %q want %q", got, want)
     }
 }
 ```
@@ -94,7 +94,9 @@ We're declaring some variables with the syntax `varName := value`, which lets us
 
 #### `t.Errorf`
 
-We are calling the `Errorf` _method_ on our `t` which will print out a message and fail the test. The `f` stands for format which allows us to build a string with values inserted into the placeholder values `%s`. When you made the test fail it should be clear how it works.
+We are calling the `Errorf` _method_ on our `t` which will print out a message and fail the test. The `f` stands for format which allows us to build a string with values inserted into the placeholder values `%q`. When you made the test fail it should be clear how it works.
+
+You can read more about the placeholder strings in the [fmt go doc](https://golang.org/pkg/fmt/#hdr-Printing). For tests `%q` is very useful as it wraps your values in double quotes.
 
 We will later explore the difference between methods and functions.
 
@@ -124,7 +126,7 @@ func TestHello(t *testing.T) {
     want := "Hello, Chris"
 
     if got != want {
-        t.Errorf("got '%s' want '%s'", got, want)
+        t.Errorf("got %q want %q", got, want)
     }
 }
 ```
@@ -223,7 +225,7 @@ func TestHello(t *testing.T) {
         want := "Hello, Chris"
 
         if got != want {
-            t.Errorf("got '%s' want '%s'", got, want)
+            t.Errorf("got %q want %q", got, want)
         }
     })
 
@@ -232,7 +234,7 @@ func TestHello(t *testing.T) {
         want := "Hello, World"
 
         if got != want {
-            t.Errorf("got '%s' want '%s'", got, want)
+            t.Errorf("got %q want %q", got, want)
         }
     })
 
@@ -257,7 +259,7 @@ func TestHello(t *testing.T) {
     assertCorrectMessage := func(t *testing.T, got, want string) {
         t.Helper()
         if got != want {
-            t.Errorf("got '%s' want '%s'", got, want)
+            t.Errorf("got %q want %q", got, want)
         }
     }
 

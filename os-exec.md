@@ -61,7 +61,7 @@ func TestGetData(t *testing.T) {
 	want := "HAPPY NEW YEAR!"
 
 	if got != want {
-		t.Errorf("got '%s', want '%s'", got, want)
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 ```
@@ -110,7 +110,7 @@ func TestGetDataIntegration(t *testing.T) {
 	want := "HAPPY NEW YEAR!"
 
 	if got != want {
-		t.Errorf("got '%s', want '%s'", got, want)
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 ```
@@ -128,7 +128,7 @@ func TestGetData(t *testing.T) {
 	want := "CATS ARE THE BEST ANIMAL"
 
 	if got != want {
-		t.Errorf("got '%s', want '%s'", got, want)
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 

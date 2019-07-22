@@ -341,8 +341,6 @@ It's similar to our approach from before, we use Go's concurrency primitives to 
 
 You'll take a similar approach when writing your own functions and methods that accept a `context` so make sure you understand what's going on.
 
-We removed the reference to `ctx` from the `SpyStore`'s fields because it's no longer interesting to us. We're strictly testing behaviour now which we prefer over testing implementation details such as "you passed through a particular value to function `foo`".
-
 Finally we can update our tests. Comment out our cancellation test so we can fix the happy path test first.
 
 ```go

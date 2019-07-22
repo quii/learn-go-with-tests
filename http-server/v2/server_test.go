@@ -70,6 +70,6 @@ func newGetScoreRequest(name string) *http.Request {
 func assertResponseBody(t *testing.T, got, want string) {
 	t.Helper()
 	if got != want {
-		t.Errorf("response body is wrong, got '%s' want '%s'", got, want)
+		t.Errorf("response body is wrong, got %q want %q", got, want)
 	}
 }
