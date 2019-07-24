@@ -568,7 +568,7 @@ func main() {
 
 If we run the tests and the program manually, we can see that all the behavior remains the same.
 
-Since we are using the `ConfigurableSleeper`, it is now safe to delete the `DefaultSleeper` implementation. Wrapping up our program and having a more general Sleeper with arbitrary long countdowns. Adding parameters in such a fashion is called generalization as it makes entities more general and is often followed by encapsulation, where functionality is encapsulated in a function or other entitity.
+Since we are using the `ConfigurableSleeper`, it is now safe to delete the `DefaultSleeper` implementation. Wrapping up our program and having a more general Sleeper with arbitrary long countdowns. Adding parameters in such a fashion is called generalization as it makes entities more general and is often followed by encapsulation, where functionality is encapsulated in a function or other entity.
 
 ## But isn't mocking evil?
 
