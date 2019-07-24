@@ -480,7 +480,7 @@ We now have our function and its 2 important properties properly tested.
 
 ## Extending Sleeper to be configurable
 
-A nice feature would be for the `Sleeper` to be configurable.
+A nice feature would be for the `Sleeper` to be configurable. This means that we would like to adjust the sleep time in our main program.
 
 ### Write the test first
 
@@ -493,7 +493,7 @@ type ConfigurableSleeper struct {
 }
 ```
 
-We are using `duration` to configure the time slept and `sleep` as a way to pass in a sleep function. The signature of `sleep` is the same as for `time.Sleep` allowing us to use `time.Sleep` in our real implementation and a spy in our tests.
+We are using `duration` to configure the time slept and `sleep` as a way to pass in a sleep function. The signature of `sleep` is the same as for `time.Sleep` allowing us to use `time.Sleep` in our real implementation and the following spy in our tests:
 
 ```go
 type SpyTime struct {
@@ -553,7 +553,7 @@ func (c *ConfigurableSleeper) Sleep() {
 }
 ```
 
-With this change all of the test should be passing again.
+With this change all of the tests should be passing again and you might wonder why all the hassle as the main program didn't change at all. Hopefully it becomes clear after the following section.
 
 ### Cleanup and refactor
 
@@ -568,7 +568,7 @@ func main() {
 
 If we run the tests and the program manually, we can see that all the behavior remains the same.
 
-Since we are using the `ConfigurableSleeper`,  it is safe to delete the `DefaultSleeper` implementation. Wrapping up our program.
+Since we are using the `ConfigurableSleeper`, it is now safe to delete the `DefaultSleeper` implementation. Wrapping up our program and having a more general Sleeper with arbitrary long countdowns. Adding parameters in such a fashion is called generalization as it makes entities more general and is often followed by encapsulation, where functionality is encapsulated in a function or other entitity.
 
 ## But isn't mocking evil?
 
