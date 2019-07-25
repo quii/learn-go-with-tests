@@ -480,7 +480,7 @@ We now have our function and its 2 important properties properly tested.
 
 ## Extending Sleeper to be configurable
 
-A nice feature would be for the `Sleeper` to be configurable. This means that we would like to adjust the sleep time in our main program.
+A nice feature would be for the `Sleeper` to be configurable. This means that we can adjust the sleep time in our main program.
 
 ### Write the test first
 
