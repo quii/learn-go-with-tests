@@ -103,7 +103,7 @@ Go 的 `if` 语句非常类似于其他编程语言。
 
 ### Go 文档
 
-Go 的另一个高质量特征是文档。通过运行 `godoc -http:8000`，可以在本地启动文档。如果你访问 [localhost:8000/pkg](localhost:8000/pkg)，将看到系统上安装的所有包。
+Go 的另一个高质量特征是文档。通过运行 `godoc -http :8000`，可以在本地启动文档。如果你访问 [localhost:8000/pkg](localhost:8000/pkg)，将看到系统上安装的所有包。
 
 大多数标准库都有优秀的文档和示例。浏览 [http://localhost:8000/pkg/testing/](http://localhost:8000/pkg/testing/) 是非常值得的，去看一下你有什么可以用的。
 
