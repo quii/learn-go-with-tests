@@ -481,7 +481,7 @@ which is equivalent.
 In Go:
 
 ```go
-func secondsinradians(t time.time) float64 {
+func secondsInRadians(t time.Time) float64 {
 	return (math.Pi / (30 / (float64(t.Second()))))
 }
 ```
@@ -1559,7 +1559,7 @@ Another quick copy-and-paste with some minor adjustments
 ```go
 func minuteHand(w io.Writer, t time.Time) {
 	p := minuteHandPoint(t)
-	p = Point{p.X * secondHandLength, p.Y * secondHandLength}
+	p = Point{p.X * minuteHandLength, p.Y * minuteHandLength}
 	p = Point{p.X, -p.Y}
 	p = Point{p.X + clockCentreX, p.Y + clockCentreY}
 	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#000;stroke-width:3px;"/>`, p.X, p.Y)
@@ -1741,7 +1741,7 @@ func hoursInRadians(t time.Time) float64 {
 
 ### Repeat for new requirements
 
-```
+```go
 func TestHoursInRadians(t *testing.T) {
 	cases := []struct {
 		time  time.Time
@@ -1791,7 +1791,7 @@ ok  	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.008s
 ```
 ### Write the test first
 
-Now let's try and move the hour hand around the clocface based on the minutes
+Now let's try and move the hour hand around the clockface based on the minutes
 and the seconds that have passed.
 
 ```go
