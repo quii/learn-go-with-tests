@@ -584,7 +584,13 @@ Otherwise, our `switch` will extract out two things depending on the type
 - How many fields there are
 - How to extract the `Value` (`Field` or `Index`)
 
-Once we've determined those things we can iterate through `numberOfValues` calling `walk` with the result of the `getField` function.
+Once we've determined those things we can iterate through `numberOfValues` calling `walk` with the result of the `getField` function. You might wonder what is happening in the row
+
+```go
+    var getField func(int) reflect.Value
+```
+
+as we've been using `:=` so far to declare and initializing variables. However, `:=` is simply [short hand for both steps](https://gobyexample.com/variables). Here we are declaring a variable only. Hence the explicit version. The type of this variable is a function with `int`s as arguments and `reflect.Value` as return type.
 
 Now we've done this, handling arrays should be trivial.
 
