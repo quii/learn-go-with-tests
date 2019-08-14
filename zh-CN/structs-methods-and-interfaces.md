@@ -515,7 +515,7 @@ func (c Triangle) Area() float64 {
     {shape: Triangle{Base: 12, Height: 6}, want: 36.0},
 ```
 
-在 Kent Beck 的这边题为 [测试驱动开发实例](https://g.co/kgs/yCzDLF) 的帖子中把测试用例重构成要点和断言：
+在 Kent Beck 的这篇题为 [测试驱动开发实例](https://g.co/kgs/yCzDLF) 的帖子中把测试用例重构成要点和断言：
 
 >当测试用例不是一系列操作，而是事实的断言时，测试才清晰明了。
 
