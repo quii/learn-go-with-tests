@@ -67,7 +67,7 @@ Unlike other languages like C, Java, or JavaScript there are no parentheses surr
     var repeated string
 ```
 
-as we've been using `:=` so far to declare and initializing variables. However, `:=` is simply [short hand for both steps](https://gobyexample.com/variables). Here we are declaring a variable only. Hence, the explicit version. The type of this variable is `string`.
+as we've been using `:=` so far to declare and initializing variables. However, `:=` is simply [short hand for both steps](https://gobyexample.com/variables). Here we are declaring a `string` variable only. Hence, the explicit version. We can also use `var` to declare functions, as we'll see later on.
 
 Run the test and it should pass.
 
