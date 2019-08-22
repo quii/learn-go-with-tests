@@ -224,12 +224,19 @@ func ping(url string) chan bool {
 
 #### `ping`
 
-We have defined a function `ping` which creates a `chan bool` and returns it.
+We have defined a function `ping` which creates a `chan bool` and returns it. 
 
 In our case, we don't really _care_ what the type sent in the channel, _we just want to send a signal_ to say we're finished so booleans are fine.
 
 Inside the same function, we start a goroutine which will send a signal into that channel once we have completed `http.Get(url)`.
 
+##### Always `make` channels
+
+Notice how we have to use `make` when creating a channel; rather than say `var ch chan bool`. When you use `var` the variable will be initialised with the "zero" value of the type. So for `string` it is `""`, `int` it is 0, etc.
+
+For channels the zero value is `nil` and if you try and send to it with `<-` it will block forever because you cannot send to `nil` channels
+
+[You can see this in action in The Go Playground](https://play.golang.org/p/IIbeAox5jKA)
 #### `select`
 
 If you recall from the concurrency chapter, you can wait for values to be sent to a channel with `myVar := <-ch`. This is a _blocking_ call, as you're waiting for a value.
