@@ -517,7 +517,7 @@ have been performed because
 > [Premature optimization is the root of all evil][popt]
 > -- Donald Knuth
 
-[DI]: ../dependency-injection.md#
+[DI]: dependency-injection.md
 [wrf]: http://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast
 [godoc_race_detector]: https://blog.golang.org/race-detector
 [popt]: http://wiki.c2.com/?PrematureOptimization
