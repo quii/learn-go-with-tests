@@ -8,7 +8,7 @@ import (
 
 func TestCountdown(t *testing.T) {
 
-	t.Run("prints 5 to Go!", func(t *testing.T) {
+	t.Run("prints 3 to Go!", func(t *testing.T) {
 		buffer := &bytes.Buffer{}
 		Countdown(buffer, &CountdownOperationsSpy{})
 
