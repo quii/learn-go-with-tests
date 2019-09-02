@@ -2,13 +2,17 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/for)**
 
-To do stuff repeatedly in Go, you'll need `for`. In Go there are no `while`, `do`, `until` keywords, you can only use `for`. Which is a good thing!
+In this chaper, you will learn how to perform iteration in Go. Golang uses the `for` keyword to perform iteration, and this chapter will only present one variation. The other variations will be used in future chapters.
 
-Let's write a test for a function that repeats a character 5 times.
+* _NOTE_: if you have experience in other programming languages, you might be familiar with other loop keywords: `while`, `do`, `until`. These do not exist in Golang by design, so you can only use `for`, which is a good thing! The `for` syntax is very unremarkable and follows most C-like languages.
 
-There's nothing new so far, so try and write it yourself for practice.
+To gain understanding in a TDD approach, we want to to build a function, `Repeat` that repeats a character 5 times.
 
-## Write the test first
+## Requirement - Repeat Character
+
+There's nothing new so far, so try and write the test yourself for practice.
+
+### The Test
 
 ```go
 package iteration
@@ -25,15 +29,16 @@ func TestRepeat(t *testing.T) {
 }
 ```
 
-## Try and run the test
+Now, try and run the test.
 
 `./repeat_test.go:6:14: undefined: Repeat`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+### The Code
 
-_Keep the discipline!_ You don't need to know anything new right now to make the test fail properly.
+Let's write the minimal amount of code for the test to run and check the failing test output
 
-All you need to do right now is enough to make it compile so you can check your test is written well.
+* _Keep the discipline!_ You don't need to know anything new right now to make the test fail properly.
+* All you need to do right now is enough to make it compile so you can check your test is written well.
 
 ```go
 package iteration
@@ -47,9 +52,7 @@ Isn't it nice to know you already know enough Go to write tests for some basic p
 
 `repeat_test.go:10: expected 'aaaaa' but got ''`
 
-## Write enough code to make it pass
-
-The `for` syntax is very unremarkable and follows most C-like languages.
+Now, let's write enough code to make the test pass
 
 ```go
 func Repeat(character string) string {
@@ -73,7 +76,7 @@ Run the test and it should pass.
 
 Additional variants of the for loop are described [here](https://gobyexample.com/for).
 
-## Refactor
+### The Refactor
 
 Now it's time to refactor and introduce another construct `+=` assignment operator.
 
@@ -91,7 +94,9 @@ func Repeat(character string) string {
 
 `+=` the Add AND assignment operator, adds the right operand to the left operand and assigns the result to left operand. It works with other types like integers.
 
-### Benchmarking
+Run the test once more and it should pass.
+
+## Tool: Benchmarking
 
 Writing [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks) in Go is another first-class feature of the language and it is very similar to writing tests.
 
@@ -123,7 +128,7 @@ PASS
 
 What `136 ns/op` means is our function takes on average 136 nanoseconds to run \(on my computer\). Which is pretty ok! To test this it ran it 10000000 times.
 
-_NOTE_ by default Benchmarks are run sequentially.
+* _NOTE_: by default Benchmarks are run sequentially.
 
 ## Practice exercises
 
@@ -134,5 +139,5 @@ _NOTE_ by default Benchmarks are run sequentially.
 ## Wrapping up
 
 * More TDD practice
-* Learned `for`
+* Learned iteration using `for`
 * Learned how to write benchmarks
