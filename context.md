@@ -2,7 +2,7 @@
 
 Software often kicks off long-running, resource-intensive processes (often in goroutines). If the action that caused this gets cancelled or fails for some reason you need to stop these processes in a consistent way through your application. 
 
-If you dont manage this your snappy Go application that you're so proud of could start having difficult to debug performance problems.  
+If you don't manage this your snappy Go application that you're so proud of could start having difficult to debug performance problems.  
 
 In this chapter we'll use the package `context` to help us manage long-running processes.
 
@@ -56,7 +56,7 @@ func TestHandler(t *testing.T) {
 }
 ```
 
-Now that we have a happy path, we want to make a more realistic scenario where the `Store` cant finish a`Fetch` before the user cancels the request.
+Now that we have a happy path, we want to make a more realistic scenario where the `Store` can't finish a`Fetch` before the user cancels the request.
 
 ## Write the test first
 
