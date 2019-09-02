@@ -2,16 +2,20 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/arrays)**
 
+In this chaper, you will learn the fundamentals of using arrays, the differences between fixed-size arrays and variable slices,and  how to check the length of an array and slice.
+
 Arrays allow you to store multiple elements of the same type in a variable in
 a particular order.
 
 When you have an array, it is very common to have to iterate over them. So let's
 use [our new-found knowledge of `for`](iteration.md) to make a `Sum` function. `Sum` will
-take an array of numbers and return the total.
+take an array of 5 integers and return the total.
 
 Let's use our TDD skills
 
-## Write the test first
+## Requirement - Summation fixed size
+
+### The Test
 
 In `sum_test.go`
 
@@ -45,11 +49,13 @@ which works well for arrays.
 
 [Read more about the format strings](https://golang.org/pkg/fmt/)
 
-## Try to run the test
+Try to run the test.
 
-By running `go test` the compiler will fail with `./sum_test.go:10:15: undefined: Sum`
+The compiler will fail with `./sum_test.go:10:15: undefined: Sum`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+### The Code
+
+Let's Write the minimal amount of code for the test to run and check the failing test output
 
 In `sum.go`
 
@@ -65,7 +71,7 @@ Your test should now fail with _a clear error message_
 
 `sum_test.go:13: got 0 want 15 given, [1 2 3 4 5]`
 
-## Write enough code to make it pass
+Write enough code to make it pass
 
 ```go
 func Sum(numbers [5]int) int {
@@ -81,7 +87,7 @@ To get the value out of an array at a particular index, just use `array[index]`
 syntax. In this case, we are using `for` to iterate 5 times to work through the
 array and add each item onto `sum`.
 
-## Refactor
+### The Refactor
 
 Let's introduce [`range`](https://gobyexample.com/range) to help clean up our code
 
@@ -99,7 +105,7 @@ func Sum(numbers [5]int) int {
 values, the index and the value. We are choosing to ignore the index value by
 using `_` [blank identifier](https://golang.org/doc/effective_go.html#blank).
 
-### Arrays and their type
+## Arrays - Property
 
 An interesting property of arrays is that the size is encoded in its type. If you try
 to pass an `[4]int` into a function that expects `[5]int`, it won't compile.
@@ -114,7 +120,9 @@ have any size.
 
 The next requirement will be to sum collections of varying sizes.
 
-## Write the test first
+## Requirement - Summation variable size
+
+### The Test
 
 We will now use the [slice type][slice] which allows us to have collections of
 any size. The syntax is very similar to arrays, you just omit the size when
@@ -146,17 +154,14 @@ func TestSum(t *testing.T) {
             t.Errorf("got %d want %d given, %v", got, want, numbers)
         }
     })
-
 }
 ```
 
-## Try and run the test
-
-This does not compile
+When you try and run the test, it will not not compile
 
 `./sum_test.go:22:13: cannot use numbers (type []int) as type [5]int in argument to Sum`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+Let's write the minimal amount of code for the test to run and check the failing test output
 
 The problem here is we can either
 
@@ -179,11 +184,11 @@ func Sum(numbers []int) int {
 
 If you try to run the tests they will still not compile, you will have to change the first test to pass in a slice rather than an array.
 
-## Write enough code to make it pass
+### The Code
 
 It turns out that fixing the compiler problems were all we need to do here and the tests pass!
 
-## Refactor
+### The Refactor
 
 We had already refactored `Sum` and all we've done is changing from arrays to slices, so there's not a lot to do here. Remember that we must not neglect our test code in the refactoring stage and we have some to do here.
 
@@ -211,7 +216,6 @@ func TestSum(t *testing.T) {
             t.Errorf("got %d want %d given, %v", got, want, numbers)
         }
     })
-
 }
 ```
 
@@ -247,8 +251,10 @@ Now delete one of the tests and check the coverage again.
 Now that we are happy we have a well-tested function you should commit your
 great work before taking on the next challenge.
 
-We need a new function called `SumAll` which will take a varying number of
-slices, returning a new slice containing the totals for each slice passed in.
+A few weeks later, and we need to build a new function which will take a varying number of
+slices, returning a new slice containing the totals for each slice passed in. Let's define it as `SumAll`
+
+## Requirement - Summation of each Slice
 
 For example
 
@@ -258,7 +264,7 @@ or
 
 `SumAll([]int{1,1,1})` would return `[]int{3}`
 
-## Write the test first
+### The Test
 
 ```go
 func TestSumAll(t *testing.T) {
@@ -272,13 +278,13 @@ func TestSumAll(t *testing.T) {
 }
 ```
 
-## Try and run the test
+Try and run the test
 
 `./sum_test.go:23:9: undefined: SumAll`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+Write the minimal amount of code for the test to run and check the failing test output
 
-We need to define SumAll according to what our test wants.
+We need to define `SumAll` according to what our test wants.
 
 Go can let you write [_variadic functions_](https://gobyexample.com/variadic-functions) that can take a variable number of arguments.
 
@@ -336,7 +342,7 @@ Change the test back again and run it, you should have test output looking like 
 
 `sum_test.go:30: got [] want [3 9]`
 
-## Write enough code to make it pass
+### The Code
 
 What we need to do is iterate over the varargs, calculate the sum using our
 `Sum` function from before and then add it to the slice we will return
@@ -364,7 +370,7 @@ assign it a new value with `=`
 
 The tests should now pass
 
-## Refactor
+### The Refactor
 
 As mentioned, slices have a capacity. If you have a slice with a capacity of
 2 and try to do `mySlice[10] = 1` you will get a _runtime_ error.
@@ -386,11 +392,13 @@ func SumAll(numbersToSum ...[]int) []int {
 In this implementation, we are worrying less about capacity. We start with an
 empty slice `sums` and append to it the result of `Sum` as we work through the varargs.
 
+## Requirement - Summation of Tails
+
 Our next requirement is to change `SumAll` to `SumAllTails`, where it now
 calculates the totals of the "tails" of each slice. The tail of a collection is
 all the items apart from the first one \(the "head"\)
 
-## Write the test first
+### The Test
 
 ```go
 func TestSumAllTails(t *testing.T) {
@@ -403,17 +411,19 @@ func TestSumAllTails(t *testing.T) {
 }
 ```
 
-## Try and run the test
+Try and run the test
 
 `./sum_test.go:26:9: undefined: SumAllTails`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+### The Code
+
+Let's write the minimal amount of code for the test to run and check the failing test output
 
 Rename the function to `SumAllTails` and re-run the test
 
 `sum_test.go:30: got [3 9] want [2 9]`
 
-## Write enough code to make it pass
+Write enough code to make it pass
 
 ```go
 func SumAllTails(numbersToSum ...[]int) []int {
@@ -433,7 +443,7 @@ case, we are saying "take from 1 to the end" with `numbers[1:]`. You might want 
 invest some time in writing other tests around slices and experimenting with the
 slice operator so you can be familiar with it.
 
-## Refactor
+### The Refactor
 
 Not a lot to refactor this time.
 
@@ -441,7 +451,9 @@ What do you think would happen if you passed in an empty slice into our
 function? What is the "tail" of an empty slice? What happens when you tell Go to
 capture all elements from `myEmptySlice[1:]`?
 
-## Write the test first
+Let's test it.
+
+### The Test for Empty Slices
 
 ```go
 func TestSumAllTails(t *testing.T) {
@@ -463,11 +475,10 @@ func TestSumAllTails(t *testing.T) {
             t.Errorf("got %v want %v", got, want)
         }
     })
-
 }
 ```
 
-## Try and run the test
+Try and run the test
 
 ```text
 panic: runtime error: slice bounds out of range [recovered]
@@ -478,7 +489,7 @@ Oh no! It's important to note the test _has compiled_, it is a runtime error.
 Compile time errors are our friend because they help us write software that
 works, runtime errors are our enemies because they affect our users.
 
-## Write enough code to make it pass
+### The Code
 
 ```go
 func SumAllTails(numbersToSum ...[]int) []int {
@@ -496,7 +507,7 @@ func SumAllTails(numbersToSum ...[]int) []int {
 }
 ```
 
-## Refactor
+### The Refactor
 
 Our tests have some repeated code around assertion again, let's extract that into a function
 
@@ -534,6 +545,14 @@ $ go test
 ./sum_test.go:52:21: cannot use "dave" (type string) as type []int in argument to checkSums
 ```
 
+Run the test once more and it should pass.
+
+## Practice exercises
+
+* Create and test new function that returns the min element in each slice
+* Create and test new function that returns the max element in each slice
+* Create and test new function that returns the last element in each slice
+
 ## Wrapping up
 
 We have covered
@@ -545,6 +564,7 @@ We have covered
     using `append`
   * How to slice, slices!
 * `len` to get the length of an array or slice
+* Variadic Functions for variable arguments
 * Test coverage tool
 * `reflect.DeepEqual` and why it's useful but can reduce the type-safety of your code
 
