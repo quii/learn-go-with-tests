@@ -217,6 +217,7 @@ t.Run("unknown word", func(t *testing.T) {
 
     assertError(t, got, ErrNotFound)
 })
+}
 
 func assertError(t *testing.T, got, want error) {
     t.Helper()
