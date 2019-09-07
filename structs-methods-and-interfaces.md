@@ -385,7 +385,7 @@ This kind of approach of using interfaces to declare **only what you need** is v
 
 ## Further refactoring
 
-Now that you have some understanding of structs we can now introduce "table driven tests".
+Now that you have some understanding of structs we can introduce "table driven tests".
 
 [Table driven tests](https://github.com/golang/go/wiki/TableDrivenTests) are useful when you want to build a list of test cases that can be tested in the same manner.
 
