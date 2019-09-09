@@ -284,7 +284,7 @@ You'll always be driving small & useful functionality comfortably backed by the 
 
 ## Wrapping up 
 
-- The strength of software is that we can change it. _Most_ software will require change over time in unpredictable ways; but dont try and over-engineer because it's too hard to predict the future.
+- The strength of software is that we can change it. _Most_ software will require change over time in unpredictable ways; but don't try and over-engineer because it's too hard to predict the future.
 - Instead we need to make it so we can keep our software malleable. In order to change software we have to refactor it as it evolves or it will turn into a mess
 - A good test suite can help you refactor quicker and in a less stressful manner
 - Writing good unit tests is a design problem so think about structuring your code so you have meaningful units that you can integrate together like Lego bricks.

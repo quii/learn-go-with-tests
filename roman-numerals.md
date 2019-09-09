@@ -216,7 +216,7 @@ The code looks better to me and describes the domain _as we know it right now_.
 
 ### The Romans were into DRY too...
 
-Things start getting more complicated now. The Romans in their wisdom thought repeating characters would become hard to read and count. So a rule with Roman Numerals is you cant have the same character repeated more than 3 times in a row.
+Things start getting more complicated now. The Romans in their wisdom thought repeating characters would become hard to read and count. So a rule with Roman Numerals is you can't have the same character repeated more than 3 times in a row.
 
 Instead you take the next highest symbol and then "subtract" by putting a symbol to the left of it. Not all symbols can be used as subtractors; only I (1), X (10) and C (100).
 
@@ -227,7 +227,7 @@ For example `5` in Roman Numerals is `V`. To create 4 you do not do `IIII`, inst
 ## Write the test first
 
 ```go
-{"4 gets converted to IV (cant repeat more than 3 times)", 4, "IV"},
+{"4 gets converted to IV (can't repeat more than 3 times)", 4, "IV"},
 ```
 
 ## Try to run the test
@@ -259,7 +259,7 @@ func ConvertToRoman(arabic int) string {
 
 ## Refactor
 
-I dont "like" that we have broken our string building pattern and I want to carry on with it.
+I don't "like" that we have broken our string building pattern and I want to carry on with it.
 
 ```go
 func ConvertToRoman(arabic int) string {
@@ -354,7 +354,7 @@ func ConvertToRoman(arabic int) string {
 - Given the signals I'm reading from our code, driven from our tests of some very basic scenarios I can see that to build a Roman Numeral I need to subtract from `arabic` as I apply symbols
 - The `for` loop no longer relies on an `i` and instead we will keep building our string until we have subtracted enough symbols away from `arabic`.
 
-I'm pretty sure this approach will be valid for 6 (VI), 7 (VII) and 8 (VIII) too. Nonetheless add the cases in to our test suite and check (I wont include the code for brevity, check the github for samples if you're unsure).
+I'm pretty sure this approach will be valid for 6 (VI), 7 (VII) and 8 (VIII) too. Nonetheless add the cases in to our test suite and check (I won't include the code for brevity, check the github for samples if you're unsure).
 
 9 follows the same rule as 4 in that we should subtract `I` from the representation of the following number. 10 is represented in Roman Numerals with `X`; so therefore 9 should be `IX`.
 
@@ -682,7 +682,7 @@ This is horrible but it does work. It's so bad I felt the need to add comments.
 - I wanted to be able to look up an integer value for a given roman numeral so I made a type from our array of `RomanNumeral`s and then added a method to it, `ValueOf`
 - Next in our loop we need to look ahead _if_ the string is big enough _and the current symbol is a valid subtractor_. At the moment it's just `I` (1) but can also be `X` (10) or `C` (100).
     - If it satisfies both of these conditions we need to lookup the value and add it to the total _if_ it is one of the special subtractors, otherwise ignore it
-    - Then we need to further increment `i` so we dont count this symbol twice
+    - Then we need to further increment `i` so we don't count this symbol twice
 
 ## Refactor
 
@@ -949,7 +949,7 @@ There's probably a more elegant way but I'm not going to sweat it. The code is t
 
 There have been a few rules in the domain of Roman Numerals that we have worked with in this chapter
 
-- Cant have more than 3 consecutive symbols
+- Can't have more than 3 consecutive symbols
 - Only I (1), X (10) and C (100) can be "subtractors"
 - Taking the result of `ConvertToRoman(N)` and passing it to `ConvertToArabic` should return us `N`
 
@@ -1026,8 +1026,8 @@ You should see something like this:
 ```
 
 Just running this very simple property has exposed a flaw in our implementation. We used `int` as our input but:
-- You cant do negative numbers with Roman Numerals
-- Given our rule of a max of 3 consecutive symbols we cant represent a value greater than 3999 ([well, kinda](https://www.quora.com/Which-is-the-maximum-number-in-Roman-numerals)) and `int` has a much higher maximum value than 3999.
+- You can't do negative numbers with Roman Numerals
+- Given our rule of a max of 3 consecutive symbols we can't represent a value greater than 3999 ([well, kinda](https://www.quora.com/Which-is-the-maximum-number-in-Roman-numerals)) and `int` has a much higher maximum value than 3999.
 
 This is great! We've been forced to think more deeply about our domain which is a real strength of property based tests.
 
@@ -1081,7 +1081,7 @@ The trick, as always, is to **get started with something simple** and take **sma
 
 At no point in this process did we make any large leaps, do any huge refactorings, or get in a mess.
 
-I can hear someone cynically saying "this is just a kata". I cant argue with that, but I still take this same approach for every project I work on. I never ship a big distributed system in my first step, I find the simplest thing the team could ship (usually a "Hello world" website) and then iterate on small bits of functionality in manageable chunks, just like how we did here.
+I can hear someone cynically saying "this is just a kata". I can't argue with that, but I still take this same approach for every project I work on. I never ship a big distributed system in my first step, I find the simplest thing the team could ship (usually a "Hello world" website) and then iterate on small bits of functionality in manageable chunks, just like how we did here.
 
 The skill is knowing _how_ to split work up, and that comes with practice and with some lovely TDD to help you on your way.
 

@@ -268,7 +268,7 @@ Paraphrasing:
 
 Remember to use go vet in your build scripts as it can alert you to some subtle bugs in your code before they hit your poor users.
 
-### Dont use embedding because it's convenient
+### Don't use embedding because it's convenient
 
 - Think about the effect embedding has on your public API.
 - Do you _really_ want to expose these methods and have people coupling their own code to them?

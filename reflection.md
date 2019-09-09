@@ -767,7 +767,7 @@ func assertContains(t *testing.T, haystack []string, needle string)  {
         }
     }
     if !contains {
-        t.Errorf("expected %+v to contain %q but it didnt", haystack, needle)
+        t.Errorf("expected %+v to contain %q but it didn't", haystack, needle)
     }
 }
 ```

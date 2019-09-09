@@ -1011,7 +1011,7 @@ In the tests we should assert there is no error. We can make a helper to help wi
 func assertNoError(t *testing.T, err error) {
     t.Helper()
     if err != nil {
-        t.Fatalf("didnt expect an error but got one, %v", err)
+        t.Fatalf("didn't expect an error but got one, %v", err)
     }
 }
 ```
@@ -1021,7 +1021,7 @@ Work through the other compilation problems using this helper. Finally, you shou
 ```
 === RUN   TestRecordingWinsAndRetrievingThem
 --- FAIL: TestRecordingWinsAndRetrievingThem (0.00s)
-    server_integration_test.go:14: didnt expect an error but got one, problem loading player store from file /var/folders/nj/r_ccbj5d7flds0sf63yy4vb80000gn/T/db841037437, problem parsing league, EOF
+    server_integration_test.go:14: didn't expect an error but got one, problem loading player store from file /var/folders/nj/r_ccbj5d7flds0sf63yy4vb80000gn/T/db841037437, problem parsing league, EOF
 ```
 
 We cannot parse the league because the file is empty. We weren't getting errors before because we always just ignored them.
@@ -1054,7 +1054,7 @@ t.Run("works with an empty file", func(t *testing.T) {
 ```
 === RUN   TestFileSystemStore/works_with_an_empty_file
     --- FAIL: TestFileSystemStore/works_with_an_empty_file (0.00s)
-        FileSystemStore_test.go:108: didnt expect an error but got one, problem loading player store from file /var/folders/nj/r_ccbj5d7flds0sf63yy4vb80000gn/T/db019548018, problem parsing league, EOF
+        FileSystemStore_test.go:108: didn't expect an error but got one, problem loading player store from file /var/folders/nj/r_ccbj5d7flds0sf63yy4vb80000gn/T/db019548018, problem parsing league, EOF
 ```
 
 ## Write enough code to make it pass

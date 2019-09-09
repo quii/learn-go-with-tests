@@ -422,7 +422,7 @@ Let's make a quick test helper for our error check just to help our test read cl
 assertError := func(t *testing.T, err error) {
     t.Helper()
     if err == nil {
-        t.Error("wanted an error but didnt get one")
+        t.Error("wanted an error but didn't get one")
     }
 }
 ```
@@ -629,7 +629,7 @@ func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
 func assertNoError(t *testing.T, got error) {
     t.Helper()
     if got != nil {
-        t.Fatal("got an error but didnt want one")
+        t.Fatal("got an error but didn't want one")
     }
 }
 
@@ -650,12 +650,12 @@ func assertError(t *testing.T, got error, want error) {
 ### Pointers
 
 * Go copies values when you pass them to functions/methods so if you're writing a function that needs to mutate state you'll need it to take a pointer to the thing you want to change.
-* The fact that Go takes a copy of values is useful a lot of the time but sometimes you wont want your system to make a copy of something, in which case you need to pass a reference. Examples could be very large data or perhaps things you intend only to have one instance of \(like database connection pools\).
+* The fact that Go takes a copy of values is useful a lot of the time but sometimes you won't want your system to make a copy of something, in which case you need to pass a reference. Examples could be very large data or perhaps things you intend only to have one instance of \(like database connection pools\).
 
 ### nil
 
 * Pointers can be nil
-* When a function returns a pointer to something, you need to make sure you check if it's nil or you might raise a runtime exception, the compiler wont help you here.
+* When a function returns a pointer to something, you need to make sure you check if it's nil or you might raise a runtime exception, the compiler won't help you here.
 * Useful for when you want to describe a value that could be missing
 
 ### Errors
