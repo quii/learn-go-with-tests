@@ -159,7 +159,7 @@ func TestArea(t *testing.T) {
         want := 72.0
 
         if got != want {
-            t.Errorf("got %.2f want %.2f", got, want)
+            t.Errorf("got %g want %g", got, want)
         }
     })
 
@@ -169,12 +169,14 @@ func TestArea(t *testing.T) {
         want := 314.1592653589793
 
         if got != want {
-            t.Errorf("got %.2f want %.2f", got, want)
+            t.Errorf("got %g want %g", got, want)
         }
     })
 
 }
 ```
+
+As you can see, the 'f' has been replaced by 'g', using 'f' it could be difficult to know the exact decimal number, with 'g' we get a complete decimal number in the error message \([fmt options](https://golang.org/pkg/fmt/)\).
 
 ## Try to run the test
 
@@ -229,7 +231,7 @@ func TestArea(t *testing.T) {
         want := 72.0
 
         if got != want {
-            t.Errorf("got %.2f want %.2f", got, want)
+            t.Errorf("got %g want %g", got, want)
         }
     })
 
@@ -239,7 +241,7 @@ func TestArea(t *testing.T) {
         want := 314.1592653589793
 
         if got != want {
-            t.Errorf("got %f want %f", got, want)
+            t.Errorf("got %g want %g", got, want)
         }
     })
 
@@ -333,7 +335,7 @@ func TestArea(t *testing.T) {
         t.Helper()
         got := shape.Area()
         if got != want {
-            t.Errorf("got %.2f want %.2f", got, want)
+            t.Errorf("got %g want %g", got, want)
         }
     }
 
@@ -403,7 +405,7 @@ func TestArea(t *testing.T) {
     for _, tt := range areaTests {
         got := tt.shape.Area()
         if got != tt.want {
-            t.Errorf("got %.2f want %.2f", got, tt.want)
+            t.Errorf("got %g want %g", got, tt.want)
         }
     }
 
@@ -439,7 +441,7 @@ func TestArea(t *testing.T) {
     for _, tt := range areaTests {
         got := tt.shape.Area()
         if got != tt.want {
-            t.Errorf("got %.2f want %.2f", got, tt.want)
+            t.Errorf("got %g want %g", got, tt.want)
         }
     }
 
@@ -566,7 +568,7 @@ func TestArea(t *testing.T) {
         t.Run(tt.name, func(t *testing.T) {
             got := tt.shape.Area()
             if got != tt.hasArea {
-                t.Errorf("%#v got %.2f want %.2f", tt.shape, got, tt.hasArea)
+                t.Errorf("%#v got %g want %g", tt.shape, got, tt.hasArea)
             }
         })
 

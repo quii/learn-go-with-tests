@@ -10,7 +10,7 @@ func TestPerimeter(t *testing.T) {
 	want := 40.0
 
 	if got != want {
-		t.Errorf("got %.2f want %.2f", got, want)
+		t.Errorf("got %g want %g", got, want)
 	}
 }
 
@@ -27,7 +27,7 @@ func TestArea(t *testing.T) {
 	for _, tt := range areaTests {
 		got := tt.shape.Area()
 		if got != tt.want {
-			t.Errorf("got %.2f want %.2f", got, tt.want)
+			t.Errorf("got %g want %g", got, tt.want)
 		}
 	}
 
