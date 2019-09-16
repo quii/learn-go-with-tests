@@ -200,7 +200,7 @@ func Countdown(out io.Writer) {
 
 If you run the program now, you should get the desired output but we don't have it as a dramatic countdown with the 1 second pauses.
 
-Go let's you achieve this with `time.Sleep`. Try adding it in to our code.
+Go lets you achieve this with `time.Sleep`. Try adding it in to our code.
 
 ```go
 func Countdown(out io.Writer) {
