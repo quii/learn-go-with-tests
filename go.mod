@@ -1,6 +1,6 @@
 module github.com/quii/learn-go-with-tests
 
-go 1.12
+go 1.13
 
 require (
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
