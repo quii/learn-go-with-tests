@@ -9,10 +9,12 @@ import (
 	"os"
 )
 
+// Store manages a bookshelf
 type Store struct {
 	db *pgx.Conn
 }
 
+// StoreBook will store a book
 func (store *Store) StoreBook(book Book) {
 	_, err := store.db.Exec(context.Background(), "insert into bookshelf.books (title, author) values ($1, $2)", book.Title, book.Author)
 	if err != nil {
@@ -20,6 +22,7 @@ func (store *Store) StoreBook(book Book) {
 	}
 }
 
+// GetBooks fetches all books
 func (store *Store) GetBooks() ([]Book, error) {
 	var books []Book
 
@@ -45,11 +48,13 @@ func (store *Store) GetBooks() ([]Book, error) {
 	return books, nil
 }
 
+// Book represents a book
 type Book struct {
 	Title  string
 	Author string
 }
 
+// NewStore creates a new store, connecting to the db and applying db migrations
 func NewStore() *Store {
 	url := "postgres://postgres:learn-go-with-tests@localhost/postgres?sslmode=disable"
 	conn, err := pgx.Connect(context.Background(), url)

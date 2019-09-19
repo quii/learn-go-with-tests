@@ -3,6 +3,7 @@ module github.com/quii/learn-go-with-tests
 go 1.13
 
 require (
+	github.com/client9/misspell v0.3.4 // indirect
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
 	github.com/google/go-cmp v0.3.1
 	github.com/gorilla/websocket v1.4.1
