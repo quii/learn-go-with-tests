@@ -14,12 +14,35 @@ type Store struct {
 }
 
 func (store *Store) StoreBook(book Book) {
-
+	_, err := store.db.Exec(context.Background(), "insert into bookshelf.books (title, author) values ($1, $2)", book.Title, book.Author)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (store *Store) GetBooks() ([]Book, error) {
+	var books []Book
 
-	return nil, nil
+	rows, err := store.db.Query(context.Background(), "select title, author from bookshelf.books")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var title string
+		var author string
+		err := rows.Scan(&title, &author)
+		if err != nil {
+			log.Fatal(err)
+		}
+		books = append(books, Book{
+			Title:  title,
+			Author: author,
+		})
+	}
+
+	return books, nil
 }
 
 type Book struct {
@@ -34,7 +57,6 @@ func NewStore() *Store {
 		fmt.Fprintf(os.Stderr, "Unable to connection to database: %v\n", err)
 		os.Exit(1)
 	}
-	defer conn.Close(context.Background())
 
 	_, err = conn.Exec(context.Background(), "create schema if not exists bookshelf")
 
