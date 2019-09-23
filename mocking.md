@@ -489,7 +489,7 @@ Let's first create a new type for `ConfigurableSleeper` that accepts what we nee
 ```go
 type ConfigurableSleeper struct {
     duration time.Duration
-    Sleep    func(time.Duration)
+    sleep    func(time.Duration)
 }
 ```
 
