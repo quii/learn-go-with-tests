@@ -27,7 +27,7 @@ func TestSum(t *testing.T) {
     got := Sum(numbers)
     want := 15
 
-    if want != got {
+    if got != want {
         t.Errorf("got %d want %d given, %v", got, want, numbers)
     }
 }
