@@ -461,7 +461,7 @@ There are two ways around this:
 2. Refactor our function by refactoring our equation
 
 Now (1) may not seem all that appealing, but it's often the only way to make
-floating point equality work. Being inaccurate by some infinitessimal fraction
+floating point equality work. Being inaccurate by some infinitesimal fraction
 is frankly not going to matter for the purposes of drawing a clockface, so we
 could write a function that defines a 'close enough' equality for our angles.
 But there's a simple way we can get the accuracy back: we rearrange the equation
@@ -633,7 +633,7 @@ FAIL	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.007s
 ```
 
 Wait, what (again)? Looks like we've been cursed by the floats once more - both
-of those unexpected numbers are _infinitessimal_ - way down at the 16th decimal
+of those unexpected numbers are _infinitesimal_ - way down at the 16th decimal
 place. So again we can either choose to try to increase precision, or to just
 say that they're roughly equal and get on with our lives.
 
@@ -694,7 +694,7 @@ v4 ends
 
 ### Repeat for new requirements
 
-Well, saying _new_ isn't enirely accurate - really what we can do now is get
+Well, saying _new_ isn't entirely accurate - really what we can do now is get
 that acceptance test passing! Let's remind ourselves of what it looks like:
 
 
