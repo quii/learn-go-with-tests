@@ -68,7 +68,7 @@ Go 1.11 introduced [Modules](https://github.com/golang/go/wiki/Modules), enablin
 
 Modules aim to solve problems related to dependency management, version selection and reproducible builds; they also enable users to run Go code outside of GOPATH.
 
-Using Modules is prety straightforward. Just select any directory outside GOPATH as the root of your project, and create a new module with the go mod init command.
+Using Modules is pretty straightforward. Just select any directory outside GOPATH as the root of your project, and create a new module with the go mod init command.
 ```sh
 mkdir my-project
 cd my-project
