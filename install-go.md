@@ -32,7 +32,7 @@ You can verify the installation with:
 
 ```sh
 $ go version
-go version go1.10 darwin/amd64
+go version go1.13.1 darwin/amd64
 ```
 
 ## Go Environment
