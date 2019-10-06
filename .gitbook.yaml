@@ -1,1 +1,5 @@
 root: ./ko-KR
+
+structure:
+  readme: gb-readme.md
+  summary: SUMMARY.md
