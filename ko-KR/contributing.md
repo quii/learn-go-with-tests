@@ -1,4 +1,7 @@
-# Contributing
+# 한국어 번역 기여
+번역 기여는 누구라도 환영입니다! [번역 기여 가이드](https://github.com/Gunforge/learn-go-with-tests-ko/wiki/%EB%B2%88%EC%97%AD-%EA%B8%B0%EC%97%AC-%EA%B0%80%EC%9D%B4%EB%93%9C)를 참고하여 [레포지토리](https://github.com/Gunforge/learn-go-with-tests-ko)에 이슈를 생성하거나 번역 PR을 제출해보세요.
+
+# Contributing (원본)
 
 Contributions are very welcome. I hope for this to become a great home for guides of how to learn Go by writing tests. Consider submitting a PR or creating an issue which you can do [here](https://github.com/quii/learn-go-with-tests).
 
