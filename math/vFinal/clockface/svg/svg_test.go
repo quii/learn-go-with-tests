@@ -110,7 +110,7 @@ func TestSVGWriterHourHand(t *testing.T) {
 			xml.Unmarshal(b.Bytes(), &svg)
 
 			if !containsLine(c.line, svg.Line) {
-				t.Errorf("Expected to find the minute hand line %+v, in the SVG lines %+v", c.line, svg.Line)
+				t.Errorf("Expected to find the hour hand line %+v, in the SVG lines %+v", c.line, svg.Line)
 			}
 		})
 	}

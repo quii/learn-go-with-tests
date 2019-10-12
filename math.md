@@ -1633,7 +1633,7 @@ func TestSVGWriterHourHand(t *testing.T) {
 			xml.Unmarshal(b.Bytes(), &svg)
 
 			if !containsLine(c.line, svg.Line) {
-				t.Errorf("Expected to find the minute hand line %+v, in the SVG lines %+v", c.line, svg.Line)
+				t.Errorf("Expected to find the hour hand line %+v, in the SVG lines %+v", c.line, svg.Line)
 			}
 		})
 	}
@@ -1645,7 +1645,7 @@ func TestSVGWriterHourHand(t *testing.T) {
 ```
 --- FAIL: TestSVGWriterHourHand (0.00s)
     --- FAIL: TestSVGWriterHourHand/06:00:00 (0.00s)
-        clockface_acceptance_test.go:113: Expected to find the minute hand line {X1:150 Y1:150 X2:150 Y2:200}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
+        clockface_acceptance_test.go:113: Expected to find the hour hand line {X1:150 Y1:150 X2:150 Y2:200}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
 FAIL
 exit status 1
 FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.013s
@@ -2004,7 +2004,7 @@ func TestSVGWriterHourHand(t *testing.T) {
 			xml.Unmarshal(b.Bytes(), &svg)
 
 			if !containsLine(c.line, svg.Line) {
-				t.Errorf("Expected to find the minute hand line %+v, in the SVG lines %+v", c.line, svg.Line)
+				t.Errorf("Expected to find the hour hand line %+v, in the SVG lines %+v", c.line, svg.Line)
 			}
 		})
 	}
@@ -2016,7 +2016,7 @@ func TestSVGWriterHourHand(t *testing.T) {
 ```
 --- FAIL: TestSVGWriterHourHand (0.00s)
     --- FAIL: TestSVGWriterHourHand/06:00:00 (0.00s)
-        clockface_acceptance_test.go:113: Expected to find the minute hand line {X1:150 Y1:150 X2:150 Y2:200}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
+        clockface_acceptance_test.go:113: Expected to find the hour hand line {X1:150 Y1:150 X2:150 Y2:200}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
 FAIL
 exit status 1
 FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.013s
