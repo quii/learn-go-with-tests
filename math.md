@@ -1574,7 +1574,7 @@ ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.006s
 But the proof of the pudding is in the eating - if we now compile and run our
 `clockface` program, we should see something like
 
-![a clock with only a second hand](math/v9/clockface/clockface/clock.svg)
+![a clock with second and minute hands](math/v9/clockface/clockface/clock.svg)
 
 ### Refactor
 
