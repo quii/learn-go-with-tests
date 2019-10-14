@@ -323,7 +323,7 @@ func ConvertToRoman(arabic int) string {
 
 ## Refactor
 
-Repetition in loops like this are usually a sign of an abstraction waiting to be called out. Short-circuiting loops can be an effective tool for reabability but it could also be telling you something else.
+Repetition in loops like this are usually a sign of an abstraction waiting to be called out. Short-circuiting loops can be an effective tool for readability but it could also be telling you something else.
 
 We are looping over our Arabic number and if we hit certain symbols we are calling `break` but what we are _really_ doing is subtracting over `i` in a ham-fisted manner.
 
@@ -447,12 +447,8 @@ Here are some test cases, try and make them pass.
 {"50 gets converted to L", 50, "L"},
 ```
 
-If you're a cheater, all you needed to add to the `RomanNumerals` array is
+Need help? You can see what symbols to add in [this gist](https://gist.github.com/pamelafox/6c7b948213ba55332d86efd0f0b037de).
 
-```go
-{50, "L"},
-{40, "XL"},
-```
 
 ## And the rest!
 
@@ -661,7 +657,7 @@ func ConvertToArabic(roman string) int {
 			potentialNumber := string([]byte{symbol, nextSymbol})
 
 			// get the value of the two character string
-			value := romanNumerals.ValueOf(potentialNumber)
+			value := RomanNumerals.ValueOf(potentialNumber)
 
 			if value != 0 {
 				total += value
@@ -836,13 +832,13 @@ Try again, they still fail. However we left a comment earlier...
 total++ // this is fishy...
 ```
 
-We should never be just increment total as that implies every symbol is a `I`. Replace it with
+We should never be just incrementing `total` as that implies every symbol is a `I`. Replace it with:
 
 ```go
 total += romanNumerals.ValueOf(symbol)
 ```
 
-And all the tests pass! Now that we have fully working software we can indulge ourselves in some refactoring, with confidence
+And all the tests pass! Now that we have fully working software we can indulge ourselves in some refactoring, with confidence.
 
 ## Refactor
 
