@@ -1,81 +1,75 @@
-package bookshelf
+package main
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
-	"github.com/jackc/pgx/v4"
-	"io/ioutil"
 	"log"
 	"os"
+	"time"
+
+	_ "github.com/lib/pq"
 )
 
-// Store manages a bookshelf
+// Storer will hold the contract for a Store.
+type Storer interface {
+	ApplyMigration(name, stmt string) error
+}
+
+// Store manages a bookshelf using an *sql.DB.
 type Store struct {
-	db *pgx.Conn
+	db *sql.DB
 }
 
-// StoreBook will store a book
-func (store *Store) StoreBook(book Book) {
-	_, err := store.db.Exec(context.Background(), "insert into bookshelf.books (title, author) values ($1, $2)", book.Title, book.Author)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
+const (
+	removeTimeout = 10 * time.Second
+)
 
-// GetBooks fetches all books
-func (store *Store) GetBooks() ([]Book, error) {
-	var books []Book
+// NewStore creates a new store, returning a connection to the db, and an
+// anonymous function to remove the db connection when necessary
+func NewStore() (*Store, func()) {
+	// remember to change 'secret-password' for the password you set earlier
+	const connStr = "postgres://books_user:secret-password@localhost:5432/books_db"
+	// if you initialized postgres with docker, the connection string will look like this
+	// const connStr = "postgres://books_user:secret-password@my-postgres:5432/books_db"
+	// where 'my-postgres' is the '--name' parameter passed to the docker command
 
-	rows, err := store.db.Query(context.Background(), "select title, author from bookshelf.books")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var title string
-		var author string
-		err := rows.Scan(&title, &author)
-		if err != nil {
-			log.Fatal(err)
-		}
-		books = append(books, Book{
-			Title:  title,
-			Author: author,
-		})
-	}
-
-	return books, nil
-}
-
-// Book represents a book
-type Book struct {
-	Title  string
-	Author string
-}
-
-// NewStore creates a new store, connecting to the db and applying db migrations
-func NewStore() *Store {
-	url := "postgres://postgres:learn-go-with-tests@localhost/postgres?sslmode=disable"
-	conn, err := pgx.Connect(context.Background(), url)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connection to database: %v\n", err)
 		os.Exit(1)
 	}
 
-	_, err = conn.Exec(context.Background(), "create schema if not exists bookshelf")
-
-	if err != nil {
-		log.Fatal(err)
+	// exponential backoff
+	remove := func() {
+		deadline := time.Now().Add(removeTimeout)
+		for tries := 0; time.Now().Before(deadline); tries++ {
+			err := db.Close()
+			retryIn := time.Second << uint(tries)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error closing connection to database, retrying in %v: %v\n", retryIn, err)
+				time.Sleep(retryIn)
+				continue
+			}
+			return
+		}
+		log.Fatalf("timeout of %v exceeded", removeTimeout)
 	}
 
-	migration, _ := ioutil.ReadFile("0001_create_bookshelf.sql")
+	return &Store{db: db}, remove
+}
 
-	_, err = conn.Exec(context.Background(), string(migration))
-
+// ApplyMigration is a wrapper around sql.DB.Exec that only returns an error
+func (s *Store) ApplyMigration(name, stmt string) error {
+	_, err := s.db.Exec(stmt)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
+}
 
-	return &Store{db: conn}
+func migrate(store Storer, dir string, num int) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return err
+	}
+	return nil
 }
