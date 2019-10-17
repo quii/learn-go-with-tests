@@ -66,10 +66,3 @@ func (s *Store) ApplyMigration(name, stmt string) error {
 	}
 	return nil
 }
-
-func migrate(store Storer, dir string, num int) error {
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		return err
-	}
-	return nil
-}
