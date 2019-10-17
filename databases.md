@@ -1127,8 +1127,10 @@ func migrate(
 
 Our tests now pass
 
+```sh
 PASS
 ok github.com/quii/learn-go-with-tests/databases/v2 0.475s
+```
 
 We're missing an explicit check for `num == -1` to run all migrations.
 
@@ -1601,9 +1603,9 @@ Key points
 
 -   **SQL Language**
 
-        	The `SQL` language is part of an ISO standard, and most database engines comform to it partially. This means that code written for one `RDBMS` (say, `PostgreSQL`), will cannot be interpreted as-is by a different one (say, `SQLite3`). There are a lot of similarities, however, and the changes are often small.
+    The `SQL` language is part of an ISO standard, and most database engines comform to it partially. This means that code written for one `RDBMS` (say, `PostgreSQL`), will cannot be interpreted as-is by a different one (say, `SQLite3`). There are a lot of similarities, however, and the changes are often small.
 
-        	Keep in mind that the `SQL` you're seeing here is very `PostgreSQL` specific, and some, if not all of it, may not be executable in a different engine.
+    Keep in mind that the `SQL` you're seeing here is very `PostgreSQL` specific, and some, if not all of it, may not be executable in a different engine.
 
 The test! Here is our first integration test.
 
