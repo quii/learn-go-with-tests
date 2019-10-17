@@ -2,7 +2,7 @@
 
 Oftentimes when creating software, it's necessary to save (or, more precisely, _persist_) some application state.
 
-As an example, when you log into your online banking system, the system has to
+As an example, when you log into your online banking system, the system has to:
 
 1. Check that it's really you accessing the system (this is called _authentication_, and is beyond the scope of this chapter)
 2. Retrieve some information from _somewhere_ and show it to the user (you).
@@ -11,12 +11,12 @@ Information that is stored and meant to be long-lived is said to be [_persisted_
 
 Some storage systems, like the filesystem, can be effective for one-off or small amounts of storage, but they fall short for larger application, for a number of reasons.
 
-This is why most software applications, large and small, opt for storage systems that can provide
+This is why most software applications, large and small, opt for storage systems that can provide:
 
--   Reliability: The data you want is there when you need it
+-   Reliability: The data you want is there when you need it.
 -   Concurrency: Imagine thousands of users accessing simultaneously.
--   Consistent: You expect the same inputs to produce the same results
--   Durable: Data should remain there even in case of a system failure (power outage or system crash)
+-   Consistent: You expect the same inputs to produce the same results.
+-   Durable: Data should remain there even in case of a system failure (power outage or system crash).
 
 NOTE: The above bullet points are a rewording of the [_ACID principles_](https://en.wikipedia.org/wiki/ACID), it's a set of properties often expressed and used in database design.
 
@@ -48,12 +48,12 @@ The reasons for this choice, include, but are not limited to:
 
 ### Docker
 
-The easiest (and cleanest) way of getting `PostgreSQL` up and running is by using `docker`. This will create the database and user
+The easiest (and cleanest) way of getting `PostgreSQL` up and running is by using `docker`. This will create the database and user:
 
 -   [`Docker` installation instructions](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
 -   See [https://hub.docker.com/\_/postgres](https://hub.docker.com/_/postgres) for more details on how to use this image.
 
-```bash
+```sh
 ~$ docker run \
     --name my-postgres \ # name of the instance
     -e POSTGRES_DB=bookshelf_db \ # name for the database
@@ -70,18 +70,19 @@ You may need to run the above command with elevation (prepend it with `sudo`).
 
 Install `PostgreSQL` with the package manager
 
-```bash
+```sh
 ~$ sudo apt-get upgrade
 ~$ sudo apt-get install postgresql postgresql-contrib
 ```
 
 PostgreSQL installs and initializes a database called `postgres`, and a user also called `postgres`. Since this is a system-wide install, we don't want to pollute this main database with this application's tables (`PostgreSQL` uses these to store administrative data), so we will have to create a user and a database.
 
-Note that inside the `psql` shell, anything after a double hyphen (`--`) is considered a comment
-
-```
+```sh
 ~$ sudo -i -u postgres # this will switch you to the postgres user
 ~$ psql
+```
+
+```
 psql (10.10 (Ubuntu 10.10-0ubuntu0.18.04.1))
 Type "help" for help
 
@@ -89,9 +90,9 @@ postgres=# CREATE USER bookshelf_user WITH CREATEDB PASSWORD 'secret-password';
 CREATE ROLE
 postgres=# CREATE DATABASE bookshelf_db OWNER bookshelf_user;
 CREATE DATABASE
-
-postgres=# -- you can view users and databases with the commands \du and \l respectively
 ```
+
+You can view users and databases with the commands \du and \l respectively.
 
 ## Database migrations
 
@@ -122,11 +123,11 @@ With these in mind, let's dive in...
 
 ## Project
 
-We will initially write a (simple) tool to handle our (also simple) migrations, then we will be creating a CRUD program to interact with our spiffy, real database.
+We will initially write a (simple) tool to handle our (also simple) migrations, then we will be creating a `CRUD` program to interact with our spiffy, real database.
 
 ## Write the test first
 
-```golang
+```go
 // migrate_test.go
 package main
 
@@ -150,7 +151,7 @@ func TestMigrateUp(t *testing.T) {
 
 Fails, as expected.
 
-```bash
+```sh
 # command-line-arguments [command-line-arguments.test]
 .\migrate_test.go:9:10: undefined: MigrateUp
 FAIL    command-line-arguments [build failed]
@@ -167,7 +168,7 @@ Before we continue down the happy-path, we need to make sure our `MigrateUp` fun
 
 The code directly below defines an interface, which will allow us to mock the database functionality, as well as a `NewStore` function that will simplify its creation.
 
-```golang
+```go
 // bookshelf-store.go
 package main
 
@@ -195,9 +196,9 @@ const (
 
 func NewStore() (*Store, func()) {
 	// remember to change 'secret-password' for the password you set earlier
-	const connStr = "postgres://books_user:secret-password@localhost:5432/books_db"
+	const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/bookshelf_db"
 	// if you initialized postgres with docker, the connection string will look like this
-	// const connStr = "postgres://books_user:secret-password@my-postgres:5432/books_db"
+	// const connStr = "postgres://bookshelf_user:secret-password@my-postgres:5432/bookshelf_db"
 	// where 'my-postgres' is the '--name' parameter passed to the docker command
 
 	db, err := sql.Open("postgres", connStr)
@@ -242,7 +243,7 @@ Generally when calling external services you want to account for the possibility
 
 This is here as a demonstration mostly, where it will prove useful is during the integration tests. The test database that we create will have be destroyed after running tests, thus, it can't have read or write operations running.
 
-Code explained
+Code explained:
 
 ```go
 remove := func() {
@@ -277,7 +278,7 @@ The `ApplyMigration` method is merely a wrapper around the `sql.DB.Exec` method,
 
 Here is the signature for our `MigrateUp` function, with our `Storer` interface:
 
-```golang
+```go
 MigrateUp(store Storer, dir string, num int)
 ```
 
@@ -298,7 +299,7 @@ Seeing as we will have a `MigrateDown` as well, and so far they seem only to dif
 
 Let's write our mock store (and test) first, so we can test the `migrate` function in isolation.
 
-```golang
+```go
 // migrate_test.go
 import (
 	"time"
@@ -368,7 +369,7 @@ Now we're ready to address the different points, one by one.
 
 1. It needs to check whether the `dir` passed in exists.
 
-```golang
+```go
 ...
 func TestMigrate(t *testing.T) {
 	store := NewSpyStore()
@@ -741,7 +742,7 @@ func CreateTempDir(
 }
 ```
 
-Note that now our second test `no error on existing directory` can be removed, as an empty, existing directory raises an error as well. We've added the `direction` test as well.
+Our second test `no error on existing directory` can be removed, as an empty, existing directory raises an error as well. We've added the `direction` test as well.
 
 ```go
 ...
@@ -1529,3 +1530,349 @@ And we are green again
 PASS
 ok      github.com/quii/learn-go-with-tests/databases/v2        1.555s
 ```
+
+## Modifying the database
+
+The moment of truth, now that our `migrate` function behaves as expected, we can implement it for our integration tests!
+
+But, like everything we've done before, we need to test it as well.
+
+Integration tests are, in some aspects, easier to implement than unit tests, as you can rely on the service error reporting to test your application (though you want to maintain as much control as possible).
+
+Before we move on, let's write two wrapper functions around our `migrate` powerhouse.
+
+```go
+// bookshelf-store.go
+func MigrateUp(out io.Writer, store Storer, dir string, num int) ([]string, error) {
+	return migrate(out, os.Stdout, store, dir, num, Directions[UP])
+}
+
+func MigrateDown(out io.Writer, store Storer, dir string, num int) ([]string, error) {
+	return migrate(out, os.Stdout, store, dir, num, Directions[DOWN])
+}
+```
+
+## Write the test first
+
+We're going to rely on the failure of `sql.DB`'s [`Exec`](https://golang.org/pkg/database/sql/#DB.Exec) method, which returns an error if the operation could not complete. We can also use some `PostgreSQL` utilities to list the tables from within our application, and examine the output to verify our tables are there.
+
+Recall our migration written earlier from `migrations/0001_create_books_table.up.sql`. This time we will add some comments to explain what each line does.
+
+Remember, in `SQL`, everything after a double hyphen (`--`) is a comment.
+
+```sql
+BEGIN; -- BEGIN starts a transaction
+
+-- create a table named `books`
+CREATE TABLE IF NOT EXISTS books (
+	-- add a column named `id`, which is the PRIMARY KEY
+	-- type SERIAL means it's an auto-incrementing sequence
+	-- of values
+	id SERIAL PRIMARY KEY,
+	-- add a column named `title`, which is of type VARCHAR (string)
+	-- and a maximum allocation of 255 characters. It cannot be NULL
+	title VARCHAR(255) NOT NULL,
+	-- add a column named `author`, same as `title`
+	author VARCHAR(255) NOT NULL
+);
+
+-- CREATEs an index named `books_id_uindex` on the table `books`
+-- using the column `id`
+CREATE UNIQUE INDEX IF NOT EXISTS  books_id_uindex ON books (id);
+
+COMMIT; -- COMMIT saves the transaction to the database
+```
+
+Key points
+
+-   **Transaction**:
+
+    A transaction represents a batch of work that needs to be performed together. A transaction has to be started with `BEGIN`, and is either saved with `COMMIT` or all the work done so far reversed with `ROLLBACK`.
+
+    We don't use `ROLLBACK` in our migration because our simple creation of tables and index is very unlikely to fail, and it is safeguarded by the `IF NOT EXISTS` clause, which does nothing if the table or index already exists.
+
+-   **Index**:
+
+    A database index is, in the layman's terms, a trade-off that improves the retrieval of information (if done right) by giving a little more every time data is added.
+
+    Here are more formal definitions if the subject interests you: [Wikipedia](https://en.wikipedia.org/wiki/Database_index), [Use The Index, Luke](https://use-the-index-luke.com/sql/anatomy).
+
+    In this case, the index is redundant, as `PostgreSQL` creates an index on the `PRIMARY KEY` of a table by default.
+
+-   **SQL Language**
+
+        	The `SQL` language is part of an ISO standard, and most database engines comform to it partially. This means that code written for one `RDBMS` (say, `PostgreSQL`), will cannot be interpreted as-is by a different one (say, `SQLite3`). There are a lot of similarities, however, and the changes are often small.
+
+        	Keep in mind that the `SQL` you're seeing here is very `PostgreSQL` specific, and some, if not all of it, may not be executable in a different engine.
+
+The test! Here is our first integration test.
+
+```go
+//integration_test.go
+package main
+
+import "testing"
+
+func TestMigrations(t *testing.T) {
+	store, removeStore := NewStore()
+	defer removeStore()
+
+	t.Run("migrate up", func(t *testing.T){
+		_, err := MigrateUp(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("migration up failed: %v", err)
+		}
+	})
+	t.Run("migrate down", func(t *testing.T){
+		_, err := MigrateDown(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("migration down failed: %v", err)
+		}
+	})
+}
+```
+
+## Try to run the test
+
+I have deliberately turned off my `PostgreSQL` server to get an error.
+
+If you'd like to do the same, run `sudo systemctl stop postgresql.service` in a shell, or kill your `docker` container of `postgres`.
+
+```sh
+--- FAIL: TestMigrations (2.68s)
+    --- FAIL: TestMigrations/migrate_up (1.37s)
+        integration_test.go:14: migration up failed: dial tcp 127.0.0.1:5432: connectex: No connection could be made because the target machine actively refused it.
+    --- FAIL: TestMigrations/migrate_down (1.31s)
+        integration_test.go:20: migration down failed: dial tcp 127.0.0.1:5432: connectex: No connection could be made because the target machine actively refused it.
+FAIL
+exit status 1
+FAIL    github.com/quii/learn-go-with-tests/databases/v3        4.073s
+```
+
+This output is one of many possible errors we may get. While we cannot control this type of error in the real world, this is useful to know in case we find it "in the wild". This is why we do `integration tests` in the first place!
+
+Restart your `postgres` `docker` instance or run `sudo systemctl start postgresql.service`, and try again.
+
+```sh
+--- FAIL: TestMigrations (6.21s)
+    --- FAIL: TestMigrations/migrate_up (6.15s)
+        integration_test.go:14: migration up failed: pq: SSL is not enabled on the server
+    --- FAIL: TestMigrations/migrate_down (0.06s)
+        integration_test.go:20: migration down failed: pq: SSL is not enabled on the server
+FAIL
+exit status 1
+FAIL    github.com/quii/learn-go-with-tests/databases/v3        12.427s
+```
+
+I admit that I deliberately left out an important part of the connection string, the query parameter `sslmode=disable`. Partly to get this error, partly to explain `SSL`.
+
+Databases are generally used over networks, and, like all network connections, they should be `secured` if they have sensitive data. One of the security measures `PostgreSQL` can implements is **S**ecure **S**ocket **L**ayer, or **SSL**. It allows encrypted connections to and from the database.
+
+Our database lives locally, so it would be redundant to implement encryption here.
+
+Change the `connStr` constant inside `NewStore` to include the query parameter `sslmode=disable`.
+
+```go
+// bookshelf-store.go
+...
+const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/bookshelf_db?sslmode=disable"
+...
+```
+
+## Try to run the tests
+
+Now our tests pass
+
+```sh
+PASS
+ok      github.com/quii/learn-go-with-tests/databases/v3        12.989s
+```
+
+You probably noticed that our test are much slower now (~`12s` vs ~`1s` before).
+
+That said, such is the nature of integration tests: testing between services requires more computing power, and has to account for things like latency, message queues and other nuisances that add to the test time.
+
+It's not entirely hopeless though, as a solution exists! It's along the lines of "run the tests on someone else's computer".
+
+Actually, it's exactly like "run the tests on someone else's computer", and it's called contionuous integration (commonly referred to as CI).
+
+We won't cover CI in this chapter, but we'll point to some resources at the end. For the moment, we'll have to bite the bullet and endure the slow tests.
+
+## Where are the tables?
+
+So far our tests pass, and we assume they do what they're supposed to. But we're modifying a database, you would think there is _something_ happening somewhere that makes said modifications. And you would be right.
+
+Let's extend our tests to ensure that we are getting some output.
+
+```go
+// integration_tests.go
+...
+const queryTables = `
+SELECT tablename, tableowner
+FROM pg_catalog.pg_tables
+WHERE
+	schemaname != 'pg_catalog'
+	AND
+	schemaname != 'information_schema';`
+
+type pgTable struct {
+	tableOwner string `sql:"tableowner"`
+	tableName string `sql:"tablename"`
+}
+
+func TestMigrations(t *testing.T) {
+	store, removeStore := NewStore()
+	defer removeStore()
+
+	t.Run("migrate up", func(t *testing.T) {
+		_, err := MigrateUp(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("migration up failed: %v", err)
+		}
+
+		rows, err := store.db.Query(queryTables)
+		if err != nil {
+			t.Errorf("received error querying rows: %v",  err)
+			t.FailNow()
+		}
+		defer rows.Close()
+
+		tables := make([]pgTable, 0)
+		for rows.Next() {
+			var table pgTable
+			if err := rows.Scan(&table.tableName, &table.tableOwner); err != nil {
+				t.Errorf("error scanning row: %v", err)
+				continue
+			}
+			tables = append(tables, table)
+		}
+		if err := rows.Err(); err != nil {
+			t.Errorf("rows error: %v", err)
+		}
+
+		set := make(map[string]bool)
+		for _, table := range tables {
+			set[table.tableName] = true
+		}
+
+		if _, ok := set["books"]; !ok {
+			t.Error("table \"books\" not returned")
+		}
+	})
+	t.Run("migrate down", func(t *testing.T) {
+		_, err := MigrateDown(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("migration down failed: %v", err)
+		}
+
+		rows, err := store.db.Query(queryTables)
+		if err != nil {
+			t.Errorf("received error querying rows: %v",  err)
+			t.FailNow()
+		}
+		defer rows.Close()
+
+		got := 0
+		for rows.Next() {
+			got++
+		}
+		if err := rows.Err(); err != nil {
+			t.Errorf("rows error: %v", err)
+		}
+		if got > 0 {
+			t.Errorf("got %d want 0 rows", got)
+		}
+	})
+}
+```
+
+And our tests still pass, but this time we are sure of what our code does.
+
+```sh
+PASS
+ok      github.com/quii/learn-go-with-tests/databases/v3        0.860s
+```
+
+## What is going on?!
+
+If you're not faimilar with `sql` and how `go` handles it, you are probably confused right now. Let's break down the code and explain it in smaller chunks.
+
+```go
+const queryTables = `
+SELECT tablename, tableowner
+FROM pg_catalog.pg_tables
+WHERE
+	schemaname != 'pg_catalog'
+	AND
+	schemaname != 'information_schema';`
+```
+
+Here we're creating a constant string to `query` the desired fields from one of `PostgreSQL`'s administrative databases: `pg_catalog`, from the table `pg_tables`. The `WHERE` clause is to filter out `PostgreSQL`'s own tables.
+
+```go
+type pgTable struct {
+	tableOwner string `sql:"tableowner"`
+	tableName string `sql:"tablename"`
+}
+```
+
+This struct will hold table information. The `tags` `sql:"tableowner"` and `sql:"tablename"`, tell the `database/sql` package utilities to map those columns to those fields.
+
+For the `migrate up` test, we'll add comments on each line instead
+
+```go
+	t.Run("migrate up", func(t *testing.T) {
+		_, err := MigrateUp(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("migration up failed: %v", err)
+		}
+
+		// this executes the queryTables query defined above
+		rows, err := store.db.Query(queryTables)
+		if err != nil {
+			t.Errorf("received error querying rows: %v",  err)
+			t.FailNow()
+		}
+		// prevent memory leaks
+		defer rows.Close()
+
+		// create a slice to hold our testable information
+		tables := make([]pgTable, 0)
+		// iterates through the `rows`, one by one
+		for rows.Next() {
+			var table pgTable
+			// this scan the columns on each row, mapping them to
+			// the pgTable created above
+			if err := rows.Scan(&table.tableName, &table.tableOwner); err != nil {
+				t.Errorf("error scanning row: %v", err)
+				continue
+			}
+			tables = append(tables, table)
+		}
+		if err := rows.Err(); err != nil {
+			t.Errorf("rows error: %v", err)
+		}
+
+		// we create a set of unique values using the table names
+		set := make(map[string]bool)
+		for _, table := range tables {
+			set[table.tableName] = true
+		}
+
+		// if the table we want (books) is not in the set, then it
+		// was not returned by the query, thus, should fail
+		if _, ok := set["books"]; !ok {
+			t.Error("table \"books\" not returned")
+		}
+	})
+```
+
+The `migrate down` tests uses very similar logic to the `migrate up` test, but instead it counts the rows returned. The number of rows should be `0`, because we `down`-migrated all the tables.
+
+## What we've accomplished so far
+
+Up to this point, we have managed to create our migration tool, and have tested it thoroughly.
+
+This tool is, however, secondary to our actual goals. Now we'll be moving on to create a `CRUD` application to interact with our database.
+
+In case you are wondering, `CRUD` is an acronym for **C**reate, **R**etrieve, **U**pdate, **D**elete, often used to describe the basic operations needed to run against a storage system.
