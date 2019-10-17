@@ -159,3 +159,5 @@ func migrate(
 	}
 	return migrations, nil
 }
+
+func main() {}

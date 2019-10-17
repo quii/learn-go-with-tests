@@ -1,4 +1,4 @@
-package main
+package bookshelf
 
 import (
 	"database/sql"
@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // unneeded namespace
 )
 
 // Storer will hold the contract for a Store.
@@ -23,20 +23,18 @@ type Storer interface {
 
 // Store manages a bookshelf using an *sql.DB.
 type Store struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
 const (
 	removeTimeout = 10 * time.Second
 	// UP directional const
-	UP uint = iota
+	UP = "up"
 	// DOWN directional const
-	DOWN
+	DOWN = "down"
 )
 
 var (
-	// Directions holds possible direction values
-	Directions = [...]string{UP: "up", DOWN: "down"}
 	// ErrMigrationDirEmpty empty migration directory.
 	ErrMigrationDirEmpty = errors.New("empty migration directory")
 	// ErrMigrationDirNoExist migration directory does not exist.
@@ -47,7 +45,7 @@ var (
 // anonymous function to remove the db connection when necessary.
 func NewStore() (*Store, func()) {
 	// remember to change 'secret-password' for the password you set earlier
-	const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/bookshelf_db"
+	const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/bookshelf_db?sslmode=disable"
 	// if you initialized postgres with docker, the connection string will look like this
 	// const connStr = "postgres://bookshelf_user:secret-password@my-postgres:5432/bookshelf_db"
 	// where 'my-postgres' is the '--name' parameter passed to the docker command
@@ -74,20 +72,33 @@ func NewStore() (*Store, func()) {
 		log.Fatalf("timeout of %v exceeded", removeTimeout)
 	}
 
-	return &Store{db: db}, remove
+	return &Store{DB: db}, remove
 }
 
 // ApplyMigration is a wrapper around sql.DB.Exec that only returns an error.
 func (s *Store) ApplyMigration(name, stmt string) error {
-	_, err := s.db.Exec(stmt)
+	_, err := s.DB.Exec(stmt)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// migrate is the workorse of the migration tool.
-func migrate(
+// MigrateUp wrapper around `migrate` that hardcodes to Directions[UP].
+func MigrateUp(out io.Writer, store Storer, dir string, num int) ([]string, error) {
+	return Migrate(out, store, dir, num, UP)
+}
+
+// MigrateDown wrapper around `migrate` that hardcodes to Directions[DOWN].
+func MigrateDown(out io.Writer, store Storer, dir string, num int) ([]string, error) {
+	return Migrate(out, store, dir, num, DOWN)
+}
+
+// Migrate runs `num` .sql files found inside `dir`, designatied by
+// `direction` which can be `up` or `down`, against the `store`. `out`
+// is for reporting success or failure. migrate will abort if any error
+// were to be encountered
+func Migrate(
 	out io.Writer,
 	store Storer,
 	dir string,
@@ -110,7 +121,7 @@ func migrate(
 	}
 
 	switch direction {
-	case Directions[DOWN]:
+	case DOWN:
 		sort.SliceStable(files, func(i, j int) bool { return files[j].Name() < files[i].Name() })
 	default:
 		sort.SliceStable(files, func(i, j int) bool { return files[i].Name() < files[j].Name() })
@@ -146,5 +157,3 @@ func migrate(
 	}
 	return migrations, nil
 }
-
-func main() {}

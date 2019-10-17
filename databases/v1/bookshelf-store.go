@@ -66,3 +66,5 @@ func (s *Store) ApplyMigration(name, stmt string) error {
 	}
 	return nil
 }
+
+func main() {}

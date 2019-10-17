@@ -233,6 +233,8 @@ func (s *Store) ApplyMigration(name, stmt string) error {
 	}
 	return nil
 }
+
+func main(){}
 ```
 
 ---
@@ -1878,3 +1880,68 @@ Up to this point, we have managed to create our migration tool, and have tested 
 This tool is, however, secondary to our actual goals. Now we'll be moving on to create a `CRUD` application to interact with our database.
 
 In case you are wondering, `CRUD` is an acronym for **C**reate, **R**etrieve, **U**pdate, **D**elete, often used to describe the basic operations needed to run against a storage system.
+
+But first...
+
+## Housekeeping
+
+Our application is growing, and so is our codebase. Before we are drowing in `.go` files, let's use `go`'s package structure to our advantage.
+
+Let's create a package (directory), aptly name it `bookshelf`, and put our `migrate` related code (`bookshelf-store.go`) inside it. Don't forget to change occurrences of `package main` to `package bookshelf`.
+
+Also change all test files (`migrate_test`, `integration_test`) `package main` to `package bookshelf_test`, and put them inside the `bookshelf` directory. You will have to import the `bookshelf` package you created into these tests.
+
+Inside bookshelf, the `migrate` function will have to be exported (change to `Migrate`).
+
+Inside bookshelf, an utility package called `testutils`, that will hold all the testing utilities (duh!) we have created so far: assertions and helpers.
+
+Inside `migrate_test.go`, all occurrences of `migrate` will need to be changed to `bookshelf.Migrate`. You will need to import the `bookshelf/testutils` package and prepend all `assertions` and occurrences of `CreateTempDir` and `NewSpyStore` with `testutils.*`.
+
+Finally, move the `migrations` directory inside the `bookshelf` dir.
+
+---
+
+### Note on the package import string:
+
+To me, the import string of my `bookshelf` package looks like this:
+
+```go
+import (
+	...
+	"github.com/djangulo/learn-go-with-tests/databases/v4/bookshelf"
+)
+```
+
+It's likely you did not clone the repository to go through this chapter, and that's OK.
+
+Keep in mind that you may need to change your import string to something like
+
+```go
+import (
+	...
+	"github.com/YOUR_GITHUB_HANDLE/bookshelf"
+)
+```
+
+---
+
+Once you're done, folder structure should look like this:
+
+```sh
+├── bookshelf
+│   ├── bookshelf-store.go
+│   ├── integration_test.go
+│   ├── migrate_test.go
+│   └── testutils
+│       ├── assertions.go
+│       └── store.go
+└── migrations
+    ├── 0001_create_books_table.down.sql
+    └── 0001_create_books_table.up.sql
+
+3 directories, 7 files
+```
+
+Try running the tests, the compiler will tell you what to do. Keep correcting the errors, eventually they will run out, I promise.
+
+This exercise in patience may seem pointless now, but it's well worth the effort.
