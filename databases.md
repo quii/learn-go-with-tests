@@ -1928,16 +1928,17 @@ import (
 Once you're done, folder structure should look like this:
 
 ```sh
-├── bookshelf
-│   ├── bookshelf-store.go
-│   ├── integration_test.go
-│   ├── migrate_test.go
-│   └── testutils
-│       ├── assertions.go
-│       └── store.go
-└── migrations
-    ├── 0001_create_books_table.down.sql
-    └── 0001_create_books_table.up.sql
+.
+└── bookshelf
+    ├── bookshelf-store.go
+    ├── integration_test.go
+    ├── migrate_test.go
+    ├── migrations
+    │   ├── 0001_create_books_table.down.sql
+    │   └── 0001_create_books_table.up.sql
+    └── testutils
+        ├── assertions.go
+        └── store.go
 
 3 directories, 7 files
 ```

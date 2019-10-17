@@ -6,8 +6,6 @@ go:
 
 before_install:
   - go get github.com/quii/learn-go-with-tests/command-line/v1
-  - psql -c "CREATE USER bookshelf_user WITH CREATEDB PASSWORD 'secret-password';" -U postgres
-  - psql -c 'CREATE DATABASE bookshelf_db OWNER bookshelf_user;' -U postgres
 
 install: true
 
@@ -25,6 +23,8 @@ jobs:
     - stage: build
       script:
         - go get -u golang.org/x/lint/golint
+        - psql -c "CREATE USER bookshelf_user WITH CREATEDB PASSWORD 'secret-password';" -U postgres
+        - psql -c 'CREATE DATABASE bookshelf_db OWNER bookshelf_user;' -U postgres
         - "./build.sh"
     - stage: spelling
       script:
