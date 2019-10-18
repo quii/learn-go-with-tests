@@ -1947,7 +1947,7 @@ Also change all test files (`migrate_test`, `integration_test`) `package main` t
 
 Inside bookshelf, the `migrate` function will have to be exported (change to `Migrate`).
 
-Inside bookshelf, an utility package called `testutils`, that will hold all the testing utilities (duh!) we have created so far: assertions and helpers.
+Inside bookshelf, an utility package called `testutils`, that will hold all the testing utilities (duh!) we have created so far: put assertions into a file called `assertions.go`, `CreateTempDir` inside `helpers.go` and `SpyStore` and its related functions and methods inside `store.go`.
 
 Inside `migrate_test.go`, all occurrences of `migrate` will need to be changed to `bookshelf.Migrate`. You will need to import the `bookshelf/testutils` package and prepend all `assertions` and occurrences of `CreateTempDir` and `NewSpyStore` with `testutils.*`.
 
