@@ -48,9 +48,6 @@ var (
 func NewStore() (*Store, func()) {
 	// remember to change 'secret-password' for the password you set earlier
 	const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/bookshelf_db"
-	// if you initialized postgres with docker, the connection string will look like this
-	// const connStr = "postgres://bookshelf_user:secret-password@my-postgres:5432/bookshelf_db"
-	// where 'my-postgres' is the '--name' parameter passed to the docker command
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {

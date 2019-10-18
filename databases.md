@@ -55,7 +55,6 @@ The easiest (and cleanest) way of getting `PostgreSQL` up and running is by usin
 
 ```sh
 ~$ docker run \
-    --name my-postgres \ # name of the instance
     -e POSTGRES_DB=bookshelf_db \ # name for the database
     -e POSTGRES_USER=bookshelf_user \ # name for the database user
     -e POSTGRES_PASSWORD=secret-password \ # database password
@@ -197,9 +196,6 @@ const (
 func NewStore() (*Store, func()) {
 	// remember to change 'secret-password' for the password you set earlier
 	const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/bookshelf_db"
-	// if you initialized postgres with docker, the connection string will look like this
-	// const connStr = "postgres://bookshelf_user:secret-password@my-postgres:5432/bookshelf_db"
-	// where 'my-postgres' is the '--name' parameter passed to the docker command
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
