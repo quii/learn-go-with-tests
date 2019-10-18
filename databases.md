@@ -1,5 +1,7 @@
 # Databases
 
+<!-- TODO: add links to start:v1, end:v2 -->
+
 Oftentimes when creating software, it's necessary to save (or, more precisely, _persist_) some application state.
 
 As an example, when you log into your online banking system, the system has to:
@@ -1533,6 +1535,8 @@ ok      github.com/quii/learn-go-with-tests/databases/v2        1.555s
 
 ## Modifying the database
 
+<!-- TODO: add links start:v2, end:v3 -->
+
 The moment of truth, now that our `migrate` function behaves as expected, we can implement it for our integration tests!
 
 But, like everything we've done before, we need to test it as well.
@@ -1939,6 +1943,8 @@ But first...
 
 ## Housekeeping
 
+<!-- TODO: add links start:v3, end:v4 -->
+
 Our application is growing, and so is our codebase. Before we are drowing in `.go` files, let's use `go`'s package structure to our advantage.
 
 Let's create a package (directory), aptly name it `bookshelf`, and put our `migrate` related code (`bookshelf-store.go`) inside it. Don't forget to change occurrences of `package main` to `package bookshelf`.
@@ -2002,6 +2008,8 @@ Try running the tests, the compiler will tell you what to do. Keep correcting th
 This exercise in patience may seem pointless now, but it's well worth the effort.
 
 ## CRUD
+
+<!-- TODO: add links start:v4, end:v5 -->
 
 We have `4` operations to write and test. A lot of the code already in place helps us, so the workload will be lighter than before (we hope so at least).
 
