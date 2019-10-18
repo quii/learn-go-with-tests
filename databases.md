@@ -2000,3 +2000,761 @@ Once you're done, folder structure should look like this:
 Try running the tests, the compiler will tell you what to do. Keep correcting the errors, eventually they will run out, I promise.
 
 This exercise in patience may seem pointless now, but it's well worth the effort.
+
+## CRUD
+
+We have `4` operations to write and test. A lot of the code already in place helps us, so the workload will be lighter than before (we hope so at least).
+
+In the `SQL` migration, We created a table called `books`, with columns called `id`, `title` and `author`. Let`s create a struct to hold these objects before we get into testing.
+
+```go
+// bookshelf/bookshelf-store.go
+...
+type Book struct {
+	ID     int64  `sql:"id"`
+	Title  string `sql:"title"`
+	Author string `sql:"author"`
+}
+...
+```
+
+## Write the test first
+
+Before we can retrieve, update or delete an object, we need to create it first! Logically, it makes sense to start here.
+
+Change the `SpyStore` struct in `bookshelf/testutils/store.go` to include a slice of books.
+
+```go
+// bookshelf/testutils/store.go
+package testutils
+
+import (
+	...
+	"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf"
+)
+...
+type SpyStore struct {
+	Migrations map[string]migration
+	Books []*bookshelf.Book
+}
+...
+func NewSpyStore() *SpyStore {
+	books := make([]*bookshelf.Book, 0)
+	return &SpyStore{
+		Migrations: map[string]migration{},
+		Books: books,
+	}
+}
+```
+
+And our test
+
+```go
+// bookshelf/crud_test.go
+package bookshelf_test
+
+import (
+	"testing"
+
+	"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf"
+	"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf/testutils"
+)
+
+func TestCreate(t *testing.T) {
+	store := testutils.NewSpyStore()
+
+	var book bookshelf.Book
+	err := store.CreateBook(&book, "Moby Dick", "Herman Melville")
+	testutils.AssertNoError(t, err)
+	if book.ID == 0 {
+		t.Error("book returned without an ID")
+	}
+}
+
+```
+
+Notice that the `CreateBook` method does not have an `ID` field provided, this is because `primary keys` are usually autoincremented and provided by the database.
+
+This `ID` field is our criteria for a passing test.
+
+This is not written in stone, however: just happens that when we created the database table, we designated the `id` field as `SERIAL`, and `PostgreSQL` handles the auto-incrementing for us. But we could have designated a `PRIMARY KEY` of whichever type we would've wanted. For example, had we assigned the `title` as the primary key, the `id` field would have not been necessary. Or, if we designated `id` as `PRIMARY KEY`, but as type `INT` instead of `SERIAL`, our application would have had to find the latest `id` and increment it.
+
+## Try to run the test
+
+```sh
+~$ $go test ./bookshelf
+# github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf_test [github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf.test]
+databases\v5\bookshelf\crud_test.go:14:14: store.CreateBook undefined (type *"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf/testutils".SpyStore has no field or method CreateBook)
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf [build failed]
+FAIL
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+Write the `CreateBook` method for the `SpyStore`.
+
+```go
+// bookshelf/testutils/store.go
+...
+func (s *SpyStore) CreateBook(book *bookshelf.Book, title, author string) error {
+	return nil
+}
+...
+```
+
+When we run the tests again
+
+```sh
+~$ go test ./bookshelf/
+--- FAIL: TestCreate (0.00s)
+    crud_test.go:17: book returned without an ID
+FAIL
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  4.635s
+FAIL
+```
+
+## Write enough code to make it pass
+
+We should check that the passed in book has a valid (i.e. non-zero) `id`, and that the `Title` and `Author` match what was passed in. We should ensure our `id`'s are unique as well (as will the database).
+
+As a side note, `PostgreSQL`'s behavior regarding the `SERIAL` type is to keep autoincrementing it no matter what, even if previous `id`s are gone. For example, if you create `books` with `id`s 1, 2, 3 and 4, and delete the `book` with `id` 2, the next `id` created will be `5`. You could reassign it should you want to, but this leads to confusion and it's generally bad practice.
+
+Let's use a helper to find the last ID before we assign it to the book.
+
+```go
+// bookshelf/testutils/store.go
+func (s *SpyStore) CreateBook(book *bookshelf.Book, title, author string) error {
+	book.ID = newID(s)
+	book.Title = title
+	book.Author = author
+	s.Books = append(s.Books, book)
+	return nil
+}
+
+func newID(store *SpyStore) int64 {
+	if len(store.Books) == 0 {
+		return 1
+	}
+	var last int64
+	for _, b := range store.Books {
+		if b.ID > last {
+			last = b.ID
+		}
+	}
+	return last + 1
+}
+```
+
+## Try to run the test
+
+```sh
+~$ go test ./bookshelf
+ok      github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  1.384s
+```
+
+## But wait, what if we create the same book twice?
+
+Our tests pass, but what about duplicated data? We don't need two, three or twenty entries of the same book.
+
+Turn's out we have made a mistake when creating the tables in `migrations/0001_create_books_table.up.sql`. While we designated the `author` and the `title` columns to be required (`NOT NULL`, we should test against this too!), we did not designate the `title` as `UNIQUE`. We should be careful, as there could be different `author`s with books that share a `title`; this may seem like an edge case, but edge cases is one of many reasons why we test!
+
+While you might be tempted to just change the `0001_create_books_table.up.sql` file, you shouldn't! You might break the production database by altering the existing migrations!
+
+The proper way to do this is to add a new migration (`up` and `down` as well), that modifies the database to the desired behavior.
+
+Let's start there. Create two new files: `migrations/0002_books_unique_title.up.sql` and `migrations/0002_books_unique_title.down.sql`.
+
+```sql
+-- migrations/0002_books_unique_title.up.sql
+ALTER TABLE IF EXISTS books ADD CONSTRAINT books_unique_author_title UNIQUE (author, title);
+
+```
+
+```sql
+-- migrations/0002_books_unique_title.down.sql
+ALTER TABLE IF EXISTS books DROP CONSTRAINT IF EXISTS books_unique_author_title;
+```
+
+We should test our migrations before we move on, our integration tests should tell us if our `SQL` is correct.
+
+```sh
+~$ go test ./bookshelf
+--- FAIL: TestMigrations (0.46s)
+    --- FAIL: TestMigrations/idempotency (0.23s)
+        integration_test.go:105: second migrate up failed: pq: relation "books_unique_author_title" already exists
+FAIL
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.776s
+FAIL
+```
+
+It's complaining that the constraint already exists. Unfortunately, there is no handy `IF NOT EXISTS` for constraint creation on `PostgreSQL`. We have two ways to go about this:
+
+1. Create a `PostgreSQL` function using the scripting language provided by `PostgreSQL`.
+2. Or, drop the constraint before creation, to ensure it runs without a hitch.
+
+Being honest here, option 2 is bad. This exposes your system to exist without the constraint, even for a few milliseconds, bad things could happen. Not to mention the cost of the unnecessary write operation.
+
+But, since this is not an `SQL` book, we're going to opt for the easier of the two, that is, option 2. If this were a real application, option 1 would be the choice without question. If you still want to go this way, search online for "postgresql add constraint if not exists", answers abound.
+
+Modify `0002_books_unique_title.up.sql` to drop the constraint just before creating it. Let's wrap it in a transaction, so at least it runs as a unit.
+
+```sql
+-- migrations/0002_books_unique_title.up.sql
+BEGIN;
+ALTER TABLE IF EXISTS books DROP CONSTRAINT IF EXISTS books_unique_author_title;
+ALTER TABLE IF EXISTS books ADD CONSTRAINT books_unique_author_title UNIQUE (author, title);
+COMMIT;
+```
+
+And run the tests again
+
+```sh
+~$ go test ./bookshelf
+ok      github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.502s
+```
+
+Now our tests pass.
+
+Take a moment to appreciate how our `go` integration tests just helped us test our that our `SQL` is up to our standards.
+
+We've been to focused on the unit tests. We need to create integration tests for our `Createbook` function as well.
+
+We need to implement it in the `Store` as well.
+
+As usual, let's start with the test.
+
+## Write the test first
+
+```go
+// bookshelf/integration_test.go
+...
+func TestCreateBook(t *testing.T) {
+	store, removeStore := bookshelf.NewStore()
+	defer removeStore()
+
+	t.Run("can create a book", func(t *testing.T) {
+		var book bookshelf.Book
+		err := store.CreateBook(&book, "test-title", "test-author")
+		if err != nil {
+			t.Errorf("received error on CreateBook: %v", err)
+		}
+		if book.ID == 0 {
+			t.Error("invalid ID received")
+		}
+	})
+
+	t.Run("cannot create a duplicate title-author", func(t *testing.T) {
+		var b1, b2 bookshelf.Book
+		err := store.CreateBook(&b1, "test-title", "test-author")
+		if err != nil {
+			t.Errorf("received error on CreateBook: %v", err)
+		}
+
+		err = store.CreateBook(&b2, "test-title", "test-author")
+		if err == nil {
+			t.Error("wanted an error but didn't get one")
+		}
+		
+	})
+
+}
+
+```
+
+## Try to run the test
+
+```sh
+~$ go test ./bookshelf
+# github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf_test [github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf.test]
+bookshelf\integration_test.go:131:15: store.CreateBook undefined (type *bookshelf.Store has no field or method CreateBook)
+bookshelf\integration_test.go:142:15: store.CreateBook undefined (type *bookshelf.Store has no field or method CreateBook)
+bookshelf\integration_test.go:147:14: store.CreateBook undefined (type *bookshelf.Store has no field or method CreateBook)
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf [build failed]
+FAIL
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+Fair enough, no method exists. Let's add the signature to the `Storer` interface, as well as the method to the `Store`.
+
+```go
+// bookshelf/bookshelf-store.go
+...
+type Storer interface {
+	ApplyMigration(name, stmt string) error
+	CreateBook(*Book, string, string) error
+}
+...
+func (s *Store) CreateBook(book *Book, title, author string) error {
+	return nil
+}
+...
+```
+
+## Try to run the test
+
+We receive our expected failure.
+
+```sh
+~$ go test ./bookshelf
+--- FAIL: TestCreateBook (0.05s)
+    --- FAIL: TestCreateBook/can_create_a_book (0.00s)
+        integration_test.go:136: invalid ID received
+    --- FAIL: TestCreateBook/cannot_create_a_duplicate_title-author (0.00s)
+        integration_test.go:149: wanted an error but didn't get one
+FAIL
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.730s
+FAIL
+```
+
+## Write enough code to make it pass
+
+We can now implement it.
+
+```go
+// bookshelf/bookshelf-store.go
+...
+// CreateBook inserts a new Book into the database.
+func (s *Store) CreateBook(book *Book, title, author string) error {
+	stmt := "INSERT INTO books (title, author) VALUES ($1, $2) RETURNING id, title, author;"
+	row := s.DB.QueryRow(stmt, title, author)
+
+	err := row.Scan(&book.ID, &book.Title, &book.Author)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+```
+
+Run the tests again:
+
+```sh
+~$ go test ./bookshelf
+--- FAIL: TestCreateBook (0.11s)
+    integration_test.go:127: received error on CreateBook: pq: relation "books" does not exist
+    integration_test.go:130: invalid ID received
+FAIL
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  1.031s
+FAIL
+```
+
+Huh, "relation `books` does not exist". By now, you probably know this means the table `books` does not exist in the database.
+
+Well, we did not migrate before we tested, so that makes sense.
+
+Add a call to `MigrateUp`, and check the error, after acquiring the `store`.
+
+```go
+// bookshelf/integration_test.go
+func TestCreateBook(t *testing.T) {
+	store, removeStore := bookshelf.NewStore()
+	defer removeStore()
+
+	_, err := bookshelf.MigrateUp(dummyWriter, store, "migrations", -1)
+	if err != nil {
+		t.Errorf("migration up failed: %v", err)
+		t.FailNow()
+	}
+	...
+}
+```
+
+## Try to run the tests
+
+```sh
+~$ go test ./bookshelf
+--- FAIL: TestCreateBook (0.20s)
+    --- FAIL: TestCreateBook/cannot_create_a_duplicate_title-author (0.03s)
+        integration_test.go:144: received error on CreateBook: pq: duplicate key value violates unique constraint "books_unique_author_title"
+FAIL
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  1.197s
+FAIL
+```
+
+Is it the error we expect? Yes it is. But an error should be _passing_, so what is going on?
+
+The test raising the error is the first `CreateBook` call inside `cannot create a duplicate title-author`. This is not what we planned!
+
+As it turns out, there is only 1 database connection string in our application; the one that lives inside `NewStore`. This means that all along we've been migrating `up` and `down`, inserting and deleting into a single database! This is a very risky practice, as our tests may modify or delete sensitive data once we're running in production.
+
+So what do we do?
+
+## Test database
+
+So far, we have been operating in the `bookshelf_db` database, that we created at the start of the chapter. We need a secondary database that we can test to our heart's content.
+
+Our options are:
+
+1. Write some `go` code that creates a test database on the fly. Runs the tests and drops it once it's done.
+2. Create a test database outside our application (using `psql`), and hardcode the address in our application.
+
+Both approaches have their downsides:
+
+1. The first approach requires more `go` code to write, and depends on the privileges that the DB user (`bookshelf_user`, in our case) has. When created the database, we gave our user `bookshelf_user` the capacity to create databases with `CREATEDB`.
+2. The second approach is simpler to implement, but then our tests depend on the existence of said test database. It also implies that we need to track 2 connections inside our application, as opposed to just 
+
+We will opt for the first approach, and take advantage that our `MigrateDown` function cleans the database tables, due to the `CASCADE` statement at the end of the `down` migrations.
+
+## Refactor
+
+Now we need to refactor our code. Stop and think about what's going on inside `NewStore`.
+
+```go
+// bookshelf/bookshelf-store.go
+func NewStore() (*Store, func()) {
+	const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/bookshelf_db?sslmode=disable"
+	...
+}
+```
+
+We've hard-coded the connection string into our function that was soupposed to give us flexibility!
+
+Let's create some utilities to help ourselves.
+
+Inside `bookshelf-store.go`, insert the following:
+
+```go
+//bookshelf/bookshelf-store.go
+...
+type DBConf struct {
+	User, Pass, Host, Port, DBName,	SSLMode string
+}
+
+func (d *DBConf) String() string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		d.User, d.Pass, d.Host, d.Port, d.DBName, d.SSLMode)
+}
+
+func getenv(key, defaultValue string) string {
+	envvar := os.Getenv(key)
+	if envvar == "" {
+		return defaultValue
+	}
+	return envvar
+}
+
+var MainDBConf DBConf
+func init() {
+	MainDBConf.User = getenv("POSGRES_USER", "bookshelf_user")
+	MainDBConf.Pass = getenv("POSTGRES_PASSWORD", "secret-password")
+	MainDBConf.Host = getenv("POSTGRES_HOST", "localhost")
+	MainDBConf.Port = getenv("POSTGRES_PORT", "5432")
+	MainDBConf.DBName = getenv("POSTGRES_DB", "bookshelf_db")
+	MainDBConf.SSLMode = getenv("POSTGRES_SSLMODE0", "disable")
+}
+```
+With the code above, we can choose the database we want to connect to via environment variables. The `getenv` function is a simple extension of [`os.Getenv`](https://golang.org/pkg/os/#Getenv) that provides save defaults in case the variables are not set.
+
+The code inside the `init` function will run every time the package is called, so the `MainDBConf` will be instantiated and ready when the `bookshelf` package is imported.
+
+Our `NewStore` function now looks like this:
+
+```go
+// bookshelf/bookshelf-store.go
+func NewStore(conf *DBConf) (*Store, func()) {
+
+	db, err := sql.Open("postgres", conf.String())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connection to database %q: %v\n", conf.DBName, err)
+		os.Exit(1)
+	}
+
+	// exponential backoff
+	remove := func() {
+		deadline := time.Now().Add(removeTimeout)
+		for tries := 0; time.Now().Before(deadline); tries++ {
+			err := db.Close()
+			retryIn := time.Second << uint(tries)
+			if err != nil {
+				fmt.Fprintf(
+					os.Stderr,
+					"error closing connection to database %q, retrying in %v: %v\n",
+					conf.DBName,
+					retryIn,
+					err,
+				)
+				time.Sleep(retryIn)
+				continue
+			}
+			return
+		}
+		log.Fatalf("timeout of %v exceeded", removeTimeout)
+	}
+
+	return &Store{DB: db}, remove
+}
+```
+
+With this tooling in place, we can create a helper function to instantiate a new database just for our tests. Let's get to it!
+
+Insert the function below inside `bookshelf/testutils/helpers.go`:
+
+```go
+// bookshelf/testutils/helpers.go
+package testutils
+import (
+	...
+	"database/sql"
+	"io/ioutil"
+	"time"
+
+	"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf"
+	_ "github.com/lib/pq"
+)
+...
+func NewTestStore(conf *bookshelf.DBConf) (*bookshelf.Store, func(), error) {
+	main, removeMain := bookshelf.NewStore(&bookshelf.MainDBConf)
+
+	_, err := main.DB.Exec(
+		fmt.Sprintf("CREATE DATABASE %s OWNER %s;",
+			conf.DBName,
+			bookshelf.MainDBConf.User,
+		),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	testDB, err := sql.Open("postgres", conf.String())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	remove := func() {
+		closeDeadline := time.Now().Add(5 * time.Second)
+		dropDeadline := time.Now().Add(10 * time.Second)
+		for tries := 0; time.Now().Before(closeDeadline); tries++ {
+			retryIn := time.Second << uint(tries)
+			err := testDB.Close()
+			if err != nil {
+				fmt.Fprintf(
+					os.Stderr,
+					"error closing test database %q, retrying in %v: %v\n",
+					conf.DBName,
+					retryIn,
+					err,
+				)
+				time.Sleep(retryIn)
+				continue
+			}
+			break
+		}
+		for tries := 0; time.Now().Before(dropDeadline); tries++ {
+			retryIn := time.Second << uint(tries)
+			_, err := main.DB.Exec(fmt.Sprintf("DROP DATABASE %s;", conf.DBName))
+			if err != nil {
+				fmt.Fprintf(
+					os.Stderr,
+					"error dropping test database %q, retrying in %v: %v\n",
+					conf.DBName,
+					retryIn,
+					err,
+				)
+				time.Sleep(retryIn)
+				continue
+			}
+			break
+		}
+		removeMain()
+	}
+	return &bookshelf.Store{DB: testDB}, remove, nil
+}
+```
+
+Remember `exponential backoff`? This is where this pattern shines in our codebase. If the `mainDB` tries to drop the test database, but it's being written by a test, the operation will fail. With exponential backoff, it'll give the running operations a bit of time to finish, and then finally drop the test database.
+
+We now can create the test database inside each test function, run all our tests with a predictable state, and drop it once we're done. We can use the fact that `MigrateDown` clears the database to our advantage and clean it after each test.
+
+However, to avoid creating the test database multiple times, let's group our `TestCreateBook` and `TestMigrate` into a single function. We can still get meaningful reporting by nesting them with `t.Run`.
+
+There is nothing stopping us from creating as many test databases as we want, but each database created will make our tests that much slower.
+
+Let's create another test utility to reset the database on a whim.
+
+```go
+// bookshelf/testutils/helpers.go
+func ResetStore(store *bookshelf.Store) error {
+	var err error
+	_, err = bookshelf.MigrateDown(dummyWriter, store, "migrations", -1)
+	if err != nil {
+		return err
+	}
+
+	_, err = bookshelf.MigrateUp(dummyWriter, store, "migrations", -1)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+```
+
+And finally, our integration tests.
+
+```go
+// bookshelf/integration_test.go
+...
+import (
+	...
+	"os"
+	"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf/testutils"
+)
+...
+var (
+	dbconf = bookshelf.DBConf{
+		User:    bookshelf.MainDBConf.User,
+		Pass:    bookshelf.MainDBConf.Pass,
+		Host:    bookshelf.MainDBConf.Host,
+		Port:    bookshelf.MainDBConf.Port,
+		DBName:  "bookshelf_test_db",
+		SSLMode: bookshelf.MainDBConf.SSLMode,
+	}
+)
+
+func TestDBIntegration(t *testing.T) {
+
+	store, removeStore, err := testutils.NewTestStore(&dbconf)
+	if err != nil {
+		panic(err)
+	}
+	defer removeStore()
+
+	t.Run("Migrate", func(t *testing.T) {
+
+		t.Run("migrate up", func(t *testing.T) {
+			_, err := bookshelf.MigrateUp(dummyWriter, store, "migrations", -1)
+			if err != nil {
+				t.Errorf("migration up failed: %v", err)
+			}
+
+			rows, err := store.DB.Query(queryTables)
+			if err != nil {
+				t.Errorf("received error querying rows: %v", err)
+				t.FailNow()
+			}
+			defer rows.Close()
+
+			tables := make([]pgTable, 0)
+			for rows.Next() {
+				var table pgTable
+				if err := rows.Scan(&table.tableName, &table.tableOwner); err != nil {
+					t.Errorf("error scanning row: %v", err)
+					continue
+				}
+				tables = append(tables, table)
+			}
+			if err := rows.Err(); err != nil {
+				t.Errorf("rows error: %v", err)
+			}
+
+			set := make(map[string]bool)
+			for _, table := range tables {
+				set[table.tableName] = true
+			}
+
+			if _, ok := set["books"]; !ok {
+				t.Error("table books not returned")
+			}
+		})
+		t.Run("migrate down", func(t *testing.T) {
+			_, err := bookshelf.MigrateDown(dummyWriter, store, "migrations", -1)
+			if err != nil {
+				t.Errorf("migration down failed: %v", err)
+			}
+
+			rows, err := store.DB.Query(queryTables)
+			if err != nil {
+				t.Errorf("received error querying rows: %v", err)
+				t.FailNow()
+			}
+			defer rows.Close()
+
+			got := 0
+			for rows.Next() {
+				var a, b string
+				if err := rows.Scan(&a, &b); err != nil {
+					t.Errorf("error scanning row: %v", err)
+					continue
+				}
+				fmt.Println(a, b)
+				got++
+			}
+			if err := rows.Err(); err != nil {
+				t.Errorf("rows error: %v", err)
+			}
+			if got > 0 {
+				t.Errorf("got %d want 0 rows", got)
+			}
+		})
+		t.Run("idempotency", func(t *testing.T) {
+			_, err := bookshelf.MigrateDown(dummyWriter, store, "migrations", -1)
+			if err != nil {
+				t.Errorf("first migrate down failed: %v", err)
+			}
+
+			_, err = bookshelf.MigrateUp(dummyWriter, store, "migrations", -1)
+			if err != nil {
+				t.Errorf("first migrate up failed: %v", err)
+			}
+
+			_, err = bookshelf.MigrateUp(dummyWriter, store, "migrations", -1)
+			if err != nil {
+				t.Errorf("second migrate up failed: %v", err)
+			}
+
+			_, err = bookshelf.MigrateDown(dummyWriter, store, "migrations", -1)
+			if err != nil {
+				t.Errorf("second migrate down failed: %v", err)
+			}
+
+			_, err = bookshelf.MigrateDown(dummyWriter, store, "migrations", -1)
+			if err != nil {
+				t.Errorf("third migrate down failed: %v", err)
+			}
+		})
+	})
+
+	t.Run("CreateBook", func(t *testing.T) {
+		t.Run("can create a book", func(t *testing.T) {
+			testutils.ResetStore(store)
+
+			var book bookshelf.Book
+			err := store.CreateBook(&book, "test-title", "test-author")
+			if err != nil {
+				t.Errorf("received error on CreateBook: %v", err)
+			}
+			if book.ID == 0 {
+				t.Error("invalid ID received")
+			}
+		})
+
+		t.Run("cannot create a duplicate title-author", func(t *testing.T) {
+			testutils.ResetStore(store)
+
+			var b1, b2 bookshelf.Book
+			err := store.CreateBook(&b1, "test-title", "test-author")
+			if err != nil {
+				t.Errorf("received error on CreateBook: %v", err)
+			}
+
+			err = store.CreateBook(&b2, "test-title", "test-author")
+			if err == nil {
+				t.Error("wanted an error but didn't get one")
+			}
+		})
+	})
+}
+
+```
+
+Our tests pass.
+
+```sh
+~$ go test ./bookshelf
+ok      github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  4.644s
+```
+
+Before we move on with the rest of the `CRUD` tests (the `RUD` part), we need a few more tests for `CreateBook`.
+
