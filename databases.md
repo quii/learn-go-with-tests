@@ -1869,6 +1869,64 @@ For the `migrate up` test, we'll add comments on each line instead
 
 The `migrate down` tests uses very similar logic to the `migrate up` test, but instead it counts the rows returned. The number of rows should be `0`, because we `down`-migrated all the tables.
 
+## Best practices
+
+Recall that earlier we mentioned that our migrations should follow best practices:
+
+-   Migrations should be _ordered_. ...
+-   Migrations should be _reversible_. ...
+-   Migrations should be _idempotent_. ...
+
+We tested that they were _ordered_ with our unit tests, and that they're _reversible_ with our integration tests. But are they _idempotent_?
+
+Let's write a test for it! Simply run the same migrations twice, the database should raise an error if it doesn't allow the same migration twice.
+
+## Write the test first
+
+We will simply run a bunch of migrations, with no particular order. The database should raise an error if there is a problem.
+
+```go
+// integration_test.go
+func TestMigrations(t *testing.T) {
+...
+	t.Run("idempotency", func(t *testing.T){
+		_, err := MigrateDown(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("first migrate down failed: %v", err)
+		}
+
+		_, err = MigrateUp(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("first migrate up failed: %v", err)
+		}
+
+		_, err = MigrateUp(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("second migrate up failed: %v", err)
+		}
+
+		_, err = MigrateDown(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("second migrate down failed: %v", err)
+		}
+
+		_, err = MigrateDown(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("third migrate down failed: %v", err)
+		}
+	})
+}
+```
+
+## Try to run the test
+
+We pass!
+
+```sh
+PASS
+ok      github.com/quii/learn-go-with-tests/databases/v3        1.384s
+```
+
 ## What we've accomplished so far
 
 Up to this point, we have managed to create our migration tool, and have tested it thoroughly.

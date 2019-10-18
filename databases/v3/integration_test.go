@@ -78,4 +78,30 @@ func TestMigrations(t *testing.T) {
 			t.Errorf("got %d want 0 rows", got)
 		}
 	})
+	t.Run("idempotency", func(t *testing.T) {
+		_, err := MigrateDown(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("first migrate down failed: %v", err)
+		}
+
+		_, err = MigrateUp(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("first migrate up failed: %v", err)
+		}
+
+		_, err = MigrateUp(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("second migrate up failed: %v", err)
+		}
+
+		_, err = MigrateDown(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("second migrate down failed: %v", err)
+		}
+
+		_, err = MigrateDown(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("third migrate down failed: %v", err)
+		}
+	})
 }

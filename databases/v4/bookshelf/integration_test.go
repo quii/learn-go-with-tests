@@ -1,8 +1,9 @@
 package bookshelf_test
 
 import (
-	"github.com/djangulo/learn-go-with-tests/databases/v4/bookshelf"
 	"testing"
+
+	"github.com/djangulo/learn-go-with-tests/databases/v4/bookshelf"
 )
 
 const queryTables = `
@@ -79,6 +80,32 @@ func TestMigrations(t *testing.T) {
 		}
 		if got > 0 {
 			t.Errorf("got %d want 0 rows", got)
+		}
+	})
+	t.Run("idempotency", func(t *testing.T) {
+		_, err := bookshelf.MigrateDown(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("first migrate down failed: %v", err)
+		}
+
+		_, err = bookshelf.MigrateUp(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("first migrate up failed: %v", err)
+		}
+
+		_, err = bookshelf.MigrateUp(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("second migrate up failed: %v", err)
+		}
+
+		_, err = bookshelf.MigrateDown(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("second migrate down failed: %v", err)
+		}
+
+		_, err = bookshelf.MigrateDown(dummyWriter, store, "migrations", -1)
+		if err != nil {
+			t.Errorf("third migrate down failed: %v", err)
 		}
 	})
 }
