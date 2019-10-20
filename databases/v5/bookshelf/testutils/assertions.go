@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf"
 )
 
 // AssertError asserts error exists and is of the desired type.
@@ -93,6 +95,17 @@ func AssertSliceCalls(t *testing.T, store *SpyStore, migrations []string, want [
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v want %v calls for migrations %v", got, want, migrations)
+	}
+}
+
+// AssertBooksEqual checks the two books passed are equal
+func AssertBooksEqual(t *testing.T, got, want *bookshelf.Book) {
+	t.Helper()
+	if got == nil || got.ID == 0 {
+		t.Errorf("nil or invalid ID: %v", got)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v want %v", got, want)
 	}
 }
 

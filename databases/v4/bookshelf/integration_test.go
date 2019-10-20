@@ -20,7 +20,7 @@ type pgTable struct {
 }
 
 func TestMigrations(t *testing.T) {
-	store, removeStore := bookshelf.NewStore()
+	store, removeStore := bookshelf.NewPostgreSQLStore()
 	defer removeStore()
 
 	t.Run("migrate up", func(t *testing.T) {

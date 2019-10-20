@@ -55,7 +55,7 @@ func TestMigrate(t *testing.T) {
 
 	t.Run("error on nonexistent directory", func(t *testing.T) {
 		store := NewSpyStore()
-		_, err := migrate(dummyWriter, store, "i-do-not-exist", -1, Directions[UP])
+		_, err := migrate(dummyWriter, store, "i-do-not-exist", -1, UP)
 		AssertError(t, err, ErrMigrationDirNoExist)
 	})
 
@@ -65,7 +65,7 @@ func TestMigrate(t *testing.T) {
 		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", true)
 		defer cleanup()
 
-		_, err := migrate(dummyWriter, store, tmpdir, -1, Directions[UP])
+		_, err := migrate(dummyWriter, store, tmpdir, -1, UP)
 		AssertError(t, err, ErrMigrationDirEmpty)
 	})
 
@@ -74,9 +74,9 @@ func TestMigrate(t *testing.T) {
 		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
-		_, err := migrate(dummyWriter, store, tmpdir, -1, Directions[UP])
+		_, err := migrate(dummyWriter, store, tmpdir, -1, UP)
 		AssertNoError(t, err)
-		AssertAllStoreMigrationCalls(t, store, 1, Directions[UP])
+		AssertAllStoreMigrationCalls(t, store, 1, UP)
 	})
 
 	t.Run("only apply migrations in one direction", func(t *testing.T) {
@@ -84,9 +84,9 @@ func TestMigrate(t *testing.T) {
 		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
-		_, err := migrate(dummyWriter, store, tmpdir, -1, Directions[UP])
+		_, err := migrate(dummyWriter, store, tmpdir, -1, UP)
 		AssertNoError(t, err)
-		AssertAllStoreMigrationCalls(t, store, 1, Directions[UP])
+		AssertAllStoreMigrationCalls(t, store, 1, UP)
 		for name := range store.migrations {
 			if strings.HasSuffix(name, "down.sql") {
 				t.Errorf("Wrong direction migration applied: %s", name)
@@ -99,7 +99,7 @@ func TestMigrate(t *testing.T) {
 		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
-		migrations, _ := migrate(dummyWriter, store, tmpdir, -1, Directions[UP])
+		migrations, _ := migrate(dummyWriter, store, tmpdir, -1, UP)
 		AssertOrderAscending(t, store, migrations)
 	})
 
@@ -108,7 +108,7 @@ func TestMigrate(t *testing.T) {
 		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
-		migrations, _ := migrate(dummyWriter, store, tmpdir, -1, Directions[DOWN])
+		migrations, _ := migrate(dummyWriter, store, tmpdir, -1, DOWN)
 		AssertOrderDescending(t, store, migrations)
 	})
 
@@ -117,7 +117,7 @@ func TestMigrate(t *testing.T) {
 		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
-		migrations, _ := migrate(dummyWriter, store, tmpdir, 2, Directions[UP])
+		migrations, _ := migrate(dummyWriter, store, tmpdir, 2, UP)
 		AssertSliceCalls(t, store, migrations, []int{1, 1, 0})
 	})
 
@@ -127,7 +127,7 @@ func TestMigrate(t *testing.T) {
 		defer cleanup()
 
 		// keep in mind the `migrations` slice is reversed
-		migrations, _ := migrate(dummyWriter, store, tmpdir, 2, Directions[DOWN])
+		migrations, _ := migrate(dummyWriter, store, tmpdir, 2, DOWN)
 		AssertSliceCalls(t, store, migrations, []int{1, 1, 0})
 	})
 
@@ -136,7 +136,7 @@ func TestMigrate(t *testing.T) {
 		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
-		migrations, _ := migrate(dummyWriter, store, tmpdir, -1, Directions[UP])
+		migrations, _ := migrate(dummyWriter, store, tmpdir, -1, UP)
 		AssertSliceCalls(t, store, migrations, []int{1, 1, 1})
 	})
 
@@ -147,7 +147,7 @@ func TestMigrate(t *testing.T) {
 		defer cleanup()
 
 		gotBuf := &bytes.Buffer{}
-		migrations, _ := migrate(gotBuf, store, tmpdir, -1, Directions[UP])
+		migrations, _ := migrate(gotBuf, store, tmpdir, -1, UP)
 		got := gotBuf.String()
 
 		total := len(migrations)
@@ -176,7 +176,7 @@ func TestMigrate(t *testing.T) {
 		tmpfile.Close()
 
 		gotBuf := &bytes.Buffer{}
-		_, err := migrate(gotBuf, store, tmpdir, -1, Directions[UP])
+		_, err := migrate(gotBuf, store, tmpdir, -1, UP)
 		got := gotBuf.String()
 
 		wantBuf := &bytes.Buffer{}

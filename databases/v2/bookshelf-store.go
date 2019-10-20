@@ -16,36 +16,34 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Storer will hold the contract for a Store.
+// Storer will hold the contract for a PostgreSQLStore.
 type Storer interface {
 	ApplyMigration(name, stmt string) error
 }
 
-// Store manages a bookshelf using an *sql.DB.
-type Store struct {
+// PostgreSQLStore manages a bookshelf using an *sql.DB.
+type PostgreSQLStore struct {
 	db *sql.DB
 }
 
 const (
 	removeTimeout = 10 * time.Second
 	// UP directional const
-	UP uint = iota
+	UP = "up"
 	// DOWN directional const
-	DOWN
+	DOWN = "down"
 )
 
 var (
-	// Directions holds possible direction values
-	Directions = [...]string{UP: "up", DOWN: "down"}
 	// ErrMigrationDirEmpty empty migration directory.
 	ErrMigrationDirEmpty = errors.New("empty migration directory")
 	// ErrMigrationDirNoExist migration directory does not exist.
 	ErrMigrationDirNoExist = errors.New("migration directory does not exist")
 )
 
-// NewStore creates a new store, returning a connection to the db, and an
+// NewPostgreSQLStore creates a new store, returning a connection to the db, and an
 // anonymous function to remove the db connection when necessary.
-func NewStore() (*Store, func()) {
+func NewPostgreSQLStore() (*PostgreSQLStore, func()) {
 	// remember to change 'secret-password' for the password you set earlier
 	const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/bookshelf_db"
 
@@ -71,11 +69,11 @@ func NewStore() (*Store, func()) {
 		log.Fatalf("timeout of %v exceeded", removeTimeout)
 	}
 
-	return &Store{db: db}, remove
+	return &PostgreSQLStore{db: db}, remove
 }
 
 // ApplyMigration is a wrapper around sql.DB.Exec that only returns an error.
-func (s *Store) ApplyMigration(name, stmt string) error {
+func (s *PostgreSQLStore) ApplyMigration(name, stmt string) error {
 	_, err := s.db.Exec(stmt)
 	if err != nil {
 		return err
@@ -107,7 +105,7 @@ func migrate(
 	}
 
 	switch direction {
-	case Directions[DOWN]:
+	case DOWN:
 		sort.SliceStable(files, func(i, j int) bool { return files[j].Name() < files[i].Name() })
 	default:
 		sort.SliceStable(files, func(i, j int) bool { return files[i].Name() < files[j].Name() })

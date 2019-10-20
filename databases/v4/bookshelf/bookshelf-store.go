@@ -16,13 +16,13 @@ import (
 	_ "github.com/lib/pq" // unneeded namespace
 )
 
-// Storer will hold the contract for a Store.
+// Storer will hold the contract for a PostgreSQLStore.
 type Storer interface {
 	ApplyMigration(name, stmt string) error
 }
 
-// Store manages a bookshelf using an *sql.DB.
-type Store struct {
+// PostgreSQLStore manages a bookshelf using an *sql.DB.
+type PostgreSQLStore struct {
 	DB *sql.DB
 }
 
@@ -41,9 +41,9 @@ var (
 	ErrMigrationDirNoExist = errors.New("migration directory does not exist")
 )
 
-// NewStore creates a new store, returning a connection to the db, and an
+// NewPostgreSQLStore creates a new store, returning a connection to the db, and an
 // anonymous function to remove the db connection when necessary.
-func NewStore() (*Store, func()) {
+func NewPostgreSQLStore() (*PostgreSQLStore, func()) {
 	// remember to change 'secret-password' for the password you set earlier
 	const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/bookshelf_db?sslmode=disable"
 
@@ -69,11 +69,11 @@ func NewStore() (*Store, func()) {
 		log.Fatalf("timeout of %v exceeded", removeTimeout)
 	}
 
-	return &Store{DB: db}, remove
+	return &PostgreSQLStore{DB: db}, remove
 }
 
 // ApplyMigration is a wrapper around sql.DB.Exec that only returns an error.
-func (s *Store) ApplyMigration(name, stmt string) error {
+func (s *PostgreSQLStore) ApplyMigration(name, stmt string) error {
 	_, err := s.DB.Exec(stmt)
 	if err != nil {
 		return err
@@ -81,12 +81,12 @@ func (s *Store) ApplyMigration(name, stmt string) error {
 	return nil
 }
 
-// MigrateUp wrapper around `migrate` that hardcodes to Directions[UP].
+// MigrateUp wrapper around `migrate` that hardcodes to ByTitleAuthor[UP].
 func MigrateUp(out io.Writer, store Storer, dir string, num int) ([]string, error) {
 	return Migrate(out, store, dir, num, UP)
 }
 
-// MigrateDown wrapper around `migrate` that hardcodes to Directions[DOWN].
+// MigrateDown wrapper around `migrate` that hardcodes to DOWN.
 func MigrateDown(out io.Writer, store Storer, dir string, num int) ([]string, error) {
 	return Migrate(out, store, dir, num, DOWN)
 }

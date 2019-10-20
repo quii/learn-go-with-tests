@@ -15,13 +15,13 @@ import (
 func TestMigrate(t *testing.T) {
 
 	t.Run("error on nonexistent directory", func(t *testing.T) {
-		store := testutils.NewSpyStore()
+		store := testutils.NewSpyStore(dummyBooks)
 		_, err := bookshelf.Migrate(dummyWriter, store, "i-do-not-exist", -1, bookshelf.UP)
 		testutils.AssertError(t, err, bookshelf.ErrMigrationDirNoExist)
 	})
 
 	t.Run("error on empty directory", func(t *testing.T) {
-		store := testutils.NewSpyStore()
+		store := testutils.NewSpyStore(dummyBooks)
 
 		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", true)
 		defer cleanup()
@@ -31,7 +31,7 @@ func TestMigrate(t *testing.T) {
 	})
 
 	t.Run("non-empty directory attempts to migrate", func(t *testing.T) {
-		store := testutils.NewSpyStore()
+		store := testutils.NewSpyStore(dummyBooks)
 		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
@@ -41,7 +41,7 @@ func TestMigrate(t *testing.T) {
 	})
 
 	t.Run("only apply migrations in one direction", func(t *testing.T) {
-		store := testutils.NewSpyStore()
+		store := testutils.NewSpyStore(dummyBooks)
 		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
@@ -56,7 +56,7 @@ func TestMigrate(t *testing.T) {
 	})
 
 	t.Run("up migrations should be ordered ascending", func(t *testing.T) {
-		store := testutils.NewSpyStore()
+		store := testutils.NewSpyStore(dummyBooks)
 		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
@@ -65,7 +65,7 @@ func TestMigrate(t *testing.T) {
 	})
 
 	t.Run("down migrations should be ordered descending", func(t *testing.T) {
-		store := testutils.NewSpyStore()
+		store := testutils.NewSpyStore(dummyBooks)
 		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
@@ -74,7 +74,7 @@ func TestMigrate(t *testing.T) {
 	})
 
 	t.Run("runs as many migrations as the num param, up", func(t *testing.T) {
-		store := testutils.NewSpyStore()
+		store := testutils.NewSpyStore(dummyBooks)
 		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
@@ -83,7 +83,7 @@ func TestMigrate(t *testing.T) {
 	})
 
 	t.Run("runs as many migrations as the num param, down", func(t *testing.T) {
-		store := testutils.NewSpyStore()
+		store := testutils.NewSpyStore(dummyBooks)
 		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
@@ -93,7 +93,7 @@ func TestMigrate(t *testing.T) {
 	})
 
 	t.Run("runs all migrations if num == -1", func(t *testing.T) {
-		store := testutils.NewSpyStore()
+		store := testutils.NewSpyStore(dummyBooks)
 		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
@@ -102,7 +102,7 @@ func TestMigrate(t *testing.T) {
 	})
 
 	t.Run("success output is expected", func(t *testing.T) {
-		store := testutils.NewSpyStore()
+		store := testutils.NewSpyStore(dummyBooks)
 
 		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
@@ -128,7 +128,7 @@ func TestMigrate(t *testing.T) {
 	})
 
 	t.Run("failure output is expected", func(t *testing.T) {
-		store := testutils.NewSpyStore()
+		store := testutils.NewSpyStore(dummyBooks)
 		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", true)
 		defer cleanup()
 

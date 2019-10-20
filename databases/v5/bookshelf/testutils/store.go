@@ -24,15 +24,6 @@ type SpyStore struct {
 	Books      []*bookshelf.Book
 }
 
-// CreateBook creates a new book in the store
-func (s *SpyStore) CreateBook(book *bookshelf.Book, title, author string) error {
-	book.ID = newID(s)
-	book.Title = title
-	book.Author = author
-	s.Books = append(s.Books, book)
-	return nil
-}
-
 // ApplyMigration saves the "migration" to the store
 func (s *SpyStore) ApplyMigration(name, stmt string) error {
 	if strings.Contains(strings.ToLower(stmt), "cake") {
@@ -54,15 +45,45 @@ func (s *SpyStore) ApplyMigration(name, stmt string) error {
 	return nil
 }
 
+// Create inserts a new *bookshelf.Book into the SpyStore.
+func (s *SpyStore) Create(book *bookshelf.Book, title, author string) error {
+	book.ID = newID(s)
+	book.Title = title
+	book.Author = author
+	s.Books = append(s.Books, book)
+	return nil
+}
+
+// ByID find a book by ID.
+func (s *SpyStore) ByID(book *bookshelf.Book, id int64) error {
+	for _, b := range s.Books {
+		if b.ID == id {
+			*book = *b
+			return nil
+		}
+	}
+	return bookshelf.ErrBookDoesNotExist
+}
+
+// ByTitleAuthor find a book by title and author. Case insensitive.
+func (s *SpyStore) ByTitleAuthor(book *bookshelf.Book, title, author string) error {
+	title, author = strings.ToLower(title), strings.ToLower(author)
+	for _, b := range s.Books {
+		if strings.ToLower(b.Title) == title && strings.ToLower(b.Author) == author {
+			*book = *b
+			return nil
+		}
+	}
+	return bookshelf.ErrBookDoesNotExist
+}
+
 // NewSpyStore returns a new *SpyStore
-func NewSpyStore() *SpyStore {
-	books := make([]*bookshelf.Book, 0)
+func NewSpyStore(books []*bookshelf.Book) *SpyStore {
 	return &SpyStore{
 		Migrations: map[string]migration{},
 		Books:      books,
 	}
 }
-
 func newID(store *SpyStore) int64 {
 	if len(store.Books) == 0 {
 		return 1
