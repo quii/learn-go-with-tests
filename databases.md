@@ -6,12 +6,12 @@ Oftentimes when creating software, it's necessary to save (or, more precisely, _
 
 As an example, when you log into your online banking system, the system has to:
 
-1. Check that it's really you accessing the system (this is called _authentication_, and is beyond the scope of this chapter)
+1. Check that it's really you accessing the system (this is called _authentication_, and is beyond the scope of this chapter).
 2. Retrieve some information from _somewhere_ and show it to the user (you).
 
 Information that is stored and meant to be long-lived is said to be [_persisted_](<https://en.wikipedia.org/wiki/Persistence_(computer_science)>), usually on a medium that can reliably reproduce the data stored.
 
-Some storage systems, like the filesystem, can be effective for one-off or small amounts of storage, but they fall short for larger application, for a number of reasons.
+Some storage systems, like the filesystem, can be effective for one-off or small amounts of storage, but they fall short for a larger application, for a number of reasons.
 
 This is why most software applications, large and small, opt for storage systems that can provide:
 
@@ -24,9 +24,9 @@ NOTE: The above bullet points are a rewording of the [_ACID principles_](https:/
 
 _Databases_ are storage mediums that can provide these properties, and much much more.
 
-Also note that, in general, there are two large branches of database types, [SQL](https://en.wikipedia.org/wiki/SQL) and [NOSQL](https://en.wikipedia.org/wiki/NoSQL). In this chapter we will be focusing on SQL databases, using the [database/sql](https://golang.org/pkg/database/sql) package and the `postgres` driver [pq](_ "github.com/lib/pq").
+Also note that, in general, there are two large branches of database types, [SQL](https://en.wikipedia.org/wiki/SQL) and [NOSQL](https://en.wikipedia.org/wiki/NoSQL). In this chapter we will be focusing on SQL databases, using the [database/sql](https://golang.org/pkg/database/sql) package and the `postgres` driver [pq](_ 'github.com/lib/pq').
 
-There is a fair bit of CLI usage in this chapter (mainly setting up the database). For the sake of simplicity we will assume that you are running a system `ubuntu` on your machine, with `bash` installed. In the near future, look into the appendix for installation on other systems.
+There is a fair bit of CLI usage in this chapter (mainly setting up the database). For the sake of simplicity we will assume that you are running `ubuntu` on your machine, with `bash` installed. In the near future, look into the appendix for installation on other systems.
 
 ## A note on RDBMS choice
 
@@ -93,7 +93,7 @@ postgres=# CREATE DATABASE bookshelf_db OWNER bookshelf_user;
 CREATE DATABASE
 ```
 
-You can view users and databases with the commands \du and \l respectively.
+You can view users and databases with the commands `\du` and `\l` respectively, inside the `psql` shell.
 
 ## Database migrations
 
@@ -124,7 +124,7 @@ With these in mind, let's dive in...
 
 ## Project
 
-We will initially write a (simple) tool to handle our (also simple) migrations, then we will be creating a `CRUD` program to interact with our spiffy, real database.
+We will initially write a (simple) tool to handle our (also simple) migrations, then we will be creating a library that will allow us to perform book-related `CRUD` operations on a `PostgreSQL` database.
 
 ## Write the test first
 
@@ -137,7 +137,7 @@ import (
 )
 
 func TestMigrateUp(t *testing.T) {
-	store, removeStore := NewStore()
+	store, removeStore := NewPostgreSQLStore()
 	defer removeStore()
 
 	const numberOfMigrations = 1
@@ -163,11 +163,11 @@ FAIL
 
 We will take some liberties with writing code, keeping it in small batches and testing as we go.
 
-Below is some boilerplate that will assist in creating the database connection. We need an `*sql.DB` instance that we can pass on to our tests first. As we learned in the `Dependency Injection` chapter, we should make a helper method so we can acquire an instance from anywhere in our application, while passing in the dependencies, in our case, the database connection string.
+Below is some boilerplate that will assist in creating the database connection. We need an `*sql.DB` instance that we can pass on to our tests first. As we learned in the [Dependency Injection](https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/dependency-injection) chapter, we should make a helper method so we can acquire an instance from anywhere in our application, while passing in the dependencies, in our case, the database connection string.
 
 Before we continue down the happy-path, we need to make sure our `MigrateUp` function works as expected (unit-test) before we attempt to call it on the real database (integration-test).
 
-The code directly below defines an interface, which will allow us to mock the database functionality, as well as a `NewStore` function that will simplify its creation.
+The code directly below defines an interface, which will allow us to mock the database functionality, as well as a `NewPostgreSQLStore` function that will simplify its creation.
 
 ```go
 // bookshelf-store.go
@@ -187,7 +187,7 @@ type Storer interface {
 	ApplyMigration(name, stmt string) error
 }
 
-type Store struct {
+type PostgreSQLStore struct {
 	db *sql.DB
 }
 
@@ -195,7 +195,7 @@ const (
 	removeTimeout = 10 * time.Second
 )
 
-func NewStore() (*Store, func()) {
+func NewPostgreSQLStore() (*PostgreSQLStore, func()) {
 	// remember to change 'secret-password' for the password you set earlier
 	const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/bookshelf_db"
 
@@ -221,10 +221,10 @@ func NewStore() (*Store, func()) {
 		log.Fatalf("timeout of %v exceeded", removeTimeout)
 	}
 
-	return &Store{db: db}, remove
+	return &PostgreSQLStore{db: db}, remove
 }
 
-func (s *Store) ApplyMigration(name, stmt string) error {
+func (s *PostgreSQLStore) ApplyMigration(name, stmt string) error {
 	_, err := s.db.Exec(stmt)
 	if err != nil {
 		return err
@@ -274,7 +274,7 @@ remove := func() {
 
 We could add more methods to the `Storer` interface, but at this point, we don't need them. So we won't for now.
 
-The `ApplyMigration` method is merely a wrapper around the `sql.DB.Exec` method, but this allows us to abstract it on our unit tests, testing that the `MigrateUp`, function does what it's intended
+The `ApplyMigration` method is merely a wrapper around the `sql.DB.Exec` method, this allows us to abstract it when writing our unit tests, testing that the `MigrateUp`, function does what it's intended
 
 Here is the signature for our `MigrateUp` function, with our `Storer` interface:
 
@@ -295,7 +295,7 @@ There's a lot to our `MigrateUp` function, so let's break it down and test each 
 
 Seeing as we will have a `MigrateDown` as well, and so far they seem only to differ on step `3`, we can use a little foresight and create a utility function `migrate`, which will be used by both variants.
 
-## Write the test first
+## 1 - Existence of `dir`
 
 Let's write our mock store (and test) first, so we can test the `migrate` function in isolation.
 
@@ -367,6 +367,8 @@ COMMIT;
 
 Now we're ready to address the different points, one by one.
 
+## Write the test first
+
 1. It needs to check whether the `dir` passed in exists.
 
 ```go
@@ -400,7 +402,7 @@ As expected, it fails.
 FAIL    github.com/quii/learn-go-with-tests/databases/v1 [build failed]
 ```
 
-## Write enough code to make it pass
+## Write the minimal amount of code for the test to run and check the failing test output
 
 ```go
 // bookshelf-store.go
@@ -417,6 +419,8 @@ FAIL
 exit status 1
 FAIL    github.com/quii/learn-go-with-tests/databases/v1        0.608s
 ```
+
+## Write enough code to make it pass
 
 We need an error for non-existent directories. Thankfully, this is easy with `os.Stat` and `os.IsNotExist`
 
@@ -435,6 +439,8 @@ ok      github.com/quii/learn-go-with-tests/databases/v1        0.484s
 ```
 
 On to the next point
+
+## 2 - Get files inside `dir`
 
 2. It needs to get all the filenames inside `dir`, and allow us to iterate over them.
 
@@ -791,6 +797,8 @@ func TestMigrate(t *testing.T) {
 }
 ```
 
+## Try to run the test
+
 ```sh
 # github.com/quii/learn-go-with-tests/databases/v2 [github.com/quii/learn-go-with-tests/databases/v2.test]
 .\migrate_test.go:81:17: too many arguments in call to migrate
@@ -799,23 +807,21 @@ func TestMigrate(t *testing.T) {
 FAIL    github.com/quii/learn-go-with-tests/databases/v2 [build failed]
 ```
 
+## Write the minimal amount of code for the test to run and check the failing test output
+
 The compiler is complaining, because migrate does not yet accept a direction. Let's `DRY` things a little preemtively this time. Add the following to `bookshelf-store.go`.
 
 ```go
 // bookshelf-store.go
 ...
 const (
-	UP uint = iota
-	DOWN
-)
-...
-var (
-	Directions = [...]string{UP: "up", DOWN: "down"}
+	UP = "up"
+	DOWN = "down
 )
 ...
 ```
 
-Now you can access the directions by a very explicit `Directions[UP]` or `Directions[DOWN]`.
+Now you can access the directions by a very explicit `UP` or `DOWN`.
 
 Change the signature of `migrate` to include a direction, and a check using [`strings.HasSuffix`](https://golang.org/pkg/strings/#HasSuffix).
 
@@ -847,6 +853,10 @@ Looks like we accidentally covered point no. 3:
     3. It needs to run only `up` migrations.
 
 But we are missing the 2.1 annex: it needs to be ordered. Thanfully, we can solve this with a couple of assertions and the fact that in `go`, strings are comparable.
+
+## 2.1 Ordered migrations
+
+Add the following assertions to `migrate-test.go`
 
 ```go
 // migrate_test.go
@@ -937,7 +947,7 @@ t.Run("up migrations should be ordered ascending", func(t *testing.T){
 	tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
 	defer cleanup()
 
-	migrations, _ := migrate(store, tmpdir, -1, Directions[UP])
+	migrations, _ := migrate(store, tmpdir, -1, UP)
 	AssertOrderAscending(t, store, migrations)
 })
 
@@ -946,7 +956,7 @@ t.Run("down migrations should be ordered descending", func(t *testing.T){
 	tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
 	defer cleanup()
 
-	migrations, _ := migrate(store, tmpdir, -1, Directions[DOWN])
+	migrations, _ := migrate(store, tmpdir, -1, DOWN)
 	AssertOrderDescending(t, store, migrations)
 })
 ```
@@ -965,7 +975,7 @@ FAIL    github.com/quii/learn-go-with-tests/databases/v2        0.624s
 
 The `up` migrations are in the correct order, by grace of `ioutil.Readall`. But we should implement it explicitly, as the API for `ioutil.Readall` is not in our control, and may change and break our application.
 
-## Write the minimal amount of code to make it pass
+## Write enough code to make it pass
 
 It's a matter of using the [`sort`](https://golang.org/pkg/sort) package to sort the `files` returned by `ioutil.ReadAll`. Specifically, [`sort.SliceStable`](https://golang.org/pkg/sort/#SliceStable). Recall that our order is implemented by the filename, we need to use `file.Name()` inside our sorting functions
 
@@ -986,7 +996,7 @@ func migrate(
 	}
 
 	switch direction {
-	case Directions[DOWN]:
+	case DOWN:
 		sort.SliceStable(files, func(i, j int) bool { return files[j].Name() < files[i].Name() })
 	default:
 		sort.SliceStable(files, func(i, j int) bool { return files[i].Name() < files[j].Name() })
@@ -1003,7 +1013,9 @@ PASS
 ok      github.com/quii/learn-go-with-tests/databases/v2        0.653s
 ```
 
-On to point no. 4:
+On to point no. 4.
+
+## 4. Run `N` migrations in either direction
 
 4. It needs to run migrations `1` through `num`, or all of them if `num == -1`.
 
@@ -1019,7 +1031,7 @@ These are all important questions, but since we are adhering to best practices, 
 
 ## Write the test first
 
-Our `CreateTempDir` function creates 3 `up` files, and 3 `down` files if the `empty` boolan param is `false`. Since our `SpyStore` is tracking how many calls each migration receives, we can check that only the first `num` have been called directly, so let's do that.
+Our `CreateTempDir` function creates 3 `up` files, and 3 `down` files if the `empty` boolean param is `false`. Since our `SpyStore` is tracking how many calls each migration receives, we can check that only the first `num` have been called directly, so let's do that.
 
 Since we have to write two tests (one for `up` and one for `down` migrations), let's our tests DRY and write an assertion function using [`reflect`](https://golang.org/pkg/reflect). We need to take care to account for migrations that may not exist in the store (with a `0` value), so we'll have to modify the `got` slice artificially.
 
@@ -1038,7 +1050,7 @@ func TestMigrate(t *testing.T) {
 		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
-		migrations, _ := migrate(store, tmpdir, 2, Directions[UP])
+		migrations, _ := migrate(store, tmpdir, 2, UP)
 		AssertSliceCalls(t, store, migrations, []int{1, 1, 0})
 	})
 
@@ -1048,7 +1060,7 @@ func TestMigrate(t *testing.T) {
 		defer cleanup()
 
 		// `migrations` slice is reversed, so desired order is still (1,1,0)
-		migrations, _ := migrate(store, tmpdir, 2, Directions[DOWN])
+		migrations, _ := migrate(store, tmpdir, 2, DOWN)
 		AssertSliceCalls(t, store, migrations, []int{1, 1, 0})
 	})
 }
@@ -1083,7 +1095,7 @@ exit status 1
 FAIL    github.com/quii/learn-go-with-tests/databases/v2        0.566s
 ```
 
-## Write the minimal amount of code to make them pass
+## Write enough code to make it pass
 
 We'll introduce a `count` variable, increment it when the migrations are applied, and break the loop as soon as `count >= num`.
 
@@ -1125,7 +1137,7 @@ func migrate(
 
 ## Try to run the tests
 
-Our tests now pass
+Our tests now pass.
 
 ```sh
 PASS
@@ -1144,7 +1156,7 @@ We're missing an explicit check for `num == -1` to run all migrations.
 		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
 		defer cleanup()
 
-		migrations, _ := migrate(store, tmpdir, -1, Directions[UP])
+		migrations, _ := migrate(store, tmpdir, -1, UP)
 		AssertSliceCalls(t, store, migrations, []int{1, 1, 1})
 	})
 ...
@@ -1191,11 +1203,11 @@ PASS
 ok     github.com/quii/learn-go-with-tests/databases/v2        0.943s
 ```
 
-## Moving on
+## 5.1 Report success
 
 There's a lot of nuance to point number 5, so let's break it into simpler pieces:
 
-5. Lastly, it needs to report on the success of each migration run, if a migration fails, the entire process should be halted.
+1. Lastly, it needs to report on the success of each migration run, if a migration fails, the entire process should be halted.
 
 > ... it needs to report on the success of each migration run...
 
@@ -1224,7 +1236,7 @@ import (
 		defer cleanup()
 
 		gotBuf := &bytes.Buffer{}
-		migrations, _ := migrate(gotBuf, store, tmpdir, -1, Directions[UP])
+		migrations, _ := migrate(gotBuf, store, tmpdir, -1, UP)
 		got := gotBuf.String()
 
 		total := len(migrations)
@@ -1300,7 +1312,7 @@ Whoops, looks like we forgot to modify current calls to `migrate` in our tests. 
 // migrate_test.go
 ...
 ...
-migrate(dummyWriter, store, "i-do-not-exist", -1, Directions[UP])
+migrate(dummyWriter, store, "i-do-not-exist", -1, UP)
 ...
 var dummyWriter = &bytes.Buffer{}
 ```
@@ -1414,7 +1426,7 @@ PASS
 ok      github.com/quii/learn-go-with-tests/databases/v2        1.129s
 ```
 
-## On to 5-2
+## 5.2 Reporting failure
 
 5. Lastly, it needs to report on the success of each migration run, if a migration fails, the entire process should be halted.
 
@@ -1468,7 +1480,7 @@ func (s *SpyStore) ApplyMigration(name, stmt string) error {
 		tmpfile.Close()
 
 		gotBuf := &bytes.Buffer{}
-		_, err = migrate(gotBuf, store, tmpdir, -1, Directions[UP])
+		_, err = migrate(gotBuf, store, tmpdir, -1, UP)
 		got := gotBuf.String()
 
 		wantBuf := &bytes.Buffer{}
@@ -1548,11 +1560,11 @@ Before we move on, let's write two wrapper functions around our `migrate` powerh
 ```go
 // bookshelf-store.go
 func MigrateUp(out io.Writer, store Storer, dir string, num int) ([]string, error) {
-	return migrate(out, os.Stdout, store, dir, num, Directions[UP])
+	return migrate(out, os.Stdout, store, dir, num, UP)
 }
 
 func MigrateDown(out io.Writer, store Storer, dir string, num int) ([]string, error) {
-	return migrate(out, os.Stdout, store, dir, num, Directions[DOWN])
+	return migrate(out, os.Stdout, store, dir, num, DOWN)
 }
 ```
 
@@ -1560,7 +1572,7 @@ func MigrateDown(out io.Writer, store Storer, dir string, num int) ([]string, er
 
 We're going to rely on the failure of `sql.DB`'s [`Exec`](https://golang.org/pkg/database/sql/#DB.Exec) method, which returns an error if the operation could not complete. We can also use some `PostgreSQL` utilities to list the tables from within our application, and examine the output to verify our tables are there.
 
-Recall our migration written earlier from `migrations/0001_create_books_table.up.sql`. This time we will add some comments to explain what each line does.
+Recall our migration written earlier to `migrations/0001_create_books_table.up.sql`. This time we will add some comments to explain what each line does.
 
 Remember, in `SQL`, everything after a double hyphen (`--`) is a comment.
 
@@ -1597,7 +1609,7 @@ Key points
 
 -   **Index**:
 
-    A database index is, in the layman's terms, a trade-off that improves the retrieval of information (if done right) by giving a little more every time data is added.
+    A database index is, in layman terms, a trade-off that improves the retrieval of information (if done right) by giving a little more every time data is added.
 
     Here are more formal definitions if the subject interests you: [Wikipedia](https://en.wikipedia.org/wiki/Database_index), [Use The Index, Luke](https://use-the-index-luke.com/sql/anatomy).
 
@@ -1605,7 +1617,7 @@ Key points
 
 -   **SQL Language**
 
-    The `SQL` language is part of an ISO standard, and most database engines comform to it partially. This means that code written for one `RDBMS` (say, `PostgreSQL`), will cannot be interpreted as-is by a different one (say, `SQLite3`). There are a lot of similarities, however, and the changes are often small.
+    The `SQL` language is part of an ISO standard, and most database engines comform to it partially. This means that code written for one `RDBMS` (say, `PostgreSQL`), will cannot be interpreted as-is by a different one (say, `SQLite3`). There are a lot of similarities, however, and the changes required are often small.
 
     Keep in mind that the `SQL` you're seeing here is very `PostgreSQL` specific, and some, if not all of it, may not be executable in a different engine.
 
@@ -1618,7 +1630,7 @@ package main
 import "testing"
 
 func TestMigrations(t *testing.T) {
-	store, removeStore := NewStore()
+	store, removeStore := NewPostgreSQLStore()
 	defer removeStore()
 
 	t.Run("migrate up", func(t *testing.T){
@@ -1674,7 +1686,7 @@ Databases are generally used over networks, and, like all network connections, t
 
 Our database lives locally, so it would be redundant to implement encryption here.
 
-Change the `connStr` constant inside `NewStore` to include the query parameter `sslmode=disable`.
+Change the `connStr` constant inside `NewPostgreSQLStore` to include the query parameter `sslmode=disable`.
 
 ```go
 // bookshelf-store.go
@@ -1692,9 +1704,7 @@ PASS
 ok      github.com/quii/learn-go-with-tests/databases/v3        12.989s
 ```
 
-You probably noticed that our test are much slower now (~`12s` vs ~`1s` before).
-
-That said, such is the nature of integration tests: testing between services requires more computing power, and has to account for things like latency, message queues and other nuisances that add to the test time.
+You probably noticed that our test are much slower now. Such is the nature of integration tests: testing between services requires more computing power, and has to account for things like latency, message queues and other nuisances that add to the test time.
 
 It's not entirely hopeless though, as a solution exists! It's along the lines of "run the tests on someone else's computer".
 
@@ -1725,7 +1735,7 @@ type pgTable struct {
 }
 
 func TestMigrations(t *testing.T) {
-	store, removeStore := NewStore()
+	store, removeStore := NewPostgreSQLStore()
 	defer removeStore()
 
 	t.Run("migrate up", func(t *testing.T) {
@@ -2013,6 +2023,14 @@ This exercise in patience may seem pointless now, but it's well worth the effort
 
 We have `4` operations to write and test. A lot of the code already in place helps us, so the workload will be lighter than before (we hope so at least).
 
+Let's think for a minute about the direction we want to take. Just like we did with the `Migrate` function, we want to create package level functions whose behavior we want to control and validate, that in turn call the much simpler method implemented by the `Storer` interface. If you analyze the `ApplyMigration` method of both the `PostgreSQLStore` and the `SpyStore`, you'll notice that they are "dumb", in the sense that they only call their underlying storage engines. The _behavior_ that we wanted was enforced via the `Migrate` function.
+
+This keeps our package _extendible_. With this structure, if a consumer of our `package`'s API wanted to use a different storage method, say, a `NoSQL` database, `AWS S3` file storage or simply a different database (like `MySQL`), they could do so by creating their storage object and having it implement our `Storer` interface, then they can simply plug it into our package level functions (like `Migrate`) and trust they will work (as the _behavior_ is still the same).
+
+The `go` standard library is full useful interfaces like this. A couple of excellent examples are the `encoding/json` package [`Marshaler`](https://golang.org/pkg/encoding/json/#Marshaler) and [`Unmarshaler`](https://golang.org/pkg/encoding/json/#Unmarshaler) interfaces. `encoding/json` has ensured these interfaces are implemented by all standard types, but if you want a certain behavior, simply implement these interfaces in your custom type and encoding will work.
+
+With this mindset, we should aim to write functions to `Create`, `Retrieve`, `Update`, `Delete` and `List` books, with those same names. These verbs will perform all kinds of validation, and, if they pass, then call the `Storer` methods by the same name.
+
 In the `SQL` migration, We created a table called `books`, with columns called `id`, `title` and `author`. Let`s create a struct to hold these objects before we get into testing.
 
 ```go
@@ -2030,32 +2048,9 @@ type Book struct {
 
 Before we can retrieve, update or delete an object, we need to create it first! Logically, it makes sense to start here.
 
-Change the `SpyStore` struct in `bookshelf/testutils/store.go` to include a slice of books.
+While we're at it, we should test that the title or author aren't empty (remember the `NOT NULL` in our migrations?)
 
-```go
-// bookshelf/testutils/store.go
-package testutils
-
-import (
-	...
-	"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf"
-)
-...
-type SpyStore struct {
-	Migrations map[string]migration
-	Books []*bookshelf.Book
-}
-...
-func NewSpyStore() *SpyStore {
-	books := make([]*bookshelf.Book, 0)
-	return &SpyStore{
-		Migrations: map[string]migration{},
-		Books: books,
-	}
-}
-```
-
-And our test
+Create a new file `crud_test.go` and add the following code:
 
 ```go
 // bookshelf/crud_test.go
@@ -2069,69 +2064,159 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	store := testutils.NewSpyStore()
 
-	var book bookshelf.Book
-	err := store.CreateBook(&book, "Moby Dick", "Herman Melville")
-	testutils.AssertNoError(t, err)
-	if book.ID == 0 {
-		t.Error("book returned without an ID")
-	}
+	t.Run("creates accurately", func(t *testing.T) {
+		store := testutils.NewSpyStore()
+
+		title, author := "Moby Dick", "Herman Melville"
+
+		book, err := bookshelf.Create(store, title, author)
+		testutils.AssertNoError(t, err)
+		if book.ID == 0 {
+			t.Error("book returned without an ID")
+		}
+		if book.Title != title {
+			t.Errorf("got %q want %q for title", book.Title, title)
+		}
+		if book.Author != author {
+			t.Errorf("got %q want %q for author", book.Author, author)
+		}
+	})
+	t.Run("error on empty title", func(t *testing.T) {
+		store := testutils.NewSpyStore()
+
+		title, author := "", "Herman Melville"
+
+		_, err := bookshelf.Create(store, title, author)
+		testutils.AssertError(t, err, bookshelf.ErrEmptyTitleField)
+	})
+	t.Run("error on empty author", func(t *testing.T) {
+		store := testutils.NewSpyStore()
+
+		title, author := "Moby Dick", ""
+
+		_, err := bookshelf.Create(store, title, author)
+		testutils.AssertError(t, err, bookshelf.ErrEmptyAuthorField)
+	})
 }
-
 ```
-
-Notice that the `CreateBook` method does not have an `ID` field provided, this is because `primary keys` are usually autoincremented and provided by the database.
-
-This `ID` field is our criteria for a passing test.
-
-This is not written in stone, however: just happens that when we created the database table, we designated the `id` field as `SERIAL`, and `PostgreSQL` handles the auto-incrementing for us. But we could have designated a `PRIMARY KEY` of whichever type we would've wanted. For example, had we assigned the `title` as the primary key, the `id` field would have not been necessary. Or, if we designated `id` as `PRIMARY KEY`, but as type `INT` instead of `SERIAL`, our application would have had to find the latest `id` and increment it.
 
 ## Try to run the test
 
+It fails, as expected, because we haven't written anything yet.
+
 ```sh
-~$ $go test ./bookshelf
+~$ go test ./bookshelf
 # github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf_test [github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf.test]
-databases\v5\bookshelf\crud_test.go:14:14: store.CreateBook undefined (type *"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf/testutils".SpyStore has no field or method CreateBook)
+bookshelf/crud_test.go:17:16: undefined: "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".Create
+bookshelf/crud_test.go:34:13: undefined: "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".Create
+bookshelf/crud_test.go:35:33: undefined: "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".ErrEmptyTitleField
+bookshelf/crud_test.go:42:13: undefined: "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".Create
+bookshelf/crud_test.go:43:33: undefined: "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".ErrEmptyAuthorField
 FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf [build failed]
 FAIL
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-Write the `CreateBook` method for the `SpyStore`.
+Add the following into `bookshelf-store.go`
 
 ```go
-// bookshelf/testutils/store.go
+// bookshelf/bookshelf-store.go
 ...
-func (s *SpyStore) CreateBook(book *bookshelf.Book, title, author string) error {
-	return nil
+var (
+	ErrEmptyTitleField = errors.New("empty title field")
+	ErrEmptyAuthorField = errors.New("empty author field")
+)
+...
+func Create(store Storer, title, author string) (*Book, error) {
+	var book Book
+	return &book, nil
 }
-...
 ```
 
-When we run the tests again
+Run the tests again. We get our expected failures.
 
 ```sh
-~$ go test ./bookshelf/
+~$ go test ./bookshelf
 --- FAIL: TestCreate (0.00s)
-    crud_test.go:17: book returned without an ID
+    --- FAIL: TestCreate/creates_accurately (0.00s)
+        crud_test.go:20: book returned without an ID
+        crud_test.go:23: got "" want "Moby Dick" for title
+        crud_test.go:26: got "" want "Herman Melville" for author
+    --- FAIL: TestCreate/error_on_empty_title (0.00s)
+        crud_test.go:35: wanted an error but didn't get one
+        crud_test.go:35: got <nil> want empty title field
+    --- FAIL: TestCreate/error_on_empty_author (0.00s)
+        crud_test.go:43: wanted an error but didn't get one
+        crud_test.go:43: got <nil> want empty author field
 FAIL
-FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  4.635s
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.079s
 FAIL
 ```
 
 ## Write enough code to make it pass
 
-We should check that the passed in book has a valid (i.e. non-zero) `id`, and that the `Title` and `Author` match what was passed in. We should ensure our `id`'s are unique as well (as will the database).
+```go
+// bookshelf/bookshelf-store.go
+func Create(store Storer, title, author string) (*Book, error) {
+	if title == "" {
+		return nil, ErrEmptyTitleField
+	}
+	if author == "" {
+		return nil, ErrEmptyAuthorField
+	}
+	var book Book
+	err := store.Create(&book, title, author)
+	if err != nil {
+		return nil, err
+	}
+	return &book, err
+}
+```
 
-As a side note, `PostgreSQL`'s behavior regarding the `SERIAL` type is to keep autoincrementing it no matter what, even if previous `id`s are gone. For example, if you create `books` with `id`s 1, 2, 3 and 4, and delete the `book` with `id` 2, the next `id` created will be `5`. You could reassign it should you want to, but this leads to confusion and it's generally bad practice.
+## Try to run the test
 
-Let's use a helper to find the last ID before we assign it to the book.
+Once more, expected failure
+
+```sh
+~$ go test ./bookshelf
+# github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf
+bookshelf/bookshelf-store.go:177:14: store.Create undefined (type Storer has no field or method Create)
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf [build failed]
+FAIL
+```
+
+## Write enough code to make it pass
+
+Add the `Create` method to the `Storer` interface, with the same signature.
 
 ```go
-// bookshelf/testutils/store.go
-func (s *SpyStore) CreateBook(book *bookshelf.Book, title, author string) error {
+// bookshelf/bookshelf-store.go
+...
+type Storer interface {
+	ApplyMigration(name, stmt string) error
+	Create(book *Book, title string, author string) error
+}
+...
+```
+
+And in `testutils/store.go`. We'll use a helper method to acquire the latest `id`.
+
+```go
+// testutils/store.go
+package testutils
+import (
+	...
+	"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf"
+)
+...
+type SpyStore struct {
+	Migrations map[string]migration
+	Books      []*bookshelf.Book
+}
+...
+func (s *SpyStore) Create(book *bookshelf.Book, title, author string) error {
 	book.ID = newID(s)
 	book.Title = title
 	book.Author = author
@@ -2139,6 +2224,12 @@ func (s *SpyStore) CreateBook(book *bookshelf.Book, title, author string) error 
 	return nil
 }
 
+func NewSpyStore() *SpyStore {
+	return &SpyStore{
+		Migrations: map[string]migration{},
+		Books:      []*bookshelf.Book{},
+	}
+}
 func newID(store *SpyStore) int64 {
 	if len(store.Books) == 0 {
 		return 1
@@ -2157,14 +2248,50 @@ func newID(store *SpyStore) int64 {
 
 ```sh
 ~$ go test ./bookshelf
-ok      github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  1.384s
+# github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf_test [github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf.test]
+bookshelf/integration_test.go:27:32: cannot use store (type *bookshelf.PostgreSQLStore) as type bookshelf.Storer in argument to bookshelf.MigrateUp:
+        *bookshelf.PostgreSQLStore does not implement bookshelf.Storer (missing Create method)
+...
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf [build failed]
+FAIL
 ```
+
+Seems like we broke our integration tests. Our `PostgreSQLStore` does not implement the `Create` method. Let's do that now.
+
+```go
+// bookshelf/bookshelf-store.go
+// Create inserts a new book into the postgres store.
+func (s *PostgreSQLStore) Create(book *Book, title string, author string) error {
+	stmt := "INSERT INTO books (title, author) VALUES ($1, $2) RETURNING id, title, author;"
+	row := s.DB.QueryRow(stmt, title, author)
+	err := row.Scan(&book.ID, &book.Title, &book.Author)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+```
+
+Our tests now pass.
+
+```sh
+~$ go test ./bookshelf
+ok      github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf      0.074s
+```
+
+The create method of the `PostgreSQLStore` is not tested yet, but we will get to that. Let's finish testing the behavior of the package level `Create` function first.
+
+Notice that the `Create` method does not have an `ID` field provided, this is because `primary keys` are usually autoincremented and provided by the database.
+
+This is not written in stone, however: just happens that when we created the database table, we designated the `id` field as `SERIAL`, and `PostgreSQL` handles the auto-incrementing for us. But we could have designated a `PRIMARY KEY` of whichever type we would've wanted. For example, had we assigned the `title` as the primary key, the `id` field would have not been necessary. Or, if we designated `id` as `PRIMARY KEY`, but as type `INT` instead of `SERIAL`, our application would have had to find the latest `id` and increment it.
+
+As a side note, `PostgreSQL`'s behavior regarding the `SERIAL` type is to keep autoincrementing it no matter what, even if previous `id`s are gone. For example, if you create `books` with `id`s 1, 2, 3 and 4, and delete the `book` with `id` 2, the next `id` created will be `5`. You could reassign it should you want to, but this leads to confusion and it's generally regarded as a bad practice.
 
 ## But wait, what if we create the same book twice?
 
 Our tests pass, but what about duplicated data? We don't need two, three or twenty entries of the same book.
 
-Turn's out we have made a mistake when creating the tables in `migrations/0001_create_books_table.up.sql`. While we designated the `author` and the `title` columns to be required (`NOT NULL`, we should test against this too!), we did not designate the `title` as `UNIQUE`. We should be careful, as there could be different `author`s with books that share a `title`; this may seem like an edge case, but edge cases is one of many reasons why we test!
+As it turns out, we made a mistake when creating the tables in `migrations/0001_create_books_table.up.sql`. While we designated the `author` and the `title` columns to be required (`NOT NULL`, we should test against this too!), we did not designate the `title` as `UNIQUE`. We should be careful, as there could be different `author`s with books that share a `title`; this may seem like an edge case, but edge cases is one of many reasons why we test!
 
 While you might be tempted to just change the `0001_create_books_table.up.sql` file, you shouldn't! You might break the production database by altering the existing migrations!
 
@@ -2183,15 +2310,15 @@ ALTER TABLE IF EXISTS books ADD CONSTRAINT books_unique_author_title UNIQUE (aut
 ALTER TABLE IF EXISTS books DROP CONSTRAINT IF EXISTS books_unique_author_title;
 ```
 
-We should test our migrations before we move on, our integration tests should tell us if our `SQL` is correct.
+We should test our migrations before we move on, our current integration tests should tell us if our `SQL` is correct.
 
 ```sh
 ~$ go test ./bookshelf
---- FAIL: TestMigrations (0.46s)
-    --- FAIL: TestMigrations/idempotency (0.23s)
-        integration_test.go:105: second migrate up failed: pq: relation "books_unique_author_title" already exists
+--- FAIL: TestMigrations (0.11s)
+    --- FAIL: TestMigrations/idempotency (0.06s)
+        integration_test.go:98: second migrate up failed: pq: relation "books_unique_author_title" already exists
 FAIL
-FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.776s
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.117s
 FAIL
 ```
 
@@ -2225,9 +2352,464 @@ Now our tests pass.
 
 Take a moment to appreciate how our `go` integration tests just helped us test our that our `SQL` is up to our standards.
 
-We've been to focused on the unit tests. We need to create integration tests for our `Createbook` function as well.
+This behavior is enforced by the database, at the database level. We need to give our potential users a way to prevent duplicated data as well.
 
-We need to implement it in the `Store` as well.
+We could create an `Exists` function, but this would be terribly inefficient, as it would query the database, to then tell the user `said book exists`, like a mathematician.
+
+We should instead write the `Retrieve` function instead. We can use this to check if the book exists, and return it (or rather, populate the `*Book*` object with it).
+
+## Write the test first
+
+We have a choice to make for the retrieve function, we could
+
+-   a) Create a function with signature`Retrieve(store, param interface{}) (*Book, error)` , and do a type switch inside: `int` leads to type search, and `string` leads to title search
+-   b) Create two functions, with signatures `ByID(store Storer, id int64) (*Book, error)` and `ByTitleAuthor(store Storer, author, title string) (*Book, error)`.
+
+I believe option `b)` is the better one. First, our code is more explicit. Second, there's no `interface{}` dances inside our tests. Let's do that.
+
+Modify `NewSpyStore` to include an `initialBooks` parameter, so we can populate the `SpyStore` on creation.
+
+```go
+// bookshelf/testutils/store.go
+...
+func NewSpyStore(books []*bookshelf.Book) *SpyStore {
+	return &SpyStore{
+		Migrations: map[string]migration{},
+		Books:     books,
+	}
+}
+...
+```
+
+Add a new assertion in `testutils/assertions.go`
+
+```go
+// bookshelf/testutils/assertions.go
+package testutils
+import (
+	...
+	"github.com/djangulo/learn-go-with-tests/database/v5/bookshelf"
+)
+...
+func AssertBooksEqual(t *testing.T, got, want *bookshelf.Book) {
+	t.Helper()
+	if got == nil || got.ID == 0 {
+		t.Errorf("nil or invalid ID: %v", got)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v want %v", got, want)
+	}
+}
+```
+
+Then create a `dummyBooks` variable and add the following test to `crud_test.go`. You can change `TestCreate` to use the `AssertBooksEqual` helper too.
+
+You will have to modify all occurrences of `NewSpyStore` in `migrate_test.go` and in `crud_test.go`.
+
+```go
+// bookshelf/crud_test.go
+...
+var (
+	dummyBooks = make([]*bookshelf.Book, 0)
+	testBooks = []*bookshelf.Book{
+		&bookshelf.Book{ID: 10, Author: "W. Shakespeare", Title: "The Tragedie of Hamlet"},
+		&bookshelf.Book{ID: 22, Author: "W. Shakespeare", Title: "Romeo & Juliet"},
+	}
+)
+...
+func TestByID(t *testing.T) {
+
+	t.Run("ByID success", func(t *testing.T) {
+		store := testutils.NewSpyStore(testBooks)
+
+		book, err := bookshelf.ByID(store, testBooks[0].ID)
+		testutils.AssertNoError(t, err)
+		testutils.AssertBooksEqual(t, book, testBooks[0])
+	})
+
+	for _, test := range []struct {
+		name string
+		in   int64
+		want error
+	}{
+		{"ByID not found", int64(42), bookshelf.ErrBookDoesNotExist},
+		{"ByID zero value", int64(0), bookshelf.ErrZeroValueID},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			store := testutils.NewSpyStore(testBooks)
+			_, err := bookshelf.ByID(store, test.in)
+			testutils.AssertError(t, err, test.want)
+		})
+	}
+
+}
+
+func TestByAuthorTitle(t *testing.T) {
+
+	t.Run("ByTitleAuthor success", func(t *testing.T) {
+		store := testutils.NewSpyStore(testBooks)
+
+		book, err := bookshelf.ByTitleAuthor(store, testBooks[0].Title, testBooks[0].Author)
+		testutils.AssertNoError(t, err)
+		testutils.AssertBooksEqual(t, book, testBooks[0])
+	})
+
+	for _, test := range []struct {
+		name, title, author string
+		want                error
+	}{
+		{"ByTitleAuthor failure empty title", "", "Herman Melville", bookshelf.ErrEmptyTitleField},
+		{"ByTitleAuthor failure empty author", "Moby Dick", "", bookshelf.ErrEmptyAuthorField},
+		{"ByTitleAuthor failure not found", "Moby Dick", "Herman Melville", bookshelf.ErrBookDoesNotExist},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			store := testutils.NewSpyStore(testBooks)
+			_, err := bookshelf.ByTitleAuthor(store, test.title, test.author)
+			testutils.AssertError(t, err, test.want)
+		})
+	}
+
+}
+```
+
+## Try to run the test
+
+Expected failures:
+
+```sh
+~$ go test ./bookshelf
+# github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf_test [github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf.test]
+bookshelf/crud_test.go:52:16: undefined: bookshelf.ByID
+bookshelf/crud_test.go:62:33: undefined: bookshelf.ErrBookDoesNotExist
+bookshelf/crud_test.go:63:33: undefined: bookshelf.ErrZeroValueID
+bookshelf/crud_test.go:67:14: undefined: bookshelf.ByID
+bookshelf/crud_test.go:79:16: undefined: bookshelf.ByTitleAuthor
+bookshelf/crud_test.go:90:62: undefined: bookshelf.ErrBookDoesNotExist
+bookshelf/crud_test.go:94:14: undefined: bookshelf.ByTitleAuthor
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf [build failed]
+FAIL
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+```go
+// bookshelf/bookshelf-store.go
+...
+var (
+	...
+	ErrZeroValueID = errors.New("zero value ID")
+	ErrBookDoesNotExist = errors.New("book does not exist")
+)
+...
+func ByID(store Storer, id int64) (*Book, error) {
+	var book Book
+	return &book, nil
+}
+func ByTitleAuthor(store Storer, title, author string) (*Book, error) {
+	var book Book
+	return &book, nil
+}
+```
+
+## Try to run the tests
+
+```sh
+~$ go test ./bookshelf
+--- FAIL: TestByID (0.00s)
+    --- FAIL: TestByID/ByID_success (0.00s)
+        crud_test.go:46: nil or invalid ID: <nil>
+        crud_test.go:46: got <nil> want &{10 The Tragedie of Hamlet W. Shakespeare}
+    --- FAIL: TestByID/ByID_not_found (0.00s)
+        crud_test.go:60: wanted an error but didn't get one
+        crud_test.go:60: got <nil> want book does not exist
+    --- FAIL: TestByID/ByID_zero_value (0.00s)
+        crud_test.go:60: wanted an error but didn't get one
+        crud_test.go:60: got <nil> want zero value ID
+--- FAIL: TestByAuthorTitle (0.00s)
+    --- FAIL: TestByAuthorTitle/ByAuthorTitle_success (0.00s)
+        crud_test.go:73: nil or invalid ID: <nil>
+        crud_test.go:73: got <nil> want &{10 The Tragedie of Hamlet W. Shakespeare}
+    --- FAIL: TestByAuthorTitle/ByAuthorTitle_failure_empty_title (0.00s)
+        crud_test.go:87: wanted an error but didn't get one
+        crud_test.go:87: got <nil> want empty title field
+    --- FAIL: TestByAuthorTitle/ByAuthorTitle_failure_empty_author (0.00s)
+        crud_test.go:87: wanted an error but didn't get one
+        crud_test.go:87: got <nil> want empty author field
+    --- FAIL: TestByAuthorTitle/ByAuthorTitle_failure_not_found (0.00s)
+        crud_test.go:87: wanted an error but didn't get one
+        crud_test.go:87: got <nil> want book does not exist
+FAIL
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.122s
+FAIL
+```
+
+We got our work cut out for us, let's get to it!
+
+## Write enough code to make it pass
+
+```go
+// bookshelf/bookshelf-store.go
+...
+func ByID(store Storer, id int64) (*Book, error) {
+	if id == 0 {
+		return nil, ErrZeroValueID
+	}
+	var book Book
+	err := store.ByID(&book, id)
+	if err != nil {
+		return nil, ErrBookDoesNotExist
+	}
+	return &book, nil
+}
+
+func ByTitleAuthor(store Storer, title, author string) (*Book, error) {
+	if title == "" {
+		return nil, ErrEmptyTitleField
+	}
+	if author == "" {
+		return nil, ErrEmptyAuthorField
+	}
+	var book Book
+	err := store.ByTitleAuthor(&book, title, author)
+	if err != nil {
+		return nil, ErrBookDoesNotExist
+	}
+	return &book, nil
+}
+```
+
+You know what's coming by now:
+
+```sh
+~$ go test ./bookshelf
+# github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf
+bookshelf/bookshelf-store.go:195:13: store.ByID undefined (type Storer has no field or method ByID)
+bookshelf/bookshelf-store.go:210:13: store.ByTitleAuthor undefined (type Storer has no field or method ByTitleAuthor)
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf [build failed]
+FAIL
+```
+
+Add the `Storer` method signatures.
+
+```go
+// bookshelf/bookshelf-store.go
+...
+type Storer interface {
+	ApplyMigration(name, stmt string) error
+	Create(book *Book, title string, author string) error
+	ByID(book *Book, id int64) error
+	ByTitleAuthor(book *Book, title string, author string) error
+}
+...
+```
+
+## Try to run the tests
+
+It'll be a looong list of the same error. `integration_test.go` and `crud_test.go` are not happy with our `Storer` changes.
+
+```sh
+~$ go test ./bookshelf
+# github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf_test [github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf.test]
+bookshelf/crud_test.go:17:32: cannot use store (type *testutils.SpyStore) as type "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".Storer in argument to "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".Create:
+        *testutils.SpyStore does not implement "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".Storer (missing ByID method)
+...
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf [build failed]
+FAIL
+```
+
+## Write enough code to make it pass
+
+Add the `ByID` and the `ByTitleAuthor` to the `SpyStore`:
+
+```go
+// bookshelf/testutils/store.go
+...
+func (s *SpyStore) ByID(book *bookshelf.Book, id int64) error {
+	for _, b := range s.Books {
+		if b.ID == id {
+			*book = *b
+			return nil
+		}
+	}
+	return bookshelf.ErrBookDoesNotExist
+}
+
+func (s *SpyStore) ByTitleAuthor(book *bookshelf.Book, title, author string) error {
+	title, author = strings.ToLower(title), strings.ToLower(author)
+	for _, b := range s.Books {
+		if strings.ToLower(b.Title) == title && strings.ToLower(b.Author) == author {
+			*book = *b
+			return nil
+		}
+	}
+	return bookshelf.ErrBookDoesNotExist
+}
+```
+
+And to the `PostgreSQLStore`:
+
+```go
+// bookshelf/bookshelf-store.go
+func (s *PostgreSQLStore) ByID(book *Book, id int64) error {
+	stmt := "SELECT id, title, author FROM books WHERE id = $1 LIMIT 1;"
+	row := s.DB.QueryRow(stmt, id)
+	err := row.Scan(&book.ID, &book.Title, &book.Author)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *PostgreSQLStore) ByTitleAuthor(book *Book, title, author string) error {
+	stmt := "SELECT id, title, author FROM books WHERE title = $1 AND author = $2 LIMIT 1;"
+	row := s.DB.QueryRow(stmt, title, author)
+	err := row.Scan(&book.ID, &book.Title, &book.Author)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+```
+
+And we're back to green!
+
+```sh
+~$ go test ./bookshelf
+ok      github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf      0.144s
+```
+
+Now that we've written and tested our retrieve methods, we can implement them inside the `Create` to validate existence.
+
+This woul render the `Create` method a tad inefficient: it would entail a `read+write` operation as opposed to just a `write`. Because of this, we want to leave it optional to the consumers of our API. Let's instead write a `GetOrCreate` function that does exactly that, and leave `Create` unchanged.
+
+## Write the test first
+
+```go
+// bookshelf/crud_test.go
+func TestGetOrCreate(t *testing.T) {
+
+	t.Run("success", func(t *testing.T) {
+		for _, test := range []struct {
+			name, title, author string
+			want                *bookshelf.Book
+		}{
+			{"GetOrCreate retrieves from store", testBooks[1].Title, testBooks[1].Author, testBooks[1]},
+			{
+				"GetOrCreate insert into store",
+				"Moby Dick",
+				"Herman Melville",
+				&bookshelf.Book{testBooks[1].ID + 1, "Moby Dick", "Herman Melville"},
+			},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				store := testutils.NewSpyStore(testBooks)
+				book, err := bookshelf.GetOrCreate(store, test.title, test.author)
+				testutils.AssertNoError(t, err)
+				testutils.AssertBooksEqual(t, book, test.want)
+			})
+		}
+	})
+	t.Run("failure", func(t *testing.T) {
+		for _, test := range []struct {
+			name, title, author string
+			want                error
+		}{
+			{"GetOrCreate failure empty title", "", "Herman Melville", bookshelf.ErrEmptyTitleField},
+			{"GetOrCreate failure empty author", "Moby Dick", "", bookshelf.ErrEmptyAuthorField},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				store := testutils.NewSpyStore(testBooks)
+				_, err := bookshelf.GetOrCreate(store, test.title, test.author)
+				testutils.AssertError(t, err, test.want)
+			})
+		}
+	})
+}
+```
+
+## Try to run the test
+
+```sh
+~$ go test ./bookshelf
+# github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf_test [github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf.test]
+bookshelf/crud_test.go:126:18: undefined: bookshelf.GetOrCreate
+bookshelf/crud_test.go:142:15: undefined: bookshelf.GetOrCreate
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf [build failed]
+FAIL
+djangulo@sif:~/go/src/github.com/djangulo/l
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+```go
+// bookshelf/bookshelf-store.go
+...
+func GetOrCreate(store Storer, title, author string) (*Book, error){
+	var book Book
+	return &book, nil
+}
+```
+
+## Try to run the test
+
+Our expected failures:
+
+```sh
+~$ go test ./bookshelf
+--- FAIL: TestGetOrCreate (0.00s)
+    --- FAIL: TestGetOrCreate/success (0.00s)
+        --- FAIL: TestGetOrCreate/success/GetOrCreate_retrieves_from_store (0.00s)
+            crud_test.go:112: nil or invalid ID: &{0  }
+            crud_test.go:112: got &{0  } want &{22 Romeo & Juliet W. Shakespeare}
+        --- FAIL: TestGetOrCreate/success/GetOrCreate_insert_into_store (0.00s)
+            crud_test.go:112: nil or invalid ID: &{0  }
+            crud_test.go:112: got &{0  } want &{23 Moby Dick Herman Melville}
+    --- FAIL: TestGetOrCreate/failure (0.00s)
+        --- FAIL: TestGetOrCreate/failure/GetOrCreate_failure_empty_title (0.00s)
+            crud_test.go:127: wanted an error but didn't get one
+            crud_test.go:127: got <nil> want empty title field
+        --- FAIL: TestGetOrCreate/failure/GetOrCreate_failure_empty_author (0.00s)
+            crud_test.go:127: wanted an error but didn't get one
+            crud_test.go:127: got <nil> want empty author field
+FAIL
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.120s
+FAIL
+```
+
+## Write enough code to make it pass
+
+Thankfully, all the hard work is already done (and tested). Just use the `ByTitleAuthor` function to validate existence, and if the error is `ErrBookDoesNotExist`, call `Create`.
+
+```go
+// bookshelf/bookshelf-store.go
+...
+func GetOrCreate(store Storer, title, author string) (*Book, error) {
+	book, _ := ByTitleAuthor(store, title, author)
+	if book != nil {
+		return book, nil
+	}
+	book, err := Create(store, title, author)
+	if err != nil {
+		return nil, err
+	}
+	return book, nil
+
+```
+
+## Try to run the tests
+
+And our tests now pass.
+
+```sh
+~$ go test ./bookshelf
+ok      github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.153s
+```
+
+## The `C` and the `R`
+
+<!-- TODO: start: v5, end: v6 -->
+
+We've been to focused on the unit tests. We need to create integration tests for our `Create`, `ByID`, `ByTitleAuthor` and `GetOrCreate` functions.
 
 As usual, let's start with the test.
 
@@ -2237,113 +2819,44 @@ As usual, let's start with the test.
 // bookshelf/integration_test.go
 ...
 func TestCreateBook(t *testing.T) {
-	store, removeStore := bookshelf.NewStore()
+	store, removeStore := bookshelf.NewPostgreSQLStore()
 	defer removeStore()
 
 	t.Run("can create a book", func(t *testing.T) {
-		var book bookshelf.Book
-		err := store.CreateBook(&book, "test-title", "test-author")
+		book, err := bookshelf.Create(store, "test-title", "test-author")
 		if err != nil {
 			t.Errorf("received error on CreateBook: %v", err)
 		}
-		if book.ID == 0 {
-			t.Error("invalid ID received")
-		}
+		testutils.AssertBooksEqual(t, book, &bookshelf.Book{1, "test-title", "test-author"})
 	})
 
 	t.Run("cannot create a duplicate title-author", func(t *testing.T) {
-		var b1, b2 bookshelf.Book
-		err := store.CreateBook(&b1, "test-title", "test-author")
+		_, err := bookshelf.Create(store, "test-title", "test-author")
 		if err != nil {
 			t.Errorf("received error on CreateBook: %v", err)
 		}
-
-		err = store.CreateBook(&b2, "test-title", "test-author")
+		_, err = bookshelf.Create(store, "test-title", "test-author")
 		if err == nil {
 			t.Error("wanted an error but didn't get one")
 		}
-		
+
 	})
-
 }
-
 ```
 
 ## Try to run the test
 
 ```sh
 ~$ go test ./bookshelf
-# github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf_test [github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf.test]
-bookshelf\integration_test.go:131:15: store.CreateBook undefined (type *bookshelf.Store has no field or method CreateBook)
-bookshelf\integration_test.go:142:15: store.CreateBook undefined (type *bookshelf.Store has no field or method CreateBook)
-bookshelf\integration_test.go:147:14: store.CreateBook undefined (type *bookshelf.Store has no field or method CreateBook)
-FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf [build failed]
-FAIL
-```
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-Fair enough, no method exists. Let's add the signature to the `Storer` interface, as well as the method to the `Store`.
-
-```go
-// bookshelf/bookshelf-store.go
-...
-type Storer interface {
-	ApplyMigration(name, stmt string) error
-	CreateBook(*Book, string, string) error
-}
-...
-func (s *Store) CreateBook(book *Book, title, author string) error {
-	return nil
-}
-...
-```
-
-## Try to run the test
-
-We receive our expected failure.
-
-```sh
-~$ go test ./bookshelf
---- FAIL: TestCreateBook (0.05s)
+--- FAIL: TestCreateBook (0.00s)
     --- FAIL: TestCreateBook/can_create_a_book (0.00s)
-        integration_test.go:136: invalid ID received
+        integration_test.go:121: received error on CreateBook: pq: relation "books" does not exist
+        integration_test.go:123: nil or invalid ID: <nil>
+        integration_test.go:123: got <nil> want &{1 test-title test-author}
     --- FAIL: TestCreateBook/cannot_create_a_duplicate_title-author (0.00s)
-        integration_test.go:149: wanted an error but didn't get one
+        integration_test.go:129: received error on CreateBook: pq: relation "books" does not exist
 FAIL
-FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.730s
-FAIL
-```
-
-## Write enough code to make it pass
-
-We can now implement it.
-
-```go
-// bookshelf/bookshelf-store.go
-...
-// CreateBook inserts a new Book into the database.
-func (s *Store) CreateBook(book *Book, title, author string) error {
-	stmt := "INSERT INTO books (title, author) VALUES ($1, $2) RETURNING id, title, author;"
-	row := s.DB.QueryRow(stmt, title, author)
-
-	err := row.Scan(&book.ID, &book.Title, &book.Author)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-```
-
-Run the tests again:
-
-```sh
-~$ go test ./bookshelf
---- FAIL: TestCreateBook (0.11s)
-    integration_test.go:127: received error on CreateBook: pq: relation "books" does not exist
-    integration_test.go:130: invalid ID received
-FAIL
-FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  1.031s
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v6/bookshelf  0.155s
 FAIL
 ```
 
@@ -2356,7 +2869,7 @@ Add a call to `MigrateUp`, and check the error, after acquiring the `store`.
 ```go
 // bookshelf/integration_test.go
 func TestCreateBook(t *testing.T) {
-	store, removeStore := bookshelf.NewStore()
+	store, removeStore := bookshelf.NewPostgreSQLStore()
 	defer removeStore()
 
 	_, err := bookshelf.MigrateUp(dummyWriter, store, "migrations", -1)
@@ -2371,24 +2884,24 @@ func TestCreateBook(t *testing.T) {
 ## Try to run the tests
 
 ```sh
-~$ go test ./bookshelf
---- FAIL: TestCreateBook (0.20s)
-    --- FAIL: TestCreateBook/cannot_create_a_duplicate_title-author (0.03s)
-        integration_test.go:144: received error on CreateBook: pq: duplicate key value violates unique constraint "books_unique_author_title"
+~$ go test  ./bookshelf
+--- FAIL: TestCreateBook (0.05s)
+    --- FAIL: TestCreateBook/cannot_create_a_duplicate_title-author (0.00s)
+        integration_test.go:135: received error on CreateBook: pq: duplicate key value violates unique constraint "books_unique_author_title"
 FAIL
-FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  1.197s
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v6/bookshelf  0.190s
 FAIL
 ```
 
-Is it the error we expect? Yes it is. But an error should be _passing_, so what is going on?
+Is it the error we expect? Yes it is. But the tests should be _passing_, so what is going on?
 
 The test raising the error is the first `CreateBook` call inside `cannot create a duplicate title-author`. This is not what we planned!
 
-As it turns out, there is only 1 database connection string in our application; the one that lives inside `NewStore`. This means that all along we've been migrating `up` and `down`, inserting and deleting into a single database! This is a very risky practice, as our tests may modify or delete sensitive data once we're running in production.
+As it turns out, there is only 1 database connection string in our application; the one that lives inside `NewPostgreSQLStore`. This means that all along we've been migrating `up` and `down`, inserting and deleting into a single database! This is a very risky practice, as our tests may modify or delete sensitive data once we're running in production.
 
 So what do we do?
 
-## Test database
+## The test database
 
 So far, we have been operating in the `bookshelf_db` database, that we created at the start of the chapter. We need a secondary database that we can test to our heart's content.
 
@@ -2400,17 +2913,17 @@ Our options are:
 Both approaches have their downsides:
 
 1. The first approach requires more `go` code to write, and depends on the privileges that the DB user (`bookshelf_user`, in our case) has. When created the database, we gave our user `bookshelf_user` the capacity to create databases with `CREATEDB`.
-2. The second approach is simpler to implement, but then our tests depend on the existence of said test database. It also implies that we need to track 2 connections inside our application, as opposed to just 
+2. The second approach is simpler to implement, but then our tests depend on the existence of said test database. It also implies that we need to track 2 connections inside our application, as opposed to just
 
 We will opt for the first approach, and take advantage that our `MigrateDown` function cleans the database tables, due to the `CASCADE` statement at the end of the `down` migrations.
 
 ## Refactor
 
-Now we need to refactor our code. Stop and think about what's going on inside `NewStore`.
+Now we need to refactor our code. Stop and think about what's going on inside `NewPostgreSQLStore`.
 
 ```go
 // bookshelf/bookshelf-store.go
-func NewStore() (*Store, func()) {
+func NewPostgreSQLStore() (*PostgreSQLStore, func()) {
 	const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/bookshelf_db?sslmode=disable"
 	...
 }
@@ -2453,15 +2966,16 @@ func init() {
 	MainDBConf.SSLMode = getenv("POSTGRES_SSLMODE0", "disable")
 }
 ```
+
 With the code above, we can choose the database we want to connect to via environment variables. The `getenv` function is a simple extension of [`os.Getenv`](https://golang.org/pkg/os/#Getenv) that provides save defaults in case the variables are not set.
 
 The code inside the `init` function will run every time the package is called, so the `MainDBConf` will be instantiated and ready when the `bookshelf` package is imported.
 
-Our `NewStore` function now looks like this:
+Our `NewPostgreSQLStore` function now looks like this:
 
 ```go
 // bookshelf/bookshelf-store.go
-func NewStore(conf *DBConf) (*Store, func()) {
+func NewPostgreSQLStore(conf *DBConf) (*PostgreSQLStore, func()) {
 
 	db, err := sql.Open("postgres", conf.String())
 	if err != nil {
@@ -2491,11 +3005,11 @@ func NewStore(conf *DBConf) (*Store, func()) {
 		log.Fatalf("timeout of %v exceeded", removeTimeout)
 	}
 
-	return &Store{DB: db}, remove
+	return &PostgreSQLStore{DB: db}, remove
 }
 ```
 
-With this tooling in place, we can create a helper function to instantiate a new database just for our tests. Let's get to it!
+With this tooling in place, we can create a helper function to instantiate a new database just for our tests.
 
 Insert the function below inside `bookshelf/testutils/helpers.go`:
 
@@ -2505,15 +3019,14 @@ package testutils
 import (
 	...
 	"database/sql"
-	"io/ioutil"
 	"time"
 
-	"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf"
+	"github.com/djangulo/learn-go-with-tests/databases/v6/bookshelf"
 	_ "github.com/lib/pq"
 )
 ...
-func NewTestStore(conf *bookshelf.DBConf) (*bookshelf.Store, func(), error) {
-	main, removeMain := bookshelf.NewStore(&bookshelf.MainDBConf)
+func NewTestPostgreSQLStore(conf *bookshelf.DBConf) (*bookshelf.PostgreSQLStore, func(), error) {
+	main, removeMain := bookshelf.NewPostgreSQLStore(&bookshelf.MainDBConf)
 
 	_, err := main.DB.Exec(
 		fmt.Sprintf("CREATE DATABASE %s OWNER %s;",
@@ -2567,7 +3080,7 @@ func NewTestStore(conf *bookshelf.DBConf) (*bookshelf.Store, func(), error) {
 		}
 		removeMain()
 	}
-	return &bookshelf.Store{DB: testDB}, remove, nil
+	return &bookshelf.PostgreSQLStore{DB: testDB}, remove, nil
 }
 ```
 
@@ -2583,7 +3096,7 @@ Let's create another test utility to reset the database on a whim.
 
 ```go
 // bookshelf/testutils/helpers.go
-func ResetStore(store *bookshelf.Store) error {
+func ResetStore(store *bookshelf.PostgreSQLStore) error {
 	var err error
 	_, err = bookshelf.MigrateDown(dummyWriter, store, "migrations", -1)
 	if err != nil {
@@ -2599,15 +3112,16 @@ func ResetStore(store *bookshelf.Store) error {
 }
 ```
 
-And finally, our integration tests.
+And finally, our integration tests. We've included the tests for `ByID`, `ByTitleAuthor`, and `GetOrCreate` that were omitted before for brevity.
 
 ```go
 // bookshelf/integration_test.go
 ...
 import (
 	...
+	"fmt"
 	"os"
-	"github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf/testutils"
+	"github.com/djangulo/learn-go-with-tests/databases/v6/bookshelf/testutils"
 )
 ...
 var (
@@ -2623,7 +3137,7 @@ var (
 
 func TestDBIntegration(t *testing.T) {
 
-	store, removeStore, err := testutils.NewTestStore(&dbconf)
+	store, removeStore, err := testutils.NewTestPostgreSQLStore(&dbconf)
 	if err != nil {
 		panic(err)
 	}
@@ -2724,12 +3238,11 @@ func TestDBIntegration(t *testing.T) {
 		})
 	})
 
-	t.Run("CreateBook", func(t *testing.T) {
+	t.Run("Create", func(t *testing.T) {
 		t.Run("can create a book", func(t *testing.T) {
 			testutils.ResetStore(store)
 
-			var book bookshelf.Book
-			err := store.CreateBook(&book, "test-title", "test-author")
+			book, err := bookshelf.Create(store, "test-title", "test-author")
 			if err != nil {
 				t.Errorf("received error on CreateBook: %v", err)
 			}
@@ -2741,28 +3254,134 @@ func TestDBIntegration(t *testing.T) {
 		t.Run("cannot create a duplicate title-author", func(t *testing.T) {
 			testutils.ResetStore(store)
 
-			var b1, b2 bookshelf.Book
-			err := store.CreateBook(&b1, "test-title", "test-author")
+			_, err := bookshelf.Create(store, "test-title", "test-author")
 			if err != nil {
 				t.Errorf("received error on CreateBook: %v", err)
 			}
 
-			err = store.CreateBook(&b2, "test-title", "test-author")
+			_, err = bookshelf.Create(store, "test-title", "test-author")
 			if err == nil {
 				t.Error("wanted an error but didn't get one")
 			}
 		})
 	})
-}
+	t.Run("ByID", func(t *testing.T) {
+		testutils.ResetStore(store)
+		for _, b := range testBooks {
+			disposable := new(bookshelf.Book)
+			store.Create(disposable, b.Title, b.Author)
+		}
 
+		t.Run("ByID success", func(t *testing.T) {
+			_, err := bookshelf.ByID(store, 1)
+			testutils.AssertNoError(t, err)
+		})
+
+		for _, test := range []struct {
+			name string
+			in   int64
+			want error
+		}{
+			{"ByID not found", int64(42), bookshelf.ErrBookDoesNotExist},
+			{"ByID zero value", int64(0), bookshelf.ErrZeroValueID},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				store := testutils.NewSpyStore(testBooks)
+				_, err := bookshelf.ByID(store, test.in)
+				testutils.AssertError(t, err, test.want)
+			})
+		}
+	})
+
+	t.Run("ByTitleAuthor", func(t *testing.T) {
+		testutils.ResetStore(store)
+		for _, b := range testBooks {
+			disposable := new(bookshelf.Book)
+			store.Create(disposable, b.Title, b.Author)
+		}
+
+		t.Run("ByTitleAuthor success", func(t *testing.T) {
+			store := testutils.NewSpyStore(testBooks)
+
+			_, err := bookshelf.ByTitleAuthor(store, testBooks[0].Title, testBooks[0].Author)
+			testutils.AssertNoError(t, err)
+		})
+
+		for _, test := range []struct {
+			name, title, author string
+			want                error
+		}{
+			{"ByTitleAuthor failure empty title", "", "Herman Melville", bookshelf.ErrEmptyTitleField},
+			{"ByTitleAuthor failure empty author", "Moby Dick", "", bookshelf.ErrEmptyAuthorField},
+			{"ByTitleAuthor failure not found", "Moby Dick", "Herman Melville", bookshelf.ErrBookDoesNotExist},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				store := testutils.NewSpyStore(testBooks)
+				_, err := bookshelf.ByTitleAuthor(store, test.title, test.author)
+				testutils.AssertError(t, err, test.want)
+			})
+		}
+	})
+}
 ```
 
 Our tests pass.
 
 ```sh
 ~$ go test ./bookshelf
-ok      github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  4.644s
+ok      github.com/djangulo/learn-go-with-tests/databases/v6/bookshelf  2.610s
 ```
 
-Before we move on with the rest of the `CRUD` tests (the `RUD` part), we need a few more tests for `CreateBook`.
+## Wrapping up
 
+We managed to create a working `bookshelf` package, that interacts with a database and maintains certain *behaviors*.
+
+Not only that, our package is extendible: it provides a default storage medium, the `PostgreSQL` database, and if that's not enough, you can create any other storage type you wanted as long as they implement the `Storer` interface.
+
+Note that we only created a `library` with the tools for implementing persistent storage of Books, we did not provide a program. But with the library there, creating, say, a CLI or a webserver is trivial.
+
+We covered a lot of different topics related to databases and DevOps, here are some more resources to expand further in one of the many directions.
+
+### PostgreSQL
+
+As mentioned before, `PostgreSQL` is a powerful database. We only scratched the surface here of what it's capable of.
+
+The [documentation](https://www.postgresql.org/docs/11/index.html) is excellent: its well organized, covers examples, use cases, concerns and workarounds for A LOT of scenarios. That should be your first place to look for answers related to this awesome database.
+
+This is just one of many databases though, below is by-no-means-comprehensive list:
+
+- [MySQL](https://www.mysql.com/).
+- [SQLite](https://sqlite.org/index.html).
+- [MariaDB](https://mariadb.org/)
+- [SQL Server](https://www.microsoft.com/en-us/sql-server/)
+- [Cassandra](https://cassandra.apache.org/)
+
+In this guide we used the term _database_ freely to refer to a Relational Database. In the strictest sense, this is very inaccurate, as [there are many, many different types of databases](https://en.wikipedia.org/wiki/Outline_of_databases#Types_of_databases).
+
+### Continuous integration
+
+Continuous Integration, or CI, was mentioned briefly in this chapter. It is simply merging all (tested) code into the main codebase.
+
+It's a natural segueway that follows TDD.
+
+While `CI` itself is a concept, you need a framework to itegrate it into your coding flow.
+
+Generally, you create a series of tasks that need to be executed in sequence, that can either pass or fail (sound familiar?). These tasks can range from building your application, to testing it in isolation, to publishing it online or merging with a `master` repository.
+
+Here are some of the most recognized CI/CD frameworks out there:
+
+| Project   | Homepage                 | Available as | Remarks                                                                                                              |
+| :-------- | :----------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------- |
+| Travis CI | https://travis-ci.org/   | SaaS         | Free for open source projects.                                                                                       |
+| Circle CI | https://travis-ci.org/   | SaaS         | Free for open source projects.                                                                                       |
+| Concourse | https://concourse-ci.org | Self-hosted  | Written in `Go`, it's relatively simple to use, and provides a `CLI`.                                                |
+| Jenkins   | https://jenkins.io/      | Self-hosted  | Probably the easiest to setup. Oldest in the market. Immense community. Ocean of plugins to extend. Written in Java. |
+| GoCD      | https://www.gocd.org/    | Self-hosted  | Written in Java (I know, right?). Extendible via plugins.                                                            |
+
+### Database normalization
+
+If you're interested in databases and Database design, I suggest you familiarize yourself with **database normalization**. Below are some useful resources.
+
+-   [Database Normalization](https://en.wikipedia.org/wiki/Database_normalization).
+-   [A Simple Guide to Five Normal Forms in Relational Database Theory](http://www.bkent.net/Doc/simple5.htm).
+-   [Relational Database Design/Normalization](https://en.wikibooks.org/wiki/Relational_Database_Design/Normalization).
