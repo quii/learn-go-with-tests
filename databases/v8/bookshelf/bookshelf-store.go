@@ -23,6 +23,8 @@ type Storer interface {
 	ByID(book *Book, id int64) error
 	ByTitleAuthor(book *Book, title string, author string) error
 	List(books *[]*Book, query string) error
+	Update(book *Book, id int64, fields map[string]interface{}) error
+	Delete(book *Book, id int64) error
 }
 
 // PostgreSQLStore manages a bookshelf using an *sql.DB.
@@ -54,6 +56,10 @@ var (
 	ErrEmptyTitleField = errors.New("empty title field")
 	// ErrEmptyAuthorField empty author field
 	ErrEmptyAuthorField = errors.New("empty author field")
+	// ErrEmptyFields fields are empty
+	ErrEmptyFields = errors.New("fields are empty")
+	// ErrInvalidFields invalid fields
+	ErrInvalidFields = errors.New("invalid fields")
 	// ErrZeroValueID zero value ID
 	ErrZeroValueID = errors.New("zero value ID")
 	// ErrBookDoesNotExist book does not exist
@@ -153,6 +159,9 @@ func (s *PostgreSQLStore) ByID(book *Book, id int64) error {
 	row := s.DB.QueryRow(stmt, id)
 	err := row.Scan(&book.ID, &book.Title, &book.Author)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return ErrBookDoesNotExist
+		}
 		return err
 	}
 	return nil
@@ -196,6 +205,47 @@ func (s *PostgreSQLStore) List(books *[]*Book, query string) error {
 	if err := rows.Close(); err != nil {
 		return err
 	}
+	return nil
+}
+
+// Update updates the values of Book with `id` in the database.
+func (s *PostgreSQLStore) Update(book *Book, id int64, fields map[string]interface{}) error {
+	columns := make([]string, 0)
+	values := make([]interface{}, 0)
+	for column, value := range fields {
+		columns = append(columns, column)
+		values = append(values, value)
+	}
+	values = append(values, id)
+
+	stmt := fmt.Sprintf("UPDATE books SET (%s) = ROW(", strings.Join(columns, ", "))
+	var i int
+	for i = 1; i <= len(columns); i++ {
+		stmt += fmt.Sprintf("$%d", i)
+		if i != len(columns) {
+			stmt += ","
+		}
+	}
+	stmt += fmt.Sprintf(") WHERE id = $%d RETURNING id, title, author;", i)
+
+	fmt.Println(stmt)
+	row := s.DB.QueryRow(stmt, values...)
+	err := row.Scan(&book.ID, &book.Title, &book.Author)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Delete removes a book from the database.
+func (s *PostgreSQLStore) Delete(book *Book, id int64) error {
+	stmt := "DELETE FROM books WHERE id = $1 RETURNING title, author;"
+	row := s.DB.QueryRow(stmt, id)
+	err := row.Scan(&book.Title, &book.Author)
+	if err != nil {
+		return err
+	}
+	book.ID = 0
 	return nil
 }
 
@@ -357,6 +407,71 @@ func List(store Storer, search string) ([]*Book, error) {
 	return books, nil
 }
 
-// func Update(store Storer, ID int64, title, author string) (*Book, error) {
+// Update updates values for Book with ID == id.
+func Update(store Storer, id int64, fields map[string]interface{}) (*Book, error) {
+	if id == 0 {
+		return nil, ErrZeroValueID
+	}
+	if len(fields) == 0 {
+		return nil, ErrEmptyFields
+	}
+	err := bookFields.Validate(fields)
+	if err != nil {
+		return nil, err
+	}
 
-// }
+	fields = dropField(fields, "id") // cannot update id
+	var book Book
+	err = store.Update(&book, id, fields)
+	if err != nil {
+		return nil, err
+	}
+	return &book, nil
+}
+
+// Delete removes a Book from the store.
+func Delete(store Storer, id int64) (*Book, error) {
+	if id == 0 {
+		return nil, ErrZeroValueID
+	}
+	var book Book
+	err := store.Delete(&book, id)
+	if err != nil {
+		return nil, err
+	}
+	return &book, nil
+}
+
+type canonicalFieldsMap map[string]bool
+
+var bookFields = canonicalFieldsMap{
+	"id":     true,
+	"author": true,
+	"title":  true,
+}
+
+func (c *canonicalFieldsMap) Validate(m map[string]interface{}) error {
+	fields := make([]string, 0)
+	for f := range m {
+		fields = append(fields, f)
+	}
+	errorFields := make([]string, 0)
+	for _, field := range fields {
+		if _, ok := (*c)[field]; !ok {
+			errorFields = append(errorFields, field)
+		}
+	}
+	if len(errorFields) > 0 {
+		return ErrInvalidFields
+	}
+	return nil
+}
+
+func dropField(m map[string]interface{}, toDrop ...string) map[string]interface{} {
+	for _, field := range toDrop {
+		if _, ok := m[field]; ok {
+			delete(m, field)
+		}
+	}
+	return m
+}

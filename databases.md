@@ -2558,7 +2558,10 @@ func ByID(store Storer, id int64) (*Book, error) {
 	var book Book
 	err := store.ByID(&book, id)
 	if err != nil {
-		return nil, ErrBookDoesNotExist
+		if err == sql.ErrNoRows {
+			return nil, ErrBookDoesNotExist
+		}
+		return nil, err
 	}
 	return &book, nil
 }
@@ -2573,7 +2576,10 @@ func ByTitleAuthor(store Storer, title, author string) (*Book, error) {
 	var book Book
 	err := store.ByTitleAuthor(&book, title, author)
 	if err != nil {
-		return nil, ErrBookDoesNotExist
+		if err == sql.ErrNoRows {
+			return nil, ErrBookDoesNotExist
+		}
+		return nil, err
 	}
 	return &book, nil
 }
@@ -3563,6 +3569,506 @@ With this, our tests are still green.
 ok      github.com/djangulo/learn-go-with-tests/databases/v7/bookshelf  4.023s
 ```
 
+## Update and Delete
+
+<!-- TODO: start: v7, end: v8 -->
+
+The `Update` and `Delete` functions should be fairly straightforward implementation:
+
+- For `Update`, provide an `ID`, new values and return the updated result. Return an error if both values are empty or if the `ID` is invalid.
+- For `Delete`, all we need is the `ID`. It should return the values of the deleted book on success, and an error if the `ID` is invalid or if it does not exist in the store.
+
+## Write the test first
+
+```go
+// bookshelf/crud_test.go
+...
+func TestUpdate(t *testing.T) {
+
+	for _, test := range []struct {
+		name     string
+		fields   map[string]interface{}
+		book     *bookshelf.Book
+		wantBook *bookshelf.Book
+	}{
+		{
+			"Update success: title only",
+			map[string]interface{}{"title": "Romeo And Juliet"},
+			testBooks[1],
+			&bookshelf.Book{testBooks[1].ID, "Romeo And Juliet", testBooks[1].Author},
+		},
+		{
+			"Update success: author only",
+			map[string]interface{}{"author": "William Shakespeare"},
+			testBooks[1],
+			&bookshelf.Book{testBooks[1].ID, testBooks[1].Title, "William Shakespeare"},
+		},
+		{
+			"Update success: title+author",
+			map[string]interface{}{"title": "Romeo And Juliet", "author": "William Shakespeare"},
+			testBooks[1],
+			&bookshelf.Book{testBooks[1].ID, "Romeo And Juliet", "William Shakespeare"},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			store := testutils.NewSpyStore(testBooks)
+			updated, err := bookshelf.Update(store, test.book.ID, test.fields)
+			testutils.AssertNoError(t, err)
+			testutils.AssertBooksEqual(t, updated, test.wantBook)
+		})
+	}
+
+	for _, test := range []struct {
+		name   string
+		id     int64
+		fields map[string]interface{}
+		want   error
+	}{
+		{"Update failure: empty fields", 10, nil, bookshelf.ErrEmptyFields},
+		{"Update failure: invalid fields", 10, map[string]interface{}{"isbn": 10}, bookshelf.ErrInvalidFields},
+		{"Update failure: zero value ID", 0, map[string]interface{}{"author": "doesn't matter"}, bookshelf.ErrZeroValueID},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			store := testutils.NewSpyStore(testBooks)
+			_, err := bookshelf.Update(store, test.id, test.fields)
+			testutils.AssertError(t, err, test.want)
+		})
+	}
+}
+
+func TestDelete(t *testing.T) {
+
+	for _, test := range []struct {
+		name string
+		id   int64
+		want *bookshelf.Book
+	}{
+		{"Delete success", 10, testBooks[0]},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			store := testutils.NewSpyStore(testBooks)
+			_, err := bookshelf.Delete(store, test.id)
+			testutils.AssertNoError(t, err)
+			var dummy bookshelf.Book
+			err = store.ByID(&dummy, test.id)
+			testutils.AssertError(t, err, bookshelf.ErrBookDoesNotExist)
+		})
+	}
+
+	for _, test := range []struct {
+		name string
+		id   int64
+		want error
+	}{
+		{"Delete failure: does not exist", 42, bookshelf.ErrBookDoesNotExist},
+		{"Delete failure: zero value ID", 0, bookshelf.ErrZeroValueID},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			store := testutils.NewSpyStore(testBooks)
+			_, err := bookshelf.Delete(store, test.id)
+			testutils.AssertError(t, err, test.want)
+		})
+	}
+}
+```
+
+## Try to run the test
+
+```sh
+~$ go test ./bookshelf
+# github.com/djangulo/learn-go-with-tests/databases/v8/bookshelf_test [github.com/djangulo/learn-go-with-tests/databases/v8/bookshelf.test]
+bookshelf\crud_test.go:168:20: undefined: bookshelf.Update
+bookshelf\crud_test.go:179:48: undefined: bookshelf.ErrEmptyFields
+bookshelf\crud_test.go:184:14: undefined: bookshelf.Update
+bookshelf\crud_test.go:198:78: undefined: bookshelf.ErrInvalidFields
+bookshelf\crud_test.go:201:20: undefined: bookshelf.Delete
+bookshelf\crud_test.go:220:14: undefined: bookshelf.Delete
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v8/bookshelf [build failed]
+FAIL//
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+Insert the new error and the `Delete` and `Update` functions.
+
+```go
+// bookshelf/bookshelf-store.go
+var (
+	...
+	ErrEmptyFields = errors.New("fields are empty")
+	ErrInvalidFields = errors.New("invalid fields")
+)
+...
+func Update(store Storer, id int64, fields map[string]interface{}) (*Book, error) {
+	var book Book
+	return &book, nil
+}
+
+func Delete(store Storer, id int64) (*Book, error) {
+	var book Book
+	return &book, nil
+}
+```
+
+## About `map[string]interface{}`
+
+As it turns out, the type `map[string]interface{}` is ideal for handling updates. First off, most `database/sql` functions and methods accept a variadic `...interface{}` argument, these methods then use introspection to cast the type of the given field to the necessary column. Second, the `map[string]interface{}` type conveniently holds the column name and the value to update it to.
+
+You can pass a map with `1`, `2` or `N` fields, it doesn't matter, validation can be handled in a single helper function. If the tabels were to be extended, instead of adding a new parameter to the `Storer`, the functions and the methods, simply add them to the `fields` param and you'd be done.
+
+We didn't do this for the `Create` methods because `Title` and `Author` are required, although we could have if we wanted to.
+
+Here are some helpers that will assist in validating and cleaning the `fields` parameter.
+
+```go
+// bookshelf/bookshelf-store.go
+...
+type canonicalFieldsMap map[string]bool
+var bookFields = map[string]bool{
+	"id": true,
+	"author": true,
+	"title": true,
+}
+func (c *canonicalFieldsMap) Validate(m map[string]interface{}) error {
+	fields := make([]string, 0)
+	for f := range m {
+		fields = append(fields, f)
+	}
+	errorFields := make([]string, 0)
+	for _, field := range fields {
+		if _, ok := (*c)[field]; !ok {
+			errorFields = append(errorFields, field)
+		}
+	}
+	if len(errorFields) > 0 {
+		return ErrInvalidFields
+	}
+	return nil
+}
+func dropField(m map[string]interface{}, toDrop ...string) map[string]interface{} {
+	for _, field := range toDrop {
+		if _, ok := m[field]; ok {
+			delete(m, field)
+		}
+	}
+	return m
+}
+```
+
+## Try to run the tests
+
+There's something to be said about a thorough error report that tells you exactly what to do.
+
+```sh
+~$ go test ./bookshelf
+--- FAIL: TestUpdate (0.00s)
+    --- FAIL: TestUpdate/Update_success:_title_only (0.00s)
+        crud_test.go:188: nil or invalid ID: &{0  }
+        crud_test.go:188: got &{0  } want &{22 Romeo And Juliet W. Shakespeare}
+    --- FAIL: TestUpdate/Update_success:_author_only (0.00s)
+        crud_test.go:188: nil or invalid ID: &{0  }
+        crud_test.go:188: got &{0  } want &{22 Romeo & Juliet William Shakespeare}
+    --- FAIL: TestUpdate/Update_success:_title+author (0.00s)
+        crud_test.go:188: nil or invalid ID: &{0  }
+        crud_test.go:188: got &{0  } want &{22 Romeo And Juliet William Shakespeare}
+    --- FAIL: TestUpdate/Update_failure:_empty_fields (0.00s)
+        crud_test.go:205: wanted an error but didn't get one
+        crud_test.go:205: got <nil> want fields are empty
+    --- FAIL: TestUpdate/Update_failure:_invalid_fields (0.00s)
+        crud_test.go:205: wanted an error but didn't get one
+        crud_test.go:205: got <nil> want invalid fields: isbn
+    --- FAIL: TestUpdate/Update_failure:_zero_value_ID (0.00s)
+        crud_test.go:205: wanted an error but didn't get one
+        crud_test.go:205: got <nil> want zero value ID
+--- FAIL: TestDelete (0.00s)
+    --- FAIL: TestDelete/Delete_success (0.00s)
+        crud_test.go:225: wanted an error but didn't get one
+        crud_test.go:225: got <nil> want book does not exist
+    --- FAIL: TestDelete/Delete_failure:_does_not_exist (0.00s)
+        crud_test.go:240: wanted an error but didn't get one
+        crud_test.go:240: got <nil> want book does not exist
+    --- FAIL: TestDelete/Delete_failure:_zero_value_ID (0.00s)
+        crud_test.go:240: wanted an error but didn't get one
+        crud_test.go:240: got <nil> want zero value ID
+FAIL
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v8/bookshelf  3.861s
+FAIL
+```
+
+Let's get to work!
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+```go
+// bookshelf/bookshelf-store.go
+func Update(store Storer, id int64, fields map[string]interface{}) (*Book, error) {
+	if id == 0 {
+		return nil, ErrZeroValueID
+	}
+	err := bookFields.Validate(fields)
+	if err != nil {
+		return nil, err
+	}
+
+	fields = dropField(fields, "id") // cannot update id
+	var book Book
+	err = store.Update(&book, id, fields)
+	if err != nil {
+		return nil, err
+	}
+	return &book, nil
+}
+...
+func Delete(store Storer, id int64) (*Book, error) {
+	if id == 0 {
+		return nil, ErrZeroValueID
+	}
+	var book Book
+	err := store.Delete(&book, id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrBookDoesNotExist
+		}
+		return nil, err
+	}
+	return &book, nil
+}
+```
+
+Run the tests:
+
+```sh
+~$ go test ./bookshelf
+# github.com/djangulo/learn-go-with-tests/databases/v8/bookshelf
+bookshelf\bookshelf-store.go:380:13: store.Update undefined (type Storer has no field or method Update)
+bookshelf\bookshelf-store.go:393:14: store.Delete undefined (type Storer has no field or method Delete)
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v8/bookshelf [build failed]
+FAIL
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+Write the method signatures into `Storer`.
+
+```go
+// bookshelf/bookshelf-store.go
+...
+type Storer interface {
+	...
+	Update(book *Book, id int64, fields map[string]interface{}) error
+	Delete(book *Book, id int64) error
+}
+...
+```
+
+## Try to run the tests
+
+
+```sh
+~$ go test ./bookshelf
+# github.com/djangulo/learn-go-with-tests/databases/v8/bookshelf/testutils
+bookshelf\testutils\helpers.go:133:32: cannot use store (type *bookshelf.PostgreSQLStore) as type bookshelf.Storer in argument to bookshelf.MigrateDown:
+        *bookshelf.PostgreSQLStore does not implement bookshelf.Storer (missing Delete method)
+bookshelf\testutils\helpers.go:138:30: cannot use store (type *bookshelf.PostgreSQLStore) as type bookshelf.Storer in argument to bookshelf.MigrateUp:
+        *bookshelf.PostgreSQLStore does not implement bookshelf.Storer (missing Delete method)
+FAIL    github.com/djangulo/learn-go-with-tests/dat
+```
+
+## Write enough code to make it pass
+
+Implement the `Update` and `Delete` methods for the `PostgreSQLStore`.
+
+```go
+// bookshelf/bookshelf-store.go
+func (s *PostgreSQLStore) Update(book *Book, id int64, fields map[string]interface{}) error {
+	columns := make([]string, 0)
+	values := make([]interface{}, 0)
+	for column, value := range fields {
+		columns = append(columns, column)
+		values = append(values, value)
+	}
+	values = append(values, id)
+
+	stmt := fmt.Sprintf("UPDATE books SET (%s) = ROW(", strings.Join(columns, ", "))
+	var i int
+	for i = 1; i <= len(columns); i++ {
+		stmt += fmt.Sprintf("$%d", i)
+		if i != len(columns) {
+			stmt += ","
+		}
+	}
+	stmt += fmt.Sprintf(") WHERE id = $%d RETURNING id, title, author;", i)
+
+	fmt.Println(stmt)
+	row := s.DB.QueryRow(stmt, values...)
+	err := row.Scan(&book.ID, &book.Title, &book.Author)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (s *PostgreSQLStore) Delete(book *Book, id int64) error {
+	stmt := "DELETE FROM books WHERE id = $1 RETURNING title, author;"
+	row := s.DB.QueryRow(stmt, id)
+	err := row.Scan(&book.Title, &book.Author)
+	if err != nil {
+		return err
+	}
+	book.ID = 0
+	return nil
+}
+```
+
+And in the `SpyStore`.
+```go
+// bookshelf/testutils/store.go
+func (s *SpyStore) Update(book *bookshelf.Book, id int64, fields map[string]interface{}) error {
+	for _, b := range s.Books {
+		if (*b).ID == id {
+			*book = *b
+		}
+	}
+	if title, ok := fields["title"]; ok {
+		title := title.(string)
+		book.Title = title
+	}
+	if author, ok := fields["author"]; ok {
+		author := author.(string)
+		book.Author = author
+	}
+	return nil
+}
+func (s *SpyStore) Delete(book *bookshelf.Book, id int64) error {
+	err := (*s).ByID(book, id)
+	if err != nil {
+		return err
+	}
+	var idx int
+	for i, b := range s.Books {
+		if (*b).ID == id {
+			idx = i
+			break
+		}
+	}
+	book.ID = 0
+	s.Books = append(s.Books[:idx], s.Books[idx+1:]...)
+	return nil
+}
+...
+```
+
+And with all that, our tests now pass (phew).
+
+```sh
+~$ go test ./bookshelf
+ok      github.com/djangulo/learn-go-with-tests/databases/v8/bookshelf  5.241s
+```
+
+For integration tests, we can do the same we did for `List`, and reuse the test cases, while swapping out the store and assertions.
+
+```go
+// bookshelf/integration_test.go
+...
+t.Run("Update", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			for _, test := range []struct {
+				name     string
+				fields   map[string]interface{}
+				id       int64
+				wantBook *bookshelf.Book
+			}{
+				{
+					"title only",
+					map[string]interface{}{"title": "Romeo And Juliet"},
+					1,
+					&bookshelf.Book{1, "Romeo And Juliet", "W. Shakespeare"},
+				},
+				{
+					"author only",
+					map[string]interface{}{"author": "William Shakespeare"},
+					1,
+					&bookshelf.Book{1, "The Tragedie of Hamlet", "William Shakespeare"},
+				},
+				{
+					"title+author",
+					map[string]interface{}{"title": "Romeo And Juliet", "author": "William Shakespeare"},
+					1,
+					&bookshelf.Book{1, "Romeo And Juliet", "William Shakespeare"},
+				},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					testutils.ResetStore(store)
+					for _, b := range testBooks {
+						disposable := new(bookshelf.Book)
+						store.Create(disposable, b.Title, b.Author)
+					}
+					_, err := bookshelf.Update(store, test.id, test.fields)
+					testutils.AssertNoError(t, err)
+				})
+			}
+
+		})
+		t.Run("failure", func(t *testing.T) {
+			for _, test := range []struct {
+				name   string
+				id     int64
+				fields map[string]interface{}
+				want   error
+			}{
+				{"empty fields", 1, nil, bookshelf.ErrEmptyFields},
+				{"invalid fields", 1, map[string]interface{}{"isbn": 10}, bookshelf.ErrInvalidFields},
+				{"zero value ID", 0, map[string]interface{}{"author": "doesn't matter"}, bookshelf.ErrZeroValueID},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					_, err := bookshelf.Update(store, test.id, test.fields)
+					testutils.AssertError(t, err, test.want)
+				})
+			}
+		})
+	})
+
+	t.Run("Delete", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			for _, test := range []struct {
+				name string
+				id   int64
+				want *bookshelf.Book
+			}{
+				{"deletes", 1, testBooks[0]},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					testutils.ResetStore(store)
+					for _, b := range testBooks {
+						disposable := new(bookshelf.Book)
+						store.Create(disposable, b.Title, b.Author)
+					}
+					_, err := bookshelf.Delete(store, test.id)
+					testutils.AssertNoError(t, err)
+					var dummy bookshelf.Book
+					err = store.ByID(&dummy, test.id)
+					testutils.AssertError(t, err, bookshelf.ErrBookDoesNotExist)
+				})
+			}
+		})
+		t.Run("failure", func(t *testing.T) {
+			for _, test := range []struct {
+				name string
+				id   int64
+				want error
+			}{
+				{"Delete failure: does not exist", 42, bookshelf.ErrBookDoesNotExist},
+				{"Delete failure: zero value ID", 0, bookshelf.ErrZeroValueID},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					store := testutils.NewSpyStore(testBooks)
+					_, err := bookshelf.Delete(store, test.id)
+					testutils.AssertError(t, err, test.want)
+				})
+			}
+		})
+	})
+...
+```
 
 ## Wrapping up
 
@@ -3570,7 +4076,7 @@ We managed to create a working `bookshelf` package, that interacts with a databa
 
 Not only that, our package is extendible: it provides a default storage medium, the `PostgreSQL` database, and if that's not enough, you can create any other storage type you wanted as long as they implement the `Storer` interface.
 
-Note that we only created a `library` with the tools for implementing persistent storage of Books, we did not provide a program. But with the library there, creating, say, a CLI or a webserver is trivial.
+Note that we only created a _library_ with the tools for implementing persistent storage of Books, we did not provide a program. But with the library there, creating, say, a CLI or a webserver is trivial.
 
 We covered a lot of different topics related to databases and DevOps, here are some more resources to expand further in one of the many directions.
 

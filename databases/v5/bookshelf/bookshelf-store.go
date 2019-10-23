@@ -230,7 +230,10 @@ func ByID(store Storer, id int64) (*Book, error) {
 	var book Book
 	err := store.ByID(&book, id)
 	if err != nil {
-		return nil, ErrBookDoesNotExist
+		if err == sql.ErrNoRows {
+			return nil, ErrBookDoesNotExist
+		}
+		return nil, err
 	}
 	return &book, nil
 }
@@ -246,7 +249,10 @@ func ByTitleAuthor(store Storer, title, author string) (*Book, error) {
 	var book Book
 	err := store.ByTitleAuthor(&book, title, author)
 	if err != nil {
-		return nil, ErrBookDoesNotExist
+		if err == sql.ErrNoRows {
+			return nil, ErrBookDoesNotExist
+		}
+		return nil, err
 	}
 	return &book, nil
 }
