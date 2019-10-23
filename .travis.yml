@@ -18,6 +18,19 @@ stages:
   - spelling
   - epub
 
+addons:
+  postgresql: "11"
+  apt:
+    packages:
+      - postgresql-11
+      - postgresql-client-11
+      - postgresql-contrib-11
+
+env:
+  global:
+    - PGPORT=5433
+    - POSTGRES_PORT=5433
+
 jobs:
   include:
     - stage: build

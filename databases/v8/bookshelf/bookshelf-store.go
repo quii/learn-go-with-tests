@@ -95,7 +95,7 @@ func init() {
 	MainDBConf.Host = getenv("POSTGRES_HOST", "localhost")
 	MainDBConf.Port = getenv("POSTGRES_PORT", "5432")
 	MainDBConf.DBName = getenv("POSTGRES_DB", "bookshelf_db")
-	MainDBConf.SSLMode = getenv("POSTGRES_SSLMODE0", "disable")
+	MainDBConf.SSLMode = getenv("POSTGRES_SSLMODE", "disable")
 }
 
 // NewPostgreSQLStore creates a new store, returning a connection to the db, and an
@@ -228,7 +228,6 @@ func (s *PostgreSQLStore) Update(book *Book, id int64, fields map[string]interfa
 	}
 	stmt += fmt.Sprintf(") WHERE id = $%d RETURNING id, title, author;", i)
 
-	fmt.Println(stmt)
 	row := s.DB.QueryRow(stmt, values...)
 	err := row.Scan(&book.ID, &book.Title, &book.Author)
 	if err != nil {

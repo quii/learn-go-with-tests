@@ -89,7 +89,7 @@ func init() {
 	MainDBConf.Host = getenv("POSTGRES_HOST", "localhost")
 	MainDBConf.Port = getenv("POSTGRES_PORT", "5432")
 	MainDBConf.DBName = getenv("POSTGRES_DB", "bookshelf_db")
-	MainDBConf.SSLMode = getenv("POSTGRES_SSLMODE0", "disable")
+	MainDBConf.SSLMode = getenv("POSTGRES_SSLMODE", "disable")
 }
 
 // NewPostgreSQLStore creates a new store, returning a connection to the db, and an
