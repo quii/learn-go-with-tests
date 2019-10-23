@@ -3091,7 +3091,7 @@ We now can create the test database inside each test function, run all our tests
 
 However, to avoid creating the test database multiple times, let's group our `TestCreateBook` and `TestMigrate` into a single function. We can still get meaningful reporting by nesting them with `t.Run`.
 
-There is nothing stopping us from creating as many test databases as we want, but each database created will make our tests that much slower.
+There is nothing stopping us from creating as many test databases as we want, but each database created will make our tests that much slower. In a real world scenario, the ideal setup would be a fresh database for each integration test, as these will run in CI. You want to be as thorough as possible if you have full control over the external service.
 
 Let's create another test utility to reset the database on a whim.
 
@@ -3332,6 +3332,237 @@ Our tests pass.
 ~$ go test ./bookshelf
 ok      github.com/djangulo/learn-go-with-tests/databases/v6/bookshelf  2.610s
 ```
+
+## List books
+
+<!-- TODO: start:v6, end: v7 -->
+
+We've done a great job so far testing and implementing our `bookshelf` package. But we still need more functionality in order for it to be a fully fledged storage option.
+
+The `List` function should be the easiest one to implement. Let's start there.
+
+## Write the test first
+
+There's actually not a lot to validate. The `List` function retrieves books if there are, and an empty slice if there aren't any results. We should still return an error in case the `Storer.List` method returns one.
+
+Let's add an optional `search` parameter which would filter results in the `title` or `author` columns. Also, safeguard the tests against nil pointers (in case of errors) and index overflow (as it may not return the length we want).
+
+```go
+// bookshelf/crud_test.go
+...
+import (
+	...
+	"reflect"
+)
+...
+func TestList(t *testing.T) {
+	store := testutils.NewSpyStore(testBooks)
+
+	for _, test := range []struct {
+		name, query string
+		want        []*bookshelf.Book
+	}{
+		{"List success: all", "", testBooks},
+		{"List success: by author", "shake", testBooks[:2]},
+		{"List success: by title", "old man", testBooks[2:2]},
+		{"List empty if no match", "this query fails", testBooks[2:2]},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			books, err := bookshelf.List(store, test.query)
+			testutils.AssertNoError(err)
+			if !reflect.DeepEqual(books, test.want) {
+				t.Errorf("got %v want %v", books, test.want)
+			}
+		})
+	}
+}
+```
+
+## Try to run the test
+
+Fails as expected, as `List` does not exist.
+
+```sh
+~$ go test ./bookshelf
+# github.com/djangulo/learn-go-with-tests/databases/v7/bookshelf_test [github.com/djangulo/learn-go-with-tests/databases/v7/bookshelf.test]
+bookshelf\crud_test.go:147:18: undefined: bookshelf.List
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v7/bookshelf [build failed]
+FAIL
+```
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+Write the `List` function into `bookshelf-store.go`.
+
+```go
+// bookshelf/bookshelf-store.go
+func List(store Storer, search string) ([]*Book, error) {
+	return nil, nil
+}
+```
+
+Run the tests:
+
+```sh
+~$ go test ./bookshelf
+--- FAIL: TestList (0.00s)
+    --- FAIL: TestList/List_success:_all (0.00s)
+        crud_test.go:152: got [] want [0x904020 0x904060 0x9040a0]
+    --- FAIL: TestList/List_success:_by_author (0.00s)
+        crud_test.go:152: got [] want [0x904020 0x904060]
+    --- FAIL: TestList/List_success:_by_title (0.00s)
+        crud_test.go:152: got [] want [0x9040a0]
+    --- FAIL: TestList/List_empty_if_no_match (0.00s)
+        crud_test.go:152: got [] want []
+FAIL
+FAIL    github.com/djangulo/learn-go-with-tests/databases/v7/bookshelf  5.916s
+FAIL
+```
+
+## Write enough code to make it pass
+
+We're going to have to add the `Storer` interface methods, and modify both our `PostgreSQLStore` as well as the `SpyStore`.
+
+```go
+// bookshelf/bookshelf-store.go
+...
+type Storer interface {
+	...
+	List(books *[]*Book, query string) error
+}
+...
+func (s *PostgreSQLStore) List(books *[]*Book, query string) error {
+	var rows *sql.Rows
+	var err error
+	stmt := "SELECT id, title, author FROM books"
+	if query != "" {
+		stmt += " WHERE LOWER(title) = $1 OR LOWER(author) = $2;"
+		rows, err = s.DB.Query(stmt, query, query)
+	} else {
+		stmt += ";"
+		rows, err = s.DB.Query(stmt)
+	}
+	if err != nil {
+		return err
+	}
+
+	for rows.Next() {
+		var book Book
+		err := rows.Scan(&book.ID, &book.Title, &book.Author)
+		if err != nil {
+			fmt.Fprintf(os.Stdout, "error scanning row: %v\n", err)
+			continue
+		}
+		*books = append(*books, &book)
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+...
+func List(store Storer, search string) ([]*Book, error) {
+	books := make([]*Book, 0)
+	if search != "" {
+		search = strings.ToLower(search)
+		err := store.List(&books, search)
+		if err != nil {
+			return nil, err
+		}
+		return books, nil
+	}
+
+	err := store.List(&books, "")
+	if err != nil {
+		return nil, err
+	}
+	return books, nil
+}
+```
+
+And our `SpyStore`.
+
+```go
+// bookshelf/testutils/store.go
+func (s *SpyStore) List(books *[]*bookshelf.Book, query string) error {
+	if query == "" {
+		for _, b := range s.Books {
+			*books = append(*books, b)
+		}
+		return nil
+	}
+	for _, b := range s.Books {
+		if strings.Contains(strings.ToLower(b.Title), query) ||
+			strings.Contains(strings.ToLower(b.Author), query) {
+			*books = append(*books, b)
+		}
+	}
+	return nil
+}
+```
+
+Our tests pass:
+
+```sh
+~$ go test ./bookshelf
+ok      github.com/djangulo/learn-go-with-tests/databases/v7/bookshelf  4.168s
+```
+
+## Integrate
+
+Let's write some integration tests for our `List` function. As a matter of fact, we can just reuse the test cases written for `crud_test.go`. The difference here is that the `PostgreSQLStore` returns new objects, and the `ID`s will now be assigned by the store. Let's reuse the loop and test cases, but change the assertion logic.
+
+```go
+// bookshelf/integration_test.go
+...
+import (
+	...
+	"reflect"
+)
+...
+	t.Run("List", func(t *testing.T) {
+		testutils.ResetStore(store)
+		for _, b := range testBooks {
+			disposable := new(bookshelf.Book)
+			store.Create(disposable, b.Title, b.Author)
+		}
+
+		for _, test := range []struct {
+			name, query string
+			want        []*bookshelf.Book
+		}{
+			{"List success: all", "", testBooks},
+			{"List success: by author", "shake", testBooks[:2]},
+			{"List success: by title", "old man", testBooks[2:2]},
+			{"List empty if no match", "this query fails", []*bookshelf.Book{}},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				books, err := bookshelf.List(store, test.query)
+				testutils.AssertNoError(t, err)
+
+				wantSet := make(map[string]*bookshelf.Book)
+				for _, b := range test.want {
+					wantSet[b.Title] = b
+				}
+
+				for _, b := range books {
+					if _, ok := wantSet[b.Title]; !ok {
+						t.Errorf("unwanted result %v", *b)
+					}
+				}
+			})
+		}
+	})
+...
+```
+
+With this, our tests are still green.
+
+```sh
+~$ go test ./bookshelf
+ok      github.com/djangulo/learn-go-with-tests/databases/v7/bookshelf  4.023s
+```
+
 
 ## Wrapping up
 
