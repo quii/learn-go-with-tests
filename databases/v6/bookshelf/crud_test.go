@@ -102,7 +102,7 @@ func TestGetOrCreate(t *testing.T) {
 				"GetOrCreate insert into store",
 				"Moby Dick",
 				"Herman Melville",
-				&bookshelf.Book{testBooks[1].ID + 1, "Moby Dick", "Herman Melville"},
+				&bookshelf.Book{testBooks[len(testBooks)-1].ID + 1, "Moby Dick", "Herman Melville"},
 			},
 		} {
 			t.Run(test.name, func(t *testing.T) {
@@ -135,5 +135,6 @@ var (
 	testBooks  = []*bookshelf.Book{
 		&bookshelf.Book{ID: 10, Author: "W. Shakespeare", Title: "The Tragedie of Hamlet"},
 		&bookshelf.Book{ID: 22, Author: "W. Shakespeare", Title: "Romeo & Juliet"},
+		&bookshelf.Book{ID: 24, Author: "Ernest Hemingway", Title: "The Old Man and The Sea"},
 	}
 )
