@@ -94,6 +94,8 @@ A good option for debugging Go (that's integrated with VS Code) is Delve. This c
 go get -u github.com/go-delve/delve/cmd/dlv
 ```
 
+For additional help configuring and running the Go debugger in VS Code, please reference the [VS Code debugging documentation](https://github.com/Microsoft/vscode-go/wiki/Debugging-Go-code-using-VS-Code).
+
 ## Go Linting
 
 An improvement over the default linter can be configured using [GolangCI-Lint](https://github.com/golangci/golangci-lint).
