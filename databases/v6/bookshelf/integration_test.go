@@ -26,7 +26,8 @@ func TestMigrateIntegration(t *testing.T) {
 
 	store, removeStore, err := testutils.NewTestPostgreSQLStore(false)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stdout, "db creation failed on test TestMigrateIntegration")
+		t.FailNow()
 	}
 	defer removeStore()
 

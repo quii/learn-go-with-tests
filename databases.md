@@ -2908,7 +2908,7 @@ As it turns out, there is only 1 database connection string in our application; 
 
 So what do we do?
 
-## The test database
+## The test databases
 
 So far, we have been operating in the `bookshelf_db` database, that we created at the start of the chapter. We need a secondary database that we can test to our heart's content.
 
@@ -3065,8 +3065,8 @@ func randString(n int) string {
 var (
 	chars = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
 		ActiveTestDBRegistry = &TestDBRegistry{
-	Databases: map[string]*bookshelf.DBConf{},
-	Prefix:    "bookshelf_test_db",
+		Databases: map[string]*bookshelf.DBConf{},
+		Prefix:    "bookshelf_test_db",
 	}
 )
 
@@ -3251,7 +3251,8 @@ import (
 func TestMigrateIntegration(t *testing.T) {
 	store, removeStore, err := testutils.NewTestPostgreSQLStore(false)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stdout, "db creation failed on test TestMigrateIntegration")
+		t.FailNow()
 	}
 	defer removeStore()
 
@@ -3438,7 +3439,7 @@ func TestByIDIntegration(t *testing.T) {
 func TestByTitleAuthorIntegration(t *testing.T) {
 	store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "db creation failed on TestByIDIntegration")
+		fmt.Fprintf(os.Stdout, "db creation failed on TestByTitleAuthorIntegration")
 		t.FailNow()
 	}
 	defer removeStore()
@@ -3470,7 +3471,7 @@ func TestByTitleAuthorIntegration(t *testing.T) {
 func TestGetOrCreateIntegration(t *testing.T) {
 	store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "db creation failed on TestByIDIntegration")
+		fmt.Fprintf(os.Stdout, "db creation failed on TestGetOrCreateIntegration")
 		t.FailNow()
 	}
 	defer removeStore()
@@ -3704,7 +3705,7 @@ import (
 func TestListIntegration(t *testing.T) {
 	store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "db creation failed on TestByIDIntegration")
+		fmt.Fprintf(os.Stdout, "db creation failed on TestListIntegration")
 		t.FailNow()
 	}
 	defer removeStore()
@@ -4001,6 +4002,9 @@ func Update(store Storer, id int64, fields map[string]interface{}) (*Book, error
 	var book Book
 	err = store.Update(&book, id, fields)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrBookDoesNotExist
+		}
 		return nil, err
 	}
 	return &book, nil
@@ -4156,105 +4160,117 @@ For integration tests, we can do the same we did for `List`, and reuse the test 
 ```go
 // bookshelf/integration_test.go
 ...
-t.Run("Update", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			for _, test := range []struct {
-				name     string
-				fields   map[string]interface{}
-				id       int64
-				wantBook *bookshelf.Book
-			}{
-				{
-					"title only",
-					map[string]interface{}{"title": "Romeo And Juliet"},
-					1,
-					&bookshelf.Book{1, "Romeo And Juliet", "W. Shakespeare"},
-				},
-				{
-					"author only",
-					map[string]interface{}{"author": "William Shakespeare"},
-					1,
-					&bookshelf.Book{1, "The Tragedie of Hamlet", "William Shakespeare"},
-				},
-				{
-					"title+author",
-					map[string]interface{}{"title": "Romeo And Juliet", "author": "William Shakespeare"},
-					1,
-					&bookshelf.Book{1, "Romeo And Juliet", "William Shakespeare"},
-				},
-			} {
-				t.Run(test.name, func(t *testing.T) {
-					testutils.ResetStore(store)
-					for _, b := range testBooks {
-						disposable := new(bookshelf.Book)
-						store.Create(disposable, b.Title, b.Author)
-					}
-					_, err := bookshelf.Update(store, test.id, test.fields)
-					testutils.AssertNoError(t, err)
-				})
-			}
+func TestUpdateIntegration(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		for _, test := range []struct {
+			name     string
+			fields   map[string]interface{}
+			id       int64
+			wantBook *bookshelf.Book
+		}{
+			{
+				"title only",
+				map[string]interface{}{"title": "Romeo & Juliet"},
+				9,
+				&bookshelf.Book{9, "Romeo And Juliet", "William Shakespeare"},
+			},
+			{
+				"author only",
+				map[string]interface{}{"author": "W. Shakespeare"},
+				8,
+				&bookshelf.Book{8, "The Tragedie of Hamlet", "W. Shakespeare"},
+			},
+			{
+				"title+author",
+				map[string]interface{}{"title": "Romeo & Juliet", "author": "W. Shakespeare"},
+				9,
+				&bookshelf.Book{9, "Romeo & Juliet", "W. Shakespeare"},
+			},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
+				if err != nil {
+					fmt.Fprintf(os.Stdout, "db creation failed on TestUpdateIntegration")
+					t.FailNow()
+				}
+				defer removeStore()
+				_, err = bookshelf.Update(store, test.id, test.fields)
+				testutils.AssertNoError(t, err)
+			})
+		}
 
-		})
-		t.Run("failure", func(t *testing.T) {
-			for _, test := range []struct {
-				name   string
-				id     int64
-				fields map[string]interface{}
-				want   error
-			}{
-				{"empty fields", 1, nil, bookshelf.ErrEmptyFields},
-				{"invalid fields", 1, map[string]interface{}{"isbn": 10}, bookshelf.ErrInvalidFields},
-				{"zero value ID", 0, map[string]interface{}{"author": "doesn't matter"}, bookshelf.ErrZeroValueID},
-			} {
-				t.Run(test.name, func(t *testing.T) {
-					_, err := bookshelf.Update(store, test.id, test.fields)
-					testutils.AssertError(t, err, test.want)
-				})
-			}
-		})
+	})
+	t.Run("failure", func(t *testing.T) {
+		store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
+		if err != nil {
+			fmt.Fprintf(os.Stdout, "db creation failed on TestUpdateIntegration")
+			t.FailNow()
+		}
+		defer removeStore()
+		for _, test := range []struct {
+			name   string
+			id     int64
+			fields map[string]interface{}
+			want   error
+		}{
+			{"empty fields", 1, nil, bookshelf.ErrEmptyFields},
+			{"invalid fields", 1, map[string]interface{}{"isbn": 10}, bookshelf.ErrInvalidFields},
+			{"zero value ID", 0, map[string]interface{}{"author": "doesn't matter"}, bookshelf.ErrZeroValueID},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				_, err := bookshelf.Update(store, test.id, test.fields)
+				testutils.AssertError(t, err, test.want)
+			})
+		}
+	})
+}
+
+func TestDeleteIntegration(t *testing.T) {
+	store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "db creation failed on TestDeleteIntegration")
+		t.FailNow()
+	}
+	defer removeStore()
+
+	t.Run("success", func(t *testing.T) {
+		for _, test := range []struct {
+			name string
+			id   int64
+		}{
+			{"deletes", 1},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				testutils.ResetStore(store)
+				for _, b := range testBooks {
+					disposable := new(bookshelf.Book)
+					store.Create(disposable, b.Title, b.Author)
+				}
+				_, err := bookshelf.Delete(store, test.id)
+				testutils.AssertNoError(t, err)
+				var dummy bookshelf.Book
+				err = store.ByID(&dummy, test.id)
+				testutils.AssertError(t, err, bookshelf.ErrBookDoesNotExist)
+			})
+		}
+	})
+	t.Run("failure", func(t *testing.T) {
+		for _, test := range []struct {
+			name string
+			id   int64
+			want error
+		}{
+			{"does not exist", 42, bookshelf.ErrBookDoesNotExist},
+			{"zero value ID", 0, bookshelf.ErrZeroValueID},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				_, err := bookshelf.Delete(store, test.id)
+				testutils.AssertError(t, err, test.want)
+			})
+		}
 	})
 
-	t.Run("Delete", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			for _, test := range []struct {
-				name string
-				id   int64
-				want *bookshelf.Book
-			}{
-				{"deletes", 1, testBooks[0]},
-			} {
-				t.Run(test.name, func(t *testing.T) {
-					testutils.ResetStore(store)
-					for _, b := range testBooks {
-						disposable := new(bookshelf.Book)
-						store.Create(disposable, b.Title, b.Author)
-					}
-					_, err := bookshelf.Delete(store, test.id)
-					testutils.AssertNoError(t, err)
-					var dummy bookshelf.Book
-					err = store.ByID(&dummy, test.id)
-					testutils.AssertError(t, err, bookshelf.ErrBookDoesNotExist)
-				})
-			}
-		})
-		t.Run("failure", func(t *testing.T) {
-			for _, test := range []struct {
-				name string
-				id   int64
-				want error
-			}{
-				{"Delete failure: does not exist", 42, bookshelf.ErrBookDoesNotExist},
-				{"Delete failure: zero value ID", 0, bookshelf.ErrZeroValueID},
-			} {
-				t.Run(test.name, func(t *testing.T) {
-					store := testutils.NewSpyStore(testBooks)
-					_, err := bookshelf.Delete(store, test.id)
-					testutils.AssertError(t, err, test.want)
-				})
-			}
-		})
-	})
-...
+}
 ```
 
 ## Wrapping up

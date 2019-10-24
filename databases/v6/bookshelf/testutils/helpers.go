@@ -69,11 +69,13 @@ func CreateTempDir(
 
 }
 
+// TestDBRegistry keeps track of all the different test DB configs.
 type TestDBRegistry struct {
 	Databases map[string]*bookshelf.DBConf
 	Prefix    string
 }
 
+// Add adds a new DBConfig to the registry.
 func (t *TestDBRegistry) Add(conf *bookshelf.DBConf) string {
 	rand.Seed(time.Now().UnixNano())
 	dbname := (*t).Prefix + "_" + randString(20)
@@ -84,12 +86,14 @@ func (t *TestDBRegistry) Add(conf *bookshelf.DBConf) string {
 	return dbname
 }
 
+// Remove drops a DBConfig from the registry
 func (t *TestDBRegistry) Remove(dbname string) {
 	if _, ok := (*t).Databases[dbname]; ok {
 		delete((*t).Databases, dbname)
 	}
 }
 
+// randString returns a random alphanumeric string of length n.
 func randString(n int) string {
 	b := make([]rune, n)
 	for i := 0; i < n; i++ {
@@ -99,7 +103,8 @@ func randString(n int) string {
 }
 
 var (
-	chars                = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+	chars = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+	// ActiveTestDBRegistry singleton to hold active test databases.
 	ActiveTestDBRegistry = &TestDBRegistry{
 		Databases: map[string]*bookshelf.DBConf{},
 		Prefix:    "bookshelf_test_db",

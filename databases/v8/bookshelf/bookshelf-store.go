@@ -423,6 +423,9 @@ func Update(store Storer, id int64, fields map[string]interface{}) (*Book, error
 	var book Book
 	err = store.Update(&book, id, fields)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrBookDoesNotExist
+		}
 		return nil, err
 	}
 	return &book, nil
@@ -436,6 +439,9 @@ func Delete(store Storer, id int64) (*Book, error) {
 	var book Book
 	err := store.Delete(&book, id)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrBookDoesNotExist
+		}
 		return nil, err
 	}
 	return &book, nil
