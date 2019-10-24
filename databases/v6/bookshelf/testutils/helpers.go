@@ -1,6 +1,7 @@
 package testutils
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -181,6 +182,7 @@ func NewTestPostgreSQLStore(migrate bool) (*bookshelf.PostgreSQLStore, func(), e
 
 	store := bookshelf.PostgreSQLStore{DB: testDB}
 	if migrate {
+		dummyWriter := &bytes.Buffer{}
 		bookshelf.MigrateUp(dummyWriter, &store, "migrations/test", -1)
 	}
 

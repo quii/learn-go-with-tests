@@ -402,15 +402,14 @@ func TestDeleteIntegration(t *testing.T) {
 			{"deletes", 1},
 		} {
 			t.Run(test.name, func(t *testing.T) {
-				testutils.ResetStore(store)
 				for _, b := range testBooks {
 					disposable := new(bookshelf.Book)
 					store.Create(disposable, b.Title, b.Author)
 				}
 				_, err := bookshelf.Delete(store, test.id)
 				testutils.AssertNoError(t, err)
-				var dummy bookshelf.Book
-				err = store.ByID(&dummy, test.id)
+
+				_, err = bookshelf.ByID(store, test.id)
 				testutils.AssertError(t, err, bookshelf.ErrBookDoesNotExist)
 			})
 		}

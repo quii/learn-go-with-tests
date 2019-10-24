@@ -3,15 +3,14 @@ package testutils
 import (
 	"errors"
 	"strings"
-	"time"
 
 	"github.com/djangulo/learn-go-with-tests/databases/v6/bookshelf"
 )
 
 type migration struct {
-	name    string
-	stmt    string
-	called  int
+	name   string
+	stmt   string
+	called int
 }
 
 // ErrNoCakeSQL no cake allowed
@@ -35,8 +34,8 @@ func (s *SpyStore) ApplyMigration(name, stmt string) error {
 		return nil
 	}
 	m = migration{
-		name:    name,
-		stmt:    stmt,
+		name: name,
+		stmt: stmt,
 	}
 	m.called++
 	s.Migrations[name] = m

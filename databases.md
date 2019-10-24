@@ -2960,7 +2960,7 @@ Is it the error we expect? Yes it is. But the tests should be _passing_, so what
 
 The test raising the error is the first `CreateBook` call inside `cannot create a duplicate title-author`. This is not what we planned!
 
-As it turns out, there is only 1 database connection string in our application; the one that lives inside `NewPostgreSQLStore`. This means that all along we've been migrating `up` and `down`, inserting and deleting into a single database! This is a very risky practice, as our tests may modify or delete sensitive data once we're running in production.
+As it turns out, there is only `1` database connection string in our application; the one that lives inside `NewPostgreSQLStore`. This means that all along we've been migrating `up` and `down`, inserting and deleting into a single database! This is a very risky practice, as our tests may modify or delete sensitive data once we're running in production.
 
 So what do we do?
 
@@ -2970,15 +2970,15 @@ So far, we have been operating in the `bookshelf_db` database, that we created a
 
 Our options are:
 
-1. Write some `go` code that creates a test database on the fly. Runs the tests and drops it once it's done.
+1. Write some `go` code that creates a test database on the fly, runs the tests and drops it once it's done.
 2. Create a test database outside our application (using `psql`), and hardcode the address in our application.
 
 Both approaches have their downsides:
 
 1. The first approach requires more `go` code to write, and depends on the privileges that the DB user (`bookshelf_user`, in our case) has. When created the database, we gave our user `bookshelf_user` the capacity to create databases with `CREATEDB`.
-2. The second approach is simpler to implement, but then our tests depend on the existence of said test database. It also implies that we need to track 2 connections inside our application, as opposed to just
+2. The second approach is simpler to implement, but then our tests depend on the existence of said test database. It also implies that we need to track 2 connections inside our application, as opposed to just one.
 
-We will opt for the first approach, and take advantage that our `MigrateDown` function cleans the database tables, due to the `CASCADE` statement at the end of the `down` migrations.
+We will opt for the first approach; although it will turn out to be a little harder, our tests will be much more exhaustive because of it.
 
 ## Refactor
 
@@ -2992,7 +2992,7 @@ func NewPostgreSQLStore() (*PostgreSQLStore, func()) {
 }
 ```
 
-We've hard-coded the connection string into our function that was soupposed to give us flexibility!
+We've hard-coded the connection string into our function that was supposed to give us flexibility!
 
 Let's create some utilities to help ourselves.
 
@@ -3030,9 +3030,9 @@ func init() {
 }
 ```
 
-With the code above, we can choose the database we want to connect to via environment variables. The `getenv` function is a simple extension of [`os.Getenv`](https://golang.org/pkg/os/#Getenv) that provides save defaults in case the variables are not set.
+With the code above, we can choose the database we want to connect to via environment variables. The `getenv` function is a simple extension of [`os.Getenv`](https://golang.org/pkg/os/#Getenv) that provides safe defaults in case the environment variables are not set.
 
-The code inside the `init` function will run every time the package is called, so the `MainDBConf` will be instantiated and ready when the `bookshelf` package is imported.
+The code inside the `init` function will run every time the package is imported, so the `MainDBConf` will be instantiated and ready when needed.
 
 Our `NewPostgreSQLStore` function now looks like this:
 
@@ -3070,6 +3070,15 @@ func NewPostgreSQLStore(conf *DBConf) (*PostgreSQLStore, func()) {
 
 	return &PostgreSQLStore{DB: db}, remove
 }
+```
+
+Modify integration tests to use the `MainDBConf` variable.
+
+```go
+// bookshelf/integration_test.go
+...
+	store, removeStore := bookshelf.NewPostgreSQLStore(&bookshelf.MainDBConf)
+...
 ```
 
 With this tooling in place, we can create a helper function to instantiate a new database just for our tests.
@@ -3199,7 +3208,7 @@ Remember `exponential backoff`? This is where this pattern shines in our codebas
 
 We now can create the test database inside each test function, run all our tests with a predictable state, and drop it once we're done. We can use the fact that `MigrateDown` clears the database to our advantage and clean it after each test.
 
-For the sake of demonstration, we will use this helper function... **a lot**. Each of the integration tests we write will run in its own database. This allows us to run with a predictable state every time. Even better, now that we have disposable databases, we can make put `test` migrations inside our `migrations` directory, ensuring that not only the test databases will be available, but they also will be populated with data.
+For the sake of demonstration, we will use this helper function... **a lot**. Each of the integration tests we write will run in its own database. This allows us to run with a predictable state every time. Even better, now that we have disposable databases, we can put `test` migrations inside our `migrations` directory, ensuring that not only the test databases will be available, but they also will be populated with data.
 
 If all this creating databases is slowing down your computer, feel free to group all integration tests from here on into a single one, using `t.Run` freely to nest different function names.
 
@@ -3254,7 +3263,37 @@ INSERT INTO books (title, author) VALUES
 ```
 ```sql
 -- migrations/test/0003_insert_test_data.down.sql
-DELETE  FROM books;
+DELETE  FROM books; -- clears the table
+```
+
+Our directory structure looks like this now:
+
+```sh
+~$ tree .
+.
+└── bookshelf
+    ├── bookshelf-store.go
+    ├── crud_test.go
+    ├── integration_test.go
+    ├── migrate_test.go
+    ├── migrations
+    │   ├── 0001_create_bookshelf_table.down.sql
+    │   ├── 0001_create_bookshelf_table.up.sql
+    │   ├── 0002_books_unique_title.down.sql
+    │   ├── 0002_books_unique_title.up.sql
+    │   └── test
+    │       ├── 0001_create_bookshelf_table.down.sql
+    │       ├── 0001_create_bookshelf_table.up.sql
+    │       ├── 0002_books_unique_title.down.sql
+    │       ├── 0002_books_unique_title.up.sql
+    │       ├── 0003_insert_test_data.down.sql
+    │       └── 0003_insert_test_data.up.sql
+    └── testutils
+        ├── assertions.go
+        ├── helpers.go
+        └── store.go
+
+4 directories, 17 files
 ```
 
 Let's include a boolean `migrate` parameter in `NewTestPostgreSQLStore`,  to optionally populate the new test database..
@@ -3263,11 +3302,16 @@ Let's create another test utility to reset the database on a whim.
 
 ```go
 // bookshelf/testutils/helpers.go
+import (
+	...
+	"bytes"
+)
 ...
 func NewTestPostgreSQLStore(migrate bool) (*bookshelf.PostgreSQLStore, func(), error) {
 	...
 	store := bookshelf.PostgreSQLStore{DB: testDB}
 	if migrate {
+		dummyWriter := &bytes.Buffer{}
 		bookshelf.MigrateUp(dummyWriter, &store, "migrations/test", -1)
 	}
 
@@ -3290,9 +3334,9 @@ func ResetStore(store *bookshelf.PostgreSQLStore) error {
 }
 ```
 
-Keep in mind that each database created will make our tests slower. This affects us now, but in reality we should be offloading this types of tests to CI. You want to be as thorough as possible if you have full control over the external service.
+Keep in mind that each database created will make our tests slower. This affects us now, but in reality we should be offloading this type of tests to CI. You want to be as thorough as possible if you have full control over the external service.
 
-And finally, our integration tests. We've included the tests for `ByID`, `ByTitleAuthor`, and `GetOrCreate` that were omitted before for brevity.
+Finally, our integration tests. We've included the tests for `ByID`, `ByTitleAuthor`, and `GetOrCreate` that were omitted before for brevity.
 
 ```go
 // bookshelf/integration_test.go
@@ -3301,7 +3345,6 @@ import (
 	...
 	"fmt"
 	"os"
-	"github.com/djangulo/learn-go-with-tests/databases/v6/bookshelf/testutils"
 )
 ...
 func TestMigrateIntegration(t *testing.T) {
@@ -3409,7 +3452,7 @@ func TestMigrateIntegration(t *testing.T) {
 }
 ```
 
-Since `TestMigrateIntegration` takes so much space, let's start using table-driven tests for our successes and failures.
+Since `TestMigrateIntegration` is taking so much space, let's start using table-driven tests for our successes and failures to keep our tests a bit shorter.
 
 ```go
 // bookshelf/integration_test.go
@@ -3968,7 +4011,7 @@ Here are some helpers that will assist in validating and cleaning the `fields` p
 // bookshelf/bookshelf-store.go
 ...
 type canonicalFieldsMap map[string]bool
-var bookFields = map[string]bool{
+var bookFields = canonicalFieldsMap{
 	"id": true,
 	"author": true,
 	"title": true,
@@ -4048,6 +4091,9 @@ Let's get to work!
 func Update(store Storer, id int64, fields map[string]interface{}) (*Book, error) {
 	if id == 0 {
 		return nil, ErrZeroValueID
+	}
+	if len(fields) == 0 {
+		return nil, ErrEmptyFields
 	}
 	err := bookFields.Validate(fields)
 	if err != nil {
@@ -4146,7 +4192,6 @@ func (s *PostgreSQLStore) Update(book *Book, id int64, fields map[string]interfa
 	}
 	stmt += fmt.Sprintf(") WHERE id = $%d RETURNING id, title, author;", i)
 
-	fmt.Println(stmt)
 	row := s.DB.QueryRow(stmt, values...)
 	err := row.Scan(&book.ID, &book.Title, &book.Author)
 	if err != nil {
@@ -4297,15 +4342,14 @@ func TestDeleteIntegration(t *testing.T) {
 			{"deletes", 1},
 		} {
 			t.Run(test.name, func(t *testing.T) {
-				testutils.ResetStore(store)
 				for _, b := range testBooks {
 					disposable := new(bookshelf.Book)
 					store.Create(disposable, b.Title, b.Author)
 				}
 				_, err := bookshelf.Delete(store, test.id)
 				testutils.AssertNoError(t, err)
-				var dummy bookshelf.Book
-				err = store.ByID(&dummy, test.id)
+
+				_, err = bookshelf.ByID(store, test.id)
 				testutils.AssertError(t, err, bookshelf.ErrBookDoesNotExist)
 			})
 		}
@@ -4338,6 +4382,25 @@ Not only that, our package is extendible: it provides a default storage medium, 
 Note that we only created a _library_ with the tools for implementing persistent storage of Books, we did not provide a program. But with the library there, creating, say, a CLI or a webserver is trivial.
 
 We covered a lot of different topics related to databases and DevOps, here are some more resources to expand further in one of the many directions.
+
+### SQL tooling
+
+`Go` has excellent tooling for handling databases. Throughout this chapter we saw some of the utilities of the `database/sql` package. There's a plethora of community packages to handle a diverse amount of `SQL` related needs: migrations, extensions, ORMs, SQL generators, etc.
+
+There are tradeoffs to all extensions, of course: ORM's for instance, speed up initial delivery and reduce boilerplate, but become cumbersome when optimizations are needed; SQL generators are opinionated and often require intervention.
+
+Below are a few well-known packages that are out there. If these don't fit your needs, a [godoc.org](https://godoc.org) search is your best friend!
+
+| Type       | Package                | Homepage                                                                                                                                              | Remarks                                           |
+| :--------- | :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------ |
+| extension  | sqlx                   | [github.com/jmoiron/sqlx](https://github.com/jmoiron/sqlx), [GoDoc](https://godoc.org/github.com/jmoiron/sqlx)                                        | [Guide](https://jmoiron.github.io/sqlx/).         |
+| ORM        | GORM                   | [gorm.io](https://gorm.io), [GoDoc](https://godoc.org/github.com/jinzhu/gorm)                                                                         | [Docs](http://gorm.io/docs/).                     |
+| ORM        | GORP                   | https://github.com/go-gorp/gorp, [GoDoc](https://godoc.org/gopkg.in/gorp.v2)                                                                          |                                                   |
+| ORM        | Beego/orm              | [github.com/astaxie/beego/tree/master/orm](https://github.com/astaxie/beego/tree/master/orm), [GoDoc](https://godoc.org/github.com/astaxie/beego/orm) | ORM for the [Beego framework](https://beego.me/). |
+| migrations | golang-migrate/migrate | [github.com/golang-migrate/migrate](https://github.com/golang-migrate/migrate), [GoDoc](https://godoc.org/github.com/golang-migrate/migrate)          |                                                   |
+| migrations | go-pg/migrations       | [github.com/go-pg/migrations](https://github.com/go-pg/migrations), [GoDoc](https://godoc.org/github.com/go-pg/migrations)                            | PostgreSQL only.                                  |
+
+
 
 ### PostgreSQL
 
