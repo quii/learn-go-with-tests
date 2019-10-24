@@ -2083,9 +2083,9 @@ Let's think for a minute about the direction we want to take. Just like we did w
 
 This keeps our package _extendible_. With this structure, if a consumer of our `package`'s API wanted to use a different storage method, say, a `NoSQL` database, `AWS S3` file storage or simply a different database (like `MySQL`), they could do so by creating their storage object and having it implement our `Storer` interface, then they can simply plug it into our package level functions (like `Migrate`) and trust they will work (as the _behavior_ is still the same).
 
-The `go` standard library is full useful interfaces like this. A couple of excellent examples are the `encoding/json` package [`Marshaler`](https://golang.org/pkg/encoding/json/#Marshaler) and [`Unmarshaler`](https://golang.org/pkg/encoding/json/#Unmarshaler) interfaces. `encoding/json` has ensured these interfaces are implemented by all standard types, but if you want a certain behavior, simply implement these interfaces in your custom type and encoding will work.
+The `go` standard library is full useful interfaces like this. A couple of excellent examples are the `encoding/json` package [`Marshaler`](https://golang.org/pkg/encoding/json/#Marshaler) and [`Unmarshaler`](https://golang.org/pkg/encoding/json/#Unmarshaler) interfaces. The `Go` development team has ensured these interfaces are implemented by all standard types, but if you want a certain behavior for a custom type, simply have your custom type implement these interfaces and `JSON` encoding will work.
 
-With this mindset, we should aim to write functions to `Create`, `Retrieve`, `Update`, `Delete` and `List` books, with those same names. These verbs will perform all kinds of validation, and, if they pass, then call the `Storer` methods by the same name.
+With this mindset, we should aim to write functions to `Create`, `Retrieve`, `Update`, `Delete` and `List` books, with those same names. These verbs will perform all kinds of validation, and, if they pass, then call the `Storer` methods by the same (or similar) name.
 
 In the `SQL` migration, We created a table called `books`, with columns called `id`, `title` and `author`. Let`s create a struct to hold these objects before we get into testing.
 
@@ -2102,9 +2102,9 @@ type Book struct {
 
 ## Write the test first
 
-Before we can retrieve, update or delete an object, we need to create it first! Logically, it makes sense to start here.
+Before we can retrieve, update or delete an object, we need be able to create it first!
 
-While we're at it, we should test that the title or author aren't empty (remember the `NOT NULL` in our migrations?)
+While we're at it, we should test that the title or author aren't empty (remember the `NOT NULL` in our migrations?).
 
 Create a new file `crud_test.go` and add the following code:
 
@@ -2164,18 +2164,18 @@ It fails, as expected, because we haven't written anything yet.
 ```sh
 ~$ go test ./bookshelf
 # github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf_test [github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf.test]
-bookshelf/crud_test.go:17:16: undefined: "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".Create
-bookshelf/crud_test.go:34:13: undefined: "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".Create
-bookshelf/crud_test.go:35:33: undefined: "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".ErrEmptyTitleField
-bookshelf/crud_test.go:42:13: undefined: "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".Create
-bookshelf/crud_test.go:43:33: undefined: "github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf".ErrEmptyAuthorField
+bookshelf\crud_test.go:17:16: undefined: bookshelf.Create
+bookshelf\crud_test.go:34:13: undefined: bookshelf.Create
+bookshelf\crud_test.go:35:33: undefined: bookshelf.ErrEmptyTitleField
+bookshelf\crud_test.go:42:13: undefined: bookshelf.Create
+bookshelf\crud_test.go:43:33: undefined: bookshelf.ErrEmptyAuthorField
 FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf [build failed]
 FAIL
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-Add the following into `bookshelf-store.go`
+Add the following into `bookshelf-store.go`.
 
 ```go
 // bookshelf/bookshelf-store.go
@@ -2233,7 +2233,7 @@ func Create(store Storer, title, author string) (*Book, error) {
 
 ## Try to run the test
 
-Once more, expected failure
+Once more, expected failure:
 
 ```sh
 ~$ go test ./bookshelf
@@ -2316,7 +2316,6 @@ Seems like we broke our integration tests. Our `PostgreSQLStore` does not implem
 
 ```go
 // bookshelf/bookshelf-store.go
-// Create inserts a new book into the postgres store.
 func (s *PostgreSQLStore) Create(book *Book, title string, author string) error {
 	stmt := "INSERT INTO books (title, author) VALUES ($1, $2) RETURNING id, title, author;"
 	row := s.DB.QueryRow(stmt, title, author)
@@ -2378,12 +2377,12 @@ FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.117s
 FAIL
 ```
 
-It's complaining that the constraint already exists. Unfortunately, there is no handy `IF NOT EXISTS` for constraint creation on `PostgreSQL`. We have two ways to go about this:
+`PostgreSQL` is complaining that the constraint already exists. Unfortunately, there is no handy `IF NOT EXISTS` for constraint creation on `PostgreSQL`. We have two ways to go about this:
 
 1. Create a `PostgreSQL` function using the scripting language provided by `PostgreSQL`.
-2. Or, drop the constraint before creation, to ensure it runs without a hitch.
+2. Drop the constraint before creation, to ensure it runs without a hitch.
 
-Being honest here, option 2 is bad. This exposes your system to exist without the constraint, even for a few milliseconds, bad things could happen. Not to mention the cost of the unnecessary write operation.
+Being honest here, option 2 is bad. This exposes your system to exist without the constraint, even for a few milliseconds, and bad things could happen. Not to mention the cost of the unnecessary write operation.
 
 But, since this is not an `SQL` book, we're going to opt for the easier of the two, that is, option 2. If this were a real application, option 1 would be the choice without question. If you still want to go this way, search online for "postgresql add constraint if not exists", answers abound.
 
@@ -2406,19 +2405,19 @@ ok      github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.502s
 
 Now our tests pass.
 
-Take a moment to appreciate how our `go` integration tests just helped us test our that our `SQL` is up to our standards.
+Take a moment to appreciate how our `Go` integration tests just helped us test our that our `SQL` is up to our standards.
 
 This behavior is enforced by the database, at the database level. We need to give our potential users a way to prevent duplicated data as well.
 
 We could create an `Exists` function, but this would be terribly inefficient, as it would query the database, to then tell the user `said book exists`, like a mathematician.
 
-We should instead write the `Retrieve` function instead. We can use this to check if the book exists, and return it (or rather, populate the `*Book*` object with it).
+We should instead write the `Retrieve` function instead. We can use this to check if the book exists, and return it (or rather, populate the `*Book` object with it).
 
 ## Write the test first
 
 We have a choice to make for the retrieve function, we could
 
--   a) Create a function with signature`Retrieve(store, param interface{}) (*Book, error)` , and do a type switch inside: `int` leads to type search, and `string` leads to title search
+-   a) Create a function with signature`Retrieve(store, param interface{}) (*Book, error)` , and do a type switch inside: `int` leads to type search, and `string` leads to title search.
 -   b) Create two functions, with signatures `ByID(store Storer, id int64) (*Book, error)` and `ByTitleAuthor(store Storer, author, title string) (*Book, error)`.
 
 I believe option `b)` is the better one. First, our code is more explicit. Second, there's no `interface{}` dances inside our tests. Let's do that.
@@ -2458,7 +2457,7 @@ func AssertBooksEqual(t *testing.T, got, want *bookshelf.Book) {
 }
 ```
 
-Then create a `dummyBooks` variable and add the following test to `crud_test.go`. You can change `TestCreate` to use the `AssertBooksEqual` helper too.
+Then create a `dummyBooks` variable, some `testBooks`, and add the following test to `crud_test.go`. You can change `TestCreate` to use the `AssertBooksEqual` helper too.
 
 You will have to modify all occurrences of `NewSpyStore` in `migrate_test.go` and in `crud_test.go`.
 
@@ -2570,6 +2569,8 @@ func ByTitleAuthor(store Storer, title, author string) (*Book, error) {
 
 ## Try to run the tests
 
+We got our work cut out for us, let's get to it!
+
 ```sh
 ~$ go test ./bookshelf
 --- FAIL: TestByID (0.00s)
@@ -2600,7 +2601,6 @@ FAIL    github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf  0.122s
 FAIL
 ```
 
-We got our work cut out for us, let's get to it!
 
 ## Write enough code to make it pass
 
@@ -2741,9 +2741,9 @@ And we're back to green!
 ok      github.com/djangulo/learn-go-with-tests/databases/v5/bookshelf      0.144s
 ```
 
-Now that we've written and tested our retrieve methods, we can implement them inside the `Create` to validate existence.
+Now that we've written and tested our retrieve methods, we can implement them inside the `Create` function to validate existence.
 
-This woul render the `Create` method a tad inefficient: it would entail a `read+write` operation as opposed to just a `write`. Because of this, we want to leave it optional to the consumers of our API. Let's instead write a `GetOrCreate` function that does exactly that, and leave `Create` unchanged.
+This would render the `Create` method a tad inefficient: it would entail a `read+write` operation as opposed to just a `write`. Because of this, we want to leave it optional to the consumers of our API. Let's instead write a `GetOrCreate` function that does exactly that, and leave `Create` unchanged.
 
 ## Write the test first
 
@@ -2856,12 +2856,12 @@ func GetOrCreate(store Storer, title, author string) (*Book, error) {
 		return nil, err
 	}
 	return book, nil
-
+}
 ```
 
 ## Try to run the tests
 
-And our tests now pass.
+The tests pass.
 
 ```sh
 ~$ go test ./bookshelf
