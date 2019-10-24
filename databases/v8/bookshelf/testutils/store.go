@@ -3,13 +3,11 @@ package testutils
 import (
 	"errors"
 	"strings"
-	"time"
 
 	"github.com/djangulo/learn-go-with-tests/databases/v8/bookshelf"
 )
 
 type migration struct {
-	created time.Time
 	name    string
 	stmt    string
 	called  int
@@ -38,7 +36,6 @@ func (s *SpyStore) ApplyMigration(name, stmt string) error {
 	m = migration{
 		name:    name,
 		stmt:    stmt,
-		created: time.Now(),
 	}
 	m.called++
 	s.Migrations[name] = m

@@ -153,10 +153,11 @@ func TestMigrateUp(t *testing.T) {
 Fails, as expected.
 
 ```sh
-# command-line-arguments [command-line-arguments.test]
-.\migrate_test.go:9:10: undefined: MigrateUp
-FAIL    command-line-arguments [build failed]
-FAIL
+~$ go test
+# github.com/quii/learn-go-with-tests/databases/v1 [github.com/quii/learn-go-with-tests/databases/v1.test]
+.\migrate_test.go:8:24: undefined: NewPostgreSQLStore
+.\migrate_test.go:12:9: undefined: MigrateUp
+FAIL    github.com/quii/learn-go-with-tests/databases/v1 [build failed]
 ```
 
 ## Write enough code to make it pass
@@ -301,13 +302,8 @@ Let's write our mock store (and test) first, so we can test the `migrate` functi
 
 ```go
 // migrate_test.go
-import (
-	"time"
-	...
-)
-
+...
 type migration struct {
-	created time.Time
 	name string
 	stmt string
 	called int
@@ -324,16 +320,15 @@ func (s *SpyStore) ApplyMigration(name, stmt string) error {
 		m.called++
 		return nil
 	}
-	m := migration{
+	m = migration{
 		name: name,
 		stmt: stmt,
-		created: time.Now(),
 	}
 	m.called++
 	s.migrations[name] = m
 	return nil
 }
-func NewSpyStore() {
+func NewSpyStore() *SpyStore {
 	return &SpyStore{map[string]migration{}}
 }
 

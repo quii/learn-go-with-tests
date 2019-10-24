@@ -3,14 +3,12 @@ package testutils
 import (
 	"errors"
 	"strings"
-	"time"
 )
 
 type migration struct {
-	created time.Time
-	name    string
-	stmt    string
-	called  int
+	name   string
+	stmt   string
+	called int
 }
 
 // ErrNoCakeSQL no cake allowed
@@ -33,9 +31,8 @@ func (s *SpyStore) ApplyMigration(name, stmt string) error {
 		return nil
 	}
 	m = migration{
-		name:    name,
-		stmt:    stmt,
-		created: time.Now(),
+		name: name,
+		stmt: stmt,
 	}
 	m.called++
 	s.Migrations[name] = m

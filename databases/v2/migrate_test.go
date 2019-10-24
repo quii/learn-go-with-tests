@@ -10,11 +10,9 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 )
 
 type migration struct {
-	created time.Time
 	name    string
 	stmt    string
 	called  int
@@ -40,7 +38,6 @@ func (s *SpyStore) ApplyMigration(name, stmt string) error {
 	m = migration{
 		name:    name,
 		stmt:    stmt,
-		created: time.Now(),
 	}
 	m.called++
 	s.migrations[name] = m
