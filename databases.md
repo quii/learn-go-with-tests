@@ -3545,12 +3545,12 @@ func TestList(t *testing.T) {
 	}{
 		{"List success: all", "", testBooks},
 		{"List success: by author", "shake", testBooks[:2]},
-		{"List success: by title", "old man", testBooks[2:2]},
-		{"List empty if no match", "this query fails", testBooks[2:2]},
+		{"List success: by title", "old man", testBooks[2:3]},
+		{"List empty if no match", "this query fails", []*bookshelf.Book{}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			books, err := bookshelf.List(store, test.query)
-			testutils.AssertNoError(err)
+			testutils.AssertNoError(t, err)
 			if !reflect.DeepEqual(books, test.want) {
 				t.Errorf("got %v want %v", books, test.want)
 			}
@@ -3701,40 +3701,52 @@ import (
 	"reflect"
 )
 ...
-	t.Run("List", func(t *testing.T) {
-		testutils.ResetStore(store)
-		for _, b := range testBooks {
-			disposable := new(bookshelf.Book)
-			store.Create(disposable, b.Title, b.Author)
-		}
+func TestListIntegration(t *testing.T) {
+	store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "db creation failed on TestByIDIntegration")
+		t.FailNow()
+	}
+	defer removeStore()
 
-		for _, test := range []struct {
-			name, query string
-			want        []*bookshelf.Book
-		}{
-			{"List success: all", "", testBooks},
-			{"List success: by author", "shake", testBooks[:2]},
-			{"List success: by title", "old man", testBooks[2:2]},
-			{"List empty if no match", "this query fails", []*bookshelf.Book{}},
-		} {
-			t.Run(test.name, func(t *testing.T) {
-				books, err := bookshelf.List(store, test.query)
-				testutils.AssertNoError(t, err)
+	testBooks := []*bookshelf.Book{
+		{1, "Alice's Adventures in Wonderland", "Lewis Carroll"},
+		{2, "The Ball and The Cross", "G.K. Chesterton"},
+		{3, "The Man Who Was Thursday", "G.K. Chesterton"},
+		{4, "Moby Dick", "Herman Melville"},
+		{5, "Paradise Lost", "John Milton"},
+		{6, "The Tragedie of Julius Caesar", "William Shakespeare"},
+		{7, "The Tragedie of Hamlet", "William Shakespeare"},
+		{8, "The Tragedie of Macbeth", "William Shakespeare"},
+		{9, "Romeo and Juliet", "William Shakespeare"},
+	}
 
-				wantSet := make(map[string]*bookshelf.Book)
-				for _, b := range test.want {
-					wantSet[b.Title] = b
+	for _, test := range []struct {
+		name, query string
+		want        []*bookshelf.Book
+	}{
+		{"List success: all", "", testBooks},
+		{"List success: by author", "shake", testBooks[6:]},
+		{"List success: by title", "alice", testBooks[0:1]},
+		{"List empty if no match", "this query fails", []*bookshelf.Book{}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			books, err := bookshelf.List(store, test.query)
+			testutils.AssertNoError(t, err)
+
+			wantSet := make(map[string]*bookshelf.Book)
+			for _, b := range test.want {
+				wantSet[b.Title] = b
+			}
+
+			for _, b := range books {
+				if _, ok := wantSet[b.Title]; !ok {
+					t.Errorf("unwanted result %v", *b)
 				}
-
-				for _, b := range books {
-					if _, ok := wantSet[b.Title]; !ok {
-						t.Errorf("unwanted result %v", *b)
-					}
-				}
-			})
-		}
-	})
-...
+			}
+		})
+	}
+}
 ```
 
 With this, our tests are still green.
