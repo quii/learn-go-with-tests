@@ -1588,11 +1588,11 @@ Before we move on, let's write two wrapper functions around our `migrate` powerh
 ```go
 // bookshelf-store.go
 func MigrateUp(out io.Writer, store Storer, dir string, num int) ([]string, error) {
-	return migrate(out, os.Stdout, store, dir, num, UP)
+	return migrate(out, store, dir, num, UP)
 }
 
 func MigrateDown(out io.Writer, store Storer, dir string, num int) ([]string, error) {
-	return migrate(out, os.Stdout, store, dir, num, DOWN)
+	return migrate(out, store, dir, num, DOWN)
 }
 ```
 
@@ -1607,14 +1607,14 @@ Remember, in `SQL`, everything after a double hyphen (`--`) is a comment.
 ```sql
 BEGIN; -- BEGIN starts a transaction
 
--- create a table named `books`
+-- create a table named `books`, only if it does not exist
 CREATE TABLE IF NOT EXISTS books (
 	-- add a column named `id`, which is the PRIMARY KEY
 	-- type SERIAL means it's an auto-incrementing sequence
 	-- of values
 	id SERIAL PRIMARY KEY,
 	-- add a column named `title`, which is of type VARCHAR (string)
-	-- and a maximum allocation of 255 characters. It cannot be NULL
+	-- and it has a maximum length of 255 characters. It cannot be NULL
 	title VARCHAR(255) NOT NULL,
 	-- add a column named `author`, same as `title`
 	author VARCHAR(255) NOT NULL
@@ -1649,7 +1649,7 @@ Key points
 
     Keep in mind that the `SQL` you're seeing here is very `PostgreSQL` specific, and some, if not all of it, may not be executable in a different engine.
 
-The test! Here is our first integration test.
+Where were we? right, ...the test! Here is our first integration test.
 
 ```go
 //integration_test.go
@@ -1683,6 +1683,7 @@ I have deliberately turned off my `PostgreSQL` server to get an error.
 If you'd like to do the same, run `sudo systemctl stop postgresql.service` in a shell, or kill your `docker` container of `postgres`.
 
 ```sh
+~$ go test
 --- FAIL: TestMigrations (2.68s)
     --- FAIL: TestMigrations/migrate_up (1.37s)
         integration_test.go:14: migration up failed: dial tcp 127.0.0.1:5432: connectex: No connection could be made because the target machine actively refused it.
@@ -1698,6 +1699,7 @@ This output is one of many possible errors we may get. While we cannot control t
 Restart your `postgres` `docker` instance or run `sudo systemctl start postgresql.service`, and try again.
 
 ```sh
+~$ go test
 --- FAIL: TestMigrations (6.21s)
     --- FAIL: TestMigrations/migrate_up (6.15s)
         integration_test.go:14: migration up failed: pq: SSL is not enabled on the server
@@ -1725,14 +1727,15 @@ const connStr = "postgres://bookshelf_user:secret-password@localhost:5432/booksh
 
 ## Try to run the tests
 
-Now our tests pass
+It shouldn't be surprising that our integration tests pass without having to write code: we already mocked a database with our `SpyStore`, and tested the _behavior_ of `Migrate` thoroughly.
 
 ```sh
+~$ go test
 PASS
 ok      github.com/quii/learn-go-with-tests/databases/v3        12.989s
 ```
 
-You probably noticed that our test are much slower now. Such is the nature of integration tests: testing between services requires more computing power, and has to account for things like latency, message queues and other nuisances that add to the test time.
+You probably noticed the tests are much slower now. Such is the nature of integration tests: testing between services requires more computing power, and has to account for things like network latency, message queues and other nuisances that add to the test time.
 
 It's not entirely hopeless though, as a solution exists! It's along the lines of "run the tests on someone else's computer".
 
@@ -1742,9 +1745,9 @@ We won't cover CI in this chapter, but we'll point to some resources at the end.
 
 ## Where are the tables?
 
-So far our tests pass, and we assume they do what they're supposed to. But we're modifying a database, you would think there is _something_ happening somewhere that makes said modifications. And you would be right.
+So far our tests pass, and we assume they do what they're supposed to. But we're modifying a database, you would think there is _something_ happening _somewhere_ that makes said modifications. And you would be right.
 
-Let's extend our tests to ensure that we are getting some output.
+Let's extend our tests to ensure that we are getting some output in case of a failure.
 
 ```go
 // integration_tests.go
@@ -1828,9 +1831,10 @@ func TestMigrations(t *testing.T) {
 }
 ```
 
-And our tests still pass, but this time we are sure of what our code does.
+And our tests still pass, but this time we are sure of what our code is doing.
 
 ```sh
+~$ go test
 PASS
 ok      github.com/quii/learn-go-with-tests/databases/v3        0.860s
 ```
@@ -1858,9 +1862,9 @@ type pgTable struct {
 }
 ```
 
-This struct will hold table information. The `tags` `sql:"tableowner"` and `sql:"tablename"`, tell the `database/sql` package utilities to map those columns to those fields.
+This struct will hold table information. The tags `sql:"tableowner"` and `sql:"tablename"`, tell the `database/sql` package utilities to map those columns to those fields.
 
-For the `migrate up` test, we'll add comments on each line instead
+For the `migrate up` test, we'll add comments on each line instead.
 
 ```go
 	t.Run("migrate up", func(t *testing.T) {
@@ -1875,10 +1879,10 @@ For the `migrate up` test, we'll add comments on each line instead
 			t.Errorf("received error querying rows: %v",  err)
 			t.FailNow()
 		}
-		// prevent memory leaks
+		// prevent memory leaks by closing the `rows` object
 		defer rows.Close()
 
-		// create a slice to hold our testable information
+		// create a slice to hold our information
 		tables := make([]pgTable, 0)
 		// iterates through the `rows`, one by one
 		for rows.Next() {
@@ -1909,7 +1913,7 @@ For the `migrate up` test, we'll add comments on each line instead
 	})
 ```
 
-The `migrate down` tests uses very similar logic to the `migrate up` test, but instead it counts the rows returned. The number of rows should be `0`, because we `down`-migrated all the tables.
+The `migrate down` tests uses very similar logic to the `migrate up` test, but instead it counts the rows returned. The number of rows should be `0`, because we `down`-migrated all the tables &ndash; effectively removing them from the database.
 
 ## Best practices
 
@@ -1921,7 +1925,7 @@ Recall that earlier we mentioned that our migrations should follow best practice
 
 We tested that they were _ordered_ with our unit tests, and that they're _reversible_ with our integration tests. But are they _idempotent_?
 
-Let's write a test for it! Simply run the same migrations twice, the database should raise an error if it doesn't allow the same migration twice.
+Let's write a test for it! Simply run the same migrations twice or in unexpected order; the database should raise an error if it doesn't allow the same migration twice.
 
 ## Write the test first
 
@@ -1965,6 +1969,7 @@ func TestMigrations(t *testing.T) {
 We pass!
 
 ```sh
+~$ go test
 PASS
 ok      github.com/quii/learn-go-with-tests/databases/v3        1.384s
 ```
@@ -1983,19 +1988,19 @@ But first...
 
 <!-- TODO: add links start:v3, end:v4 -->
 
-Our application is growing, and so is our codebase. Before we are drowing in `.go` files, let's use `go`'s package structure to our advantage.
+Our package is growing, and so is our codebase. Before we are drowing in `.go` files, let's use `Go`'s package structure to our advantage.
 
-Let's create a package (directory), aptly name it `bookshelf`, and put our `migrate` related code (`bookshelf-store.go`) inside it. Don't forget to change occurrences of `package main` to `package bookshelf`.
+Let's create a package (directory), aptly name it `bookshelf`, and put our `migrate` related code (`bookshelf-store.go`) inside it. Change occurrences of `package main` to `package bookshelf`.
 
 Also change all test files (`migrate_test`, `integration_test`) `package main` to `package bookshelf_test`, and put them inside the `bookshelf` directory. You will have to import the `bookshelf` package you created into these tests.
 
-Inside bookshelf, the `migrate` function will have to be exported (change to `Migrate`).
+Inside bookshelf, the `migrate` function will have to be exported (change it to `Migrate`).
 
-Inside bookshelf, an utility package called `testutils`, that will hold all the testing utilities (duh!) we have created so far: put assertions into a file called `assertions.go`, `CreateTempDir` inside `helpers.go` and `SpyStore` and its related functions and methods inside `store.go`.
+Inside bookshelf, create an utility package called `testutils`, that will hold all the testing utilities (duh!) we have created so far: put assertions into a file called `assertions.go`, `CreateTempDir` inside `helpers.go` and `SpyStore` and its related functions and methods inside `store.go`.
 
 Inside `migrate_test.go`, all occurrences of `migrate` will need to be changed to `bookshelf.Migrate`. You will need to import the `bookshelf/testutils` package and prepend all `assertions` and occurrences of `CreateTempDir` and `NewSpyStore` with `testutils.*`.
 
-Finally, move the `migrations` directory inside the `bookshelf` dir.
+Finally, move the `migrations` directory inside the `bookshelf` dir, and remove the `func main() {}` at the bottom of `bookshelf-store.go`.
 
 ---
 
@@ -2012,12 +2017,13 @@ import (
 
 It's likely you did not clone the repository to go through this chapter, and that's OK.
 
-Keep in mind that you may need to change your import string to something like
+You may need to change your import string to something like:
 
 ```go
 import (
 	...
-	"github.com/YOUR_GITHUB_HANDLE/bookshelf"
+	// if your files are in the $GOPATH
+	"github.com/YOUR_GITHUB_HANDLE/NAME_OF_PARENT_DIR/bookshelf"
 )
 ```
 
@@ -2026,24 +2032,46 @@ import (
 Once you're done, folder structure should look like this:
 
 ```sh
+~$ tree .
 .
 └── bookshelf
     ├── bookshelf-store.go
     ├── integration_test.go
     ├── migrate_test.go
     ├── migrations
-    │   ├── 0001_create_books_table.down.sql
-    │   └── 0001_create_books_table.up.sql
+    │   ├── 0001_create_bookshelf_table.down.sql
+    │   └── 0001_create_bookshelf_table.up.sql
     └── testutils
         ├── assertions.go
+        ├── helpers.go
         └── store.go
 
-3 directories, 7 files
+3 directories, 8 files
 ```
 
-Try running the tests, the compiler will tell you what to do. Keep correcting the errors, eventually they will run out, I promise.
+Try running the tests (now with `go test ./bookshelf`), the compiler will tell you what to do. Keep correcting the errors; I promise that eventually they will run out.
+
+Once you manage to get the code to build, the tests should pass.
+
+Here is a sample of one of the changed tests in `migrate_test.go`:
+
+```go
+// bookshelf/migrate_test.go
+...
+	t.Run("error on empty directory", func(t *testing.T) {
+		store := testutils.NewSpyStore()
+		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", true)
+		defer cleanup()
+
+		_, err := bookshelf.Migrate(dummyWriter, store, tmpdir, -1, bookshelf.UP)
+		testutils.AssertError(t, err, bookshelf.ErrMigrationDirEmpty)
+	})
+...
+```
 
 This exercise in patience may seem pointless now, but it's well worth the effort.
+
+If you're still not convinced it's worth your time, you can find the restructured code [here](https://github.com/djangulo/learn-go-with-tests/tree/databases/databases/v4).
 
 ## CRUD
 
