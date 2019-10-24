@@ -7,38 +7,32 @@ go:
 before_install:
   - go get github.com/quii/learn-go-with-tests/command-line/v1
 
+before_script:
+  - |-
+    docker run \
+      --detach \
+      -e POSTGRES_DB=bookshelf_db \
+      -e POSTGRES_USER=bookshelf_user \
+      -e POSTGRES_PASSWORD=secret-password \
+      -p 5432:5432 \
+      postgres:11.5
+
 install: true
 
 services:
   - docker
-  - postgresql
 
 stages:
   - build
   - spelling
   - epub
 
-addons:
-  postgresql: "11"
-  apt:
-    packages:
-      - postgresql-11
-      - postgresql-client-11
-      - postgresql-contrib-11
-
-env:
-  global:
-    - PGPORT=5433
-    - POSTGRES_PORT=5433
-
 jobs:
   include:
     - stage: build
       script:
         - go get -u golang.org/x/lint/golint
-        - psql -c "CREATE USER bookshelf_user WITH CREATEDB PASSWORD 'secret-password';" -U postgres
-        - psql -c 'CREATE DATABASE bookshelf_db OWNER bookshelf_user;' -U postgres
-        - "./build.sh"
+        - './build.sh'
     - stage: spelling
       script:
         - go get -u github.com/client9/misspell/cmd/misspell
@@ -46,13 +40,13 @@ jobs:
     - stage: releases
       script:
         - docker pull jagregory/pandoc
-        - "./build.books.sh"
+        - './build.books.sh'
       deploy:
         provider: releases
         api_key:
           secure: q58oofLU1tCcO618axSmlc3eOf6f/QtP/XORtn0o7z/1O6AENlWAIn0RYetHEp0JNYQfS4sqgy34gAy2H6BpZURaHc1muW0fhwRndBjrbU5DviflOc9lH8pLzDZpzhKdBiCMoZpDs+Gp27PmZn62vHSZkiR3EMdrJFoDV8/fUCy4UYs/U3/QiG/Qv/DnKM0GI5LfNWGtD0dzbe1z4qVEfUXk44CnxEJZoaSEx6e0zrP9QHreUGpADB4syzgSW/Q8RwmyZIWPZrmmBu8qzrmpJtcjNaUllx4VAIB86U5fZaUIEoAodGf7+3Ut8K5oI+eBo5HkAYShwrzXRs6gQWp8nwEWyxzEvLwf4949llnC0ez6qvSf7prXJKK2Rmvid7xZt51eMglBDatAFaprmdM4AZeWibUpVP2QbzYAqpkd8SZazmjYzRJPeduNzGoOOsHuqIWdmKHthQEMZXiXSDy4HWP9A085/+i45pK6jf1Bfu2XbCW+Yh3d1uTUCSStPMgVOLbTL8YGaKpnpO6TAo0/vAEiO4//lZeodx/w7s8zTDPVPpb9hDFbcwQfWZarPTzVQuUKrVagFlLooTpzJ2sU7I7Q45O6vvDvhZzj2gM+/gXtbS8CKwUNEOsJubprGksW5254vMRayTUVXXeHcrAIMcCdW0D9+YbXifmJvcc1LYk=
         file:
-          - "learn-go-with-tests.epub"
+          - 'learn-go-with-tests.epub'
         #          - "learn-go-with-tests.pdf"
         skip_cleanup: true
         on:

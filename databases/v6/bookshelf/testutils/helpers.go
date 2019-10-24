@@ -3,6 +3,7 @@ package testutils
 import (
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"testing"
@@ -68,13 +69,60 @@ func CreateTempDir(
 
 }
 
-// NewTestPostgreSQLStore returns a test database with the conf settings.
-func NewTestPostgreSQLStore(conf *bookshelf.DBConf) (*bookshelf.PostgreSQLStore, func(), error) {
+type TestDBRegistry struct {
+	Databases map[string]*bookshelf.DBConf
+	Prefix    string
+}
+
+func (t *TestDBRegistry) Add(conf *bookshelf.DBConf) string {
+	rand.Seed(time.Now().UnixNano())
+	dbname := (*t).Prefix + "_" + randString(20)
+
+	(*conf).DBName = dbname
+	(*t).Databases[dbname] = conf
+
+	return dbname
+}
+
+func (t *TestDBRegistry) Remove(dbname string) {
+	if _, ok := (*t).Databases[dbname]; ok {
+		delete((*t).Databases, dbname)
+	}
+}
+
+func randString(n int) string {
+	b := make([]rune, n)
+	for i := 0; i < n; i++ {
+		b[i] = chars[rand.Intn(len(chars))]
+	}
+	return string(b)
+}
+
+var (
+	chars                = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+	ActiveTestDBRegistry = &TestDBRegistry{
+		Databases: map[string]*bookshelf.DBConf{},
+		Prefix:    "bookshelf_test_db",
+	}
+)
+
+// NewTestPostgreSQLStore returns a test database with the bookshelf.MainDBConf settings
+// and a randomly generated name.
+func NewTestPostgreSQLStore(migrate bool) (*bookshelf.PostgreSQLStore, func(), error) {
 	main, removeMain := bookshelf.NewPostgreSQLStore(&bookshelf.MainDBConf)
+	dbconf := &bookshelf.DBConf{
+		User:    bookshelf.MainDBConf.User,
+		Pass:    bookshelf.MainDBConf.Pass,
+		Host:    bookshelf.MainDBConf.Host,
+		Port:    bookshelf.MainDBConf.Port,
+		SSLMode: bookshelf.MainDBConf.SSLMode,
+	}
+
+	dbname := ActiveTestDBRegistry.Add(dbconf)
 
 	_, err := main.DB.Exec(
 		fmt.Sprintf("CREATE DATABASE %s OWNER %s;",
-			conf.DBName,
+			dbname,
 			bookshelf.MainDBConf.User,
 		),
 	)
@@ -82,7 +130,7 @@ func NewTestPostgreSQLStore(conf *bookshelf.DBConf) (*bookshelf.PostgreSQLStore,
 		return nil, nil, err
 	}
 
-	testDB, err := sql.Open("postgres", conf.String())
+	testDB, err := sql.Open("postgres", dbconf.String())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -97,7 +145,7 @@ func NewTestPostgreSQLStore(conf *bookshelf.DBConf) (*bookshelf.PostgreSQLStore,
 				fmt.Fprintf(
 					os.Stderr,
 					"error closing test database %q, retrying in %v: %v\n",
-					conf.DBName,
+					dbname,
 					retryIn,
 					err,
 				)
@@ -108,12 +156,12 @@ func NewTestPostgreSQLStore(conf *bookshelf.DBConf) (*bookshelf.PostgreSQLStore,
 		}
 		for tries := 0; time.Now().Before(dropDeadline); tries++ {
 			retryIn := time.Second << uint(tries)
-			_, err := main.DB.Exec(fmt.Sprintf("DROP DATABASE %s;", conf.DBName))
+			_, err := main.DB.Exec(fmt.Sprintf("DROP DATABASE %s;", dbname))
 			if err != nil {
 				fmt.Fprintf(
 					os.Stderr,
 					"error dropping test database %q, retrying in %v: %v\n",
-					conf.DBName,
+					dbname,
 					retryIn,
 					err,
 				)
@@ -122,9 +170,16 @@ func NewTestPostgreSQLStore(conf *bookshelf.DBConf) (*bookshelf.PostgreSQLStore,
 			}
 			break
 		}
+		ActiveTestDBRegistry.Remove(dbname)
 		removeMain()
 	}
-	return &bookshelf.PostgreSQLStore{DB: testDB}, remove, nil
+
+	store := bookshelf.PostgreSQLStore{DB: testDB}
+	if migrate {
+		bookshelf.MigrateUp(dummyWriter, &store, "migrations/test", -1)
+	}
+
+	return &store, remove, nil
 }
 
 // ResetStore refreshes the store for each test.

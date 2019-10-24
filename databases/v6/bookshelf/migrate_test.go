@@ -154,6 +154,23 @@ func TestMigrate(t *testing.T) {
 		}
 		testutils.AssertError(t, err, testutils.ErrNoCakeSQL)
 	})
+	t.Run("ignores subdirectiories", func(t *testing.T) {
+		store := testutils.NewSpyStore(dummyBooks)
+
+		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", false)
+		defer cleanup()
+		subdir, err := ioutil.TempDir(tmpdir, "subdirectory")
+		if err != nil {
+			t.FailNow()
+		}
+		f, err := ioutil.TempFile(subdir, "subfile.*.up.sql")
+		if err != nil {
+			t.FailNow()
+		}
+		if _, ok := store.Migrations[f.Name()]; ok {
+			t.Errorf("%q is not supposed to exist in the store", f.Name())
+		}
+	})
 }
 
 var dummyWriter = &bytes.Buffer{}

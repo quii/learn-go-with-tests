@@ -3018,7 +3018,7 @@ func NewPostgreSQLStore(conf *DBConf) (*PostgreSQLStore, func()) {
 
 With this tooling in place, we can create a helper function to instantiate a new database just for our tests.
 
-Insert the function below inside `bookshelf/testutils/helpers.go`:
+Insert the functions and variables below inside `bookshelf/testutils/helpers.go`:
 
 ```go
 // bookshelf/testutils/helpers.go
@@ -3027,17 +3027,64 @@ import (
 	...
 	"database/sql"
 	"time"
+	"math/rand"
 
 	"github.com/djangulo/learn-go-with-tests/databases/v6/bookshelf"
 	_ "github.com/lib/pq"
 )
 ...
-func NewTestPostgreSQLStore(conf *bookshelf.DBConf) (*bookshelf.PostgreSQLStore, func(), error) {
+type TestDBRegistry struct {
+	Databases map[string]*bookshelf.DBConf
+	Prefix    string
+}
+
+func (t *TestDBRegistry) Add(conf *bookshelf.DBConf) string {
+	rand.Seed(time.Now().UnixNano())
+	dbname := (*t).Prefix + "_" + randString(20)
+	
+	(*conf).DBName = dbname
+	(*t).Databases[dbname] = conf
+	
+	return dbname
+}
+
+func (t *TestDBRegistry) Remove(dbname string) {
+	if _, ok := (*t).Databases[dbname]; ok {
+		delete((*t).Databases, dbname)
+	}
+}
+
+func randString(n int) string {
+	b := make([]rune, n)
+	for i := 0; i < n; i++ {
+		b[i] = chars[rand.Intn(len(chars))]
+	}
+	return string(b)
+}
+
+var (
+	chars = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+		ActiveTestDBRegistry = &TestDBRegistry{
+	Databases: map[string]*bookshelf.DBConf{},
+	Prefix:    "bookshelf_test_db",
+	}
+)
+
+func NewTestPostgreSQLStore() (*bookshelf.PostgreSQLStore, func(), error) {
 	main, removeMain := bookshelf.NewPostgreSQLStore(&bookshelf.MainDBConf)
+	dbconf := &bookshelf.DBConf{
+		User:    bookshelf.MainDBConf.User,
+		Pass:    bookshelf.MainDBConf.Pass,
+		Host:    bookshelf.MainDBConf.Host,
+		Port:    bookshelf.MainDBConf.Port,
+		SSLMode: bookshelf.MainDBConf.SSLMode,
+	}
+
+	dbname := ActiveTestDBRegistry.Add(dbconf)
 
 	_, err := main.DB.Exec(
 		fmt.Sprintf("CREATE DATABASE %s OWNER %s;",
-			conf.DBName,
+			dbname,
 			bookshelf.MainDBConf.User,
 		),
 	)
@@ -3045,7 +3092,7 @@ func NewTestPostgreSQLStore(conf *bookshelf.DBConf) (*bookshelf.PostgreSQLStore,
 		return nil, nil, err
 	}
 
-	testDB, err := sql.Open("postgres", conf.String())
+	testDB, err := sql.Open("postgres", dbconf.String())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -3060,7 +3107,7 @@ func NewTestPostgreSQLStore(conf *bookshelf.DBConf) (*bookshelf.PostgreSQLStore,
 				fmt.Fprintf(
 					os.Stderr,
 					"error closing test database %q, retrying in %v: %v\n",
-					conf.DBName,
+					dbname,
 					retryIn,
 					err,
 				)
@@ -3071,12 +3118,12 @@ func NewTestPostgreSQLStore(conf *bookshelf.DBConf) (*bookshelf.PostgreSQLStore,
 		}
 		for tries := 0; time.Now().Before(dropDeadline); tries++ {
 			retryIn := time.Second << uint(tries)
-			_, err := main.DB.Exec(fmt.Sprintf("DROP DATABASE %s;", conf.DBName))
+			_, err := main.DB.Exec(fmt.Sprintf("DROP DATABASE %s;", dbname))
 			if err != nil {
 				fmt.Fprintf(
 					os.Stderr,
 					"error dropping test database %q, retrying in %v: %v\n",
-					conf.DBName,
+					dbname,
 					retryIn,
 					err,
 				)
@@ -3085,6 +3132,7 @@ func NewTestPostgreSQLStore(conf *bookshelf.DBConf) (*bookshelf.PostgreSQLStore,
 			}
 			break
 		}
+		ActiveTestDBRegistry.Remove(dbname)
 		removeMain()
 	}
 	return &bookshelf.PostgreSQLStore{DB: testDB}, remove, nil
@@ -3095,22 +3143,89 @@ Remember `exponential backoff`? This is where this pattern shines in our codebas
 
 We now can create the test database inside each test function, run all our tests with a predictable state, and drop it once we're done. We can use the fact that `MigrateDown` clears the database to our advantage and clean it after each test.
 
-However, to avoid creating the test database multiple times, let's group our `TestCreateBook` and `TestMigrate` into a single function. We can still get meaningful reporting by nesting them with `t.Run`.
+For the sake of demonstration, we will use this helper function... **a lot**. Each of the integration tests we write will run in its own database. This allows us to run with a predictable state every time. Even better, now that we have disposable databases, we can make put `test` migrations inside our `migrations` directory, ensuring that not only the test databases will be available, but they also will be populated with data.
 
-There is nothing stopping us from creating as many test databases as we want, but each database created will make our tests that much slower. In a real world scenario, the ideal setup would be a fresh database for each integration test, as these will run in CI. You want to be as thorough as possible if you have full control over the external service.
+If all this creating databases is slowing down your computer, feel free to group all integration tests from here on into a single one, using `t.Run` freely to nest different function names.
+
+Add the following test to `migrate_test.go`, to ensure that sub-directories are ignored:
+
+```go
+// bookshelf/migrate_test.go
+...
+	t.Run("ignores subdirectiories", func(t *testing.T) {
+		store := testutils.NewSpyStore(dummyBooks)
+
+		tmpdir, _, cleanup := testutils.CreateTempDir(t, "test-migrations", false)
+		defer cleanup()
+		subdir, err := ioutil.TempDir(tmpdir, "subdirectory")
+		if err != nil {
+			t.FailNow()
+		}
+		f, err := ioutil.TempFile(subdir, "subfile.*.up.sql")
+		if err != nil {
+			t.FailNow()
+		}
+		if _, ok := store.Migrations[f.Name()]; ok {
+			t.Errorf("%q is not supposed to exist in the store", f.Name())
+		}
+	})
+	...
+```
+
+## Try to run the test
+
+Seems like we didn't break anything.
+
+```sh
+~$ go test ./bookshelf
+ok      github.com/djangulo/learn-go-with-tests/databases/v6/bookshelf  5.362s
+```
+
+Now create a copy of of the `migrations` directory into itself, name it `test`, and add the following migrations into it:
+
+```sql
+-- migrations/test/0003_insert_test_data.up.sql
+INSERT INTO books (title, author) VALUES 
+('Alice''s Adventures in Wonderland', 'Lewis Carroll'),
+('The Ball and The Cross', 'G.K. Chesterton'),
+('The Man Who Was Thursday', 'G.K. Chesterton'),
+('Moby Dick', 'Herman Melville'),
+('Paradise Lost', 'John Milton'),
+('The Tragedie of Julius Caesar', 'William Shakespeare'),
+('The Tragedie of Hamlet', 'William Shakespeare'),
+('The Tragedie of Macbeth', 'William Shakespeare'),
+('Romeo and Juliet', 'William Shakespeare') ON CONFLICT DO NOTHING;
+```
+```sql
+-- migrations/test/0003_insert_test_data.down.sql
+DELETE  FROM books;
+```
+
+Let's include a boolean `migrate` parameter in `NewTestPostgreSQLStore`,  to optionally populate the new test database..
 
 Let's create another test utility to reset the database on a whim.
 
 ```go
 // bookshelf/testutils/helpers.go
+...
+func NewTestPostgreSQLStore(migrate bool) (*bookshelf.PostgreSQLStore, func(), error) {
+	...
+	store := bookshelf.PostgreSQLStore{DB: testDB}
+	if migrate {
+		bookshelf.MigrateUp(dummyWriter, &store, "migrations/test", -1)
+	}
+
+	return &store, remove, nil
+}
+
 func ResetStore(store *bookshelf.PostgreSQLStore) error {
 	var err error
-	_, err = bookshelf.MigrateDown(dummyWriter, store, "migrations", -1)
+	_, err = bookshelf.MigrateDown(dummyWriter, store, "migrations/test", -1)
 	if err != nil {
 		return err
 	}
 
-	_, err = bookshelf.MigrateUp(dummyWriter, store, "migrations", -1)
+	_, err = bookshelf.MigrateUp(dummyWriter, store, "migrations/test", -1)
 	if err != nil {
 		return err
 	}
@@ -3118,6 +3233,8 @@ func ResetStore(store *bookshelf.PostgreSQLStore) error {
 	return nil
 }
 ```
+
+Keep in mind that each database created will make our tests slower. This affects us now, but in reality we should be offloading this types of tests to CI. You want to be as thorough as possible if you have full control over the external service.
 
 And finally, our integration tests. We've included the tests for `ByID`, `ByTitleAuthor`, and `GetOrCreate` that were omitted before for brevity.
 
@@ -3131,20 +3248,8 @@ import (
 	"github.com/djangulo/learn-go-with-tests/databases/v6/bookshelf/testutils"
 )
 ...
-var (
-	dbconf = bookshelf.DBConf{
-		User:    bookshelf.MainDBConf.User,
-		Pass:    bookshelf.MainDBConf.Pass,
-		Host:    bookshelf.MainDBConf.Host,
-		Port:    bookshelf.MainDBConf.Port,
-		DBName:  "bookshelf_test_db",
-		SSLMode: bookshelf.MainDBConf.SSLMode,
-	}
-)
-
-func TestDBIntegration(t *testing.T) {
-
-	store, removeStore, err := testutils.NewTestPostgreSQLStore(&dbconf)
+func TestMigrateIntegration(t *testing.T) {
+	store, removeStore, err := testutils.NewTestPostgreSQLStore(false)
 	if err != nil {
 		panic(err)
 	}
@@ -3244,24 +3349,48 @@ func TestDBIntegration(t *testing.T) {
 			}
 		})
 	})
+}
+```
 
-	t.Run("Create", func(t *testing.T) {
-		t.Run("can create a book", func(t *testing.T) {
-			testutils.ResetStore(store)
+Since `TestMigrateIntegration` takes so much space, let's start using table-driven tests for our successes and failures.
 
-			book, err := bookshelf.Create(store, "test-title", "test-author")
-			if err != nil {
-				t.Errorf("received error on CreateBook: %v", err)
-			}
-			if book.ID == 0 {
-				t.Error("invalid ID received")
-			}
-		})
+```go
+// bookshelf/integration_test.go
+func TestCreateIntegration(t *testing.T) {
 
+	t.Run("success", func(t *testing.T) {
+		for _, test := range []struct {
+			name, title, author string
+			want                *bookshelf.Book
+		}{
+			{"can create", "test-title", "test-author", &bookshelf.Book{10, "test-title", "test-author"}},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
+				if err != nil {
+					fmt.Fprintf(os.Stdout, "db creation failed on test %q", test.name)
+					t.FailNow()
+				}
+				defer removeStore()
+
+				book, err := bookshelf.Create(store, test.title, test.author)
+
+				testutils.AssertNoError(t, err)
+				testutils.AssertBooksEqual(t, book, test.want)
+			})
+		}
+	})
+
+	t.Run("failure", func(t *testing.T) {
 		t.Run("cannot create a duplicate title-author", func(t *testing.T) {
-			testutils.ResetStore(store)
+			store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
+			if err != nil {
+				fmt.Fprintf(os.Stdout, "db creation failed on test for duplicate title-author")
+				t.FailNow()
+			}
+			defer removeStore()
 
-			_, err := bookshelf.Create(store, "test-title", "test-author")
+			_, err = bookshelf.Create(store, "test-title", "test-author")
 			if err != nil {
 				t.Errorf("received error on CreateBook: %v", err)
 			}
@@ -3272,59 +3401,105 @@ func TestDBIntegration(t *testing.T) {
 			}
 		})
 	})
-	t.Run("ByID", func(t *testing.T) {
-		testutils.ResetStore(store)
-		for _, b := range testBooks {
-			disposable := new(bookshelf.Book)
-			store.Create(disposable, b.Title, b.Author)
-		}
 
-		t.Run("ByID success", func(t *testing.T) {
-			_, err := bookshelf.ByID(store, 1)
-			testutils.AssertNoError(t, err)
-		})
+}
+func TestByIDIntegration(t *testing.T) {
+	store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "db creation failed on TestByIDIntegration")
+		t.FailNow()
+	}
+	defer removeStore()
 
+	t.Run("success", func(t *testing.T) {
+		got, err := bookshelf.ByID(store, 1)
+		testutils.AssertNoError(t, err)
+		want := &bookshelf.Book{1, "Alice's Adventures in Wonderland", "Lewis Carroll"}
+		testutils.AssertBooksEqual(t, got, want)
+	})
+
+	t.Run("failure", func(t *testing.T) {
 		for _, test := range []struct {
 			name string
 			in   int64
 			want error
 		}{
-			{"ByID not found", int64(42), bookshelf.ErrBookDoesNotExist},
-			{"ByID zero value", int64(0), bookshelf.ErrZeroValueID},
+			{"not found", int64(42), bookshelf.ErrBookDoesNotExist},
+			{"zero value", int64(0), bookshelf.ErrZeroValueID},
 		} {
 			t.Run(test.name, func(t *testing.T) {
-				store := testutils.NewSpyStore(testBooks)
 				_, err := bookshelf.ByID(store, test.in)
 				testutils.AssertError(t, err, test.want)
 			})
 		}
 	})
+}
 
-	t.Run("ByTitleAuthor", func(t *testing.T) {
-		testutils.ResetStore(store)
-		for _, b := range testBooks {
-			disposable := new(bookshelf.Book)
-			store.Create(disposable, b.Title, b.Author)
-		}
+func TestByTitleAuthorIntegration(t *testing.T) {
+	store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "db creation failed on TestByIDIntegration")
+		t.FailNow()
+	}
+	defer removeStore()
 
-		t.Run("ByTitleAuthor success", func(t *testing.T) {
-			store := testutils.NewSpyStore(testBooks)
+	t.Run("success", func(t *testing.T) {
+		got, err := bookshelf.ByTitleAuthor(store, "Alice's Adventures in Wonderland", "Lewis Carroll")
+		want := &bookshelf.Book{1, "Alice's Adventures in Wonderland", "Lewis Carroll"}
+		testutils.AssertNoError(t, err)
+		testutils.AssertBooksEqual(t, got, want)
+	})
 
-			_, err := bookshelf.ByTitleAuthor(store, testBooks[0].Title, testBooks[0].Author)
-			testutils.AssertNoError(t, err)
-		})
-
+	t.Run("failure", func(t *testing.T) {
 		for _, test := range []struct {
 			name, title, author string
 			want                error
 		}{
-			{"ByTitleAuthor failure empty title", "", "Herman Melville", bookshelf.ErrEmptyTitleField},
-			{"ByTitleAuthor failure empty author", "Moby Dick", "", bookshelf.ErrEmptyAuthorField},
-			{"ByTitleAuthor failure not found", "Moby Dick", "Herman Melville", bookshelf.ErrBookDoesNotExist},
+			{"empty title", "", "Herman Melville", bookshelf.ErrEmptyTitleField},
+			{"empty author", "Moby Dick", "", bookshelf.ErrEmptyAuthorField},
+			{"not found", "The DaVinci Code", "Dan Brown", bookshelf.ErrBookDoesNotExist},
 		} {
 			t.Run(test.name, func(t *testing.T) {
-				store := testutils.NewSpyStore(testBooks)
 				_, err := bookshelf.ByTitleAuthor(store, test.title, test.author)
+				testutils.AssertError(t, err, test.want)
+			})
+		}
+	})
+}
+
+func TestGetOrCreateIntegration(t *testing.T) {
+	store, removeStore, err := testutils.NewTestPostgreSQLStore(true)
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "db creation failed on TestByIDIntegration")
+		t.FailNow()
+	}
+	defer removeStore()
+
+	t.Run("success", func(t *testing.T) {
+		for _, test := range []struct {
+			name, title, author string
+			want                *bookshelf.Book
+		}{
+			{"retrieves", "Alice's Adventures in Wonderland", "Lewis Carroll", &bookshelf.Book{1, "Alice's Adventures in Wonderland", "Lewis Carroll"}},
+			{"inserts", "DaVinci", "Dan Brown", &bookshelf.Book{10, "DaVinci", "Dan Brown"}},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				book, err := bookshelf.GetOrCreate(store, test.title, test.author)
+				testutils.AssertNoError(t, err)
+				testutils.AssertBooksEqual(t, book, test.want)
+			})
+		}
+	})
+	t.Run("failure", func(t *testing.T) {
+		for _, test := range []struct {
+			name, title, author string
+			want                error
+		}{
+			{"empty title", "", "Herman Melville", bookshelf.ErrEmptyTitleField},
+			{"empty author", "Moby Dick", "", bookshelf.ErrEmptyAuthorField},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				_, err := bookshelf.GetOrCreate(store, test.title, test.author)
 				testutils.AssertError(t, err, test.want)
 			})
 		}
