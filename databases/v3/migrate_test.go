@@ -332,7 +332,6 @@ func CreateTempDir(
 		os.RemoveAll(tmpdir)
 	}
 	return tmpdir, filenames, cleanup
-
 }
 
 var dummyWriter = &bytes.Buffer{}

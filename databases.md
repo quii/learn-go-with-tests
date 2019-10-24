@@ -24,7 +24,7 @@ NOTE: The above bullet points are a rewording of the [_ACID principles_](https:/
 
 _Databases_ are storage mediums that can provide these properties, and much much more.
 
-Also note that, in general, there are two large branches of database types, [SQL](https://en.wikipedia.org/wiki/SQL) and [NOSQL](https://en.wikipedia.org/wiki/NoSQL). In this chapter we will be focusing on SQL databases, using the [database/sql](https://golang.org/pkg/database/sql) package and the `postgres` driver [pq](_ 'github.com/lib/pq').
+There are [many different types of databases](https://en.wikipedia.org/wiki/Outline_of_databases#Types_of_databases), each one with its own data structures, procedures and algorithms. In this chapter we will be focusing on [SQL](https://en.wikipedia.org/wiki/SQL) databases, which is of the [relational type](https://en.wikipedia.org/wiki/Relational_database), using the [database/sql](https://golang.org/pkg/database/sql) package and the `postgres` driver [pq](https://github.com/lib/pq).
 
 There is a fair bit of CLI usage in this chapter (mainly setting up the database). For the sake of simplicity we will assume that you are running `ubuntu` on your machine, with `bash` installed. In the near future, look into the appendix for installation on other systems.
 
@@ -60,16 +60,16 @@ The easiest (and cleanest) way of getting `PostgreSQL` up and running is by usin
     -e POSTGRES_DB=bookshelf_db \ # name for the database
     -e POSTGRES_USER=bookshelf_user \ # name for the database user
     -e POSTGRES_PASSWORD=secret-password \ # database password
-    -p 5432:5432 \ # map port 5432 on host to docker container's 5432
-	-d \ # detach process
+    --publish 5434:5432 \ # map port 5432 on host to docker container's 5432
+	--detach \ # detach process
     postgres:11.5 # get official postgres image, version 11.5
 ```
 
-You may need to run the above command with elevation (prepend it with `sudo`).
+You may need to run the above command with elevation (prepend it with `sudo`). If you already have `PosgreSQL` installed on your system, but would still want to run it with `docker`, you have to change the host port to a different one (syntax is "`--publish HOST:CONTAINER`") like `--publish 5433:5432`, and change your database connection string (in the application) to point to this port (`5433`, in this example).
 
 ### Manual installation
 
-Install `PostgreSQL` with the package manager
+Install `PostgreSQL` with the package manager.
 
 ```sh
 ~$ sudo apt-get upgrade
@@ -84,7 +84,7 @@ PostgreSQL installs and initializes a database called `postgres`, and a user als
 ```
 
 ```
-psql (10.10 (Ubuntu 10.10-0ubuntu0.18.04.1))
+psql (11.5 (Debian 11.5-3.pgdg90+1))
 Type "help" for help
 
 postgres=# CREATE USER bookshelf_user WITH CREATEDB PASSWORD 'secret-password';
@@ -116,7 +116,7 @@ There are excellent, open source migration management tools out there ([exhibit 
 
 But we will not be using those. We will write our own tool (although simpler than those linked above) instead, using the `go` toolchain. We will also try to adhere to best practices, these being:
 
--   Migrations should be _ordered_, so there is a definitive order each time they are run. We will simply prepend each filename with a number, allowing enough digits for a large number of files (although realistically, migrations get "squashed" into a smaller number of files on real projects, if it makes sense to do so).
+-   Migrations should be _ordered_, so there is a definitive order each time they are run. We will simply prepend each filename with a number and (eventually) sort them by name, allowing enough digits for a large number of files (although realistically, migrations get "squashed" into a smaller number of files on real projects, if it makes sense to do so).
 -   Migrations should be _reversible_. Applying a change to a database should simple to perform, and reversing said change should be easy as well. We will write two migration files for every change, appropriately suffixed `up` and `down`.
 -   Migrations should be _idempotent_. Re-applying a change that has previously been applied should yield no effects beyond those of the initial application.
 
@@ -168,7 +168,7 @@ Below is some boilerplate that will assist in creating the database connection. 
 
 Before we continue down the happy-path, we need to make sure our `MigrateUp` function works as expected (unit-test) before we attempt to call it on the real database (integration-test).
 
-The code directly below defines an interface, which will allow us to mock the database functionality, as well as a `NewPostgreSQLStore` function that will simplify its creation.
+The code directly below defines an interface, which will assist us in mocking the database functionality, as well as a `NewPostgreSQLStore` function that will simplify its creation.
 
 ```go
 // bookshelf-store.go
@@ -240,9 +240,9 @@ func main(){}
 
 ### Note on exponential backoff (`remove` anonymous function)
 
-Generally when calling external services you want to account for the possibility of failure, yet the reasons why the service could fail are numerous. The database is an external service because (generally) databases run in a client-server paradigm. In our case, the database connection could fail to close for a number of reasons. This pattern is useful to give the service some time to correct itself or reset before attempting our call again. This snippet does so by waiting on powers of 2 incrementally: 1, 2, 4, 8, 16, ..., N seconds, with a hard limit set at `removeTimeout` seconds.
+Generally when calling external services you want to account for the possibility of failure, yet the reasons why the service could fail are numerous. The database is an external service because (generally) databases run in a client-server paradigm over a network connection. In our case, the database connection could fail to close for a number of reasons. This pattern is useful to give the service some time to correct itself or reset before attempting our call again. This snippet does so by waiting on powers of 2 incrementally: `1`, `2`, `4`, `8`, `16`, &hellip;, `N` seconds, with a hard limit set at `removeTimeout` seconds.
 
-This is here as a demonstration mostly, where it will prove useful is during the integration tests. The test database that we create will have be destroyed after running tests, thus, it can't have read or write operations running.
+This is here as a demonstration mostly, where it will prove useful is when we're writing the `integration tests`. The test databases we create will have to be destroyed after running tests, thus, they can't have any read or write operations running at the time.
 
 Code explained:
 
@@ -256,7 +256,7 @@ remove := func() {
 	for tries := 0; time.Now().Before(deadline); tries++ {
 		err := db.Close()
 		// as `tries` increases every loop, `retryIn` becomes a
-		// time.Second` unit to the `tries` of 2
+		// `time.Second` unit to the `tries` power of 2
 		// https://play.golang.org/p/ubyLNhxE31K has an illustrative example
 		retryIn := time.Second << uint(tries)
 		if err != nil {
@@ -273,9 +273,9 @@ remove := func() {
 
 ---
 
-We could add more methods to the `Storer` interface, but at this point, we don't need them. So we won't for now.
+We could add more methods to the `Storer` interface, but at this point, we don't need them.
 
-The `ApplyMigration` method is merely a wrapper around the `sql.DB.Exec` method, this allows us to abstract it when writing our unit tests, testing that the `MigrateUp`, function does what it's intended
+The `ApplyMigration` method is merely a wrapper around the `sql.DB.Exec` method, this allows us to abstract it when writing our unit tests, testing that the `MigrateUp`, function does what it's intended to.
 
 Here is the signature for our `MigrateUp` function, with our `Storer` interface:
 
@@ -366,21 +366,24 @@ Now we're ready to address the different points, one by one.
 
 1. It needs to check whether the `dir` passed in exists.
 
+Replace the `TestMigrateUp` test written earlier by `TestMigrate` below.
+
 ```go
+// migrate_test.go
 ...
 func TestMigrate(t *testing.T) {
 	store := NewSpyStore()
-	t.Run("error on nonexistent directory", func(t *testing.T){
+	t.Run("error on nonexistent directory", func(t *testing.T) {
 		err := migrate(store, "i-do-not-exist", -1)
-		if err != nil {
-			t.Errorf("got an error but didn't want one: %v", err)
+		if err == nil {
+			t.Error("wanted an error but didn't get one")
 		}
 	})
 
-	t.Run("no error on existing directory", func(t *testing.T){
+	t.Run("no error on existing directory", func(t *testing.T) {
 		err := migrate(store, "migrations", -1)
-		if err == nil {
-			t.Error("wanted an error but didn't get one")
+		if err != nil {
+			t.Errorf("got an error but didn't want one: %v", err)
 		}
 	})
 }
@@ -391,9 +394,10 @@ func TestMigrate(t *testing.T) {
 As expected, it fails.
 
 ```sh
+~$ go test
 # github.com/quii/learn-go-with-tests/databases/v1 [github.com/quii/learn-go-with-tests/databases/v1.test]
-.\migrate_test.go:37:10: undefined: migrate
-.\migrate_test.go:44:10: undefined: migrate
+.\migrate_test.go:39:10: undefined: migrate
+.\migrate_test.go:46:10: undefined: migrate
 FAIL    github.com/quii/learn-go-with-tests/databases/v1 [build failed]
 ```
 
@@ -407,9 +411,10 @@ func migrate(store Storer, dir string, num int) error {
 ```
 
 ```sh
+~$ go test
 --- FAIL: TestMigrate (0.00s)
-    --- FAIL: TestMigrate/no_error_on_existing_directory (0.00s)
-        migrate_test.go:45: wanted an error but didn't get one
+    --- FAIL: TestMigrate/error_on_nonexistent_directory (0.00s)
+        migrate_test.go:48: wanted an error but didn't get one
 FAIL
 exit status 1
 FAIL    github.com/quii/learn-go-with-tests/databases/v1        0.608s
@@ -429,6 +434,7 @@ func migrate(store Storer, dir string, num int) error {
 ```
 
 ```sh
+~$ go test
 PASS
 ok      github.com/quii/learn-go-with-tests/databases/v1        0.484s
 ```
@@ -444,15 +450,16 @@ We can use [`ioutil.ReadDir`](https://golang.org/pkg/io/ioutil/#ReadDir) to impl
 ## Write the test first
 
 ```go
-// migrate-test.go
+// migrate_test.go
 import (
 	...
 	"os"
+	"fmt"
 	"io/ioutil"
 )
 func TestMigrate(t \*testing.T) {
 	...
-		t.Run("error on empty directory", func(t *testing.T) {
+	t.Run("error on empty directory", func(t *testing.T) {
 		// create temporary directory
 		tmpdir, err := ioutil.TempDir("", "test-migrations")
 		if err != nil {
@@ -512,9 +519,10 @@ func TestMigrate(t \*testing.T) {
 ## Try to run the tests
 
 ```sh
+~$ go test
 --- FAIL: TestMigrate (0.00s)
     --- FAIL: TestMigrate/error_on_empty_directory (0.00s)
-        migrate_test.go:72: wanted an error but didn't get one
+        migrate_test.go:65: wanted an error but didn't get one
 FAIL
 exit status 1
 FAIL    github.com/quii/learn-go-with-tests/databases/v2        0.389s
@@ -543,11 +551,12 @@ func TestMigrate(t \*testing.T) {
 ```
 
 ```sh
+~$ go test
 --- FAIL: TestMigrate (0.03s)
     --- FAIL: TestMigrate/error_on_empty_directory (0.00s)
-        migrate_test.go:72: wanted an error but didn't get one
+        migrate_test.go:65: wanted an error but didn't get one
     --- FAIL: TestMigrate/non-empty_directory_attempts_to_migrate (0.03s)
-        migrate_test.go:115: no migrations in store
+        migrate_test.go:107: no migrations in store
 FAIL
 exit status 1
 FAIL    github.com/quii/learn-go-with-tests/databases/v2        0.521s
@@ -557,7 +566,7 @@ That's better.
 
 ## Write enough code to make it pass
 
-We finally get to use the interface! Here, we call `ApplyMigration` inside our `migrate` function
+We finally get to use the interface! Here, we call `ApplyMigration` inside our `migrate` function.
 
 ```go
 // bookshelf-store.go
@@ -567,8 +576,12 @@ import (
 	"io/ioutil"
 	"path/filepath"
 )
+...
 func migrate(store Storer, dir string, num int) error {
-	...
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return fmt.Errorf("directory %q does not exist", dir)
+	}
+
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return err
@@ -592,16 +605,19 @@ func migrate(store Storer, dir string, num int) error {
 	}
 	return nil
 }
+...
 ```
 
 ```sh
+~$ go test
 PASS
 ok      github.com/quii/learn-go-with-tests/databases/v2        0.512s
 ```
 
-Just to see what the failing output would look like, change the `want` variable value to 2 (so it fails) in the `non-empty directory attempts to migrate` and run the tests.
+Just to see what the failing output would look like, change the `want` variable value to 2 (so it fails) in the `non-empty directory attempts to migrate` test, and re-run the tests.
 
 ```sh
+~$ go test
 --- FAIL: TestMigrate (0.05s)
     --- FAIL: TestMigrate/non-empty_directory_attempts_to_migrate (0.05s)
         migrate_test.go:120: wanted 2 call got 1 calls for 02.017392150.down.sql migration
@@ -617,7 +633,7 @@ FAIL    github.com/quii/learn-go-with-tests/databases/v2        0.556s
 
 Uh oh. We have several problems that this output reveals:
 
--   Our `migrate` function is running `up` and `down` migrations indiscriminately. We need to add a testcase so that it only runs one kind at a time.
+-   Our `migrate` function is running `up` and `down` migrations indiscriminately. We need to add a test case that ensures us that it will only run one kind at a time.
 -   It's including cases from previous tests. This is an easy fix, just need to instantiate a new `SpyStore` on each test.
 
 ## Refactor
@@ -663,7 +679,7 @@ func AssertError(t *testing.T, got, want error) {
 	}
 }
 
-func AssertNoError(t *testing.T, got error) {
+func AssertNoError(t *testing.T, err error) {
 	t.Helper()
 	if err != nil {
 		t.Errorf("got an error but didn't want one: %v", err)
@@ -673,7 +689,7 @@ func AssertNoError(t *testing.T, got error) {
 func AssertStoreMigrationCalls(t *testing.T, store *SpyStore, name string, num int) {
 	t.Helper()
 
-	m, ok := store.migrations[m]
+	m, ok := store.migrations[name]
 	if !ok {
 		t.Errorf("migration %q does not exist in store", name)
 	}
@@ -693,11 +709,7 @@ func AssertAllStoreMigrationCalls(t *testing.T, store *SpyStore, num int, direct
 	}
 }
 
-func CreateTempDir(
-	t *testing.T,
-	name string,
-	empty bool,
-) (string, []string, func()) {
+func CreateTempDir(t *testing.T, name string, empty bool) (string, []string, func()) {
 	t.Helper()
 
 	tmpdir, err := ioutil.TempDir("", name)
@@ -706,18 +718,20 @@ func CreateTempDir(
 		os.RemoveAll(tmpdir)
 		t.FailNow()
 	}
+
 	filenames := make([]string, 0)
 	if !empty {
 		for _, filename := range []string{
-			"01.*.up.sql",
 			"01.*.down.sql",
-			"02.*.up.sql",
+			"01.*.up.sql",
 			"02.*.down.sql",
-		}{
+			"02.*.up.sql",
+			"03.*.down.sql",
+			"03.*.up.sql",
+		} {
 			tmpfile, err := ioutil.TempFile(tmpdir, filename)
 			if err != nil {
 				fmt.Println(err)
-				os.Remove(tmpfile.Name())
 				t.FailNow()
 			}
 			filenames = append(filenames, filepath.Base(tmpfile.Name()))
@@ -725,17 +739,15 @@ func CreateTempDir(
 			if _, err := tmpfile.Write([]byte(filename + " SQL content")); err != nil {
 				tmpfile.Close()
 				fmt.Println(err)
-				os.Remove(tmpfile.Name())
 				t.FailNow()
 			}
 			if err := tmpfile.Close(); err != nil {
 				fmt.Println(err)
-				os.Remove(tmpfile.Name())
 				t.FailNow()
 			}
 		}
-
 	}
+
 	cleanup := func() {
 		os.RemoveAll(tmpdir)
 	}
@@ -743,7 +755,9 @@ func CreateTempDir(
 }
 ```
 
-Our second test `no error on existing directory` can be removed, as an empty, existing directory raises an error as well. We've added the `direction` test as well.
+Our second test `no error on existing directory` can be removed, as an empty, existing directory raises an error as well.
+
+We've added the `direction` test case as well.
 
 ```go
 ...
@@ -795,8 +809,12 @@ func TestMigrate(t *testing.T) {
 ## Try to run the test
 
 ```sh
+~$ go test
 # github.com/quii/learn-go-with-tests/databases/v2 [github.com/quii/learn-go-with-tests/databases/v2.test]
-.\migrate_test.go:81:17: too many arguments in call to migrate
+.\migrate_test.go:61:17: too many arguments in call to migrate
+        have (*SpyStore, string, number, string)
+        want (Storer, string, int)
+.\migrate_test.go:70:17: too many arguments in call to migrate
         have (*SpyStore, string, number, string)
         want (Storer, string, int)
 FAIL    github.com/quii/learn-go-with-tests/databases/v2 [build failed]
@@ -804,14 +822,16 @@ FAIL    github.com/quii/learn-go-with-tests/databases/v2 [build failed]
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-The compiler is complaining, because migrate does not yet accept a direction. Let's `DRY` things a little preemtively this time. Add the following to `bookshelf-store.go`.
+The compiler is complaining, because `migrate` does not yet accept a `direction` parameter.
+
+Let's `DRY` things a little preemtively this time, and add some constants for both the `up` and `down` directions. Add the following to `bookshelf-store.go`.
 
 ```go
 // bookshelf-store.go
 ...
 const (
 	UP = "up"
-	DOWN = "down
+	DOWN = "down"
 )
 ...
 ```
@@ -826,7 +846,7 @@ import (
 	"strings"
 )
 ...
-func migrate(store Storer, dir string, num int, direction string) {
+func migrate(store Storer, dir string, num int, direction string) error {
 	...
 	for _, file := range files {
 		if !strings.HasSuffix(file.Name(), direction+".sql") {
@@ -837,11 +857,23 @@ func migrate(store Storer, dir string, num int, direction string) {
 	...
 ```
 
-```sh
-ok      github.com/quii/learn-go-with-tests/databases/v2        0.437s
+Remember to modify othe occurrences of `migrate` in the test file.
+
+```go
+// migrate_test.go
+	...
+	err := migrate(store, "i-do-not-exist", -1, UP)
+	...
+	err := migrate(store, tmpdir, -1, UP)
+	...
 ```
 
-Remember to modify other occurrences of `migrate` in the test file.
+With that, our tests should be passing.
+
+```sh
+~$ go test
+ok      github.com/quii/learn-go-with-tests/databases/v2        0.437s
+```
 
 Looks like we accidentally covered point no. 3:
 
@@ -851,7 +883,7 @@ But we are missing the 2.1 annex: it needs to be ordered. Thanfully, we can solv
 
 ## 2.1 Ordered migrations
 
-Add the following assertions to `migrate-test.go`
+Add the following assertions to `migrate_test.go`
 
 ```go
 // migrate_test.go
@@ -882,19 +914,18 @@ func AssertOrderDescending(t *testing.T, store *SpyStore, migrations []string) {
 }
 ```
 
-But we don't have a way to capture migrations _in order_, we only get them from the `SpyStore`. We need to implement a return value that captures the order. This is also, indirectly helping us with point no. 5:
+But we don't have a way to capture migrations _in order_, we only get them from the `SpyStore`. We need to implement a return value that captures the order.
+
+This will indirectly help us with point no. 5:
 
 5. Lastly, it needs to report on the success of each migration run, if a migration fails, the entire process should be halted.
+
+But we'll worry about `5` when we have to.
 
 ```go
 // bookshelf-store.go
 ...
-func migrate(
-	store Storer,
-	dir string,
-	num int,
-	direction string,
-) ([]string, error) {
+func migrate(store Storer, dir string, num int, direction string) ([]string, error) {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		return nil, ErrMigrationDirNoExist
 	}
@@ -929,7 +960,16 @@ func migrate(
 }
 ```
 
-Remember to change implementation of `migrate` in the test, to now return two values, discarding the first one as we don't need it.
+Remember to change calls to `migrate` in the tests, to now return two values, discarding the first one in the existing tests, as we don't need it.
+
+```go
+// migrate_test.go
+	...
+	_, err := migrate(store, "i-do-not-exist", -1, UP)
+	...
+	_, err := migrate(store, tmpdir, -1, UP)
+	...
+```
 
 ## Write the test first
 
@@ -937,28 +977,32 @@ Now we can test the order of the migrations:
 
 ```go
 // migrate_test.go
-t.Run("up migrations should be ordered ascending", func(t *testing.T){
-	store := NewSpyStore()
-	tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
-	defer cleanup()
+...
+	t.Run("up migrations should be ordered ascending", func(t *testing.T){
+		store := NewSpyStore()
+		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
+		defer cleanup()
 
-	migrations, _ := migrate(store, tmpdir, -1, UP)
-	AssertOrderAscending(t, store, migrations)
-})
+		migrations, _ := migrate(store, tmpdir, -1, UP)
+		AssertOrderAscending(t, store, migrations)
+	})
 
-t.Run("down migrations should be ordered descending", func(t *testing.T){
-	store := NewSpyStore()
-	tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
-	defer cleanup()
+	t.Run("down migrations should be ordered descending", func(t *testing.T){
+		store := NewSpyStore()
+		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", false)
+		defer cleanup()
 
-	migrations, _ := migrate(store, tmpdir, -1, DOWN)
-	AssertOrderDescending(t, store, migrations)
-})
+		migrations, _ := migrate(store, tmpdir, -1, DOWN)
+		AssertOrderDescending(t, store, migrations)
+	})
+}
+...
 ```
 
 ## Try to run the test
 
 ```sh
+~$ go test
 --- FAIL: TestMigrate (0.03s)
     --- FAIL: TestMigrate/down_migrations_should_be_ordered_descending (0.00s)
         migrate_test.go:98: wrong migration order for desc: "01.993770360.down.sql" before "02.441780074.down.sql")
@@ -968,26 +1012,30 @@ exit status 1
 FAIL    github.com/quii/learn-go-with-tests/databases/v2        0.624s
 ```
 
-The `up` migrations are in the correct order, by grace of `ioutil.Readall`. But we should implement it explicitly, as the API for `ioutil.Readall` is not in our control, and may change and break our application.
+The `up` migrations are in the correct order, by grace of `ioutil.Readall`. But we should implement it explicitly, as the API for `ioutil.Readall` is not in our control, and may change unexpectedly and break our application.
 
 ## Write enough code to make it pass
 
-It's a matter of using the [`sort`](https://golang.org/pkg/sort) package to sort the `files` returned by `ioutil.ReadAll`. Specifically, [`sort.SliceStable`](https://golang.org/pkg/sort/#SliceStable). Recall that our order is implemented by the filename, we need to use `file.Name()` inside our sorting functions
+It's a matter of using the [`sort`](https://golang.org/pkg/sort) package to sort the `files` returned by `ioutil.ReadAll`. Specifically, [`sort.SliceStable`](https://golang.org/pkg/sort/#SliceStable).
+
+Recall that our order is implemented by the filename, so we need to use `file.Name()` inside our sorting functions. We'll use a switch case, using our convenient constant `DOWN` for descending, and leaving the default case to be the ascending sort.
 
 ```go
 // bookshelf-store.go
-func migrate(
-	store Storer,
-	dir string,
-	num int,
-	direction string,
-) ([]string, error) {
-
+import (
 	...
-
+	"sort"
+)
+...
+func migrate(store Storer, dir string, num int, direction string) ([]string, error) {
+	...
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(files) == 0 {
+		return nil, ErrMigrationDirEmpty
 	}
 
 	switch direction {
@@ -1020,15 +1068,17 @@ For `up` migrations, `1` through `num` makes sense: you will run the `num` first
 -   or the number of files to process before stopping?
 -   What if the number of files change before applying `down` migrations?
 
-These are all important questions, but since we are adhering to best practices, our migration files will be _idempotent_, so it does not matter if they are run repeatedly.
+These are all important questions, but since we are adhering to the best practices listed earlier, our migration files will be _idempotent_, so it does not matter if they are run repeatedly.
 
-`num` should be the number of files to process on `down` migrations, reporting appropriately the state of the database when done.
+`num` should be the number of files to process on `down` migrations.
 
 ## Write the test first
 
 Our `CreateTempDir` function creates 3 `up` files, and 3 `down` files if the `empty` boolean param is `false`. Since our `SpyStore` is tracking how many calls each migration receives, we can check that only the first `num` have been called directly, so let's do that.
 
-Since we have to write two tests (one for `up` and one for `down` migrations), let's our tests DRY and write an assertion function using [`reflect`](https://golang.org/pkg/reflect). We need to take care to account for migrations that may not exist in the store (with a `0` value), so we'll have to modify the `got` slice artificially.
+Since we have to write two tests (one for `up` and one for `down` migrations), let's keey our tests `DRY` and write an assertion function using [`reflect`](https://golang.org/pkg/reflect).
+
+ We need to take care to account for migrations that may not exist in the store (with a `0` value), so we'll have to modify the `got` slice artificially.
 
 ```go
 // migrate_test.go
@@ -1060,7 +1110,7 @@ func TestMigrate(t *testing.T) {
 	})
 }
 ...
-func AssertSliceCalls(t *testing.T, store *SpyStore, migrations []string,want []int) {
+func AssertSliceCalls(t *testing.T, store *SpyStore, migrations []string, want []int) {
 	t.Helper()
 	got := make([]int, 0)
 	for _, m := range migrations {
@@ -1077,9 +1127,10 @@ func AssertSliceCalls(t *testing.T, store *SpyStore, migrations []string,want []
 
 ## Try to run the test
 
-We get an explicit report of what was called and shouldn't have been:
+We get an explicit report of what was called and what shouldn't have been:
 
 ```sh
+~$ go test
 --- FAIL: TestMigrate (0.04s)
     --- FAIL: TestMigrate/runs_as_many_migrations_as_the_num_param,_up (0.02s)
         migrate_test.go:113: got [1 1 1] want [1 1 0] calls for migrations [01.813038608.up.sql 02.463630274.up.sql 03.431250500.up.sql]
@@ -1097,12 +1148,7 @@ We'll introduce a `count` variable, increment it when the migrations are applied
 ```go
 // bookshelf-store.go
 ...
-func migrate(
-	store Storer,
-	dir string,
-	num int,
-	direction string,
-) ([]string, error) {
+func migrate(store Storer, dir string, num int, direction string) ([]string, error) {
 	...
 	migrations := make([]string, 0)
 	count := 0
@@ -1135,6 +1181,7 @@ func migrate(
 Our tests now pass.
 
 ```sh
+~$ go test
 PASS
 ok github.com/quii/learn-go-with-tests/databases/v2 0.475s
 ```
@@ -1162,6 +1209,7 @@ We're missing an explicit check for `num == -1` to run all migrations.
 It fails, as the `count` variable introduced before is always greater than `-1`.
 
 ```sh
+~$ go test
 --- FAIL: TestMigrate (0.04s)
     --- FAIL: TestMigrate/runs_all_migrations_if_num_==_-1 (0.00s)
         migrate_test.go:132: got [0 0 0] want [1 1 1] calls for migrations []
@@ -1176,12 +1224,7 @@ It's a simple fix: prepend `num != -1` to the breaking condition.
 
 ```go
 // bookshelf-store.go
-func migrate(
-	store Storer,
-	dir string,
-	num int,
-	direction string,
-) ([]string, error) {
+func migrate(store Storer, dir string, num int, direction string) ([]string, error) {
 	...
 	for _, file := range files {
 		if num != -1 && count >= num {
@@ -1194,6 +1237,7 @@ func migrate(
 And we're back to green
 
 ```sh
+~$ go test
 PASS
 ok     github.com/quii/learn-go-with-tests/databases/v2        0.943s
 ```
@@ -1208,7 +1252,7 @@ There's a lot of nuance to point number 5, so let's break it into simpler pieces
 
 Our migrate function currently writes no output. A simple `fmt.Println` should get the job done. But it complicates our testing, as the default output would be `os.Stdout`. We could use `go`'s utilites (namely, `os.Pipe`) to capture `os.Stdout`'s output, but this could lead to a race condition (`migrate` would be writing to `os.Stdout` as well as the `testing`). It can get hairy.
 
-Since `migrate` will be an internal function (remember `MigrateUp`), we can hardcode `os.Stdout` inside the `migrate` call inside `MigrateUp`. Let's add an `io.Writer` parameter to `migrate`, which then we can use to safely inspect output.
+Let's add an `io.Writer` parameter to `migrate`, which then we can use to safely inspect output.
 
 But, as always, test first!
 
@@ -1257,6 +1301,7 @@ import (
 Test fails, as expected.
 
 ```sh
+~$ go test
 # github.com/quii/learn-go-with-tests/databases/v2 [github.com/quii/learn-go-with-tests/databases/v2.test]
 .\migrate_test.go:143:27: too many arguments in call to migrate
         have (*bytes.Buffer, *SpyStore, string, number, string)
@@ -1274,19 +1319,14 @@ import (
 	"io"
 )
 ...
-func migrate(
-	out io.Writer,
-	store Storer,
-	dir string,
-	num int,
-	direction string,
-) ([]string, error) {
+func migrate(out io.Writer, store Storer, dir string, num int, direction string) ([]string, error) {
 ...
 ```
 
 Run the tests again
 
 ```sh
+~$ go test
 # github.com/quii/learn-go-with-tests/databases/v2 [github.com/quii/learn-go-with-tests/databases/v2.test]
 .\migrate_test.go:51:20: not enough arguments in call to migrate
         have (*SpyStore, string, number, string)
@@ -1315,6 +1355,7 @@ var dummyWriter = &bytes.Buffer{}
 Now our tests run, and yield the expected failure
 
 ```sh
+~$ go test
 --- FAIL: TestMigrate (0.08s)
     --- FAIL: TestMigrate/success_output_is_expected (0.01s)
         migrate_test.go:158: got "" want "applying 1/3: 01.734206635.up.sql ...SUCCESS\napplying 2/3: 02.168107541.up.sql ...SUCCESS\napplying 3/3: 03.660970255.up.sql ...SUCCESS\n"
@@ -1330,13 +1371,7 @@ If `store.ApplyMigration` doesn't return an error, we can assume it was successf
 ```go
 // bookshelf-store.go
 ...
-func migrate(
-	out io.Writer,
-	store Storer,
-	dir string,
-	num int,
-	direction string,
-) ([]string, error) {
+func migrate(out io.Writer, store Storer, dir string, num int, direction string) ([]string, error) {
 	...
 
 	total := len(files)
@@ -1367,6 +1402,7 @@ func migrate(
 Success! oh wait...
 
 ```sh
+~$ go test
 --- FAIL: TestMigrate (0.11s)
     --- FAIL: TestMigrate/success_output_is_expected (0.00s)
         migrate_test.go:158: got "applying 1/6: 01.414028183.up.sql ...SUCCESS\napplying 2/6: 02.949529057.up.sql ...SUCCESS\napplying 3/6: 03.887873211.up.sql ...SUCCESS\n" want "applying 1/3: 01.414028183.up.sql ...SUCCESS\napplying 2/3: 02.949529057.up.sql ...SUCCESS\napplying 3/3: 03.887873211.up.sql ...SUCCESS\n"
@@ -1384,13 +1420,7 @@ Let's fix that by filtering the `files` outside of the main loop.
 ```go
 // bookshelf-store.go
 ...
-func migrate(
-	out io.Writer,
-	store Storer,
-	dir string,
-	num int,
-	direction string,
-) ([]string, error) {
+func migrate(out io.Writer, store Storer, dir string, num int, direction string) ([]string, error) {
 	...
 	allFiles, err := ioutil.ReadDir(dir)
 	if err != nil {
@@ -1402,6 +1432,11 @@ func migrate(
 			files = append(files, f)
 		}
 	}
+	total := len(files)
+	if total == 0 {
+		return nil, ErrMigrationDirEmpty
+	}
+	...
 
 	for _, file := range files {
 		if num != -1 && count >= num {
@@ -1417,6 +1452,7 @@ func migrate(
 Now our tests are passing.
 
 ```sh
+~$ go test
 PASS
 ok      github.com/quii/learn-go-with-tests/databases/v2        1.129s
 ```
@@ -1431,7 +1467,7 @@ This already happens, as we return the error if it fails. But how do we _test_ t
 
 This is prime material for the integration tests, as the database engine itself will tell you if the `sql` inside the migration file is bad or cannot be executed. And we will get to this.
 
-We need to simulate a failure. We can do this within our `SpyStore`.
+For now, we need to simulate a failure. We can do this within our `SpyStore`.
 
 Given that we will test this anyway (via the integration tests), we don't have to parse any `sql` inside the migration files; this is a whole different beast that we fortunately don't have to deal with.
 
@@ -1439,7 +1475,7 @@ Since we used an interface (`Storer`) to abstract implementation, we can put wha
 
 Pies vs Cakes is a very serious debate that has raged on since forever. Pie is clearly superior. So we decided to forbid any cake-related SQL. Our failure condition will be the word `cake` inside the `sql` files.
 
-Let's move on to our tests
+Let's move on to our tests.
 
 ## Write the test first
 
@@ -1458,24 +1494,25 @@ import (
 var errNoCakeSQL = errors.New("cakeSQL is not allowed")
 ...
 func (s *SpyStore) ApplyMigration(name, stmt string) error {
-	if strings.Contains(strings.Lower(stmt), "cake") {
+	if strings.Contains(strings.ToLower(stmt), "cake") {
 		return errNoCakeSQL
 	}
 	// the rest of the method is unchanged
 	...
 }
 ...
-	t.Run("failure output is expected", func(t *testing.T){
+	t.Run("failure output is expected", func(t *testing.T) {
 		store := NewSpyStore()
 		tmpdir, _, cleanup := CreateTempDir(t, "test-migrations", true)
 		defer cleanup()
 
 		tmpfile, _ := ioutil.TempFile(tmpdir, "01.cake.*.up.sql")
-		tmpfile.Write([]byte("cake is superior! end pie tyranny")); err != nil {
-		tmpfile.Close()
+		if _, err := tmpfile.Write([]byte("cake is superior! end pie tyranny")); err != nil {
+			tmpfile.Close()
+		}
 
 		gotBuf := &bytes.Buffer{}
-		_, err = migrate(gotBuf, store, tmpdir, -1, UP)
+		_, err := migrate(gotBuf, store, tmpdir, -1, UP)
 		got := gotBuf.String()
 
 		wantBuf := &bytes.Buffer{}
@@ -1499,6 +1536,7 @@ func (s *SpyStore) ApplyMigration(name, stmt string) error {
 As expected, since there is no code for the failure report yet.
 
 ```sh
+~$ go test
 --- FAIL: TestMigrate (0.07s)
     --- FAIL: TestMigrate/failure_output_is_expected (0.00s)
         migrate_test.go:191: got "applying 1/1: 01.cake.702313345.up.sql " want "applying 1/1: 01.cake.702313345.up.sql ...FAILURE: cakeSQL is not allowed\n"
@@ -1512,13 +1550,7 @@ FAIL    github.com/quii/learn-go-with-tests/databases/v2        0.647s
 ```go
 // bookshelf-store.go
 ...
-func migrate(
-	out io.Writer,
-	store Storer,
-	dir string,
-	num int,
-	direction string,
-) ([]string, error) {
+func migrate(out io.Writer, store Storer, dir string, num int, direction string) ([]string, error) {
 	...
 	for _, file := range files {
 		...
@@ -1536,6 +1568,7 @@ func migrate(
 And we are green again
 
 ```sh
+~$ go test
 PASS
 ok      github.com/quii/learn-go-with-tests/databases/v2        1.555s
 ```
@@ -1544,11 +1577,11 @@ ok      github.com/quii/learn-go-with-tests/databases/v2        1.555s
 
 <!-- TODO: add links start:v2, end:v3 -->
 
-The moment of truth, now that our `migrate` function behaves as expected, we can implement it for our integration tests!
+The moment of truth, now that our `migrate` function behaves as expected, we can use it for our integration tests!
 
 But, like everything we've done before, we need to test it as well.
 
-Integration tests are, in some aspects, easier to implement than unit tests, as you can rely on the service error reporting to test your application (though you want to maintain as much control as possible).
+Integration tests are, in some aspects, easier to implement than unit tests, as you can rely on the service error reporting to test your application (though you want to maintain as much control over it as possible).
 
 Before we move on, let's write two wrapper functions around our `migrate` powerhouse.
 
@@ -4321,3 +4354,4 @@ If you're interested in databases and Database design, I suggest you familiarize
 -   [Database Normalization](https://en.wikipedia.org/wiki/Database_normalization).
 -   [A Simple Guide to Five Normal Forms in Relational Database Theory](http://www.bkent.net/Doc/simple5.htm).
 -   [Relational Database Design/Normalization](https://en.wikibooks.org/wiki/Relational_Database_Design/Normalization).
+
