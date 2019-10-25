@@ -14,8 +14,8 @@ func Racer(a, b string) (winner string) {
 	}
 }
 
-func ping(url string) chan bool {
-	ch := make(chan bool)
+func ping(url string) chan struct{} {
+	ch := make(chan struct{})
 	go func() {
 		http.Get(url)
 		close(ch)
