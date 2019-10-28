@@ -229,7 +229,7 @@ Remember we are just trying to take as small as steps as reasonably possible, so
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     if player == "Pepper" {
         fmt.Fprint(w, "20")
@@ -249,7 +249,7 @@ If we had started with the store code the amount of changes we'd have to do woul
 
 We're resisting the temptation to use any routing libraries right now, just the smallest step to get our test passing.
 
-`r.URL.Path` returns the path of the request and then we are using slice syntax to slice it past the final slash after `/players/`. It's not very robust but will do the trick for now.
+`r.URL.Path` returns the path of the request which we can then use [`strings.TrimPrefix`](https://golang.org/pkg/strings/#TrimPrefix) to trim away `/players/` to get the requested player. It's not very robust but will do the trick for now.
 
 ## Refactor
 
@@ -257,7 +257,7 @@ We can simplify the `PlayerServer` by separating out the score retrieval into a 
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     fmt.Fprint(w, GetPlayerScore(player))
 }
@@ -337,7 +337,7 @@ Finally, we will now implement the `Handler` interface by adding a method to our
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
     fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
@@ -356,7 +356,7 @@ type PlayerServer struct {
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
     fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
@@ -532,7 +532,7 @@ t.Run("returns 404 on missing players", func(t *testing.T) {
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     w.WriteHeader(http.StatusNotFound)
 
@@ -616,7 +616,7 @@ Now our first two tests fail because of the 404 instead of 200, so we can fix `P
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     score := p.store.GetPlayerScore(player)
 
@@ -674,7 +674,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     score := p.store.GetPlayerScore(player)
 
@@ -703,7 +703,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *PlayerServer) showScore(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     score := p.store.GetPlayerScore(player)
 
@@ -874,7 +874,7 @@ Now that we know there is one element in our `winCalls` slice we can safely refe
 
 ```go
 func (p *PlayerServer) processWin(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
     p.store.RecordWin(player)
     w.WriteHeader(http.StatusAccepted)
 }
@@ -888,7 +888,7 @@ We can DRY up this code a bit as we're extracting the player name the same way i
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     switch r.Method {
     case http.MethodPost:

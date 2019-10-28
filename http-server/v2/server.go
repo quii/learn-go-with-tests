@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // PlayerStore stores score information about players
@@ -16,7 +17,7 @@ type PlayerServer struct {
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
+	player := strings.TrimPrefix(r.URL.Path, "/players/")
 
 	score := p.store.GetPlayerScore(player)
 
