@@ -1026,6 +1026,16 @@ Great! You've made a REST-ish service. To take this forward you'd want to pick a
 - Plug it into the integration test, check it's still ok
 - Finally plug it into `main`
 
+## Refactor
+
+We are almost there! Lets take some effort to prevent concurrency errors like these
+
+```
+fatal error: concurrent map read and map write
+```
+
+By adding mutexes, we enforce concurrency safety especially for the counter in our `RecordWin` function. Read more about mutexes in the sync chapter.
+
 ## Wrapping up
 
 ### `http.Handler`
