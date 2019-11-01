@@ -24,6 +24,8 @@ NOTE: The above bullet points are a rewording of the [_ACID principles_](https:/
 
 _Databases_ are storage mediums that can provide these properties, and much much more.
 
+A database is, in the most general sense, an organized collection of data. A very good analogy to a database is a filing cabinet: it has an `index`, so you can reach information quickly. If you receive a new file, you can store it in your filing cabinet (`insert`), trusting that your system will allow you to easily `retrieve` it later on. You can pull a file, change some details, and put it back in (`update`). I have yet to see a filing cabinet with an integrated shredder, but you get the idea: you can `delete` a file if you want to.
+
 There are [many different types of databases](https://en.wikipedia.org/wiki/Outline_of_databases#Types_of_databases), each one with its own data structures, procedures and algorithms. In this chapter we will be focusing on [SQL](https://en.wikipedia.org/wiki/SQL) databases, which is of the [relational type](https://en.wikipedia.org/wiki/Relational_database), using the [database/sql](https://golang.org/pkg/database/sql) package and the `postgres` driver [pq](https://github.com/lib/pq).
 
 There is a fair bit of CLI usage in this chapter (mainly setting up the database). For the sake of simplicity we will assume that you are running `ubuntu` on your machine, with `bash` installed. In the near future, look into the appendix for installation on other systems.
@@ -334,7 +336,7 @@ func NewSpyStore() *SpyStore {
 
 ```
 
-And our migration files, which will be used in the tests
+And our migration files, which will be used in the tests.
 
 ```sh
 ~$ mkdir migrations
@@ -422,7 +424,7 @@ FAIL    github.com/quii/learn-go-with-tests/databases/v1        0.608s
 
 ## Write enough code to make it pass
 
-We need an error for non-existent directories. Thankfully, this is easy with `os.Stat` and `os.IsNotExist`
+We need an error for non-existent directories. Thankfully, this is easy with `os.Stat` and `os.IsNotExist`.
 
 ```go
 func migrate(store Storer, dir string, num int) error {
@@ -1234,7 +1236,7 @@ func migrate(store Storer, dir string, num int, direction string) ([]string, err
 }
 ```
 
-And we're back to green
+And we're back to green:
 
 ```sh
 ~$ go test
@@ -1645,7 +1647,7 @@ Key points
 
 -   **SQL Language**
 
-    The `SQL` language is part of an ISO standard, and most database engines comform to it partially. This means that code written for one `RDBMS` (say, `PostgreSQL`), will cannot be interpreted as-is by a different one (say, `SQLite3`). There are a lot of similarities, however, and the changes required are often small.
+    The `SQL` language is part of an ISO standard, and most database engines conform to it partially. This means that code written for one `RDBMS` (say, `PostgreSQL`), will cannot be interpreted as-is by a different one (say, `SQLite3`). There are a lot of similarities, however, and the changes required are often small.
 
     Keep in mind that the `SQL` you're seeing here is very `PostgreSQL` specific, and some, if not all of it, may not be executable in a different engine.
 
