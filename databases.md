@@ -24,7 +24,9 @@ NOTE: The above bullet points are a rewording of the [_ACID principles_](https:/
 
 _Databases_ are storage mediums that can provide these properties, and much much more.
 
-A database is, in the most general sense, an organized collection of data. A very good analogy to a database is a filing cabinet: it has an `index`, so you can reach information quickly. If you receive a new file, you can store it in your filing cabinet (`insert`), trusting that your system will allow you to easily `retrieve` it later on. You can pull a file, change some details, and put it back in (`update`). I have yet to see a filing cabinet with an integrated shredder, but you get the idea: you can `delete` a file if you want to.
+A database is, in the most general sense, an organized collection of data. It provides several functions that allow entry, storage, and retrieval of information, and provides ways to manage and organize said information. A DBMS (Database Management System) is the software that interacts with the users, the applications and the database to perform transformations on the data. The term "database" is often used to refer indistinctively to the DBMS, the database itself, and in some cases an application that interacts with the two.
+
+A very good analogy to a database is a filing cabinet: it has an `index`, so you can reach information quickly. If you receive a new file, you can `insert` it in your filing cabinet for storage, trusting that your system will allow you to easily `retrieve` it later on. You can pull a file, `update` some details, and put it back in. I have yet to see a filing cabinet with an integrated paper shredder, but you get the idea: you can `delete` a file if you want to.
 
 There are [many different types of databases](https://en.wikipedia.org/wiki/Outline_of_databases#Types_of_databases), each one with its own data structures, procedures and algorithms. In this chapter we will be focusing on [SQL](https://en.wikipedia.org/wiki/SQL) databases, which is of the [relational type](https://en.wikipedia.org/wiki/Relational_database), using the [database/sql](https://golang.org/pkg/database/sql) package and the `postgres` driver [pq](https://github.com/lib/pq).
 
@@ -67,7 +69,7 @@ The easiest (and cleanest) way of getting `PostgreSQL` up and running is by usin
     postgres:11.5 # get official postgres image, version 11.5
 ```
 
-You may need to run the above command with elevation (prepend it with `sudo`). If you already have `PosgreSQL` installed on your system, but would still want to run it with `docker`, you have to change the host port to a different one (syntax is "`--publish HOST:CONTAINER`") like `--publish 5433:5432`, and change your database connection string (in the application) to point to this port (`5433`, in this example).
+You may need to run the above command with elevation, i.e.  prepend it with `sudo`. If you already have `PosgreSQL` installed on your system, but would still want to run it with `docker`, you have to change the host port to a different one (syntax is "`--publish HOST:CONTAINER`") like `--publish 5433:5432`, and change your database connection string in the application to point to this port (`5433`, in this example).
 
 ### Manual installation
 
@@ -78,7 +80,7 @@ Install `PostgreSQL` with the package manager.
 ~$ sudo apt-get install postgresql postgresql-contrib
 ```
 
-PostgreSQL installs and initializes a database called `postgres`, and a user also called `postgres`. Since this is a system-wide install, we don't want to pollute this main database with this application's tables (`PostgreSQL` uses these to store administrative data), so we will have to create a user and a database.
+PostgreSQL installs and initializes a database called `postgres`, and a user also called `postgres`. Since this is a system-wide install, we don't want to pollute this main database with this application's tables, as `PostgreSQL` uses these to store administrative data, so we will have to create a user and a database.
 
 ```sh
 ~$ sudo -i -u postgres # this will switch you to the postgres user
@@ -116,7 +118,7 @@ If you are wondering "What's all this about migrations?", it's because we will n
 
 There are excellent, open source migration management tools out there ([exhibit 1](https://github.com/golang-migrate/migrate), [exhibit 2](https://github.com/mattes/migrate), [exhibit 3](https://github.com/go-pg/migrations)).
 
-But we will not be using those. We will write our own tool (although simpler than those linked above) instead, using the `go` toolchain. We will also try to adhere to best practices, these being:
+But we will not be using those. We will write our own tool, although simpler than those linked above, using the `go` toolchain. We will also try to adhere to best practices, these being:
 
 -   Migrations should be _ordered_, so there is a definitive order each time they are run. We will simply prepend each filename with a number and (eventually) sort them by name, allowing enough digits for a large number of files (although realistically, migrations get "squashed" into a smaller number of files on real projects, if it makes sense to do so).
 -   Migrations should be _reversible_. Applying a change to a database should simple to perform, and reversing said change should be easy as well. We will write two migration files for every change, appropriately suffixed `up` and `down`.
@@ -126,7 +128,7 @@ With these in mind, let's dive in...
 
 ## Project
 
-We will initially write a (simple) tool to handle our (also simple) migrations, then we will be creating a library that will allow us to perform book-related `CRUD` operations on a `PostgreSQL` database.
+We will initially write a simple tool to handle our migrations, then we will be creating a library that will allow us to perform book-related `CRUD` operations on a `PostgreSQL` database.
 
 ## Write the test first
 
@@ -300,7 +302,7 @@ Seeing as we will have a `MigrateDown` as well, and so far they seem only to dif
 
 ## 1 - Existence of `dir`
 
-Let's write our mock store (and test) first, so we can test the `migrate` function in isolation.
+Let's write our mock store, and tests, first, so we can test the `migrate` function in isolation.
 
 ```go
 // migrate_test.go
@@ -530,7 +532,7 @@ exit status 1
 FAIL    github.com/quii/learn-go-with-tests/databases/v2        0.389s
 ```
 
-Only one failure, and no migration input. This is because our store is completely empty (as no code is implemented yet). Let's add a check for it before we move on.
+Only one failure, and no migration input. This is because our store is completely empty, as no code is implemented yet. Let's add a check for it before we move on.
 
 ```go
 // migrate-test.go
@@ -1639,7 +1641,7 @@ Key points
 
 -   **Index**:
 
-    A database index is, in layman terms, a trade-off that improves the retrieval of information (if done right) by giving a little more every time data is added.
+    A database index is, in layman terms, a trade-off that improves the retrieval of information by giving a little more every time data is added.
 
     Here are more formal definitions if the subject interests you: [Wikipedia](https://en.wikipedia.org/wiki/Database_index), [Use The Index, Luke](https://use-the-index-luke.com/sql/anatomy).
 
@@ -1647,7 +1649,7 @@ Key points
 
 -   **SQL Language**
 
-    The `SQL` language is part of an ISO standard, and most database engines conform to it partially. This means that code written for one `RDBMS` (say, `PostgreSQL`), will cannot be interpreted as-is by a different one (say, `SQLite3`). There are a lot of similarities, however, and the changes required are often small.
+    The `SQL` language is part of an ISO standard, and most database engines conform to it partially. This means that code written for one `RDBMS`, say, `PostgreSQL`, will cannot be interpreted as-is by a different one, say, `SQLite3`. There are a lot of similarities, however, and the changes required are often small.
 
     Keep in mind that the `SQL` you're seeing here is very `PostgreSQL` specific, and some, if not all of it, may not be executable in a different engine.
 
@@ -1741,7 +1743,7 @@ You probably noticed the tests are much slower now. Such is the nature of integr
 
 It's not entirely hopeless though, as a solution exists! It's along the lines of "run the tests on someone else's computer".
 
-Actually, it's exactly like "run the tests on someone else's computer", and it's called contionuous integration (commonly referred to as CI).
+Actually, it's exactly like "run the tests on someone else's computer", and it's called contionuous integration, commonly referred to as CI.
 
 We won't cover CI in this chapter, but we'll point to some resources at the end. For the moment, we'll have to bite the bullet and endure the slow tests.
 
@@ -2083,11 +2085,11 @@ We have `4` operations to write and test. A lot of the code already in place hel
 
 Let's think for a minute about the direction we want to take. Just like we did with the `Migrate` function, we want to create package level functions whose behavior we want to control and validate, that in turn call the much simpler method implemented by the `Storer` interface. If you analyze the `ApplyMigration` method of both the `PostgreSQLStore` and the `SpyStore`, you'll notice that they are "dumb", in the sense that they only call their underlying storage engines. The _behavior_ that we wanted was enforced via the `Migrate` function.
 
-This keeps our package _extendible_. With this structure, if a consumer of our `package`'s API wanted to use a different storage method, say, a `NoSQL` database, `AWS S3` file storage or simply a different database (like `MySQL`), they could do so by creating their storage object and having it implement our `Storer` interface, then they can simply plug it into our package level functions (like `Migrate`) and trust they will work (as the _behavior_ is still the same).
+This keeps our package _extendible_. With this structure, if a consumer of our `package`'s API wanted to use a different storage method, say, a `NoSQL` database, `AWS S3` file storage or simply a different database (like `MySQL`), they could do so by creating their storage object and having it implement our `Storer` interface, then they can simply plug it into our package level functions like `Migrate` and trust they will work, as the _behavior_ is still the same.
 
 The `go` standard library is full useful interfaces like this. A couple of excellent examples are the `encoding/json` package [`Marshaler`](https://golang.org/pkg/encoding/json/#Marshaler) and [`Unmarshaler`](https://golang.org/pkg/encoding/json/#Unmarshaler) interfaces. The `Go` development team has ensured these interfaces are implemented by all standard types, but if you want a certain behavior for a custom type, simply have your custom type implement these interfaces and `JSON` encoding will work.
 
-With this mindset, we should aim to write functions to `Create`, `Retrieve`, `Update`, `Delete` and `List` books, with those same names. These verbs will perform all kinds of validation, and, if they pass, then call the `Storer` methods by the same (or similar) name.
+With this mindset, we should aim to write functions to `Create`, `Retrieve`, `Update`, `Delete` and `List` books, with those same names. These verbs will perform all kinds of validation, and, if they pass, then call the `Storer` methods by the same, or similar, name.
 
 In the `SQL` migration, We created a table called `books`, with columns called `id`, `title` and `author`. Let`s create a struct to hold these objects before we get into testing.
 
