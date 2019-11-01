@@ -150,7 +150,7 @@ if res.StatusCode != http.StatusOK {
 
 This change has had some _real positive effects_
 
-- Our `DumbGetter` function has become simper, it's no longer concerned with the intricacies of an error string, it just creates a `BadStatusError`.
+- Our `DumbGetter` function has become simpler, it's no longer concerned with the intricacies of an error string, it just creates a `BadStatusError`.
 - Our tests now reflect (and document) what a user of our code _could_ do if they decided they wanted to do some more sophisticated error handling than just logging. Just do a type assertion and then you get easy access to the properties of the error. 
 - It is still "just" an `error`, so if they choose to they can pass it up the call stack or log it like any other `error`.
 
