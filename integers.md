@@ -92,7 +92,7 @@ This is great because it aids the usability of code you are writing. It is prefe
 You can add documentation to functions with comments, and these will appear in Go Doc just like when you look at the standard library's documentation.
 
 ```go
-// Add takes two integers and returns the sum of them
+// Add takes two integers and returns the sum of them.
 func Add(x, y int) int {
     return x + y
 }
