@@ -61,7 +61,7 @@ type Handler interface {
 }
 ```
 
-It has one function which expects two arguments, the first being where we _write our response_ and the second being the HTTP request that was sent to us.
+A type implements the Handler interface by implementing the `ServeHTTP` method which expects two arguments, the first is where we _write our response_ and the second is the HTTP request that was sent to the server.
 
 Let's write a test for a function `PlayerServer` that takes in those two arguments. The request sent in will be to get a player's score, which we expect to be `"20"`.
 
@@ -171,7 +171,7 @@ To run this, do `go build` which will take all the `.go` files in the directory 
 
 ### `http.HandlerFunc`
 
-Earlier we explored that the `Handler` interface is what we need to implement in order to make a server. _Typically_ we do that by creating a `struct` and make it implement the interface. However the use-case for structs is for holding data but _currently_ we have no state, so it doesn't feel right to be creating one.
+Earlier we explored that the `Handler` interface is what we need to implement in order to make a server. _Typically_ we do that by creating a `struct` and make it implement the interface by implementing its own ServeHTTP method. However the use-case for structs is for holding data but _currently_ we have no state, so it doesn't feel right to be creating one.
 
 [HandlerFunc](https://golang.org/pkg/net/http/#HandlerFunc) lets us avoid this.
 
@@ -181,7 +181,8 @@ Earlier we explored that the `Handler` interface is what we need to implement in
 type HandlerFunc func(ResponseWriter, *Request)
 ```
 
-So we use this to wrap our `PlayerServer` function so that it now conforms to `Handler`.
+From the documentation, we see that type `HandlerFunc` has already implemented the `ServeHTTP` method. 
+By type casting our `PlayerServer` function with it, we have now implemented the required `Handler`.
 
 ### `http.ListenAndServe(":5000"...)`
 
@@ -1024,6 +1025,16 @@ Great! You've made a REST-ish service. To take this forward you'd want to pick a
 - TDD the functionality so you're sure it works
 - Plug it into the integration test, check it's still ok
 - Finally plug it into `main`
+
+## Refactor
+
+We are almost there! Lets take some effort to prevent concurrency errors like these
+
+```
+fatal error: concurrent map read and map write
+```
+
+By adding mutexes, we enforce concurrency safety especially for the counter in our `RecordWin` function. Read more about mutexes in the sync chapter.
 
 ## Wrapping up
 
