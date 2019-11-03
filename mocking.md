@@ -30,7 +30,7 @@ We don't want to spend a long time with code that will theoretically work after 
 Here's how we can divide our work up and iterate on it:
 
 - Print 3
-- Print 1, 2, 3 and Go!
+- Print 3, 2, 1 and Go!
 - Wait a second between each line
 
 ## Write the test first
