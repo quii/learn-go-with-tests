@@ -542,7 +542,7 @@ t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
     cli := poker.NewCLI(dummyPlayerStore, in, stdout, blindAlerter)
     cli.PlayPoker()
 
-    got :=stdout.String()
+    got := stdout.String()
     want := poker.PlayerPrompt
 
     if got != want {
@@ -667,7 +667,6 @@ func (p *Game) Finish(winner string) {
 
 // cli.go
 type CLI struct {
-	playerStore PlayerStore
 	in          *bufio.Reader
 	out         io.Writer
 	game        *Game
@@ -783,7 +782,7 @@ This is just an exercise in copying our `CLI` tests but with less dependencies
 func TestGame_Start(t *testing.T) {
 	t.Run("schedules alerts on game start for 5 players", func(t *testing.T) {
 		blindAlerter := &poker.SpyBlindAlerter{}
-		game := poker.NewTexasHoldem(blindAlerter, dummyPlayerStore)
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
 
 		game.Start(5)
 
@@ -806,7 +805,7 @@ func TestGame_Start(t *testing.T) {
 
 	t.Run("schedules alerts on game start for 7 players", func(t *testing.T) {
 		blindAlerter := &poker.SpyBlindAlerter{}
-		game := poker.NewTexasHoldem(blindAlerter, dummyPlayerStore)
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
 
 		game.Start(7)
 
@@ -824,7 +823,7 @@ func TestGame_Start(t *testing.T) {
 
 func TestGame_Finish(t *testing.T) {
 	store := &poker.StubPlayerStore{}
-	game := poker.NewTexasHoldem(dummyBlindAlerter, store)
+	game := poker.NewGame(dummyBlindAlerter, store)
 	winner := "Ruth"
 
 	game.Finish(winner)
@@ -894,8 +893,8 @@ Here is an example of one of the tests being fixed; try and do the rest yourself
 			t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
 		}
 
-		if game.StartCalledWith != 7 {
-			t.Errorf("wanted Start called with 7 but got %d", game.StartCalledWith)
+		if game.StartedWith != 7 {
+			t.Errorf("wanted Start called with 7 but got %d", game.StartedWith)
 		}
 	})
 ```
