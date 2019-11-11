@@ -1086,7 +1086,7 @@ A very handy way of scheduling a function call after a specific duration. It is 
 
 Some of my favourites are
 
-- `time.After(duration)` which return you a `chan Time` when the duration has expired. So if you wish to do something _after_ a specific time, this can help. 
+- `time.After(duration)` returns a `chan Time` when the duration has expired. So if you wish to do something _after_ a specific time, this can help. 
 - `time.NewTicker(duration)` returns a `Ticker` which is similar to the above in that it returns a channel but this one "ticks" every duration, rather than just once. This is very handy if you want to execute some code every `N duration`.  
 
 ### More examples of good separation of concerns
@@ -1101,7 +1101,7 @@ Our tests got messy. We had too many assertions (check this input, schedules the
 
 Even though the tests and the production code was a bit cluttered we could freely refactor backed by our tests. 
 
-Remember when you get in to these situations to always take small steps and re-run the tests after every change. 
+Remember when you get into these situations to always take small steps and re-run the tests after every change. 
 
 It would've been dangerous to refactor both the test code _and_ the production code at the same time, so we first refactored the production code (in the current state we couldn't improve the tests much) without changing its interface so we could rely on our tests as much as we could while changing things. _Then_ we refactored the tests after the design improved.
 
