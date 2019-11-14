@@ -242,7 +242,7 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-Now when we run the tests you get (or or don't get - see above):
+Now when we run the tests you get (or don't get - see above):
 
 ```sh
 --- FAIL: TestCheckWebsites (0.00s)
