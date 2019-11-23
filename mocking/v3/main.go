@@ -23,7 +23,7 @@ func (d *DefaultSleeper) Sleep() {
 const finalWord = "Go!"
 const countdownStart = 3
 
-// Countdown prints a countdown from 5 to out with a delay between count provided by Sleeper
+// Countdown prints a countdown from 3 to out with a delay between count provided by Sleeper
 func Countdown(out io.Writer, sleeper Sleeper) {
 	for i := countdownStart; i > 0; i-- {
 		sleeper.Sleep()

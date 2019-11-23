@@ -218,7 +218,7 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-`value` has a method `NumField` which returns the number of fields in the value. This lets us iterate over the fields and call `fn` which passes our test.
+`val` has a method `NumField` which returns the number of fields in the value. This lets us iterate over the fields and call `fn` which passes our test.
 
 ## Refactor
 
