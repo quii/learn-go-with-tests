@@ -61,7 +61,7 @@ type Handler interface {
 }
 ```
 
-It has one function which expects two arguments, the first being where we _write our response_ and the second being the HTTP request that was sent to us.
+A type implements the Handler interface by implementing the `ServeHTTP` method which expects two arguments, the first is where we _write our response_ and the second is the HTTP request that was sent to the server.
 
 Let's write a test for a function `PlayerServer` that takes in those two arguments. The request sent in will be to get a player's score, which we expect to be `"20"`.
 
@@ -171,7 +171,7 @@ To run this, do `go build` which will take all the `.go` files in the directory 
 
 ### `http.HandlerFunc`
 
-Earlier we explored that the `Handler` interface is what we need to implement in order to make a server. _Typically_ we do that by creating a `struct` and make it implement the interface. However the use-case for structs is for holding data but _currently_ we have no state, so it doesn't feel right to be creating one.
+Earlier we explored that the `Handler` interface is what we need to implement in order to make a server. _Typically_ we do that by creating a `struct` and make it implement the interface by implementing its own ServeHTTP method. However the use-case for structs is for holding data but _currently_ we have no state, so it doesn't feel right to be creating one.
 
 [HandlerFunc](https://golang.org/pkg/net/http/#HandlerFunc) lets us avoid this.
 
@@ -181,7 +181,8 @@ Earlier we explored that the `Handler` interface is what we need to implement in
 type HandlerFunc func(ResponseWriter, *Request)
 ```
 
-So we use this to wrap our `PlayerServer` function so that it now conforms to `Handler`.
+From the documentation, we see that type `HandlerFunc` has already implemented the `ServeHTTP` method. 
+By type casting our `PlayerServer` function with it, we have now implemented the required `Handler`.
 
 ### `http.ListenAndServe(":5000"...)`
 
@@ -229,7 +230,7 @@ Remember we are just trying to take as small as steps as reasonably possible, so
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     if player == "Pepper" {
         fmt.Fprint(w, "20")
@@ -249,7 +250,7 @@ If we had started with the store code the amount of changes we'd have to do woul
 
 We're resisting the temptation to use any routing libraries right now, just the smallest step to get our test passing.
 
-`r.URL.Path` returns the path of the request and then we are using slice syntax to slice it past the final slash after `/players/`. It's not very robust but will do the trick for now.
+`r.URL.Path` returns the path of the request which we can then use [`strings.TrimPrefix`](https://golang.org/pkg/strings/#TrimPrefix) to trim away `/players/` to get the requested player. It's not very robust but will do the trick for now.
 
 ## Refactor
 
@@ -257,7 +258,7 @@ We can simplify the `PlayerServer` by separating out the score retrieval into a 
 
 ```go
 func PlayerServer(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     fmt.Fprint(w, GetPlayerScore(player))
 }
@@ -337,7 +338,7 @@ Finally, we will now implement the `Handler` interface by adding a method to our
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
     fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
@@ -356,7 +357,7 @@ type PlayerServer struct {
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
     fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 ```
@@ -532,7 +533,7 @@ t.Run("returns 404 on missing players", func(t *testing.T) {
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     w.WriteHeader(http.StatusNotFound)
 
@@ -616,7 +617,7 @@ Now our first two tests fail because of the 404 instead of 200, so we can fix `P
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     score := p.store.GetPlayerScore(player)
 
@@ -674,7 +675,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     score := p.store.GetPlayerScore(player)
 
@@ -703,7 +704,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *PlayerServer) showScore(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     score := p.store.GetPlayerScore(player)
 
@@ -874,7 +875,7 @@ Now that we know there is one element in our `winCalls` slice we can safely refe
 
 ```go
 func (p *PlayerServer) processWin(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
     p.store.RecordWin(player)
     w.WriteHeader(http.StatusAccepted)
 }
@@ -888,7 +889,7 @@ We can DRY up this code a bit as we're extracting the player name the same way i
 
 ```go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    player := r.URL.Path[len("/players/"):]
+    player := strings.TrimPrefix(r.URL.Path, "/players/")
 
     switch r.Method {
     case http.MethodPost:
@@ -1024,6 +1025,16 @@ Great! You've made a REST-ish service. To take this forward you'd want to pick a
 - TDD the functionality so you're sure it works
 - Plug it into the integration test, check it's still ok
 - Finally plug it into `main`
+
+## Refactor
+
+We are almost there! Lets take some effort to prevent concurrency errors like these
+
+```
+fatal error: concurrent map read and map write
+```
+
+By adding mutexes, we enforce concurrency safety especially for the counter in our `RecordWin` function. Read more about mutexes in the sync chapter.
 
 ## Wrapping up
 

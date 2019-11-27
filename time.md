@@ -542,7 +542,7 @@ t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
     cli := poker.NewCLI(dummyPlayerStore, in, stdout, blindAlerter)
     cli.PlayPoker()
 
-    got :=stdout.String()
+    got := stdout.String()
     want := poker.PlayerPrompt
 
     if got != want {
@@ -667,7 +667,6 @@ func (p *Game) Finish(winner string) {
 
 // cli.go
 type CLI struct {
-	playerStore PlayerStore
 	in          *bufio.Reader
 	out         io.Writer
 	game        *Game
@@ -783,7 +782,7 @@ This is just an exercise in copying our `CLI` tests but with less dependencies
 func TestGame_Start(t *testing.T) {
 	t.Run("schedules alerts on game start for 5 players", func(t *testing.T) {
 		blindAlerter := &poker.SpyBlindAlerter{}
-		game := poker.NewTexasHoldem(blindAlerter, dummyPlayerStore)
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
 
 		game.Start(5)
 
@@ -806,7 +805,7 @@ func TestGame_Start(t *testing.T) {
 
 	t.Run("schedules alerts on game start for 7 players", func(t *testing.T) {
 		blindAlerter := &poker.SpyBlindAlerter{}
-		game := poker.NewTexasHoldem(blindAlerter, dummyPlayerStore)
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
 
 		game.Start(7)
 
@@ -824,7 +823,7 @@ func TestGame_Start(t *testing.T) {
 
 func TestGame_Finish(t *testing.T) {
 	store := &poker.StubPlayerStore{}
-	game := poker.NewTexasHoldem(dummyBlindAlerter, store)
+	game := poker.NewGame(dummyBlindAlerter, store)
 	winner := "Ruth"
 
 	game.Finish(winner)
@@ -894,8 +893,8 @@ Here is an example of one of the tests being fixed; try and do the rest yourself
 			t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
 		}
 
-		if game.StartCalledWith != 7 {
-			t.Errorf("wanted Start called with 7 but got %d", game.StartCalledWith)
+		if game.StartedWith != 7 {
+			t.Errorf("wanted Start called with 7 but got %d", game.StartedWith)
 		}
 	})
 ```
@@ -1086,7 +1085,7 @@ A very handy way of scheduling a function call after a specific duration. It is 
 
 Some of my favourites are
 
-- `time.After(duration)` which return you a `chan Time` when the duration has expired. So if you wish to do something _after_ a specific time, this can help. 
+- `time.After(duration)` returns a `chan Time` when the duration has expired. So if you wish to do something _after_ a specific time, this can help. 
 - `time.NewTicker(duration)` returns a `Ticker` which is similar to the above in that it returns a channel but this one "ticks" every duration, rather than just once. This is very handy if you want to execute some code every `N duration`.  
 
 ### More examples of good separation of concerns
@@ -1101,7 +1100,7 @@ Our tests got messy. We had too many assertions (check this input, schedules the
 
 Even though the tests and the production code was a bit cluttered we could freely refactor backed by our tests. 
 
-Remember when you get in to these situations to always take small steps and re-run the tests after every change. 
+Remember when you get into these situations to always take small steps and re-run the tests after every change. 
 
 It would've been dangerous to refactor both the test code _and_ the production code at the same time, so we first refactored the production code (in the current state we couldn't improve the tests much) without changing its interface so we could rely on our tests as much as we could while changing things. _Then_ we refactored the tests after the design improved.
 

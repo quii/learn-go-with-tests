@@ -23,7 +23,7 @@ func TestAdder(t *testing.T) {
 }
 ```
 
-You will notice that we're using `%d` as our format strings rather than `%s`. That's because we want it to print an integer rather than a string.
+You will notice that we're using `%d` as our format strings rather than `%q`. That's because we want it to print an integer rather than a string.
 
 Also note that we are no longer using the main package, instead we've defined a package named integers, as the name suggests this will group functions for working with integers such as Add.
 
@@ -92,7 +92,7 @@ This is great because it aids the usability of code you are writing. It is prefe
 You can add documentation to functions with comments, and these will appear in Go Doc just like when you look at the standard library's documentation.
 
 ```go
-// Add takes two integers and returns the sum of them
+// Add takes two integers and returns the sum of them.
 func Add(x, y int) int {
     return x + y
 }

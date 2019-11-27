@@ -33,7 +33,7 @@ func Perimeter(width float64, height float64) float64 {
 }
 ```
 
-Results in `shapes_test.go:10: got 0 want 40`.
+Results in `shapes_test.go:10: got 0.00 want 40.00`.
 
 ## Write enough code to make it pass
 

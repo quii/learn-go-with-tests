@@ -1,5 +1,7 @@
 # WebSockets
 
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/websockets)**
+
 In this chapter we'll learn how to use WebSockets to improve our application. 
 
 ## Project recap
@@ -766,7 +768,7 @@ Before that though, let's tidy up some code.
 
 ## Refactor
 
-The way we're using WebSockets is fairly basic and the error handling is fairly naive, so I wanted to encapsulate that in a type just to remove that messyness from the server code. We may wish to revisit it later but for now this'll tidy things up a bit
+The way we're using WebSockets is fairly basic and the error handling is fairly naive, so I wanted to encapsulate that in a type just to remove that messiness from the server code. We may wish to revisit it later but for now this'll tidy things up a bit
 
 ```go
 type playerServerWS struct {

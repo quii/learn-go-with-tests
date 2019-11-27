@@ -1,5 +1,7 @@
 # Reflection
 
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/reflection)**
+
 [From Twitter](https://twitter.com/peterbourgon/status/1011403901419937792?s=09)
 
 > golang challenge: write a function `walk(x interface{}, fn func(string))` which takes a struct `x` and calls `fn` for all strings fields found inside. difficulty level: recursively.
@@ -216,7 +218,7 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-`value` has a method `NumField` which returns the number of fields in the value. This lets us iterate over the fields and call `fn` which passes our test.
+`val` has a method `NumField` which returns the number of fields in the value. This lets us iterate over the fields and call `fn` which passes our test.
 
 ## Refactor
 

@@ -273,7 +273,7 @@ type Reader interface {
 }
 ```
 
-With our file, you can imagine it reading through byte by byte until the end. What happens if you try and `Read` a second time?
+With our file, you can imagine it reading through byte by byte until the end. What happens if you try to `Read` a second time?
 
 Add the following to the end of our current test.
 
@@ -594,7 +594,7 @@ func (l League) Find(name string) *Player {
 
 Now if anyone has a `League` they can easily find a given player.
 
-Change our `PlayerStore` interface to return `League` rather than `[]Player`. Try and re-run the tests, you'll get a compilation problem because we've changed the interface but it's very easy to fix; just change the return type from `[]Player` to `League`.
+Change our `PlayerStore` interface to return `League` rather than `[]Player`. Try to re-run the tests, you'll get a compilation problem because we've changed the interface but it's very easy to fix; just change the return type from `[]Player` to `League`.
 
 This lets us simplify our methods in `FileSystemStore`.
 
@@ -721,7 +721,7 @@ Running the program now persists the data in a file in between restarts, hooray!
 
 ## More refactoring and performance concerns
 
-Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the file from the start, and parsing it into JSON. We should not have to do that because `FileSystemStore` is entirely responsible for the state of the league; we just want to use the file at the start to get the current state and updating it when data changes.
+Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the entire file and parsing it into JSON. We should not have to do that because `FileSystemStore` is entirely responsible for the state of the league; it should only need to read the file when the program starts up and only need to update the file when data changes.
 
 We can create a constructor which can do some of this initialisation for us and store the league as a value in our `FileSystemStore` to be used on the reads instead.
 
@@ -773,19 +773,19 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 }
 ```
 
-If you try and run the tests it will now complain about initialising `FileSystemPlayerStore` so just fix them by calling our new constructor.
+If you try to run the tests it will now complain about initialising `FileSystemPlayerStore` so just fix them by calling our new constructor.
 
 ### Another problem
 
 There is some more naivety in the way we are dealing with files which _could_ create a very nasty bug down the line.
 
-When we `RecordWin` we `Seek` back to the start of the file and then write the new data but what if the new data was smaller than what was there before?
+When we `RecordWin`, we `Seek` back to the start of the file and then write the new data—but what if the new data was smaller than what was there before?
 
-In our current case, this is impossible. We never edit or delete scores so the data can only get bigger but it would be irresponsible for us to leave the code like this, it's not unthinkable that a delete scenario could come up.
+In our current case, this is impossible. We never edit or delete scores so the data can only get bigger. However, it would be irresponsible for us to leave the code like this; it's not unthinkable that a delete scenario could come up.
 
 How will we test for this though? What we need to do is first refactor our code so we separate out the concern of the _kind of data we write, from the writing_. We can then test that separately to check it works how we hope.
 
-We'll create a new type to encapsulate our "when we write we go from the beginning" functionality. I'm going to call it `Tape`. Create a new file with the following
+We'll create a new type to encapsulate our "when we write we go from the beginning" functionality. I'm going to call it `Tape`. Create a new file with the following:
 
 ```go
 package main
@@ -827,11 +827,11 @@ func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStor
 
 Finally, we can get the amazing payoff we wanted by removing the `Seek` call from `RecordWin`. Yes, it doesn't feel much, but at least it means if we do any other kind of writes we can rely on our `Write` to behave how we need it to. Plus it will now let us test the potentially problematic code separately and fix it.
 
-Let's write the test where we want to update the entire contents of a file with something that is smaller than the original contents. In `tape_test.go`:
+Let's write the test where we want to update the entire contents of a file with something that is smaller than the original contents. 
 
 ## Write the test first
 
-We'll just create a file, try and write to it using our tape, read it all again and see what's in the file
+Our test will create a file with some content, try to write to it using the `tape`, and read it all again to see what's in the file. In `tape_test.go`:
 
 ```go
 func TestTape_Write(t *testing.T) {
@@ -862,13 +862,13 @@ func TestTape_Write(t *testing.T) {
     tape_test.go:23: got 'abc45' want 'abc'
 ```
 
-As we thought! It simply writes the data we want, leaving over the rest.
+As we thought! It writes the data we want, but leaves the rest of the original data remaining.
 
 ## Write enough code to make it pass
 
 `os.File` has a truncate function that will let us effectively empty the file. We should be able to just call this to get what we want.
 
-Change `tape` to the following
+Change `tape` to the following:
 
 ```go
 type tape struct {
@@ -892,7 +892,7 @@ In `RecordWin` we have the line `json.NewEncoder(f.database).Encode(f.league)`.
 
 We don't need to create a new encoder every time we write, we can initialise one in our constructor and use that instead.
 
-Store a reference to an `Encoder` in our type.
+Store a reference to an `Encoder` in our type:
 
 ```go
 type FileSystemPlayerStore struct {
@@ -901,7 +901,7 @@ type FileSystemPlayerStore struct {
 }
 ```
 
-Initialise it in the constructor
+Initialise it in the constructor:
 
 ```go
 func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
@@ -921,7 +921,7 @@ Use it in `RecordWin`.
 
 ### On testing private types
 
-It's true that _in general_ you should favour not testing private things as that can sometimes lead to your tests being too tightly coupled to the implementation; which can hinder refactoring in future.
+It's true that _in general_ you should favour not testing private things as that can sometimes lead to your tests being too tightly coupled to the implementation, which can hinder refactoring in future.
 
 However, we must not forget that tests should give us _confidence_.
 
@@ -954,9 +954,9 @@ If we go back to `FileSystemStore.go` we have `league, _ := NewLeague(f.database
 
 `NewLeague` can return an error if it is unable to parse the league from the `io.Reader` that we provide.
 
-It was pragmatic to ignore that at the time as we already had failing tests. If we had tried to tackle it at the same time we would be juggling two things at once.
+It was pragmatic to ignore that at the time as we already had failing tests. If we had tried to tackle it at the same time, we would have been juggling two things at once.
 
-Let's make it so if our constructor is capable of returning an error.
+Let's make it so our constructor is capable of returning an error.
 
 ```go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
@@ -974,7 +974,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 }
 ```
 
-Remember it is very important to give helpful error messages (just like your tests). People jokingly on the internet say most Go code is
+Remember it is very important to give helpful error messages (just like your tests). People on the internet jokingly say that most Go code is:
 
 ```go
 if err != nil {
@@ -984,7 +984,7 @@ if err != nil {
 
 **That is 100% not idiomatic.** Adding contextual information (i.e what you were doing to cause the error) to your error messages makes operating your software far easier.
 
-If you try and compile you'll get some errors.
+If you try to compile you'll get some errors.
 
 ```
 ./main.go:18:35: multiple-value NewFileSystemPlayerStore() in single-value context
@@ -1016,7 +1016,7 @@ func assertNoError(t *testing.T, err error) {
 }
 ```
 
-Work through the other compilation problems using this helper. Finally, you should have a failing test
+Work through the other compilation problems using this helper. Finally, you should have a failing test:
 
 ```
 === RUN   TestRecordingWinsAndRetrievingThem
@@ -1026,7 +1026,7 @@ Work through the other compilation problems using this helper. Finally, you shou
 
 We cannot parse the league because the file is empty. We weren't getting errors before because we always just ignored them.
 
-Let's fix our big integration test by putting some valid JSON in it and then we can write a specific test for this scenario.
+Let's fix our big integration test by putting some valid JSON in it:
 
 ```go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
@@ -1034,7 +1034,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
     //etc...
 ```
 
-Now all the tests are passing we need to handle the scenario where the file is empty.
+Now that all the tests are passing, we need to handle the scenario where the file is empty.
 
 ## Write the test first
 
@@ -1090,11 +1090,11 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 }
 ```
 
-`file.Stat` returns stats on our file. This lets us check the size of the file, if it's empty we `Write` an empty JSON array and `Seek` back to the start ready for the rest of the code.
+`file.Stat` returns stats on our file, which lets us check the size of the file. If it's empty, we `Write` an empty JSON array and `Seek` back to the start, ready for the rest of the code.
 
 ## Refactor
 
-Our constructor is a bit messy now, we can extract the initialise code into a function
+Our constructor is a bit messy now, so let's extract the initialise code into a function:
 
 ```go
 func initialisePlayerDBFile(file *os.File) error {
@@ -1139,13 +1139,13 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
 ## Sorting
 
-Our product owner wants `/league` to return the players sorted by their scores.
+Our product owner wants `/league` to return the players sorted by their scores, from highest to lowest.
 
-The main decision to make here is where in the software should this happen. If we were using a "real" database we would use things like `ORDER BY` so the sorting is super fast so for that reason it feels like implementations of `PlayerStore` should be responsible.
+The main decision to make here is where in the software should this happen. If we were using a "real" database we would use things like `ORDER BY` so the sorting is super fast. For that reason, it feels like implementations of `PlayerStore` should be responsible.
 
 ## Write the test first
 
-We can update the assertion on our first test in `TestFileSystemStore`
+We can update the assertion on our first test in `TestFileSystemStore`:
 
 ```go
 t.Run("league sorted", func(t *testing.T) {
@@ -1203,11 +1203,11 @@ Easy!
 
 ### What we've covered
 
-- The `Seeker` interface and its relation with `Reader` and `Writer`.
+- The `Seeker` interface and its relation to `Reader` and `Writer`.
 - Working with files.
 - Creating an easy to use helper for testing with files that hides all the messy stuff.
 - `sort.Slice` for sorting slices.
-- Using the compiler to help us make structural changes to the application safely.
+- Using the compiler to help us safely make structural changes to the application.
 
 ### Breaking rules
 
