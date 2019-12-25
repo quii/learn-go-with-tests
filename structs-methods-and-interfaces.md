@@ -98,7 +98,7 @@ type Rectangle struct {
 }
 ```
 
-Now lets refactor the tests to use `Rectangle` instead of plain `float64`s.
+Now let's refactor the tests to use `Rectangle` instead of plain `float64`s.
 
 ```go
 func TestPerimeter(t *testing.T) {
