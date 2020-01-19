@@ -19,14 +19,14 @@ type InMemoryPlayerStore struct {
 
 // RecordWin will record a player's win
 func (i *InMemoryPlayerStore) RecordWin(name string) {
-	i.lock.RLock()
-	defer i.lock.RUnlock()
+	i.lock.Lock()
+	defer i.lock.Unlock()
 	i.store[name]++
 }
 
 // GetPlayerScore retrieves scores for a given player
 func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
-	i.lock.Lock()
-	defer i.lock.Unlock()
+	i.lock.RLock()
+	defer i.lock.RUnlock()
 	return i.store[name]
 }
