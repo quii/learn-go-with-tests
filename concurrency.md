@@ -465,7 +465,7 @@ the calls of `wc`, and each send to the result channel, is happening in parallel
 inside its own process, each of the results is being dealt with one at a time as
 we take values out of the result channel with the receive expression.
 
-We have paralellized the part of the code that we wanted to make faster, while
+We have parallelized the part of the code that we wanted to make faster, while
 making sure that the part that cannot happen in parallel still happens linearly.
 And we have communicated across the multiple processes involved by using
 channels.
