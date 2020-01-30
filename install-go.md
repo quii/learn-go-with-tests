@@ -37,6 +37,7 @@ go version go1.13.1 darwin/amd64
 
 ## Go Environment
 
+### $GOPATH
 Go is opinionated.
 
 By convention, all Go code lives within a single workspace (folder). This workspace could be anywhere in your machine. If you don't specify, Go will assume $HOME/go as the default workspace. The workspace is identified (and modified) by the environment variable [GOPATH](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable).
@@ -61,6 +62,44 @@ mkdir -p $GOPATH/src $GOPATH/pkg $GOPATH/bin
 ```
 
 At this point you can _go get_ and the src/package/bin will be installed correctly in the appropriate $GOPATH/xxx directory.
+
+### Go Modules
+Go 1.11 introduced [Modules](https://github.com/golang/go/wiki/Modules), enabling an alternative workflow. This new approach will gradually [become the default](https://blog.golang.org/modules2019) mode, deprecating the use of GOPATH.
+
+Modules aim to solve problems related to dependency management, version selection and reproducible builds; they also enable users to run Go code outside of GOPATH.
+
+Using Modules is pretty straightforward. Select any directory outside GOPATH as the root of your project, and create a new module with the go mod init command.
+
+A go.mod file will be generated, containing the module path, a Go version, and its dependency requirements, which are the other modules needed for a successful build.
+
+If no <modulepath> is specified, go mod init will try to guess the module path from the directory structure, but it can also be overrided, by supplying an argument.
+
+```sh
+mkdir my-project
+cd my-project
+go mod init <modulepath>
+```
+
+A go.mod file could look like this
+
+```
+module cmd
+
+go 1.12
+
+require (
+        github.com/google/pprof v0.0.0-20190515194954-54271f7e092f
+        golang.org/x/arch v0.0.0-20190815191158-8a70ba74b3a1
+        golang.org/x/tools v0.0.0-20190611154301-25a4f137592f
+)
+```
+
+The built-in documentation provides an overview of all available go mod commands.
+
+```sh
+go help mod
+go help mod init
+```
 
 ## Go Editor
 
