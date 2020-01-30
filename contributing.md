@@ -10,6 +10,12 @@ Contributions are very welcome. I hope for this to become a great home for guide
 
 If you don't feel confident to submit your own guide, submitting an issue for something you want to learn is still a valuable contribution.
 
+### ⚠️ Get feedback quickly for new content ⚠️
+
+- TDD teaches us to work iteratively and get feedback and I strongly suggest you do the same if you wish to contribute
+    - Open a PR with your first test and implementation, discuss your approach so I can offer feedback and course correct
+- This is of course open-source but I do have strong opinions on the content. The sooner you talk to me the better.
+
 ## Style guide
 
 * Always be reinforcing the TDD cycle. Take a look at the [Chapter Template](template.md).
