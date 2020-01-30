@@ -1120,8 +1120,8 @@ tests, to sharpen everything up.
 type SVG struct {
 	XMLName xml.Name `xml:"svg"`
 	Xmlns   string   `xml:"xmlns,attr"`
-	Width   float64  `xml:"width,attr"`
-	Height  float64  `xml:"height,attr"`
+	Width   string   `xml:"width,attr"`
+	Height  string   `xml:"height,attr"`
 	ViewBox string   `xml:"viewBox,attr"`
 	Version string   `xml:"version,attr"`
 	Circle  Circle   `xml:"circle"`
