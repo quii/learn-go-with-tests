@@ -411,7 +411,7 @@ type RomanNumeral struct {
 	Symbol string
 }
 
-var RomanNumerals = []RomanNumeral {
+var allRomanNumerals = []RomanNumeral {
 	{10, "X"},
 	{9, "IX"},
 	{5, "V"},
@@ -423,7 +423,7 @@ func ConvertToRoman(arabic int) string {
 
 	var result strings.Builder
 
-	for _, numeral := range RomanNumerals {
+	for _, numeral := range allRomanNumerals {
 		for arabic >= numeral.Value {
 			result.WriteString(numeral.Symbol)
 			arabic -= numeral.Value
@@ -516,10 +516,10 @@ func TestRomanNumerals(t *testing.T) {
 - I removed `description` as I felt the _data_ described enough of the information.
 - I added a few other edge cases I found just to give me a little more confidence. With table based tests this is very cheap to do.
 
-I didn't change the algorithm, all I had to do was update the `RomanNumerals` array.
+I didn't change the algorithm, all I had to do was update the `allRomanNumerals` array.
 
 ```go
-var RomanNumerals = []RomanNumeral{
+var allRomanNumerals = []RomanNumeral{
 	{1000, "M"},
 	{900, "CM"},
 	{500, "D"},
@@ -657,7 +657,7 @@ func ConvertToArabic(roman string) int {
 			potentialNumber := string([]byte{symbol, nextSymbol})
 
 			// get the value of the two character string
-			value := romanNumerals.ValueOf(potentialNumber)
+			value := allRomanNumerals.ValueOf(potentialNumber)
 
 			if value != 0 {
 				total += value
@@ -698,7 +698,7 @@ func ConvertToArabic(roman string) int {
 			potentialNumber := string([]byte{symbol, nextSymbol})
 
 			// get the value of the two character string
-			value := romanNumerals.ValueOf(potentialNumber)
+			value := allRomanNumerals.ValueOf(potentialNumber)
 
 			if value != 0 {
 				total += value
@@ -746,14 +746,14 @@ func ConvertToArabic(roman string) int {
 			// build the two character string
 			potentialNumber := string([]byte{symbol, nextSymbol})
 
-			if value := romanNumerals.ValueOf(potentialNumber); value != 0 {
+			if value := allRomanNumerals.ValueOf(potentialNumber); value != 0 {
 				total += value
 				i++ // move past this character too for the next loop
 			} else {
 				total++ // this is fishy...
 			}
 		} else {
-			total+=romanNumerals.ValueOf(string([]byte{symbol}))
+			total+=allRomanNumerals.ValueOf(string([]byte{symbol}))
 		}
 	}
 	return total
@@ -787,14 +787,14 @@ func ConvertToArabic(roman string) int {
 		symbol := roman[i]
 
 		if couldBeSubtractive(i, symbol, roman) {
-			if value := romanNumerals.ValueOf(symbol, roman[i+1]); value != 0 {
+			if value := allRomanNumerals.ValueOf(symbol, roman[i+1]); value != 0 {
 				total += value
 				i++ // move past this character too for the next loop
 			} else {
 				total++ // this is fishy...
 			}
 		} else {
-			total+=romanNumerals.ValueOf(symbol)
+			total+=allRomanNumerals.ValueOf(symbol)
 		}
 	}
 	return total
@@ -835,7 +835,7 @@ total++ // this is fishy...
 We should never be just incrementing `total` as that implies every symbol is a `I`. Replace it with:
 
 ```go
-total += romanNumerals.ValueOf(symbol)
+total += allRomanNumerals.ValueOf(symbol)
 ```
 
 And all the tests pass! Now that we have fully working software we can indulge ourselves in some refactoring, with confidence.
