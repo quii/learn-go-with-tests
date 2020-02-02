@@ -181,7 +181,7 @@ Earlier we explored that the `Handler` interface is what we need to implement in
 type HandlerFunc func(ResponseWriter, *Request)
 ```
 
-From the documentation, we see that type `HandlerFunc` has already implemented the `ServeHTTP` method. 
+From the documentation, we see that type `HandlerFunc` has already implemented the `ServeHTTP` method.
 By type casting our `PlayerServer` function with it, we have now implemented the required `Handler`.
 
 ### `http.ListenAndServe(":5000"...)`
@@ -343,7 +343,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-The only other change is we now call our `store.GetPlayerStore` to get the score, rather than the local function we defined (which we can now delete).
+The only other change is we now call our `store.GetPlayerScore` to get the score, rather than the local function we defined (which we can now delete).
 
 Here is the full code listing of our server
 
