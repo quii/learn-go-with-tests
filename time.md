@@ -170,14 +170,14 @@ We'll need to add the `BlindAlerter` as a field on our `CLI` so we can reference
 ```go
 type CLI struct {
 	playerStore PlayerStore
-	in          *bufio.Reader
+	in          *bufio.Scanner
 	alerter     BlindAlerter
 }
 
 func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
 	return &CLI{
 		playerStore: store,
-		in:          bufio.NewReader(in),
+		in:          bufio.NewScanner(in),
 		alerter:     alerter,
 	}
 }
@@ -493,7 +493,7 @@ We need to add our new dependency to our `CLI` so we can reference it in `PlayPo
 ```go
 type CLI struct {
 	playerStore PlayerStore
-	in          *bufio.Reader
+	in          *bufio.Scanner
 	out         io.Writer
 	alerter     BlindAlerter
 }
@@ -501,7 +501,7 @@ type CLI struct {
 func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
 	return &CLI{
 		playerStore: store,
-		in:          bufio.NewReader(in),
+		in:          bufio.NewScanner(in),
 		out:         out,
 		alerter:     alerter,
 	}
@@ -667,14 +667,14 @@ func (p *Game) Finish(winner string) {
 
 // cli.go
 type CLI struct {
-	in          *bufio.Reader
+	in          *bufio.Scanner
 	out         io.Writer
 	game        *Game
 }
 
 func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
 	return &CLI{
-		in:  bufio.NewReader(in),
+		in:  bufio.NewScanner(in),
 		out: out,
 		game: &Game{
 			alerter: alerter,
@@ -731,7 +731,7 @@ All we need to do right now is change `NewCLI`
 ```go
 func NewCLI(in io.Reader, out io.Writer, game *Game) *CLI {
 	return &CLI{
-		in:  bufio.NewReader(in),
+		in:  bufio.NewScanner(in),
 		out: out,
 		game: game,
 	}
