@@ -358,7 +358,7 @@ const htmlTemplatePath = "game.html"
 func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
 	p := new(PlayerServer)
 
-	tmpl, err := template.ParseFiles("game.html")
+	tmpl, err := template.ParseFiles(htmlTemplatePath)
 
 	if err != nil {
 		return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
@@ -702,7 +702,7 @@ Next lets assign it in our constructor
 func NewPlayerServer(store PlayerStore, game Game) (*PlayerServer, error) {
 	p := new(PlayerServer)
 
-	tmpl, err := template.ParseFiles("game.html")
+	tmpl, err := template.ParseFiles(htmlTemplatePath)
 
 	if err != nil {
 		return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
