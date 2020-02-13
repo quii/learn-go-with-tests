@@ -3,9 +3,10 @@ package poker
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"html/template"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
 // PlayerStore stores score information about players
@@ -35,7 +36,7 @@ const htmlTemplatePath = "game.html"
 func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
 	p := new(PlayerServer)
 
-	tmpl, err := template.ParseFiles("game.html")
+	tmpl, err := template.ParseFiles(htmlTemplatePath)
 
 	if err != nil {
 		return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
