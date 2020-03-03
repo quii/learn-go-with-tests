@@ -18,7 +18,7 @@ type readerCtx struct {
 	delegate io.Reader
 }
 
-func (r readerCtx) Read(p []byte) (n int, err error) {
+func (r *readerCtx) Read(p []byte) (n int, err error) {
 	if err := r.ctx.Err(); err != nil {
 		return 0, err
 	}

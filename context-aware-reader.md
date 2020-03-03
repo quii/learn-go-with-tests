@@ -16,7 +16,7 @@ type Reader interface {
 }
 ```
 
-By using `io.Reader` you can gain a lot of re-use from the standard library, it's a very commonly used abstraction (along with it's counterpart `io.Writer`)
+By using `io.Reader` you can gain a lot of re-use from the standard library, it's a very commonly used abstraction (along with its counterpart `io.Writer`)
 
 ### Context aware?
 
@@ -32,7 +32,7 @@ Testing this poses an interesting challenge. Normally when using an `io.Reader` 
 
 What we want to demonstrate is something like
 
-> Given an `io.Reader` with "ABCDEFG", when I send a cancel signal half-way through when I try to continue to read i get nothing else
+> Given an `io.Reader` with "ABCDEF", when I send a cancel signal half-way through I when I try to continue to read I get nothing else so all I get is "ABC"
 
 Let's look at the interface again.
 
@@ -42,7 +42,13 @@ type Reader interface {
 }
 ```
 
-The `Reader`'s `Read` method will read the contents it has into a `[]byte` that we supply. So rather than reading everything, we could supply a fixed-size byte array that doesnt fit all the contents. _Then_ we could send our cancel signal and a subsequent read would return an error as we'd hope
+The `Reader`'s `Read` method will read the contents it has into a `[]byte` that we supply.
+
+So rather than reading everything, we could:
+
+ - Supply a fixed-size byte array that doesnt fit all the contents
+ - Send a cancel signal
+ - Try and read again and this should return an error with 0 bytes read
 
 For now, let's just write a "happy path" test where there is no cancellation, just so we can get familiar with the problem without having to write any production code yet.
 
@@ -84,11 +90,15 @@ func assertBufferHas(t *testing.T, buf []byte, want string) {
 
 From this we can imagine sending some kind of cancel signal before the second read to change behaviour.
 
-Now we've seen how it works we'll start writing some actual code!
+Now we've seen how it works we'll TDD the rest of the functionality.
 
 ## Write the test first
 
-Ultimately we want to be able to compose an `io.Reader` with a `context.Context`. Let's move in that direction by changing our existing test so it runs against a function that will eventually do this composition for us.
+We want to be able to compose an `io.Reader` with a `context.Context`.
+
+With TDD it's best to start with imagining your desired API and write a test for it.
+
+From there let the compiler and failing test output can guide us to a solution
 
 ```go
 t.Run("behaves like a normal reader", func(t *testing.T) {
@@ -149,7 +159,7 @@ func NewCancellableReader(rdr io.Reader) io.Reader {
 }
 ```
 
-It should pass.
+The test should now pass.
 
 I know, I know, this seems silly and pedantic but before charging in to the fancy work it is important that we have _some_ verification that we haven't broken the "normal" behaviour of an `io.Reader` and this test will give us confidence as we move forward.
 
@@ -175,7 +185,7 @@ t.Run("stops reading when cancelled", func(t *testing.T) {
     n, err := rdr.Read(got)
 
     if err == nil {
-        t.Error("expected an error but didnt get one")
+        t.Error("expected an error after cancellation but didnt get one")
     }
 
     if n > 0 {
@@ -185,7 +195,7 @@ t.Run("stops reading when cancelled", func(t *testing.T) {
 ```
 
 We can more or less copy the first test but now we're:
-- Creating a context with cancellation so we can `cancel` after the first read
+- Creating a `context.Context` with cancellation so we can `cancel` after the first read
 - For our code to work we'll need to pass `ctx` to our function
 - We then assert that post-`cancel` nothing was read
 
@@ -199,7 +209,7 @@ We can more or less copy the first test but now we're:
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-Update our signature to accept a context
+The compiler is telling us what to do; update our signature to accept a context
 
 ```go
 func NewCancellableReader(ctx context.Context, rdr io.Reader) io.Reader {
@@ -229,14 +239,14 @@ We know we need to have a type that encapsulates the `io.Reader` that we read fr
 ```go
 func NewCancellableReader(ctx context.Context, rdr io.Reader) io.Reader {
 	return &readerCtx{
-		ctx: ctx,
-		delegate:   rdr,
+		ctx:      ctx,
+		delegate: rdr,
 	}
 }
 
 type readerCtx struct {
-	ctx	context.Context
-	delegate   io.Reader
+	ctx      context.Context
+	delegate io.Reader
 }
 ```
 
@@ -247,10 +257,10 @@ As I have stressed many times in this book, go slowly and let the compiler help 
 	*readerCtx does not implement io.Reader (missing Read method)
 ```
 
-The abstraction feels right, but it doesn't implement the interface we need so let's add the method.
+The abstraction feels right, but it doesn't implement the interface we need (`io.Reader`) so let's add the method.
 
 ```go
-func (r readerCtx) Read(p []byte) (n int, err error) {
+func (r *readerCtx) Read(p []byte) (n int, err error) {
 	panic("implement me")
 }
 ```
@@ -265,7 +275,9 @@ func (r readerCtx) Read(p []byte) (n int, err error) {
 }
 ```
 
-At this point we have our happy path test passing again and it feels like we have our stuff abstracted nicely, we just need to check the `context.Context` to see if it has been cancelled.
+At this point we have our happy path test passing again and it feels like we have our stuff abstracted nicely
+
+To make our second test pass we need to check the `context.Context` to see if it has been cancelled.
 
 ```go
 func (r readerCtx) Read(p []byte) (n int, err error) {
@@ -276,7 +288,7 @@ func (r readerCtx) Read(p []byte) (n int, err error) {
 }
 ```
 
-The tests should now pass. You'll notice how we return the error from the `context.Context`. This allows callers of the code to inspect the various reasons cancellation has occurred and this is covered more in the original post.
+All tests should now pass. You'll notice how we return the error from the `context.Context`. This allows callers of the code to inspect the various reasons cancellation has occurred and this is covered more in the original post.
 
 ## Wrapping up
 
