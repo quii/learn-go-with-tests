@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestCancelReaders(t *testing.T) {
+func TestContextAwareReader(t *testing.T) {
 	t.Run("behaves like a normal reader", func(t *testing.T) {
 		rdr := NewCancellableReader(context.Background(), strings.NewReader("123456"))
 		got := make([]byte, 3)
