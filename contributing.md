@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions are very welcome. I hope for this to become a great home for guides of how to learn Go by writing tests. Consider submitting a PR or creating an issue which you can do [here](https://github.com/quii/learn-go-with-tests).
+Contributions are very welcome. I hope for this to become a great home for guides of how to learn Go by writing tests. Consider submitting a PR or creating an issue which you can do [here](https://github.com/quii/learn-go-with-tests/issues).
 
 ## What we're looking for
 
