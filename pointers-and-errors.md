@@ -173,7 +173,7 @@ func (w *Wallet) Balance() int {
 ```
 
 and seemingly addressed the object directly. In fact, the code above using `(*w)` is absolutely valid. However, the makers of Go deemed this notation cumbersome, so the language permits us to write `w.balance`, without explicit dereference.
-These pointers to structs even have an own name: _struct pointers_ and they are [automatically dereferenced](https://golang.org/ref/spec#Method_values).
+These pointers to structs even have their own name: _struct pointers_ and they are [automatically dereferenced](https://golang.org/ref/spec#Method_values).
 
 Technically you do not need to change `Balance` to use a pointer receiver as taking a copy of the balance is fine. However by convention you should keep your method receiver types to be the same for consistency.
 
