@@ -108,7 +108,7 @@ Another quality of life feature of Go is the documentation. You can launch the d
 
 The vast majority of the standard library has excellent documentation with examples. Navigating to [http://localhost:8000/pkg/testing/](http://localhost:8000/pkg/testing/) would be worthwhile to see what's available to you.
 
-If you don't have `godoc` command, then maybe you are using the newer version of Go (1.13 or later) which is [no longer including `godoc`](https://golang.org/doc/go1.13#godoc). You can manually install it with `go get golang.org/x/tools/cmd/godoc`.
+If you don't have `godoc` command, then maybe you are using the newer version of Go (1.14 or later) which is [no longer including `godoc`](https://golang.org/doc/go1.14#godoc). You can manually install it with `go get golang.org/x/tools/cmd/godoc`.
 
 ### Hello, YOU
 
