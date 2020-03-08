@@ -36,6 +36,7 @@
 
 * [OS Exec](os-exec.md)
 * [Error types](error-types.md)
+* [Context-aware Reader](context-aware-reader.md)
 
 ## Meta
 
