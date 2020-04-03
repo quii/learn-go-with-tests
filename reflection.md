@@ -641,7 +641,7 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-The final type we want to handle is `map`.
+The next type we want to handle is `map`.
 
 ## Write the test first
 
@@ -770,6 +770,148 @@ func assertContains(t *testing.T, haystack []string, needle string)  {
     }
     if !contains {
         t.Errorf("expected %+v to contain %q but it didn't", haystack, needle)
+    }
+}
+```
+
+The next type we want to handle is `chan`.
+
+## Write the test first
+
+```go
+t.Run("with channels", func(t *testing.T) {
+		aChannel := make(chan Profile)
+
+		go func() {
+			aChannel <- Profile{33, "Berlin"}
+			aChannel <- Profile{34, "Katowice"}
+			close(aChannel)
+		}()
+
+		var got []string
+		want := []string{"Berlin", "Katowice"}
+
+		walk(aChannel, func(input string) {
+			got = append(got, input)
+		})
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+```
+
+## Try to run the test
+
+```
+--- FAIL: TestWalk (0.00s)
+    --- FAIL: TestWalk/with_channels (0.00s)
+        reflection_test.go:115: got [], want [Berlin Katowice]
+```
+
+## Write enough code to make it pass
+
+We can iterate through all values sent through channel until it was closed with Recv()
+
+```go
+func walk(x interface{}, fn func(input string)) {
+    val := getValue(x)
+
+    numberOfValues := 0
+    var getField func(int) reflect.Value
+
+    switch val.Kind() {
+    case reflect.String:
+        fn(val.String())
+    case reflect.Struct:
+        numberOfValues = val.NumField()
+        getField = val.Field
+    case reflect.Slice, reflect.Array:
+        numberOfValues = val.Len()
+        getField = val.Index
+    case reflect.Map:
+        for _, key := range val.MapKeys() {
+            walk(val.MapIndex(key).Interface(), fn)
+        }
+    case reflect.Chan:
+		for v, ok := val.Recv(); ok; v, ok = val.Recv() {	
+			walk(v.Interface(), fn)
+		}
+    }
+
+    for i:=0; i< numberOfValues; i++ {
+        walk(getField(i).Interface(), fn)
+    }
+}
+```
+The next type we want to handle is `func`.
+
+## Write the test first
+
+```go
+t.Run("with function", func(t *testing.T) {
+		aFunction := func() (Profile, Profile) {
+			return Profile{33, "Berlin"}, Profile{34, "Katowice"}
+		}
+
+		var got []string
+		want := []string{"Berlin", "Katowice"}
+
+		walk(aFunction, func(input string) {
+			got = append(got, input)
+		})
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+```
+
+## Try to run the test
+
+```
+--- FAIL: TestWalk (0.00s)
+    --- FAIL: TestWalk/with_function (0.00s)
+        reflection_test.go:132: got [], want [Berlin Katowice]
+```
+
+## Write enough code to make it pass
+
+Non zero-argument functions do not seem to make a lot of sense in this scenario. But we should allow for arbitrary return values.
+
+```go
+func walk(x interface{}, fn func(input string)) {
+    val := getValue(x)
+
+    numberOfValues := 0
+    var getField func(int) reflect.Value
+
+    switch val.Kind() {
+    case reflect.String:
+        fn(val.String())
+    case reflect.Struct:
+        numberOfValues = val.NumField()
+        getField = val.Field
+    case reflect.Slice, reflect.Array:
+        numberOfValues = val.Len()
+        getField = val.Index
+    case reflect.Map:
+        for _, key := range val.MapKeys() {
+            walk(val.MapIndex(key).Interface(), fn)
+        }
+    case reflect.Chan:
+		for v, ok := val.Recv(); ok; v, ok = val.Recv() {	
+			walk(v.Interface(), fn)
+		}
+	case reflect.Func:
+		valFnResult := val.Call(nil)
+		for _, res := range valFnResult {
+			walk(res.Interface(), fn)
+		}
+    }
+
+    for i:=0; i< numberOfValues; i++ {
+        walk(getField(i).Interface(), fn)
     }
 }
 ```
