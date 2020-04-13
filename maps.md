@@ -258,7 +258,7 @@ In this test, we are utilizing our `Search` function to make the validation of t
 In `dictionary.go`
 
 ```go
-func (d Dictionary) Add(word, definition string) {
+func (d Dictionary) Add(word string, definition string) {
 }
 ```
 
@@ -271,7 +271,7 @@ dictionary_test.go:31: should find added word: could not find the word you were 
 ## Write enough code to make it pass
 
 ```go
-func (d Dictionary) Add(word, definition string) {
+func (d Dictionary) Add(word string, definition string) {
     d[word] = definition
 }
 ```
@@ -365,7 +365,7 @@ func TestAdd(t *testing.T) {
     })
 }
 ...
-func assertError(t *testing.T, got, want error) {
+func assertError(t *testing.T, got error, want error) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got %q want %q", got, want)
@@ -400,7 +400,7 @@ var (
     ErrWordExists = errors.New("cannot add word because it already exists")
 )
 
-func (d Dictionary) Add(word, definition string) error {
+func (d Dictionary) Add(word string, definition string) error {
     d[word] = definition
     return nil
 }
@@ -416,7 +416,7 @@ dictionary_test.go:44: got 'new test' want 'this is just a test'
 ## Write enough code to make it pass
 
 ```go
-func (d Dictionary) Add(word, definition string) error {
+func (d Dictionary) Add(word string, definition string) error {
     _, err := d.Search(word)
 
     switch err {
@@ -483,7 +483,7 @@ func TestUpdate(t *testing.T) {
 We already know how to deal with an error like this. We need to define our function.
 
 ```go
-func (d Dictionary) Update(word, definition string) {}
+func (d Dictionary) Update(word string, definition string) {}
 ```
 
 With that in place, we are able to see that we need to change the definition of the word.
@@ -497,7 +497,7 @@ dictionary_test.go:55: got 'this is just a test' want 'new definition'
 We already saw how to do this when we fixed the issue with `Add`. So let's implement something really similar to `Add`.
 
 ```go
-func (d Dictionary) Update(word, definition string) {
+func (d Dictionary) Update(word string, definition string) {
     d[word] = definition
 }
 ```
@@ -551,7 +551,7 @@ const (
     ErrWordDoesNotExist = DictionaryErr("cannot update word because it does not exist")
 )
 
-func (d Dictionary) Update(word, definition string) error {
+func (d Dictionary) Update(word string, definition string) error {
     d[word] = definition
     return nil
 }
@@ -568,7 +568,7 @@ dictionary_test.go:66: got error '%!q(<nil>)' want 'cannot update word because i
 ## Write enough code to make it pass
 
 ```go
-func (d Dictionary) Update(word, definition string) error {
+func (d Dictionary) Update(word string, definition string) error {
     _, err := d.Search(word)
 
     switch err {
