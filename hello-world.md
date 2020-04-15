@@ -189,7 +189,7 @@ At this point, if you are using source control \(which you should!\) I would
 I _wouldn't_ push to master though, because I plan to refactor next. It is nice
 to commit at this point in case you somehow get into a mess with refactoring - you can always go back to the working version.
 
-There's not a lot to refactor here, but we can introduce another language feature _constants_.
+There's not a lot to refactor here, but we can introduce another language feature, _constants_.
 
 ### Constants
 
