@@ -142,7 +142,7 @@ An improvement over the default linter can be configured using [GolangCI-Lint](h
 This can be installed as follows:
 
 ```sh
-go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+brew install golangci/tap/golangci-lint
 ```
 
 ## Refactoring and your tooling
