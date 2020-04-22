@@ -815,33 +815,28 @@ We can iterate through all values sent through channel until it was closed with 
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-    val := getValue(x)
+	val := getValue(x)
 
-    numberOfValues := 0
-    var getField func(int) reflect.Value
+	var getField func(int) reflect.Value
 
-    switch val.Kind() {
-    case reflect.String:
-        fn(val.String())
-    case reflect.Struct:
-        numberOfValues = val.NumField()
-        getField = val.Field
-    case reflect.Slice, reflect.Array:
-        numberOfValues = val.Len()
-        getField = val.Index
-    case reflect.Map:
-        for _, key := range val.MapKeys() {
-            walk(val.MapIndex(key).Interface(), fn)
-        }
-    case reflect.Chan:
+	switch val.Kind() {
+	case reflect.String:
+		fn(val.String())
+	case reflect.Struct:
+		numberOfValues = val.NumField()
+		getField = val.Field
+	case reflect.Slice, reflect.Array:
+		numberOfValues = val.Len()
+		getField = val.Index
+	case reflect.Map:
+		for _, key := range val.MapKeys() {
+			walk(val.MapIndex(key).Interface(), fn)
+		}
+	case reflect.Chan:
 		for v, ok := val.Recv(); ok; v, ok = val.Recv() {	
 			walk(v.Interface(), fn)
 		}
-    }
-
-    for i:=0; i< numberOfValues; i++ {
-        walk(getField(i).Interface(), fn)
-    }
+	}
 }
 ```
 The next type we want to handle is `func`.
@@ -881,25 +876,24 @@ Non zero-argument functions do not seem to make a lot of sense in this scenario.
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-    val := getValue(x)
+	val := getValue(x)
 
-    numberOfValues := 0
-    var getField func(int) reflect.Value
+	var getField func(int) reflect.Value
 
-    switch val.Kind() {
-    case reflect.String:
-        fn(val.String())
-    case reflect.Struct:
-        numberOfValues = val.NumField()
-        getField = val.Field
-    case reflect.Slice, reflect.Array:
-        numberOfValues = val.Len()
-        getField = val.Index
-    case reflect.Map:
-        for _, key := range val.MapKeys() {
-            walk(val.MapIndex(key).Interface(), fn)
-        }
-    case reflect.Chan:
+	switch val.Kind() {
+	case reflect.String:
+		fn(val.String())
+	case reflect.Struct:
+		numberOfValues = val.NumField()
+		getField = val.Field
+	case reflect.Slice, reflect.Array:
+		numberOfValues = val.Len()
+		getField = val.Index
+	case reflect.Map:
+		for _, key := range val.MapKeys() {
+			walk(val.MapIndex(key).Interface(), fn)
+		}
+	case reflect.Chan:
 		for v, ok := val.Recv(); ok; v, ok = val.Recv() {	
 			walk(v.Interface(), fn)
 		}
@@ -908,11 +902,7 @@ func walk(x interface{}, fn func(input string)) {
 		for _, res := range valFnResult {
 			walk(res.Interface(), fn)
 		}
-    }
-
-    for i:=0; i< numberOfValues; i++ {
-        walk(getField(i).Interface(), fn)
-    }
+	}
 }
 ```
 
