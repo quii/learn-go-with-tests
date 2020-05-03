@@ -598,7 +598,7 @@ Remember, we are free to commit whatever sins we need to make this work. Once we
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 	
-    numberOfPlayers, _ := strconv.Atoi(cli.readLine())
+	numberOfPlayers, _ := strconv.Atoi(cli.readLine())
 
 	cli.scheduleBlindAlerts(numberOfPlayers)
 
