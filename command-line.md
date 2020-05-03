@@ -348,8 +348,8 @@ type CLI struct {
 }
 
 func (cli *CLI) PlayPoker() {
-	reader := bufio.NewScanner(cli.in)
-	reader.Scan()
+    reader := bufio.NewScanner(cli.in)
+    reader.Scan()
     cli.playerStore.RecordWin(extractWinner(reader.Text()))
 }
 
