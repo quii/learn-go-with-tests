@@ -2,13 +2,13 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/hello-world)**
 
-It is traditional for your first program in a new language to be Hello, world.
+It is traditional for your first program in a new language to be [Hello, World](https://en.m.wikipedia.org/wiki/%22Hello,_World!%22_program). 
 
 In the [previous chapter](install-go.md#go-environment) we discussed how Go is opinionated as to where you put your files.
 
 Make a directory in the following path `$GOPATH/src/github.com/{your-user-id}/hello`.
 
-So if you're on a unix based OS and your username is "bob" and you are happy to stick with Go's conventions about `$GOPATH` (which is the easiest way of setting up) you could run `mkdir -p $GOPATH/src/github.com/bob/hello`.
+So if you're on a unix based OS and you are happy to stick with Go's conventions about `$GOPATH` (which is the easiest way of setting up) you could run `mkdir -p $GOPATH/src/github.com/$USER/hello`.
 
 For subsequent chapters, you can make a new folder with whatever name you like to put the code in e.g `$GOPATH/src/github.com/{your-user-id}/integers` for the next chapter might be sensible. Some readers of this book like to make an enclosing folder for all the work such as "learn-go-with-tests/hello". In short, it's up to you how you structure your folders.
 
