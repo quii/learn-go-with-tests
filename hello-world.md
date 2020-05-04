@@ -502,6 +502,47 @@ A few new concepts:
 * `default` in the switch case will be branched to if none of the other `case` statements match.
 * The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposed to the world, so we made this function private.
 
+### Map approach
+
+There is another approach using [dictionary object](https://en.wikipedia.org/wiki/Associative_array). It's also called associative array, map.
+
+For simplicity, it just *"key-value"* structure. However, full explanation of `map` is not a part of that tutorial.
+
+```go
+const defaultName = "World"
+const defaultLanguage = "english"
+
+var prefixes = map[string]string{
+	"french": "Bonjour, ",
+	"spanish": "Hola, ",
+	"english": "Hello, ",
+}
+
+// Hello returns a personalised greeting in a given language
+func Hello(name string, language string) string {
+	if len(name) == 0 {
+		name = defaultName
+	}
+
+	if len(language) == 0 {
+		language = defaultLanguage
+	}
+
+	return prefixes[language] + name
+}
+```
+
+You can see `len` function. It's a function that tell us a length of a string and other types.
+You can check docs [here](https://golang.org/pkg/builtin/#len)
+
+So `len(name) == 0` is the same as `name == ""`.
+
+Instead of `default` case in `switch` we use `defaultLanguage` constant.
+We got rid of prefix constants. Also, it's easier to add new language just extending the map variable.
+
+Now you can see a full power of TDD. We did not change tests, but they are passed.
+They are our proof we don't break anything during our refactoring.
+
 ## Wrapping up
 
 Who knew you could get so much out of `Hello, world`?
@@ -512,7 +553,7 @@ By now you should have some understanding of:
 
 * Writing tests
 * Declaring functions, with arguments and return types
-* `if`, `const` and `switch`
+* `if`, `const`, `switch`, `map`
 * Declaring variables and constants
 
 ### The TDD process and _why_ the steps are important
