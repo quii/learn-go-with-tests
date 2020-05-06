@@ -61,7 +61,7 @@ func Repeat(character string) string {
 }
 ```
 
-Unlike other languages like C, Java, or JavaScript there are no parentheses surrounding the three components of the for statement and the braces { } are always required. You might wonder what is happening in the row
+Unlike other languages like C, Java, or JavaScript there are no parentheses surrounding the three components of the for statement and the braces `{ }` are always required. You might wonder what is happening in the row
 
 ```go
     var repeated string
@@ -89,7 +89,7 @@ func Repeat(character string) string {
 }
 ```
 
-`+=` the Add AND assignment operator, adds the right operand to the left operand and assigns the result to left operand. It works with other types like integers.
+`+=` called _"the Add AND assignment operator"_, adds the right operand to the left operand and assigns the result to left operand. It works with other types like integers.
 
 ### Benchmarking
 
