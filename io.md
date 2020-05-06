@@ -1154,7 +1154,9 @@ t.Run("league sorted", func(t *testing.T) {
         {"Name": "Chris", "Wins": 33}]`)
     defer cleanDatabase()
 
-    store := FileSystemPlayerStore{database}
+    store, err := NewFileSystemPlayerStore(database)
+
+    assertNoError(t, err)
 
     got := store.GetLeague()
 
