@@ -2,9 +2,9 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/integers)**
 
-Integers work as you would expect. Let's write an add function to try things out. Create a test file called `adder_test.go` and write this code.
+Integers work as you would expect. Let's write an `Add` function to try things out. Create a test file called `adder_test.go` and write this code.
 
-**note:** Go source files can only have one `package` per directory, make sure that your files are organised separately. [Here is a good explanation on this.](https://dave.cheney.net/2014/12/01/five-suggestions-for-setting-up-a-go-project)
+**Note:** Go source files can only have one `package` per directory, make sure that your files are organised separately. [Here is a good explanation on this.](https://dave.cheney.net/2014/12/01/five-suggestions-for-setting-up-a-go-project)
 
 ## Write the test first
 
@@ -25,7 +25,7 @@ func TestAdder(t *testing.T) {
 
 You will notice that we're using `%d` as our format strings rather than `%q`. That's because we want it to print an integer rather than a string.
 
-Also note that we are no longer using the main package, instead we've defined a package named integers, as the name suggests this will group functions for working with integers such as Add.
+Also note that we are no longer using the main package, instead we've defined a package named `integers`, as the name suggests this will group functions for working with integers such as `Add`.
 
 ## Try and run the test
 
@@ -67,9 +67,9 @@ func Add(x, y int) int {
 
 Ah hah! Foiled again, TDD is a sham right?
 
-We could write another test, with some different numbers to force that test to fail but that feels like a game of cat and mouse.
+We could write another test, with some different numbers to force that test to fail but that feels like [a game of cat and mouse](https://en.m.wikipedia.org/wiki/Cat_and_mouse).
 
-Once we're more familiar with Go's syntax I will introduce a technique called Property Based Testing, which would stop annoying developers and help you find bugs.
+Once we're more familiar with Go's syntax I will introduce a technique called *"Property Based Testing"*, which would stop annoying developers and help you find bugs.
 
 For now, let's fix it properly
 
@@ -108,7 +108,7 @@ Go examples are executed just like tests so you can be confident examples reflec
 
 Examples are compiled \(and optionally executed\) as part of a package's test suite.
 
-As with typical tests, examples are functions that reside in a package's \_test.go files. Add the following ExampleAdd function to the `adder_test.go` file.
+As with typical tests, examples are functions that reside in a package's `_test.go` files. Add the following `ExampleAdd` function to the `adder_test.go` file.
 
 ```go
 func ExampleAdd() {
@@ -132,7 +132,7 @@ $ go test -v
 --- PASS: ExampleAdd (0.00s)
 ```
 
-Please note that the example function will not be executed if you remove the comment "//Output: 6". Although the function will be compiled, it won't be executed.
+Please note that the example function will not be executed if you remove the comment `//Output: 6`. Although the function will be compiled, it won't be executed.
 
 By adding this code the example will appear in the documentation inside `godoc`, making your code even more accessible.
 
