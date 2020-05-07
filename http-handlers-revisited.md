@@ -233,7 +233,7 @@ If you wish to explore this approach in more detail following TDD read the [Depe
 
 Now that we've decoupled ourselves from any specific implementation detail around registration writing the code for our handler is straightforward and follows the responsibilities described earlier.
 
-This simplicitly is reflected in our tests
+This simplicity is reflected in our tests
 
 ### The tests!
 
