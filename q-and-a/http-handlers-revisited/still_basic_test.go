@@ -1,4 +1,4 @@
-package http_handlers_revisited
+package main
 
 import (
 	"bytes"
@@ -13,22 +13,22 @@ import (
 )
 
 type MockUserService struct {
-	AddFunc func(user User) (string, error)
-	UsersAdded []User
+	RegisterFunc    func(user User) (string, error)
+	UsersRegistered []User
 }
 
-func (m *MockUserService) Add(user User) (insertedID string, err error) {
-	m.UsersAdded = append(m.UsersAdded, user)
-	return m.AddFunc(user)
+func (m *MockUserService) Register(user User) (insertedID string, err error) {
+	m.UsersRegistered = append(m.UsersRegistered, user)
+	return m.RegisterFunc(user)
 }
 
 func TestRegisterUser(t *testing.T) {
-	t.Run("can add valid users", func(t *testing.T) {
+	t.Run("can register valid users", func(t *testing.T) {
 		user := User{Name: "CJ"}
 		expectedInsertedID := "whatever"
 
 		service := &MockUserService{
-			AddFunc: func(user User) (string, error) {
+			RegisterFunc: func(user User) (string, error) {
 				return expectedInsertedID, nil
 			},
 		}
@@ -45,12 +45,12 @@ func TestRegisterUser(t *testing.T) {
 			t.Errorf("expected body of %q but got %q", res.Body.String(), expectedInsertedID)
 		}
 
-		if len(service.UsersAdded)!= 1 {
-			t.Fatalf("expected 1 user added but got %d", len(service.UsersAdded))
+		if len(service.UsersRegistered)!= 1 {
+			t.Fatalf("expected 1 user added but got %d", len(service.UsersRegistered))
 		}
 
-		if !reflect.DeepEqual(service.UsersAdded[0], user) {
-			t.Errorf("the user added %+v was not what was expected %+v", service.UsersAdded[0], user)
+		if !reflect.DeepEqual(service.UsersRegistered[0], user) {
+			t.Errorf("the user registered %+v was not what was expected %+v", service.UsersRegistered[0], user)
 		}
 	})
 
@@ -69,7 +69,7 @@ func TestRegisterUser(t *testing.T) {
 		user := User{Name: "CJ"}
 
 		service := &MockUserService{
-			AddFunc: func(user User) (string, error) {
+			RegisterFunc: func(user User) (string, error) {
 				return "", errors.New("couldn't add new user")
 			},
 		}

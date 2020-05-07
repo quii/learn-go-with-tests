@@ -91,7 +91,7 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 
 Let's just list all the things this one function has to do:
 
-1. Do some HTTP stuff, send headers, status codes, etc.
+1. Write HTTP responses, send headers, status codes, etc.
 2. Decode the request's body into a `User`
 3. Connect to a database (and all the details around that)
 4. Query the database and applying some business logic depending on the result
@@ -111,14 +111,14 @@ The lines can blur depending on how abstractly you're thinking and sometimes you
 Thankfully with HTTP handlers I feel like I have a pretty good idea what they should do, no matter what project I've worked on:
 
 1. Accept a HTTP request, parse and validate it.
-2. Call some `ServiceThing` to do `ImportantBusinessLogic` with the stuff I got from step 1.
+2. Call some `ServiceThing` to do `ImportantBusinessLogic` with the data I got from step 1.
 3. Send an appropriate `HTTP` response depending on what `ServiceThing` returns.
 
 I'm not saying every HTTP handler _ever_ should have roughly this shape, but 99 times out of 100 that seems to be the case for me.
 
-When you force this separation of concerns testing these handlers becomes a breeze but more importantly testing `ImportantBusinessLogic` no longer has to concern itself with `HTTP`, you can just test the important stuff!
+When you force this separation of concerns testing these handlers becomes a breeze but more importantly testing `ImportantBusinessLogic` no longer has to concern itself with `HTTP`, you can test the business logic separately.
 
-By separating these concerns it also means you can use `ImportantBusinessLogic` in other contexts without having to modify it, neat.
+By separating these concerns it also means you can use `ImportantBusinessLogic` in other contexts without having to modify it.
 
 ## Go's Handlers
 
@@ -134,7 +134,9 @@ Reader, take a breath and look at the code above. What do you notice?
 
 There's no framework magic, no annotations, no magic beans, nothing.
 
-It's just a function, and we know how to test functions. It fits in nicely with the commentary above.
+It's just a function, _and we know how to test functions_.
+
+It fits in nicely with the commentary above:
 
 - It takes a [`http.Request`](https://golang.org/pkg/net/http/#Request) which is just a bundle of data for us to inspect, parse and validate.
 - > [A `http.ResponseWriter` interface is used by an HTTP handler to construct an HTTP response.](https://golang.org/pkg/net/http/#ResponseWriter)
@@ -170,9 +172,9 @@ A common complaint about TDD tutorials is that they're always "too simple" and n
 
 This is one of the biggest challenges we face but need to keep striving for. It _is possible_ (although not necessarily easy) to design code, so it can be simple to read and test if we practice and apply good software engineering principles.
 
-Let's go back to the example from before and the list of things it has to do:
+Recapping what the handler from earlier does:
 
-1. Do some HTTP stuff, send headers, status codes, etc.
+1. Write HTTP responses, send headers, status codes, etc.
 2. Decode the request's body into a `User`
 3. Connect to a database (and all the details around that)
 4. Query the database and applying some business logic depending on the result
@@ -182,9 +184,9 @@ Let's go back to the example from before and the list of things it has to do:
 Taking the idea of a more ideal separation of concerns I'd want it to be more like:
 
 1. Decode the request's body into a `User`
-2. Call a `UserService.Insert(user)` (this is our `ServiceThing`)
+2. Call a `UserService.Register(user)` (this is our `ServiceThing`)
 3. If there's an error act on it (the example always sends a `400 BadRequest` which I don't think is right, for now I'll just have a catch-all handler of a `500 Internal Server Error` _for now_. I must stress that returning `500` for all errors makes for a terrible API! Later on we can make the error handling more sophisticated, perhaps with [error types](error-types.md).
-4. If there's no error, `201 Created` with the ID as the response body (again for brevity/laziness)
+4. If there's no error, `201 Created` with the ID as the response body (again for terseness/laziness)
 
 For the sake of brevity I won't go over the usual TDD process, check all the other chapters for examples.
 
@@ -192,7 +194,7 @@ For the sake of brevity I won't go over the usual TDD process, check all the oth
 
 ```go
 type UserService interface {
-	Add(user User) (insertedID string, err error)
+	Register(user User) (insertedID string, err error)
 }
 
 type UserServer struct {
@@ -214,7 +216,7 @@ func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	insertedID, err := u.service.Add(newUser)
+	insertedID, err := u.service.Register(newUser)
 
 	if err != nil {
 		//todo: handle different kinds of errors differently
@@ -239,22 +241,22 @@ This simplicity is reflected in our tests
 
 ```go
 type MockUserService struct {
-	AddFunc func(user User) (string, error)
-	UsersAdded []User
+	RegisterFunc    func(user User) (string, error)
+	UsersRegistered []User
 }
 
-func (m *MockUserService) Add(user User) (insertedID string, err error) {
-	m.UsersAdded = append(m.UsersAdded, user)
-	return m.AddFunc(user)
+func (m *MockUserService) Register(user User) (insertedID string, err error) {
+	m.UsersRegistered = append(m.UsersRegistered, user)
+	return m.RegisterFunc(user)
 }
 
 func TestRegisterUser(t *testing.T) {
-	t.Run("can add valid users", func(t *testing.T) {
+	t.Run("can register valid users", func(t *testing.T) {
 		user := User{Name: "CJ"}
 		expectedInsertedID := "whatever"
 
 		service := &MockUserService{
-			AddFunc: func(user User) (string, error) {
+			RegisterFunc: func(user User) (string, error) {
 				return expectedInsertedID, nil
 			},
 		}
@@ -271,12 +273,12 @@ func TestRegisterUser(t *testing.T) {
 			t.Errorf("expected body of %q but got %q", res.Body.String(), expectedInsertedID)
 		}
 
-		if len(service.UsersAdded)!= 1 {
-			t.Fatalf("expected 1 user added but got %d", len(service.UsersAdded))
+		if len(service.UsersRegistered)!= 1 {
+			t.Fatalf("expected 1 user added but got %d", len(service.UsersRegistered))
 		}
 
-		if !reflect.DeepEqual(service.UsersAdded[0], user) {
-			t.Errorf("the user added %+v was not what was expected %+v", service.UsersAdded[0], user)
+		if !reflect.DeepEqual(service.UsersRegistered[0], user) {
+			t.Errorf("the user registered %+v was not what was expected %+v", service.UsersRegistered[0], user)
 		}
 	})
 
@@ -295,7 +297,7 @@ func TestRegisterUser(t *testing.T) {
 		user := User{Name: "CJ"}
 
 		service := &MockUserService{
-			AddFunc: func(user User) (string, error) {
+			RegisterFunc: func(user User) (string, error) {
 				return "", errors.New("couldn't add new user")
 			},
 		}
@@ -331,13 +333,29 @@ func NewMongoUserService() *MongoUserService {
 	return &MongoUserService{}
 }
 
-func (m MongoUserService) Add(user User) (insertedID string, err error) {
+func (m MongoUserService) Register(user User) (insertedID string, err error) {
 	// use m.mongoConnection to perform queries
 	panic("implement me")
 }
 ```
 
 We can test this separately and once we're happy in `main` we can snap these two units together for our working application.
+
+```go
+func main() {
+	mongoService := NewMongoUserService()
+	server := NewUserServer(mongoService)
+	http.ListenAndServe(":8000", http.HandlerFunc(server.RegisterUser))
+}
+```
+
+### A more robust and extensible design with little effort
+
+These principles not only make our lives easier in the short-term they make the system easier to extend in the future.
+
+It wouldn't be surprising that further iterations of this system we'd want to email the user a confirmation of registration.
+
+With the old design we'd have to change the handler _and_ the surrounding tests. By separating concerns using an interface we don't have to edit the handler _at all_ because it's not concerned with the business logic around registration.
 
 ## Wrapping up
 
@@ -349,5 +367,4 @@ Reiterating again; **Go's http handlers are just functions**. If you write them 
 
 ### Notes: Things to talk about
 
-- Cut out the stuff
 - Read that post on technical writing

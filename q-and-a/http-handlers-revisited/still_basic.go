@@ -1,4 +1,4 @@
-package http_handlers_revisited
+package main
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ type User struct {
 }
 
 type UserService interface {
-	Add(user User) (insertedID string, err error)
+	Register(user User) (insertedID string, err error)
 }
 
 type UserServer struct {
@@ -33,7 +33,7 @@ func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	insertedID, err := u.service.Add(newUser)
+	insertedID, err := u.service.Register(newUser)
 
 	if err != nil {
 		//todo: handle different kinds of errors differently
@@ -54,8 +54,13 @@ func NewMongoUserService() *MongoUserService {
 	return &MongoUserService{}
 }
 
-func (m MongoUserService) Add(user User) (insertedID string, err error) {
+func (m MongoUserService) Register(user User) (insertedID string, err error) {
 	// use m.mongoConnection to perform queries
 	panic("implement me")
 }
 
+func main() {
+	mongoService := NewMongoUserService()
+	server := NewUserServer(mongoService)
+	http.ListenAndServe(":8000", http.HandlerFunc(server.RegisterUser))
+}

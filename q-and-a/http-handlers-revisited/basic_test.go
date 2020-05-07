@@ -1,4 +1,4 @@
-package http_handlers_revisited
+package main
 
 import (
 	"net/http"
