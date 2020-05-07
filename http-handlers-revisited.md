@@ -1,6 +1,8 @@
 # HTTP Handlers Revisited
 
-This book already has a chapter on [testing a HTTP handler](http-server.md) but this will feature a broader discussion on designing them, so they are simple to test. We'll take a look at a real example and how we can improve how it's designed.
+This book already has a chapter on [testing a HTTP handler](http-server.md) but this will feature a broader discussion on designing them, so they are simple to test.
+
+We'll take a look at a real example and how we can improve how it's designed.
 
 Testing HTTP handlers seems to be a recurring question in the Go community, and I think it points to a wider problem of people misunderstanding how to design them.
 
@@ -98,15 +100,15 @@ This is too much.
 
 ## What is a HTTP Handler and what should it do ?
 
-Forgetting specific Go details for a moment, no matter what language I've worked in what has always served me well is the separation of concerns and the single responsibility principle.
+Forgetting specific Go details for a moment, no matter what language I've worked in what has always served me well is thinking about the [separation of concerns](https://en.wikipedia.org/wiki/Separation_of_concerns) and the [single responsibility principle](https://en.wikipedia.org/wiki/Single-responsibility_principle).
 
 This can be quite tricky to apply depending on the problem you're solving. What exactly _is_ a responsibility?
 
-The lines can blur depending on how abstractly you're thinking and sometimes your first guess might not be right. That's what refactoring is for!
+The lines can blur depending on how abstractly you're thinking and sometimes your first guess might not be right.
 
 Thankfully with HTTP handlers I feel like I have a pretty good idea what they should do, no matter what project I've worked on:
 
-1. Accept a Request, parse and validate it.
+1. Accept a HTTP request, parse and validate it.
 2. Call some `ServiceThing` to do `ImportantBusinessLogic` with the stuff I got from step 1.
 3. Send an appropriate `HTTP` response depending on what `ServiceThing` returns.
 
@@ -132,8 +134,8 @@ There's no framework magic, no annotations, no magic beans, nothing.
 
 It's just a function, and we know how to test functions. It fits in nicely with the commentary above.
 
-- It takes a `Request` which is just a bundle of data for us to inspect, parse and validate.
-- It has a `ResponseWriter` which lets us write `HTTP` stuff.
+- It takes a [`http.Request`](https://golang.org/pkg/net/http/#Request) which is just a bundle of data for us to inspect, parse and validate.
+- > [A `http.ResponseWriter` interface is used by an HTTP handler to construct an HTTP response.](https://golang.org/pkg/net/http/#ResponseWriter)
 
 ### Super basic example test
 
@@ -156,7 +158,31 @@ func TestTeapotHandler(t *testing.T) {
 
 To test our function, we _call_ it.
 
-`http.ResponseWriter` is an interface which means we can pass in a `httptest.ResponseRecorder` which our function will use to write `HTTP` stuff. The recorder will record (or _spy_ on) what was sent, and then we can make some assertions in our test.
+For our test we pass a `httptest.ResponseRecorder` as our `http.ResponseWriter` argument, and our function will use it to write the `HTTP` response. The recorder will record (or _spy_ on) what was sent, and then we can make our assertions.
+
+## Calling a `ServiceThing` in our handler
+
+A common complaint about TDD tutorials is that they're always "too simple" and not "real world enough". My answer to that is:
+
+> Wouldn't it be nice if all your code was simple to read and test like the examples you mention?
+
+This is one of the biggest challenges we face but need to keep striving for. It _is possible_ (although not necessarily easy) to design code, so it can be simple to read and test if we practice and apply good software engineering principles.
+
+Let's go back to the example from before and the list of things it has to do:
+
+1. Do some HTTP stuff, send headers, status codes, etc.
+2. Decode the request's body into a `User`
+3. Connect to a database (and all the details around that)
+4. Query the database and applying some business logic depending on the result
+5. Generate a password
+6. Insert a record
+
+Taking the idea of a more ideal separation of concerns I'd want it to be more like:
+
+1. Parse and validate the structure of the `User` object sent in the request
+2. Call `UserService.Insert(user)` (this is our `ServiceThing`)
+3. If there's an error act on it (the example always sends a `400 BadRequest` which I don't think is right, but I'll stick to it) or return a `200 OK` (probably should be a `201 Created`)
+
 
 ## Wrapping up
 
@@ -172,3 +198,5 @@ Reiterating again; **Go's http handlers are just functions**. If you write them 
 - They're just functions! Show them being tested in a simple scenario
 - Sep of concerns, iterate with some kind of DB
 - What http handlers _should_ be responsible for
+- Cut out the stuff
+- Read that post on technical writing
