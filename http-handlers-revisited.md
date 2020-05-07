@@ -179,10 +179,163 @@ Let's go back to the example from before and the list of things it has to do:
 
 Taking the idea of a more ideal separation of concerns I'd want it to be more like:
 
-1. Parse and validate the structure of the `User` object sent in the request
-2. Call `UserService.Insert(user)` (this is our `ServiceThing`)
-3. If there's an error act on it (the example always sends a `400 BadRequest` which I don't think is right, but I'll stick to it) or return a `200 OK` (probably should be a `201 Created`)
+1. Decode the request's body into a `User`
+2. Call a `UserService.Insert(user)` (this is our `ServiceThing`)
+3. If there's an error act on it (the example always sends a `400 BadRequest` which I don't think is right, for now I'll just have a catch-all handler of a `500 Internal Server Error` _for now_. I must stress that returning `500` for all errors makes for a terrible API! Later on we can make the error handling more sophisticated, perhaps with [error types](error-types.md).
+4. If there's no error, `201 Created` with the ID as the response body (again for brevity/laziness)
 
+For the sake of brevity I won't go over the usual TDD process, check all the other chapters for examples.
+
+### New design
+
+```go
+type UserService interface {
+	Add(user User) (insertedID string, err error)
+}
+
+type UserServer struct {
+	service UserService
+}
+
+func NewUserServer(service UserService) *UserServer {
+	return &UserServer{service: service}
+}
+
+func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request)  {
+	defer r.Body.Close()
+
+	var newUser User
+	err := json.NewDecoder(r.Body).Decode(&newUser)
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not decode user payload: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	insertedID, err := u.service.Add(newUser)
+
+	if err != nil {
+		//todo: handle different kinds of errors differently
+		http.Error(w, fmt.Sprintf("problem storing new user: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprint(w, insertedID)
+}
+```
+
+Our `RegisterUser` method matches the shape of `http.HandlerFunc` so we're good to go. We've attached it as a method on a new type `UserServer` which contains a dependency on a `UserService` which is captured as an interface. Interfaces are a fantastic way to ensure our `HTTP` concerns are decoupled from any specific database details.
+
+If you wish to explore this approach in more detail following TDD read the [Dependency Injection](dependency-injection.md) chapter and the [HTTP Server chapter of the "Build an application" section](http-server.md).
+
+Now that we've decoupled ourselves from any specific implementation detail around registration writing the code for our handler is straightforward and follows the responsibilities described earlier.
+
+This simplicitly is reflected in our tests
+
+### The tests!
+
+```go
+type MockUserService struct {
+	AddFunc func(user User) (string, error)
+	UsersAdded []User
+}
+
+func (m *MockUserService) Add(user User) (insertedID string, err error) {
+	m.UsersAdded = append(m.UsersAdded, user)
+	return m.AddFunc(user)
+}
+
+func TestRegisterUser(t *testing.T) {
+	t.Run("can add valid users", func(t *testing.T) {
+		user := User{Name: "CJ"}
+		expectedInsertedID := "whatever"
+
+		service := &MockUserService{
+			AddFunc: func(user User) (string, error) {
+				return expectedInsertedID, nil
+			},
+		}
+		server := NewUserServer(service)
+
+		req := httptest.NewRequest(http.MethodGet, "/", userToJSON(user))
+		res := httptest.NewRecorder()
+
+		server.RegisterUser(res, req)
+
+		assertStatus(t, res.Code, http.StatusCreated)
+
+		if res.Body.String() != expectedInsertedID {
+			t.Errorf("expected body of %q but got %q", res.Body.String(), expectedInsertedID)
+		}
+
+		if len(service.UsersAdded)!= 1 {
+			t.Fatalf("expected 1 user added but got %d", len(service.UsersAdded))
+		}
+
+		if !reflect.DeepEqual(service.UsersAdded[0], user) {
+			t.Errorf("the user added %+v was not what was expected %+v", service.UsersAdded[0], user)
+		}
+	})
+
+	t.Run("returns 400 bad request if body is not valid user JSON", func(t *testing.T) {
+		server := NewUserServer(nil)
+
+		req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader("trouble will find me"))
+		res := httptest.NewRecorder()
+
+		server.RegisterUser(res, req)
+
+		assertStatus(t, res.Code, http.StatusBadRequest)
+	})
+
+	t.Run("returns a 500 internal server error if the service fails", func(t *testing.T) {
+		user := User{Name: "CJ"}
+
+		service := &MockUserService{
+			AddFunc: func(user User) (string, error) {
+				return "", errors.New("couldn't add new user")
+			},
+		}
+		server := NewUserServer(service)
+
+		req := httptest.NewRequest(http.MethodGet, "/", userToJSON(user))
+		res := httptest.NewRecorder()
+
+		server.RegisterUser(res, req)
+
+		assertStatus(t, res.Code, http.StatusInternalServerError)
+	})
+}
+```
+
+Now our handler isn't coupled to a specific implementation of storage it is trivial for us to write a `MockUserService` to help us write simple, fast unit tests to exercise the specific responsibilities it has.
+
+### But what about the database code? You're cheating!
+
+This is all very deliberate. We don't want HTTP handlers concerned with our business logic, databases, connections, etc.
+
+By doing this we have liberated the handler from messy details, we've _also_ made it easier to test our persistence layer and business logic as it is also no longer coupled to irrelevant HTTP details.
+
+All we need to do is now implement our `UserService` using whatever database we want to use
+
+```go
+type MongoUserService struct {
+}
+
+func NewMongoUserService() *MongoUserService {
+	//todo: pass in DB URL as argument to this function
+	//todo: connect to db, create a connection pool
+	return &MongoUserService{}
+}
+
+func (m MongoUserService) Add(user User) (insertedID string, err error) {
+	// use m.mongoConnection to perform queries
+	panic("implement me")
+}
+```
+
+We can test this separately and once we're happy in `main` we can snap these two units together for our working application.
 
 ## Wrapping up
 
