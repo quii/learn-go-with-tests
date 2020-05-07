@@ -1,8 +1,10 @@
 # HTTP Handlers Revisited
 
+**[You can find all the code here](https://github.com/quii/learn-go-with-tests/tree/master/q-and-a/http-handlers-revisited)**
+
 This book already has a chapter on [testing a HTTP handler](http-server.md) but this will feature a broader discussion on designing them, so they are simple to test.
 
-We'll take a look at a real example and how we can improve how it's designed.
+We'll take a look at a real example and how we can improve how it's designed by applying principles such as single responsibility principle and separation of concerns. These principles can be realised by using [interfaces](structs-methods-and-interfaces.md) and [dependency injection](dependency-injection.md). By doing this we'll show how testing handlers is actually quite trivial.
 
 ![Common question in Go community illustrated](amazing-art.png)
 
