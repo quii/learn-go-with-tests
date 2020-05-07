@@ -45,7 +45,7 @@ func TestRegisterUser(t *testing.T) {
 			t.Errorf("expected body of %q but got %q", res.Body.String(), expectedInsertedID)
 		}
 
-		if len(service.UsersRegistered)!= 1 {
+		if len(service.UsersRegistered) != 1 {
 			t.Fatalf("expected 1 user added but got %d", len(service.UsersRegistered))
 		}
 
@@ -84,7 +84,7 @@ func TestRegisterUser(t *testing.T) {
 	})
 }
 
-func assertStatus(t *testing.T, got, want int){
+func assertStatus(t *testing.T, got, want int) {
 	t.Helper()
 	if got != want {
 		t.Errorf("wanted http status %d but got %d", got, want)

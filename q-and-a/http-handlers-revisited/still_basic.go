@@ -22,7 +22,7 @@ func NewUserServer(service UserService) *UserServer {
 	return &UserServer{service: service}
 }
 
-func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request)  {
+func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var newUser User

@@ -231,15 +231,15 @@ func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request)  {
 }
 ```
 
-Our `RegisterUser` method matches the shape of `http.HandlerFunc` so we're good to go. We've attached it as a method on a new type `UserServer` which contains a dependency on a `UserService` which is captured as an interface. Interfaces are a fantastic way to ensure our `HTTP` concerns are decoupled from any specific database details.
+Our `RegisterUser` method matches the shape of `http.HandlerFunc` so we're good to go. We've attached it as a method on a new type `UserServer` which contains a dependency on a `UserService` which is captured as an interface. Interfaces are a fantastic way to ensure our `HTTP` concerns are decoupled from any specific implementation details.
 
 If you wish to explore this approach in more detail following TDD read the [Dependency Injection](dependency-injection.md) chapter and the [HTTP Server chapter of the "Build an application" section](http-server.md).
 
 Now that we've decoupled ourselves from any specific implementation detail around registration writing the code for our handler is straightforward and follows the responsibilities described earlier.
 
-This simplicity is reflected in our tests
-
 ### The tests!
+
+This simplicity is reflected in our tests.
 
 ```go
 type MockUserService struct {
@@ -275,7 +275,7 @@ func TestRegisterUser(t *testing.T) {
 			t.Errorf("expected body of %q but got %q", res.Body.String(), expectedInsertedID)
 		}
 
-		if len(service.UsersRegistered)!= 1 {
+		if len(service.UsersRegistered) != 1 {
 			t.Fatalf("expected 1 user added but got %d", len(service.UsersRegistered))
 		}
 
@@ -317,7 +317,7 @@ func TestRegisterUser(t *testing.T) {
 
 Now our handler isn't coupled to a specific implementation of storage it is trivial for us to write a `MockUserService` to help us write simple, fast unit tests to exercise the specific responsibilities it has.
 
-### But what about the database code? You're cheating!
+### What about the database code? You're cheating!
 
 This is all very deliberate. We don't want HTTP handlers concerned with our business logic, databases, connections, etc.
 
@@ -357,16 +357,14 @@ These principles not only make our lives easier in the short-term they make the 
 
 It wouldn't be surprising that further iterations of this system we'd want to email the user a confirmation of registration.
 
-With the old design we'd have to change the handler _and_ the surrounding tests. By separating concerns using an interface we don't have to edit the handler _at all_ because it's not concerned with the business logic around registration.
+With the old design we'd have to change the handler _and_ the surrounding tests. This is often how parts of code become unmaintainable, more and more functionality creeps in because it's already _designed_ that way; for the "HTTP handler" to handle... everything!
+
+By separating concerns using an interface we don't have to edit the handler _at all_ because it's not concerned with the business logic around registration.
 
 ## Wrapping up
 
 Testing Go's HTTP handlers is not challenging, but designing good software can be!
 
-People make the mistake of thinking HTTP handlers are special and throw out good software engineering practices when writing them which then makes them challenging to test.
+People make the mistake of thinking HTTP handlers are special and throw out good software engineering practices when writing them which then makes testing them challenging.
 
 Reiterating again; **Go's http handlers are just functions**. If you write them like you would other functions, with clear responsibilities, and a good separation of concerns you will have no trouble testing them, and your codebase will be healthier for it.
-
-### Notes: Things to talk about
-
-- Read that post on technical writing
