@@ -120,10 +120,10 @@ I'm not saying every HTTP handler _ever_ should have roughly this shape, but 99 
 
 When you separate these concerns:
 
- - Testing handlers becomes a breeze and is focused on clear requirements
+ - Testing handlers becomes a breeze and is focused a small number of concerns.
  - Importantly testing `ImportantBusinessLogic` no longer has to concern itself with `HTTP`, you can test the business logic cleanly.
  - You can use `ImportantBusinessLogic` in other contexts without having to modify it.
- - If `ImportantBusinessLogic` changes what it does, if the interface remains the same you don't have to change your handlers
+ - If `ImportantBusinessLogic` changes what it does, so lang as the interface remains the same you don't have to change your handlers.
 
 ## Go's Handlers
 
