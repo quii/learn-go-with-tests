@@ -4,6 +4,8 @@ This book already has a chapter on [testing a HTTP handler](http-server.md) but 
 
 We'll take a look at a real example and how we can improve how it's designed.
 
+![Common question in Go community illustrated](amazing-art.png)
+
 Testing HTTP handlers seems to be a recurring question in the Go community, and I think it points to a wider problem of people misunderstanding how to design them.
 
 So often people's difficulties with testing stems from the design of their code rather than the actual writing of tests. As I stress so often in this book:
@@ -347,9 +349,5 @@ Reiterating again; **Go's http handlers are just functions**. If you write them 
 
 ### Notes: Things to talk about
 
-- Complaints about examples being too simplistic; well design your code so it is simplistic
-- They're just functions! Show them being tested in a simple scenario
-- Sep of concerns, iterate with some kind of DB
-- What http handlers _should_ be responsible for
 - Cut out the stuff
 - Read that post on technical writing
