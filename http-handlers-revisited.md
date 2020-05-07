@@ -190,7 +190,7 @@ Taking the idea of a more ideal separation of concerns I'd want it to be more li
 
 1. Decode the request's body into a `User`
 2. Call a `UserService.Register(user)` (this is our `ServiceThing`)
-3. If there's an error act on it (the example always sends a `400 BadRequest` which I don't think is right, for now I'll just have a catch-all handler of a `500 Internal Server Error` _for now_. I must stress that returning `500` for all errors makes for a terrible API! Later on we can make the error handling more sophisticated, perhaps with [error types](error-types.md).
+3. If there's an error act on it (the example always sends a `400 BadRequest` which I don't think is right, I'll just have a catch-all handler of a `500 Internal Server Error` _for now_. I must stress that returning `500` for all errors makes for a terrible API! Later on we can make the error handling more sophisticated, perhaps with [error types](error-types.md).
 4. If there's no error, `201 Created` with the ID as the response body (again for terseness/laziness)
 
 For the sake of brevity I won't go over the usual TDD process, check all the other chapters for examples.
@@ -213,6 +213,7 @@ func NewUserServer(service UserService) *UserServer {
 func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request)  {
 	defer r.Body.Close()
 
+    // request parsing and validation
 	var newUser User
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 
@@ -221,11 +222,13 @@ func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
+    // call a service thing to take care of the hard work
 	insertedID, err := u.service.Register(newUser)
 
+    // depending on what we get back, respond accordingly
 	if err != nil {
 		//todo: handle different kinds of errors differently
-		http.Error(w, fmt.Sprintf("problem storing new user: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("problem registering new user: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -234,7 +237,9 @@ func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request)  {
 }
 ```
 
-Our `RegisterUser` method matches the shape of `http.HandlerFunc` so we're good to go. We've attached it as a method on a new type `UserServer` which contains a dependency on a `UserService` which is captured as an interface. Interfaces are a fantastic way to ensure our `HTTP` concerns are decoupled from any specific implementation details.
+Our `RegisterUser` method matches the shape of `http.HandlerFunc` so we're good to go. We've attached it as a method on a new type `UserServer` which contains a dependency on a `UserService` which is captured as an interface.
+
+Interfaces are a fantastic way to ensure our `HTTP` concerns are decoupled from any specific implementation; we can just call the method on the dependency, and we don't have to care _how_ a user gets registered.
 
 If you wish to explore this approach in more detail following TDD read the [Dependency Injection](dependency-injection.md) chapter and the [HTTP Server chapter of the "Build an application" section](http-server.md).
 

@@ -37,7 +37,7 @@ func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		//todo: handle different kinds of errors differently
-		http.Error(w, fmt.Sprintf("problem storing new user: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("problem registering new user: %v", err), http.StatusInternalServerError)
 		return
 	}
 
