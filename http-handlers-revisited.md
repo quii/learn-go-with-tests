@@ -1,6 +1,6 @@
 # HTTP Handlers Revisited
 
-This book already has a chapter on [testing a HTTP handler](http-server.md) but this will feature a broader discussion on designing them, so they are simple to test.
+This book already has a chapter on [testing a HTTP handler](http-server.md) but this will feature a broader discussion on designing them, so they are simple to test. We'll take a look at a real example and how we can improve how it's designed.
 
 Testing HTTP handlers seems to be a recurring question in the Go community, and I think it points to a wider problem of people misunderstanding how to design them.
 
