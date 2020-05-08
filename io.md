@@ -344,7 +344,9 @@ t.Run("get player score", func(t *testing.T) {
 
 ## Try to run the test
 
-`./FileSystemStore_test.go:38:15: store.GetPlayerScore undefined (type FileSystemPlayerStore has no field or method GetPlayerScore)`
+```
+./FileSystemStore_test.go:38:15: store.GetPlayerScore undefined (type FileSystemPlayerStore has no field or method GetPlayerScore)
+```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
