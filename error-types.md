@@ -37,23 +37,23 @@ As Pedro says, we _could_ write a test for the status error like so.
 ```go
 t.Run("when you don't get a 200 you get a status error", func(t *testing.T) {
 
-    svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-        res.WriteHeader(http.StatusTeapot)
-    }))
-    defer svr.Close()
+	svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		res.WriteHeader(http.StatusTeapot)
+	}))
+	defer svr.Close()
 
-    _, err := DumbGetter(svr.URL)
+	_, err := DumbGetter(svr.URL)
 
-    if err == nil {
-        t.Fatal("expected an error")
-    }
+	if err == nil {
+		t.Fatal("expected an error")
+	}
 
-    want := fmt.Sprintf("did not get 200 from %s, got %d", svr.URL, http.StatusTeapot)
-    got := err.Error()
+	want := fmt.Sprintf("did not get 200 from %s, got %d", svr.URL, http.StatusTeapot)
+	got := err.Error()
 
-    if got != want {
-        t.Errorf(`got "%v", want "%v"`, got, want)
-    }
+	if got != want {
+		t.Errorf(`got "%v", want "%v"`, got, want)
+	}
 })
 ```
 
@@ -95,28 +95,28 @@ Let's change our existing test to reflect this need
 ```go
 t.Run("when you don't get a 200 you get a status error", func(t *testing.T) {
 
-    svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-        res.WriteHeader(http.StatusTeapot)
-    }))
-    defer svr.Close()
+	svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		res.WriteHeader(http.StatusTeapot)
+	}))
+	defer svr.Close()
 
-    _, err := DumbGetter(svr.URL)
+	_, err := DumbGetter(svr.URL)
 
-    if err == nil {
-        t.Fatal("expected an error")
-    }
+	if err == nil {
+		t.Fatal("expected an error")
+	}
 
-    got, isStatusErr := err.(BadStatusError)
+	got, isStatusErr := err.(BadStatusError)
 
-    if !isStatusErr {
-        t.Fatalf("was not a BadStatusError, got %T", err)
-    }
+	if !isStatusErr {
+		t.Fatalf("was not a BadStatusError, got %T", err)
+	}
 
-    want := BadStatusError{URL:svr.URL, Status:http.StatusTeapot}
+	want := BadStatusError{URL: svr.URL, Status: http.StatusTeapot}
 
-    if got != want {
-        t.Errorf("got %v, want %v", got, want)
-    }
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
 })
 ```
 
@@ -144,7 +144,7 @@ Let's fix `DumbGetter` by updating our error handling code to use our type
 
 ```go
 if res.StatusCode != http.StatusOK {
-    return "", BadStatusError{URL: url, Status: res.StatusCode}
+	return "", BadStatusError{URL: url, Status: res.StatusCode}
 }
 ```
 
@@ -169,28 +169,28 @@ As of Go 1.13 there are new ways to work with errors in the standard library whi
 ```go
 t.Run("when you don't get a 200 you get a status error", func(t *testing.T) {
 
-    svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-        res.WriteHeader(http.StatusTeapot)
-    }))
-    defer svr.Close()
+	svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		res.WriteHeader(http.StatusTeapot)
+	}))
+	defer svr.Close()
 
-    _, err := DumbGetter(svr.URL)
+	_, err := DumbGetter(svr.URL)
 
-    if err == nil {
-        t.Fatal("expected an error")
-    }
+	if err == nil {
+		t.Fatal("expected an error")
+	}
 
-    var got BadStatusError
-    isBadStatusError := errors.As(err, &got)
-    want := BadStatusError{URL: svr.URL, Status: http.StatusTeapot}
+	var got BadStatusError
+	isBadStatusError := errors.As(err, &got)
+	want := BadStatusError{URL: svr.URL, Status: http.StatusTeapot}
 
-    if !isBadStatusError {
-        t.Fatalf("was not a BadStatusError, got %T", err)
-    }
+	if !isBadStatusError {
+		t.Fatalf("was not a BadStatusError, got %T", err)
+	}
 
-    if got != want {
-        t.Errorf("got %v, want %v", got, want)
-    }
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
 })
 ```
 

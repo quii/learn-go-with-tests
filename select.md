@@ -17,15 +17,15 @@ Let's start with something naive to get us going.
 
 ```go
 func TestRacer(t *testing.T) {
-    slowURL := "http://www.facebook.com"
-    fastURL := "http://www.quii.co.uk"
+	slowURL := "http://www.facebook.com"
+	fastURL := "http://www.quii.co.uk"
 
-    want := fastURL
-    got := Racer(slowURL, fastURL)
+	want := fastURL
+	got := Racer(slowURL, fastURL)
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 ```
 
@@ -39,7 +39,7 @@ We know this isn't perfect and has problems but it will get us going. It's impor
 
 ```go
 func Racer(a, b string) (winner string) {
-    return
+	return
 }
 ```
 
@@ -49,19 +49,19 @@ func Racer(a, b string) (winner string) {
 
 ```go
 func Racer(a, b string) (winner string) {
-    startA := time.Now()
-    http.Get(a)
-    aDuration := time.Since(startA)
+	startA := time.Now()
+	http.Get(a)
+	aDuration := time.Since(startA)
 
-    startB := time.Now()
-    http.Get(b)
-    bDuration := time.Since(startB)
+	startB := time.Now()
+	http.Get(b)
+	bDuration := time.Since(startB)
 
-    if aDuration < bDuration {
-        return a
-    }
+	if aDuration < bDuration {
+		return a
+	}
 
-    return b
+	return b
 }
 ```
 
@@ -92,27 +92,27 @@ Let's change our tests to use mocks so we have reliable servers to test against 
 ```go
 func TestRacer(t *testing.T) {
 
-    slowServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        time.Sleep(20 * time.Millisecond)
-        w.WriteHeader(http.StatusOK)
-    }))
+	slowServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(20 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	}))
 
-    fastServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusOK)
-    }))
+	fastServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
 
-    slowURL := slowServer.URL
-    fastURL := fastServer.URL
+	slowURL := slowServer.URL
+	fastURL := fastServer.URL
 
-    want := fastURL
-    got := Racer(slowURL, fastURL)
+	want := fastURL
+	got := Racer(slowURL, fastURL)
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 
-    slowServer.Close()
-    fastServer.Close()
+	slowServer.Close()
+	fastServer.Close()
 }
 ```
 
@@ -136,20 +136,20 @@ We have some duplication in both our production code and test code.
 
 ```go
 func Racer(a, b string) (winner string) {
-    aDuration := measureResponseTime(a)
-    bDuration := measureResponseTime(b)
+	aDuration := measureResponseTime(a)
+	bDuration := measureResponseTime(b)
 
-    if aDuration < bDuration {
-        return a
-    }
+	if aDuration < bDuration {
+		return a
+	}
 
-    return b
+	return b
 }
 
 func measureResponseTime(url string) time.Duration {
-    start := time.Now()
-    http.Get(url)
-    return time.Since(start)
+	start := time.Now()
+	http.Get(url)
+	return time.Since(start)
 }
 ```
 
@@ -158,28 +158,28 @@ This DRY-ing up makes our `Racer` code a lot easier to read.
 ```go
 func TestRacer(t *testing.T) {
 
-    slowServer := makeDelayedServer(20 * time.Millisecond)
-    fastServer := makeDelayedServer(0 * time.Millisecond)
+	slowServer := makeDelayedServer(20 * time.Millisecond)
+	fastServer := makeDelayedServer(0 * time.Millisecond)
 
-    defer slowServer.Close()
-    defer fastServer.Close()
+	defer slowServer.Close()
+	defer fastServer.Close()
 
-    slowURL := slowServer.URL
-    fastURL := fastServer.URL
+	slowURL := slowServer.URL
+	fastURL := fastServer.URL
 
-    want := fastURL
-    got := Racer(slowURL, fastURL)
+	want := fastURL
+	got := Racer(slowURL, fastURL)
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 
 func makeDelayedServer(delay time.Duration) *httptest.Server {
-    return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        time.Sleep(delay)
-        w.WriteHeader(http.StatusOK)
-    }))
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(delay)
+		w.WriteHeader(http.StatusOK)
+	}))
 }
 ```
 
@@ -204,21 +204,21 @@ To do this, we're going to introduce a new construct called `select` which helps
 
 ```go
 func Racer(a, b string) (winner string) {
-    select {
-    case <-ping(a):
-        return a
-    case <-ping(b):
-        return b
-    }
+	select {
+	case <-ping(a):
+		return a
+	case <-ping(b):
+		return b
+	}
 }
 
 func ping(url string) chan struct{} {
-    ch := make(chan struct{})
-    go func() {
-        http.Get(url)
-        close(ch)
-    }()
-    return ch
+	ch := make(chan struct{})
+	go func() {
+		http.Get(url)
+		close(ch)
+	}()
+	return ch
 }
 ```
 
@@ -258,17 +258,17 @@ Our final requirement was to return an error if `Racer` takes longer than 10 sec
 
 ```go
 t.Run("returns an error if a server doesn't respond within 10s", func(t *testing.T) {
-    serverA := makeDelayedServer(11 * time.Second)
-    serverB := makeDelayedServer(12 * time.Second)
+	serverA := makeDelayedServer(11 * time.Second)
+	serverB := makeDelayedServer(12 * time.Second)
 
-    defer serverA.Close()
-    defer serverB.Close()
+	defer serverA.Close()
+	defer serverB.Close()
 
-    _, err := Racer(serverA.URL, serverB.URL)
+	_, err := Racer(serverA.URL, serverB.URL)
 
-    if err == nil {
-        t.Error("expected an error but didn't get one")
-    }
+	if err == nil {
+		t.Error("expected an error but didn't get one")
+	}
 })
 ```
 
@@ -282,12 +282,12 @@ We've made our test servers take longer than 10s to return to exercise this scen
 
 ```go
 func Racer(a, b string) (winner string, error error) {
-    select {
-    case <-ping(a):
-        return a, nil
-    case <-ping(b):
-        return b, nil
-    }
+	select {
+	case <-ping(a):
+		return a, nil
+	case <-ping(b):
+		return b, nil
+	}
 }
 ```
 
@@ -307,14 +307,14 @@ If you run it now after 11 seconds it will fail.
 
 ```go
 func Racer(a, b string) (winner string, error error) {
-    select {
-    case <-ping(a):
-        return a, nil
-    case <-ping(b):
-        return b, nil
-    case <-time.After(10 * time.Second):
-        return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
-    }
+	select {
+	case <-ping(a):
+		return a, nil
+	case <-ping(b):
+		return b, nil
+	case <-time.After(10 * time.Second):
+		return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
+	}
 }
 ```
 
@@ -330,14 +330,14 @@ What we can do is make the timeout configurable. So in our test, we can have a v
 
 ```go
 func Racer(a, b string, timeout time.Duration) (winner string, error error) {
-    select {
-    case <-ping(a):
-        return a, nil
-    case <-ping(b):
-        return b, nil
-    case <-time.After(timeout):
-        return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
-    }
+	select {
+	case <-ping(a):
+		return a, nil
+	case <-ping(b):
+		return b, nil
+	case <-time.After(timeout):
+		return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
+	}
 }
 ```
 
@@ -354,18 +354,18 @@ Given this knowledge, let's do a little refactoring to be sympathetic to both ou
 var tenSecondTimeout = 10 * time.Second
 
 func Racer(a, b string) (winner string, error error) {
-    return ConfigurableRacer(a, b, tenSecondTimeout)
+	return ConfigurableRacer(a, b, tenSecondTimeout)
 }
 
 func ConfigurableRacer(a, b string, timeout time.Duration) (winner string, error error) {
-    select {
-    case <-ping(a):
-        return a, nil
-    case <-ping(b):
-        return b, nil
-    case <-time.After(timeout):
-        return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
-    }
+	select {
+	case <-ping(a):
+		return a, nil
+	case <-ping(b):
+		return b, nil
+	case <-time.After(timeout):
+		return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
+	}
 }
 ```
 
@@ -374,39 +374,39 @@ Our users and our first test can use `Racer` (which uses `ConfigurableRacer` und
 ```go
 func TestRacer(t *testing.T) {
 
-    t.Run("compares speeds of servers, returning the url of the fastest one", func(t *testing.T) {
-        slowServer := makeDelayedServer(20 * time.Millisecond)
-        fastServer := makeDelayedServer(0 * time.Millisecond)
+	t.Run("compares speeds of servers, returning the url of the fastest one", func(t *testing.T) {
+		slowServer := makeDelayedServer(20 * time.Millisecond)
+		fastServer := makeDelayedServer(0 * time.Millisecond)
 
-        defer slowServer.Close()
-        defer fastServer.Close()
+		defer slowServer.Close()
+		defer fastServer.Close()
 
-        slowURL := slowServer.URL
-        fastURL := fastServer.URL
+		slowURL := slowServer.URL
+		fastURL := fastServer.URL
 
-        want := fastURL
-        got, err := Racer(slowURL, fastURL)
+		want := fastURL
+		got, err := Racer(slowURL, fastURL)
 
-        if err != nil {
-            t.Fatalf("did not expect an error but got one %v", err)
-        }
+		if err != nil {
+			t.Fatalf("did not expect an error but got one %v", err)
+		}
 
-        if got != want {
-            t.Errorf("got %q, want %q", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
 
-    t.Run("returns an error if a server doesn't respond within 10s", func(t *testing.T) {
-        server := makeDelayedServer(25 * time.Millisecond)
+	t.Run("returns an error if a server doesn't respond within 10s", func(t *testing.T) {
+		server := makeDelayedServer(25 * time.Millisecond)
 
-        defer server.Close()
+		defer server.Close()
 
-        _, err := ConfigurableRacer(server.URL, server.URL, 20*time.Millisecond)
+		_, err := ConfigurableRacer(server.URL, server.URL, 20*time.Millisecond)
 
-        if err == nil {
-            t.Error("expected an error but didn't get one")
-        }
-    })
+		if err == nil {
+			t.Error("expected an error but didn't get one")
+		}
+	})
 }
 ```
 
