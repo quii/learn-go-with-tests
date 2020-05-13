@@ -848,7 +848,7 @@ It seems the obvious thing to do, would be to make it so `playerServerWS` _does_
 
 ```go
 func (w *playerServerWS) Write(p []byte) (n int, err error) {
-	err = w.WriteMessage(1, p)
+	err = w.WriteMessage(websocket.TextMessage, p)
 
 	if err != nil {
 		return 0, err
