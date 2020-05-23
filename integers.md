@@ -14,12 +14,12 @@ package integers
 import "testing"
 
 func TestAdder(t *testing.T) {
-    sum := Add(2, 2)
-    expected := 4
+	sum := Add(2, 2)
+	expected := 4
 
-    if sum != expected {
-        t.Errorf("expected '%d' but got '%d'", expected, sum)
-    }
+	if sum != expected {
+		t.Errorf("expected '%d' but got '%d'", expected, sum)
+	}
 }
 ```
 
@@ -43,7 +43,7 @@ Write enough code to satisfy the compiler _and that's all_ - remember we want to
 package integers
 
 func Add(x, y int) int {
-    return 0
+	return 0
 }
 ```
 
@@ -61,7 +61,7 @@ In the strictest sense of TDD we should now write the _minimal amount of code to
 
 ```go
 func Add(x, y int) int {
-    return 4
+	return 4
 }
 ```
 
@@ -75,7 +75,7 @@ For now, let's fix it properly
 
 ```go
 func Add(x, y int) int {
-    return x + y
+	return x + y
 }
 ```
 
@@ -94,7 +94,7 @@ You can add documentation to functions with comments, and these will appear in G
 ```go
 // Add takes two integers and returns the sum of them.
 func Add(x, y int) int {
-    return x + y
+	return x + y
 }
 ```
 
@@ -112,9 +112,9 @@ As with typical tests, examples are functions that reside in a package's `_test.
 
 ```go
 func ExampleAdd() {
-    sum := Add(1, 5)
-    fmt.Println(sum)
-    // Output: 6
+	sum := Add(1, 5)
+	fmt.Println(sum)
+	// Output: 6
 }
 ```
 

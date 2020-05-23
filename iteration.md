@@ -16,12 +16,12 @@ package iteration
 import "testing"
 
 func TestRepeat(t *testing.T) {
-    repeated := Repeat("a")
-    expected := "aaaaa"
+	repeated := Repeat("a")
+	expected := "aaaaa"
 
-    if repeated != expected {
-        t.Errorf("expected %q but got %q", expected, repeated)
-    }
+	if repeated != expected {
+		t.Errorf("expected %q but got %q", expected, repeated)
+	}
 }
 ```
 
@@ -39,7 +39,7 @@ All you need to do right now is enough to make it compile so you can check your 
 package iteration
 
 func Repeat(character string) string {
-    return ""
+	return ""
 }
 ```
 
@@ -53,18 +53,18 @@ The `for` syntax is very unremarkable and follows most C-like languages.
 
 ```go
 func Repeat(character string) string {
-    var repeated string
-    for i := 0; i < 5; i++ {
-        repeated = repeated + character
-    }
-    return repeated
+	var repeated string
+	for i := 0; i < 5; i++ {
+		repeated = repeated + character
+	}
+	return repeated
 }
 ```
 
 Unlike other languages like C, Java, or JavaScript there are no parentheses surrounding the three components of the for statement and the braces `{ }` are always required. You might wonder what is happening in the row
 
 ```go
-    var repeated string
+	var repeated string
 ```
 
 as we've been using `:=` so far to declare and initializing variables. However, `:=` is simply [short hand for both steps](https://gobyexample.com/variables). Here we are declaring a `string` variable only. Hence, the explicit version. We can also use `var` to declare functions, as we'll see later on.
@@ -81,7 +81,7 @@ Now it's time to refactor and introduce another construct `+=` assignment operat
 const repeatCount = 5
 
 func Repeat(character string) string {
-    var repeated string
+	var repeated string
     for i := 0; i < repeatCount; i++ {
         repeated += character
     }
@@ -97,9 +97,9 @@ Writing [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks) in Go is an
 
 ```go
 func BenchmarkRepeat(b *testing.B) {
-    for i := 0; i < b.N; i++ {
-        Repeat("a")
-    }
+	for i := 0; i < b.N; i++ {
+		Repeat("a")
+	}
 }
 ```
 

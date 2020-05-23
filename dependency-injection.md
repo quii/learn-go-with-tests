@@ -17,7 +17,7 @@ Just to recap, here is what that function could look like
 
 ```go
 func Greet(name string) {
-    fmt.Printf("Hello, %s", name)
+	fmt.Printf("Hello, %s", name)
 }
 ```
 
@@ -34,7 +34,7 @@ If you look at the source code of `fmt.Printf` you can see a way for us to hook 
 ```go
 // It returns the number of bytes written and any write error encountered.
 func Printf(format string, a ...interface{}) (n int, err error) {
-    return Fprintf(os.Stdout, format, a...)
+	return Fprintf(os.Stdout, format, a...)
 }
 ```
 
@@ -44,11 +44,11 @@ What exactly _is_ an `os.Stdout`? What does `Fprintf` expect to get passed to it
 
 ```go
 func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
-    p := newPrinter()
-    p.doPrintf(format, a)
-    n, err = w.Write(p.buf)
-    p.free()
-    return
+	p := newPrinter()
+	p.doPrintf(format, a)
+	n, err = w.Write(p.buf)
+	p.free()
+	return
 }
 ```
 
@@ -56,7 +56,7 @@ An `io.Writer`
 
 ```go
 type Writer interface {
-    Write(p []byte) (n int, err error)
+	Write(p []byte) (n int, err error)
 }
 ```
 
@@ -68,15 +68,15 @@ So we know under the covers we're ultimately using `Writer` to send our greeting
 
 ```go
 func TestGreet(t *testing.T) {
-    buffer := bytes.Buffer{}
-    Greet(&buffer,"Chris")
+	buffer := bytes.Buffer{}
+	Greet(&buffer, "Chris")
 
-    got := buffer.String()
-    want := "Hello, Chris"
+	got := buffer.String()
+	want := "Hello, Chris"
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 }
 ```
 
@@ -100,7 +100,7 @@ _Listen to the compiler_ and fix the problem.
 
 ```go
 func Greet(writer *bytes.Buffer, name string) {
-    fmt.Printf("Hello, %s", name)
+	fmt.Printf("Hello, %s", name)
 }
 ```
 
@@ -114,7 +114,7 @@ Use the writer to send the greeting to the buffer in our test. Remember `fmt.Fpr
 
 ```go
 func Greet(writer *bytes.Buffer, name string) {
-    fmt.Fprintf(writer, "Hello, %s", name)
+	fmt.Fprintf(writer, "Hello, %s", name)
 }
 ```
 
@@ -128,7 +128,7 @@ To demonstrate this, try wiring up the `Greet` function into a Go application wh
 
 ```go
 func main() {
-    Greet(os.Stdout, "Elodie")
+	Greet(os.Stdout, "Elodie")
 }
 ```
 
@@ -152,7 +152,7 @@ func Greet(writer io.Writer, name string) {
 }
 
 func main() {
-    Greet(os.Stdout, "Elodie")
+	Greet(os.Stdout, "Elodie")
 }
 ```
 
@@ -168,21 +168,21 @@ Run the following
 package main
 
 import (
-    "fmt"
-    "io"
-    "net/http"
+	"fmt"
+	"io"
+	"net/http"
 )
 
 func Greet(writer io.Writer, name string) {
-    fmt.Fprintf(writer, "Hello, %s", name)
+	fmt.Fprintf(writer, "Hello, %s", name)
 }
 
 func MyGreeterHandler(w http.ResponseWriter, r *http.Request) {
-    Greet(w, "world")
+	Greet(w, "world")
 }
 
 func main() {
-    http.ListenAndServe(":5000", http.HandlerFunc(MyGreeterHandler))
+	http.ListenAndServe(":5000", http.HandlerFunc(MyGreeterHandler))
 }
 ```
 

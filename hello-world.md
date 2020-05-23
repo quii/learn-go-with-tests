@@ -20,7 +20,7 @@ package main
 import "fmt"
 
 func main() {
-    fmt.Println("Hello, world")
+	fmt.Println("Hello, world")
 }
 ```
 
@@ -44,11 +44,11 @@ package main
 import "fmt"
 
 func Hello() string {
-    return "Hello, world"
+	return "Hello, world"
 }
 
 func main() {
-    fmt.Println(Hello())
+	fmt.Println(Hello())
 }
 ```
 
@@ -62,12 +62,12 @@ package main
 import "testing"
 
 func TestHello(t *testing.T) {
-    got := Hello()
-    want := "Hello, world"
+	got := Hello()
+	want := "Hello, world"
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 }
 ```
 
@@ -126,12 +126,12 @@ package main
 import "testing"
 
 func TestHello(t *testing.T) {
-    got := Hello("Chris")
-    want := "Hello, Chris"
+	got := Hello("Chris")
+	want := "Hello, Chris"
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 }
 ```
 
@@ -151,7 +151,7 @@ Edit the `Hello` function to accept an argument of type string
 
 ```go
 func Hello(name string) string {
-    return "Hello, world"
+	return "Hello, world"
 }
 ```
 
@@ -159,7 +159,7 @@ If you try and run your tests again your `main.go` will fail to compile because 
 
 ```go
 func main() {
-    fmt.Println(Hello("world"))
+	fmt.Println(Hello("world"))
 }
 ```
 
@@ -175,7 +175,7 @@ Let's make the test pass by using the name argument and concatenate it with `Hel
 
 ```go
 func Hello(name string) string {
-    return "Hello, " + name
+	return "Hello, " + name
 }
 ```
 
@@ -205,7 +205,7 @@ We can now refactor our code
 const englishHelloPrefix = "Hello, "
 
 func Hello(name string) string {
-    return englishHelloPrefix + name
+	return englishHelloPrefix + name
 }
 ```
 
@@ -224,23 +224,23 @@ Start by writing a new failing test
 ```go
 func TestHello(t *testing.T) {
 
-    t.Run("saying hello to people", func(t *testing.T) {
-        got := Hello("Chris")
-        want := "Hello, Chris"
+	t.Run("saying hello to people", func(t *testing.T) {
+		got := Hello("Chris")
+		want := "Hello, Chris"
 
-        if got != want {
-            t.Errorf("got %q want %q", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %q want %q", got, want)
+		}
+	})
 
-    t.Run("say 'Hello, World' when an empty string is supplied", func(t *testing.T) {
-        got := Hello("")
-        want := "Hello, World"
+	t.Run("say 'Hello, World' when an empty string is supplied", func(t *testing.T) {
+		got := Hello("")
+		want := "Hello, World"
 
-        if got != want {
-            t.Errorf("got %q want %q", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %q want %q", got, want)
+		}
+	})
 
 }
 ```
@@ -260,24 +260,24 @@ We can and should refactor our tests.
 ```go
 func TestHello(t *testing.T) {
 
-    assertCorrectMessage := func(t *testing.T, got, want string) {
-        t.Helper()
-        if got != want {
-            t.Errorf("got %q want %q", got, want)
-        }
-    }
+	assertCorrectMessage := func(t *testing.T, got, want string) {
+		t.Helper()
+		if got != want {
+			t.Errorf("got %q want %q", got, want)
+		}
+	}
 
-    t.Run("saying hello to people", func(t *testing.T) {
-        got := Hello("Chris")
-        want := "Hello, Chris"
-        assertCorrectMessage(t, got, want)
-    })
+	t.Run("saying hello to people", func(t *testing.T) {
+		got := Hello("Chris")
+		want := "Hello, Chris"
+		assertCorrectMessage(t, got, want)
+	})
 
-    t.Run("empty string defaults to 'World'", func(t *testing.T) {
-        got := Hello("")
-        want := "Hello, World"
-        assertCorrectMessage(t, got, want)
-    })
+	t.Run("empty string defaults to 'World'", func(t *testing.T) {
+		got := Hello("")
+		want := "Hello, World"
+		assertCorrectMessage(t, got, want)
+	})
 
 }
 ```
@@ -294,10 +294,10 @@ Now that we have a well-written failing test, let's fix the code, using an `if`.
 const englishHelloPrefix = "Hello, "
 
 func Hello(name string) string {
-    if name == "" {
-        name = "World"
-    }
-    return englishHelloPrefix + name
+	if name == "" {
+		name = "World"
+	}
+	return englishHelloPrefix + name
 }
 ```
 
@@ -337,11 +337,11 @@ We should be confident that we can use TDD to flesh out this functionality easil
 Write a test for a user passing in Spanish. Add it to the existing suite.
 
 ```go
-    t.Run("in Spanish", func(t *testing.T) {
-        got := Hello("Elodie", "Spanish")
-        want := "Hola, Elodie"
-        assertCorrectMessage(t, got, want)
-    })
+	t.Run("in Spanish", func(t *testing.T) {
+		got := Hello("Elodie", "Spanish")
+		want := "Hola, Elodie"
+		assertCorrectMessage(t, got, want)
+	})
 ```
 
 Remember not to cheat! _Test first_. When you try and run the test, the compiler _should_ complain because you are calling `Hello` with two arguments rather than one.
@@ -356,10 +356,10 @@ Fix the compilation problems by adding another string argument to `Hello`
 
 ```go
 func Hello(name string, language string) string {
-    if name == "" {
-        name = "World"
-    }
-    return englishHelloPrefix + name
+	if name == "" {
+		name = "World"
+	}
+	return englishHelloPrefix + name
 }
 ```
 
@@ -381,15 +381,15 @@ We can use `if` here to check the language is equal to "Spanish" and if so chang
 
 ```go
 func Hello(name string, language string) string {
-    if name == "" {
-        name = "World"
-    }
+	if name == "" {
+		name = "World"
+	}
 
-    if language == "Spanish" {
-        return "Hola, " + name
-    }
+	if language == "Spanish" {
+		return "Hola, " + name
+	}
 
-    return englishHelloPrefix + name
+	return englishHelloPrefix + name
 }
 ```
 
@@ -403,15 +403,15 @@ const englishHelloPrefix = "Hello, "
 const spanishHelloPrefix = "Hola, "
 
 func Hello(name string, language string) string {
-    if name == "" {
-        name = "World"
-    }
+	if name == "" {
+		name = "World"
+	}
 
-    if language == spanish {
-        return spanishHelloPrefix + name
-    }
+	if language == spanish {
+		return spanishHelloPrefix + name
+	}
 
-    return englishHelloPrefix + name
+	return englishHelloPrefix + name
 }
 ```
 
@@ -425,19 +425,19 @@ You may have written something that looks roughly like this
 
 ```go
 func Hello(name string, language string) string {
-    if name == "" {
-        name = "World"
-    }
+	if name == "" {
+		name = "World"
+	}
 
-    if language == spanish {
-        return spanishHelloPrefix + name
-    }
+	if language == spanish {
+		return spanishHelloPrefix + name
+	}
 
-    if language == french {
-        return frenchHelloPrefix + name
-    }
+	if language == french {
+		return frenchHelloPrefix + name
+	}
 
-    return englishHelloPrefix + name
+	return englishHelloPrefix + name
 }
 ```
 
@@ -447,20 +447,20 @@ When you have lots of `if` statements checking a particular value it is common t
 
 ```go
 func Hello(name string, language string) string {
-    if name == "" {
-        name = "World"
-    }
+	if name == "" {
+		name = "World"
+	}
 
-    prefix := englishHelloPrefix
+	prefix := englishHelloPrefix
 
-    switch language {
-    case french:
-        prefix = frenchHelloPrefix
-    case spanish:
-        prefix = spanishHelloPrefix
-    }
+	switch language {
+	case french:
+		prefix = frenchHelloPrefix
+	case spanish:
+		prefix = spanishHelloPrefix
+	}
 
-    return prefix + name
+	return prefix + name
 }
 ```
 
@@ -472,23 +472,23 @@ You could argue that maybe our function is getting a little big. The simplest re
 
 ```go
 func Hello(name string, language string) string {
-    if name == "" {
-        name = "World"
-    }
+	if name == "" {
+		name = "World"
+	}
 
-    return greetingPrefix(language) + name
+	return greetingPrefix(language) + name
 }
 
 func greetingPrefix(language string) (prefix string) {
-    switch language {
-    case french:
-        prefix = frenchHelloPrefix
-    case spanish:
-        prefix = spanishHelloPrefix
-    default:
-        prefix = englishHelloPrefix
-    }
-    return
+	switch language {
+	case french:
+		prefix = frenchHelloPrefix
+	case spanish:
+		prefix = spanishHelloPrefix
+	default:
+		prefix = englishHelloPrefix
+	}
+	return
 }
 ```
 

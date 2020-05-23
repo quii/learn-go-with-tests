@@ -210,10 +210,10 @@ func NewUserServer(service UserService) *UserServer {
 	return &UserServer{service: service}
 }
 
-func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request)  {
+func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-    // request parsing and validation
+	// request parsing and validation
 	var newUser User
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 
@@ -222,10 +222,10 @@ func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-    // call a service thing to take care of the hard work
+	// call a service thing to take care of the hard work
 	insertedID, err := u.service.Register(newUser)
 
-    // depending on what we get back, respond accordingly
+	// depending on what we get back, respond accordingly
 	if err != nil {
 		//todo: handle different kinds of errors differently
 		http.Error(w, fmt.Sprintf("problem registering new user: %v", err), http.StatusInternalServerError)
