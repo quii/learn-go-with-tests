@@ -848,7 +848,7 @@ It seems the obvious thing to do, would be to make it so `playerServerWS` _does_
 
 ```go
 func (w *playerServerWS) Write(p []byte) (n int, err error) {
-	err = w.WriteMessage(1, p)
+	err = w.WriteMessage(websocket.TextMessage, p)
 
 	if err != nil {
 		return 0, err
@@ -922,7 +922,7 @@ t.Run("start a game with 3 players, send some blind alerts down WS and declare R
     writeWSMessage(t, ws, "3")
     writeWSMessage(t, ws, winner)
 
-	time.Sleep(10 * time.Millisecond)
+    time.Sleep(10 * time.Millisecond)
     assertGameStartedWith(t, game, 3)
     assertFinishCalledWith(t, game, winner)
 

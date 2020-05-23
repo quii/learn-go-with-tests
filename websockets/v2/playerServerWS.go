@@ -11,7 +11,7 @@ type playerServerWS struct {
 }
 
 func (w *playerServerWS) Write(p []byte) (n int, err error) {
-	err = w.WriteMessage(1, p)
+	err = w.WriteMessage(websocket.TextMessage, p)
 
 	if err != nil {
 		return 0, err
