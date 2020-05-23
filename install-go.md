@@ -8,7 +8,7 @@ For demonstration purposes we will show the installation procedure for OSX using
 
 ## Installation
 
-The process of installation is very easy. First, what you have to do is to run this command to install homebrew (brew). Brew has a dependency on Xcode so you should ensure this is installed first.
+The process of installation is very easy. First, what you have to do is to run this command to install homebrew. It has a dependency on Xcode so you should ensure this is installed first.
 
 ```sh
 xcode-select --install
@@ -20,7 +20,7 @@ Then you run the following to install homebrew:
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-At this point you can now install Go:
+At this point you can now install Go with:
 
 ```sh
 brew install go
@@ -40,11 +40,11 @@ go version go1.14 darwin/amd64
 ### $GOPATH
 Go is opinionated.
 
-By convention, all Go code lives within a single workspace (folder). This workspace could be anywhere in your machine. If you don't specify, Go will assume $HOME/go as the default workspace. The workspace is identified (and modified) by the environment variable [GOPATH](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable).
+By convention, all Go code lives within a single workspace (folder). This workspace could be anywhere in your machine. If you don't specify, Go will assume `$HOME/go` as the default workspace. The workspace is identified (and modified) by the environment variable [GOPATH](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable).
 
 You should set the environment variable so that you can use it later in scripts, shells, etc.
 
-Update your .bash_profile to contain the following exports:
+Update your `.bash_profile` to contain the following exports:
 
 ```sh
 export GOPATH=$HOME/go
@@ -55,24 +55,24 @@ export PATH=$PATH:$GOPATH/bin
 
 Go assumes that your workspace contains a specific directory structure.
 
-Go places its files in three directories: All source code lives in src, package objects lives in pkg, and the compiled programs live in bin. You can create these directories as follows.
+Go places its files in three directories: All source code lives in src, package objects lives in pkg, and the compiled programs live in bin. You can create these directories as follows:
 
 ```sh
 mkdir -p $GOPATH/src $GOPATH/pkg $GOPATH/bin
 ```
 
-At this point you can _go get_ and the src/package/bin will be installed correctly in the appropriate $GOPATH/xxx directory.
+At this point you can `go get` and the `src/package/bin` will be installed correctly in the appropriate `$GOPATH/xxx` directory.
 
 ### Go Modules
-Go 1.11 introduced [Modules](https://github.com/golang/go/wiki/Modules), enabling an alternative workflow. This new approach will gradually [become the default](https://blog.golang.org/modules2019) mode, deprecating the use of GOPATH.
+Go 1.11 introduced [Modules](https://github.com/golang/go/wiki/Modules), enabling an alternative workflow. This new approach will gradually [become the default](https://blog.golang.org/modules2019) mode, deprecating the use of `GOPATH`.
 
-Modules aim to solve problems related to dependency management, version selection and reproducible builds; they also enable users to run Go code outside of GOPATH.
+Modules aim to solve problems related to dependency management, version selection and reproducible builds; they also enable users to run Go code outside of `GOPATH`.
 
-Using Modules is pretty straightforward. Select any directory outside GOPATH as the root of your project, and create a new module with the go mod init command.
+Using Modules is pretty straightforward. Select any directory outside `GOPATH` as the root of your project, and create a new module with the `go mod init` command.
 
-A go.mod file will be generated, containing the module path, a Go version, and its dependency requirements, which are the other modules needed for a successful build.
+A `go.mod` file will be generated, containing the module path, a Go version, and its dependency requirements, which are the other modules needed for a successful build.
 
-If no &lt;modulepath&gt; is specified, go mod init will try to guess the module path from the directory structure, but it can also be overrided, by supplying an argument.
+If no `<modulepath>` is specified, `go mod init` will try to guess the module path from the directory structure, but it can also be overrided, by supplying an argument.
 
 ```sh
 mkdir my-project
@@ -80,7 +80,7 @@ cd my-project
 go mod init <modulepath>
 ```
 
-A go.mod file could look like this
+A `go.mod` file could look like this:
 
 ```
 module cmd
@@ -94,7 +94,7 @@ require (
 )
 ```
 
-The built-in documentation provides an overview of all available go mod commands.
+The built-in documentation provides an overview of all available `go mod` commands.
 
 ```sh
 go help mod
@@ -127,7 +127,7 @@ When you open a Go file for the first time in VS Code, it will indicate that the
 
 ## Go Debugger
 
-A good option for debugging Go (that's integrated with VS Code) is Delve. This can be installed as follows using go get:
+A good option for debugging Go (that's integrated with VS Code) is Delve. This can be installed as follows:
 
 ```sh
 go get -u github.com/go-delve/delve/cmd/dlv

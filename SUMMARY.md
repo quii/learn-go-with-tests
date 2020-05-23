@@ -37,6 +37,7 @@
 * [OS Exec](os-exec.md)
 * [Error types](error-types.md)
 * [Context-aware Reader](context-aware-reader.md)
+* [Revisiting HTTP Handlers](http-handlers-revisited.md)
 
 ## Meta
 

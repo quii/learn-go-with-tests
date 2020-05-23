@@ -14,9 +14,9 @@ We have an application with a `main.go` file that launches an HTTP server. The H
 
 ```go
 type PlayerStore interface {
-    GetPlayerScore(name string) int
-    RecordWin(name string)
-    GetLeague() League
+	GetPlayerScore(name string) int
+	RecordWin(name string)
+	GetLeague() League
 }
 ```
 
@@ -71,32 +71,32 @@ The paths will be different on your computer, but it should be similar to this:
 package main
 
 import (
-    "log"
-    "net/http"
-    "os"
-    "github.com/quii/learn-go-with-tests/command-line/v1"
+	"github.com/quii/learn-go-with-tests/command-line/v1"
+	"log"
+	"net/http"
+	"os"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-    db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
 
-    if err != nil {
-        log.Fatalf("problem opening %s %v", dbFileName, err)
-    }
+	if err != nil {
+		log.Fatalf("problem opening %s %v", dbFileName, err)
+	}
 
-    store, err := poker.NewFileSystemPlayerStore(db)
+	store, err := poker.NewFileSystemPlayerStore(db)
 
-    if err != nil {
-        log.Fatalf("problem creating file system player store, %v ", err)
-    }
+	if err != nil {
+		log.Fatalf("problem creating file system player store, %v ", err)
+	}
 
-    server := poker.NewPlayerServer(store)
+	server := poker.NewPlayerServer(store)
 
-    if err := http.ListenAndServe(":5000", server); err != nil {
-        log.Fatalf("could not listen on port 5000 %v", err)
-    }
+	if err := http.ListenAndServe(":5000", server); err != nil {
+		log.Fatalf("could not listen on port 5000 %v", err)
+	}
 }
 ```
 
@@ -122,7 +122,7 @@ package main
 import "fmt"
 
 func main() {
-    fmt.Println("Let's play poker")
+	fmt.Println("Let's play poker")
 }
 ```
 
@@ -138,13 +138,13 @@ Inside `CLI_test.go` (in the root of the project, not inside `cmd`)
 
 ```go
 func TestCLI(t *testing.T) {
-    playerStore := &StubPlayerStore{}
-    cli := &CLI{playerStore}
-    cli.PlayPoker()
+	playerStore := &StubPlayerStore{}
+	cli := &CLI{playerStore}
+	cli.PlayPoker()
 
-    if len(playerStore.winCalls) !=1 {
-        t.Fatal("expected a win call but didn't get any")
-    }
+	if len(playerStore.winCalls) != 1 {
+		t.Fatal("expected a win call but didn't get any")
+	}
 }
 ```
 
@@ -168,7 +168,7 @@ You should end up with code like this
 
 ```go
 type CLI struct {
-    playerStore PlayerStore
+	playerStore PlayerStore
 }
 
 func (cli *CLI) PlayPoker() {}
@@ -186,7 +186,7 @@ FAIL
 
 ```go
 func (cli *CLI) PlayPoker() {
-    cli.playerStore.RecordWin("Cleo")
+	cli.playerStore.RecordWin("Cleo")
 }
 ```
 
@@ -200,22 +200,22 @@ Let's extend our test to exercise this.
 
 ```go
 func TestCLI(t *testing.T) {
-    in := strings.NewReader("Chris wins\n")
-    playerStore := &StubPlayerStore{}
+	in := strings.NewReader("Chris wins\n")
+	playerStore := &StubPlayerStore{}
 
-    cli := &CLI{playerStore, in}
-    cli.PlayPoker()
+	cli := &CLI{playerStore, in}
+	cli.PlayPoker()
 
-    if len(playerStore.winCalls) < 1 {
-        t.Fatal("expected a win call but didn't get any")
-    }
+	if len(playerStore.winCalls) < 1 {
+		t.Fatal("expected a win call but didn't get any")
+	}
 
-    got := playerStore.winCalls[0]
-    want := "Chris"
+	got := playerStore.winCalls[0]
+	want := "Chris"
 
-    if got != want {
-        t.Errorf("didn't record correct winner, got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("didn't record correct winner, got %q, want %q", got, want)
+	}
 }
 ```
 
@@ -233,8 +233,8 @@ We need to add our new dependency into `CLI`.
 
 ```go
 type CLI struct {
-    playerStore PlayerStore
-    in io.Reader
+	playerStore PlayerStore
+	in          io.Reader
 }
 ```
 
@@ -250,7 +250,7 @@ Remember to do the strictly easiest thing first
 
 ```go
 func (cli *CLI) PlayPoker() {
-    cli.playerStore.RecordWin("Chris")
+	cli.playerStore.RecordWin("Chris")
 }
 ```
 
@@ -262,15 +262,15 @@ In `server_test` we earlier did checks to see if wins are recorded as we have he
 
 ```go
 func assertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
-    t.Helper()
+	t.Helper()
 
-    if len(store.winCalls) != 1 {
-        t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
-    }
+	if len(store.winCalls) != 1 {
+		t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
+	}
 
-    if store.winCalls[0] != winner {
-        t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
-    }
+	if store.winCalls[0] != winner {
+		t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
+	}
 }
 ```
 
@@ -280,13 +280,13 @@ The test should now read like so
 
 ```go
 func TestCLI(t *testing.T) {
-    in := strings.NewReader("Chris wins\n")
-    playerStore := &StubPlayerStore{}
+	in := strings.NewReader("Chris wins\n")
+	playerStore := &StubPlayerStore{}
 
-    cli := &CLI{playerStore, in}
-    cli.PlayPoker()
+	cli := &CLI{playerStore, in}
+	cli.PlayPoker()
 
-    assertPlayerWin(t, playerStore, "Chris")
+	assertPlayerWin(t, playerStore, "Chris")
 }
 ```
 
@@ -297,25 +297,25 @@ Now let's write _another_ test with different user input to force us into actual
 ```go
 func TestCLI(t *testing.T) {
 
-    t.Run("record chris win from user input", func(t *testing.T) {
-        in := strings.NewReader("Chris wins\n")
-        playerStore := &StubPlayerStore{}
+	t.Run("record chris win from user input", func(t *testing.T) {
+		in := strings.NewReader("Chris wins\n")
+		playerStore := &StubPlayerStore{}
 
-        cli := &CLI{playerStore, in}
-        cli.PlayPoker()
+		cli := &CLI{playerStore, in}
+		cli.PlayPoker()
 
-        assertPlayerWin(t, playerStore, "Chris")
-    })
+		assertPlayerWin(t, playerStore, "Chris")
+	})
 
-    t.Run("record cleo win from user input", func(t *testing.T) {
-        in := strings.NewReader("Cleo wins\n")
-        playerStore := &StubPlayerStore{}
+	t.Run("record cleo win from user input", func(t *testing.T) {
+		in := strings.NewReader("Cleo wins\n")
+		playerStore := &StubPlayerStore{}
 
-        cli := &CLI{playerStore, in}
-        cli.PlayPoker()
+		cli := &CLI{playerStore, in}
+		cli.PlayPoker()
 
-        assertPlayerWin(t, playerStore, "Cleo")
-    })
+		assertPlayerWin(t, playerStore, "Cleo")
+	})
 
 }
 ```
@@ -343,18 +343,18 @@ Update the code to the following
 
 ```go
 type CLI struct {
-    playerStore PlayerStore
-    in          io.Reader
+	playerStore PlayerStore
+	in          io.Reader
 }
 
 func (cli *CLI) PlayPoker() {
-    reader := bufio.NewScanner(cli.in)
-    reader.Scan()
-    cli.playerStore.RecordWin(extractWinner(reader.Text()))
+	reader := bufio.NewScanner(cli.in)
+	reader.Scan()
+	cli.playerStore.RecordWin(extractWinner(reader.Text()))
 }
 
 func extractWinner(userInput string) string {
-    return strings.Replace(userInput, " wins", "", 1)
+	return strings.Replace(userInput, " wins", "", 1)
 }
 ```
 
@@ -371,32 +371,32 @@ In `main.go` add the following and run it. (you may have to adjust the path of t
 package main
 
 import (
-    "fmt"
-    "github.com/quii/learn-go-with-tests/command-line/v3"
-    "log"
-    "os"
+	"fmt"
+	"github.com/quii/learn-go-with-tests/command-line/v3"
+	"log"
+	"os"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-    fmt.Println("Let's play poker")
-    fmt.Println("Type {Name} wins to record a win")
+	fmt.Println("Let's play poker")
+	fmt.Println("Type {Name} wins to record a win")
 
-    db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
 
-    if err != nil {
-        log.Fatalf("problem opening %s %v", dbFileName, err)
-    }
+	if err != nil {
+		log.Fatalf("problem opening %s %v", dbFileName, err)
+	}
 
-    store, err := poker.NewFileSystemPlayerStore(db)
+	store, err := poker.NewFileSystemPlayerStore(db)
 
-    if err != nil {
-        log.Fatalf("problem creating file system player store, %v ", err)
-    }
+	if err != nil {
+		log.Fatalf("problem creating file system player store, %v ", err)
+	}
 
-    game := poker.CLI{store, os.Stdin}
-    game.PlayPoker()
+	game := poker.CLI{store, os.Stdin}
+	game.PlayPoker()
 }
 ```
 
@@ -454,34 +454,34 @@ package poker
 import "testing"
 
 type StubPlayerStore struct {
-    scores   map[string]int
-    winCalls []string
-    league   []Player
+	scores   map[string]int
+	winCalls []string
+	league   []Player
 }
 
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
-    score := s.scores[name]
-    return score
+	score := s.scores[name]
+	return score
 }
 
 func (s *StubPlayerStore) RecordWin(name string) {
-    s.winCalls = append(s.winCalls, name)
+	s.winCalls = append(s.winCalls, name)
 }
 
 func (s *StubPlayerStore) GetLeague() League {
-    return s.league
+	return s.league
 }
 
 func AssertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
-    t.Helper()
+	t.Helper()
 
-    if len(store.winCalls) != 1 {
-        t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
-    }
+	if len(store.winCalls) != 1 {
+		t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
+	}
 
-    if store.winCalls[0] != winner {
-        t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
-    }
+	if store.winCalls[0] != winner {
+		t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
+	}
 }
 
 // todo for you - the rest of the helpers
@@ -494,25 +494,25 @@ In our `CLI` test you'll need to call the code as if you were using it within a 
 ```go
 func TestCLI(t *testing.T) {
 
-    t.Run("record chris win from user input", func(t *testing.T) {
-        in := strings.NewReader("Chris wins\n")
-        playerStore := &poker.StubPlayerStore{}
+	t.Run("record chris win from user input", func(t *testing.T) {
+		in := strings.NewReader("Chris wins\n")
+		playerStore := &poker.StubPlayerStore{}
 
-        cli := &poker.CLI{playerStore, in}
-        cli.PlayPoker()
+		cli := &poker.CLI{playerStore, in}
+		cli.PlayPoker()
 
-        poker.AssertPlayerWin(t, playerStore, "Chris")
-    })
+		poker.AssertPlayerWin(t, playerStore, "Chris")
+	})
 
-    t.Run("record cleo win from user input", func(t *testing.T) {
-        in := strings.NewReader("Cleo wins\n")
-        playerStore := &poker.StubPlayerStore{}
+	t.Run("record cleo win from user input", func(t *testing.T) {
+		in := strings.NewReader("Cleo wins\n")
+		playerStore := &poker.StubPlayerStore{}
 
-        cli := &poker.CLI{playerStore, in}
-        cli.PlayPoker()
+		cli := &poker.CLI{playerStore, in}
+		cli.PlayPoker()
 
-        poker.AssertPlayerWin(t, playerStore, "Cleo")
-    })
+		poker.AssertPlayerWin(t, playerStore, "Cleo")
+	})
 
 }
 ```
@@ -604,25 +604,25 @@ Now refactor both of our applications to use this function to create the store.
 package main
 
 import (
-    "github.com/quii/learn-go-with-tests/command-line/v3"
-    "log"
-    "os"
-    "fmt"
+	"fmt"
+	"github.com/quii/learn-go-with-tests/command-line/v3"
+	"log"
+	"os"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-    store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+	store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
 
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer close()
 
-    fmt.Println("Let's play poker")
-    fmt.Println("Type {Name} wins to record a win")
-    poker.NewCLI(store, os.Stdin).PlayPoker()
+	fmt.Println("Let's play poker")
+	fmt.Println("Type {Name} wins to record a win")
+	poker.NewCLI(store, os.Stdin).PlayPoker()
 }
 ```
 
@@ -632,26 +632,26 @@ func main() {
 package main
 
 import (
-    "github.com/quii/learn-go-with-tests/command-line/v3"
-    "log"
-    "net/http"
+	"github.com/quii/learn-go-with-tests/command-line/v3"
+	"log"
+	"net/http"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-    store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+	store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
 
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer close()
 
-    server := poker.NewPlayerServer(store)
+	server := poker.NewPlayerServer(store)
 
-    if err := http.ListenAndServe(":5000", server); err != nil {
-        log.Fatalf("could not listen on port 5000 %v", err)
-    }
+	if err := http.ListenAndServe(":5000", server); err != nil {
+		log.Fatalf("could not listen on port 5000 %v", err)
+	}
 }
 ```
 
