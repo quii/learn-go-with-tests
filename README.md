@@ -12,6 +12,8 @@
 - Formats: [Gitbook](https://quii.gitbook.io/learn-go-with-tests), [EPUB or PDF](https://github.com/quii/learn-go-with-tests/releases)
 - Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests), [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
 
+[Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii)!
+
 ## Why
 
 * Explore the Go language by writing tests
