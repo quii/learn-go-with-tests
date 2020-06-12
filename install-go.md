@@ -17,7 +17,7 @@ xcode-select --install
 Then you run the following to install homebrew:
 
 ```sh
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 ```
 
 At this point you can now install Go with:
@@ -85,7 +85,7 @@ A `go.mod` file could look like this:
 ```
 module cmd
 
-go 1.12
+go 1.14
 
 require (
         github.com/google/pprof v0.0.0-20190515194954-54271f7e092f
@@ -117,13 +117,13 @@ You can confirm VS Code installed correctly you can run the following in your sh
 code .
 ```
 
-VS Code is shipped with very little software enabled, you can enable new software by installing extensions. To add Go support you must install an extension, there are a variety available for VS Code, an exceptional one is [Luke Hoban's package](https://github.com/Microsoft/vscode-go). This can be installed as follows:
+VS Code is shipped with very little software enabled, you can enable new software by installing extensions. To add Go support you must install an extension, there are a variety available for VS Code, an exceptional one is [Luke Hoban's package](https://github.com/golang/vscode-go). This can be installed as follows:
 
 ```sh
-code --install-extension ms-vscode.go
+code --install-extension golang.go
 ```
 
-When you open a Go file for the first time in VS Code, it will indicate that the Analysis tools are missing, you should click the button to install these. The list of tools that gets installed (and used) by VS Code are available [here](https://github.com/Microsoft/vscode-go/wiki/Go-tools-that-the-Go-extension-depends-on).
+When you open a Go file for the first time in VS Code, it will indicate that the Analysis tools are missing, you should click the button to install these. The list of tools that gets installed (and used) by VS Code are available [here](https://github.com/golang/vscode-go/blob/master/docs/tools.md).
 
 ## Go Debugger
 
@@ -133,11 +133,11 @@ A good option for debugging Go (that's integrated with VS Code) is Delve. This c
 go get -u github.com/go-delve/delve/cmd/dlv
 ```
 
-For additional help configuring and running the Go debugger in VS Code, please reference the [VS Code debugging documentation](https://github.com/Microsoft/vscode-go/wiki/Debugging-Go-code-using-VS-Code).
+For additional help configuring and running the Go debugger in VS Code, please reference the [VS Code debugging documentation](https://github.com/golang/vscode-go/blob/master/docs/debugging.md).
 
 ## Go Linting
 
-An improvement over the default linter can be configured using [GolangCI-Lint](https://github.com/golangci/golangci-lint).
+An improvement over the default linter can be configured using [GolangCI-Lint](https://golangci-lint.run).
 
 This can be installed as follows:
 
