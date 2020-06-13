@@ -14,7 +14,7 @@ How does a software system "fail" anyway? Can't it just be changed until it's co
 
 A lot of people are choosing Go to build systems because it has made a number of choices which one hopes will make it more legacy-proof. 
 
-- Compared to my previous life of Scala where [I described how it has enough rope to hang yourself](http://www.quii.co.uk/Scala_-_Just_enough_rope_to_hang_yourself), Go has only 25 keywords and _a lot_ of systems can be built from the standard library and a few other small libraries. The hope is that with Go you can write code and come back to it in 6 months time and it'll still make sense.
+- Compared to my previous life of Scala where [I described how it has enough rope to hang yourself](http://www.quii.dev/Scala_-_Just_enough_rope_to_hang_yourself), Go has only 25 keywords and _a lot_ of systems can be built from the standard library and a few other small libraries. The hope is that with Go you can write code and come back to it in 6 months time and it'll still make sense.
 - The tooling in respect to testing, benchmarking, linting & shipping is first class compared to most alternatives.
 - The standard library is brilliant.
 - Very fast compilation speed for tight feedback loops
