@@ -8,72 +8,68 @@ description: Learn Go with Tests
 
 [Art by Denise](https://twitter.com/deniseyu21)
 
-[Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii)!
+Go言語でテスト駆動開発を学ぶ
 
-_Learn test-driven development with Go_
+翻訳:[英語](https://quii.gitbook.io/learn-go-with-tests/), [中文](https://studygolang.gitbook.io/learn-go-with-tests), [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
 
-Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests), [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
+* テストを作成してGo言語を探索する
+* **テスト駆動開発\(TDD\)を使用しながらGoを習得します。**GoはTDDを学習するのに適した言語です。TDDは簡単に学習することができ、テストが組み込まれているからです。
+* Goで堅牢な十分にテストされたシステムの作成を開始できることを確信してみてください。
 
-* Explore the Go language by writing tests
-* **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
-* Be confident that you'll be able to start writing robust, well-tested systems in Go
+## 背景
 
-## Background
+私は、Goを開発チームに導入し経験があり、Goに興味のある一部の人からGoシステムの非常に効果的な記述方法で、チームを成長させる方法について、さまざまなアプローチを試してみました。
 
-I have some experience introducing Go to development teams and have tried different approaches as to how to grow a team from some people curious about Go into highly effective writers of Go systems.
+### うまくいかなかったもの
 
-### What didn't work
+#### 本を読む
 
-#### Read _the_ book
+私たちが試したアプローチとして、 [Go Programming Language](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440) という本を手に取り、毎週、次の章と演習について話し合うことでした。
 
-An approach we tried was to take [the blue book](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440) and every week discuss the next chapter along with the exercises.
+私は、この本が大好きですが、それは高いレベルのコミットメントを必要としました。本は概念の説明をする上で非常に詳細であり、それは明らかに素晴らしいですが、進捗がゆっくりと着実であることを意味します。これはすべての人にあてはまるとは限りません。
 
-I love this book but it requires a high level of commitment. The book is very detailed in explaining concepts, which is obviously great but it means that the progress is slow and steady - this is not for everyone.
+少数の人が第X章を読んで、演習を行う一方で、多くの人は、読まなかったことがわかりました。
 
-I found that whilst a small number of people would read chapter X and do the exercises, many people didn't.
+#### いくつかの問題を解決する
 
-#### Solve some problems
+「型」は楽しいですが、通常、言語を学習する範囲は限られています。後ルーチンを使用して型を解決することはほとんどありません。
 
-Katas are fun but they are usually limited in their scope for learning a language; you're unlikely to use goroutines to solve a kata.
+もう一つの問題は、さまざまなレベルの熱意がある場合です。一部の人々は他の人よりもはるかに多くの言語を学び、彼らが行ったことを実証するとき、他の人が慣れていない機能で人々を混乱させることになります。
 
-Another problem is when you have varying levels of enthusiasm. Some people just learn way more of the language than others and when demonstrating what they have done end up confusing people with features the others are not familiar with.
+これにより、学習はまったく構造化されておらず、その場しのぎの感じになります。
 
-This ends up making the learning feel quite _unstructured_ and _ad hoc_.
+### 何がうまくいったか
 
-### What did work
+群を抜いて最も効果的な方法は、 [go by example](https://gobyexample.com/) を読み、例を挙げて、それらを調査して、グループとして議論することで、言語の基礎をゆっくりと紹介することでした。これは「宿題については第X章を読む」よりもインタラクティブなアプローチでした。
 
-By far the most effective way was by slowly introducing the fundamentals of the language by reading through [go by example](https://gobyexample.com/), exploring them with examples and discussing them as a group. This was a more interactive approach than "read chapter x for homework".
+時間の経過とともに、チームは言語の文法の強固な基盤を得て、システムの構築を開始できるようになりました。
 
-Over time the team gained a solid foundation of the _grammar_ of the language so we could then start to build systems.
+私にとってこれは、ギターを習得しようとするときの感覚に似ています。
 
-This to me seems analogous to practicing scales when trying to learn guitar.
+自分がどれほど芸術的であるかは関係ありません。基本を理解し、力学を練習しない限り、優れた音楽を書くことはほとんどありません。
 
-It doesn't matter how artistic you think you are, you are unlikely to write good music without understanding the fundamentals and practicing the mechanics.
+### 自分にとって何がうまくいくか
 
-### What works for me
+新しいプログラミング言語を学ぶ際、私は、通常 `REPL` をいじり始めますが、最終的にはより多くの構造が必要になります。
 
-When _I_ learn a new programming language I usually start by messing around in a REPL but eventually, I need more structure.
+私がやりたいのは、概念を探究し、テストでアイディアを固めることです。テストでは、作成したコードが正しいことを確認し、学習した機能を文書化します。
 
-What I like to do is explore concepts and then solidify the ideas with tests. Tests verify the code I write is correct and documents the feature I have learned.
+グループでの学習経験と自分の個人的な方法を取り入れて、他のチームに役立つと期待されるものを作成してみます。小規模なテストを記述して基礎を学び、既存のソフトウェア設定スキルを活用して優れたシステムを出荷できるようにします。
 
-Taking my experience of learning with a group and my own personal way I am going to try and create something that hopefully proves useful to other teams. Learning the fundamentals by writing small tests so that you can then take your existing software design skills and ship some great systems.
+## 対象者
 
-## Who this is for
+* Go言語に興味のある方
+* すでに Go言語は知っているが、さらにテスト駆動開発\(TDD\)を試したい方
 
-* People who are interested in picking up Go
-* People who already know some Go, but want to explore testing more
+## 必要なもの
 
-## What you'll need
+* コンピューター！
+* [Go言語のインストール](https://golang.org/)
+* テキストエディター
+* プログラミングの経験。変数、関数などの概念の理解 `if`
+* 端末の使用が快適
 
-* A computer!
-* [Installed Go](https://golang.org/)
-* A text editor
-* Some experience with programming. Understanding of concepts like `if`, variables, functions etc.
-* Comfortable with using the terminal
 
-## Feedback
-
-* Add issues/submit PRs [here](https://github.com/quii/learn-go-with-tests) or [tweet me @quii](https://twitter.com/quii)
 
 [MIT license](https://github.com/andmorefine/learn-go-with-tests/tree/2705e1505f1d4426969523d3c9be643bc40ca699/LICENSE.md)
 
