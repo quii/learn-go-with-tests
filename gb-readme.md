@@ -1,8 +1,10 @@
-# Learn Go with Tests
+---
+description: Learn Go with Tests
+---
 
-<p align="center">
-  <img src="red-green-blue-gophers-smaller.png" />
-</p>
+# テスト駆動開発でGO言語を学びましょう
+
+![](.gitbook/assets/red-green-blue-gophers-smaller.png)
 
 [Art by Denise](https://twitter.com/deniseyu21)
 
@@ -73,4 +75,5 @@ Taking my experience of learning with a group and my own personal way I am going
 
 * Add issues/submit PRs [here](https://github.com/quii/learn-go-with-tests) or [tweet me @quii](https://twitter.com/quii)
 
-[MIT license](LICENSE.md)
+[MIT license](https://github.com/andmorefine/learn-go-with-tests/tree/2705e1505f1d4426969523d3c9be643bc40ca699/LICENSE.md)
+

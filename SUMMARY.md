@@ -1,46 +1,47 @@
 # Table of contents
 
-* [Learn Go with Tests](gb-readme.md)
+* [テスト駆動開発でGO言語を学びましょう](gb-readme.md)
 
 ## Go fundamentals
 
-* [Install Go](install-go.md)
-* [Hello, World](hello-world.md)
-* [Integers](integers.md)
-* [Iteration](iteration.md)
-* [Arrays and slices](arrays-and-slices.md)
-* [Structs, methods & interfaces](structs-methods-and-interfaces.md)
-* [Pointers & errors](pointers-and-errors.md)
-* [Maps](maps.md)
-* [Dependency Injection](dependency-injection.md)
-* [Mocking](mocking.md)
-* [Concurrency](concurrency.md)
-* [Select](select.md)
-* [Reflection](reflection.md)
-* [Sync](sync.md)
-* [Context](context.md)
-* [Intro to property based tests](roman-numerals.md)
-* [Maths](math.md)
+* [Install Go](go-fundamentals/install-go.md)
+* [Hello, World](go-fundamentals/hello-world.md)
+* [Integers](go-fundamentals/integers.md)
+* [Iteration](go-fundamentals/iteration.md)
+* [Arrays and slices](go-fundamentals/arrays-and-slices.md)
+* [Structs, methods & interfaces](go-fundamentals/structs-methods-and-interfaces.md)
+* [Pointers & errors](go-fundamentals/pointers-and-errors.md)
+* [Maps](go-fundamentals/maps.md)
+* [Dependency Injection](go-fundamentals/dependency-injection.md)
+* [Mocking](go-fundamentals/mocking.md)
+* [Concurrency](go-fundamentals/concurrency.md)
+* [Select](go-fundamentals/select.md)
+* [Reflection](go-fundamentals/reflection.md)
+* [Sync](go-fundamentals/sync.md)
+* [Context](go-fundamentals/context.md)
+* [Intro to property based tests](go-fundamentals/roman-numerals.md)
+* [Maths](go-fundamentals/math.md)
 
 ## Build an application
 
-* [Intro](app-intro.md)
-* [HTTP server](http-server.md)
-* [JSON, routing and embedding](json.md)
-* [IO and sorting](io.md)
-* [Command line & package structure](command-line.md)
-* [Time](time.md)
-* [WebSockets](websockets.md)
+* [Intro](build-an-application/app-intro.md)
+* [HTTP server](build-an-application/http-server.md)
+* [JSON, routing and embedding](build-an-application/json.md)
+* [IO and sorting](build-an-application/io.md)
+* [Command line & package structure](build-an-application/command-line.md)
+* [Time](build-an-application/time.md)
+* [WebSockets](build-an-application/websockets.md)
 
 ## Questions and answers
 
-* [OS Exec](os-exec.md)
-* [Error types](error-types.md)
-* [Context-aware Reader](context-aware-reader.md)
-* [Revisiting HTTP Handlers](http-handlers-revisited.md)
+* [OS Exec](questions-and-answers/os-exec.md)
+* [Error types](questions-and-answers/error-types.md)
+* [Context-aware Reader](questions-and-answers/context-aware-reader.md)
+* [Revisiting HTTP Handlers](questions-and-answers/http-handlers-revisited.md)
 
 ## Meta
 
-* [Why unit tests and how to make them work for you](why.md)
-* [Contributing](contributing.md)
-* [Chapter Template](template.md)
+* [Why unit tests and how to make them work for you](meta/why.md)
+* [Contributing](meta/contributing.md)
+* [Chapter Template](meta/template.md)
+
