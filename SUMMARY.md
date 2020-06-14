@@ -2,7 +2,7 @@
 
 * [テスト駆動開発でGO言語を学びましょう](gb-readme.md)
 
-## Go fundamentals
+## Go言語：基礎 <a id="go-fundamentals"></a>
 
 * [Install Go](go-fundamentals/install-go.md)
 * [Hello, World](go-fundamentals/hello-world.md)
