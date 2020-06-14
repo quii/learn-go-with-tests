@@ -1,4 +1,8 @@
-# Iteration
+---
+description: Iteration
+---
+
+# 反復、繰り返し
 
 [**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/for)
 

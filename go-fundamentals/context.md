@@ -1,4 +1,8 @@
-# Context
+---
+description: Context (長期実行プロセスの管理に役立つパッケージ)
+---
+
+# コンテキスト
 
 [**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/context)
 

@@ -1,4 +1,8 @@
-# Contributing
+---
+description: Contributing
+---
+
+# 貢献
 
 Contributions are very welcome. I hope for this to become a great home for guides of how to learn Go by writing tests. Consider submitting a PR or creating an issue which you can do [here](https://github.com/quii/learn-go-with-tests/issues).
 
@@ -18,7 +22,7 @@ If you don't feel confident to submit your own guide, submitting an issue for so
 
 ## Style guide
 
-* Always be reinforcing the TDD cycle. Take a look at the [Chapter Template](template.md).
+* Always be reinforcing the TDD cycle. Take a look at the [Chapter Template]().
 * Emphasis on iterating over functionality driven by tests. The Hello, world example works well because we gradually make it more sophisticated and learning new techniques _driven_ by the tests. For example:
   * `Hello()` &lt;- how to write functions, return types.
   * `Hello(name string)` &lt;- arguments, constants.

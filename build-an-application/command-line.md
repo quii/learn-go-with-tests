@@ -1,4 +1,8 @@
-# Command line & package structure
+---
+description: Command line & package structure
+---
+
+# コマンドライン、パッケージ構造
 
 [**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/command-line)
 

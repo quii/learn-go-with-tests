@@ -1,4 +1,8 @@
-# Error types
+---
+description: Error types
+---
+
+# エラーの種類
 
 [**You can find all the code here**](https://github.com/quii/learn-go-with-tests/tree/master/q-and-a/error-types)
 

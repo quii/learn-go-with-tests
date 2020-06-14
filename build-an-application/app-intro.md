@@ -1,4 +1,8 @@
-# Intro
+---
+description: Intro
+---
+
+# はじめに
 
 Now that you have hopefully digested the _Go Fundamentals_ section you have a solid grounding of a majority of Go's language features and how to do TDD.
 

@@ -1,4 +1,8 @@
-# IO and sorting
+---
+description: IO and sorting
+---
+
+# IO、並び替え
 
 [**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/io)
 

@@ -1,4 +1,8 @@
-# Dependency Injection
+---
+description: Dependency Injection
+---
+
+# 依存性注入
 
 [**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/di)
 

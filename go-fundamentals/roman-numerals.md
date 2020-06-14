@@ -1,4 +1,8 @@
-# Intro to property based tests
+---
+description: Intro to property based tests
+---
+
+# プロパティベースのテスト概要
 
 [**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/roman-numerals)
 

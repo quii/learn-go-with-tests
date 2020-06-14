@@ -1,4 +1,8 @@
-# OS Exec
+---
+description: OS Exec
+---
+
+# OS実行
 
 [**You can find all the code here**](https://github.com/quii/learn-go-with-tests/tree/master/q-and-a/os-exec)
 

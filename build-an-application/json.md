@@ -1,4 +1,8 @@
-# JSON, routing and embedding
+---
+description: 'JSON, routing and embedding'
+---
+
+# JSON, ルーティング、埋め込み
 
 [**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/json)
 

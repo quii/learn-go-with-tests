@@ -6,42 +6,41 @@
 
 * [Goをインストールする](go-fundamentals/install-go.md)
 * [Hello, World](go-fundamentals/hello-world.md)
-* [Integers](go-fundamentals/integers.md)
-* [Iteration](go-fundamentals/iteration.md)
-* [Arrays and slices](go-fundamentals/arrays-and-slices.md)
-* [Structs, methods & interfaces](go-fundamentals/structs-methods-and-interfaces.md)
-* [Pointers & errors](go-fundamentals/pointers-and-errors.md)
-* [Maps](go-fundamentals/maps.md)
-* [Dependency Injection](go-fundamentals/dependency-injection.md)
-* [Mocking](go-fundamentals/mocking.md)
-* [Concurrency](go-fundamentals/concurrency.md)
-* [Select](go-fundamentals/select.md)
-* [Reflection](go-fundamentals/reflection.md)
-* [Sync](go-fundamentals/sync.md)
-* [Context](go-fundamentals/context.md)
-* [Intro to property based tests](go-fundamentals/roman-numerals.md)
-* [Maths](go-fundamentals/math.md)
+* [整数](go-fundamentals/integers.md)
+* [反復、繰り返し](go-fundamentals/iteration.md)
+* [配列とスライス](go-fundamentals/arrays-and-slices.md)
+* [構造体、メドッド、インターフェース](go-fundamentals/structs-methods-and-interfaces.md)
+* [ポインタとエラー](go-fundamentals/pointers-and-errors.md)
+* [マップ](go-fundamentals/maps.md)
+* [依存性注入](go-fundamentals/dependency-injection.md)
+* [スタブ・モック](go-fundamentals/mocking.md)
+* [並行性](go-fundamentals/concurrency.md)
+* [選択](go-fundamentals/select.md)
+* [リフレクション](go-fundamentals/reflection.md)
+* [同期](go-fundamentals/sync.md)
+* [コンテキスト](go-fundamentals/context.md)
+* [プロパティベースのテスト概要](go-fundamentals/roman-numerals.md)
+* [数学](go-fundamentals/math.md)
 
-## Build an application
+## アプリケーションを構築する <a id="build-an-application"></a>
 
-* [Intro](build-an-application/app-intro.md)
-* [HTTP server](build-an-application/http-server.md)
-* [JSON, routing and embedding](build-an-application/json.md)
-* [IO and sorting](build-an-application/io.md)
-* [Command line & package structure](build-an-application/command-line.md)
-* [Time](build-an-application/time.md)
-* [WebSockets](build-an-application/websockets.md)
+* [はじめに](build-an-application/app-intro.md)
+* [HTTPサーバー](build-an-application/http-server.md)
+* [JSON, ルーティング、埋め込み](build-an-application/json.md)
+* [IO、並び替え](build-an-application/io.md)
+* [コマンドライン、パッケージ構造](build-an-application/command-line.md)
+* [時間](build-an-application/time.md)
+* [ウェブソケット](build-an-application/websockets.md)
 
-## Questions and answers
+## 質問と答え <a id="questions-and-answers"></a>
 
-* [OS Exec](questions-and-answers/os-exec.md)
-* [Error types](questions-and-answers/error-types.md)
-* [Context-aware Reader](questions-and-answers/context-aware-reader.md)
-* [Revisiting HTTP Handlers](questions-and-answers/http-handlers-revisited.md)
+* [OS実行](questions-and-answers/os-exec.md)
+* [エラーの種類](questions-and-answers/error-types.md)
+* [コンテキスト認識リーダー](questions-and-answers/context-aware-reader.md)
+* [HTTPハンドラーの再検討](questions-and-answers/http-handlers-revisited.md)
 
-## Meta
+## メタ
 
-* [Why unit tests and how to make them work for you](meta/why.md)
-* [Contributing](meta/contributing.md)
-* [Chapter Template](meta/template.md)
+* [ユニットテスト機能を作成する方法](meta/why.md)
+* [貢献](meta/contributing.md)
 

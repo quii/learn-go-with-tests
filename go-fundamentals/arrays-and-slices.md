@@ -1,4 +1,8 @@
-# Arrays and slices
+---
+description: Arrays and slices
+---
+
+# 配列とスライス
 
 [**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/arrays)
 

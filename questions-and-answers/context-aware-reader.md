@@ -1,4 +1,8 @@
-# Context-aware Reader
+---
+description: Context-aware Reader
+---
+
+# コンテキスト認識リーダー
 
 [**You can find all the code here**](https://github.com/quii/learn-go-with-tests/tree/master/q-and-a/context-aware-reader)
 
