@@ -4,19 +4,21 @@ description: 'Hello, World'
 
 # Hello, World
 
-[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/hello-world)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/master/hello-world)
 
-It is traditional for your first program in a new language to be [Hello, World](https://en.m.wikipedia.org/wiki/%22Hello,_World!%22_program).
+新しい言語での最初のプログラムが [Hello, World](https://en.m.wikipedia.org/wiki/%22Hello,_World!%22_program)であるのは伝統的です。
 
-In the [previous chapter](install-go.md#go-environment) we discussed how Go is opinionated as to where you put your files.
+[前の章](install-go.md#go-environment) では、ファイルの配置場所についてGoがどのように考えられているかを説明しました。
 
-Make a directory in the following path `$GOPATH/src/github.com/{your-user-id}/hello`.
+次のパス `$GOPATH/src/github.com/{your-user-id}/hello`にディレクトリを作成します。
 
-So if you're on a unix based OS and you are happy to stick with Go's conventions about `$GOPATH` \(which is the easiest way of setting up\) you could run `mkdir -p $GOPATH/src/github.com/$USER/hello`.
+したがって、UNIXベースのOSを使用していて、 `$GOPATH` を設定している場合は、次のコマンドでディレクトリを作成できます。 `mkdir -p $GOPATH/src/github.com/$USER/hello`.
 
-For subsequent chapters, you can make a new folder with whatever name you like to put the code in e.g `$GOPATH/src/github.com/{your-user-id}/integers` for the next chapter might be sensible. Some readers of this book like to make an enclosing folder for all the work such as "learn-go-with-tests/hello". In short, it's up to you how you structure your folders.
+以降の章では、コードを好きな名前で新しいフォルダーを作成できます。たとえば、次の章では `$GOPATH/src/github.com/{your-user-id}/integers` にコードを配置することをお勧めします。
+このサイトの一部のユーザーは、`learn-go-with-tests/hello`. などのすべての作業用のフォルダーを作成することを好みます。
+つまり、フォルダをどのように構成するかはあなた次第です。
 
-Create a file in this directory called `hello.go` and write this code. To run it type `go run hello.go`.
+このディレクトリに`hello.go`というファイルを作成し、このコードを記述します。実行するには`go run hello.go`と入力します。
 
 ```go
 package main
@@ -28,19 +30,21 @@ func main() {
 }
 ```
 
-## How it works
+## 使い方
 
-When you write a program in Go you will have a `main` package defined with a `main` func inside it. Packages are ways of grouping up related Go code together.
+Goでプログラムを作成すると、その中に `main`関数が定義された` main`パッケージが作成されます。
+パッケージは、関連するGoコードをグループ化する方法です。
 
-The `func` keyword is how you define a function with a name and a body.
+`func`キーワードは、名前と本体で関数を定義する方法です。
 
-With `import "fmt"` we are importing a package which contains the `Println` function that we use to print.
+`import "fmt"`では、印刷に使用する `Println`関数を含むパッケージをインポートしています。
 
-## How to test
+## テスト方法
 
-How do you test this? It is good to separate your "domain" code from the outside world \(side-effects\). The `fmt.Println` is a side effect \(printing to stdout\) and the string we send in is our domain.
+どのようにテストすればよいと思いますか？
+「ドメイン」コードを外界から分離することは良いことです。 `fmt.Println`は副作用であり、送信する文字列はドメインです。
 
-So let's separate these concerns so it's easier to test
+テストを簡単にするために、これらの懸念事項を分離しましょう
 
 ```go
 package main
@@ -56,9 +60,10 @@ func main() {
 }
 ```
 
-We have created a new function again with `func` but this time we've added another keyword `string` in the definition. This means this function returns a `string`.
+`func`を使用して新しい関数を再度作成しましたが、今回は定義に別のキーワード`string`を追加しました。
+つまり、この関数は `string`を返します。
 
-Now create a new file called `hello_test.go` where we are going to write a test for our `Hello` function
+ここで、 `hello_test.go`という新しいファイルを作成します。ここで、`Hello`関数のテストを記述します
 
 ```go
 package main
@@ -75,49 +80,59 @@ func TestHello(t *testing.T) {
 }
 ```
 
-Before explaining, let's just run the code. Run `go test` in your terminal. It should've passed! Just to check, try deliberately breaking the test by changing the `want` string.
+説明する前に、コードを実行してみましょう。
+端末で`go test`を実行します。合格したはずです！
+確認するために、`want`文字列を変更して、意図的にテストを中断してみてください。
 
-Notice how you have not had to pick between multiple testing frameworks and then figure out how to install. Everything you need is built in to the language and the syntax is the same as the rest of the code you will write.
+複数のテストフレームワークを選択する必要がなく、インストール方法を理解する必要がないことに注意してください。
+必要なものはすべて言語に組み込まれており、構文は、これから記述する残りのコードと同じです。
 
-### Writing tests
+### テストを書く
 
-Writing a test is just like writing a function, with a few rules
+テストの作成は、関数の作成と同様であり、いくつかのルールがあります。
 
-* It needs to be in a file with a name like `xxx_test.go`
-* The test function must start with the word `Test`
-* The test function takes one argument only `t *testing.T`
+* `xxx_test.go`のような名前のファイルにある必要があります。
+* テスト関数は`Test`という単語で始まる必要があります。
+* テスト関数は1つの引数のみをとります。 `t *testing.T`
 
-For now it's enough to know that your `t` of type `*testing.T` is your "hook" into the testing framework so you can do things like `t.Fail()` when you want to fail.
+とりあえず、 `* testing.T`タイプの`t`がテストフレームワークへの`hook`(フック)であることを知っていれば十分なので、失敗したいときに `t.Fail()`のようなことを実行できます。
 
-We've covered some new topics:
+新しいトピックをいくつか取り上げました。
 
 #### `if`
 
-If statements in Go are very much like other programming languages.
+Goのステートメントが他のプログラミング言語とよく似ている場合。
 
 #### Declaring variables
 
-We're declaring some variables with the syntax `varName := value`, which lets us re-use some values in our test for readability.
+いくつかの変数を構文`varName := value`で宣言しています。これにより、読みやすくするためにテストでいくつかの値を再利用できます。
 
 #### `t.Errorf`
 
-We are calling the `Errorf` _method_ on our `t` which will print out a message and fail the test. The `f` stands for format which allows us to build a string with values inserted into the placeholder values `%q`. When you made the test fail it should be clear how it works.
+メッセージを出力してテストに失敗する`t`で`Errorf` _method_ を呼び出しています。
+`f`は、プレースホルダー値`％q`に値が挿入された文字列を作成できる形式を表します。
+テストを失敗させたとき、それがどのように機能するかは明らかです。
 
-You can read more about the placeholder strings in the [fmt go doc](https://golang.org/pkg/fmt/#hdr-Printing). For tests `%q` is very useful as it wraps your values in double quotes.
+プレースホルダー文字列の詳細については、 [fmt go doc](https://golang.org/pkg/fmt/#hdr-Printing)。
+テストでは、 `%q` は値を二重引用符で囲むので非常に便利です。
 
-We will later explore the difference between methods and functions.
+メソッドと関数の違いについては後で説明します。
 
-### Go doc
+### Go ドキュメント
 
-Another quality of life feature of Go is the documentation. You can launch the docs locally by running `godoc -http :8000`. If you go to [localhost:8000/pkg](http://localhost:8000/pkg) you will see all the packages installed on your system.
+Goのもう1つの質機能はドキュメントです。
+`godoc -http :8000`を実行すると、ローカルでドキュメントを起動できます。
+[localhost:8000/pkg](http://localhost:8000/pkg) に移動すると、システムにインストールされているすべてのパッケージが表示されます。
 
-The vast majority of the standard library has excellent documentation with examples. Navigating to [http://localhost:8000/pkg/testing/](http://localhost:8000/pkg/testing/) would be worthwhile to see what's available to you.
+標準ライブラリの大部分には、例を含む優れたドキュメントがあります。
+[http://localhost:8000/pkg/testing/](http://localhost:8000/pkg/testing/) に移動すると、何が利用できるかを確認する価値があります。
 
-If you don't have `godoc` command, then maybe you are using the newer version of Go \(1.14 or later\) which is [no longer including `godoc`](https://golang.org/doc/go1.14#godoc). You can manually install it with `go get golang.org/x/tools/cmd/godoc`.
+`godoc` コマンドがない場合は、`godoc`を含まない新しいバージョンのGo（`1.14`以降）を使用している可能性があります [no longer including `godoc`](https://golang.org/doc/go1.14#godoc)。
+`go get golang.org/x/tools/cmd/godoc`を使用して手動でインストールできます。
 
 ### Hello, YOU
 
-Now that we have a test we can iterate on our software safely.
+これでテストが完了したので、ソフトウェアを安全に反復できます。
 
 In the last example we wrote the test _after_ the code had been written just so you could get an example of how to write a test and declare a function. From this point on we will be _writing tests first_.
 
