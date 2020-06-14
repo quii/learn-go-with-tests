@@ -10,7 +10,7 @@ description: Learn Go with Tests
 
 Go言語でテスト駆動開発を学ぶ
 
-翻訳:[英語](https://quii.gitbook.io/learn-go-with-tests/), [中文](https://studygolang.gitbook.io/learn-go-with-tests), [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
+翻訳:[英語](https://quii.gitbook.io/learn-go-with-tests/), [中文](https://studygolang.gitbook.io/learn-go-with-tests), [Português](https://larien.gitbook.io/aprenda-go-com-testes/), [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
 
 * テストを作成してGo言語を探索する
 * **テスト駆動開発\(TDD\)を使用しながらGoを習得します。**GoはTDDを学習するのに適した言語です。TDDは簡単に学習することができ、テストが組み込まれているからです。
