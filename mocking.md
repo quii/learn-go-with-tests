@@ -610,6 +610,17 @@ It is sometimes hard to know _what level_ to test exactly but here are some thou
 
 As always, rules in software development aren't really rules and there can be exceptions. [Uncle Bob's article of "When to mock"](https://8thlight.com/blog/uncle-bob/2014/05/10/WhenToMock.html) has some excellent pointers.
 
+#### Can't I just use a mocking framework?
+
+Mocking requires no magic and is relatively simple; using a framework can make mocking seem more complicated than it is. We don't use automocking in this chapter so that we get:
+
+- a better understanding of how to mock
+- practise implementing interfaces
+
+In collaborative projects there is value auto-generating mocks. In a team, a mock generation tool codifies consistency around the test doubles. This will avoid inconsistently written test doubles which can translate to inconsistently written tests.
+
+You should only use a mock generator that generates test doubles against an interface. Any tool that overly dictates how tests are written, or that use lots of 'magic', can get in the sea.
+
 ## Wrapping up
 
 ### More on TDD approach
