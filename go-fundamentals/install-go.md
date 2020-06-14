@@ -6,79 +6,81 @@ description: Install Go
 
 Goの公式インストール手順は、[こちら](https://golang.org/doc/install)から入手できます。
 
-This guide will assume that you are using a package manager for e.g. [Homebrew](https://brew.sh), [Chocolatey](https://chocolatey.org), [Apt](https://help.ubuntu.com/community/AptGet/Howto) or [yum](https://access.redhat.com/solutions/9934).
+このガイドでは、パッケージマネージャーを使用していることを前提としています。 [Homebrew](https://brew.sh), [Chocolatey](https://chocolatey.org), [Apt](https://help.ubuntu.com/community/AptGet/Howto) or [yum](https://access.redhat.com/solutions/9934).
 
-For demonstration purposes we will show the installation procedure for OSX using Homebrew.
+デモのために、Homebrewを使用したOSXのインストール手順を紹介します。
 
-## Installation
+## インストール
 
-The process of installation is very easy. First, what you have to do is to run this command to install homebrew. It has a dependency on Xcode so you should ensure this is installed first.
+インストールのプロセスは非常に簡単です。
+まず、このコマンドを実行して自作をインストールする必要があります。これはXcodeに依存しているため、これが最初にインストールされていることを確認する必要があります。
 
 ```bash
 xcode-select --install
 ```
 
-Then you run the following to install homebrew:
+次に、以下を実行して自作をインストールします。
 
 ```bash
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-At this point you can now install Go with:
+この時点で、次のようにGoをインストールできます。
 
 ```bash
 brew install go
 ```
 
-_You should follow any instructions recommended by your package manager. **Note** these may be host os specific_.
+※ パッケージマネージャーが推奨する指示に従ってください。 **注**これらはホストos固有の場合があります。
 
-You can verify the installation with:
+インストールは次の方法で確認できます。
 
 ```bash
 $ go version
 go version go1.14 darwin/amd64
 ```
 
-## Go Environment
+## Go環境
 
 ### $GOPATH
 
-Go is opinionated.
+Go は意欲的です。
 
-By convention, all Go code lives within a single workspace \(folder\). This workspace could be anywhere in your machine. If you don't specify, Go will assume `$HOME/go` as the default workspace. The workspace is identified \(and modified\) by the environment variable [GOPATH](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable).
+慣例により、すべてのGoコードは単一のワークスペース \(folder\)内にあります。このワークスペースは、マシンのどこにあってもかまいません。指定しない場合、Goはデフォルトのワークスペースとして  `$HOME/go` を想定します。ワークスペースは、 特定された \(and modified\) 環境変数 [GOPATH](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable)によって、変更されています。
 
-You should set the environment variable so that you can use it later in scripts, shells, etc.
+後でスクリプトやシェルなどで使用できるように、環境変数を設定する必要があります。
 
-Update your `.bash_profile` to contain the following exports:
+次のエクスポートが含まれるように `.bash_profile`を更新します。
 
 ```bash
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 ```
 
-_Note_ you should open a new shell to pickup these environment variables.
+_注_これらの環境変数を取得するには、新しいシェルを開く必要があります。
 
-Go assumes that your workspace contains a specific directory structure.
+Goは、ワークスペースに特定のディレクトリ構造が含まれていることを前提としています。
 
-Go places its files in three directories: All source code lives in src, package objects lives in pkg, and the compiled programs live in bin. You can create these directories as follows:
+Goはそのファイルを3つのディレクトリに配置します。すべてのソースコードは`src`にあり、パッケージオブジェクトは`pkg`にあり、コンパイルされたプログラムは`bin`にあります。これらのディレクトリは次のように作成できます。
 
 ```bash
 mkdir -p $GOPATH/src $GOPATH/pkg $GOPATH/bin
 ```
 
-At this point you can `go get` and the `src/package/bin` will be installed correctly in the appropriate `$GOPATH/xxx` directory.
+この時点で、 `go get` を実行すると、 `src/package/bin` が適切な `$GOPATH/xxx` ディレクトリに正しくインストールされます。
 
-### Go Modules
+### Go モジュール
 
-Go 1.11 introduced [Modules](https://github.com/golang/go/wiki/Modules), enabling an alternative workflow. This new approach will gradually [become the default](https://blog.golang.org/modules2019) mode, deprecating the use of `GOPATH`.
+Go 1.11 は [モジュール](https://github.com/golang/go/wiki/Modules), 導入し、代替ワークフローを可能にしました。この新しいアプローチは徐々にデフォルトになります。 [become the default](https://blog.golang.org/modules2019) モードになり、 `GOPATH`の使用は廃止されます。
 
-Modules aim to solve problems related to dependency management, version selection and reproducible builds; they also enable users to run Go code outside of `GOPATH`.
+モジュールは、依存関係の管理、バージョンの選択、および再現可能なビルドに関連する問題の解決を目的としています。
+また、ユーザーが`GOPATH`の外でGoコードを実行できるようにします。
 
-Using Modules is pretty straightforward. Select any directory outside `GOPATH` as the root of your project, and create a new module with the `go mod init` command.
+モジュールの使用は非常に簡単です。プロジェクトのルートとして`GOPATH`以外のディレクトリを選択し、`go mod init`コマンドで新しいモジュールを作成します。
 
-A `go.mod` file will be generated, containing the module path, a Go version, and its dependency requirements, which are the other modules needed for a successful build.
+モジュールパス、Goバージョン、およびその依存関係要件を含む `go.mod`ファイルが生成されます。これらは、正常なビルドに必要な他のモジュールです。
 
-If no `<modulepath>` is specified, `go mod init` will try to guess the module path from the directory structure, but it can also be overrided, by supplying an argument.
+`<modulepath>`が指定されていない場合、 `go mod init`はディレクトリ構造からモジュールパスを推測しようとしますが、引数を指定してオーバーライドすることもできます。
 
 ```bash
 mkdir my-project
@@ -86,7 +88,7 @@ cd my-project
 go mod init <modulepath>
 ```
 
-A `go.mod` file could look like this:
+`go.mod`ファイルは次のようになります。
 
 ```text
 module cmd
@@ -100,80 +102,79 @@ require (
 )
 ```
 
-The built-in documentation provides an overview of all available `go mod` commands.
+組み込みのドキュメントは、利用可能なすべての `go mod`コマンドの概要を提供します。
 
 ```bash
 go help mod
 go help mod init
 ```
 
-## Go Editor
+## Go エディター
 
-Editor preference is very individualistic, you may already have a preference that supports Go. If you don't you should consider an Editor such as [Visual Studio Code](https://code.visualstudio.com), which has exceptional Go support.
+エディターの設定は非常に個性的です。Goをサポートする設定がすでにある可能性があります。そうでない場合は、[Visual Studio Code]（https://code.visualstudio.com）などの優れたGoサポートを備えたエディターを検討する必要があります。
 
-You can install it using the following command:
+次のコマンドを使用してインストールできます。
 
 ```bash
 brew cask install visual-studio-code
 ```
 
-You can confirm VS Code installed correctly you can run the following in your shell.
+VS Codeが正しくインストールされていることを確認できます。シェルで以下を実行できます。
 
 ```bash
 code .
 ```
 
-VS Code is shipped with very little software enabled, you can enable new software by installing extensions. To add Go support you must install an extension, there are a variety available for VS Code, an exceptional one is [Luke Hoban's package](https://github.com/Microsoft/vscode-go). This can be installed as follows:
+VS Codeはほとんどソフトウェアが有効になっていない状態で出荷されます。拡張機能をインストールすることで新しいソフトウェアを有効にできます。 Goサポートを追加するには、拡張機能をインストールする必要があります。VSCodeにはさまざまなものがありますが、例外は[Luke Hobanのパッケージ]（https://github.com/Microsoft/vscode-go）です。これは次のようにインストールできます。
 
 ```bash
 code --install-extension ms-vscode.go
 ```
 
-When you open a Go file for the first time in VS Code, it will indicate that the Analysis tools are missing, you should click the button to install these. The list of tools that gets installed \(and used\) by VS Code are available [here](https://github.com/Microsoft/vscode-go/wiki/Go-tools-that-the-Go-extension-depends-on).
+VS Codeで初めてGoファイルを開くと、分析ツールが見つからないことが示されます。これらをインストールするには、ボタンをクリックする必要があります。 VS Codeによってインストールされるツールのリストは、[こちら]（https://github.com/Microsoft/vscode-go/wiki/Go-tools-that-the-Go-extension-依存します）。
 
-## Go Debugger
+## Go デバッガー
 
-A good option for debugging Go \(that's integrated with VS Code\) is Delve. This can be installed as follows:
+Go（VS Codeに統合されている）のデバッグに適したオプションは`Delve`です。これは次のようにインストールできます。
 
 ```bash
 go get -u github.com/go-delve/delve/cmd/dlv
 ```
 
-For additional help configuring and running the Go debugger in VS Code, please reference the [VS Code debugging documentation](https://github.com/Microsoft/vscode-go/wiki/Debugging-Go-code-using-VS-Code).
+VS CodeでGoデバッガーを構成および実行するための追加のヘルプについては、[VS Codeデバッグドキュメント]（https://github.com/Microsoft/vscode-go/wiki/Debugging-Go-code-using-VS-Code）を参照してください）。
 
-## Go Linting
+## Go リンター
 
-An improvement over the default linter can be configured using [GolangCI-Lint](https://github.com/golangci/golangci-lint).
+デフォルトのリンターに対する改良は、[GolangCI-Lint]（https://github.com/golangci/golangci-lint）を使用して構成できます。
 
-This can be installed as follows:
+これは次のようにインストールできます。
 
 ```bash
 brew install golangci/tap/golangci-lint
 ```
 
-## Refactoring and your tooling
+## リファクタリングとツール
 
-A big emphasis of this book is around the importance of refactoring.
+この本では、リファクタリングの重要性を強調しています。
 
-Your tools can help you do bigger refactoring with confidence.
+ツールは、自信を持って大きなリファクタリングを行うのに役立ちます。
 
-You should be familiar enough with your editor to perform the following with a simple key combination:
+簡単なキーの組み合わせで次のことを実行できるように、エディタを十分に理解している必要があります。
 
-* **Extract/Inline variable**. Being able to take magic values and give them a name lets you simplify your code quickly
-* **Extract method/function**. It is vital to be able to take a section of code and extract functions/methods
-* **Rename**. You should be able to confidently rename symbols across files.
-* **go fmt**. Go has an opinioned formatter called `go fmt`. Your editor should be running this on every file save.
-* **Run tests**. It goes without saying that you should be able to do any of the above and then quickly re-run your tests to ensure your refactoring hasn't broken anything
+* **Extract/Inline variable**. 変数値を取り、それらに名前を付けることができることで、コードをすばやく単純化できます。
+* **Extract method/function**. コードのセクションを取得し、関数/メソッドを抽出できることが重要です。
+* **Rename**. ファイル間でシンボルの名前を自信を持って変更できるはずです。
+* **go fmt**. Goには、 `go fmt`と呼ばれる定型化されたフォーマッターがあります。エディターは、ファイルを保存するたびにこれを実行する必要があります。
+* **Run tests**. 上記のいずれかを実行してから、テストをすばやく再実行して、リファクタリングによって何も壊れていないことを確認する必要があります。
 
-In addition, to help you work with your code you should be able to:
+さらに、コードの操作を支援するために、次のことができる必要があります。
 
-* **View function signature** - You should never be unsure how to call a function in Go. Your IDE should describe a function in terms of its documentation, its parameters and what it returns.
-* **View function definition** - If it's still not clear what a function does, you should be able to jump to the source code and try and figure it out yourself.
-* **Find usages of a symbol** - Being able to see the context of a function being called can help your decision process when refactoring.
+* **View function signature** - Goで関数を呼び出す方法がわからないはずです。 IDEは、そのドキュメント、パラメータ、および返されるものの観点から関数を記述する必要があります。
+* **View function definition** - 関数の機能がまだ明確でない場合は、ソースコードにジャンプして、自分でそれを理解できるようにする必要があります。
+* **Find usages of a symbol** - 呼び出されている関数のコンテキストを確認できると、リファクタリング時の決定プロセスに役立ちます。
 
-Mastering your tools will help you concentrate on the code and reduce context switching.
+ツールを習得することで、コードに集中し、コンテキストの切り替えを減らすことができます。
 
-## Wrapping up
+## まとめ
 
-At this point you should have Go installed, an editor available and some basic tooling in place. Go has a very large ecosystem of third party products. We have identified a few useful components here, for a more complete list see [https://awesome-go.com](https://awesome-go.com).
-
+この時点で、Goがインストールされ、エディターが利用可能で、いくつかの基本的なツールが整っているはずです。 Goには、サードパーティ製品の非常に大きなエコシステムがあります。ここでいくつかの有用なコンポーネントを特定しました。より完全なリストについては、[https://awesome-go.com]（https://awesome-go.com）を参照してください。
