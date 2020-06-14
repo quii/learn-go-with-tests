@@ -12,8 +12,7 @@ Goの公式インストール手順は、[こちら](https://golang.org/doc/inst
 
 ## インストール
 
-インストールのプロセスは非常に簡単です。
-まず、このコマンドを実行して自作をインストールする必要があります。これはXcodeに依存しているため、これが最初にインストールされていることを確認する必要があります。
+インストールのプロセスは非常に簡単です。 まず、このコマンドを実行して自作をインストールする必要があります。これはXcodeに依存しているため、これが最初にインストールされていることを確認する必要があります。
 
 ```bash
 xcode-select --install
@@ -46,7 +45,7 @@ go version go1.14 darwin/amd64
 
 Go は意欲的です。
 
-慣例により、すべてのGoコードは単一のワークスペース \(folder\)内にあります。このワークスペースは、マシンのどこにあってもかまいません。指定しない場合、Goはデフォルトのワークスペースとして  `$HOME/go` を想定します。ワークスペースは、 特定された \(and modified\) 環境変数 [GOPATH](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable)によって、変更されています。
+慣例により、すべてのGoコードは単一のワークスペース \(folder\)内にあります。このワークスペースは、マシンのどこにあってもかまいません。指定しない場合、Goはデフォルトのワークスペースとして `$HOME/go` を想定します。ワークスペースは、 特定された \(and modified\) 環境変数 [GOPATH](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable)によって、変更されています。
 
 後でスクリプトやシェルなどで使用できるように、環境変数を設定する必要があります。
 
@@ -73,8 +72,7 @@ mkdir -p $GOPATH/src $GOPATH/pkg $GOPATH/bin
 
 Go 1.11 は [モジュール](https://github.com/golang/go/wiki/Modules), 導入し、代替ワークフローを可能にしました。この新しいアプローチは徐々にデフォルトになります。 [become the default](https://blog.golang.org/modules2019) モードになり、 `GOPATH`の使用は廃止されます。
 
-モジュールは、依存関係の管理、バージョンの選択、および再現可能なビルドに関連する問題の解決を目的としています。
-また、ユーザーが`GOPATH`の外でGoコードを実行できるようにします。
+モジュールは、依存関係の管理、バージョンの選択、および再現可能なビルドに関連する問題の解決を目的としています。 また、ユーザーが`GOPATH`の外でGoコードを実行できるようにします。
 
 モジュールの使用は非常に簡単です。プロジェクトのルートとして`GOPATH`以外のディレクトリを選択し、`go mod init`コマンドで新しいモジュールを作成します。
 
@@ -111,7 +109,7 @@ go help mod init
 
 ## Go エディター
 
-エディターの設定は非常に個性的です。Goをサポートする設定がすでにある可能性があります。そうでない場合は、[Visual Studio Code]（https://code.visualstudio.com）などの優れたGoサポートを備えたエディターを検討する必要があります。
+エディターの設定は非常に個性的です。Goをサポートする設定がすでにある可能性があります。そうでない場合は、[Visual Studio Code](https://code.visualstudio.com) などの優れたGoサポートを備えたエディターを検討する必要があります。
 
 次のコマンドを使用してインストールできます。
 
@@ -125,13 +123,13 @@ VS Codeが正しくインストールされていることを確認できます�
 code .
 ```
 
-VS Codeはほとんどソフトウェアが有効になっていない状態で出荷されます。拡張機能をインストールすることで新しいソフトウェアを有効にできます。 Goサポートを追加するには、拡張機能をインストールする必要があります。VSCodeにはさまざまなものがありますが、例外は[Luke Hobanのパッケージ]（https://github.com/Microsoft/vscode-go）です。これは次のようにインストールできます。
+VS Codeはほとんどソフトウェアが有効になっていない状態で出荷されます。拡張機能をインストールすることで新しいソフトウェアを有効にできます。 Goサポートを追加するには、拡張機能をインストールする必要があります。VSCodeにはさまざまなものがありますが、例外は[Luke Hobanのパッケージ](https://github.com/Microsoft/vscode-go)です。これは次のようにインストールできます。
 
 ```bash
 code --install-extension ms-vscode.go
 ```
 
-VS Codeで初めてGoファイルを開くと、分析ツールが見つからないことが示されます。これらをインストールするには、ボタンをクリックする必要があります。 VS Codeによってインストールされるツールのリストは、[こちら]（https://github.com/Microsoft/vscode-go/wiki/Go-tools-that-the-Go-extension-依存します）。
+VS Codeで初めてGoファイルを開くと、分析ツールが見つからないことが示されます。これらをインストールするには、ボタンをクリックする必要があります。 VS Codeによってインストールされるツールのリストは、[こちら](https://github.com/Microsoft/vscode-go/wiki/Go-tools-that-the-Go-extension-depends-on)。
 
 ## Go デバッガー
 
@@ -141,11 +139,11 @@ Go（VS Codeに統合されている）のデバッグに適したオプショ�
 go get -u github.com/go-delve/delve/cmd/dlv
 ```
 
-VS CodeでGoデバッガーを構成および実行するための追加のヘルプについては、[VS Codeデバッグドキュメント]（https://github.com/Microsoft/vscode-go/wiki/Debugging-Go-code-using-VS-Code）を参照してください）。
+VS CodeでGoデバッガーを構成および実行するための追加のヘルプについては、[VS Codeデバッグドキュメント](https://github.com/Microsoft/vscode-go/wiki/Debugging-Go-code-using-VS-Code)を参照してください。
 
 ## Go リンター
 
-デフォルトのリンターに対する改良は、[GolangCI-Lint]（https://github.com/golangci/golangci-lint）を使用して構成できます。
+デフォルトのリンターに対する改良は、[GolangCI-Lint](https://github.com/golangci/golangci-lint)を使用して構成できます。
 
 これは次のようにインストールできます。
 
@@ -177,4 +175,5 @@ brew install golangci/tap/golangci-lint
 
 ## まとめ
 
-この時点で、Goがインストールされ、エディターが利用可能で、いくつかの基本的なツールが整っているはずです。 Goには、サードパーティ製品の非常に大きなエコシステムがあります。ここでいくつかの有用なコンポーネントを特定しました。より完全なリストについては、[https://awesome-go.com]（https://awesome-go.com）を参照してください。
+この時点で、Goがインストールされ、エディターが利用可能で、いくつかの基本的なツールが整っているはずです。 Goには、サードパーティ製品の非常に大きなエコシステムがあります。ここでいくつかの有用なコンポーネントを特定しました。より完全なリストについては、[https://awesome-go.com](https://awesome-go.com)を参照してください。
+
