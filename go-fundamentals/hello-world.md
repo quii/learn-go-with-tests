@@ -134,11 +134,12 @@ Goのもう1つの質機能はドキュメントです。
 
 これでテストが完了したので、ソフトウェアを安全に反復できます。
 
-In the last example we wrote the test _after_ the code had been written just so you could get an example of how to write a test and declare a function. From this point on we will be _writing tests first_.
+最後の例では、テストを記述した後、コードを記述したので、テストを記述して関数を宣言する方法の例を取得できます。この時点から、`テストを最初に作成`します。
 
-Our next requirement is to let us specify the recipient of the greeting.
+次の要件は、挨拶の受信者を指定できるようにすることです。
 
-Let's start by capturing these requirements in a test. This is basic test driven development and allows us to make sure our test is _actually_ testing what we want. When you retrospectively write tests there is the risk that your test may continue to pass even if the code doesn't work as intended.
+これらの要件をテストに取り込むことから始めましょう。
+これは基本的なテスト主導の開発であり、テストが希望どおりに実際にテストされていることを確認できます。テストをさかのぼって作成すると、コードが意図したとおりに機能しなくても、テストが引き続きパスする可能性があります。
 
 ```go
 package main
@@ -155,7 +156,7 @@ func TestHello(t *testing.T) {
 }
 ```
 
-Now run `go test`, you should have a compilation error
+`go test`を実行すると、コンパイルエラーが発生するはずです
 
 ```text
 ./hello_test.go:6:18: too many arguments in call to Hello
@@ -163,11 +164,12 @@ Now run `go test`, you should have a compilation error
     want ()
 ```
 
-When using a statically typed language like Go it is important to _listen to the compiler_. The compiler understands how your code should snap together and work so you don't have to.
+Goのような静的に型付けされた言語を使用する場合、コンパイラーをリッスンすることが重要です。
+コンパイラーは、コードがどのようにスナップして機能するかを理解しているので、そうする必要はありません。
 
-In this case the compiler is telling you what you need to do to continue. We have to change our function `Hello` to accept an argument.
+この場合、コンパイラーは続行するために何をする必要があるかを指示しています。引数を受け付けるには、関数 `Hello`を変更する必要があります。
 
-Edit the `Hello` function to accept an argument of type string
+文字列型の引数を受け入れるように`Hello`関数を編集します
 
 ```go
 func Hello(name string) string {
@@ -175,7 +177,7 @@ func Hello(name string) string {
 }
 ```
 
-If you try and run your tests again your `main.go` will fail to compile because you're not passing an argument. Send in "world" to make it pass.
+もう一度テストを実行すると、引数を渡していないため、 `main.go`はコンパイルに失敗します。それを通過させるために`"world"`を送ってください。
 
 ```go
 func main() {
@@ -183,15 +185,15 @@ func main() {
 }
 ```
 
-Now when you run your tests you should see something like
+テストを実行すると、次のように表示されます。
 
 ```text
 hello_test.go:10: got 'Hello, world' want 'Hello, Chris''
 ```
 
-We finally have a compiling program but it is not meeting our requirements according to the test.
+ようやくコンパイルプログラムができましたが、テストによると要件を満たしていません。
 
-Let's make the test pass by using the name argument and concatenate it with `Hello,`
+`name`引数を使用してテストに合格し、 `Hello,`と連結してみましょう
 
 ```go
 func Hello(name string) string {
@@ -199,25 +201,25 @@ func Hello(name string) string {
 }
 ```
 
-When you run the tests they should now pass. Normally as part of the TDD cycle we should now _refactor_.
+テストを実行すると、テストに合格するはずです。通常、TDDサイクルの一部として、 _refactor_ を実行する必要があります。
 
-### A note on source control
+### ソース管理に関する注意
 
-At this point, if you are using source control \(which you should!\) I would `commit` the code as it is. We have working software backed by a test.
+この時点で、ソース管理を使用している場合はそうする必要があります！。 コードをそのまま `commit` します。テストに裏打ちされた実用的なソフトウェアがあります。
 
-I _wouldn't_ push to master though, because I plan to refactor next. It is nice to commit at this point in case you somehow get into a mess with refactoring - you can always go back to the working version.
+ただし、次にリファクタリングする予定なので、マスターにプッシュしません。何らかの理由でリファクタリングで混乱に陥った場合に備えて、この時点でコミットすると便利です。いつでも作業バージョンに戻ることができます。
 
-There's not a lot to refactor here, but we can introduce another language feature, _constants_.
+ここでリファクタリングすることは多くありませんが、 _constants_ という別の言語機能を導入できます。
 
-### Constants
+### 定数
 
-Constants are defined like so
+定数は次のように定義できます。
 
 ```go
 const englishHelloPrefix = "Hello, "
 ```
 
-We can now refactor our code
+コードをリファクタリングできるようになりました。
 
 ```go
 const englishHelloPrefix = "Hello, "
@@ -227,17 +229,17 @@ func Hello(name string) string {
 }
 ```
 
-After refactoring, re-run your tests to make sure you haven't broken anything.
+リファクタリング後、テストを再実行して、何も壊れていないことを確認します。
 
-Constants should improve performance of your application as it saves you creating the `"Hello, "` string instance every time `Hello` is called.
+定数は、 `Hello`が呼び出されるたびに`"Hello、"`文字列インスタンスを作成する手間を省くため、アプリケーションのパフォーマンスを向上させるはずです。
 
-To be clear, the performance boost is incredibly negligible for this example! But it's worth thinking about creating constants to capture the meaning of values and sometimes to aid performance.
+明確にするために、この例ではパフォーマンスの向上はごくわずかです。ただし、値の意味を把握するために、また場合によってはパフォーマンスを支援するために定数を作成することを検討する価値があります。
 
-## Hello, world... again
+## Hello, world... もう一度
 
-The next requirement is when our function is called with an empty string it defaults to printing "Hello, World", rather than "Hello, ".
+次の要件は、関数が空の文字列で呼び出されたときに、デフォルトで`"Hello、"`ではなく`"Hello、World"`を出力することです。
 
-Start by writing a new failing test
+新しい失敗するテストを書くことから始めます。
 
 ```go
 func TestHello(t *testing.T) {
@@ -263,17 +265,17 @@ func TestHello(t *testing.T) {
 }
 ```
 
-Here we are introducing another tool in our testing arsenal, subtests. Sometimes it is useful to group tests around a "thing" and then have subtests describing different scenarios.
+ここでは、テストの武器であるサブテストに別のツールを導入しています。 「もの」を中心にテストをグループ化し、さまざまなシナリオを説明するサブテストを作成すると便利な場合があります。
 
-A benefit of this approach is you can set up shared code that can be used in the other tests.
+このアプローチの利点は、他のテストで使用できる共有コードを設定できることです。
 
-There is repeated code when we check if the message is what we expect.
+メッセージが期待どおりかどうかを確認するときにコードが繰り返されます。
 
-Refactoring is not _just_ for the production code!
+リファクタリングは、量産コードにとって `ちょうど`ではありません！
 
-It is important that your tests _are clear specifications_ of what the code needs to do.
+テストでは、コードが何をする必要があるのか​​を明確に指定することが重要です。
 
-We can and should refactor our tests.
+テストをリファクタリングすることができます。
 
 ```go
 func TestHello(t *testing.T) {
@@ -300,13 +302,16 @@ func TestHello(t *testing.T) {
 }
 ```
 
-What have we done here?
+さて、ここで何をしましたか？
 
-We've refactored our assertion into a function. This reduces duplication and improves readability of our tests. In Go you can declare functions inside other functions and assign them to variables. You can then call them, just like normal functions. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
+アサーションを関数にリファクタリングしました。
+これにより、重複が削減され、テストの可読性が向上します。
+Goでは、他の関数内で関数を宣言して、変数に割り当てることができます。
+その後、通常の関数と同じようにそれらを呼び出すことができます。 `t * testing.T`を渡す必要があるので、必要なときにテストコードを失敗させることができます。
 
-`t.Helper()` is needed to tell the test suite that this method is a helper. By doing this when it fails the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems easier. If you still don't understand, comment it out, make a test fail and observe the test output.
+このメソッドがヘルパーであることをテストスイートに伝えるには、 `t.Helper()`が必要です。失敗したときにこれを行うと、レポートされる行番号はテストヘルパー内ではなく、`関数呼び出し`内にあります。これにより、他の開発者が問題を簡単に追跡できるようになります。それでも理解できない場合は、コメントアウトし、テストを失敗させて、テスト出力を観察します。
 
-Now that we have a well-written failing test, let's fix the code, using an `if`.
+うまく書かれた不合格のテストができたので、 `if`を使用してコードを修正しましょう。
 
 ```go
 const englishHelloPrefix = "Hello, "
@@ -319,39 +324,40 @@ func Hello(name string) string {
 }
 ```
 
-If we run our tests we should see it satisfies the new requirement and we haven't accidentally broken the other functionality.
+テストを実行すると、新しい要件を満たし、他の機能を誤って壊していないことがわかります。
 
-### Back to source control
+### ソース管理に戻る
 
-Now we are happy with the code I would amend the previous commit so we only check in the lovely version of our code with its test.
+さて、前のコミットを修正するコードに満足しているので、コードの素敵なバージョンをテストでチェックインするだけです。
 
-### Discipline
+### 規律
 
-Let's go over the cycle again
+サイクルをもう一度見てみましょう
 
-* Write a test
-* Make the compiler pass
-* Run the test, see that it fails and check the error message is meaningful
-* Write enough code to make the test pass
-* Refactor
+* テストを書く
+* コンパイラーをパスする
+* テストを実行し、失敗することを確認し、エラーメッセージが意味があることを確認します
+* テストに合格するのに十分なコードを記述します
+* リファクタリング
 
-On the face of it this may seem tedious but sticking to the feedback loop is important.
+一見面倒に見えるかもしれませんが、フィードバックループを守ることが重要です。
 
-Not only does it ensure that you have _relevant tests_, it helps ensure _you design good software_ by refactoring with the safety of tests.
+これは、`関連するテスト`があることを保証するだけでなく、テストの安全性を考慮してリファクタリングすることにより、`優れたソフトウェアを設計する`ことを保証するのに役立ちます。
 
-Seeing the test fail is an important check because it also lets you see what the error message looks like. As a developer it can be very hard to work with a codebase when failing tests do not give a clear idea as to what the problem is.
+テストが失敗したことを確認することは、エラーメッセージがどのように表示されるかを確認できるため、重要なチェックです。開発者としては、テストに失敗して問題が何であるかについて明確なアイデアが得られない場合、コードベースを操作するのは非常に困難です。
 
-By ensuring your tests are _fast_ and setting up your tools so that running tests is simple you can get in to a state of flow when writing your code.
+テストが`fast`であることを確認し、テストを簡単に実行できるようにツールを設定することで、コードを記述するときにフローの状態に入ることができます。
 
-By not writing tests you are committing to manually checking your code by running your software which breaks your state of flow and you won't be saving yourself any time, especially in the long run.
+テストを記述しないことにより、フローの状態を壊すソフトウェアを実行して手動でコードをチェックすることを約束し、特に長期的には、時間を節約できなくなります。
 
-## Keep going! More requirements
+## 立ち止まるな！ その他の要件
 
-Goodness me, we have more requirements. We now need to support a second parameter, specifying the language of the greeting. If a language is passed in that we do not recognise, just default to English.
+よかった、もっと要件があります。
+次に、挨拶の言語を指定する2番目のパラメーターをサポートする必要があります。認識されない言語が渡された場合は、デフォルトで英語に設定されます。
 
-We should be confident that we can use TDD to flesh out this functionality easily!
+TDDを使用してこの機能を簡単に具体化できると確信しているはずです。
 
-Write a test for a user passing in Spanish. Add it to the existing suite.
+スペイン語で合格するユーザーのテストを作成します。既存のスイートに追加します。
 
 ```go
     t.Run("in Spanish", func(t *testing.T) {
@@ -361,7 +367,7 @@ Write a test for a user passing in Spanish. Add it to the existing suite.
     })
 ```
 
-Remember not to cheat! _Test first_. When you try and run the test, the compiler _should_ complain because you are calling `Hello` with two arguments rather than one.
+不正行為をしないことを忘れないでください！ `最初にテスト`。テストを実行しようとすると、1つではなく2つの引数を指定して `Hello`を呼び出すため、コンパイラは文句を言うべきです_。
 
 ```text
 ./hello_test.go:27:19: too many arguments in call to Hello
@@ -369,7 +375,7 @@ Remember not to cheat! _Test first_. When you try and run the test, the compiler
     want (string)
 ```
 
-Fix the compilation problems by adding another string argument to `Hello`
+`Hello`に別の文字列引数を追加して、コンパイルの問題を修正します
 
 ```go
 func Hello(name string, language string) string {
@@ -380,7 +386,7 @@ func Hello(name string, language string) string {
 }
 ```
 
-When you try and run the test again it will complain about not passing through enough arguments to `Hello` in your other tests and in `hello.go`
+テストをもう一度実行すると、他のテストと `hello.go`で` Hello`に十分な引数を渡さないというメッセージが表示されます。
 
 ```text
 ./hello.go:15:19: not enough arguments in call to Hello
@@ -388,13 +394,13 @@ When you try and run the test again it will complain about not passing through e
     want (string, string)
 ```
 
-Fix them by passing through empty strings. Now all your tests should compile _and_ pass, apart from our new scenario
+空の文字列を渡すことで修正します。これで、新しいシナリオを除いて、すべてのテストで`and`がコンパイルされます。
 
 ```text
 hello_test.go:29: got 'Hello, Elodie' want 'Hola, Elodie'
 ```
 
-We can use `if` here to check the language is equal to "Spanish" and if so change the message
+ここで`if`を使用して、言語が`"Spanish"`に等しいことを確認し、そうであればメッセージを変更します
 
 ```go
 func Hello(name string, language string) string {
@@ -410,9 +416,9 @@ func Hello(name string, language string) string {
 }
 ```
 
-The tests should now pass.
+これでテストに合格するはずです。
 
-Now it is time to _refactor_. You should see some problems in the code, "magic" strings, some of which are repeated. Try and refactor it yourself, with every change make sure you re-run the tests to make sure your refactoring isn't breaking anything.
+ さて、リファクタリングのお時間です。コードにいくつかの問題が見られるはずです。`"magic"`文字列は、その一部が繰り返されます。自分で試してリファクタリングしてください。変更を加えるたびに、テストを再実行して、リファクタリングが何も壊していないことを確認してください。
 
 ```go
 const spanish = "Spanish"
@@ -432,13 +438,13 @@ func Hello(name string, language string) string {
 }
 ```
 
-### French
+### フランス語
 
-* Write a test asserting that if you pass in `"French"` you get `"Bonjour, "`
-* See it fail, check the error message is easy to read
-* Do the smallest reasonable change in the code
+* `"French"`を渡すと、 `"Bonjour、"`が得られることを表明するテストを作成します
+* それが失敗するのを見て、エラーメッセージが読みやすいことを確認してください
+* コードに最小限の合理的な変更を加える
 
-You may have written something that looks roughly like this
+大体このようなものを書いたかもしれません。
 
 ```go
 func Hello(name string, language string) string {
@@ -460,7 +466,7 @@ func Hello(name string, language string) string {
 
 ## `switch`
 
-When you have lots of `if` statements checking a particular value it is common to use a `switch` statement instead. We can use `switch` to refactor the code to make it easier to read and more extensible if we wish to add more language support later
+特定の値をチェックする多くの `if`ステートメントがある場合、代わりに`switch`ステートメントを使用するのが一般的です。後で言語サポートを追加したい場合は、 `switch`を使用してコードをリファクタリングして読みやすくし、拡張性を高めることができます。
 
 ```go
 func Hello(name string, language string) string {
@@ -481,11 +487,11 @@ func Hello(name string, language string) string {
 }
 ```
 
-Write a test to now include a greeting in the language of your choice and you should see how simple it is to extend our _amazing_ function.
+選択した言語で挨拶を含めるためのテストを作成すると、`amazing`関数を拡張するのがいかに簡単かがわかります。
 
-### one...last...refactor?
+### あとひとつ...最後に...リファクター？
 
-You could argue that maybe our function is getting a little big. The simplest refactor for this would be to extract out some functionality into another function.
+多分私たちの機能が少し大きくなっていると主張することができます。このための最も簡単なリファクタリングは、一部の機能を別の関数に抽出することです。
 
 ```go
 func Hello(name string, language string) string {
@@ -509,36 +515,36 @@ func greetingPrefix(language string) (prefix string) {
 }
 ```
 
-A few new concepts:
+いくつかの新しい概念
 
-* In our function signature we have made a _named return value_ `(prefix string)`.
-* This will create a variable called `prefix` in your function.
-  * It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for strings it is `""`.
-    * You can return whatever it's set to by just calling `return` rather than `return prefix`.
-  * This will display in the Go Doc for your function so it can make the intent of your code clearer.
-* `default` in the switch case will be branched to if none of the other `case` statements match.
-* The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposed to the world, so we made this function private.
+* 関数のシグネチャでは、 _named return value_ `(prefix string)`を作成しました。
+* これにより、関数に `prefix` という変数が作成されます。
+  * "zero" 値が割り当てられます。これはタイプによって異なります。たとえば、`int`は`0`で、文字列の場合は`""`です。
+    * `return prefix`ではなく`return`を呼び出すだけで、設定されているものを返すことができます。
+  * これは関数のGo Docに表示されるので、コードの意図をより明確にすることができます。
+* switchケースの`default` は、他の`case`ステートメントのいずれも一致しない場合に分岐します。
+* 関数名は小文字で始まります。 Goでは、パブリック関数は大文字で始まり、プライベート関数は小文字で始まります。アルゴリズムの内部を世界に公開したくないので、この関数をプライベートにしました。
 
-## Wrapping up
+## まとめ
 
-Who knew you could get so much out of `Hello, world`?
+`Hello, world`からこんなに多くを得ることができると誰が知ってたのでしょう。
 
-By now you should have some understanding of:
+これで、次のことをある程度理解できたはずです。
 
-### Some of Go's syntax around
+### Goの構文のいくつか
 
-* Writing tests
-* Declaring functions, with arguments and return types
-* `if`, `const` and `switch`
-* Declaring variables and constants
+* テストを書く
+* 引数と戻り値の型を使用した関数の宣言
+* `if`、`const` および `switch`
+* 変数と定数の宣言
 
-### The TDD process and _why_ the steps are important
+### TDDプロセスとそのステップが重要である理由
 
-* _Write a failing test and see it fail_ so we know we have written a _relevant_ test for our requirements and seen that it produces an _easy to understand description of the failure_
-* Writing the smallest amount of code to make it pass so we know we have working software
-* _Then_ refactor, backed with the safety of our tests to ensure we have well-crafted code that is easy to work with
+* `失敗するテストを作成してそれを確認する`要件に対応する`relevant`テストを作成し、失敗の説明を簡単に理解できることを確認しました。
+* 機能するソフトウェアがあることを確認するために、最小限のコードを記述して合格させる。
+* リファクタリング、テストの安全性に裏打ちされており、操作が簡単な巧妙に作成されたコードがあることを確認します
 
-In our case we've gone from `Hello()` to `Hello("name")`, to `Hello("name", "French")` in small, easy to understand steps.
+今回のケースでは、 `Hello()` から `Hello("name")` から `Hello("name", "French")` に、小さくて簡単な手順で進みました。
 
-This is of course trivial compared to "real world" software but the principles still stand. TDD is a skill that needs practice to develop but by being able to break problems down into smaller components that you can test you will have a much easier time writing software.
-
+もちろん、これは「現実の世界」のソフトウェアに比べれば取るに足らないことですが、原則は変わりません。
+TDDは、開発するための練習が必要なスキルですが、問題をより小さなコンポーネントに分解してテストできるため、ソフトウェアの作成がはるかに簡単になります。
