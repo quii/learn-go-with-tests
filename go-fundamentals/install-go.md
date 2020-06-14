@@ -4,7 +4,7 @@ description: Install Go
 
 # Goをインストールする
 
-The official installation instructions for Go are available [here](https://golang.org/doc/install).
+Goの公式インストール手順は、[こちら](https://golang.org/doc/install)から入手できます。
 
 This guide will assume that you are using a package manager for e.g. [Homebrew](https://brew.sh), [Chocolatey](https://chocolatey.org), [Apt](https://help.ubuntu.com/community/AptGet/Howto) or [yum](https://access.redhat.com/solutions/9934).
 
