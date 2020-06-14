@@ -1,4 +1,8 @@
-# Install Go
+---
+description: Install Go
+---
+
+# Goをインストールする
 
 The official installation instructions for Go are available [here](https://golang.org/doc/install).
 

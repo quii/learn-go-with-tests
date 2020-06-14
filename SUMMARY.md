@@ -4,7 +4,7 @@
 
 ## Go言語：基礎 <a id="go-fundamentals"></a>
 
-* [Install Go](go-fundamentals/install-go.md)
+* [Goをインストールする](go-fundamentals/install-go.md)
 * [Hello, World](go-fundamentals/hello-world.md)
 * [Integers](go-fundamentals/integers.md)
 * [Iteration](go-fundamentals/iteration.md)
