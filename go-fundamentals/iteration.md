@@ -4,15 +4,16 @@ description: Iteration
 
 # 反復、繰り返し
 
-[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/for)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/master/for)
 
-To do stuff repeatedly in Go, you'll need `for`. In Go there are no `while`, `do`, `until` keywords, you can only use `for`. Which is a good thing!
+Goで繰り返し作業を行うには、 `for`が必要です。
+Goには `while`、` do`、 `until`キーワードはなく、`for`のみ使用できます。これは良いことです！
 
-Let's write a test for a function that repeats a character 5 times.
+文字を5回繰り返す関数のテストを書いてみましょう。
 
-There's nothing new so far, so try and write it yourself for practice.
+これまでに新しいことは何もないので、練習のために自分で書いてみてください。
 
-## Write the test first
+## 最初にテストを書く
 
 ```go
 package iteration
@@ -29,15 +30,16 @@ func TestRepeat(t *testing.T) {
 }
 ```
 
-## Try and run the test
+## テストを試して実行する
 
 `./repeat_test.go:6:14: undefined: Repeat`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
 
-_Keep the discipline!_ You don't need to know anything new right now to make the test fail properly.
+規律を守りましょう！
+テストを適切に失敗させるために、今すぐ新しいことを知る必要はありません。
 
-All you need to do right now is enough to make it compile so you can check your test is written well.
+あなたが今する必要があるのはそれをコンパイルするのに十分なので、あなたのテストがうまく書かれていることを確認することができます。
 
 ```go
 package iteration
@@ -47,13 +49,14 @@ func Repeat(character string) string {
 }
 ```
 
-Isn't it nice to know you already know enough Go to write tests for some basic problems? This means you can now play with the production code as much as you like and know it's behaving as you'd hope.
+いくつかの基本的な問題のテストを書くのに、十分なGoをすでに知っているのはいいことではありませんか？
+つまり、これで本番コードを好きなだけ動かしても、希望どおりに動作していることがわかるようになります。
 
 `repeat_test.go:10: expected 'aaaaa' but got ''`
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
-The `for` syntax is very unremarkable and follows most C-like languages.
+`for`構文は非常に目立たず、ほとんどのC言語のような言語に従います。
 
 ```go
 func Repeat(character string) string {
@@ -65,21 +68,23 @@ func Repeat(character string) string {
 }
 ```
 
-Unlike other languages like C, Java, or JavaScript there are no parentheses surrounding the three components of the for statement and the braces `{ }` are always required. You might wonder what is happening in the row
+C、Java、JavaScriptなどの他の言語とは異なり、forステートメントの3つのコンポーネントを囲む括弧はなく、中括弧  `{ }` は常に必要です。
+行で何が起こっているのか不思議に思うかもしれません。
 
 ```go
     var repeated string
 ```
 
-as we've been using `:=` so far to declare and initializing variables. However, `:=` is simply [short hand for both steps](https://gobyexample.com/variables). Here we are declaring a `string` variable only. Hence, the explicit version. We can also use `var` to declare functions, as we'll see later on.
+これまで変数の宣言と初期化に `:=`を使用してきました。ただし、 `:=`は単に [変数代入の省略形](https://gobyexample.com/variables)です。
+ここでは `string`変数のみを宣言しています。したがって、明示的なバージョンです。後で説明するように、`var`を使用して関数を宣言することもできます。
 
-Run the test and it should pass.
+テストを実行すれば合格です。
 
-Additional variants of the for loop are described [here](https://gobyexample.com/for).
+forループのその他のバリアントについては、 [こちら](https://gobyexample.com/for)をご覧ください。
 
-## Refactor
+## リファクタリング
 
-Now it's time to refactor and introduce another construct `+=` assignment operator.
+次に、リファクタリングして、別の構成体 `+=`代入演算子を導入します。
 
 ```go
 const repeatCount = 5
@@ -93,11 +98,12 @@ func Repeat(character string) string {
 }
 ```
 
-`+=` called _"the Add AND assignment operator"_, adds the right operand to the left operand and assigns the result to left operand. It works with other types like integers.
+`+=` は `加算代入演算子`と呼ばれ、右のオペランドを左のオペランドに追加し、結果を左のオペランドに割り当てます。
+整数のような他の型で動作します。
 
-### Benchmarking
+### ベンチマーク
 
-Writing [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks) in Go is another first-class feature of the language and it is very similar to writing tests.
+Goでの [ベンチマーク](https://golang.org/pkg/testing/#hdr-Benchmarks) の記述は、言語のもう1つの優れた機能であり、テストの記述とよく似ています。
 
 ```go
 func BenchmarkRepeat(b *testing.B) {
@@ -107,15 +113,16 @@ func BenchmarkRepeat(b *testing.B) {
 }
 ```
 
-You'll see the code is very similar to a test.
+コードがテストに非常に似ていることがわかります。
 
-The `testing.B` gives you access to the cryptically named `b.N`.
+`testing.B`は、暗号的に命名された`b.N`にアクセスできるようになります。
 
-When the benchmark code is executed, it runs `b.N` times and measures how long it takes.
+ベンチマークコードが実行されると、`b.N`回実行され、かかる時間を測定します。
 
-The amount of times the code is run shouldn't matter to you, the framework will determine what is a "good" value for that to let you have some decent results.
+コードが実行される回数は重要ではありません。フレームワークは、適切な結果を得るために、その`適切な`値を決定します。
 
-To run the benchmarks do `go test -bench=.` \(or if you're in Windows Powershell `go test -bench="."`\)
+ベンチマークを実行するには、`go test -bench=.` を実行します
+（ Windows Powershellを使用している場合は、 `go test -bench="."`）
 
 ```text
 goos: darwin
@@ -125,19 +132,19 @@ pkg: github.com/quii/learn-go-with-tests/for/v4
 PASS
 ```
 
-What `136 ns/op` means is our function takes on average 136 nanoseconds to run \(on my computer\). Which is pretty ok! To test this it ran it 10000000 times.
+`136 ns/op`が意味することは、関数がコンピュータ上を実行するのに平均で`136ナノ秒`かかることです。かなり大丈夫です！
+これをテストするために、10000000回実行しました。
 
-_NOTE_ by default Benchmarks are run sequentially.
+デフォルトでは、ベンチマークは順次実行されます。
 
-## Practice exercises
+## 練習問題
 
-* Change the test so a caller can specify how many times the character is repeated and then fix the code
-* Write `ExampleRepeat` to document your function
-* Have a look through the [strings](https://golang.org/pkg/strings) package. Find functions you think could be useful and experiment with them by writing tests like we have here. Investing time learning the standard library will really pay off over time.
+* テストを変更して、発信者が文字が繰り返される回数を指定し、コードを修正できるようにする
+* 関数をドキュメント化するために `ExampleRepeat` を記述します
+* [strings](https://golang.org/pkg/strings) パッケージをご覧ください。便利だと思われる関数を見つけて、ここにあるようなテストを作成して実験してください。標準ライブラリの学習に時間を費やすことは、時間の経過とともに本当に実を結びます。
 
-## Wrapping up
+## まとめ
 
-* More TDD practice
-* Learned `for`
-* Learned how to write benchmarks
-
+* より多くのテスト駆動開発（TDD）プラクティス
+* `for`文の学び
+* ベンチマークの書き方を学びました
