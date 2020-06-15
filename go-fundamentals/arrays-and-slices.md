@@ -4,15 +4,15 @@ description: Arrays and slices
 
 # 配列とスライス
 
-[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/arrays)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/master/arrays)
 
-Arrays allow you to store multiple elements of the same type in a variable in a particular order.
+配列を使うと、同じ型の複数の要素を特定の順番で変数に格納することができます。
 
-When you have an array, it is very common to have to iterate over them. So let's use [our new-found knowledge of `for`](iteration.md) to make a `Sum` function. `Sum` will take an array of numbers and return the total.
+配列を持っていると、それらの要素を繰り返し処理しなければならないことがよくあります。そこで、[新しく知った`for`の知識](iteration.md) を使って`Sum`関数を作ってみましょう。`Sum`は数値の配列を受け取り、その合計を返します。
 
-Let's use our TDD skills
+テスト駆動開発（TDD）の技術を使ってみましょう
 
-## Write the test first
+## 最初にテストを書く
 
 In `sum_test.go`
 
@@ -34,20 +34,20 @@ func TestSum(t *testing.T) {
 }
 ```
 
-Arrays have a _fixed capacity_ which you define when you declare the variable. We can initialize an array in two ways:
+配列には`固定容量`があり、これは変数を宣言する際に定義します。配列を初期化するには、以下の2つの方法があります。
 
 * \[N\]type{value1, value2, ..., valueN} e.g. `numbers := [5]int{1, 2, 3, 4, 5}`
 * \[...\]type{value1, value2, ..., valueN} e.g. `numbers := [...]int{1, 2, 3, 4, 5}`
 
-It is sometimes useful to also print the inputs to the function in the error message and we are using the `%v` placeholder which is the "default" format, which works well for arrays.
+エラーメッセージに関数への入力を表示するのも便利な場合がありますが、ここでは `%v` プレースホルダを使用しています。
 
-[Read more about the format strings](https://golang.org/pkg/fmt/)
+[文字列の書式についての詳細はこちら](https://golang.org/pkg/fmt/)
 
-## Try to run the test
+## テストを実行してみてください
 
-By running `go test` the compiler will fail with `./sum_test.go:10:15: undefined: Sum`
+`go test`を実行すると、コンパイラは失敗します。 `./sum_test.go:10:15: undefined: Sum`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを書き、失敗したテストの出力をチェックする
 
 In `sum.go`
 
@@ -59,11 +59,11 @@ func Sum(numbers [5]int) int {
 }
 ```
 
-Your test should now fail with _a clear error message_
+これで、テストは明確なエラーメッセージが表示されて失敗するはずです。
 
 `sum_test.go:13: got 0 want 15 given, [1 2 3 4 5]`
 
-## Write enough code to make it pass
+## テストをパスするのに十分なコードを書く
 
 ```go
 func Sum(numbers [5]int) int {
@@ -75,11 +75,11 @@ func Sum(numbers [5]int) int {
 }
 ```
 
-To get the value out of an array at a particular index, just use `array[index]` syntax. In this case, we are using `for` to iterate 5 times to work through the array and add each item onto `sum`.
+特定のインデックスの配列から値を取り出すには、`array[index]`構文を使えば大丈夫です。この例では`for`を使って配列を5回繰り返し、各項目を`sum`に加算しています。
 
-## Refactor
+## リファクタリング
 
-Let's introduce [`range`](https://gobyexample.com/range) to help clean up our code
+コードをきれいにするために[`range`](https://gobyexample.com/range)を導入してみましょう。
 
 ```go
 func Sum(numbers [5]int) int {
@@ -91,23 +91,25 @@ func Sum(numbers [5]int) int {
 }
 ```
 
-`range` lets you iterate over an array. Every time it is called it returns two values, the index and the value. We are choosing to ignore the index value by using `_` [blank identifier](https://golang.org/doc/effective_go.html#blank).
+`range`は配列の反復処理を行うことができる。呼び出されるたびにインデックスと値の2つの値を返します。ここではインデックスの値を無視して `_` [空（スペース）の識別子](https://golang.org/doc/effective_go.html#blank)を使用しています。
 
-### Arrays and their type
+### 配列とその型
 
-An interesting property of arrays is that the size is encoded in its type. If you try to pass an `[4]int` into a function that expects `[5]int`, it won't compile. They are different types so it's just the same as trying to pass a `string` into a function that wants an `int`.
+配列の興味深い特性として、サイズが型でエンコードされていることが挙げられます。
+もし `[5]int` を期待する関数に `[4]int` を渡そうとしてもコンパイルできません。
+これらは異なる型なので、`int` を求める関数に `string` を渡そうとするのと同じです。
 
-You may be thinking it's quite cumbersome that arrays have a fixed length, and most of the time you probably won't be using them!
+配列の長さが固定されているのは非常に面倒だと思うかもしれませんし、ほとんどの場合、配列を使うことはないでしょう。
 
-Go has _slices_ which do not encode the size of the collection and instead can have any size.
+Goには`slices`がありますが、これはコレクションのサイズをエンコードするものではなく、任意のサイズを持つことができます。
 
-The next requirement will be to sum collections of varying sizes.
+次の要件は、さまざまなサイズのコレクションを合計することです。
 
-## Write the test first
+## 最初にテストを書く
 
-We will now use the [slice type](https://golang.org/doc/effective_go.html#slices) which allows us to have collections of any size. The syntax is very similar to arrays, you just omit the size when declaring them
+ここでは、任意のサイズのコレクションを持つことができる [slice type](https://golang.org/doc/effective_go.html#slices) を使用します。構文は配列と非常に似ていますが、宣言時にサイズを省略するだけです。
 
-`mySlice := []int{1,2,3}` rather than `myArray := [3]int{1,2,3}`
+`myArray := [3]int{1,2,3}`ではなく、`mySlice := []int{1,2,3}`こちらです。
 
 ```go
 func TestSum(t *testing.T) {
@@ -137,25 +139,23 @@ func TestSum(t *testing.T) {
 }
 ```
 
-## Try and run the test
+## テストを実行してみてください
 
-This does not compile
+これはコンパイルされません
 
 `./sum_test.go:22:13: cannot use numbers (type []int) as type [5]int in argument to Sum`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを書き、失敗したテストの出力をチェックする
 
-The problem here is we can either
+ここで問題なのは
 
-* Break the existing API by changing the argument to `Sum` to be a slice rather
+* 引数`Sum`をスライスに変更することで、既存のAPIを壊します。
 
-  than an array. When we do this we will know we have potentially ruined
+  配列に対して、このようなことをすると、破壊された可能性を潜在的発見するので他のテストがコンパイルされません!
 
-  someone's day because our _other_ test will not compile!
+* 新しい関数を作成しましょう
 
-* Create a new function
-
-In our case, no-one else is using our function so rather than having two functions to maintain let's just have one.
+私たちの場合は誰もこの関数を使っていないので、二つの関数を持つよりも一つの関数を持つことにしましょう。
 
 ```go
 func Sum(numbers []int) int {
@@ -167,15 +167,15 @@ func Sum(numbers []int) int {
 }
 ```
 
-If you try to run the tests they will still not compile, you will have to change the first test to pass in a slice rather than an array.
+テストを実行しようとしてもコンパイルされないので、最初のテストを配列ではなくスライスで渡すように変更しなければなりません。
 
-## Write enough code to make it pass
+## テストをパスさせるのに十分なコードを書いてください
 
-It turns out that fixing the compiler problems were all we need to do here and the tests pass!
+コンパイラの問題を修正するだけで、次のことができることがわかりました。
 
-## Refactor
+## リファクタリング
 
-We had already refactored `Sum` and all we've done is changing from arrays to slices, so there's not a lot to do here. Remember that we must not neglect our test code in the refactoring stage and we have some to do here.
+すでに`Sum`をリファクタリングしており、配列からスライスに変更しただけなので、ここでやることはそれほど多くありません。リファクタリングの段階でテストコードをおろそかにしてはいけないことを覚えておいてください。
 
 ```go
 func TestSum(t *testing.T) {
@@ -205,38 +205,38 @@ func TestSum(t *testing.T) {
 }
 ```
 
-It is important to question the value of your tests. It should not be a goal to have as many tests as possible, but rather to have as much _confidence_ as possible in your code base. Having too many tests can turn in to a real problem and it just adds more overhead in maintenance. **Every test has a cost**.
+テストの価値を問うことは重要です。可能な限り多くのテストを行うことが目標ではなく、むしろコードベースに対して可能な限り多くの`信頼`を持つことが目標です。あまりにも多くのテストを持っていると、実際に問題になることがありますし、メンテナンスのオーバーヘッドを増やすだけです。 **すべてのテストにはコストがある**.
 
-In our case, you can see that having two tests for this function is redundant. If it works for a slice of one size it's very likely it'll work for a slice of any size \(within reason\).
+私たちのケースでは、この関数のために2つのテストを持つことが冗長であることがわかります。あるサイズのスライスで動作するなら、どのサイズのスライスでも動作する可能性が高いです。
 
-Go's built-in testing toolkit features a [coverage tool](https://blog.golang.org/cover), which can help identify areas of your code you have not covered. I do want to stress that having 100% coverage should not be your goal, it's just a tool to give you an idea of your coverage. If you have been strict with TDD, it's quite likely you'll have close to 100% coverage anyway.
+Goの組み込みテストツールキットには、 [カバレッジツール](https://blog.golang.org/cover)があり、あなたがカバーしていないコードの領域を特定するのに役立ちます。私が強調したいのは、100%のカバレッジを持つことがゴールではないということです。TDD を厳格に行っていれば、100% に近いカバレッジが得られる可能性が高いでしょう。
 
-Try running
+実行してみてください。
 
 `go test -cover`
 
-You should see
+見てください。
 
 ```bash
 PASS
 coverage: 100.0% of statements
 ```
 
-Now delete one of the tests and check the coverage again.
+テストの一つを削除して、カバレッジをもう一度確認してください。
 
-Now that we are happy we have a well-tested function you should commit your great work before taking on the next challenge.
+これで、十分にテストされた関数を手に入れたことに満足しているので、次の課題に挑戦する前に、あなたの素晴らしい作品をコミットしてください。
 
-We need a new function called `SumAll` which will take a varying number of slices, returning a new slice containing the totals for each slice passed in.
+次に様々なスライスの数を受け取り、渡された各スライスの `SumAll` を含む新しいスライスを返します。
 
-For example
+例えば、以下のようになります。
 
-`SumAll([]int{1,2}, []int{0,9})` would return `[]int{3, 9}`
+`SumAll([]int{1,2}, []int{0,9})` は `[]int{3, 9}`を返します。
 
-or
+もしくは
 
-`SumAll([]int{1,1,1})` would return `[]int{3}`
+`SumAll([]int{1,1,1})` は `[]int{3}`を返します。
 
-## Write the test first
+## 最初にテストを書く
 
 ```go
 func TestSumAll(t *testing.T) {
@@ -250,15 +250,15 @@ func TestSumAll(t *testing.T) {
 }
 ```
 
-## Try and run the test
+## テストを実行してみてください
 
 `./sum_test.go:23:9: undefined: SumAll`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを書き、失敗したテストの出力をチェックする
 
-We need to define SumAll according to what our test wants.
+テストの目的に応じて`SumAll`を定義する必要があります。
 
-Go can let you write [_variadic functions_](https://gobyexample.com/variadic-functions) that can take a variable number of arguments.
+Goを使えば、可変数の引数を取ることができる [可変関数](https://gobyexample.com/variadic-functions) を書くことができます。
 
 ```go
 func SumAll(numbersToSum ...[]int) (sums []int) {
@@ -266,11 +266,11 @@ func SumAll(numbersToSum ...[]int) (sums []int) {
 }
 ```
 
-Try to compile but our tests still don't compile!
+コンパイルしようとしても、テストはまだコンパイルされません。
 
 `./sum_test.go:26:9: invalid operation: got != want (slice can only be compared to nil)`
 
-Go does not let you use equality operators with slices. You _could_ write a function to iterate over each `got` and `want` slice and check their values but for convenience sake, we can use [`reflect.DeepEqual`](https://golang.org/pkg/reflect/#DeepEqual) which is useful for seeing if _any_ two variables are the same.
+Goでは、スライスで等号演算子を使うことはできません。`got` と `want` の各スライスを繰り返し処理して値を確認する関数を書くこともできますが、便利のために [`reflect.DeepEqual`](https://golang.org/pkg/reflect/#DeepEqual) を使うと、2つの変数が同じであるかどうかを確認するのに便利です。
 
 ```go
 func TestSumAll(t *testing.T) {
@@ -284,9 +284,9 @@ func TestSumAll(t *testing.T) {
 }
 ```
 
-\(make sure you `import reflect` in the top of your file to have access to `DeepEqual`\)
+（`DeepEqual`にアクセスできるようにするには、ファイルの先頭で`import reflect`を作成します）
 
-It's important to note that `reflect.DeepEqual` is not "type safe", the code will compile even if you did something a bit silly. To see this in action, temporarily change the test to:
+重要なのは、`reflect.DeepEqual`は「型安全」ではないことに注意することです。これを確認するには、テストを一時的に変更してください。
 
 ```go
 func TestSumAll(t *testing.T) {
@@ -300,15 +300,15 @@ func TestSumAll(t *testing.T) {
 }
 ```
 
-What we have done here is try to compare a `slice` with a `string`. Which makes no sense, but the test compiles! So while using `reflect.DeepEqual` is a convenient way of comparing slices \(and other things\) you must be careful when using it.
+ここで行ったことは、`slice` と `string` を比較しようとしていることです。これでは意味がありませんが、テストはコンパイルされます。だから、`reflect.DeepEqual`を使うのはスライスを比較するのに便利な方法ですが、使うときは注意が必要です。
 
-Change the test back again and run it, you should have test output looking like this
+テストを再度変更して実行すると、以下のようなテスト出力が得られるはずです。
 
 `sum_test.go:30: got [] want [3 9]`
 
-## Write enough code to make it pass
+## テストをパスするのに十分なコードを書く
 
-What we need to do is iterate over the varargs, calculate the sum using our `Sum` function from before and then add it to the slice we will return
+必要なのは可変長引数を繰り返し処理して、前に使った`Sum`関数を使って合計を計算し、それを返すスライスに追加することです。
 
 ```go
 func SumAll(numbersToSum ...[]int) []int {
@@ -323,19 +323,19 @@ func SumAll(numbersToSum ...[]int) []int {
 }
 ```
 
-Lots of new things to learn!
+新しい学びがたくさんあります!
 
-There's a new way to create a slice. `make` allows you to create a slice with a starting capacity of the `len` of the `numbersToSum` we need to work through.
+スライスを作成する新しい方法があります。`make` を使うと、`numbersToSum`の開始容量が `len`であるスライスを作成できるようになります。
 
-You can index slices like arrays with `mySlice[N]` to get the value out or assign it a new value with `=`
+配列のように `mySlice[N]` でスライスをインデックス化して値を取得したり、`=` で新しい値を代入したりすることができます。
 
-The tests should now pass
+これでテストは合格するはずです。
 
-## Refactor
+## リファクタリング
 
-As mentioned, slices have a capacity. If you have a slice with a capacity of 2 and try to do `mySlice[10] = 1` you will get a _runtime_ error.
+前述したように、スライスには容量があります。容量2のスライスを持っていて `mySlice[10] = 1` を実行しようとすると、ランタイムエラーが発生します。
 
-However, you can use the `append` function which takes a slice and a new value, returning a new slice with all the items in it.
+しかし、`append`関数を使えば、スライスと新しい値を受け取り、その中にあるすべての項目を含む新しいスライスを返すことができます。
 
 ```go
 func SumAll(numbersToSum ...[]int) []int {
@@ -348,11 +348,11 @@ func SumAll(numbersToSum ...[]int) []int {
 }
 ```
 
-In this implementation, we are worrying less about capacity. We start with an empty slice `sums` and append to it the result of `Sum` as we work through the varargs.
+この実装では、容量についてはあまり気にしていません。空のスライス `sums` から始め、 可変長引数を処理しながら `Sum` の結果をそれに追加します。
 
-Our next requirement is to change `SumAll` to `SumAllTails`, where it now calculates the totals of the "tails" of each slice. The tail of a collection is all the items apart from the first one \(the "head"\)
+次の要件は `SumAll` を `SumAllTails` に変更することです。コレクションの末尾とは、最初のものを除いたすべてのアイテムのことです。
 
-## Write the test first
+## 最初にテストを書く
 
 ```go
 func TestSumAllTails(t *testing.T) {
@@ -365,17 +365,17 @@ func TestSumAllTails(t *testing.T) {
 }
 ```
 
-## Try and run the test
+## テストを実行してみてください
 
 `./sum_test.go:26:9: undefined: SumAllTails`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを書き、失敗したテストの出力をチェックする
 
-Rename the function to `SumAllTails` and re-run the test
+関数名を `SumAllTails` に変更し、テストを再実行します。
 
 `sum_test.go:30: got [3 9] want [2 9]`
 
-## Write enough code to make it pass
+## テストがパスするのに十分なコードを書く
 
 ```go
 func SumAllTails(numbersToSum ...[]int) []int {
@@ -389,15 +389,19 @@ func SumAllTails(numbersToSum ...[]int) []int {
 }
 ```
 
-Slices can be sliced! The syntax is `slice[low:high]` If you omit the value on one of the sides of the `:` it captures everything to the side of it. In our case, we are saying "take from 1 to the end" with `numbers[1:]`. You might want to invest some time in writing other tests around slices and experimenting with the slice operator so you can be familiar with it.
+スライスはスライスすることができます。構文は `slice[low:high]` で、`:` の片方の辺の値を省略すると、その辺までのすべての値をキャプチャします。この例では、`numbers[1:]` を使って「1から最後まで取る」と言っています。スライスを使った他のテストを書いたり、スライス演算子に慣れるために実験をしたりすることに時間を投資したほうがいいかもしれません。
 
-## Refactor
+## リファクタリング
 
-Not a lot to refactor this time.
+今回はリファクタリングすることはあまりありません。
 
-What do you think would happen if you passed in an empty slice into our function? What is the "tail" of an empty slice? What happens when you tell Go to capture all elements from `myEmptySlice[1:]`?
+空のスライスを関数に渡すとどうなると思いますか？
 
-## Write the test first
+空のスライスの「末尾」とは何ですか？
+
+Goに `myEmptySlice[1:]` からすべての要素をキャプチャするように指示するとどうなるか?
+
+## 最初にテストを書く
 
 ```go
 func TestSumAllTails(t *testing.T) {
@@ -423,16 +427,17 @@ func TestSumAllTails(t *testing.T) {
 }
 ```
 
-## Try and run the test
+## テストを実行してみてください
 
 ```text
 panic: runtime error: slice bounds out of range [recovered]
-    panic: runtime error: slice bounds out of range
+panic: runtime error: slice bounds out of range
 ```
 
-Oh no! It's important to note the test _has compiled_, it is a runtime error. Compile time errors are our friend because they help us write software that works, runtime errors are our enemies because they affect our users.
+これはランタイムエラーです。
+コンパイル時のエラーは、動作するソフトウェアを書くのに役立ちますが、ランタイムエラーはユーザーに影響を与えます。
 
-## Write enough code to make it pass
+## テストをパスするのに十分なコードを書く
 
 ```go
 func SumAllTails(numbersToSum ...[]int) []int {
@@ -450,9 +455,9 @@ func SumAllTails(numbersToSum ...[]int) []int {
 }
 ```
 
-## Refactor
+## リファクタリング
 
-Our tests have some repeated code around assertion again, let's extract that into a function
+このテストでは、アサーションの周りに繰り返しコードがあるので、それを関数に抽出してみましょう。
 
 ```go
 func TestSumAllTails(t *testing.T) {
@@ -479,34 +484,36 @@ func TestSumAllTails(t *testing.T) {
 }
 ```
 
-A handy side-effect of this is this adds a little type-safety to our code. If a silly developer adds a new test with `checkSums(t, got, "dave")` the compiler will stop them in their tracks.
+これは便利な副作用として、コードに少しだけ型の安全性が追加されます。
+アホな開発者が `checkSums(t, got, "dave")` で新しいテストを追加しても、コンパイラはその場で止めてくれます。
 
 ```bash
 $ go test
 ./sum_test.go:52:21: cannot use "dave" (type string) as type []int in argument to checkSums
 ```
 
-## Wrapping up
+## まとめ
 
-We have covered
+ここで学んだこと
 
-* Arrays
-* Slices
-  * The various ways to make them
-  * How they have a _fixed_ capacity but you can create new slices from old ones
+* 配列
+* スライス
+  * 作り方いろいろ
+  * 固定容量を持っていますが、古いものから新しいスライスを作成することができます。
 
-    using `append`
+    `append`を使えば追加できます
 
-  * How to slice, slices!
-* `len` to get the length of an array or slice
-* Test coverage tool
-* `reflect.DeepEqual` and why it's useful but can reduce the type-safety of your code
+  * スライスからスライス
+* 配列やスライスの長さを取得するために `len` を使用します。
+* テストカバレッジツール
+* `reflect.DeepEqual` と、なぜそれが便利なのか、しかしコードの型安全性を低下させる可能性があるのか。
 
-We've used slices and arrays with integers but they work with any other type too, including arrays/slices themselves. So you can declare a variable of `[][]string` if you need to.
+ここまでは整数のスライスや配列を使ってきましたが、配列やスライス自体を含め、他の型でも動作します。ですから、必要に応じて `[][]string` の変数を宣言することができます。
 
-[Check out the Go blog post on slices](https://blog.golang.org/go-slices-usage-and-internals) for an in-depth look into slices. Try writing more tests to demonstrate what you learn from reading it.
+スライスの詳細については、[スライスに関するGoブログ記事](https://blog.golang.org/go-slices-usage-and-internals)を参照してください。これを読んで学んだことを実証するために、より多くのテストを書いてみてください。
 
-Another handy way to experiment with Go other than writing tests is the Go playground. You can try most things out and you can easily share your code if you need to ask questions. [I have made a go playground with a slice in it for you to experiment with.](https://play.golang.org/p/ICCWcRGIO68)
+テストを書く以外にGoを使って実験するもう一つの便利な方法は、Goの遊び場です。ほとんどのことを試すことができますし、質問が必要な場合は簡単にコードを共有することができます。 [Go playgroundにスライスを入れて実験できるようにしてみました。](https://play.golang.org/p/ICCWcRGIO68)
 
-[Here is an example](https://play.golang.org/p/bTrRmYfNYCp) of slicing an array and how changing the slice affects the original array; but a "copy" of the slice will not affect the original array. [Another example](https://play.golang.org/p/Poth8JS28sc) of why it's a good idea to make a copy of a slice after slicing a very large slice.
+[配列をスライスした例](https://play.golang.org/p/bTrRmYfNYCp) では、配列をスライスして、スライスを変更すると元の配列にどのように影響するかを説明していますが、スライスの「コピー」は元の配列には影響しません。
 
+[別の例](https://play.golang.org/p/Poth8JS28sc) 非常に大きなスライスをスライスした後にコピーを作るのが良い理由があります。
