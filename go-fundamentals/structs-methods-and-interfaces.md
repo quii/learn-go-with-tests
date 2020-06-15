@@ -2,7 +2,7 @@
 description: 'Structs, methods & interfaces'
 ---
 
-# 構造体、メドッド、インターフェース
+# 構造体、メソッド、インターフェース
 
 [**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/structs)
 

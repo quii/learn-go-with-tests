@@ -9,7 +9,7 @@
 * [整数](go-fundamentals/integers.md)
 * [反復、繰り返し](go-fundamentals/iteration.md)
 * [配列とスライス](go-fundamentals/arrays-and-slices.md)
-* [構造体、メドッド、インターフェース](go-fundamentals/structs-methods-and-interfaces.md)
+* [構造体、メソッド、インターフェース](go-fundamentals/structs-methods-and-interfaces.md)
 * [ポインタとエラー](go-fundamentals/pointers-and-errors.md)
 * [マップ](go-fundamentals/maps.md)
 * [依存性注入](go-fundamentals/dependency-injection.md)
