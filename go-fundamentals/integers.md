@@ -4,13 +4,13 @@ description: integers
 
 # 整数
 
-[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/integers)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/master/integers)
 
-Integers work as you would expect. Let's write an `Add` function to try things out. Create a test file called `adder_test.go` and write this code.
+整数は期待どおりに機能します。物事を試すために `Add` 関数を書いてみましょう。  `adder_test.go` というテストファイルを作成し、このコードを記述します。
 
-**Note:** Go source files can only have one `package` per directory, make sure that your files are organised separately. [Here is a good explanation on this.](https://dave.cheney.net/2014/12/01/five-suggestions-for-setting-up-a-go-project)
+**注:** Goソースファイルは、ディレクトリごとに1つの `package` のみを持つことができます。ファイルが個別に編成されていることを確認してください。[説明](https://dave.cheney.net/2014/12/01/five-suggestions-for-setting-up-a-go-project)
 
-## Write the test first
+## 最初にテストを書く
 
 ```go
 package integers
@@ -27,21 +27,22 @@ func TestAdder(t *testing.T) {
 }
 ```
 
-You will notice that we're using `%d` as our format strings rather than `%q`. That's because we want it to print an integer rather than a string.
+`%d` ではなく、`%q`をフォーマット文字列として使用していることに気付くでしょう。これは、文字列ではなく整数を出力するためです。
 
-Also note that we are no longer using the main package, instead we've defined a package named `integers`, as the name suggests this will group functions for working with integers such as `Add`.
+また、メインパッケージを使用していないことに注意してください。代わりに、`integers`という名前のパッケージを定義しました。これは、名前がこれにより、`Add`などの整数を操作するための関数をグループ化することを示唆しているためです。
 
-## Try and run the test
+## テストを試して実行する
 
-Run the test `go test`
+`go test`を実行します
 
-Inspect the compilation error
+コンパイルエラーを検査する
 
 `./adder_test.go:6:9: undefined: Add`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
 
-Write enough code to satisfy the compiler _and that's all_ - remember we want to check that our tests fail for the correct reason.
+コンパイラを満足させるのに十分なコードを記述してください。これですべてです。
+テストが正しい理由で失敗したことを確認したいことに注意してください。
 
 ```go
 package integers
@@ -51,17 +52,19 @@ func Add(x, y int) int {
 }
 ```
 
-When you have more than one argument of the same type \(in our case two integers\) rather than having `(x int, y int)` you can shorten it to `(x, y int)`.
+`(x int, y int)` ではなく、同じタイプの`（この場合は2つの整数）`の引数が複数ある場合は、 `(x, y int)`に短縮できます。
 
-Now run the tests and we should be happy that the test is correctly reporting what is wrong.
+ここでテストを実行すると、テストが何が悪いのかを正しく報告していることに満足するはずです。
 
 `adder_test.go:10: expected '4' but got '0'`
 
-If you have noticed we learnt about _named return value_ in the [last](hello-world.md#one...last...refactor?) section but aren't using the same here. It should generally be used when the meaning of the result isn't clear from context, in our case it's pretty much clear that `Add` function will add the parameters. You can refer [this](https://github.com/golang/go/wiki/CodeReviewComments#named-result-parameters) wiki for more details.
+結果の意味がコンテキストから明確でない場合に一般的に使用する必要があります。この場合、`Add`関数がパラメーターを追加することはかなり明確です。
+詳細については、[wiki](https://github.com/golang/go/wiki/CodeReviewComments#named-result-parameters) を参照してください。
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
-In the strictest sense of TDD we should now write the _minimal amount of code to make the test pass_. A pedantic programmer may do this
+TDDの最も厳密な意味では、テストをパスするための最小限のコードを書く必要があります。
+知識のあるプログラマはこれを行うかもしれません。
 
 ```go
 func Add(x, y int) int {
@@ -69,13 +72,14 @@ func Add(x, y int) int {
 }
 ```
 
-Ah hah! Foiled again, TDD is a sham right?
+ああ！再び失敗した！TDDは意味あるんですか？
 
-We could write another test, with some different numbers to force that test to fail but that feels like [a game of cat and mouse](https://en.m.wikipedia.org/wiki/Cat_and_mouse).
+別のテストを作成して、いくつかの異なる数字を使用してそのテストを強制的に失敗させることもできますが、 [猫とマウスのゲーム](https://en.m.wikipedia.org/wiki/Cat_and_mouse)のように感じられます。
 
-Once we're more familiar with Go's syntax I will introduce a technique called _"Property Based Testing"_, which would stop annoying developers and help you find bugs.
+Goの構文に慣れてきたら、「プロパティベーステスト」`Property Based Testing`と呼ばれる手法を紹介します。
+これは、開発者を煩わせずにバグを見つけるのに役立ちます。
 
-For now, let's fix it properly
+とりあえず、きちんと直しましょう。
 
 ```go
 func Add(x, y int) int {
@@ -83,17 +87,18 @@ func Add(x, y int) int {
 }
 ```
 
-If you re-run the tests they should pass.
+テストを再実行すると、合格するはずです。
 
-## Refactor
+## リファクタリング
 
-There's not a lot in the _actual_ code we can really improve on here.
+ここで実際に改善できるコードは多くありません。
 
-We explored earlier how by naming the return argument it appears in the documentation but also in most developer's text editors.
+戻り引数に名前を付けることにより、ドキュメントだけでなくほとんどの開発者のテキストエディターにもどのように表示されるかについては、以前に説明しました。
 
-This is great because it aids the usability of code you are writing. It is preferable that a user can understand the usage of your code by just looking at the type signature and documentation.
+あなたが書いているコードの使いやすさを助けるので、これは素晴らしいです。
+型シグネチャとドキュメントを見るだけで、ユーザーがコードの使用法を理解できることが望ましいです。
 
-You can add documentation to functions with comments, and these will appear in Go Doc just like when you look at the standard library's documentation.
+コメント付きの関数にドキュメントを追加できます。コメントは、標準ライブラリのドキュメントと同じようにGo Docに表示されます。
 
 ```go
 // Add takes two integers and returns the sum of them.
@@ -102,17 +107,17 @@ func Add(x, y int) int {
 }
 ```
 
-### Examples
+### 例
 
-If you really want to go the extra mile you can make [examples](https://blog.golang.org/examples). You will find a lot of examples in the documentation of the standard library.
+一歩進んだら [例](https://blog.golang.org/examples)にしてください。標準ライブラリのドキュメントに多くの例があります。
 
-Often code examples that can be found outside the codebase, such as a readme file often become out of date and incorrect compared to the actual code because they don't get checked.
+多くの場合、READMEファイルなど、コードベースの外部にあるコード例は、チェックされないため、実際のコードと比較して古くなり、正しくありません。
 
-Go examples are executed just like tests so you can be confident examples reflect what the code actually does.
+Goの例はテストと同じように実行されるため、コードが実際に行っていることを確実に例に反映できます。
 
-Examples are compiled \(and optionally executed\) as part of a package's test suite.
+例は、パッケージのテストスイートの一部としてコンパイル（およびオプションで実行）されています。
 
-As with typical tests, examples are functions that reside in a package's `_test.go` files. Add the following `ExampleAdd` function to the `adder_test.go` file.
+典型的なテストと同様に、例はパッケージの `_test.go`ファイルにある関数です。次の`ExampleAdd`関数を`adder_test.go`ファイルに追加します。
 
 ```go
 func ExampleAdd() {
@@ -122,11 +127,11 @@ func ExampleAdd() {
 }
 ```
 
-\(If your editor doesn't automatically import packages for you, the compilation step will fail because you will be missing `import "fmt"` in `adder_test.go`. It is strongly recommended you research how to have these kind of errors fixed for you automatically in whatever editor you are using.\)
+\(エディターがパッケージを自動的にインポートしない場合、 `adder_test.go`に`import "fmt"`がないため、コンパイルが失敗します。これらの種類のエラーの発生方法を調査することを強くお勧めします。本来なら使用しているエディターで自動的に修正されます。\)
 
-If your code changes so that the example is no longer valid, your build will fail.
+サンプルが無効になるようにコードが変更された場合、ビルドは失敗します。
 
-Running the package's test suite, we can see the example function is executed with no further arrangement from us:
+パッケージのテストスイートを実行すると、サンプル関数がそれ以上の調整なしで実行されていることがわかります。
 
 ```bash
 $ go test -v
@@ -136,22 +141,22 @@ $ go test -v
 --- PASS: ExampleAdd (0.00s)
 ```
 
-Please note that the example function will not be executed if you remove the comment `//Output: 6`. Although the function will be compiled, it won't be executed.
+コメント `//Output: 6`を削除すると、サンプル関数は実行されないことに注意してください。
+関数はコンパイルされますが、実行されません。
 
-By adding this code the example will appear in the documentation inside `godoc`, making your code even more accessible.
+このコードを追加することにより、サンプルは `godoc`内のドキュメントに表示され、コードにさらにアクセスしやすくなります。
 
-To try this out, run `godoc -http=:6060` and navigate to `http://localhost:6060/pkg/`
+これを試すには、 `godoc -http=:6060` を実行して `http://localhost:6060/pkg/`にアクセスします
 
-Inside here you'll see a list of all the packages in your `$GOPATH`, so assuming you wrote this code in somewhere like `$GOPATH/src/github.com/{your_id}` you'll be able to find your example documentation.
+ここには、 `$GOPATH`内のすべてのパッケージのリストが表示されるので、このコードを`$GOPATH/src/github.com/{your_id}`のような場所に記述したとする場合のドキュメントの例です。
 
-If you publish your code with examples to a public URL, you can share the documentation of your code at [pkg.go.dev](https://pkg.go.dev/). For example, [here](https://pkg.go.dev/github.com/quii/learn-go-with-tests/integers/v2) is the finalised API for this chapter. This web interface allows you to search for documentation of standard library packages and third-party packages.
+例を含むコードをパブリックURLに公開する場合は、 [pkg.go.dev](https://pkg.go.dev/)でコードのドキュメントを共有できます。たとえば、[ここ](https://pkg.go.dev/github.com/quii/learn-go-with-tests/integers/v2) は、この章の最終的なAPIです。このWebインターフェイスを使用すると、標準ライブラリパッケージおよびサードパーティパッケージのドキュメントを検索できます。
 
-## Wrapping up
+## まとめ
 
-What we have covered:
+ここで学んだこと
 
-* More practice of the TDD workflow
-* Integers, addition
-* Writing better documentation so users of our code can understand its usage quickly
-* Examples of how to use our code, which are checked as part of our tests
-
+* テスト駆動開発（TDD）ワークフローのさらなる実践
+* 整数、加算
+* より良いドキュメントを作成して、コードのユーザーがその使用法をすばやく理解できるようにする
+* テストの一環としてチェックされるコードの使用例
