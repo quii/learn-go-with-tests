@@ -4,13 +4,14 @@ description: 'Structs, methods & interfaces'
 
 # 構造体、メソッド、インターフェース
 
-[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/structs)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/master/structs)
 
-Suppose that we need some geometry code to calculate the perimeter of a rectangle given a height and width. We can write a `Perimeter(width float64, height float64)` function, where `float64` is for floating-point numbers like `123.45`.
+高さと幅を指定して長方形の周囲を計算するために、いくつかのジオメトリコードが必要だとします。 `Perimeter(width float64, height float64)`関数を記述できます。
+ここで、 `float64`は` 123.45`のような浮動小数点数用です。
 
-The TDD cycle should be pretty familiar to you by now.
+テスト駆動開発（TDD）のサイクルはもうお馴染みのものになっているはずです。
 
-## Write the test first
+## 最初にテストを書く
 
 ```go
 func TestPerimeter(t *testing.T) {
@@ -23,13 +24,13 @@ func TestPerimeter(t *testing.T) {
 }
 ```
 
-Notice the new format string? The `f` is for our `float64` and the `.2` means print 2 decimal places.
+新しいフォーマット文字列に注目してください。 `f`は` float64`用で、 `.2`は小数点以下2桁を出力することを意味します。
 
-## Try to run the test
+## テストを実行してみます
 
 `./shapes_test.go:6:9: undefined: Perimeter`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
 
 ```go
 func Perimeter(width float64, height float64) float64 {
@@ -39,7 +40,7 @@ func Perimeter(width float64, height float64) float64 {
 
 Results in `shapes_test.go:10: got 0.00 want 40.00`.
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
 ```go
 func Perimeter(width float64, height float64) float64 {
@@ -47,11 +48,11 @@ func Perimeter(width float64, height float64) float64 {
 }
 ```
 
-So far, so easy. Now let's create a function called `Area(width, height float64)` which returns the area of a rectangle.
+これまでのところ、とても簡単です。長方形の面積を返す `Area(width, height float64)`と呼ばれる関数を作成しましょう。
 
-Try to do it yourself, following the TDD cycle.
+TDDサイクルに従って、自分で試してください。
 
-You should end up with tests like this
+おそらく、あなたはこのようなテストで終わるはずでしょう
 
 ```go
 func TestPerimeter(t *testing.T) {
@@ -73,7 +74,7 @@ func TestArea(t *testing.T) {
 }
 ```
 
-And code like this
+そして、このようなコード
 
 ```go
 func Perimeter(width float64, height float64) float64 {
@@ -85,15 +86,16 @@ func Area(width float64, height float64) float64 {
 }
 ```
 
-## Refactor
+## リファクタリング
 
-Our code does the job, but it doesn't contain anything explicit about rectangles. An unwary developer might try to supply the width and height of a triangle to these functions without realising they will return the wrong answer.
+私たちのコードはその役割を果たしますが、四角形について明示的なものは何も含まれていません。不注意な開発者は、三角形の幅と高さを間違った答えを返すことに気付かずにこれらの関数に提供しようとする場合があります。
 
-We could just give the functions more specific names like `RectangleArea`. A neater solution is to define our own _type_ called `Rectangle` which encapsulates this concept for us.
+`RectangleArea`のように、より具体的な名前を関数に付けることができます。より適切なソリューションは、この概念をカプセル化する`Rectangle`と呼ばれる独自の**型**を定義することです。
 
-We can create a simple type using a **struct**. [A struct](https://golang.org/ref/spec#Struct_types) is just a named collection of fields where you can store data.
 
-Declare a struct like this
+**struct**を使用して単純なタイプを作成できます。[構造体](https://golang.org/ref/spec#Struct_types)は、データを保存できるフィールドの名前付きコレクションです。
+
+このような構造体を宣言します
 
 ```go
 type Rectangle struct {
@@ -102,7 +104,7 @@ type Rectangle struct {
 }
 ```
 
-Now let's refactor the tests to use `Rectangle` instead of plain `float64`s.
+では、プレーンな`float64`ではなく、`Rectangle`を使用するようにテストをリファクタリングしましょう。
 
 ```go
 func TestPerimeter(t *testing.T) {
@@ -126,7 +128,8 @@ func TestArea(t *testing.T) {
 }
 ```
 
-Remember to run your tests before attempting to fix, you should get a helpful error like
+修正を試みる前に必ずテストを実行してください。
+次のような有用なエラーが表示されるはずです。
 
 ```text
 ./shapes_test.go:7:18: not enough arguments in call to Perimeter
@@ -134,9 +137,9 @@ Remember to run your tests before attempting to fix, you should get a helpful er
     want (float64, float64)
 ```
 
-You can access the fields of a struct with the syntax of `myStruct.field`.
+`myStruct.field`の構文で構造体のフィールドにアクセスできます。
 
-Change the two functions to fix the test.
+2つの関数を変更してテストを修正します。
 
 ```go
 func Perimeter(rectangle Rectangle) float64 {
@@ -148,11 +151,11 @@ func Area(rectangle Rectangle) float64 {
 }
 ```
 
-I hope you'll agree that passing a `Rectangle` to a function conveys our intent more clearly but there are more benefits of using structs that we will get on to.
+`Rectangle`を関数に渡すと、意図がより明確に伝わるが、構造体を使用することで得られるメリットが増えることに同意していただければ幸いです。
 
-Our next requirement is to write an `Area` function for circles.
+次の要件は、サークルの`Area`関数を記述することです。
 
-## Write the test first
+## 最初にテストを書く
 
 ```go
 func TestArea(t *testing.T) {
@@ -180,15 +183,15 @@ func TestArea(t *testing.T) {
 }
 ```
 
-As you can see, the 'f' has been replaced by 'g', using 'f' it could be difficult to know the exact decimal number, with 'g' we get a complete decimal number in the error message \([fmt options](https://golang.org/pkg/fmt/)\).
+ご覧のとおり、 `f` は `g`に置き換えられています。`f`を使用すると、正確な10進数を知るのが難しい場合があります。`g`を使用すると、エラーメッセージで完全な10進数が表示されます。\([fmt options](https://golang.org/pkg/fmt/)\).
 
-## Try to run the test
+## テストを実行してみます
 
 `./shapes_test.go:28:13: undefined: Circle`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
 
-We need to define our `Circle` type.
+`Circle`タイプを定義する必要があります。
 
 ```go
 type Circle struct {
@@ -196,35 +199,37 @@ type Circle struct {
 }
 ```
 
-Now try to run the tests again
+もう一度テストを実行してみてください
 
 `./shapes_test.go:29:14: cannot use circle (type Circle) as type Rectangle in argument to Area`
 
-Some programming languages allow you to do something like this:
+一部のプログラミング言語では、次のようなことができます。
 
 ```go
 func Area(circle Circle) float64 { ... }
 func Area(rectangle Rectangle) float64 { ... }
 ```
 
-But you cannot in Go
+しかし、**Go**ではできません
 
 `./shapes.go:20:32: Area redeclared in this block`
 
-We have two choices:
+2つの選択肢があります。
 
-* You can have functions with the same name declared in different _packages_. So we could create our `Area(Circle)` in a new package, but that feels overkill here.
-* We can define [_methods_](https://golang.org/ref/spec#Method_declarations) on our newly defined types instead.
+* 同じ名前の関数を異なる`packages`で宣言することができます。新しいパッケージで `Area(Circle)`を作成することはできますが、ここではやりすぎだと感じます。
+* 代わりに、新しく定義した型に[メソッド](https://golang.org/ref/spec#Method_declarations)を定義できます。
 
-### What are methods?
+### メソッドとは?
 
-So far we have only been writing _functions_ but we have been using some methods. When we call `t.Errorf` we are calling the method `Errorf` on the instance of our `t` \(`testing.T`\).
+これまでは _functions_ のみを記述してきましたが、いくつかのメソッドを使用しています。
+`t.Errorf`を呼び出すときは、`t` \(`testing.T`\)のインスタンスでメソッド`Errorf`を呼び出しています。
 
-A method is a function with a receiver. A method declaration binds an identifier, the method name, to a method, and associates the method with the receiver's base type.
+メソッドは、レシーバーを持つ関数です。
+メソッド宣言は、識別子（メソッド名）をメソッドにバインドし、メソッドをレシーバーの基本タイプに関連付けます。
 
-Methods are very similar to functions but they are called by invoking them on an instance of a particular type. Where you can just call functions wherever you like, such as `Area(rectangle)` you can only call methods on "things".
+メソッドは関数と非常に似ていますが、特定のタイプのインスタンスで呼び出すことによって呼び出されます。 `Area(rectangle)`など、好きな場所で関数を呼び出すことができる場所では、「もの」のメソッドのみを呼び出すことができます。
 
-An example will help so let's change our tests first to call methods instead and then fix the code.
+例が役立つので、まずテストを変更して、代わりにメソッドを呼び出し、次にコードを修正しましょう。
 
 ```go
 func TestArea(t *testing.T) {
@@ -252,20 +257,20 @@ func TestArea(t *testing.T) {
 }
 ```
 
-If we try to run the tests, we get
+テストを実行しようとすると、
 
 ```text
 ./shapes_test.go:19:19: rectangle.Area undefined (type Rectangle has no field or method Area)
 ./shapes_test.go:29:16: circle.Area undefined (type Circle has no field or method Area)
 ```
 
-> type Circle has no field or method Area
+> タイプCircleにはフィールドまたはメソッドエリアがありません（type Circle has no field or method Area）
 
-I would like to reiterate how great the compiler is here. It is so important to take the time to slowly read the error messages you get, it will help you in the long run.
+ここでコンパイラがどれほど優れているかを繰り返し説明します。時間をかけてゆっくりと表示されるエラーメッセージを読むことは非常に重要です。それは長期的には役立ちます。
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
 
-Let's add some methods to our types
+タイプにいくつかのメソッドを追加しましょう
 
 ```go
 type Rectangle struct {
@@ -286,21 +291,23 @@ func (c Circle) Area() float64  {
 }
 ```
 
-The syntax for declaring methods is almost the same as functions and that's because they're so similar. The only difference is the syntax of the method receiver `func (receiverName ReceiverType) MethodName(args)`.
+メソッドを宣言するための構文は、関数とほとんど同じです。
+これは、メソッドが非常に似ているためです。
+唯一の違いは、メソッドレシーバー `func (receiverName ReceiverType) MethodName(args)`の構文です。
 
-When your method is called on a variable of that type, you get your reference to its data via the `receiverName` variable. In many other programming languages this is done implicitly and you access the receiver via `this`.
+そのタイプの変数でメソッドが呼び出されると、 `receiverName`変数を介してそのデータへの参照が取得されます。他の多くのプログラミング言語では、これは暗黙的に行われ、 `this`を介してレシーバーにアクセスします。
 
-It is a convention in Go to have the receiver variable be the first letter of the type.
+Goの慣例では、レシーバー変数をタイプの最初の文字にします。
 
 ```go
 r Rectangle
 ```
 
-If you try to re-run the tests they should now compile and give you some failing output.
+テストを再実行しようとすると、テストがコンパイルされ、失敗した出力がいくつか表示されます。
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
-Now let's make our rectangle tests pass by fixing our new method
+新しいメソッドを修正して、長方形のテストに成功させましょう
 
 ```go
 func (r Rectangle) Area() float64  {
@@ -308,9 +315,9 @@ func (r Rectangle) Area() float64  {
 }
 ```
 
-If you re-run the tests the rectangle tests should be passing but circle should still be failing.
+テストを再実行すると、四角形テストはパスするはずですが、円はまだ失敗しているはずです。
 
-To make circle's `Area` function pass we will borrow the `Pi` constant from the `math` package \(remember to import it\).
+サークルの `Area`関数を渡すために、`math`パッケージから `Pi`定数を借ります（インポートすることを忘れないでください\）。
 
 ```go
 func (c Circle) Area() float64  {
@@ -318,19 +325,20 @@ func (c Circle) Area() float64  {
 }
 ```
 
-## Refactor
+## リファクタリング
 
-There is some duplication in our tests.
+テストに重複があります。
 
-All we want to do is take a collection of _shapes_, call the `Area()` method on them and then check the result.
+やりたいことは、`shapes`のコレクションを取得し、それらの `Area()`メソッドを呼び出して、結果を確認することだけです。
 
-We want to be able to write some kind of `checkArea` function that we can pass both `Rectangle`s and `Circle`s to, but fail to compile if we try to pass in something that isn't a shape.
+`Rectangle`と` Circle`の両方を渡すことができるある種の `checkArea`関数を記述できるようにしたいが、形状ではないものを渡そうとするとコンパイルに失敗します。
 
-With Go, we can codify this intent with **interfaces**.
+Goでは、この意図を**インターフェース**で体系化できます。
 
-[Interfaces](https://golang.org/ref/spec#Interface_types) are a very powerful concept in statically typed languages like Go because they allow you to make functions that can be used with different types and create highly-decoupled code whilst still maintaining type-safety.
+[インターフェイス](https://golang.org/ref/spec#Interface_types)は、Goなどの静的型付き言語で非常に強力な概念です。
+これにより、さまざまな型で使用できる関数を作成し、高度に分離されたコードを作成できます。まだタイプセーフを維持しています。
 
-Let's introduce this by refactoring our tests.
+テストをリファクタリングしてこれを紹介しましょう。
 
 ```go
 func TestArea(t *testing.T) {
@@ -356,9 +364,10 @@ func TestArea(t *testing.T) {
 }
 ```
 
-We are creating a helper function like we have in other exercises but this time we are asking for a `Shape` to be passed in. If we try to call this with something that isn't a shape, then it will not compile.
+他の演習と同様にヘルパー関数を作成していますが、今回は`Shape`が渡されるように要求しています。これを形状ではないもので呼び出そうとすると、コンパイルされません。
 
-How does something become a shape? We just tell Go what a `Shape` is using an interface declaration
+どのようにして何かが形になりますか？
+`Shape`がインターフェース宣言を使用しているものをGoに伝えるだけです
 
 ```go
 type Shape interface {
@@ -366,34 +375,36 @@ type Shape interface {
 }
 ```
 
-We're creating a new `type` just like we did with `Rectangle` and `Circle` but this time it is an `interface` rather than a `struct`.
+`Rectangle`と` Circle`で行ったように新しい `type`を作成していますが、今回は`struct`ではなく `interface`です。
 
-Once you add this to the code, the tests will pass.
+これをコードに追加すると、テストに合格します。
 
-### Wait, what?
+### ちょ待って、なぜ？
 
-This is quite different to interfaces in most other programming languages. Normally you have to write code to say `My type Foo implements interface Bar`.
+これは、他のほとんどのプログラミング言語のインターフェースとはかなり異なります。通常、`My type Foo implements interface Bar`と言うコードを書く必要があります。
 
-But in our case
+しかし、私たちの場合
 
-* `Rectangle` has a method called `Area` that returns a `float64` so it satisfies the `Shape` interface
-* `Circle` has a method called `Area` that returns a `float64` so it satisfies the `Shape` interface
-* `string` does not have such a method, so it doesn't satisfy the interface
-* etc.
+* `Rectangle`には`Area`というメソッドがあり、 `float64`を返すため、`Shape`インターフェースを満たします
+* `Circle`には` Area`というメソッドがあり、 `float64`を返すため、`Shape`インターフェースを満たします
+* `string`にはそのようなメソッドがないため、インターフェースを満たしていません
+* など
 
-In Go **interface resolution is implicit**. If the type you pass in matches what the interface is asking for, it will compile.
+Goでは、**インターフェースの解決は暗黙的です**。
+渡したタイプがインターフェースが要求するものと一致する場合、それはコンパイルされます。
 
-### Decoupling
+### 切り離し（Decoupling）
 
-Notice how our helper does not need to concern itself with whether the shape is a `Rectangle` or a `Circle` or a `Triangle`. By declaring an interface the helper is _decoupled_ from the concrete types and just has the method it needs to do its job.
+ヘルパーが形状が `Rectangle`、`Circle`、または `Triangle`のどちらであるかを気にする必要がないことに注意してください。
+インターフェースを宣言することにより、ヘルパーは具象型から切り離（Decoupling）され、その機能を実行するために必要なメソッドのみを持ちます。
 
-This kind of approach of using interfaces to declare **only what you need** is very important in software design and will be covered in more detail in later sections.
+インターフェイスを使用して**必要なもののみ**を宣言するこの種のアプローチは、ソフトウェア設計において非常に重要であり、後のセクションでより詳細に説明します。
 
-## Further refactoring
+## さらにリファクタリング
 
-Now that you have some understanding of structs we can introduce "table driven tests".
+構造体についてある程度理解できたので、「**テーブル駆動テスト**」を紹介します。
 
-[Table driven tests](https://github.com/golang/go/wiki/TableDrivenTests) are useful when you want to build a list of test cases that can be tested in the same manner.
+[テーブル駆動テスト](https://github.com/golang/go/wiki/TableDrivenTests)は、同じ方法でテストできるテストケースのリストを作成する場合に役立ちます。
 
 ```go
 func TestArea(t *testing.T) {
@@ -416,19 +427,21 @@ func TestArea(t *testing.T) {
 }
 ```
 
-The only new syntax here is creating an "anonymous struct", areaTests. We are declaring a slice of structs by using `[]struct` with two fields, the `shape` and the `want`. Then we fill the slice with cases.
+ここでの唯一の新しい構文は、「匿名の構造体」`areaTests`を作成することです。 2つのフィールド、 `shape`と` want`で `[]struct`を使用して、構造体のスライスを宣言しています。次に、スライスをケースで埋めます。
 
-We then iterate over them just like we do any other slice, using the struct fields to run our tests.
+次に、構造体フィールドを使用してテストを実行し、他のスライスと同じようにそれらを繰り返します。
 
-You can see how it would be very easy for a developer to introduce a new shape, implement `Area` and then add it to the test cases. In addition, if a bug is found with `Area` it is very easy to add a new test case to exercise it before fixing it.
+開発者が新しい形状を導入し、 `Area`を実装してテストケースに追加するのが非常に簡単であることを確認できます。
+さらに、`Area`でバグが見つかった場合、修正する前に新しいテストケースを追加して実行するのは非常に簡単です。
 
-Table based tests can be a great item in your toolbox but be sure that you have a need for the extra noise in the tests. If you wish to test various implementations of an interface, or if the data being passed in to a function has lots of different requirements that need testing then they are a great fit.
+テーブルベースのテストは、ツールボックスの優れた項目になる可能性がありますが、テストで余分なノイズが必要であることを確認してください。
+インターフェースのさまざまな実装をテストしたい場合、または関数に渡されるデータに、テストを必要とするさまざまな要件がたくさんある場合、それらは非常に適しています。
 
-Let's demonstrate all this by adding another shape and testing it; a triangle.
+別の形状を追加してテストすることで、これらすべてを実証してみましょう。三角形含めて。
 
-## Write the test first
+## 最初にテストを書く
 
-Adding a new test for our new shape is very easy. Just add `{Triangle{12, 6}, 36.0},` to our list.
+新しい形状の新しいテストを追加するのはとても簡単です。リストに`{Triangle{12, 6}, 36.0},`を追加するだけです。
 
 ```go
 func TestArea(t *testing.T) {
@@ -452,15 +465,15 @@ func TestArea(t *testing.T) {
 }
 ```
 
-## Try to run the test
+## テストを実行してみます
 
-Remember, keep trying to run the test and let the compiler guide you toward a solution.
+忘れずに、テストを実行し続けて、コンパイラーに解決策を導きましょう。
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
 
 `./shapes_test.go:25:4: undefined: Triangle`
 
-We have not defined Triangle yet
+三角形はまだ定義していません
 
 ```go
 type Triangle struct {
@@ -469,14 +482,14 @@ type Triangle struct {
 }
 ```
 
-Try again
+再試行
 
 ```text
 ./shapes_test.go:25:8: cannot use Triangle literal (type Triangle) as type Shape in field value:
     Triangle does not implement Shape (missing Area method)
 ```
 
-It's telling us we cannot use a Triangle as a shape because it does not have an `Area()` method, so add an empty implementation to get the test working
+Triangleは `Area()`メソッドがないため、形状として使用できないので、テストを機能させるために空の実装を追加します
 
 ```go
 func (t Triangle) Area() float64 {
@@ -484,11 +497,11 @@ func (t Triangle) Area() float64 {
 }
 ```
 
-Finally the code compiles and we get our error
+最後にコードがコンパイルされ、エラーが発生します
 
 `shapes_test.go:31: got 0.00 want 36.00`
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
 ```go
 func (t Triangle) Area() float64 {
@@ -496,13 +509,13 @@ func (t Triangle) Area() float64 {
 }
 ```
 
-And our tests pass!
+そして、テストは成功です！
 
-## Refactor
+## リファクタリング
 
-Again, the implementation is fine but our tests could do with some improvement.
+繰り返しになりますが、実装は問題ありませんが、テストでは多少の改善が見込めます。
 
-When you scan this
+これを見直すと
 
 ```go
 {Rectangle{12, 6}, 72.0},
@@ -510,11 +523,11 @@ When you scan this
 {Triangle{12, 6}, 36.0},
 ```
 
-It's not immediately clear what all the numbers represent and you should be aiming for your tests to be easily understood.
+すべての数値が何を表しているのかすぐには明確ではなく、テストを簡単に理解できるようにする必要があります。
 
-So far you've only been shown syntax for creating instances of structs `MyStruct{val1, val2}` but you can optionally name the fields.
+ここまでは、 `MyStruct{val1、val2}`構造体のインスタンスを作成するための構文だけを示してきましたが、オプションでフィールドに名前を付けることができます。
 
-Let's see what it looks like
+それがどのように見えるか見てみましょう
 
 ```go
         {shape: Rectangle{Width: 12, Height: 6}, want: 72.0},
@@ -522,27 +535,31 @@ Let's see what it looks like
         {shape: Triangle{Base: 12, Height: 6}, want: 36.0},
 ```
 
-In [Test-Driven Development by Example](https://g.co/kgs/yCzDLF) Kent Beck refactors some tests to a point and asserts:
+[例によるテスト駆動開発](https://g.co/kgs/yCzDLF) で、Mr. Kent Beckは、いくつかのテストをある程度までリファクタリングして評価します。
 
-> The test speaks to us more clearly, as if it were an assertion of truth, **not a sequence of operations**
+> テストは、それが真実の主張であるかのように、より明確に私たちに話しかけます。**一連の操作ではありません**
 
-\(emphasis mine\)
+今度は、少なくともケースのリストのテストで、形状とその領域について真実を主張します。
 
-Now our tests \(at least the list of cases\) make assertions of truth about shapes and their areas.
+## テスト出力が役立つことを確認する
 
-## Make sure your test output is helpful
+以前に`Triangle`を実装していて、失敗したテストがあったことを覚えていますか？ 
 
-Remember earlier when we were implementing `Triangle` and we had the failing test? It printed `shapes_test.go:31: got 0.00 want 36.00`.
+`shapes_test.go:31: got 0.00 want 36.00`と表示されました。
 
-We knew this was in relation to `Triangle` because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table? How would a developer know which case failed? This is not a great experience for the developer, they will have to manually look through the cases to find out which case actually failed.
+これが`Triangle`に関連していることはわかっていましたが、それを扱っているだけでしたが、表の20のケースのいずれかでバグがシステムに侵入した場合はどうなりますか？
+開発者はどのケースが失敗したかをどのようにして知るのでしょうか？
+これは開発者にとって素晴らしい経験ではありません。
 
-We can change our error message into `%#v got %.2f want %.2f`. The `%#v` format string will print out our struct with the values in its field, so the developer can see at a glance the properties that are being tested.
+実際に失敗したケースを見つけるために、ケースを手動で調べる必要があります。
 
-To increase the readability of our test cases further we can rename the `want` field into something more descriptive like `hasArea`.
+エラーメッセージを `%#v got %.2f want %.2f`に変更できます。 `%#v`形式の文字列は、フィールドの値を含む構造体を出力するため、開発者はテストされているプロパティを一目で確認できます。
 
-One final tip with table driven tests is to use `t.Run` and to name the test cases.
+テストケースを読みやすくするために、 `want`フィールドの名前を`hasArea`のようなわかりやすい名前に変更できます。
 
-By wrapping each case in a `t.Run` you will have clearer test output on failures as it will print the name of the case
+テーブル駆動テストの最後のヒントは、 `t.Run`を使用してテストケースに名前を付けることです。
+
+各ケースを `t.Run`でラップすることで、ケースの名前が出力されるため、失敗時のテスト出力がより明確になります。
 
 ```text
 --- FAIL: TestArea (0.00s)
@@ -550,9 +567,9 @@ By wrapping each case in a `t.Run` you will have clearer test output on failures
         shapes_test.go:33: main.Rectangle{Width:12, Height:6} got 72.00 want 72.10
 ```
 
-And you can run specific tests within your table with `go test -run TestArea/Rectangle`.
+また、 `go test -run TestArea/Rectangle`を使用して、テーブル内で特定のテストを実行できます。
 
-Here is our final test code which captures this
+これを捉えた最終テストコードは次のとおりです
 
 ```go
 func TestArea(t *testing.T) {
@@ -581,18 +598,18 @@ func TestArea(t *testing.T) {
 }
 ```
 
-## Wrapping up
+## まとめ
 
-This was more TDD practice, iterating over our solutions to basic mathematic problems and learning new language features motivated by our tests.
+これはより基本的な数学の問題の解決策を繰り返し、テストによって動機付けされた新しい言語機能を学習する、よりTDDの実践でした。
 
-* Declaring structs to create your own data types which lets you bundle related data together and make the intent of your code clearer
-* Declaring interfaces so you can define functions that can be used by different types \([parametric polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism)\)
-* Adding methods so you can add functionality to your data types and so you can implement interfaces
-* Table based tests to make your assertions clearer and your suites easier to extend & maintain
+* 構造体を宣言して独自のデータ型を作成し、関連するデータをまとめてコードの意図を明確にする
+* さまざまなタイプで使用できる関数を定義できるようにインターフェイスを宣言する \([parametric polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism)\)
+* データ型に機能を追加したり、インターフェースを実装したりできるようにメソッドを追加する
+* アサーションをより明確にし、スイートを拡張および保守しやすくするためのテーブルベースのテスト
 
-This was an important chapter because we are now starting to define our own types. In statically typed languages like Go, being able to design your own types is essential for building software that is easy to understand, to piece together and to test.
+これは重要な章でした。私たちは今、独自の型を定義し始めているからです。 Goのような静的に型付けされた言語では、理解しやすく、つなぎ合わせてテストできるソフトウェアを構築するために、独自の型を設計できることが不可欠です。
 
-Interfaces are a great tool for hiding complexity away from other parts of the system. In our case our test helper _code_ did not need to know the exact shape it was asserting on, only how to "ask" for it's area.
+インターフェイスは、システムの他の部分から複雑さを隠すための優れたツールです。私たちの場合、テストヘルパーは、それがアサートしている正確な形状を知る必要はなく、その領域を`尋ねる`方法を知るだけでした。
 
-As you become more familiar with Go you start to see the real strength of interfaces and the standard library. You'll learn about interfaces defined in the standard library that are used _everywhere_ and by implementing them against your own types you can very quickly re-use a lot of great functionality.
-
+Goに慣れるにつれて、インターフェースと標準ライブラリの本当の強みを理解し始めることができます。
+`everywhere`で使用される標準ライブラリで定義されたインターフェイスについて学び、独自のタイプに対してそれらを実装することにより、多くの優れた機能を非常に迅速に再利用できます。
