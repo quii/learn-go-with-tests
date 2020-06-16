@@ -4,9 +4,9 @@ description: Mocking
 
 # スタブ・モック
 
-[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/mocking)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/master/mocking)
 
-You have been asked to write a program which counts down from 3, printing each number on a new line \(with a 1 second pause\) and when it reaches zero it will print "Go!" and exit.
+3からカウントダウンするプログラムを作成するように求められました。各数値を新しい行に表示します（1秒の間隔を置いて）、ゼロに達すると「Go！」と表示します。そして終了します。
 
 ```text
 3
@@ -15,7 +15,7 @@ You have been asked to write a program which counts down from 3, printing each n
 Go!
 ```
 
-We'll tackle this by writing a function called `Countdown` which we will then put inside a `main` program so it looks something like this:
+これに取り組むには、`Countdown`という関数を作成します。この関数を`main`プログラム内に配置して、次のようにします。
 
 ```go
 package main
@@ -25,21 +25,21 @@ func main() {
 }
 ```
 
-While this is a pretty trivial program, to test it fully we will need as always to take an _iterative_, _test-driven_ approach.
+これはかなり簡単なプログラムですが、完全にテストするには、いつものように反復的、テストドリブンのアプローチを取る必要があります。
 
-What do I mean by iterative? We make sure we take the smallest steps we can to have _useful software_.
+反復とはどういう意味ですか？私たちは、有用なソフトウェアを入手するために、できる限り小さなステップを踏んでいることを確認します。
 
-We don't want to spend a long time with code that will theoretically work after some hacking because that's often how developers fall down rabbit holes. **It's an important skill to be able to slice up requirements as small as you can so you can have** _**working software**_**.**
+開発者がうさぎの穴に陥るのはそのためであることが多いため、ハッキングの後に理論的に機能するコードに長い時間を費やしたくありません。 **要件をできる限り小さくスライスして、** _ **動作するソフトウェア** _ **を使用できるようにすることは重要なスキルです。**
 
-Here's how we can divide our work up and iterate on it:
+作業を分割して反復する方法は次のとおりです。
 
-* Print 3
-* Print 3, 2, 1 and Go!
-* Wait a second between each line
+* 表示 3
+* 3、2、1 を表示してGo！
+* 各行の間で1秒待ちます
 
-## Write the test first
+## 最初にテストを書く
 
-Our software needs to print to stdout and we saw how we could use DI to facilitate testing this in the DI section.
+私たちのソフトウェアはstdoutに出力する必要があり、DIを使用してこれをテストする方法をDIセクションで確認しました。
 
 ```go
 func TestCountdown(t *testing.T) {
@@ -56,26 +56,26 @@ func TestCountdown(t *testing.T) {
 }
 ```
 
-If anything like `buffer` is unfamiliar to you, re-read [the previous section](dependency-injection.md).
+`buffer`のようなものに不慣れな場合は、[前のセクション](dependency-injection.md)をもう一度お読みください。
 
-We know we want our `Countdown` function to write data somewhere and `io.Writer` is the de-facto way of capturing that as an interface in Go.
+`Countdown`関数でどこかにデータを書き込む必要があることはわかっています。`io.Writer`は、Goのインターフェースとしてデータをキャプチャするための事実上の方法です。
 
-* In `main` we will send to `os.Stdout` so our users see the countdown printed to the terminal.
-* In test we will send to `bytes.Buffer` so our tests can capture what data is being generated.
+* `main`で`os.Stdout`に送信して、ターミナルに出力されたカウントダウンをユーザーに表示します。
+* テストでは、`bytes.Buffer`に送信して、生成されるデータをテストでキャプチャできるようにします。
 
-## Try and run the test
+## テストを試して実行する
 
 `./countdown_test.go:11:2: undefined: Countdown`
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
 
-Define `Countdown`
+`Countdown`を定義します
 
 ```go
 func Countdown() {}
 ```
 
-Try again
+再試行
 
 ```go
 ./countdown_test.go:11:11: too many arguments in call to Countdown
@@ -83,7 +83,7 @@ Try again
     want ()
 ```
 
-The compiler is telling you what your function signature could be, so update it.
+コンパイラーは、関数のシグニチャーが何であるかを通知しているので、更新してください。
 
 ```go
 func Countdown(out *bytes.Buffer) {}
@@ -91,9 +91,9 @@ func Countdown(out *bytes.Buffer) {}
 
 `countdown_test.go:17: got '' want '3'`
 
-Perfect!
+パーフェクト！
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
 ```go
 func Countdown(out *bytes.Buffer) {
@@ -101,11 +101,11 @@ func Countdown(out *bytes.Buffer) {
 }
 ```
 
-We're using `fmt.Fprint` which takes an `io.Writer` \(like `*bytes.Buffer`\) and sends a `string` to it. The test should pass.
+`fm.Fprint`を使用しています。これは、`io.Writer`（`* bytes.Buffer`など）を受け取り、それに`string`を送信します。テストは成功するはずです。
 
-## Refactor
+## リファクタリング
 
-We know that while `*bytes.Buffer` works, it would be better to use a general purpose interface instead.
+`*bytes.Buffer`は機能しますが、代わりに汎用インターフェースを使用する方がよいことはわかっています。
 
 ```go
 func Countdown(out io.Writer) {
@@ -113,9 +113,9 @@ func Countdown(out io.Writer) {
 }
 ```
 
-Re-run the tests and they should be passing.
+テストを再実行すると、テストに合格するはずです。
 
-To complete matters, let's now wire up our function into a `main` so we have some working software to reassure ourselves we're making progress.
+問題を完了するために、関数を`main`に結び付けましょう。そうすれば、作業を進めていることを確信できる実用的なソフトウェアができます。
 
 ```go
 package main
@@ -135,15 +135,17 @@ func main() {
 }
 ```
 
-Try and run the program and be amazed at your handywork.
+プログラムを試して実行すると、あなたの便利な作業に驚かされます。
 
-Yes this seems trivial but this approach is what I would recommend for any project. **Take a thin slice of functionality and make it work end-to-end, backed by tests.**
+はい、これはささいなことのようですが、このアプローチはどのプロジェクトにもお勧めします。
+**機能のごく一部を取得し、テストに裏打ちされた`end-to-end`で機能するようにします。**
 
-Next we can make it print 2,1 and then "Go!".
+次に、2,1を表示してから、「Go！」を表示します。
 
-## Write the test first
+## 最初にテストを書く
 
-By investing in getting the overall plumbing working right, we can iterate on our solution safely and easily. We will no longer need to stop and re-run the program to be confident of it working as all the logic is tested.
+配管全体を正しく機能させるために投資することで、ソリューションを安全かつ簡単に反復できます。
+すべてのロジックがテストされるので、プログラムが機能していることを確認するために、プログラムを停止して再実行する必要がなくなります。
 
 ```go
 func TestCountdown(t *testing.T) {
@@ -163,9 +165,9 @@ Go!`
 }
 ```
 
-The backtick syntax is another way of creating a `string` but lets you put things like newlines which is perfect for our test.
+バックティック構文は`string`を作成するもう1つの方法ですが、テストに最適な改行などを配置できます。
 
-## Try and run the test
+## テストを試して実行する
 
 ```text
 countdown_test.go:21: got '3' want '3
@@ -174,7 +176,7 @@ countdown_test.go:21: got '3' want '3
         Go!'
 ```
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
 ```go
 func Countdown(out io.Writer) {
@@ -184,12 +186,11 @@ func Countdown(out io.Writer) {
     fmt.Fprint(out, "Go!")
 }
 ```
+`i--`で逆にカウントする`for`ループを使用し、`fmt.Fprintln`を使用して、番号と改行文字を続けて`out`に出力します。最後に`fmt.Fprint`を使用して終わった後「Go！」を送信します。
 
-Use a `for` loop counting backwards with `i--` and use `fmt.Fprintln` to print to `out` with our number followed by a newline character. Finally use `fmt.Fprint` to send "Go!" aftward.
+## リファクタリング
 
-## Refactor
-
-There's not much to refactor other than refactoring some magic values into named constants.
+いくつかの魔法の値を名前付き定数にリファクタリングする以外に、リファクタリングすることは多くありません。
 
 ```go
 const finalWord = "Go!"
@@ -203,9 +204,9 @@ func Countdown(out io.Writer) {
 }
 ```
 
-If you run the program now, you should get the desired output but we don't have it as a dramatic countdown with the 1 second pauses.
+ここでプログラムを実行すると、目的の出力が得られるはずですが、1秒の一時停止による劇的なカウントダウンとしてはありません。
 
-Go lets you achieve this with `time.Sleep`. Try adding it in to our code.
+Goでは、`time.Sleep`でこれを実現できます。コードに追加してみてください。
 
 ```go
 func Countdown(out io.Writer) {
@@ -219,25 +220,25 @@ func Countdown(out io.Writer) {
 }
 ```
 
-If you run the program it works as we want it to.
+プログラムを実行すると、期待どおりに機能します。
 
-## Mocking
+## モック
 
-The tests still pass and the software works as intended but we have some problems:
+テストは引き続き成功し、ソフトウェアは意図したとおりに機能しますが、いくつかの問題があります。
 
-* Our tests take 4 seconds to run.
-  * Every forward thinking post about software development emphasises the importance of quick feedback loops.
-  * **Slow tests ruin developer productivity**.
-  * Imagine if the requirements get more sophisticated warranting more tests. Are we happy with 4s added to the test run for every new test of `Countdown`?
-* We have not tested an important property of our function.
+* テストの実行には4秒かかります。
+  * ソフトウェア開発に関する前向きな投稿はすべて、迅速なフィードバックループの重要性を強調しています。
+  * **遅いテストは開発者の生産性を台無しにします**。
+  * 要件がさらに洗練され、より多くのテストが必要になると想像してください。 `Countdown`のすべての新しいテストのテスト実行に4が追加されたことに満足していますか？
+* 関数の重要なプロパティはテストしていません。
 
-We have a dependency on `Sleep`ing which we need to extract so we can then control it in our tests.
+テストでそれを制御できるように抽出する必要がある`Sleep`に依存しています。
 
-If we can _mock_ `time.Sleep` we can use _dependency injection_ to use it instead of a "real" `time.Sleep` and then we can **spy on the calls** to make assertions on them.
+`time.Sleep`をモックできる場合は、「実際の」`time.Sleep`の代わりに**DI** _dependency injection_ を使用して、**呼び出しをスパイ**してアサーションを作成できます。
 
-## Write the test first
+## 最初にテストを書く
 
-Let's define our dependency as an interface. This lets us then use a _real_ Sleeper in `main` and a _spy sleeper_ in our tests. By using an interface our `Countdown` function is oblivious to this and adds some flexibility for the caller.
+依存関係をインターフェースとして定義しましょう。これにより、`main`で「実際の」Sleeperを使用し、テストで _spy sleeper_ を使用できるようになります。インターフェースを使用することにより、`Countdown`関数はこれを意識せず、呼び出し側に柔軟性を追加します。
 
 ```go
 type Sleeper interface {
@@ -245,9 +246,10 @@ type Sleeper interface {
 }
 ```
 
-I made a design decision that our `Countdown` function would not be responsible for how long the sleep is. This simplifies our code a little for now at least and means a user of our function can configure that sleepiness however they like.
+私の`Countdown`関数はスリープ時間の長さに責任を負わないと設計上の決定をしました。
+これにより、少なくとも今のところコードが少し単純化されており、関数のユーザーがその眠気を好きなように設定できることを意味します。
 
-Now we need to make a _mock_ of it for our tests to use.
+次に、テストで使用するために**モック**を作成する必要があります。
 
 ```go
 type SpySleeper struct {
@@ -259,9 +261,9 @@ func (s *SpySleeper) Sleep() {
 }
 ```
 
-_Spies_ are a kind of _mock_ which can record how a dependency is used. They can record the arguments sent in, how many times it has been called, etc. In our case, we're keeping track of how many times `Sleep()` is called so we can check it in our test.
+_Spies_ は、依存関係の使用方法を記録できるモックの一種です。送信された引数、それが呼び出された回数などを記録できます。この例では、`Sleep()`が呼び出された回数を追跡しているので、テストで確認できます。
 
-Update the tests to inject a dependency on our Spy and assert that the sleep has been called 4 times.
+テストを更新してSpyへの依存関係を挿入し、スリープが4回呼び出されたことをアサートします。
 
 ```go
 func TestCountdown(t *testing.T) {
@@ -286,7 +288,7 @@ Go!`
 }
 ```
 
-## Try and run the test
+## テストを試して実行する
 
 ```text
 too many arguments in call to Countdown
@@ -294,9 +296,9 @@ too many arguments in call to Countdown
     want (io.Writer)
 ```
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
 
-We need to update `Countdown` to accept our `Sleeper`
+`Sleeper`を受け入れるには`Countdown`を更新する必要があります
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
@@ -310,7 +312,7 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 }
 ```
 
-If you try again, your `main` will no longer compile for the same reason
+もう一度試すと、同じ理由で`main`はコンパイルできなくなります
 
 ```text
 ./main.go:26:11: not enough arguments in call to Countdown
@@ -318,7 +320,7 @@ If you try again, your `main` will no longer compile for the same reason
     want (io.Writer, Sleeper)
 ```
 
-Let's create a _real_ sleeper which implements the interface we need
+必要なインターフェースを実装する「実際の」スリーパーを作成しましょう
 
 ```go
 type DefaultSleeper struct {}
@@ -328,7 +330,7 @@ func (d *DefaultSleeper) Sleep() {
 }
 ```
 
-We can then use it in our real application like so
+それを実際のアプリケーションで使用することができます
 
 ```go
 func main() {
@@ -337,9 +339,9 @@ func main() {
 }
 ```
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
-The test is now compiling but not passing because we're still calling the `time.Sleep` rather than the injected in dependency. Let's fix that.
+テストはコンパイルされていますが、依存関係が挿入されているのではなく、`time.Sleep`を呼び出しているため、パスしていません。修正しましょう。
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
@@ -353,13 +355,15 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 }
 ```
 
-The test should pass and no longer taking 4 seconds.
+テストに合格し、4秒はかかりません。
 
-### Still some problems
+### まだいくつかの問題
 
-There's still another important property we haven't tested.
+テストしていない重要なプロパティがまだあります。
 
-`Countdown` should sleep before each print, e.g:
+`Countdown` は各表示の前にスリープする必要があります。
+
+例：
 
 * `Sleep`
 * `Print N`
@@ -369,9 +373,13 @@ There's still another important property we haven't tested.
 * `Print Go!`
 * etc
 
-Our latest change only asserts that it has slept 4 times, but those sleeps could occur out of sequence.
+私たちの最新の変更は、それが4回寝たと断言しているだけですが、それらの睡眠は順序が狂って起こる可能性があります。
 
-When writing tests if you're not confident that your tests are giving you sufficient confidence, just break it! \(make sure you have committed your changes to source control first though\). Change the code to the following
+テストが十分な自信を与えていると確信していない場合にテストを作成するときは、テストを中断してください。
+（ただし、変更を最初にソース管理にコミットしたことを確認してください）。
+
+コードを次のように変更します
+
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
@@ -388,11 +396,12 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 }
 ```
 
-If you run your tests they should still be passing even though the implementation is wrong.
+テストを実行すると、実装が間違っていてもテストは成功するはずです。
 
-Let's use spying again with a new test to check the order of operations is correct.
+新しいテストで再度スパイを使用して、操作の順序が正しいことを確認してみましょう。
 
-We have two different dependencies and we want to record all of their operations into one list. So we'll create _one spy for them both_.
+2つの異なる依存関係があり、それらのすべての操作を1つのリストに記録したいと考えています。
+ですから、両方のスパイを1つ作成します。
 
 ```go
 type CountdownOperationsSpy struct {
@@ -412,9 +421,9 @@ const write = "write"
 const sleep = "sleep"
 ```
 
-Our `CountdownOperationsSpy` implements both `io.Writer` and `Sleeper`, recording every call into one slice. In this test we're only concerned about the order of operations, so just recording them as list of named operations is sufficient.
+`CountdownOperationsSpy`は`io.Writer`と`Sleeper`の両方を実装し、すべての呼び出しを1つのスライスに記録します。このテストでは操作の順序のみを考慮しているため、名前付き操作のリストとして記録するだけで十分です。
 
-We can now add a sub-test into our test suite which verifies our sleeps and prints operate in the order we hope
+テストスイートにサブテストを追加して、スリープと表示が希望する順序で動作することを確認します。
 
 ```go
 t.Run("sleep before every print", func(t *testing.T) {
@@ -438,9 +447,10 @@ t.Run("sleep before every print", func(t *testing.T) {
 })
 ```
 
-This test should now fail. Revert `Countdown` back to how it was to fix the test.
+このテストは失敗するはずです。`Countdown`をテストの修正前の状態に戻します。
 
-We now have two tests spying on the `Sleeper` so we can now refactor our test so one is testing what is being printed and the other one is ensuring we're sleeping in between the prints. Finally we can delete our first spy as it's not used anymore.
+`Sleeper`をスパイする2つのテストができたので、テストをリファクタリングして、1つは表示されているものをテストし、もう1つは表示の合間に確実にスリープするようにします。
+最後に、最初のスパイは使用されなくなったので削除できます。
 
 ```go
 func TestCountdown(t *testing.T) {
@@ -482,15 +492,15 @@ Go!`
 }
 ```
 
-We now have our function and its 2 important properties properly tested.
+これで、機能とその2つの重要なプロパティが適切にテストされました。
 
-## Extending Sleeper to be configurable
+## スリーパーを構成可能に拡張
 
-A nice feature would be for the `Sleeper` to be configurable. This means that we can adjust the sleep time in our main program.
+`Sleeper`が構成可能であることは素晴らしい機能です。これは、メインプログラムでスリープ時間を調整できることを意味します。
 
-### Write the test first
+### 最初にテストを書く
 
-Let's first create a new type for `ConfigurableSleeper` that accepts what we need for configuration and testing.
+まず、設定とテストに必要なものを受け入れる `ConfigurableSleeper`の新しいタイプを作成しましょう。
 
 ```go
 type ConfigurableSleeper struct {
@@ -499,7 +509,7 @@ type ConfigurableSleeper struct {
 }
 ```
 
-We are using `duration` to configure the time slept and `sleep` as a way to pass in a sleep function. The signature of `sleep` is the same as for `time.Sleep` allowing us to use `time.Sleep` in our real implementation and the following spy in our tests:
+スリープ時間を設定するために`duration`を使用し、スリープ関数を渡す方法として`sleep`を使用しています。 `sleep`のシグネチャは`time.Sleep`のシグネチャと同じであり、実際の実装で`time.Sleep`を使用して、テストで次のスパイを使用できます。
 
 ```go
 type SpyTime struct {
@@ -511,7 +521,7 @@ func (s *SpyTime) Sleep(duration time.Duration) {
 }
 ```
 
-With our spy in place, we can create a new test for the configurable sleeper.
+スパイを配置したら、構成可能なスリーパーの新しいテストを作成できます。
 
 ```go
 func TestConfigurableSleeper(t *testing.T) {
@@ -527,32 +537,32 @@ func TestConfigurableSleeper(t *testing.T) {
 }
 ```
 
-There should be nothing new in this test and it is setup very similar to the previous mock tests.
+このテストには何も新しいものはなく、以前の模擬テストと非常によく似た設定になっています。
 
-### Try and run the test
+### テストを試して実行する
 
 ```text
 sleeper.Sleep undefined (type ConfigurableSleeper has no field or method Sleep, but does have sleep)
 ```
 
-You should see a very clear error message indicating that we do not have a `Sleep` method created on our `ConfigurableSleeper`.
+`ConfigurableSleeper`で作成された`Sleep`メソッドがないことを示す非常に明確なエラーメッセージが表示されます。
 
-### Write the minimal amount of code for the test to run and check failing test output
+### テストを実行し、失敗したテスト出力を確認するための最小限のコードを記述します
 
 ```go
 func (c *ConfigurableSleeper) Sleep() {
 }
 ```
 
-With our new `Sleep` function implemented we have a failing test.
+新しい`Sleep`関数が実装されたため、テストに失敗しました。
 
 ```text
 countdown_test.go:56: should have slept for 5s but slept for 0s
 ```
 
-### Write enough code to make it pass
+### 成功させるのに十分なコードを書く
 
-All we need to do now is implement the `Sleep` function for `ConfigurableSleeper`.
+ここで行う必要があるのは、`ConfigurableSleeper`の`Sleep`関数を実装することだけです。
 
 ```go
 func (c *ConfigurableSleeper) Sleep() {
@@ -560,11 +570,12 @@ func (c *ConfigurableSleeper) Sleep() {
 }
 ```
 
-With this change all of the tests should be passing again and you might wonder why all the hassle as the main program didn't change at all. Hopefully it becomes clear after the following section.
+この変更により、すべてのテストが再び成功し、メインプログラムがまったく変更されなかったので、なぜすべての面倒な作業に不思議に思うかもしれません。
+うまくいけば、次のセクションで明らかになります。
 
-### Cleanup and refactor
+### クリーンアップとリファクタリング
 
-The last thing we need to do is to actually use our `ConfigurableSleeper` in the main function.
+最後に行う必要があるのは、メイン関数で実際に `ConfigurableSleeper`を使用することです。
 
 ```go
 func main() {
@@ -573,68 +584,72 @@ func main() {
 }
 ```
 
-If we run the tests and the program manually, we can see that all the behavior remains the same.
+テストとプログラムを手動で実行すると、すべての動作が同じであることがわかります。
 
-Since we are using the `ConfigurableSleeper`, it is now safe to delete the `DefaultSleeper` implementation. Wrapping up our program and having a more [generic](https://stackoverflow.com/questions/19291776/whats-the-difference-between-abstraction-and-generalization) Sleeper with arbitrary long countdowns.
+`ConfigurableSleeper`を使用しているので、`DefaultSleeper`実装を削除しても安全です。
+私たちのプログラムをまとめ、より多くの[generic](https://stackoverflow.com/questions/19291776/whats-the-difference-between-abstraction-and-generalization)任意の長いカウントダウンを備えたスリーパーを用意します。
 
-## But isn't mocking evil?
+## しかし、モックを行うのは悪ではないのか？
 
-You may have heard mocking is evil. Just like anything in software development it can be used for evil, just like [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself).
+モックは悪だと聞いたことがあるかもしれません。ソフトウェア開発と同様に、[DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)のように悪く使用することができます。
 
-People normally get in to a bad state when they don't _listen to their tests_ and are _not respecting the refactoring stage_.
+人々は通常、テストを行っていない、そして、リファクタリング段階を尊重していない場合、悪い状態に陥ります。
 
-If your mocking code is becoming complicated or you are having to mock out lots of things to test something, you should _listen_ to that bad feeling and think about your code. Usually it is a sign of
+通常、それはモックコードが複雑になったり、何かをテストするためにたくさんのものをモックアウトしたりする必要がある場合は、その悪い感情に耳を傾け、コードについて考える必要があります。
 
-* The thing you are testing is having to do too many things \(because it has too many dependencies to mock\)
-  * Break the module apart so it does less
-* Its dependencies are too fine-grained
-  * Think about how you can consolidate some of these dependencies into one meaningful module
-* Your test is too concerned with implementation details
-  * Favour testing expected behaviour rather than the implementation
+* テストしているのは、あまりにも多くのことをしなければならないことです（モックするには依存関係が多すぎるためです）。
+  * モジュールを分解して、効率を下げます
+* 依存関係が細かすぎる
+  * これらの依存関係のいくつかを1つの意味のあるモジュールに統合する方法を考えてください
+* テストは実装の詳細にあまりにも関係しています
+  * 実装ではなく期待される動作のテストを優先する
 
-Normally a lot of mocking points to _bad abstraction_ in your code.
+通常、コードのモックポイントの多くは、 _悪い抽象化_ を指します。
 
-**What people see here is a weakness in TDD but it is actually a strength**, more often than not poor test code is a result of bad design or put more nicely, well-designed code is easy to test.
+**ここで見られるのはTDDの弱点ですが、それは実際には長所です**。多くの場合、貧弱なテストコードは、設計が悪い結果であるか、より適切に設計されたコードをテストすることは簡単です。
 
-### But mocks and tests are still making my life hard!
+### でも、模試やテストのせいで生活が苦しくなってきました!
 
-Ever run into this situation?
+この状況に遭遇したことがありますか？
 
-* You want to do some refactoring
-* To do this you end up changing lots of tests
-* You question TDD and make a post on Medium titled "Mocking considered harmful"
+* リファクタリングを行いたい
+* これを行うには、多くのテストを変更することになります
+* TDDに質問し、「モッキングは有害と見なされます」というタイトルのメディアに投稿します
 
-This is usually a sign of you testing too much _implementation detail_. Try to make it so your tests are testing _useful behaviour_ unless the implementation is really important to how the system runs.
+これは通常、実装の詳細をテストしすぎていることを示しています。
+システムの実行にとって実装が本当に重要でない限り、テストが有用な動作をチェックするようにしてください。
 
-It is sometimes hard to know _what level_ to test exactly but here are some thought processes and rules I try to follow:
+正確にテストするために、どのレベルかを知るのは難しい場合がありますが、ここに私が従おうとするいくつかの思考プロセスとルールがあります。
 
-* **The definition of refactoring is that the code changes but the behaviour stays the same**. If you have decided to do some refactoring in theory you should be able to do make the commit without any test changes. So when writing a test ask yourself
-  * Am I testing the behaviour I want or the implementation details?
-  * If I were to refactor this code, would I have to make lots of changes to the tests?
-* Although Go lets you test private functions, I would avoid it as private functions are to do with implementation.
-* I feel like if a test is working with **more than 3 mocks then it is a red flag** - time for a rethink on the design
-* Use spies with caution. Spies let you see the insides of the algorithm you are writing which can be very useful but that means a tighter coupling between your test code and the implementation. **Be sure you actually care about these details if you're going to spy on them**
+* **リファクタリングの定義では、コードは変更されますが、動作は同じです**。理論的にリファクタリングを行うことに決めた場合は、テストを変更せずにコミットを実行できるはずです。だからテストを書くときは自問してください
+  * 必要な動作や実装の詳細をテストしていますか？
+  * このコードをリファクタリングする場合、テストに多くの変更を加える必要がありますか？
+* Goではプライベート関数をテストできますが、プライベート関数は実装に関係しているため、避けたいと思います。
+* テストが**3つ以上のモックで動作している場合、それは危険信号**であるように感じます（デザインを再検討する時間）
+* スパイは注意して使用してください。スパイを使用すると、作成中のアルゴリズムの内部を確認できます。これは非常に便利ですが、テストコードと実装の間の結合がより緊密になることを意味します。 **これらをスパイする場合は、これらの詳細に注意してください**
 
-As always, rules in software development aren't really rules and there can be exceptions. [Uncle Bob's article of "When to mock"](https://8thlight.com/blog/uncle-bob/2014/05/10/WhenToMock.html) has some excellent pointers.
+いつものように、ソフトウェア開発のルールは実際にはルールではなく、例外がある場合があります。
+[ボックルおじさんの「モックするとき」の記事](https://8thlight.com/blog/uncle-bob/2014/05/10/WhenToMock.html)には、優れた指針がいくつかあります。
 
-## Wrapping up
+## まとめ
 
-### More on TDD approach
+### TDDアプローチの詳細
 
-* When faced with less trivial examples, break the problem down into "thin vertical slices". Try to get to a point where you have _working software backed by tests_ as soon as you can, to avoid getting in rabbit holes and taking a "big bang" approach.
-* Once you have some working software it should be easier to _iterate with small steps_ until you arrive at the software you need.
+* ささいな例に直面した場合は、問題を「薄いスライス」に分解してください。ウサギの穴に入り込み、「ビッグバン」アプローチをとらないように、できるだけ早く_testsで動作するソフトウェアを使用できるようにしてください。
+* 動作するソフトウェアを入手したら、必要なソフトウェアにたどり着くまで**小さなステップで繰り返す**のが簡単です。
 
-> "When to use iterative development? You should use iterative development only on projects that you want to succeed."
+> 「反復開発を使用する場合？反復開発は、成功させたいプロジェクトでのみ使用する必要があります。」
 
-Martin Fowler.
+マーティン・ファウラー（Martin Fowler）。
 
-### Mocking
+### モック
 
-* **Without mocking important areas of your code will be untested**. In our case we would not be able to test that our code paused between each print but there are countless other examples. Calling a service that _can_ fail? Wanting to test your system in a particular state? It is very hard to test these scenarios without mocking.
-* Without mocks you may have to set up databases and other third parties things just to test simple business rules. You're likely to have slow tests, resulting in **slow feedback loops**.
-* By having to spin up a database or a webservice to test something you're likely to have **fragile tests** due to the unreliability of such services.
+* **コードの重要な領域をモックしないと、テストされません**。私たちのケースでは、各表示の間にコードが一時停止することをテストすることはできませんが、他にも数え切れないほどの例があります。失敗する可能性のあるサービスを呼び出していますか？特定の状態でシステムをテストしたいですか？モックなしでこれらのシナリオをテストすることは非常に困難です。
+* モックがないと、単純なビジネスルールをテストするためだけに、データベースや他のサードパーティの設定が必要になる場合があります。テストが遅くなり、**フィードバックループが遅くなる**可能性があります。
+* 何かをテストするためにデータベースまたはWebサービスをスピンアップする必要があるため、そのようなサービスの信頼性が低いために、**壊れやすいテスト**を受ける可能性があります。
 
-Once a developer learns about mocking it becomes very easy to over-test every single facet of a system in terms of the _way it works_ rather than _what it does_. Always be mindful about **the value of your tests** and what impact they would have in future refactoring.
+開発者がモックについて学ぶと、システムの _機能_ ではなく _機能_ の観点から、システムのあらゆる側面を過剰にテストすることが非常に簡単になります。 **テストの価値**と、それらが将来のリファクタリングに与える影響について常に注意してください。
 
-In this post about mocking we have only covered **Spies** which are a kind of mock. There are different kind of mocks. [Uncle Bob explains the types in a very easy to read article](https://8thlight.com/blog/uncle-bob/2014/05/14/TheLittleMocker.html). In later chapters we will need to write code that depends on others for data, which is where we will show **Stubs** in action.
+モックに関するこの投稿では、モックの一種である**スパイ**のみを取り上げました。 モックにはさまざまな種類があります。 [ボブおじさんは非常に読みやすい記事でタイプについて説明しています](https://8thlight.com/blog/uncle-bob/2014/05/14/TheLittleMocker.html)。
 
+後の章では、データを他の人に依存するコードを書く必要があります。この場所で**スタブ**の動作を示します。
