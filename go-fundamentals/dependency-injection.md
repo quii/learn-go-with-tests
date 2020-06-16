@@ -4,20 +4,22 @@ description: Dependency Injection
 
 # 依存性注入
 
-[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/di)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/master/di)
 
-It is assumed that you have read the structs section before as some understanding of interfaces will be needed for this.
+これにはインターフェースの理解が必要になるため、構造体のセクションをすでに読んでいることが前提です。
 
-There is _a lot_ of misunderstandings around dependency injection around the programming community. Hopefully, this guide will show you how
+プログラミングコミュニティには、依存性注入に関する誤解がたくさんあります。
 
-* You don't need a framework
-* It does not overcomplicate your design
-* It facilitates testing
-* It allows you to write great, general-purpose functions.
+このガイドでは、
 
-We want to write a function that greets someone, just like we did in the hello-world chapter but this time we are going to be testing the _actual printing_.
+* フレームワークは必要ありません
+* デザインが複雑になりすぎない
+* テストを容易にします
+* 優れた汎用関数を作成できます
 
-Just to recap, here is what that function could look like
+`hello-world`の章で行ったように、誰かに挨拶する関数を書きたいのですが、今回は _actual Printing_ をテストします。
+
+要約すると、その関数は次のようになります。
 
 ```go
 func Greet(name string) {
@@ -25,15 +27,16 @@ func Greet(name string) {
 }
 ```
 
-But how can we test this? Calling `fmt.Printf` prints to stdout, which is pretty hard for us to capture using the testing framework.
+しかし、これをどのようにテストできますか？
+`fmt.Printf`を呼び出すと _stdout_ に出力されますが、テストフレームワークを使用してキャプチャするのはかなり困難です。
 
-What we need to do is to be able to **inject** \(which is just a fancy word for pass in\) the dependency of printing.
+私たちがする必要があるのは、印刷の依存関係を**注入** （過ぎたるは及ばざるが如し）をできるようにすることです。
+**関数は気にする必要はありません** _ **場所** _ **または** _ **方法** _ **印刷が行われるため、** _ **インターフェース**を受け入れる必要があります_ **具体的なタイプではありません。**
 
-**Our function doesn't need to care** _**where**_ **or** _**how**_ **the printing happens, so we should accept an** _**interface**_ **rather than a concrete type.**
+その場合は、実装を変更して印刷するように制御し、テストできるようにします。 
+実際では、stdoutに書き込むものを注入します。
 
-If we do that, we can then change the implementation to print to something we control so that we can test it. In "real life" you would inject in something that writes to stdout.
-
-If you look at the source code of `fmt.Printf` you can see a way for us to hook in
+`fmt.Printf`のソースコードを見ると、フックする方法がわかります。
 
 ```go
 // It returns the number of bytes written and any write error encountered.
@@ -42,9 +45,11 @@ func Printf(format string, a ...interface{}) (n int, err error) {
 }
 ```
 
-Interesting! Under the hood `Printf` just calls `Fprintf` passing in `os.Stdout`.
+面白いですね！
+内部では、 `Printf`は`os.Stdout`を渡して `Fprintf`を呼び出しているだけです。
 
-What exactly _is_ an `os.Stdout`? What does `Fprintf` expect to get passed to it for the 1st argument?
+`os.Stdout`とは正確に何ですか？
+`Fprintf`は第1引数として何が渡されることを期待していますか？
 
 ```go
 func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
@@ -56,7 +61,7 @@ func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
 }
 ```
 
-An `io.Writer`
+`io.Writer`
 
 ```go
 type Writer interface {
@@ -64,11 +69,11 @@ type Writer interface {
 }
 ```
 
-As you write more Go code you will find this interface popping up a lot because it's a great general purpose interface for "put this data somewhere".
+さらに多くのGoコードを書くと、このインターフェイスが「このデータをどこかに置く」ための優れた汎用インターフェイスであるため、多くのポップアップが表示されます。
 
-So we know under the covers we're ultimately using `Writer` to send our greeting somewhere. Let's use this existing abstraction to make our code testable and more reusable.
+つまり、私たちは最終的に `Writer`を使用して挨拶をどこかに送信していることを知っています。この既存の抽象化を使用して、コードをテスト可能にし、再利用可能にします。
 
-## Write the test first
+## 最初にテストを書く
 
 ```go
 func TestGreet(t *testing.T) {
@@ -84,13 +89,13 @@ func TestGreet(t *testing.T) {
 }
 ```
 
-The `buffer` type from the `bytes` package implements the `Writer` interface.
+`bytes`パッケージの`buffer`タイプは `Writer`インターフェースを実装しています。
 
-So we'll use it in our test to send in as our `Writer` and then we can check what was written to it after we invoke `Greet`
+テストでこれを使用して`Writer`として送信し、`Greet`を呼び出した後に何が書き込まれたかを確認できます。
 
-## Try and run the test
+## テストを試して実行する
 
-The test will not compile
+テストはコンパイルされません
 
 ```text
 ./di_test.go:10:7: too many arguments in call to Greet
@@ -98,9 +103,9 @@ The test will not compile
     want (string)
 ```
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
 
-_Listen to the compiler_ and fix the problem.
+コンパイラを読んで、問題を修正してください。
 
 ```go
 func Greet(writer *bytes.Buffer, name string) {
@@ -110,11 +115,11 @@ func Greet(writer *bytes.Buffer, name string) {
 
 `Hello, Chris di_test.go:16: got '' want 'Hello, Chris'`
 
-The test fails. Notice that the name is getting printed out, but it's going to stdout.
+テストは失敗します。名前は出力されますが、標準出力になることに注意してください。
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
-Use the writer to send the greeting to the buffer in our test. Remember `fmt.Fprintf` is like `fmt.Printf` but instead takes a `Writer` to send the string to, whereas `fmt.Printf` defaults to stdout.
+テストでは、ライターを使用して挨拶をバッファに送信します。`fmt.Fprintf`は`fmt.Printf`に似ていますが、代わりに `Writer`を使用して文字列を送信しますが、`fmt.Printf`のデフォルトはstdoutです。
 
 ```go
 func Greet(writer *bytes.Buffer, name string) {
@@ -122,13 +127,13 @@ func Greet(writer *bytes.Buffer, name string) {
 }
 ```
 
-The test now passes.
+テストに合格しました。
 
-## Refactor
+## リファクタリング
 
-Earlier the compiler told us to pass in a pointer to a `bytes.Buffer`. This is technically correct but not very useful.
+以前のコンパイラーは、`bytes.Buffer`へのポインターを渡すように指示しました。これは技術的には正しいですが、あまり役に立ちません。
 
-To demonstrate this, try wiring up the `Greet` function into a Go application where we want it to print to stdout.
+これを実証するために、`Greet`関数を標準出力に出力するGoアプリケーションに接続してみてください。
 
 ```go
 func main() {
@@ -138,9 +143,9 @@ func main() {
 
 `./di.go:14:7: cannot use os.Stdout (type *os.File) as type *bytes.Buffer in argument to Greet`
 
-As discussed earlier `fmt.Fprintf` allows you to pass in an `io.Writer` which we know both `os.Stdout` and `bytes.Buffer` implement.
+前に説明したように、`fmt.Fprintf`を使用すると、`os.Stdout`と `bytes.Buffer`の両方の実装がわかっている`io.Writer`を渡すことができます。
 
-If we change our code to use the more general purpose interface we can now use it in both tests and in our application.
+より汎用的なインターフェースを使用するようにコードを変更すると、テストとアプリケーションの両方で使用できるようになります。
 
 ```go
 package main
@@ -160,13 +165,14 @@ func main() {
 }
 ```
 
-## More on io.Writer
+## io.Writerの詳細
 
-What other places can we write data to using `io.Writer`? Just how general purpose is our `Greet` function?
+`io.Writer`を使用してデータを書き込むことができる他の場所は何ですか？
+`Greet`関数はどれほど一般的な目的ですか？
 
-### The internet
+### インターネット
 
-Run the following
+以下を実行します
 
 ```go
 package main
@@ -190,33 +196,37 @@ func main() {
 }
 ```
 
-Run the program and go to [http://localhost:5000](http://localhost:5000). You'll see your greeting function being used.
+プログラムを実行し、[http://localhost:5000](http://localhost:5000)に移動します。グリーティング機能が使用されているのがわかります。
 
-HTTP servers will be covered in a later chapter so don't worry too much about the details.
+HTTPサーバーについては後の章で説明しますので、詳細についてはあまり気にしないでください。
 
-When you write an HTTP handler, you are given an `http.ResponseWriter` and the `http.Request` that was used to make the request. When you implement your server you _write_ your response using the writer.
+HTTPハンドラーを作成すると、 `http.ResponseWriter`と、リクエストの作成に使用された` http.Request`が与えられます。サーバーを実装するときは、ライターを使用して応答を _write_ します。
 
-You can probably guess that `http.ResponseWriter` also implements `io.Writer` so this is why we could re-use our `Greet` function inside our handler.
+`http.ResponseWriter`も`io.Writer`を実装していると思われるので、ハンドラー内で `Greet`関数を再利用できます。
 
-## Wrapping up
+## まとめ
 
-Our first round of code was not easy to test because it wrote data to somewhere we couldn't control.
+最初のコードは、制御できない場所にデータを書き込んだため、簡単にテストできませんでした。
+
+テストによって動機付けされたコードをリファクタリングして、制御できるようにしました。
+データを、**依存関係を注入する**ことによって書き込まれ、次のことが可能になりました：
 
 _Motivated by our tests_ we refactored the code so we could control _where_ the data was written by **injecting a dependency** which allowed us to:
 
-* **Test our code** If you can't test a function _easily_, it's usually because of dependencies hard-wired into a function _or_ global state. If you have a global database connection pool for instance that is used by some kind of service layer, it is likely going to be difficult to test and they will be slow to run. DI will motivate you to inject in a database dependency \(via an interface\) which you can then mock out with something you can control in your tests.
-* **Separate our concerns**, decoupling _where the data goes_ from _how to generate it_. If you ever feel like a method/function has too many responsibilities \(generating data _and_ writing to a db? handling HTTP requests _and_ doing domain level logic?\) DI is probably going to be the tool you need.
-* **Allow our code to be re-used in different contexts** The first "new" context our code can be used in is inside tests. But further on if someone wants to try something new with your function they can inject their own dependencies.
+* **コードをテストする**関数を簡単にテストできない場合は、通常、依存関係が関数またはグローバルな状態に組み込まれているためです。たとえば、ある種のサービス層で使用されているグローバルデータベース接続プールがある場合、テストが困難になる可能性が高く、実行が遅くなります。DIは、（インターフェイスを介して）データベースの依存関係を挿入するように動機付けし、テストで制御できるものでモックアウトできます。
+* **懸念事項を分離**して、「データの移動先」と「生成方法」を分離します。メソッド/関数の責任が多すぎると感じた場合は、（データの生成、およびデータベースへの書き込み、HTTPリクエストの処理、およびドメインレベルのロジックの実行）おそらくDIが必要なツールになるでしょう。
+* **コードをさまざまなコンテキストで再利用できるようにする**コードを使用できる最初の「新しい」コンテキストは、テスト内です。しかし、さらに誰かがあなたの関数で何か新しいことを試したい場合、彼らは彼ら自身の依存関係を注入することができます。
 
-### What about mocking? I hear you need that for DI and also it's evil
+### モックにするのはどうなの？ DIにも必要だそうですが、それも悪だそうです。
 
-Mocking will be covered in detail later \(and it's not evil\). You use mocking to replace real things you inject with a pretend version that you can control and inspect in your tests. In our case though, the standard library had something ready for us to use.
+モックについては後で詳しく説明します（そしてそれは悪ではありません）。
+モックを使用して、実際に注入するものを、テストで制御および検査できる偽バージョンに置き換えます。
+私たちの場合でも、標準ライブラリには、使用する準備ができています。
 
-### The Go standard library is really good, take time to study it
+### Go標準ライブラリは本当に良いです。時間をかけて勉強してください。
 
-By having some familiarity with the `io.Writer` interface we are able to use `bytes.Buffer` in our test as our `Writer` and then we can use other `Writer`s from the standard library to use our function in a command line app or in web server.
+このように`io.Writer`インターフェースにある程度慣れていることで、テストで`bytes.Buffer`を `Writer`として使うことができ、標準ライブラリの他の`Writer`を使ってコマンドラインアプリやウェブサーバで関数を使うことができます。
 
-The more familiar you are with the standard library the more you'll see these general purpose interfaces which you can then re-use in your own code to make your software reusable in a number of contexts.
+標準ライブラリに慣れるほど、これらの汎用インターフェイスが表示され、独自のコードで再利用して、ソフトウェアをさまざまなコンテキストで再利用可能にすることができます。
 
-This example is heavily influenced by a chapter in [The Go Programming language](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440), so if you enjoyed this, go buy it!
-
+この例は、[プログラミング言語Go](https://www.amazon.co.jp/%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%E8%A8%80%E8%AA%9EGo-ADDISON-WESLEY-PROFESSIONAL-COMPUTING-Donovan/dp/4621300253/ref=sr_1_6?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&dchild=1&keywords=Go+Programming+Language&qid=1592323254&sr=8-6), の章に大きく影響されているため、これを楽しんだ場合、是非買ってみてください！
