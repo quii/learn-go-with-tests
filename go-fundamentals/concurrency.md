@@ -4,9 +4,11 @@ description: Concurrency
 
 # 並行性
 
-[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/concurrency)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/master/concurrency)
 
-Here's the setup: a colleague has written a function, `CheckWebsites`, that checks the status of a list of URLs.
+同僚がURLリストのステータスを確認する関数`CheckWebsites`を作成しました。
+
+これが設定です。
 
 ```go
 package concurrency
@@ -24,13 +26,14 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-It returns a map of each URL checked to a boolean value - `true` for a good response, `false` for a bad response.
+チェックされた各URLのマップをブール値に返します-良好な応答の場合は`true`、不良応答の場合は`false`。
 
-You also have to pass in a `WebsiteChecker` which takes a single URL and returns a boolean. This is used by the function to check all the websites.
+単一のURLを取得してブール値を返す`WebsiteChecker`も渡す必要があります。
+これは、すべてのWebサイトをチェックする機能によって使用されます。
 
-Using [dependency injection](dependency-injection.md) has allowed them to test the function without making real HTTP calls, making it reliable and fast.
+[依存性の注入(DI)](dependency-injection.md)を使用すると、実際のHTTP呼び出しを行わずに関数をテストできるため、信頼性が高く、高速です。
 
-Here's the test they've written:
+ここに彼らが書いたテストがあります。
 
 ```go
 package concurrency
@@ -68,11 +71,12 @@ func TestCheckWebsites(t *testing.T) {
 }
 ```
 
-The function is in production and being used to check hundreds of websites. But your colleague has started to get complaints that it's slow, so they've asked you to help speed it up.
+この機能は運用中であり、数百のWebサイトをチェックするために使用されています。
+しかし、あなたの同僚はそれが遅いという不満を持ち始めたので、彼らはあなたにそれを速くするのを手伝うように頼みました。
 
-## Write a test
+## テストを書く
 
-Let's use a benchmark to test the speed of `CheckWebsites` so that we can see the effect of our changes.
+ベンチマークを使用して、`CheckWebsites`の速度をテストし、変更の影響を確認してみましょう。
 
 ```go
 package concurrency
@@ -99,9 +103,10 @@ func BenchmarkCheckWebsites(b *testing.B) {
 }
 ```
 
-The benchmark tests `CheckWebsites` using a slice of one hundred urls and uses a new fake implementation of `WebsiteChecker`. `slowStubWebsiteChecker` is deliberately slow. It uses `time.Sleep` to wait exactly twenty milliseconds and then it returns true.
+ベンチマークは、100個のURLのスライスを使用して`CheckWebsites`をテストし、`WebsiteChecker`の新しい偽の実装を使用します。`slowStubWebsiteChecker`は意図的に遅いです。
+`time.Sleep`を使用して正確に20ミリ秒待機してからtrueを返します。
 
-When we run the benchmark using `go test -bench=.` \(or if you're in Windows Powershell `go test -bench="."`\):
+`go test -bench=.`を使用してベンチマークを実行する場合（またはWindows Powershellの場合`go test -bench="."`）。
 
 ```bash
 pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v0
@@ -110,23 +115,30 @@ PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v0        2.268s
 ```
 
-`CheckWebsites` has been benchmarked at 2249228637 nanoseconds - about two and a quarter seconds.
+`CheckWebsites`のベンチマークは2249228637ナノ秒で、約2.5秒です。
 
-Let's try and make this faster.
+これをもっと速くしてみましょう。
 
-### Write enough code to make it pass
+### 成功させるのに十分なコードを書く
 
-Now we can finally talk about concurrency which, for the purposes of the following, means 'having more than one thing in progress'. This is something that we do naturally everyday.
+最後に、並行性について話します。これは、以下の目的のために、「複数の処理が進行中」であることを意味します。これは私たちが毎日自然に行うことです。
 
-For instance, this morning I made a cup of tea. I put the kettle on and then, while I was waiting for it to boil, I got the milk out of the fridge, got the tea out of the cupboard, found my favourite mug, put the teabag into the cup and then, when the kettle had boiled, I put the water in the cup.
+たとえば、今朝私はお茶を作りました。
+私はやかんを置いてから、沸騰するのを待っている間に、冷蔵庫から牛乳を取り出し、食器棚からお茶を取り出し、お気に入りのマグカップを見つけ、ティーバッグをカップに入れました。
+やかんが沸騰していたので、カップに水を入れました。
 
-What I _didn't_ do was put the kettle on and then stand there blankly staring at the kettle until it boiled, then do everything else once the kettle had boiled.
+私がやらなかったのは、やかんを置いて、沸騰するまでやかんをじっと見つめてそこに立って、そしてやかんが沸騰したら、他のすべてのことをしました。
 
-If you can understand why it's faster to make tea the first way, then you can understand how we will make `CheckWebsites` faster. Instead of waiting for a website to respond before sending a request to the next website, we will tell our computer to make the next request while it is waiting.
+お茶を最初に作る方が速い理由を理解できれば、`CheckWebsites`をより速くする方法を理解できます。 Webサイトの応答を待ってから次のWebサイトに要求を送信する代わりに、待機中に次の要求を行うようにコンピューターに指示します。
 
-Normally in Go when we call a function `doSomething()` we wait for it to return \(even if it has no value to return, we still wait for it to finish\). We say that this operation is _blocking_ - it makes us wait for it to finish. An operation that does not block in Go will run in a separate _process_ called a _goroutine_. Think of a process as reading down the page of Go code from top to bottom, going 'inside' each function when it gets called to read what it does. When a separate process starts it's like another reader begins reading inside the function, leaving the original reader to carry on going down the page.
+通常、Goで関数 `doSomething()`を呼び出すと、関数が返されるのを待ちます（返される値がない場合でも、関数が終了するのを待ちます）。この操作は _blocking_ であると言います-完了するまで待機します。
 
-To tell Go to start a new goroutine we turn a function call into a `go` statement by putting the keyword `go` in front of it: `go doSomething()`.
+Goでブロックしない操作は、ゴルーチン _goroutine_ と呼ばれる別のプロセスで実行されます。
+プロセスは、Goコードのページを上から下に読み取り、呼び出されたときに各関数の「内部」に移動して、その機能を読み取るものと考えてください。
+別のプロセスが開始されると、別のリーダーが関数内で読み取りを開始し、元のリーダーがページを下に進むようにします。
+
+
+Goに新しいgoroutineを開始するよう指示するには、キーワードの前にキーワード`go`を置くことで、関数呼び出しを`go`ステートメントに変換します：「`go doSomething()`」。
 
 ```go
 package concurrency
@@ -146,13 +158,14 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-Because the only way to start a goroutine is to put `go` in front of a function call, we often use _anonymous functions_ when we want to start a goroutine. An anonymous function literal looks just the same as a normal function declaration, but without a name \(unsurprisingly\). You can see one above in the body of the `for` loop.
+ゴルーチンを開始する唯一の方法は、`go`を関数呼び出しの前に置くことなので、ゴルーチンを開始したい場合は、しばしば _無名関数_ を使用します。無名関数リテラルは、通常の関数宣言とまったく同じように見えますが、名前ががありません。
+上記は、`for`ループの本体で確認できます。
 
-Anonymous functions have a number of features which make them useful, two of which we're using above. Firstly, they can be executed at the same time that the're declared - this is what the `()` at the end of the anonymous function is doing. Secondly they maintain access to the lexical scope they are defined in - all the variables that are available at the point when you declare the anonymous function are also available in the body of the function.
+匿名関数には、それらを便利にするいくつかの機能があり、そのうち2つは上記で使用しています。まず、宣言と同時に実行できます-これは、無名関数の最後にある`()`が行っていることです。次に、定義されている字句スコープへのアクセスを維持します。無名関数を宣言した時点で使用可能なすべての変数は、関数の本体でも使用できます。
 
-The body of the anonymous function above is just the same as the loop body was before. The only difference is that each iteration of the loop will start a new goroutine, concurrent with the current process \(the `WebsiteChecker` function\) each of which will add its result to the results map.
+上記の無名関数の本体は、以前のループ本体とまったく同じです。唯一の違いは、ループの各反復が新しい**goroutine**を開始することであり、現在のプロセス（`WebsiteChecker`関数）と同時に、その結​​果が結果マップに追加されます。
 
-But when we run `go test`:
+しかし、`go test`を実行すると
 
 ```bash
 --- FAIL: TestCheckWebsites (0.00s)
@@ -162,17 +175,27 @@ exit status 1
 FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.010s
 ```
 
-### A quick aside into a parallel\(ism\) universe...
+### 余談ですが、パラレルワールドに...
 
-You might not get this result. You might get a panic message that we're going to talk about in a bit. Don't worry if you got that, just keep running the test until you _do_ get the result above. Or pretend that you did. Up to you. Welcome to concurrency: when it's not handled correctly it's hard to predict what's going to happen. Don't worry - that's why we're writing tests, to help us know when we're handling concurrency predictably.
+この結果が得られない可能性があります。
 
-### ... and we're back.
+後で説明するパニックメッセージが表示される場合があります。それが得られても心配しないでください。
 
-We are caught by the original tests `CheckWebsites` is now returning an empty map. What went wrong?
+上記の結果が _do_ になるまでテストを実行し続けてください。またはあなたがしたふりをします。
+あなた次第です。同時実行へようこそ！
 
-None of the goroutines that our `for` loop started had enough time to add their result to the `results` map; the `WebsiteChecker` function is too fast for them, and it returns the still empty map.
+正しく処理されない場合、何が起こるかを予測することは困難です。心配しないでください。
+それが、並行性を予測可能に処理していることを知るのに役立つようにテストを作成している理由です。
 
-To fix this we can just wait while all the goroutines do their work, and then return. Two seconds ought to do it, right?
+### ...戻ってきました
+
+`CheckWebsites`が空のマップを返す元のテストに引っ掛かっています。何が悪かったのか？
+
+`for`ループが開始したゴルーチンには、結果を`results`マップに追加するのに十分な時間がありませんでした。 `WebsiteChecker`関数は速すぎて、まだ空のマップを返します。
+
+これを修正するには、すべてのゴルーチンが作業を行っている間待機してから、戻ることができます。
+
+2秒でできるはずですよね？
 
 ```go
 package concurrency
@@ -196,7 +219,7 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-Now when we run the tests you get \(or don't get - see above\):
+テストを実行すると、または取得されません（上記を参照）
 
 ```bash
 --- FAIL: TestCheckWebsites (0.00s)
@@ -206,9 +229,21 @@ exit status 1
 FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.010s
 ```
 
-This isn't great - why only one result? We might try and fix this by increasing the time we wait - try it if you like. It won't work. The problem here is that the variable `url` is reused for each iteration of the `for` loop - it takes a new value from `urls` each time. But each of our goroutines have a reference to the `url` variable - they don't have their own independent copy. So they're _all_ writing the value that `url` has at the end of the iteration - the last url. Which is why the one result we have is the last url.
+これは褒められたことではありません。
 
-To fix this:
+なぜ1つの結果しかないのでしょうか？
+
+待機時間を増やすことでこれを修正する可能性があります-必要に応じて試してください。それは動作しません。
+
+ここでの問題は、変数`url`が`for`ループの反復ごとに再利用されることです。
+毎回`urls`から新しい値を取得します。
+
+しかし、それぞれのゴルーチンは`url`変数への参照を持っています。それらは独自の独立したコピーを持っていません。
+
+つまり、イテレーションの最後に`url`が持っている値、つまり最後のURLをすべて書きます。
+これが、1つの結果が最後のURLである理由です。
+
+これを修正するには
 
 ```go
 package concurrency
@@ -234,16 +269,18 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-By giving each anonymous function a parameter for the url - `u` - and then calling the anonymous function with the `url` as the argument, we make sure that the value of `u` is fixed as the value of `url` for the iteration of the loop that we're launching the goroutine in. `u` is a copy of the value of `url`, and so can't be changed.
+各匿名関数にURLのパラメーター -`u`-を指定し、引数として`url`を使用して匿名関数を呼び出すことにより、`u`の値が`url`の値として固定されていることを確認しますゴルーチンを起動するループの反復です。
 
-Now if you're lucky you'll get:
+`u`は `url`の値のコピーであるため、変更できません。
+
+運が良ければ、次のようになります。
 
 ```bash
 PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v1        2.012s
 ```
 
-But if you're unlucky \(this is more likely if you run them with the benchmark as you'll get more tries\)
+しかし、運が悪い場合はベンチマークで実行すると、より多くの試行が行われる可能性が高くなります。
 
 ```bash
 fatal error: concurrent map writes
@@ -263,13 +300,19 @@ created by github.com/gypsydave5/learn-go-with-tests/concurrency/v3.WebsiteCheck
         ... many more scary lines of text ...
 ```
 
-This is long and scary, but all we need to do is take a breath and read the stacktrace: `fatal error: concurrent map writes`. Sometimes, when we run our tests, two of the goroutines write to the results map at exactly the same time. Maps in Go don't like it when more than one thing tries to write to them at once, and so `fatal error`.
+これは長くて怖いですが、私たちがする必要があるのは、一息ついてスタックトレースを読むだけです。
 
-This is a _race condition_, a bug that occurs when the output of our software is dependent on the timing and sequence of events that we have no control over. Because we cannot control exactly when each goroutine writes to the results map, we are vulnerable to two goroutines writing to it at the same time.
+`致命的なエラー：同時マップ書き込み`。
 
-Go can help us to spot race conditions with its built in [_race detector_](https://blog.golang.org/race-detector). To enable this feature, run the tests with the `race` flag: `go test -race`.
+テストを実行すると、2つのゴルーチンがまったく同時に結果マップに書き込む場合があります。Goのマップは、一度に複数のものが書き込もうとすると気に入らないため、「致命的なエラー（`fatal error`）」が発生します。
 
-You should get some output that looks like this:
+これは _レース条件_ であり、ソフトウェアの出力が、制御できないイベントのタイミングとシーケンスに依存している場合に発生するバグです。
+各ゴルーチンが結果マップに書き込むタイミングを正確に制御することはできないため、2つのゴルーチンが同時に書き込むことに対して脆弱です。
+
+Goは、組み込みの[_racedetector_]（https://blog.golang.org/race-detector）で競合状態を特定するのに役立ちます。
+この機能を有効にするには、`race`フラグを指定してテストを実行します。`go test -race`。
+
+次のような出力が表示されます。
 
 ```bash
 ==================
@@ -304,29 +347,31 @@ Goroutine 7 (finished) created at:
 ==================
 ```
 
-The details are, again, hard to read - but `WARNING: DATA RACE` is pretty unambiguous. Reading into the body of the error we can see two different goroutines performing writes on a map:
+詳細は読みにくいですが、「警告：データレース（`WARNING: DATA RACE`）」は非常に明確です。エラーの本文を読むと、マップで書き込みを実行する2つの異なるゴルーチンがわかります。
 
-`Write at 0x00c420084d20 by goroutine 8:`
+'goroutine 8' で '0x00c420084d20'に書き込む（`Write at 0x00c420084d20 by goroutine 8:`）
 
-is writing to the same block of memory as
+と同じメモリブロックに書き込んでいます
 
-`Previous write at 0x00c420084d20 by goroutine 7:`
+'goroutine 7'による'0x00c420084d20'での以前の書き込み（`Previous write at 0x00c420084d20 by goroutine 7`）
 
-On top of that we can see the line of code where the write is happening:
+さらに、書き込みが行われているコード行を確認できます。
 
 `/Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12`
 
-and the line of code where goroutines 7 an 8 are started:
+ゴルーチン'7'と'8'が開始されるコード行
 
 `/Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11`
 
-Everything you need to know is printed to your terminal - all you have to do is be patient enough to read it.
+あなたが知る必要があるすべてはあなたのターミナルに表示されます。
+あなたがしなければならないすべてはそれを読むのに十分な忍耐です。
 
-### Channels
+### チャネル
 
-We can solve this data race by coordinating our goroutines using _channels_. Channels are a Go data structure that can both receive and send values. These operations, along with their details, allow communication between different processes.
+_channels_ を使用してゴルーチンを調整することで、このデータ競合を解決できます。
+チャネルは、値の受信と送信の両方が可能なGoデータ構造です。これらの操作とその詳細により、異なるプロセス間の通信が可能になります。
 
-In this case we want to think about the communication between the parent process and each of the goroutines that it makes to do the work of running the `WebsiteChecker` function with the url.
+この場合、親プロセスと、それがURLで`WebsiteChecker`関数を実行する作業を行うために行う各ルーチン間の通信について考えたいと思います。
 
 ```go
 package concurrency
@@ -356,29 +401,37 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-Alongside the `results` map we now have a `resultChannel`, which we `make` in the same way. `chan result` is the type of the channel - a channel of `result`. The new type, `result` has been made to associate the return value of the `WebsiteChecker` with the url being checked - it's a struct of `string` and `bool`. As we don't need either value to be named, each of them is anonymous within the struct; this can be useful in when it's hard to know what to name a value.
+`results`マップに加えて、同じ方法で`make`する`resultChannel`があります。`chan result`はチャネルのタイプです。`result`のチャネルです。新しいタイプの`result`は、`WebsiteChecker`の戻り値をチェック対象のURLに関連付けるために作成されました。これは、`string`および`bool`の構造体です。
 
-Now when we iterate over the urls, instead of writing to the `map` directly we're sending a `result` struct for each call to `wc` to the `resultChannel` with a _send statement_. This uses the `<-` operator, taking a channel on the left and a value on the right:
+どちらの値にも名前を付ける必要はないので、それらはそれぞれ構造体内で匿名です。
+これは、値の名前を付けるのが難しい場合に役立ちます。
+
+URLを反復処理するとき、`map`に直接書き込む代わりに、 _send statement_ を使用して、`wc`への各呼び出しの `result`構造体を`resultChannel`に送信します。これは、`<-`演算子を使用して、左側にチャネル、右側に値を取得します。
 
 ```go
 // Send statement
 resultChannel <- result{u, wc(u)}
 ```
 
-The next `for` loop iterates once for each of the urls. Inside we're using a _receive expression_, which assigns a value received from a channel to a variable. This also uses the `<-` operator, but with the two operands now reversed: the channel is now on the right and the variable that we're assigning to is on the left:
+次の`for`ループは、各URLに対して1回反復します。
+内部では、チャネルから受信した値を変数に割り当てる _receive式_ を使用しています。
+これも`<-`演算子を使用していますが、2つのオペランドが逆になっています。チャネルが右側にあり、代入する変数が左側にあります。
 
 ```go
 // Receive expression
 result := <-resultChannel
 ```
 
-We then use the `result` received to update the map.
+次に、受け取った`result`を使用してマップを更新します。
 
-By sending the results into a channel, we can control the timing of each write into the results map, ensuring that it happens one at a time. Although each of the calls of `wc`, and each send to the result channel, is happening in parallel inside its own process, each of the results is being dealt with one at a time as we take values out of the result channel with the receive expression.
+結果をチャネルに送信することにより、結果マップへの各書き込みのタイミングを制御して、一度に1つずつ発生するようにします。
 
-We have parallelized the part of the code that we wanted to make faster, while making sure that the part that cannot happen in parallel still happens linearly. And we have communicated across the multiple processes involved by using channels.
+`wc`の各呼び出しと結果チャネルへの送信はそれぞれ独自のプロセス内で並行して発生しますが、結果チャネルから値を取得するため、結果はそれぞれ一度に1つずつ処理されます。表現を受け取ります。
 
-When we run the benchmark:
+高速化したいコードの部分を並列化し、同時に実行できない部分は線形的に発生するようにしました。
+また、チャネルを使用することにより、関連する複数のプロセス間で通信しました。
+
+ベンチマークを実行すると
 
 ```bash
 pkg: github.com/gypsydave5/learn-go-with-tests/concurrency/v2
@@ -387,35 +440,42 @@ PASS
 ok      github.com/gypsydave5/learn-go-with-tests/concurrency/v2        2.377s
 ```
 
-23406615 nanoseconds - 0.023 seconds, about one hundred times as fast as original function. A great success.
+23406615ナノ秒（0.023秒）、元の関数の約100倍の速さ。
 
-## Wrapping up
+大成功。
 
-This exercise has been a little lighter on the TDD than usual. In a way we've been taking part in one long refactoring of the `CheckWebsites` function; the inputs and outputs never changed, it just got faster. But the tests we had in place, as well as the benchmark we wrote, allowed us to refactor `CheckWebsites` in a way that maintained confidence that the software was still working, while demonstrating that it had actually become faster.
+## まとめ
 
-In making it faster we learned about
+この演習は、TDDで通常よりも少し軽くなっています。
+ある意味では、`CheckWebsites`関数の1つの長いリファクタリングに参加しています。
 
-* _goroutines_, the basic unit of concurrency in Go, which let us check more
+入力と出力が変更されることはなく、ただ速くなっただけです。しかし、実施したテストと作成したベンチマークにより、ソフトウェアがまだ機能しているという確信を維持しながら、実際に高速になったことを示す方法で`CheckWebsites`をリファクタリングすることができました。
 
-  than one website at the same time.
+それをより速くすることで、私たちは
 
-* _anonymous functions_, which we used to start each of the concurrent processes
+* Goの並行処理の基本単位であるゴルーチン（ _goroutines_ ）により、詳細を確認できます
 
-  that check websites.
+  同時に複数のウェブサイト。
 
-* _channels_, to help organize and control the communication between the
+* _anonymous functions_ 各並行プロセスを開始するために使用しました
 
-  different processes, allowing us to avoid a _race condition_ bug.
+  ウェブサイトをチェックします。
 
-* _the race detector_ which helped us debug problems with concurrent code
+* _channels_ 間の通信を整理および制御するのに役立ちます
 
-### Make it fast
+  さまざまなプロセスにより、 _レース状態_ のバグを回避できます。
 
-One formulation of an agile way of building software, often misattributed to Kent Beck, is:
+* _the race detector_ は、並行コードに関する問題のデバッグに役立ちました
 
-> [Make it work, make it right, make it fast](http://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast)
+### 速くする
 
-Where 'work' is making the tests pass, 'right' is refactoring the code, and 'fast' is optimizing the code to make it, for example, run quickly. We can only 'make it fast' once we've made it work and made it right. We were lucky that the code we were given was already demonstrated to be working, and didn't need to be refactored. We should never try to 'make it fast' before the other two steps have been performed because
+ケントベックに誤解されていることが多い、ソフトウェアをアジャイルに構築する方法の1つの定式化は次のとおりです。
 
-> [Premature optimization is the root of all evil](http://wiki.c2.com/?PrematureOptimization) -- Donald Knuth
+> [機能させる、正しくする、速くする](http://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast)
 
+「機能させる」とはテストに合格すること、「正しくする」とはコードをリファクタリングすること、そして「速くする」とはコードを最適化して、たとえばすばやく実行することです。
+「速くする」ことができるのは、それを機能させて正しくした後だけです。
+
+与えられたコードは既に機能していることが実証されており、リファクタリングする必要がないことは幸運でした。他の2つのステップを実行する前に、「高速化」を試みるべきではありません。
+
+> [早期最適化はすべての悪の根源](http://wiki.c2.com/?PrematureOptimization) -- Donald Knuth
