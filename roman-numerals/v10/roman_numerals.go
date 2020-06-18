@@ -2,7 +2,7 @@ package v1
 
 import "strings"
 
-// ConvertToArabic converts a Roman Numeral to an Arabic number
+// ConvertToArabic converts a Roman Numeral to an Arabic number.
 func ConvertToArabic(roman string) (total int) {
 	for _, symbols := range windowedRoman(roman).Symbols() {
 		total += allRomanNumerals.ValueOf(symbols...)
@@ -10,7 +10,7 @@ func ConvertToArabic(roman string) (total int) {
 	return
 }
 
-// ConvertToRoman converts an Arabic number to a Roman Numeral
+// ConvertToRoman converts an Arabic number to a Roman Numeral.
 func ConvertToRoman(arabic int) string {
 	var result strings.Builder
 

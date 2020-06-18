@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// Racer compares the response times of a and b, returning the fastest one
+// Racer compares the response times of a and b, returning the fastest one.
 func Racer(a, b string) (winner string) {
 	select {
 	case <-ping(a):

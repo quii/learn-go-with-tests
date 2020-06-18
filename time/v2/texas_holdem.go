@@ -2,13 +2,13 @@ package poker
 
 import "time"
 
-// TexasHoldem manages a game of poker
+// TexasHoldem manages a game of poker.
 type TexasHoldem struct {
 	alerter BlindAlerter
 	store   PlayerStore
 }
 
-// NewTexasHoldem returns a new game
+// NewTexasHoldem returns a new game.
 func NewTexasHoldem(alerter BlindAlerter, store PlayerStore) *TexasHoldem {
 	return &TexasHoldem{
 		alerter: alerter,
@@ -16,7 +16,7 @@ func NewTexasHoldem(alerter BlindAlerter, store PlayerStore) *TexasHoldem {
 	}
 }
 
-// Start will schedule blind alerts dependant on the number of players
+// Start will schedule blind alerts dependant on the number of players.
 func (p *TexasHoldem) Start(numberOfPlayers int) {
 	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
 
@@ -28,7 +28,7 @@ func (p *TexasHoldem) Start(numberOfPlayers int) {
 	}
 }
 
-// Finish ends the game, recording the winner
+// Finish ends the game, recording the winner.
 func (p *TexasHoldem) Finish(winner string) {
 	p.store.RecordWin(winner)
 }

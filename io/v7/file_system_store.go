@@ -5,13 +5,13 @@ import (
 	"os"
 )
 
-// FileSystemPlayerStore stores players in the filesystem
+// FileSystemPlayerStore stores players in the filesystem.
 type FileSystemPlayerStore struct {
 	database *json.Encoder
 	league   League
 }
 
-// NewFileSystemPlayerStore creates a FileSystemPlayerStore
+// NewFileSystemPlayerStore creates a FileSystemPlayerStore.
 func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
 	file.Seek(0, 0)
 	league, _ := NewLeague(file)
@@ -22,12 +22,12 @@ func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
 	}
 }
 
-// GetLeague returns the scores of all the players
+// GetLeague returns the scores of all the players.
 func (f *FileSystemPlayerStore) GetLeague() League {
 	return f.league
 }
 
-// GetPlayerScore retrieves a player's score
+// GetPlayerScore retrieves a player's score.
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
 	player := f.league.Find(name)
@@ -39,7 +39,7 @@ func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 	return 0
 }
 
-// RecordWin will store a win for a player, incrementing wins if already known
+// RecordWin will store a win for a player, incrementing wins if already known.
 func (f *FileSystemPlayerStore) RecordWin(name string) {
 	player := f.league.Find(name)
 

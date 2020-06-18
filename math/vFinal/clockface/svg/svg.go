@@ -1,4 +1,4 @@
-// Package svg produces an SVG clockface representation of a time.
+// Package svg produces an SVG clockface representation of a time..
 package svg
 
 import (
@@ -17,7 +17,7 @@ const (
 	clockCentreY     = 150
 )
 
-// Write writes an SVG representation of an analogue clock, showing the time t, to the writer w
+// Write writes an SVG representation of an analogue clock, showing the time t, to the writer w.
 func Write(w io.Writer, t time.Time) {
 	io.WriteString(w, svgStart)
 	io.WriteString(w, bezel)

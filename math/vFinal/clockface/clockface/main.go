@@ -1,4 +1,4 @@
-// Writes an SVG clockface of the current time to Stdout
+// Writes an SVG clockface of the current time to Stdout.
 package main
 
 import (
