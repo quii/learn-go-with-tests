@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-// Countdown prints a countdown from 3 to out
+// Countdown prints a countdown from 3 to out.
 func Countdown(out io.Writer) {
 	fmt.Fprint(out, "3")
 }

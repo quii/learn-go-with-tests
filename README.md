@@ -9,8 +9,16 @@
 [![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=master)](https://travis-ci.org/quii/learn-go-with-tests)
 [![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
-- Formats: [Gitbook](https://quii.gitbook.io/learn-go-with-tests), [EPUB or PDF](https://github.com/quii/learn-go-with-tests/releases)
-- Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests), [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
+## Formats
+
+- [Gitbook](https://quii.gitbook.io/learn-go-with-tests)
+- [EPUB or PDF](https://github.com/quii/learn-go-with-tests/releases)
+
+## Translations
+
+- [中文](https://studygolang.gitbook.io/learn-go-with-tests) 
+- [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
+- [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
 
 [Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii)!
 

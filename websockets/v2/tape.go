@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-// Tape represents an os.File that will re-write from the start on every Write call
+// Tape represents an os.File that will re-write from the start on every Write call.
 type Tape struct {
 	File *os.File
 }
