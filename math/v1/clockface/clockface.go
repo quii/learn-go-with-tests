@@ -9,7 +9,7 @@ type Point struct {
 }
 
 // SecondHand is the unit vector of the second hand of an analogue clock at time `t`.
-// represented as a Point..
+// represented as a Point.
 func SecondHand(t time.Time) Point {
 	return Point{150, 60}
 }

@@ -17,7 +17,7 @@ const (
 )
 
 // A Point is a Cartesian coordinate. They are used in the package.
-// to represent the unit vector from the origin of a clock hand..
+// to represent the unit vector from the origin of a clock hand.
 type Point struct {
 	X float64
 	Y float64
@@ -29,7 +29,7 @@ func SecondsInRadians(t time.Time) float64 {
 }
 
 // SecondHandPoint is the unit vector of the second hand at time `t`,.
-// represented a Point..
+// represented a Point.
 func SecondHandPoint(t time.Time) Point {
 	return angleToPoint(SecondsInRadians(t))
 }
@@ -41,7 +41,7 @@ func MinutesInRadians(t time.Time) float64 {
 }
 
 // MinuteHandPoint is the unit vector of the minute hand at time `t`,.
-// represented a Point..
+// represented a Point.
 func MinuteHandPoint(t time.Time) Point {
 	return angleToPoint(MinutesInRadians(t))
 }
@@ -53,7 +53,7 @@ func HoursInRadians(t time.Time) float64 {
 }
 
 // HourHandPoint is the unit vector of the hour hand at time `t`,.
-// represented a Point..
+// represented a Point.
 func HourHandPoint(t time.Time) Point {
 	return angleToPoint(HoursInRadians(t))
 }

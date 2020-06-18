@@ -23,7 +23,7 @@ func Perimeter(rectangle Rectangle) float64 {
 	return 2 * (rectangle.Width + rectangle.Height)
 }
 
-// Circle represents a circle....
+// Circle represents a circle...
 type Circle struct {
 	Radius float64
 }
