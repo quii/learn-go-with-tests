@@ -8,12 +8,12 @@ import (
 
 var tenSecondTimeout = 10 * time.Second
 
-// Racer compares the response times of a and b, returning the fastest one, timing out after 10s
+// Racer compares the response times of a and b, returning the fastest one, timing out after 10s.
 func Racer(a, b string) (winner string, error error) {
 	return ConfigurableRacer(a, b, tenSecondTimeout)
 }
 
-// ConfigurableRacer compares the response times of a and b, returning the fastest one
+// ConfigurableRacer compares the response times of a and b, returning the fastest one.
 func ConfigurableRacer(a, b string, timeout time.Duration) (winner string, error error) {
 	select {
 	case <-ping(a):

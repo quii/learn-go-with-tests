@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-// CLI helps players through a game of poker
+// CLI helps players through a game of poker.
 type CLI struct {
 	playerStore PlayerStore
 	in          *bufio.Scanner
 	alerter     BlindAlerter
 }
 
-// NewCLI creates a CLI for playing poker
+// NewCLI creates a CLI for playing poker.
 func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
 	return &CLI{
 		playerStore: store,
@@ -23,7 +23,7 @@ func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
 	}
 }
 
-// PlayPoker starts the game
+// PlayPoker starts the game.
 func (cli *CLI) PlayPoker() {
 	cli.scheduleBlindAlerts()
 	userInput := cli.readLine()

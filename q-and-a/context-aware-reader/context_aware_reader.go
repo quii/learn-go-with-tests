@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-// NewCancellableReader will stop reading to rdr if ctx is cancelled
+// NewCancellableReader will stop reading to rdr if ctx is cancelled.
 func NewCancellableReader(ctx context.Context, rdr io.Reader) io.Reader {
 	return &readerCtx{
 		ctx:      ctx,

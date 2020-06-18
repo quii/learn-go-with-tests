@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// CLI helps players through a game of poker
+// CLI helps players through a game of poker.
 type CLI struct {
 	playerStore PlayerStore
 	in          *bufio.Scanner
@@ -17,7 +17,7 @@ type CLI struct {
 	game        Game
 }
 
-// NewCLI creates a CLI for playing poker
+// NewCLI creates a CLI for playing poker.
 func NewCLI(in io.Reader, out io.Writer, game Game) *CLI {
 	return &CLI{
 		in:   bufio.NewScanner(in),
@@ -26,16 +26,16 @@ func NewCLI(in io.Reader, out io.Writer, game Game) *CLI {
 	}
 }
 
-// PlayerPrompt is the text asking the user for the number of players
+// PlayerPrompt is the text asking the user for the number of players.
 const PlayerPrompt = "Please enter the number of players: "
 
-// BadPlayerInputErrMsg is the text telling the user they did bad things
+// BadPlayerInputErrMsg is the text telling the user they did bad things.
 const BadPlayerInputErrMsg = "Bad value received for number of players, please try again with a number"
 
-// BadWinnerInputMsg is the text telling the user they declared the winner wrong
+// BadWinnerInputMsg is the text telling the user they declared the winner wrong.
 const BadWinnerInputMsg = "invalid winner input, expect format of 'PlayerName wins'"
 
-// PlayPoker starts the game
+// PlayPoker starts the game.
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
 

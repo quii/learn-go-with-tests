@@ -2,13 +2,13 @@ package main
 
 import "errors"
 
-// Dictionary store definitions to words
+// Dictionary store definitions to words.
 type Dictionary map[string]string
 
-// ErrNotFound means the definition could not be found for the given word
+// ErrNotFound means the definition could not be found for the given word.
 var ErrNotFound = errors.New("could not find the word you were looking for")
 
-// Search find a word in the dictionary
+// Search find a word in the dictionary.
 func (d Dictionary) Search(word string) (string, error) {
 	definition, ok := d[word]
 	if !ok {
@@ -18,7 +18,7 @@ func (d Dictionary) Search(word string) (string, error) {
 	return definition, nil
 }
 
-// Add inserts a word and definition into the dictionary
+// Add inserts a word and definition into the dictionary.
 func (d Dictionary) Add(word, definition string) {
 	d[word] = definition
 }
