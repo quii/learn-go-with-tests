@@ -4,19 +4,20 @@ description: Context (長期実行プロセスの管理に役立つパッケー�
 
 # コンテキスト
 
-[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/master/context)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/master/context)
 
-Software often kicks off long-running, resource-intensive processes \(often in goroutines\). If the action that caused this gets cancelled or fails for some reason you need to stop these processes in a consistent way through your application.
+ソフトウェアは、多くの場合、長時間実行され、リソースを大量に消費するプロセスを開始します（多くの場合、ゴルーチンで）。これを引き起こしたアクションがキャンセルされるか、何らかの理由で失敗した場合は、アプリケーションを通じてこれらのプロセスを一貫した方法で停止する必要があります。
 
-If you don't manage this your snappy Go application that you're so proud of could start having difficult to debug performance problems.
+これを管理しないと、非常に誇りに思っているキレの良いGoアプリケーションは、パフォーマンスの問題のデバッグが困難になる可能性があります。
 
-In this chapter we'll use the package `context` to help us manage long-running processes.
+この章では、`context`パッケージを使用して、実行時間の長いプロセスを管理します。
 
-We're going to start with a classic example of a web server that when hit kicks off a potentially long-running process to fetch some data for it to return in the response.
+まず、ヒットしたときに長時間実行される可能性のあるプロセスを開始して、データをフェッチして応答で返すWebサーバーの古典的な例から始めます。
 
-We will exercise a scenario where a user cancels the request before the data can be retrieved and we'll make sure the process is told to give up.
+データを取得する前にユーザーがリクエストをキャンセルするシナリオを実行し、プロセスが中止されるように指示します。
 
-I've set up some code on the happy path to get us started. Here is our server code.
+私たちは幸せなパスにいくつかのコードを設定して始めました。
+これがサーバーコードです。
 
 ```go
 func Server(store Store) http.HandlerFunc {
@@ -26,7 +27,9 @@ func Server(store Store) http.HandlerFunc {
 }
 ```
 
-The function `Server` takes a `Store` and returns us a `http.HandlerFunc`. Store is defined as:
+関数`Server`は`Store`を受け取り、`http.HandlerFunc`を返します。
+
+`Store`は次のように定義されます
 
 ```go
 type Store interface {
@@ -34,9 +37,9 @@ type Store interface {
 }
 ```
 
-The returned function calls the `store`'s `Fetch` method to get the data and writes it to the response.
+返された関数は、`store`の` Fetch`メソッドを呼び出してデータを取得し、それを応答に書き込みます。
 
-We have a corresponding stub for `Store` which we use in a test.
+テストで使用する`Store`に対応するスタブがあります。
 
 ```go
 type StubStore struct {
@@ -62,11 +65,11 @@ func TestHandler(t *testing.T) {
 }
 ```
 
-Now that we have a happy path, we want to make a more realistic scenario where the `Store` can't finish a`Fetch` before the user cancels the request.
+幸せなパスができたので、ユーザーがリクエストをキャンセルする前に`Store`が`Fetch`を完了できない、より現実的なシナリオを作成したいと思います。
 
-## Write the test first
+## 最初にテストを書く
 
-Our handler will need a way of telling the `Store` to cancel the work so update the interface.
+私たちのハンドラーは、`Store`に作業をキャンセルしてインターフェースを更新するように指示する方法が必要になります。
 
 ```go
 type Store interface {
@@ -75,7 +78,9 @@ type Store interface {
 }
 ```
 
-We will need to adjust our spy so it takes some time to return `data` and a way of knowing it has been told to cancel. We'll also rename it to `SpyStore` as we are now observing the way it is called. It'll have to add `Cancel` as a method to implement the `Store` interface.
+スパイを調整する必要があるので、`data`を返すには時間がかかり、キャンセルするように指示されたことを知る方法があります。呼び出し方法を確認しているので、名前を`SpyStore`に変更します。
+
+`Store`インターフェースを実装するメソッドとして`Cancel`を追加する必要があります。
 
 ```go
 type SpyStore struct {
@@ -93,7 +98,7 @@ func (s *SpyStore) Cancel() {
 }
 ```
 
-Let's add a new test where we cancel the request before 100 milliseconds and check the store to see if it gets cancelled.
+100ミリ秒前にリクエストをキャンセルする新しいテストを追加して、ストアがキャンセルされるかどうかを確認します。
 
 ```go
 t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
@@ -116,17 +121,17 @@ t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
   })
 ```
 
-From the [Go Blog: Context](https://blog.golang.org/context)
+[Goブログ: コンテキスト`Context`](https://blog.golang.org/context)
 
-> The context package provides functions to derive new Context values from existing ones. These values form a tree: when a Context is canceled, all Contexts derived from it are also canceled.
+> コンテキストパッケージは、既存のコンテキスト値から新しいコンテキスト値を導出する関数を提供します。これらの値はツリーを形成します。コンテキストが取り消されると、それから派生したすべてのコンテキストも取り消されます。
 
-It's important that you derive your contexts so that cancellations are propagated throughout the call stack for a given request.
+キャンセルが特定のリクエストのコールスタック全体に伝播されるように、コンテキストを派生させることが重要です。
 
-What we do is derive a new `cancellingCtx` from our `request` which returns us a `cancel` function. We then schedule that function to be called in 5 milliseconds by using `time.AfterFunc`. Finally we use this new context in our request by calling `request.WithContext`.
+私たちがすることは、`cancel`関数を返す`request`から新しい`cancellingCtx`を派生させることです。次に、`time.AfterFunc`を使用して、その関数が5ミリ秒で呼び出されるようにスケジュールします。最後に、`request.WithContext`を呼び出して、この新しいコンテキストをリクエストで使用します。
 
-## Try to run the test
+## テストを実行してみます
 
-The test fails as we'd expect.
+テストは予想通り失敗します。
 
 ```go
 --- FAIL: TestServer (0.00s)
@@ -134,9 +139,9 @@ The test fails as we'd expect.
         context_test.go:62: store was not told to cancel
 ```
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
-Remember to be disciplined with TDD. Write the _minimal_ amount of code to make our test pass.
+TDDの訓練を受けることを忘れないでください。テストに合格するための _minimal_ 量のコードを記述します。
 
 ```go
 func Server(store Store) http.HandlerFunc {
@@ -147,11 +152,12 @@ func Server(store Store) http.HandlerFunc {
 }
 ```
 
-This makes this test pass but it doesn't feel good does it! We surely shouldn't be cancelling `Store` before we fetch on _every request_.
+これはこのテストに合格しますが、気分が良くありません！
+あらゆるリクエストをフェッチする前に、`Store`をキャンセルしてはいけません。
 
-By being disciplined it highlighted a flaw in our tests, this is a good thing!
+懲戒処分を受けることで、テストの欠陥が明らかになり、これは良いことです！
 
-We'll need to update our happy path test to assert that it does not get cancelled.
+キャンセルされないことを確認するために、幸せなパステストを更新する必要があります。
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
@@ -173,7 +179,7 @@ t.Run("returns data from store", func(t *testing.T) {
 })
 ```
 
-Run both tests and the happy path test should now be failing and now we're forced to do a more sensible implementation.
+両方のテストを実行すると、ハッピーパステストが失敗し、より賢明な実装を実行する必要があります。
 
 ```go
 func Server(store Store) http.HandlerFunc {
@@ -196,15 +202,15 @@ func Server(store Store) http.HandlerFunc {
 }
 ```
 
-What have we done here?
+ここで何をしましたか？
 
-`context` has a method `Done()` which returns a channel which gets sent a signal when the context is "done" or "cancelled". We want to listen to that signal and call `store.Cancel` if we get it but we want to ignore it if our `Store` manages to `Fetch` before it.
+`context`にはメソッド`Done()`があり、コンテキストが「完了」または「キャンセル」されたときに信号を送信するチャネルを返します。そのシグナルをリッスンし、それを取得した場合は`store.Cancel`を呼び出しますが、`Store`がその前に`Fetch`を実行した場合は無視します。
 
-To manage this we run `Fetch` in a goroutine and it will write the result into a new channel `data`. We then use `select` to effectively race to the two asynchronous processes and then we either write a response or `Cancel`.
+これを管理するには、ゴルーチンで`Fetch`を実行し、結果を新しいチャネル`data`に書き込みます。次に、`select`を使用して2つの非同期プロセスに効率的に競合し、応答または`Cancel`を書き込みます。
 
-## Refactor
+## リファクタリング
 
-We can refactor our test code a bit by making assertion methods on our spy
+スパイでアサーションメソッドを作成することで、テストコードを少しリファクタリングできます。
 
 ```go
 func (s *SpyStore) assertWasCancelled() {
@@ -222,7 +228,7 @@ func (s *SpyStore) assertWasNotCancelled() {
 }
 ```
 
-Remember to pass in the `*testing.T` when creating the spy.
+スパイを作成するときは、`*testing.T`を渡すことを忘れないでください。
 
 ```go
 func TestServer(t *testing.T) {
@@ -263,29 +269,31 @@ func TestServer(t *testing.T) {
 }
 ```
 
-This approach is ok, but is it idiomatic?
+このアプローチは大丈夫ですが、慣用的ですか？
 
-Does it make sense for our web server to be concerned with manually cancelling `Store`? What if `Store` also happens to depend on other slow-running processes? We'll have to make sure that `Store.Cancel` correctly propagates the cancellation to all of its dependants.
+私たちのウェブサーバーが手動で`Store`をキャンセルすることに関心を持つことは理にかなっていますか？`Store`が他の実行速度の遅いプロセスに依存している場合はどうなりますか？
+`Store.Cancel`がキャンセルを依存するすべてに正しくキャンセルすることを確認する必要があります。
 
-One of the main points of `context` is that it is a consistent way of offering cancellation.
+`context`の主なポイントの1つは、キャンセルを提供する一貫した方法であることです。
 
-[From the go doc](https://golang.org/pkg/context/)
+[go doc から](https://golang.org/pkg/context/)
 
-> Incoming requests to a server should create a Context, and outgoing calls to servers should accept a Context. The chain of function calls between them must propagate the Context, optionally replacing it with a derived Context created using WithCancel, WithDeadline, WithTimeout, or WithValue. When a Context is canceled, all Contexts derived from it are also canceled.
+> サーバーへの着信要求はコンテキストを作成し、サーバーへの発信呼び出しはコンテキストを受け入れる必要があります。それらの間の関数呼び出しのチェーンは、コンテキストを伝播する必要があり、オプションで、`WithCancel`、`WithDeadline`、`WithTimeout`、または`WithValue`を使用して作成された派生コンテキストに置き換えます。コンテキストがキャンセルされると、そのコンテキストから派生したすべてのコンテキストもキャンセルされます。
 
-From the [Go Blog: Context](https://blog.golang.org/context) again:
+再び[Goブログ: コンテキスト`Context`](https://blog.golang.org/context)から
 
-> At Google, we require that Go programmers pass a Context parameter as the first argument to every function on the call path between incoming and outgoing requests. This allows Go code developed by many different teams to interoperate well. It provides simple control over timeouts and cancelation and ensures that critical values like security credentials transit Go programs properly.
+> Googleでは、Goプログラマーが、最初の引数として、着信要求と発信要求の間の呼び出しパス上のすべての関数にContextパラメーターを渡す必要があります。これにより、多くの異なるチームが開発したGoコードを適切に相互運用できます。タイムアウトとキャンセルを簡単に制御し、セキュリティ認証情報などの重要な値がGoプログラムを適切に通過するようにします。
 
-\(Pause for a moment and think of the ramifications of every function having to send in a context, and the ergonomics of that.\)
+（少し間を置いて、コンテキストで送信する必要があるすべての機能の影響と、その人間工学について考えてください。）
 
-Feeling a bit uneasy? Good. Let's try and follow that approach though and instead pass through the `context` to our `Store` and let it be responsible. That way it can also pass the `context` through to it's dependants and they too can be responsible for stopping themselves.
+少し不安ですか？大丈夫です。
+そのアプローチを試してみましょう。代わりに、`context`を介して私たちの`Store`に渡し、責任を持たせましょう。そうすることで、`context`をその依存関係に渡すこともでき、それらも依存を停止する責任があります。
 
-## Write the test first
+## 最初にテストを書く
 
-We'll have to change our existing tests as their responsibilities are changing. The only thing our handler is responsible for now is making sure it sends a context through to the downstream `Store` and that it handles the error that will come from the `Store` when it is cancelled.
+責任が変化するにつれて、既存のテストを変更する必要があります。ハンドラーが今担当する唯一のことは、コンテキストがダウンストリームの`Store`に送信されることと、キャンセルされたときに`Store`から発生するエラーを処理することです。
 
-Let's update our `Store` interface to show the new responsibilities.
+`Store`インターフェースを更新して、新しい責任を示しましょう。
 
 ```go
 type Store interface {
@@ -293,7 +301,7 @@ type Store interface {
 }
 ```
 
-Delete the code inside our handler for now
+とりあえずハンドラー内のコードを削除してください
 
 ```go
 func Server(store Store) http.HandlerFunc {
@@ -302,7 +310,7 @@ func Server(store Store) http.HandlerFunc {
 }
 ```
 
-Update our `SpyStore`
+`SpyStore`を更新します
 
 ```go
 type SpyStore struct {
@@ -337,17 +345,17 @@ func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
 }
 ```
 
-We have to make our spy act like a real method that works with `context`.
+スパイを`context`で機能する実際の方法のように動作させる必要があります。
 
-We are simulating a slow process where we build the result slowly by appending the string, character by character in a goroutine. When the goroutine finishes its work it writes the string to the `data` channel. The goroutine listens for the `ctx.Done` and will stop the work if a signal is sent in that channel.
+遅いプロセスをシミュレートしていて、ゴルーチンで文字ごとに文字列を追加して、結果をゆっくり構築しています。ゴルーチンが作業を終了すると、文字列を`data`チャネルに書き込みます。ゴルーチンは`ctx.Done`をリッスンし、そのチャネルでシグナルが送信されると作業を停止します。
 
-Finally the code uses another `select` to wait for that goroutine to finish its work or for the cancellation to occur.
+最後に、コードは別の`select`を使用して、そのゴルーチンが作業を完了するか、キャンセルが発生するのを待ちます。
 
-It's similar to our approach from before, we use Go's concurrency primitives to make two asynchronous processes race each other to determine what we return.
+これは以前のアプローチに似ています。Goの同時実行プリミティブを使用して、2つの非同期プロセスが互いに競合して、何を返すかを決定します。
 
-You'll take a similar approach when writing your own functions and methods that accept a `context` so make sure you understand what's going on.
+`context`を受け入れる独自の関数とメソッドを記述する場合も同様のアプローチをとるので、何が起こっているのかを確実に理解してください。
 
-Finally we can update our tests. Comment out our cancellation test so we can fix the happy path test first.
+最後に、テストを更新できます。幸せなパステストを最初に修正できるように、キャンセルのテストをコメント化します。
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
@@ -365,7 +373,7 @@ t.Run("returns data from store", func(t *testing.T) {
 })
 ```
 
-## Try to run the test
+## テストを実行してみます
 
 ```text
 === RUN   TestServer/returns_data_from_store
@@ -374,7 +382,7 @@ t.Run("returns data from store", func(t *testing.T) {
         context_test.go:22: got "", want "hello, world"
 ```
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
 ```go
 func Server(store Store) http.HandlerFunc {
@@ -385,11 +393,11 @@ func Server(store Store) http.HandlerFunc {
 }
 ```
 
-Our happy path should be... happy. Now we can fix the other test.
+私たちの幸せな道は...幸せでなければなりません。これで、他のテストを修正できます。
 
-## Write the test first
+## 最初にテストを書く
 
-We need to test that we do not write any kind of response on the error case. Sadly `httptest.ResponseRecorder` doesn't have a way of figuring this out so we'll have to role our own spy to test for this.
+エラーの場合には、いかなる種類の応答も書かないことをテストする必要があります。悲しいことに、`httptest.ResponseRecorder`にはこれを理解する方法がないため、これをテストするために私たち自身のスパイをロールする必要があります。
 
 ```go
 type SpyResponseWriter struct {
@@ -411,7 +419,7 @@ func (s *SpyResponseWriter) WriteHeader(statusCode int) {
 }
 ```
 
-Our `SpyResponseWriter` implements `http.ResponseWriter` so we can use it in the test.
+テストで使用できるように、`SpyResponseWriter`は`http.ResponseWriter`を実装します。
 
 ```go
 t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
@@ -434,7 +442,7 @@ t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
 })
 ```
 
-## Try to run the test
+## テストを実行してみます
 
 ```text
 === RUN   TestServer
@@ -444,7 +452,7 @@ t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
         context_test.go:47: a response should not have been written
 ```
 
-## Write enough code to make it pass
+## 成功させるのに十分なコードを書く
 
 ```go
 func Server(store Store) http.HandlerFunc {
@@ -460,42 +468,41 @@ func Server(store Store) http.HandlerFunc {
 }
 ```
 
-We can see after this that the server code has become simplified as it's no longer explicitly responsible for cancellation, it simply passes through `context` and relies on the downstream functions to respect any cancellations that may occur.
+この後、サーバーコードはキャンセルの明示的な責任がなくなり、単純化されていることがわかります。サーバーコードは単に`context`を通過し、発生する可能性のあるすべてのキャンセルを下流の関数に依存しています。
 
-## Wrapping up
+## まとめ
 
-### What we've covered
+### カバーしたこと
 
-* How to test a HTTP handler that has had the request cancelled by the client.
-* How to use context to manage cancellation.
-* How to write a function that accepts `context` and uses it to cancel itself by using goroutines, `select` and channels.
-* Follow Google's guidelines as to how to manage cancellation by propagating request scoped context through your call-stack.
-* How to roll your own spy for `http.ResponseWriter` if you need it.
+* リクエストがクライアントによってキャンセルされたHTTPハンドラをテストする方法。
+* キャンセルを管理するためのコンテキストの使用方法。
+* `context`を受け入れ、それを使ってゴルーチン、`select`、およびチャネルを使用してそれ自体をキャンセルする関数の作成方法。
+* コールスタックを通じてリクエストスコープのコンテキストを伝播してキャンセルを管理する方法については、Googleのガイドラインに従ってください。
+* 必要に応じて、`http.ResponseWriter`の独自のスパイをロールする方法。
 
-### What about context.Value ?
+### `context.Value`はどうですか？
 
-[Michal Štrba](https://faiface.github.io/post/context-should-go-away-go2/) and I have a similar opinion.
+[Michal Štrba](https://faiface.github.io/post/context-should-go-away-go2/)と私は同様の意見を持っています。
 
-> If you use ctx.Value in my \(non-existent\) company, you’re fired
+> 私の（non-existent）会社で`ctx.Value`を使用すると、解雇されます
 
-Some engineers have advocated passing values through `context` as it _feels convenient_.
+一部のエンジニアは、「便利」と感じて`context`を介して値を渡すことを提唱しています。
 
-Convenience is often the cause of bad code.
+多くの場合、利便性が悪いコードの原因です。
 
-The problem with `context.Values` is that it's just an untyped map so you have no type-safety and you have to handle it not actually containing your value. You have to create a coupling of map keys from one module to another and if someone changes something things start breaking.
+`context.Values`の問題は、型付けされていないマップであるため、タイプの安全性がなく、値を実際に含まないように処理する必要があることです。あるモジュールから別のモジュールへのマップキーの結合を作成する必要があり、誰かが何かを変更すると、何かが壊れ始めます。
 
-In short, **if a function needs some values, put them as typed parameters rather than trying to fetch them from `context.Value`**. This makes is statically checked and documented for everyone to see.
+要するに、**関数がいくつかの値を必要とする場合、 `context.Value`からそれらをフェッチしようとするのではなく、型付きパラメーターとしてそれらを置きます**。これは静的にチェックされ、誰もが見ることができるように文書化されます。
 
-#### But...
+#### しかし...
 
-On other hand, it can be helpful to include information that is orthogonal to a request in a context, such as a trace id. Potentially this information would not be needed by every function in your call-stack and would make your functional signatures very messy.
+一方、リクエストに直交する情報（トレースIDなど）をコンテキストに含めると役立つ場合があります。潜在的に、この情報はコールスタックのすべての関数で必要とされるわけではなく、関数シグネチャが非常に乱雑になります。
 
-[Jack Lindamood says **Context.Value should inform, not control**](https://medium.com/@cep21/how-to-correctly-use-context-context-in-go-1-7-8f2c0fafdf39)
+[Jack Lindamoodによると、**Context.Valueは制御ではなく通知**](https://medium.com/@cep21/how-to-correctly-use-context-context-in-go-1-7-8f2c0fafdf39)
 
-> The content of context.Value is for maintainers not users. It should never be required input for documented or expected results.
+> `context.Value`のコンテンツは、ユーザーではなくメンテナー向けです。文書化された結果または期待される結果の入力が必要になることはありません。
 
-### Additional material
+### 追加資料
 
-* I really enjoyed reading [Context should go away for Go 2 by Michal Štrba](https://faiface.github.io/post/context-should-go-away-go2/). His argument is that having to pass `context` everywhere is a smell, that it's pointing to a deficiency in the language in respect to cancellation. He says it would better if this was somehow solved at the language level, rather than at a library level. Until that happens, you will need `context` if you want to manage long running processes.
-* The [Go blog further describes the motivation for working with `context` and has some examples](https://blog.golang.org/context)
-
+* [MichalŠtrbaによるGo2のコンテキストはなくなるはずです](https://faiface.github.io/post/context-should-go-away-go2/)を読んで本当に楽しんでいました。彼の主張は、どこでも`context`を渡す必要があることは匂いであり、キャンセルに関する言語の欠陥を指摘しているということです。ライブラリレベルではなく、言語レベルで何らかの方法でこれを解決した方が良いと彼は言います。それが発生するまで、実行時間の長いプロセスを管理する場合は、`context`が必要になります。
+* [Goブログでは、`context`を使用する動機についてさらに説明し、いくつかの例を挙げています](https://blog.golang.org/context)
