@@ -1,6 +1,6 @@
 # Maps
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/maps)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/maps)**
 
 In [arrays & slices](arrays-and-slices.md), you saw how to store values in order. Now, we will look at a way to store items by a `key` and look them up quickly.
 

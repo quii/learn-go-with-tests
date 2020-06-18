@@ -1,6 +1,6 @@
 # Integers
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/integers)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/integers)**
 
 Integers work as you would expect. Let's write an `Add` function to try things out. Create a test file called `adder_test.go` and write this code.
 

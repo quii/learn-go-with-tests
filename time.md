@@ -1,12 +1,12 @@
 # Time
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/time)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/time)**
 
 The product owner wants us to expand the functionality of our command line application by helping a group of people play Texas-Holdem Poker.
 
 ## Just enough information on poker
 
-You won't need to know much about poker, only that at certain time intervals all the players need to be informed of a steadily increasing "blind" value. 
+You won't need to know much about poker, only that at certain time intervals all the players need to be informed of a steadily increasing "blind" value.
 
 Our application will help keep track of when the blind should go up, and how much it should be.
 
@@ -86,7 +86,7 @@ t.Run("it schedules printing of blind values", func(t *testing.T) {
 
     cli := poker.NewCLI(playerStore, in, blindAlerter)
     cli.PlayPoker()
-    
+
     if len(blindAlerter.alerts) != 1 {
         t.Fatal("expected a blind alert to be scheduled")
     }
@@ -141,7 +141,7 @@ And then add it to the constructor
 func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI
 ```
 
-Your other tests will now fail as they don't have a `BlindAlerter` passed in to `NewCLI`. 
+Your other tests will now fail as they don't have a `BlindAlerter` passed in to `NewCLI`.
 
 Spying on BlindAlerter is not relevant for the other tests so in the test file add
 
@@ -403,7 +403,7 @@ func StdOutAlerter(duration time.Duration, amount int) {
 }
 ```
 
-Remember that any _type_ can implement an interface, not just `structs`. If you are making a library that exposes an interface with one function defined it is a common idiom to also expose a `MyInterfaceFunc` type. 
+Remember that any _type_ can implement an interface, not just `structs`. If you are making a library that exposes an interface with one function defined it is a common idiom to also expose a `MyInterfaceFunc` type.
 
 This type will be a `func` which will also implement your interface. That way users of your interface have the option to implement your interface with just a function; rather than having to create an empty `struct` type.
 
@@ -419,13 +419,13 @@ Before running you might want to change the `blindTime` increment in `CLI` to be
 
 You should see it print the blind values as we'd expect every 10 seconds. Notice how you can still type `Shaun wins` into the CLI and it will stop the program how we'd expect.
 
-The game won't always be played with 5 people so we need to prompt the user to enter a number of players before the game starts. 
+The game won't always be played with 5 people so we need to prompt the user to enter a number of players before the game starts.
 
 ## Write the test first
 
 To check we are prompting for the number of players we'll want to record what is written to StdOut. We've done this a few times now, we know that `os.Stdout` is an `io.Writer` so we can check what is written if we use dependency injection to pass in a `bytes.Buffer` in our test and see what our code will write.
 
-We don't care about our other collaborators in this test just yet so we've made some dummies in our test file. 
+We don't care about our other collaborators in this test just yet so we've made some dummies in our test file.
 
 We should be a little wary that we now have 4 dependencies for `CLI`, that feels like maybe it is starting to have too many responsibilities. Let's live with it for now and see if a refactoring emerges as we add this new functionality.
 
@@ -471,7 +471,7 @@ We have a new dependency so we'll have to update `NewCLI`
 func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI
 ```
 
-Now the _other_ tests will fail to compile because they don't have an `io.Writer` being passed into `NewCLI`. 
+Now the _other_ tests will fail to compile because they don't have an `io.Writer` being passed into `NewCLI`.
 
 Add `dummyStdout` for the other tests.
 
@@ -570,7 +570,7 @@ t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
 })
 ```
 
-Ouch! A lot of changes. 
+Ouch! A lot of changes.
 
 - We remove our dummy for StdIn and instead send in a mocked version representing our user entering 7
 - We also remove our dummy on the blind alerter so we can see that the number of players has had an effect on the scheduling
@@ -597,7 +597,7 @@ Remember, we are free to commit whatever sins we need to make this work. Once we
 ```go
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
-	
+
 	numberOfPlayers, _ := strconv.Atoi(cli.readLine())
 
 	cli.scheduleBlindAlerts(numberOfPlayers)
@@ -626,18 +626,18 @@ While our new test has been fixed, a lot of others have failed because now our s
 
 ## Refactor
 
-This all feels a bit horrible right? Let's **listen to our tests**. 
+This all feels a bit horrible right? Let's **listen to our tests**.
 
 - In order to test that we are scheduling some alerts we set up 4 different dependencies. Whenever you have a lot of dependencies for a _thing_ in your system, it implies it's doing too much. Visually we can see it in how cluttered our test is.
-- To me it feels like **we need to make a cleaner abstraction between reading user input and the business logic we want to do** 
-- A better test would be _given this user input, do we call a new type `Game` with the correct number of players_. 
+- To me it feels like **we need to make a cleaner abstraction between reading user input and the business logic we want to do**
+- A better test would be _given this user input, do we call a new type `Game` with the correct number of players_.
 - We would then extract the testing of the scheduling into the tests for our new `Game`.
 
 We can refactor toward our `Game` first and our test should continue to pass. Once we've made the structural changes we want we can think about how we can refactor the tests to reflect our new separation of concerns
 
 Remember when making changes in refactoring try to keep them as small as possible and keep re-running the tests.
 
-Try it yourself first. Think about the boundaries of what a `Game` would offer and what our `CLI` should be doing. 
+Try it yourself first. Think about the boundaries of what a `Game` would offer and what our `CLI` should be doing.
 
 For now **don't** change the external interface of `NewCLI` as we don't want to change the test code and the client code at the same time as that is too much to juggle and we could end up breaking things.
 
@@ -713,9 +713,9 @@ From a "domain" perspective:
 - We want to `Start` a `Game`, indicating how many people are playing
 - We want to `Finish` a `Game`, declaring the winner
 
-The new `Game` type encapsulates this for us. 
+The new `Game` type encapsulates this for us.
 
-With this change we've passed `BlindAlerter` and `PlayerStore` to `Game` as it is now responsible for alerting and storing results. 
+With this change we've passed `BlindAlerter` and `PlayerStore` to `Game` as it is now responsible for alerting and storing results.
 
 Our `CLI` is now just concerned with:
 
@@ -774,7 +774,7 @@ cli := poker.NewCLI(os.Stdin, os.Stdout, game)
 cli.PlayPoker()
 ```
 
-Now that we have extracted out `Game` we should move our game specific assertions into tests separate from CLI. 
+Now that we have extracted out `Game` we should move our game specific assertions into tests separate from CLI.
 
 This is just an exercise in copying our `CLI` tests but with less dependencies
 
@@ -831,9 +831,9 @@ func TestGame_Finish(t *testing.T) {
 }
 ```
 
-The intent behind what happens when a game of poker starts is now much clearer. 
+The intent behind what happens when a game of poker starts is now much clearer.
 
-Make sure to also move over the test for when the game ends. 
+Make sure to also move over the test for when the game ends.
 
 Once we are happy we have moved the tests over for game logic we can simplify our CLI tests so they reflect our intended responsibilities clearer
 
@@ -899,11 +899,11 @@ Here is an example of one of the tests being fixed; try and do the rest yourself
 	})
 ```
 
-Now that we have a clean separation of concerns, checking edge cases around IO in our `CLI` should be easier. 
+Now that we have a clean separation of concerns, checking edge cases around IO in our `CLI` should be easier.
 
 We need to address the scenario where a user puts a non numeric value when prompted for the number of players:
 
-Our code should not start the game and it should print a handy error to the user and then exit. 
+Our code should not start the game and it should print a handy error to the user and then exit.
 
 ## Write the test first
 
@@ -917,7 +917,7 @@ t.Run("it prints an error when a non numeric value is entered and does not start
 
 		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
-		
+
 		if game.StartCalled {
 			t.Errorf("game should not have started")
 		}
@@ -945,7 +945,7 @@ if err != nil {
 }
 ```
 
-Next we need to inform the user of what they did wrong so we'll assert on what is printed to `stdout`. 
+Next we need to inform the user of what they did wrong so we'll assert on what is printed to `stdout`.
 
 ## Write the test first
 
@@ -984,7 +984,7 @@ if err != nil {
 
 ## Refactor
 
-Now refactor the message into a constant like `PlayerPrompt` 
+Now refactor the message into a constant like `PlayerPrompt`
 
 ```go
 wantPrompt := poker.PlayerPrompt + poker.BadPlayerInputErrMsg
@@ -1013,7 +1013,7 @@ Using the vararg syntax (`...string`) is handy here because we need to assert on
 
 Use this helper in both of the tests where we assert on messages sent to the user.
 
-There are a number of tests that could be helped with some `assertX` functions so practice your refactoring by cleaning up our tests so they read nicely. 
+There are a number of tests that could be helped with some `assertX` functions so practice your refactoring by cleaning up our tests so they read nicely.
 
 Take some time and think about the value of some of the tests we've driven out. Remember we don't want more tests than necessary, can you refactor/remove some of them _and still be confident it all works_ ?
 
@@ -1062,7 +1062,7 @@ func TestCLI(t *testing.T) {
 	})
 }
 ```
-The tests now reflect the main capabilities of CLI, it is able to read user input in terms of how many people are playing and who won and handles when a bad value is entered for number of players. By doing this it is clear to the reader what `CLI` does, but also what it doesn't do. 
+The tests now reflect the main capabilities of CLI, it is able to read user input in terms of how many people are playing and who won and handles when a bad value is entered for number of players. By doing this it is clear to the reader what `CLI` does, but also what it doesn't do.
 
 What happens if instead of putting `Ruth wins` the user puts in `Lloyd is a killer` ?
 
@@ -1074,7 +1074,7 @@ Finish this chapter by writing a test for this scenario and making it pass.
 
 For the past 5 chapters we have slowly TDD'd a fair amount of code
 
-- We have two applications, a command line application and a web server. 
+- We have two applications, a command line application and a web server.
 - Both these applications rely on a `PlayerStore` to record winners
 - The web server can also display a league table of who is winning the most games
 - The command line app helps players play a game of poker by tracking what the current blind value is.
@@ -1085,22 +1085,22 @@ A very handy way of scheduling a function call after a specific duration. It is 
 
 Some of my favourites are
 
-- `time.After(duration)` returns a `chan Time` when the duration has expired. So if you wish to do something _after_ a specific time, this can help. 
-- `time.NewTicker(duration)` returns a `Ticker` which is similar to the above in that it returns a channel but this one "ticks" every duration, rather than just once. This is very handy if you want to execute some code every `N duration`.  
+- `time.After(duration)` returns a `chan Time` when the duration has expired. So if you wish to do something _after_ a specific time, this can help.
+- `time.NewTicker(duration)` returns a `Ticker` which is similar to the above in that it returns a channel but this one "ticks" every duration, rather than just once. This is very handy if you want to execute some code every `N duration`.
 
 ### More examples of good separation of concerns
 
-_Generally_ it is good practice to separate the responsibilities of dealing with user input and responses away from domain code. You see that here in our command line application and also our web server. 
+_Generally_ it is good practice to separate the responsibilities of dealing with user input and responses away from domain code. You see that here in our command line application and also our web server.
 
-Our tests got messy. We had too many assertions (check this input, schedules these alerts, etc) and too many dependencies. We could visually see it was cluttered; it is **so important to listen to your tests**. 
+Our tests got messy. We had too many assertions (check this input, schedules these alerts, etc) and too many dependencies. We could visually see it was cluttered; it is **so important to listen to your tests**.
 
 - If your tests look messy try and refactor them.
 - If you've done this and they're still a mess it is very likely pointing to a flaw in your design
 - This is one of the real strengths of tests.
 
-Even though the tests and the production code was a bit cluttered we could freely refactor backed by our tests. 
+Even though the tests and the production code was a bit cluttered we could freely refactor backed by our tests.
 
-Remember when you get into these situations to always take small steps and re-run the tests after every change. 
+Remember when you get into these situations to always take small steps and re-run the tests after every change.
 
 It would've been dangerous to refactor both the test code _and_ the production code at the same time, so we first refactored the production code (in the current state we couldn't improve the tests much) without changing its interface so we could rely on our tests as much as we could while changing things. _Then_ we refactored the tests after the design improved.
 

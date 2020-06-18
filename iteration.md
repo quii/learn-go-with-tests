@@ -1,6 +1,6 @@
 # Iteration
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/for)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/for)**
 
 To do stuff repeatedly in Go, you'll need `for`. In Go there are no `while`, `do`, `until` keywords, you can only use `for`. Which is a good thing!
 

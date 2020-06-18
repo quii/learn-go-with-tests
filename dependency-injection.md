@@ -1,6 +1,6 @@
 # Dependency Injection
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/di)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/di)**
 
 It is assumed that you have read the structs section before as some understanding of interfaces will be needed for this.
 

@@ -1,6 +1,6 @@
 # Command line and project structure
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/command-line)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/command-line)**
 
 Our product owner now wants to _pivot_ by introducing a second application - a command line application.
 

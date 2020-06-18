@@ -1,6 +1,6 @@
 # Context-aware readers
 
-**[You can find all the code here](https://github.com/quii/learn-go-with-tests/tree/master/q-and-a/context-aware-reader)**
+**[You can find all the code here](https://github.com/quii/learn-go-with-tests/tree/main/q-and-a/context-aware-reader)**
 
 This chapter demonstrates how to test-drive a context aware `io.Reader` as written by Mat Ryer and David Hernandez in [The Pace Dev Blog](https://pace.dev/blog/2020/02/03/context-aware-ioreader-for-golang-by-mat-ryer).
 

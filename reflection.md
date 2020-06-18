@@ -1,6 +1,6 @@
 # Reflection
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/reflection)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/reflection)**
 
 [From Twitter](https://twitter.com/peterbourgon/status/1011403901419937792?s=09)
 
@@ -834,7 +834,7 @@ func walk(x interface{}, fn func(input string)) {
 			walk(val.MapIndex(key).Interface(), fn)
 		}
 	case reflect.Chan:
-		for v, ok := val.Recv(); ok; v, ok = val.Recv() {	
+		for v, ok := val.Recv(); ok; v, ok = val.Recv() {
 			walk(v.Interface(), fn)
 		}
 	}
@@ -895,7 +895,7 @@ func walk(x interface{}, fn func(input string)) {
 			walk(val.MapIndex(key).Interface(), fn)
 		}
 	case reflect.Chan:
-		for v, ok := val.Recv(); ok; v, ok = val.Recv() {	
+		for v, ok := val.Recv(); ok; v, ok = val.Recv() {
 			walk(v.Interface(), fn)
 		}
 	case reflect.Func:

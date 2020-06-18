@@ -1,6 +1,6 @@
 # HTTP Server
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/http-server)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/http-server)**
 
 You have been asked to create a web server where users can track how many games players have won.
 

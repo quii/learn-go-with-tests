@@ -1,8 +1,8 @@
 # Sync
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/sync)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/sync)**
 
-We want to make a counter which is safe to use concurrently. 
+We want to make a counter which is safe to use concurrently.
 
 We'll start with an unsafe counter and verify its behaviour works in a single-threaded environment.
 
@@ -10,7 +10,7 @@ Then we'll exercise it's unsafeness with multiple goroutines trying to use it vi
 
 ## Write the test first
 
-We want our API to give us a method to increment the counter and then retrieve its value. 
+We want our API to give us a method to increment the counter and then retrieve its value.
 
 ```go
 func TestCounter(t *testing.T) {
@@ -20,7 +20,7 @@ func TestCounter(t *testing.T) {
 		counter.Inc()
 		counter.Inc()
 
-		if counter.Value() != 3 {			
+		if counter.Value() != 3 {
 			t.Errorf("got %d, want %d", counter.Value(), 3)
 		}
 	})
@@ -35,11 +35,11 @@ func TestCounter(t *testing.T) {
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-Let's define `Counter`. 
+Let's define `Counter`.
 
 ```go
 type Counter struct {
-	
+
 }
 ```
 
@@ -54,7 +54,7 @@ So to finally make the test run we can define those methods
 
 ```go
 func (c *Counter) Inc() {
-	
+
 }
 
 func (c *Counter) Value() int {
@@ -100,7 +100,7 @@ t.Run("incrementing the counter 3 times leaves it at 3", func(t *testing.T) {
     counter.Inc()
     counter.Inc()
     counter.Inc()
-    
+
     assertCounter(t, counter, 3)
 })
 
@@ -114,7 +114,7 @@ func assertCounter(t *testing.T, got Counter, want int)  {
 
 ## Next steps
 
-That was easy enough but now we have a requirement that it must be safe to use in a concurrent environment. We will need to write a failing test to exercise this. 
+That was easy enough but now we have a requirement that it must be safe to use in a concurrent environment. We will need to write a failing test to exercise this.
 
 ## Write the test first
 
@@ -138,7 +138,7 @@ t.Run("it runs safely concurrently", func(t *testing.T) {
 })
 ```
 
-This will loop through our `wantedCount` and fire a goroutine to call `counter.Inc()`. 
+This will loop through our `wantedCount` and fire a goroutine to call `counter.Inc()`.
 
 We are using [`sync.WaitGroup`](https://golang.org/pkg/sync/#WaitGroup) which is a convenient way of synchronising concurrent processes.
 
@@ -177,13 +177,13 @@ func (c *Counter) Inc() {
 }
 ```
 
-What this means is any goroutine calling `Inc` will acquire the lock on `Counter` if they are first. All the other goroutines will have to wait for it to be `Unlock`ed before getting access. 
+What this means is any goroutine calling `Inc` will acquire the lock on `Counter` if they are first. All the other goroutines will have to wait for it to be `Unlock`ed before getting access.
 
 If you now re-run the test it should now pass because each goroutine has to wait its turn before making a change.
 
-## I've seen other examples where the `sync.Mutex` is embedded into the struct. 
+## I've seen other examples where the `sync.Mutex` is embedded into the struct.
 
-You may see examples like this 
+You may see examples like this
 
 ```go
 type Counter struct {
@@ -202,9 +202,9 @@ func (c *Counter) Inc() {
 }
 ```
 
-This _looks_ nice but while programming is a hugely subjective discipline, this is **bad and wrong**. 
+This _looks_ nice but while programming is a hugely subjective discipline, this is **bad and wrong**.
 
-Sometimes people forget that embedding types means the methods of that type becomes _part of the public interface_; and you often will not want that. Remember that we should be very careful with our public APIs, the moment we make something public is the moment other code can couple themselves to it. We always want to avoid unnecessary coupling.  
+Sometimes people forget that embedding types means the methods of that type becomes _part of the public interface_; and you often will not want that. Remember that we should be very careful with our public APIs, the moment we make something public is the moment other code can couple themselves to it. We always want to avoid unnecessary coupling.
 
 Exposing `Lock` and `Unlock` is at best confusing but at worst potentially very harmful to your software if callers of your type start calling these methods.
 
@@ -227,7 +227,7 @@ A look at the documentation of [`sync.Mutex`](https://golang.org/pkg/sync/#Mutex
 
 > A Mutex must not be copied after first use.
 
-When we pass our `Counter` (by value) to `assertCounter` it will try and create a copy of the mutex. 
+When we pass our `Counter` (by value) to `assertCounter` it will try and create a copy of the mutex.
 
 To solve this we should pass in a pointer to our `Counter` instead, so change the signature of `assertCounter`
 
@@ -254,14 +254,14 @@ We've covered a few things from the [sync package](https://golang.org/pkg/sync/)
 
 ### When to use locks over channels and goroutines?
 
-[We've previously covered goroutines in the first concurrency chapter](concurrency.md) which let us write safe concurrent code so why would you use locks?   
+[We've previously covered goroutines in the first concurrency chapter](concurrency.md) which let us write safe concurrent code so why would you use locks?
 [The go wiki has a page dedicated to this topic; Mutex Or Channel](https://github.com/golang/go/wiki/MutexOrChannel)
 
 > A common Go newbie mistake is to over-use channels and goroutines just because it's possible, and/or because it's fun. Don't be afraid to use a sync.Mutex if that fits your problem best. Go is pragmatic in letting you use the tools that solve your problem best and not forcing you into one style of code.
 
 Paraphrasing:
 
-- **Use channels when passing ownership of data** 
+- **Use channels when passing ownership of data**
 - **Use mutexes for managing state**
 
 ### go vet

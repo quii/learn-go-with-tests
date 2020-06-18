@@ -1,6 +1,6 @@
 # HTTP Handlers Revisited
 
-**[You can find all the code here](https://github.com/quii/learn-go-with-tests/tree/master/q-and-a/http-handlers-revisited)**
+**[You can find all the code here](https://github.com/quii/learn-go-with-tests/tree/main/q-and-a/http-handlers-revisited)**
 
 This book already has a chapter on [testing a HTTP handler](http-server.md) but this will feature a broader discussion on designing them, so they are simple to test.
 

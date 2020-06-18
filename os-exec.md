@@ -1,6 +1,6 @@
 # OS Exec
 
-**[You can find all the code here](https://github.com/quii/learn-go-with-tests/tree/master/q-and-a/os-exec)**
+**[You can find all the code here](https://github.com/quii/learn-go-with-tests/tree/main/q-and-a/os-exec)**
 
 [keith6014](https://www.reddit.com/user/keith6014) asks on [reddit](https://www.reddit.com/r/golang/comments/aaz8ji/testdata_and_function_setup_help/)
 
@@ -15,7 +15,7 @@
 A few things
 
 - When something is difficult to test, it's often due to the separation of concerns not being quite right
-- Don't add "test modes" into your code, instead use [Dependency Injection](/dependency-injection.md) so that you can model your dependencies and separate concerns. 
+- Don't add "test modes" into your code, instead use [Dependency Injection](/dependency-injection.md) so that you can model your dependencies and separate concerns.
 
 I have taken the liberty of guessing what the code might look like
 
@@ -42,7 +42,7 @@ func GetData() string {
 
 - It uses `exec.Command` which allows you to execute an external command to the process
 - We capture the output in `cmd.StdoutPipe` which returns us a `io.ReadCloser` (this will become important)
-- The rest of the code is more or less copy and pasted from the [excellent documentation](https://golang.org/pkg/os/exec/#example_Cmd_StdoutPipe). 
+- The rest of the code is more or less copy and pasted from the [excellent documentation](https://golang.org/pkg/os/exec/#example_Cmd_StdoutPipe).
     - We capture any output from stdout into an `io.ReadCloser` and then we `Start` the command and then wait for all the data to be read by calling `Wait`. In between those two calls we decode the data into our `Payload` struct.
 
 Here is what is contained inside `msg.xml`
@@ -73,7 +73,7 @@ Testable code is decoupled and single purpose. To me it feels like there are two
 1. Retrieving the raw XML data
 2. Decoding the XML data and applying our business logic (in this case `strings.ToUpper` on the `<message>`)
 
-The first part is just copying the example from the standard lib. 
+The first part is just copying the example from the standard lib.
 
 The second part is where we have our business logic and by looking at the code we can see where the "seam" in our logic starts; it's where we get our `io.ReadCloser`. We can use this existing abstraction to separate concerns and make our code testable.
 
@@ -134,6 +134,6 @@ func TestGetData(t *testing.T) {
 
 ```
 
-Here is an example of a unit test for `GetData`. 
+Here is an example of a unit test for `GetData`.
 
 By separating the concerns and using existing abstractions within Go testing our important business logic is a breeze.

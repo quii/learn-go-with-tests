@@ -1,6 +1,6 @@
 # Mathematics
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/math)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/math)**
 
 For all the power of modern computers to perform huge sums at
 lightning speed, the average developer rarely uses any mathematics

@@ -1,16 +1,16 @@
 # Context
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/context)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/context)**
 
-Software often kicks off long-running, resource-intensive processes (often in goroutines). If the action that caused this gets cancelled or fails for some reason you need to stop these processes in a consistent way through your application. 
+Software often kicks off long-running, resource-intensive processes (often in goroutines). If the action that caused this gets cancelled or fails for some reason you need to stop these processes in a consistent way through your application.
 
-If you don't manage this your snappy Go application that you're so proud of could start having difficult to debug performance problems.  
+If you don't manage this your snappy Go application that you're so proud of could start having difficult to debug performance problems.
 
 In this chapter we'll use the package `context` to help us manage long-running processes.
 
-We're going to start with a classic example of a web server that when hit kicks off a potentially long-running process to fetch some data for it to return in the response. 
+We're going to start with a classic example of a web server that when hit kicks off a potentially long-running process to fetch some data for it to return in the response.
 
-We will exercise a scenario where a user cancels the request before the data can be retrieved and we'll make sure the process is told to give up. 
+We will exercise a scenario where a user cancels the request before the data can be retrieved and we'll make sure the process is told to give up.
 
 I've set up some code on the happy path to get us started. Here is our server code.
 
@@ -95,17 +95,17 @@ Let's add a new test where we cancel the request before 100 milliseconds and che
 t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
       store := &SpyStore{response: data}
       svr := Server(store)
-  
+
       request := httptest.NewRequest(http.MethodGet, "/", nil)
-      
+
       cancellingCtx, cancel := context.WithCancel(request.Context())
       time.AfterFunc(5 * time.Millisecond, cancel)
       request = request.WithContext(cancellingCtx)
-      
+
       response := httptest.NewRecorder()
-  
+
       svr.ServeHTTP(response, request)
-  
+
       if !store.cancelled {
           t.Errorf("store was not told to cancel")
       }
@@ -116,7 +116,7 @@ From the [Go Blog: Context](https://blog.golang.org/context)
 
 > The context package provides functions to derive new Context values from existing ones. These values form a tree: when a Context is canceled, all Contexts derived from it are also canceled.
 
-It's important that you derive your contexts so that cancellations are propagated throughout the call stack for a given request. 
+It's important that you derive your contexts so that cancellations are propagated throughout the call stack for a given request.
 
 What we do is derive a new `cancellingCtx` from our `request` which returns us a `cancel` function. We then schedule that function to be called in 5 milliseconds by using `time.AfterFunc`. Finally we use this new context in our request by calling `request.WithContext`.
 
@@ -132,7 +132,7 @@ The test fails as we'd expect.
 
 ## Write enough code to make it pass
 
-Remember to be disciplined with TDD. Write the _minimal_ amount of code to make our test pass. 
+Remember to be disciplined with TDD. Write the _minimal_ amount of code to make our test pass.
 
 ```go
 func Server(store Store) http.HandlerFunc {
@@ -143,11 +143,11 @@ func Server(store Store) http.HandlerFunc {
 }
 ```
 
-This makes this test pass but it doesn't feel good does it! We surely shouldn't be cancelling `Store` before we fetch on _every request_. 
+This makes this test pass but it doesn't feel good does it! We surely shouldn't be cancelling `Store` before we fetch on _every request_.
 
-By being disciplined it highlighted a flaw in our tests, this is a good thing! 
+By being disciplined it highlighted a flaw in our tests, this is a good thing!
 
-We'll need to update our happy path test to assert that it does not get cancelled. 
+We'll need to update our happy path test to assert that it does not get cancelled.
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
@@ -162,7 +162,7 @@ t.Run("returns data from store", func(t *testing.T) {
     if response.Body.String() != data {
         t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
     }
-    
+
     if store.cancelled {
         t.Error("it should not have cancelled the store")
     }
@@ -218,7 +218,7 @@ func (s *SpyStore) assertWasNotCancelled() {
 }
 ```
 
-Remember to pass in the `*testing.T` when creating the spy. 
+Remember to pass in the `*testing.T` when creating the spy.
 
 ```go
 func TestServer(t *testing.T) {
@@ -259,11 +259,11 @@ func TestServer(t *testing.T) {
 }
 ```
 
-This approach is ok, but is it idiomatic? 
+This approach is ok, but is it idiomatic?
 
-Does it make sense for our web server to be concerned with manually cancelling `Store`? What if `Store` also happens to depend on other slow-running processes? We'll have to make sure that `Store.Cancel` correctly propagates the cancellation to all of its dependants. 
+Does it make sense for our web server to be concerned with manually cancelling `Store`? What if `Store` also happens to depend on other slow-running processes? We'll have to make sure that `Store.Cancel` correctly propagates the cancellation to all of its dependants.
 
-One of the main points of `context` is that it is a consistent way of offering cancellation. 
+One of the main points of `context` is that it is a consistent way of offering cancellation.
 
 [From the go doc](https://golang.org/pkg/context/)
 
@@ -281,7 +281,7 @@ Feeling a bit uneasy? Good. Let's try and follow that approach though and instea
 
 We'll have to change our existing tests as their responsibilities are changing. The only thing our handler is responsible for now is making sure it sends a context through to the downstream `Store` and that it handles the error that will come from the `Store` when it is cancelled.
 
-Let's update our `Store` interface to show the new responsibilities. 
+Let's update our `Store` interface to show the new responsibilities.
 
 ```go
 type Store interface {
@@ -333,13 +333,13 @@ func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
 }
 ```
 
-We have to make our spy act like a real method that works with `context`. 
+We have to make our spy act like a real method that works with `context`.
 
-We are simulating a slow process where we build the result slowly by appending the string, character by character in a goroutine. When the goroutine finishes its work it writes the string to the `data` channel. The goroutine listens for the `ctx.Done` and will stop the work if a signal is sent in that channel. 
+We are simulating a slow process where we build the result slowly by appending the string, character by character in a goroutine. When the goroutine finishes its work it writes the string to the `data` channel. The goroutine listens for the `ctx.Done` and will stop the work if a signal is sent in that channel.
 
 Finally the code uses another `select` to wait for that goroutine to finish its work or for the cancellation to occur.
 
-It's similar to our approach from before, we use Go's concurrency primitives to make two asynchronous processes race each other to determine what we return. 
+It's similar to our approach from before, we use Go's concurrency primitives to make two asynchronous processes race each other to determine what we return.
 
 You'll take a similar approach when writing your own functions and methods that accept a `context` so make sure you understand what's going on.
 
@@ -385,7 +385,7 @@ Our happy path should be... happy. Now we can fix the other test.
 
 ## Write the test first
 
-We need to test that we do not write any kind of response on the error case. Sadly `httptest.ResponseRecorder` doesn't have a way of figuring this out so we'll have to role our own spy to test for this. 
+We need to test that we do not write any kind of response on the error case. Sadly `httptest.ResponseRecorder` doesn't have a way of figuring this out so we'll have to role our own spy to test for this.
 
 ```go
 type SpyResponseWriter struct {
@@ -450,13 +450,13 @@ func Server(store Store) http.HandlerFunc {
 		if err != nil {
 			return // todo: log error however you like
 		}
-		
+
 		fmt.Fprint(w, data)
 	}
 }
 ```
 
-We can see after this that the server code has become simplified as it's no longer explicitly responsible for cancellation, it simply passes through `context` and relies on the downstream functions to respect any cancellations that may occur. 
+We can see after this that the server code has become simplified as it's no longer explicitly responsible for cancellation, it simply passes through `context` and relies on the downstream functions to respect any cancellations that may occur.
 
 ## Wrapping up
 
@@ -474,13 +474,13 @@ We can see after this that the server code has become simplified as it's no long
 
 > If you use ctx.Value in my (non-existent) company, you’re fired
 
-Some engineers have advocated passing values through `context` as it _feels convenient_. 
+Some engineers have advocated passing values through `context` as it _feels convenient_.
 
-Convenience is often the cause of bad code. 
+Convenience is often the cause of bad code.
 
-The problem with `context.Values` is that it's just an untyped map so you have no type-safety and you have to handle it not actually containing your value. You have to create a coupling of map keys from one module to another and if someone changes something things start breaking. 
+The problem with `context.Values` is that it's just an untyped map so you have no type-safety and you have to handle it not actually containing your value. You have to create a coupling of map keys from one module to another and if someone changes something things start breaking.
 
-In short, **if a function needs some values, put them as typed parameters rather than trying to fetch them from `context.Value`**. This makes is statically checked and documented for everyone to see. 
+In short, **if a function needs some values, put them as typed parameters rather than trying to fetch them from `context.Value`**. This makes is statically checked and documented for everyone to see.
 
 #### But...
 

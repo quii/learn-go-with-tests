@@ -1,6 +1,6 @@
 # Concurrency
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/concurrency)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/concurrency)**
 
 Here's the setup: a colleague has written a function, `CheckWebsites`, that
 checks the status of a list of URLs.

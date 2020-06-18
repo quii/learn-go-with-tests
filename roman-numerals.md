@@ -1,6 +1,6 @@
 # Roman Numerals
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/roman-numerals)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/roman-numerals)**
 
 Some companies will ask you to do the [Roman Numeral Kata](http://codingdojo.org/kata/RomanNumerals/) as part of the interview process. This chapter will show how you can tackle it with TDD.
 

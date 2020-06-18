@@ -1,6 +1,6 @@
 # JSON, routing & embedding
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/json)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/json)**
 
 [In the previous chapter](http-server.md) we created a web server to store how many games players have won.
 

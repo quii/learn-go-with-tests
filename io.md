@@ -1,6 +1,6 @@
 # IO and sorting
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/master/io)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/io)**
 
 [In the previous chapter](json.md) we continued iterating on our application by adding a new endpoint `/league`. Along the way we learned about how to deal with JSON, embedding types and routing.
 
@@ -829,7 +829,7 @@ func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStor
 
 Finally, we can get the amazing payoff we wanted by removing the `Seek` call from `RecordWin`. Yes, it doesn't feel much, but at least it means if we do any other kind of writes we can rely on our `Write` to behave how we need it to. Plus it will now let us test the potentially problematic code separately and fix it.
 
-Let's write the test where we want to update the entire contents of a file with something that is smaller than the original contents. 
+Let's write the test where we want to update the entire contents of a file with something that is smaller than the original contents.
 
 ## Write the test first
 
