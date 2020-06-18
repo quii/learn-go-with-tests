@@ -278,13 +278,17 @@ func (d Dictionary) Add(word, definition string) {
 
 Adding to a map is also similar to an array. You just need to specify a key and set it equal to a value.
 
-### Reference Types
+### Pointers, copies, et al
 
-An interesting property of maps is that you can modify them without passing them as a pointer. This is because `map` is a reference type. Meaning it holds a reference to the underlying data structure, much like a pointer. The underlying data structure is a `hash table`, or `hash map`, and you can read more about `hash tables` [here](https://en.wikipedia.org/wiki/Hash_table).
+An interesting property of maps is that you can modify them without passing as an address to it (e.g `&myMap`)
 
-Maps being a reference is really good, because no matter how big a map gets there will only be one copy.
+This may make them _feel_ like a "reference type", [but as Dave Cheney describes](https://dave.cheney.net/2017/04/30/if-a-map-isnt-a-reference-variable-what-is-it) they are not.
 
-A gotcha that reference types introduce is that maps can be a `nil` value. A `nil` map behaves like an empty map when reading, but attempts to write to a `nil` map will cause a runtime panic. You can read more about maps [here](https://blog.golang.org/go-maps-in-action).
+> A map value is a pointer to a runtime.hmap structure.
+
+So when you pass a map to a function/method, you are indeed copying it, but just the pointer part, not the underlying data structure that contains the data.
+
+A gotcha with maps is that they can be a `nil` value. A `nil` map behaves like an empty map when reading, but attempts to write to a `nil` map will cause a runtime panic. You can read more about maps [here](https://blog.golang.org/go-maps-in-action).
 
 Therefore, you should never initialize an empty map variable:
 
