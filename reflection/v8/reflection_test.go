@@ -107,6 +107,7 @@ type Profile struct {
 }
 
 func assertContains(t *testing.T, haystack []string, needle string) {
+	t.Helper()
 	contains := false
 	for _, x := range haystack {
 		if x == needle {
