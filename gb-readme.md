@@ -10,7 +10,11 @@
 
 _Learn test-driven development with Go_
 
-Translations: [中文](https://studygolang.gitbook.io/learn-go-with-tests), [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
+Translations:
+
+- [中文](https://studygolang.gitbook.io/learn-go-with-tests) 
+- [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
+- [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
 
 * Explore the Go language by writing tests
 * **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
