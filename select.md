@@ -396,7 +396,7 @@ func TestRacer(t *testing.T) {
 		}
 	})
 
-	t.Run("returns an error if a server doesn't respond within 10s", func(t *testing.T) {
+	t.Run("returns an error if a server doesn't respond within the specified time", func(t *testing.T) {
 		server := makeDelayedServer(25 * time.Millisecond)
 
 		defer server.Close()
