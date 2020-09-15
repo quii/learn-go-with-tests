@@ -532,7 +532,7 @@ Remember earlier when we were implementing `Triangle` and we had the failing tes
 
 We knew this was in relation to `Triangle` because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table? How would a developer know which case failed? This is not a great experience for the developer, they will have to manually look through the cases to find out which case actually failed.
 
-We can change our error message into `%#v got %.2f want %.2f`. The `%#v` format string will print out our struct with the values in its field, so the developer can see at a glance the properties that are being tested.
+We can change our error message into `%#v got %g want %g`. The `%#v` format string will print out our struct with the values in its field, so the developer can see at a glance the properties that are being tested.
 
 To increase the readability of our test cases further we can rename the `want` field into something more descriptive like `hasArea`.
 
