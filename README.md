@@ -16,7 +16,7 @@
 
 ## Translations
 
-- [Русский](https://github.com/ohDaddyPlease/learn-go-with-tests-ru/)
+- [Русский](https://github.com/RussianTranslation/learn-go-with-tests-ru/)
 - [中文](https://studygolang.gitbook.io/learn-go-with-tests)
 - [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
 - [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
