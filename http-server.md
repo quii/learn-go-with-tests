@@ -960,7 +960,7 @@ For that reason, it is recommended that you research _The Test Pyramid_.
 In the interest of brevity, I am going to show you the final refactored integration test.
 
 ```go
-//server_intergration_test.go
+//server_integration_test.go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	store := InMemoryPlayerStore{}
 	server := PlayerServer{&store}
@@ -1019,7 +1019,7 @@ func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 -   We need to store the data so I've added a `map[string]int` to the `InMemoryPlayerStore` struct
 -   For convenience I've made `NewInMemoryPlayerStore` to initialise the store, and updated the integration test to use it:
     ```go
-    //server_intergration_test.go
+    //server_integration_test.go
     store := NewInMemoryPlayerStore()
     server := PlayerServer{store}
     ```
