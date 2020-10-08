@@ -63,7 +63,7 @@ type Handler interface {
 
 A type implements the Handler interface by implementing the `ServeHTTP` method which expects two arguments, the first is where we _write our response_ and the second is the HTTP request that was sent to the server.
 
-Let's write a test for a function `PlayerServer` that takes in those two arguments. The request sent in will be to get a player's score, which we expect to be `"20"`.
+Let's create a file named `server_text.go` and write a test for a function `PlayerServer` that takes in those two arguments. The request sent in will be to get a player's score, which we expect to be `"20"`.
 
 ```go
 func TestGETPlayers(t *testing.T) {
@@ -96,7 +96,7 @@ In order to test our server, we will need a `Request` to send in and we'll want 
 
 The compiler is here to help, just listen to it.
 
-Define `PlayerServer`
+Create a file `server.go` and define `PlayerServer`
 
 ```go
 func PlayerServer() {}
@@ -147,7 +147,7 @@ We want to wire this up into an application. This is important because
 - We'll have _actual working software_, we don't want to write tests for the sake of it, it's good to see the code in action.
 - As we refactor our code, it's likely we will change the structure of the program. We want to make sure this is reflected in our application too as part of the incremental approach.
 
-Create a new file for our application and put this code in.
+Create a new `main.go` file for our application and put this code in
 
 ```go
 package main

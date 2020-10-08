@@ -374,12 +374,6 @@ func assertError(t *testing.T, got, want error) {
 	if got != want {
 		t.Errorf("got %q want %q", got, want)
 	}
-	if got == nil {
-		if want == nil {
-			return
-		}
-		t.Fatal("expected to get an error.")
-	}
 }
 ```
 
