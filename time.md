@@ -999,7 +999,7 @@ const BadPlayerInputErrMsg = "Bad value received for number of players, please t
 Finally our testing around what has been sent to `stdout` is quite verbose, let's write an assert function to clean it up.
 
 ```go
-func assertMessagesSentToUser(t *testing.T, stdout *bytes.Buffer, messages ...string) {
+func assertMessagesSentToUser(t testing.TB, stdout *bytes.Buffer, messages ...string) {
 	t.Helper()
 	want := strings.Join(messages, "")
 	got := stdout.String()

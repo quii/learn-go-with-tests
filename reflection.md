@@ -761,7 +761,7 @@ t.Run("with maps", func(t *testing.T) {
 Here is how `assertContains` is defined
 
 ```go
-func assertContains(t *testing.T, haystack []string, needle string)  {
+func assertContains(t testing.TB, haystack []string, needle string)  {
     t.Helper()
     contains := false
     for _, x := range haystack {

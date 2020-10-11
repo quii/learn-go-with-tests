@@ -1,12 +1,12 @@
 package poker_test
 
 import (
-	"fmt"
+        "fmt"
 	"github.com/quii/learn-go-with-tests/time/v1"
-	"io"
-	"strings"
-	"testing"
-	"time"
+        "io"
+        "strings"
+        "testing"
+        "time"
 )
 
 type scheduledAlert struct {
@@ -115,7 +115,7 @@ func (m failOnEndReader) Read(p []byte) (n int, err error) {
 	return n, err
 }
 
-func assertScheduledAlert(t *testing.T, got, want scheduledAlert) {
+func assertScheduledAlert(t testing.TB, got, want scheduledAlert) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got %+v, want %+v", got, want)

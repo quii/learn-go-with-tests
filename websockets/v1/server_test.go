@@ -2,7 +2,6 @@ package poker
 
 import (
 	"fmt"
-	"github.com/gorilla/websocket"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 func mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer {
@@ -141,21 +142,21 @@ func TestGame(t *testing.T) {
 	})
 }
 
-func writeWSMessage(t *testing.T, conn *websocket.Conn, message string) {
+func writeWSMessage(t testing.TB, conn *websocket.Conn, message string) {
 	t.Helper()
 	if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
 		t.Fatalf("could not send message over ws connection %v", err)
 	}
 }
 
-func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
+func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want string) {
 	t.Helper()
 	if response.Header().Get("content-type") != want {
 		t.Errorf("response did not have content-type of %s, got %v", want, response.HeaderMap)
 	}
 }
 
-func getLeagueFromResponse(t *testing.T, body io.Reader) []Player {
+func getLeagueFromResponse(t testing.TB, body io.Reader) []Player {
 	t.Helper()
 	league, err := NewLeague(body)
 
@@ -166,14 +167,14 @@ func getLeagueFromResponse(t *testing.T, body io.Reader) []Player {
 	return league
 }
 
-func assertLeague(t *testing.T, got, want []Player) {
+func assertLeague(t testing.TB, got, want []Player) {
 	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v want %v", got, want)
 	}
 }
 
-func assertStatus(t *testing.T, got *httptest.ResponseRecorder, want int) {
+func assertStatus(t testing.TB, got *httptest.ResponseRecorder, want int) {
 	t.Helper()
 	if got.Code != want {
 		t.Errorf("did not get correct status, got %d, want %d", got.Code, want)
@@ -200,7 +201,7 @@ func newPostWinRequest(name string) *http.Request {
 	return req
 }
 
-func assertResponseBody(t *testing.T, got, want string) {
+func assertResponseBody(t testing.TB, got, want string) {
 	t.Helper()
 	if got != want {
 		t.Errorf("response body is wrong, got %q want %q", got, want)

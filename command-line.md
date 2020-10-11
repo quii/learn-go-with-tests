@@ -261,7 +261,7 @@ The test passes. We'll add another test to force us to write some real code next
 In `server_test` we earlier did checks to see if wins are recorded as we have here. Let's DRY that assertion up into a helper
 
 ```go
-func assertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
+func assertPlayerWin(t testing.TB, store *StubPlayerStore, winner string) {
 	t.Helper()
 
 	if len(store.winCalls) != 1 {
@@ -472,7 +472,7 @@ func (s *StubPlayerStore) GetLeague() League {
 	return s.league
 }
 
-func AssertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
+func AssertPlayerWin(t testing.TB, store *StubPlayerStore, winner string) {
 	t.Helper()
 
 	if len(store.winCalls) != 1 {

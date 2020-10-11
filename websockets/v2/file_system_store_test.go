@@ -1,13 +1,14 @@
 package poker_test
 
 import (
-	"github.com/quii/learn-go-with-tests/websockets/v2"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	poker "github.com/quii/learn-go-with-tests/websockets/v2"
 )
 
-func createTempFile(t *testing.T, initialData string) (*os.File, func()) {
+func createTempFile(t testing.TB, initialData string) (*os.File, func()) {
 	t.Helper()
 
 	tmpfile, err := ioutil.TempFile("", "db")
@@ -111,14 +112,14 @@ func TestFileSystemStore(t *testing.T) {
 	})
 }
 
-func assertScoreEquals(t *testing.T, got, want int) {
+func assertScoreEquals(t testing.TB, got, want int) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got %d want %d", got, want)
 	}
 }
 
-func assertNoError(t *testing.T, err error) {
+func assertNoError(t testing.TB, err error) {
 	t.Helper()
 	if err != nil {
 		t.Fatalf("didn't expect an error but got one, %v", err)

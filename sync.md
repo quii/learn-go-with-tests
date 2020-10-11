@@ -104,7 +104,7 @@ t.Run("incrementing the counter 3 times leaves it at 3", func(t *testing.T) {
     assertCounter(t, counter, 3)
 })
 
-func assertCounter(t *testing.T, got Counter, want int)  {
+func assertCounter(t testing.TB, got Counter, want int)  {
 	t.Helper()
 	if got.Value() != want {
 		t.Errorf("got %d, want %d", got.Value(), want)

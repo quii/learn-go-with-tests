@@ -2,10 +2,11 @@ package poker_test
 
 import (
 	"bytes"
-	"github.com/quii/learn-go-with-tests/time/v2"
 	"io"
 	"strings"
 	"testing"
+
+	poker "github.com/quii/learn-go-with-tests/time/v2"
 )
 
 var dummyBlindAlerter = &poker.SpyBlindAlerter{}
@@ -102,7 +103,7 @@ func (m failOnEndReader) Read(p []byte) (n int, err error) {
 	return n, err
 }
 
-func assertScheduledAlert(t *testing.T, got, want poker.ScheduledAlert) {
+func assertScheduledAlert(t testing.TB, got, want poker.ScheduledAlert) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got %+v, want %+v", got, want)

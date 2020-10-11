@@ -260,7 +260,7 @@ We can and should refactor our tests.
 ```go
 func TestHello(t *testing.T) {
 
-	assertCorrectMessage := func(t *testing.T, got, want string) {
+	assertCorrectMessage := func(t testing.TB, got, want string) {
 		t.Helper()
 		if got != want {
 			t.Errorf("got %q want %q", got, want)
@@ -285,6 +285,8 @@ func TestHello(t *testing.T) {
 What have we done here?
 
 We've refactored our assertion into a function. This reduces duplication and improves readability of our tests. In Go you can declare functions inside other functions and assign them to variables. You can then call them, just like normal functions. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
+
+For helper functions, it's a good idea to accept a `testing.TB` which is an interface that `*testing.T` and `*testing.B` both satisfy, so you can call helper functions from a test, or a benchmark.
 
 `t.Helper()` is needed to tell the test suite that this method is a helper. By doing this when it fails the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems easier. If you still don't understand, comment it out, make a test fail and observe the test output.
 

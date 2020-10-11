@@ -443,7 +443,7 @@ Before adding our test we need to make our other tests compile by replacing the 
 Let's create a helper function which will create a temporary file with some data inside it
 
 ```go
-func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func()) {
+func createTempFile(t testing.TB, initialData string) (io.ReadWriteSeeker, func()) {
     t.Helper()
 
     tmpfile, err := ioutil.TempFile("", "db")
@@ -1010,7 +1010,7 @@ if err != nil {
 In the tests we should assert there is no error. We can make a helper to help with this.
 
 ```go
-func assertNoError(t *testing.T, err error) {
+func assertNoError(t testing.TB, err error) {
     t.Helper()
     if err != nil {
         t.Fatalf("didn't expect an error but got one, %v", err)

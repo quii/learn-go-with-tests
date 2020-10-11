@@ -53,7 +53,7 @@ func TestContextAwareReader(t *testing.T) {
 	})
 }
 
-func assertBufferHas(t *testing.T, buf []byte, want string) {
+func assertBufferHas(t testing.TB, buf []byte, want string) {
 	t.Helper()
 	got := string(buf)
 	if got != want {

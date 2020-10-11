@@ -2,8 +2,6 @@ package poker_test
 
 import (
 	"fmt"
-	"github.com/gorilla/websocket"
-	"github.com/quii/learn-go-with-tests/websockets/v2"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +9,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gorilla/websocket"
+	poker "github.com/quii/learn-go-with-tests/websockets/v2"
 )
 
 var (
@@ -159,7 +160,7 @@ func retryUntil(d time.Duration, f func() bool) bool {
 	return false
 }
 
-func within(t *testing.T, d time.Duration, assert func()) {
+func within(t testing.TB, d time.Duration, assert func()) {
 	t.Helper()
 
 	done := make(chan struct{}, 1)
@@ -176,14 +177,14 @@ func within(t *testing.T, d time.Duration, assert func()) {
 	}
 }
 
-func writeWSMessage(t *testing.T, conn *websocket.Conn, message string) {
+func writeWSMessage(t testing.TB, conn *websocket.Conn, message string) {
 	t.Helper()
 	if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
 		t.Fatalf("could not send message over ws connection %v", err)
 	}
 }
 
-func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
+func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want string) {
 	t.Helper()
 	if response.Header().Get("content-type") != want {
 		t.Errorf("response did not have content-type of %s, got %v", want, response.HeaderMap)

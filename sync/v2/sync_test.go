@@ -36,7 +36,7 @@ func TestCounter(t *testing.T) {
 
 }
 
-func assertCounter(t *testing.T, got *Counter, want int) {
+func assertCounter(t testing.TB, got *Counter, want int) {
 	t.Helper()
 	if got.Value() != want {
 		t.Errorf("got %d, want %d", got.Value(), want)

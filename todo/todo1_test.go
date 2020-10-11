@@ -58,7 +58,7 @@ func TestToDo(t *testing.T) {
 	})
 }
 
-func assertTodoLength(t *testing.T, list []string, want int) {
+func assertTodoLength(t testing.TB, list []string, want int) {
 	t.Helper()
 	got := len(list)
 	if got != want {
@@ -66,7 +66,7 @@ func assertTodoLength(t *testing.T, list []string, want int) {
 	}
 }
 
-func assertFirstTodoEquaL(t *testing.T, todos []string, item string) {
+func assertFirstTodoEquaL(t testing.TB, todos []string, item string) {
 	t.Helper()
 	if todos[0] != item {
 		t.Errorf("want %s, got %s", item, todos[0])

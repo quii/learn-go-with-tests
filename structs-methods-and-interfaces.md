@@ -331,7 +331,7 @@ Let's introduce this by refactoring our tests.
 ```go
 func TestArea(t *testing.T) {
 
-    checkArea := func(t *testing.T, shape Shape, want float64) {
+    checkArea := func(t testing.TB, shape Shape, want float64) {
         t.Helper()
         got := shape.Area()
         if got != want {
