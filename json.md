@@ -102,6 +102,7 @@ We'll start by making the league table endpoint.
 We'll extend the existing suite as we have some useful test functions and a fake `PlayerStore` to use.
 
 ```go
+//server_test.go
 func TestLeague(t *testing.T) {
 	store := StubPlayerStore{}
 	server := &PlayerServer{&store}
@@ -150,6 +151,7 @@ Go has a built-in routing mechanism called [`ServeMux`](https://golang.org/pkg/n
 Let's commit some sins and get the tests passing in the quickest way we can, knowing we can refactor it with safety once we know the tests are passing.
 
 ```go
+//server.go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	router := http.NewServeMux()
@@ -185,6 +187,7 @@ The tests should now pass.
 `ServeHTTP` is looking quite big, we can separate things out a bit by refactoring our handlers into separate methods.
 
 ```go
+//server.go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	router := http.NewServeMux()
@@ -213,6 +216,7 @@ func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
 It's quite odd (and inefficient) to be setting up a router as a request comes in and then calling it. What we ideally want to do is have some kind of `NewPlayerServer` function which will take our dependencies and do the one-time setup of creating the router. Each request can then just use that one instance of the router.
 
 ```go
+//server.go
 type PlayerServer struct {
 	store  PlayerStore
 	router *http.ServeMux
@@ -263,6 +267,8 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 	return p
 }
 ```
+
+Then replace `server := &PlayerServer{&store}` with `server := NewPlayerServer(&store)` in `server_test.go`, `server_integration_test.go`, and `main.go`. 
 
 Finally make sure you **delete** `func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request)` as it is no longer needed!
 
