@@ -686,11 +686,16 @@ The test should pass.
 
 ## Refactor
 
-Use a constant value for the JSON content type and update `leagueHandler` with it.
+Create a constant for "application/json" and use it in `leagueHandler`
 
 ```go
 //server.go
 const jsonContentType = "application/json"
+
+func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", jsonContentType)
+	json.NewEncoder(w).Encode(p.store.GetLeague())
+}
 ```
 
 Then add a helper for `assertContentType`.
