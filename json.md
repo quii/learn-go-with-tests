@@ -452,8 +452,7 @@ Next, we'll want to extend our test so that we can control exactly what data we 
 
 We can update the test to assert that the league table contains some players that we will stub in our store.
 
-Update `StubPlayerStore` to let it store a league, which is just a slice of `Player`. We'll store our expected data in there.
-
+Update `StubPlayerStore` to let it store a league, which is just a slice of `Player`. We'll store our expected data in there. For `TestGETPlayers` and `TestStoreWins`, add `nil` to their instance of `StubPlayStore`.
 ```go
 //server_test.go
 type StubPlayerStore struct {
