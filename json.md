@@ -525,6 +525,7 @@ Try running the tests again and you should get
 We know the data is in our `StubPlayerStore` and we've abstracted that away into an interface `PlayerStore`. We need to update this so anyone passing us in a `PlayerStore` can provide us with the data for leagues.
 
 ```go
+//server.go
 type PlayerStore interface {
 	GetPlayerScore(name string) int
 	RecordWin(name string)
@@ -535,6 +536,7 @@ type PlayerStore interface {
 Now we can update our handler code to call that rather than returning a hard-coded list. Delete our method `getLeagueTable()` and then update `leagueHandler` to call `GetLeague()`.
 
 ```go
+//server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(p.store.GetLeague())
 	w.WriteHeader(http.StatusOK)
@@ -562,6 +564,7 @@ The compiler is complaining because `InMemoryPlayerStore` and `StubPlayerStore` 
 For `StubPlayerStore` it's pretty easy, just return the `league` field we added earlier.
 
 ```go
+//server_test.go
 func (s *StubPlayerStore) GetLeague() []Player {
 	return s.league
 }
@@ -570,6 +573,7 @@ func (s *StubPlayerStore) GetLeague() []Player {
 Here's a reminder of how `InMemoryStore` is implemented.
 
 ```go
+//in_memory_player_store.go
 type InMemoryPlayerStore struct {
 	store map[string]int
 }
@@ -580,6 +584,7 @@ Whilst it would be pretty straightforward to implement `GetLeague` "properly" by
 So let's just get the compiler happy for now and live with the uncomfortable feeling of an incomplete implementation in our `InMemoryStore`.
 
 ```go
+//in_memory_player_store.go
 func (i *InMemoryPlayerStore) GetLeague() []Player {
 	return nil
 }
@@ -594,6 +599,7 @@ Try and run the tests, the compiler should pass and the tests should be passing!
 The test code does not convey out intent very well and has a lot of boilerplate we can refactor away.
 
 ```go
+//server_test.go
 t.Run("it returns the league table as JSON", func(t *testing.T) {
 	wantedLeague := []Player{
 		{"Cleo", 32},
@@ -618,6 +624,7 @@ t.Run("it returns the league table as JSON", func(t *testing.T) {
 Here are the new helpers
 
 ```go
+//server_test.go
 func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
 	t.Helper()
 	err := json.NewDecoder(body).Decode(&league)
@@ -649,6 +656,7 @@ One final thing we need to do for our server to work is make sure we return a `c
 Add this assertion to the existing test
 
 ```go
+//server_test.go
 if response.Result().Header.Get("content-type") != "application/json" {
 	t.Errorf("response did not have content-type of application/json, got %v", response.Result().Header)
 }
@@ -667,6 +675,7 @@ if response.Result().Header.Get("content-type") != "application/json" {
 Update `leagueHandler`
 
 ```go
+//server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	json.NewEncoder(w).Encode(p.store.GetLeague())
@@ -677,11 +686,17 @@ The test should pass.
 
 ## Refactor
 
-Add a helper for `assertContentType`.
+Use a constant value for the JSON content type and update `leagueHandler` with it.
 
 ```go
+//server.go
 const jsonContentType = "application/json"
+```
 
+Then add a helper for `assertContentType`.
+
+```go
+//server_test.go
 func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
 	t.Helper()
 	if response.Result().Header.Get("content-type") != want {
@@ -693,6 +708,7 @@ func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want s
 Use it in the test.
 
 ```go
+//server_test.go
 assertContentType(t, response, jsonContentType)
 ```
 
@@ -705,6 +721,7 @@ The quickest way for us to get some confidence is to add to our integration test
 We can use `t.Run` to break up this test a bit and we can reuse the helpers from our server tests - again showing the importance of refactoring tests.
 
 ```go
+//server_integration_test.go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	store := NewInMemoryPlayerStore()
 	server := NewPlayerServer(store)
@@ -749,6 +766,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 `InMemoryPlayerStore` is returning `nil` when you call `GetLeague()` so we'll need to fix that.
 
 ```go
+//in_memory_player_store.go
 func (i *InMemoryPlayerStore) GetLeague() []Player {
 	var league []Player
 	for name, wins := range i.store {
