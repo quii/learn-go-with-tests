@@ -329,6 +329,7 @@ We should return some JSON that looks something like this.
 We'll start by trying to parse the response into something meaningful.
 
 ```go
+//server_test.go
 func TestLeague(t *testing.T) {
 	store := StubPlayerStore{}
 	server := NewPlayerServer(&store)
@@ -370,6 +371,7 @@ Instead, we should look to parse the JSON into data structures that are relevant
 Given the JSON data model, it looks like we need an array of `Player` with some fields so we have created a new type to capture this.
 
 ```go
+//server.go
 type Player struct {
 	Name string
 	Wins int
@@ -379,6 +381,7 @@ type Player struct {
 ### JSON decoding
 
 ```go
+//server_test.go
 var got []Player
 err := json.NewDecoder(response.Body).Decode(&got)
 ```
