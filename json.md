@@ -405,6 +405,7 @@ Our endpoint currently does not return a body so it cannot be parsed into JSON.
 ## Write enough code to make it pass
 
 ```go
+//server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	leagueTable := []Player{
 		{"Chris", 20},
@@ -432,6 +433,7 @@ Throughout this book, we have used `io.Writer` and this is another demonstration
 It would be nice to introduce a separation of concern between our handler and getting the `leagueTable` as we know we're going to not hard-code that very soon.
 
 ```go
+//server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(p.getLeagueTable())
 	w.WriteHeader(http.StatusOK)
@@ -453,6 +455,7 @@ We can update the test to assert that the league table contains some players tha
 Update `StubPlayerStore` to let it store a league, which is just a slice of `Player`. We'll store our expected data in there.
 
 ```go
+//server_test.go
 type StubPlayerStore struct {
 	scores   map[string]int
 	winCalls []string
@@ -463,6 +466,7 @@ type StubPlayerStore struct {
 Next, update our current test by putting some players in the league property of our stub and assert they get returned from our server.
 
 ```go
+//server_test.go
 func TestLeague(t *testing.T) {
 
 	t.Run("it returns the league table as JSON", func(t *testing.T) {
