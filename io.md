@@ -1004,6 +1004,7 @@ It was pragmatic to ignore that at the time as we already had failing tests. If 
 Let's make it so our constructor is capable of returning an error.
 
 ```go
+//file_system_store.go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
     file.Seek(0, 0)
     league, err := NewLeague(file)
@@ -1043,6 +1044,7 @@ If you try to compile you'll get some errors.
 In main we'll want to exit the program, printing the error.
 
 ```go
+//main.go
 store, err := NewFileSystemPlayerStore(db)
 
 if err != nil {
@@ -1053,6 +1055,7 @@ if err != nil {
 In the tests we should assert there is no error. We can make a helper to help with this.
 
 ```go
+//file_system_store_test.go
 func assertNoError(t *testing.T, err error) {
     t.Helper()
     if err != nil {
@@ -1074,6 +1077,7 @@ We cannot parse the league because the file is empty. We weren't getting errors 
 Let's fix our big integration test by putting some valid JSON in it:
 
 ```go
+//server_integration_test.go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[]`)
     //etc...
@@ -1084,6 +1088,7 @@ Now that all the tests are passing, we need to handle the scenario where the fil
 ## Write the test first
 
 ```go
+//file_system_store_test.go
 t.Run("works with an empty file", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, "")
     defer cleanDatabase()
@@ -1107,6 +1112,7 @@ t.Run("works with an empty file", func(t *testing.T) {
 Change our constructor to the following
 
 ```go
+//file_system_store.go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
     file.Seek(0, 0)
@@ -1142,6 +1148,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 Our constructor is a bit messy now, so let's extract the initialise code into a function:
 
 ```go
+//file_system_store.go
 func initialisePlayerDBFile(file *os.File) error {
     file.Seek(0, 0)
 
@@ -1161,6 +1168,7 @@ func initialisePlayerDBFile(file *os.File) error {
 ```
 
 ```go
+//file_system_store.go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
     err := initialisePlayerDBFile(file)
@@ -1193,6 +1201,7 @@ The main decision to make here is where in the software should this happen. If w
 We can update the assertion on our first test in `TestFileSystemStore`:
 
 ```go
+//file_system_store_test.go
 t.Run("league sorted", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
