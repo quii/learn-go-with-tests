@@ -683,6 +683,7 @@ t.Run("store wins for new players", func(t *testing.T) {
 We just need to handle the scenario where `Find` returns `nil` because it couldn't find the player.
 
 ```go
+//file_system_store_test.go
 func (f *FileSystemPlayerStore) RecordWin(name string) {
     league := f.GetLeague()
     player := league.Find(name)
@@ -703,6 +704,7 @@ The happy path is looking ok so we can now try using our new `Store` in the inte
 In `TestRecordingWinsAndRetrievingThem` replace the old store.
 
 ```go
+//server_integration_test.go
 database, cleanDatabase := createTempFile(t, "")
 defer cleanDatabase()
 store := &FileSystemPlayerStore{database}
@@ -711,6 +713,7 @@ store := &FileSystemPlayerStore{database}
 If you run the test it should pass and now we can delete `InMemoryPlayerStore`. `main.go` will now have compilation problems which will motivate us to now use our new store in the "real" code.
 
 ```go
+//main.go
 package main
 
 import (
@@ -750,6 +753,7 @@ Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the 
 We can create a constructor which can do some of this initialisation for us and store the league as a value in our `FileSystemStore` to be used on the reads instead.
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database io.ReadWriteSeeker
     league League
@@ -768,6 +772,7 @@ func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStor
 This way we only have to read from disk once. We can now replace all of our previous calls to getting the league from disk and just use `f.league` instead.
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetLeague() League {
     return f.league
 }
@@ -812,6 +817,7 @@ How will we test for this though? What we need to do is first refactor our code 
 We'll create a new type to encapsulate our "when we write we go from the beginning" functionality. I'm going to call it `Tape`. Create a new file with the following:
 
 ```go
+//tape.go
 package main
 
 import "io"
@@ -829,6 +835,7 @@ func (t *tape) Write(p []byte) (n int, err error) {
 Notice that we're only implementing `Write` now, as it encapsulates the `Seek` part. This means our `FileSystemStore` can just have a reference to a `Writer` instead.
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database io.Writer
     league   League
@@ -838,6 +845,7 @@ type FileSystemPlayerStore struct {
 Update the constructor to use `Tape`
 
 ```go
+//file_system_store.go
 func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
     database.Seek(0, 0)
     league, _ := NewLeague(database)
@@ -858,6 +866,7 @@ Let's write the test where we want to update the entire contents of a file with 
 Our test will create a file with some content, try to write to it using the `tape`, and read it all again to see what's in the file. In `tape_test.go`:
 
 ```go
+//tape_test.go
 func TestTape_Write(t *testing.T) {
     file, clean := createTempFile(t, "12345")
     defer clean()
@@ -895,6 +904,7 @@ As we thought! It writes the data we want, but leaves the rest of the original d
 Change `tape` to the following:
 
 ```go
+//tape.go
 type tape struct {
     file *os.File
 }
