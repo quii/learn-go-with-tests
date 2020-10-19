@@ -926,18 +926,15 @@ In `RecordWin` we have the line `json.NewEncoder(f.database).Encode(f.league)`.
 
 We don't need to create a new encoder every time we write, we can initialise one in our constructor and use that instead.
 
-Store a reference to an `Encoder` in our type:
+Store a reference to an `Encoder` in our type and initialise it in the constructor:
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database *json.Encoder
     league   League
 }
-```
 
-Initialise it in the constructor:
-
-```go
 func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
     file.Seek(0, 0)
     league, _ := NewLeague(file)
