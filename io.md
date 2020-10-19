@@ -948,6 +948,20 @@ func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
 
 Use it in `RecordWin`.
 
+```go
+func (f *FileSystemPlayerStore) RecordWin(name string) {
+	player := f.league.Find(name)
+
+	if player != nil {
+		player.Wins++
+	} else {
+		f.league = append(f.league, Player{name, 1})
+	}
+
+	f.database.Encode(f.league)
+}
+```
+
 ## Didn't we just break some rules there? Testing private things? No interfaces?
 
 ### On testing private types
