@@ -315,6 +315,7 @@ type Seeker interface {
 This sounds good, can we change `FileSystemPlayerStore` to take this interface instead?
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database io.ReadSeeker
 }
@@ -333,6 +334,7 @@ Next we'll implement `GetPlayerScore`.
 ## Write the test first
 
 ```go
+//file_system_store_test.go
 t.Run("get player score", func(t *testing.T) {
     database := strings.NewReader(`[
         {"Name": "Cleo", "Wins": 10},
@@ -361,6 +363,7 @@ t.Run("get player score", func(t *testing.T) {
 We need to add the method to our new type to get the test to compile.
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
     return 0
 }
@@ -379,6 +382,7 @@ Now it compiles and the test fails
 We can iterate over the league to find the player and return their score
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
     var wins int
@@ -399,7 +403,8 @@ func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 You will have seen dozens of test helper refactorings so I'll leave this to you to make it work
 
 ```go
-t.Run("/get player score", func(t *testing.T) {
+//file_system_store_test.go
+t.Run("get player score", func(t *testing.T) {
     database := strings.NewReader(`[
         {"Name": "Cleo", "Wins": 10},
         {"Name": "Chris", "Wins": 33}]`)
@@ -423,6 +428,7 @@ How do we write? We'd normally use a `Writer` but we already have our `ReadSeeke
 Let's update our type
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database io.ReadWriteSeeker
 }
@@ -451,6 +457,7 @@ Before adding our test we need to make our other tests compile by replacing the 
 Let's create a helper function which will create a temporary file with some data inside it
 
 ```go
+//file_system_store_test.go
 func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func()) {
     t.Helper()
 
@@ -476,6 +483,7 @@ func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func(
 You'll notice we're not only returning our `ReadWriteSeeker` (the file) but also a function. We need to make sure that the file is removed once the test is finished. We don't want to leak details of the files into the test as it's prone to error and uninteresting for the reader. By returning a `removeFile` function, we can take care of the details in our helper and all the caller has to do is run `defer cleanDatabase()`.
 
 ```go
+//file_system_store_test.go
 func TestFileSystemStore(t *testing.T) {
 
     t.Run("league from a reader", func(t *testing.T) {
@@ -520,6 +528,7 @@ Run the tests and they should be passing! There were a fair amount of changes bu
 Let's get the first iteration of recording a win for an existing player
 
 ```go
+//file_system_store_test.go
 t.Run("store wins for existing players", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
@@ -545,6 +554,7 @@ t.Run("store wins for existing players", func(t *testing.T) {
 Add the new method
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) RecordWin(name string) {
 
 }
@@ -561,6 +571,7 @@ Our implementation is empty so the old score is getting returned.
 ## Write enough code to make it pass
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) RecordWin(name string) {
     league := f.GetLeague()
 
@@ -590,6 +601,7 @@ We could refactor this common code in the internals of `FileSystemStore` but to 
 Inside `league.go` add the following
 
 ```go
+//league.go
 type League []Player
 
 func (l League) Find(name string) *Player {
@@ -606,9 +618,10 @@ Now if anyone has a `League` they can easily find a given player.
 
 Change our `PlayerStore` interface to return `League` rather than `[]Player`. Try to re-run the tests, you'll get a compilation problem because we've changed the interface but it's very easy to fix; just change the return type from `[]Player` to `League`.
 
-This lets us simplify our methods in `FileSystemStore`.
+This lets us simplify our methods in `file_system_store`.
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
     player := f.GetLeague().Find(name)
@@ -640,6 +653,7 @@ We now need to handle the scenario of recording wins of new players.
 ## Write the test first
 
 ```go
+//file_system_store.go
 t.Run("store wins for new players", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
