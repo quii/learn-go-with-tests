@@ -87,7 +87,7 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 ```
 
 ```go
-// InMemoryPlayerStore.go
+// in_memory_player_store.go
 package main
 
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
@@ -152,6 +152,7 @@ By now you should be familiar with the interfaces around the standard library fo
 For this work to be complete we'll need to implement `PlayerStore` so we'll write tests for our store calling the methods we need to implement. We'll start with `GetLeague`.
 
 ```go
+//file_system_store_test.go
 func TestFileSystemStore(t *testing.T) {
 
     t.Run("/league from a reader", func(t *testing.T) {
@@ -178,8 +179,8 @@ We're using `strings.NewReader` which will return us a `Reader`, which is what o
 ## Try to run the test
 
 ```
-# github.com/quii/learn-go-with-tests/json-and-io/v7
-./FileSystemStore_test.go:15:12: undefined: FileSystemPlayerStore
+# github.com/quii/learn-go-with-tests/io/v1
+./file_system_store_test.go:15:12: undefined: FileSystemPlayerStore
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
@@ -187,20 +188,22 @@ We're using `strings.NewReader` which will return us a `Reader`, which is what o
 Let's define `FileSystemPlayerStore` in a new file
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {}
 ```
 
 Try again
 
 ```
-# github.com/quii/learn-go-with-tests/json-and-io/v7
-./FileSystemStore_test.go:15:28: too many values in struct initializer
-./FileSystemStore_test.go:17:15: store.GetLeague undefined (type FileSystemPlayerStore has no field or method GetLeague)
+# github.com/quii/learn-go-with-tests/io/v1
+./file_system_store_test.go:15:28: too many values in struct initializer
+./file_system_store_test.go:17:15: store.GetLeague undefined (type FileSystemPlayerStore has no field or method GetLeague)
 ```
 
 It's complaining because we're passing in a `Reader` but not expecting one and it doesn't have `GetLeague` defined yet.
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database io.Reader
 }
@@ -215,7 +218,7 @@ One more try...
 ```
 === RUN   TestFileSystemStore//league_from_a_reader
     --- FAIL: TestFileSystemStore//league_from_a_reader (0.00s)
-        FileSystemStore_test.go:24: got [] want [{Cleo 10} {Chris 33}]
+        file_system_store_test.go:24: got [] want [{Cleo 10} {Chris 33}]
 ```
 
 ## Write enough code to make it pass
@@ -223,6 +226,7 @@ One more try...
 We've read JSON from a reader before
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetLeague() []Player {
     var league []Player
     json.NewDecoder(f.database).Decode(&league)
@@ -241,6 +245,7 @@ Let's try DRYing this up into a function.
 Create a new file called `league.go` and put this inside.
 
 ```go
+//league.go
 func NewLeague(rdr io.Reader) ([]Player, error) {
     var league []Player
     err := json.NewDecoder(rdr).Decode(&league)
@@ -255,6 +260,7 @@ func NewLeague(rdr io.Reader) ([]Player, error) {
 Call this in our implementation and in our test helper `getLeagueFromResponse` in `server_test.go`
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetLeague() []Player {
     league, _ := NewLeague(f.database)
     return league
@@ -278,6 +284,8 @@ With our file, you can imagine it reading through byte by byte until the end. Wh
 Add the following to the end of our current test.
 
 ```go
+//file_system_store_test.go
+
 // read again
 got = store.GetLeague()
 assertLeague(t, got, want)
@@ -345,7 +353,7 @@ t.Run("get player score", func(t *testing.T) {
 ## Try to run the test
 
 ```
-./FileSystemStore_test.go:38:15: store.GetPlayerScore undefined (type FileSystemPlayerStore has no field or method GetPlayerScore)
+./file_system_store_test.go:38:15: store.GetPlayerScore undefined (type FileSystemPlayerStore has no field or method GetPlayerScore)
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
@@ -363,7 +371,7 @@ Now it compiles and the test fails
 ```
 === RUN   TestFileSystemStore/get_player_score
     --- FAIL: TestFileSystemStore//get_player_score (0.00s)
-        FileSystemStore_test.go:43: got 0 want 33
+        file_system_store_test.go:43: got 0 want 33
 ```
 
 ## Write enough code to make it pass
@@ -423,9 +431,9 @@ type FileSystemPlayerStore struct {
 See if it compiles
 
 ```go
-./FileSystemStore_test.go:15:34: cannot use database (type *strings.Reader) as type io.ReadWriteSeeker in field value:
+./file_system_store_test.go:15:34: cannot use database (type *strings.Reader) as type io.ReadWriteSeeker in field value:
     *strings.Reader does not implement io.ReadWriteSeeker (missing Write method)
-./FileSystemStore_test.go:36:34: cannot use database (type *strings.Reader) as type io.ReadWriteSeeker in field value:
+./file_system_store_test.go:36:34: cannot use database (type *strings.Reader) as type io.ReadWriteSeeker in field value:
     *strings.Reader does not implement io.ReadWriteSeeker (missing Write method)
 ```
 
@@ -530,7 +538,7 @@ t.Run("store wins for existing players", func(t *testing.T) {
 
 ## Try to run the test
 
-`./FileSystemStore_test.go:67:8: store.RecordWin undefined (type FileSystemPlayerStore has no field or method RecordWin)`
+`./file_system_store_test.go:67:8: store.RecordWin undefined (type FileSystemPlayerStore has no field or method RecordWin)`
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
@@ -545,7 +553,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 ```
 === RUN   TestFileSystemStore/store_wins_for_existing_players
     --- FAIL: TestFileSystemStore/store_wins_for_existing_players (0.00s)
-        FileSystemStore_test.go:71: got 33 want 34
+        file_system_store_test.go:71: got 33 want 34
 ```
 
 Our implementation is empty so the old score is getting returned.
@@ -653,7 +661,7 @@ t.Run("store wins for new players", func(t *testing.T) {
 ```
 === RUN   TestFileSystemStore/store_wins_for_new_players#01
     --- FAIL: TestFileSystemStore/store_wins_for_new_players#01 (0.00s)
-        FileSystemStore_test.go:86: got 0 want 1
+        file_system_store_test.go:86: got 0 want 1
 ```
 
 ## Write enough code to make it pass
@@ -990,10 +998,10 @@ If you try to compile you'll get some errors.
 
 ```
 ./main.go:18:35: multiple-value NewFileSystemPlayerStore() in single-value context
-./FileSystemStore_test.go:35:36: multiple-value NewFileSystemPlayerStore() in single-value context
-./FileSystemStore_test.go:57:36: multiple-value NewFileSystemPlayerStore() in single-value context
-./FileSystemStore_test.go:70:36: multiple-value NewFileSystemPlayerStore() in single-value context
-./FileSystemStore_test.go:85:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./file_system_store_test.go:35:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./file_system_store_test.go:57:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./file_system_store_test.go:70:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./file_system_store_test.go:85:36: multiple-value NewFileSystemPlayerStore() in single-value context
 ./server_integration_test.go:12:35: multiple-value NewFileSystemPlayerStore() in single-value context
 ```
 
@@ -1056,7 +1064,7 @@ t.Run("works with an empty file", func(t *testing.T) {
 ```
 === RUN   TestFileSystemStore/works_with_an_empty_file
     --- FAIL: TestFileSystemStore/works_with_an_empty_file (0.00s)
-        FileSystemStore_test.go:108: didn't expect an error but got one, problem loading player store from file /var/folders/nj/r_ccbj5d7flds0sf63yy4vb80000gn/T/db019548018, problem parsing league, EOF
+        file_system_store_test.go:108: didn't expect an error but got one, problem loading player store from file /var/folders/nj/r_ccbj5d7flds0sf63yy4vb80000gn/T/db019548018, problem parsing league, EOF
 ```
 
 ## Write enough code to make it pass
@@ -1182,8 +1190,8 @@ The order of the JSON coming in is in the wrong order and our `want` will check 
 ```
 === RUN   TestFileSystemStore/league_from_a_reader,_sorted
     --- FAIL: TestFileSystemStore/league_from_a_reader,_sorted (0.00s)
-        FileSystemStore_test.go:46: got [{Cleo 10} {Chris 33}] want [{Chris 33} {Cleo 10}]
-        FileSystemStore_test.go:51: got [{Cleo 10} {Chris 33}] want [{Chris 33} {Cleo 10}]
+        file_system_store_test.go:46: got [{Cleo 10} {Chris 33}] want [{Chris 33} {Cleo 10}]
+        file_system_store_test.go:51: got [{Cleo 10} {Chris 33}] want [{Chris 33} {Cleo 10}]
 ```
 
 ## Write enough code to make it pass
