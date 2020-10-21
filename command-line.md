@@ -46,8 +46,8 @@ If you have `tree` installed you should run it and your structure should look li
 
 ```
 .
-├── file_system_store.go
-├── file_system_store_test.go
+├── FileSystemStore.go
+├── FileSystemStore_test.go
 ├── cmd
 │   └── webserver
 │       └── main.go
@@ -68,7 +68,6 @@ Finally, we need to import this package into `main.go` so we can use it to creat
 The paths will be different on your computer, but it should be similar to this:
 
 ```go
-//cmd/webserver/main.go
 package main
 
 import (
@@ -105,7 +104,7 @@ The full path may seem a bit jarring, but this is how you can import _any_ publi
 
 By separating our domain code into a separate package and committing it to a public repo like GitHub any Go developer can write their own code which imports that package the features we've written available. The first time you try and run it will complain it is not existing but all you need to do is run `go get`.
 
-In addition, users can view [the documentation at godoc.org](https://godoc.org/github.com/quii/learn-go-with-tests/command-line/v1).
+[In addition, users can view the documentation at godoc.org](https://godoc.org/github.com/quii/learn-go-with-tests/command-line/v1).
 
 ### Final checks
 
@@ -118,7 +117,6 @@ In addition, users can view [the documentation at godoc.org](https://godoc.org/g
 Before we get stuck into writing tests, let's add a new application that our project will build. Create another directory inside `cmd` called `cli` (command line interface) and add a `main.go` with the following
 
 ```go
-//cmd/cli/main.go
 package main
 
 import "fmt"
@@ -139,11 +137,6 @@ Before we jump too far ahead though, let's just write a test to check it integra
 Inside `CLI_test.go` (in the root of the project, not inside `cmd`)
 
 ```go
-//CLI_test.go
-package poker
-
-import "testing"
-
 func TestCLI(t *testing.T) {
 	playerStore := &StubPlayerStore{}
 	cli := &CLI{playerStore}
@@ -174,9 +167,6 @@ At this point, you should be comfortable enough to create our new `CLI` struct w
 You should end up with code like this
 
 ```go
-//CLI.go
-package poker
-
 type CLI struct {
 	playerStore PlayerStore
 }
@@ -195,7 +185,6 @@ FAIL
 ## Write enough code to make it pass
 
 ```go
-//CLI.go
 func (cli *CLI) PlayPoker() {
 	cli.playerStore.RecordWin("Cleo")
 }
@@ -210,7 +199,6 @@ Let's extend our test to exercise this.
 ## Write the test first
 
 ```go
-//CLI_test.go
 func TestCLI(t *testing.T) {
 	in := strings.NewReader("Chris wins\n")
 	playerStore := &StubPlayerStore{}
@@ -244,7 +232,6 @@ We create an `io.Reader` in our test using the handy `strings.NewReader`, fillin
 We need to add our new dependency into `CLI`.
 
 ```go
-//CLI.go
 type CLI struct {
 	playerStore PlayerStore
 	in          io.Reader
@@ -274,7 +261,6 @@ The test passes. We'll add another test to force us to write some real code next
 In `server_test` we earlier did checks to see if wins are recorded as we have here. Let's DRY that assertion up into a helper
 
 ```go
-//server_test.go
 func assertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
 	t.Helper()
 
@@ -293,7 +279,6 @@ Now replace the assertions in both `server_test.go` and `CLI_test.go`.
 The test should now read like so
 
 ```go
-//CLI_test.go
 func TestCLI(t *testing.T) {
 	in := strings.NewReader("Chris wins\n")
 	playerStore := &StubPlayerStore{}
@@ -310,7 +295,6 @@ Now let's write _another_ test with different user input to force us into actual
 ## Write the test first
 
 ```go
-//CLI_test.go
 func TestCLI(t *testing.T) {
 
 	t.Run("record chris win from user input", func(t *testing.T) {
@@ -358,7 +342,6 @@ We'll use a [`bufio.Scanner`](https://golang.org/pkg/bufio/) to read the input f
 Update the code to the following
 
 ```go
-//CLI.go
 type CLI struct {
 	playerStore PlayerStore
 	in          io.Reader
@@ -466,7 +449,6 @@ Anecdotally I have used this technique in other shared packages and it has prove
 So let's create a file called `testing.go` and add our stub and our helpers.
 
 ```go
-//testing.go
 package poker
 
 import "testing"
@@ -510,7 +492,6 @@ You'll need to make the helpers public (remember exporting is done with a capita
 In our `CLI` test you'll need to call the code as if you were using it within a different package.
 
 ```go
-//CLI_test.go
 func TestCLI(t *testing.T) {
 
 	t.Run("record chris win from user input", func(t *testing.T) {
@@ -548,7 +529,6 @@ You'll now see we have the same problems as we had in `main`
 The easiest way to get around this is to make a constructor as we have for other types. We'll also change `CLI` so it stores a `bufio.Scanner` instead of the reader as it's now automatically wrapped at construction time.
 
 ```go
-//CLI.go
 type CLI struct {
 	playerStore PlayerStore
 	in          *bufio.Scanner
@@ -565,7 +545,6 @@ func NewCLI(store PlayerStore, in io.Reader) *CLI {
 By doing this, we can then simplify and refactor our reading code
 
 ```go
-//CLI.go
 func (cli *CLI) PlayPoker() {
 	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
@@ -586,7 +565,6 @@ Change the test to use the constructor instead and we should be back to the test
 Finally, we can go back to our new `main.go` and use the constructor we just made
 
 ```go
-//cmd/cli/main.go
 game := poker.NewCLI(store, os.Stdin)
 ```
 
@@ -594,10 +572,9 @@ Try and run it, type "Bob wins".
 
 ### Refactor
 
-We have some repetition in our respective applications where we are opening a file and creating a `file_system_store` from its contents. This feels like a slight weakness in our package's design so we should make a function in it to encapsulate opening a file from a path and returning you the `PlayerStore`.
+We have some repetition in our respective applications where we are opening a file and creating a `FileSystemStore` from its contents. This feels like a slight weakness in our package's design so we should make a function in it to encapsulate opening a file from a path and returning you the `PlayerStore`.
 
 ```go
-//file_system_store.go
 func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(), error) {
 	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
 
@@ -624,7 +601,6 @@ Now refactor both of our applications to use this function to create the store.
 #### CLI application code
 
 ```go
-//cmd/cli/main.go
 package main
 
 import (
@@ -653,7 +629,6 @@ func main() {
 #### Web server application code
 
 ```go
-//cmd/webserver/main.go
 package main
 
 import (
