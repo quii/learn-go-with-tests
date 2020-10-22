@@ -87,7 +87,7 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 ```
 
 ```go
-// InMemoryPlayerStore.go
+// in_memory_player_store.go
 package main
 
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
@@ -152,6 +152,7 @@ By now you should be familiar with the interfaces around the standard library fo
 For this work to be complete we'll need to implement `PlayerStore` so we'll write tests for our store calling the methods we need to implement. We'll start with `GetLeague`.
 
 ```go
+//file_system_store_test.go
 func TestFileSystemStore(t *testing.T) {
 
     t.Run("/league from a reader", func(t *testing.T) {
@@ -178,8 +179,8 @@ We're using `strings.NewReader` which will return us a `Reader`, which is what o
 ## Try to run the test
 
 ```
-# github.com/quii/learn-go-with-tests/json-and-io/v7
-./FileSystemStore_test.go:15:12: undefined: FileSystemPlayerStore
+# github.com/quii/learn-go-with-tests/io/v1
+./file_system_store_test.go:15:12: undefined: FileSystemPlayerStore
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
@@ -187,20 +188,22 @@ We're using `strings.NewReader` which will return us a `Reader`, which is what o
 Let's define `FileSystemPlayerStore` in a new file
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {}
 ```
 
 Try again
 
 ```
-# github.com/quii/learn-go-with-tests/json-and-io/v7
-./FileSystemStore_test.go:15:28: too many values in struct initializer
-./FileSystemStore_test.go:17:15: store.GetLeague undefined (type FileSystemPlayerStore has no field or method GetLeague)
+# github.com/quii/learn-go-with-tests/io/v1
+./file_system_store_test.go:15:28: too many values in struct initializer
+./file_system_store_test.go:17:15: store.GetLeague undefined (type FileSystemPlayerStore has no field or method GetLeague)
 ```
 
 It's complaining because we're passing in a `Reader` but not expecting one and it doesn't have `GetLeague` defined yet.
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database io.Reader
 }
@@ -215,7 +218,7 @@ One more try...
 ```
 === RUN   TestFileSystemStore//league_from_a_reader
     --- FAIL: TestFileSystemStore//league_from_a_reader (0.00s)
-        FileSystemStore_test.go:24: got [] want [{Cleo 10} {Chris 33}]
+        file_system_store_test.go:24: got [] want [{Cleo 10} {Chris 33}]
 ```
 
 ## Write enough code to make it pass
@@ -223,6 +226,7 @@ One more try...
 We've read JSON from a reader before
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetLeague() []Player {
     var league []Player
     json.NewDecoder(f.database).Decode(&league)
@@ -241,6 +245,7 @@ Let's try DRYing this up into a function.
 Create a new file called `league.go` and put this inside.
 
 ```go
+//league.go
 func NewLeague(rdr io.Reader) ([]Player, error) {
     var league []Player
     err := json.NewDecoder(rdr).Decode(&league)
@@ -255,6 +260,7 @@ func NewLeague(rdr io.Reader) ([]Player, error) {
 Call this in our implementation and in our test helper `getLeagueFromResponse` in `server_test.go`
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetLeague() []Player {
     league, _ := NewLeague(f.database)
     return league
@@ -278,6 +284,8 @@ With our file, you can imagine it reading through byte by byte until the end. Wh
 Add the following to the end of our current test.
 
 ```go
+//file_system_store_test.go
+
 // read again
 got = store.GetLeague()
 assertLeague(t, got, want)
@@ -307,6 +315,7 @@ type Seeker interface {
 This sounds good, can we change `FileSystemPlayerStore` to take this interface instead?
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database io.ReadSeeker
 }
@@ -325,6 +334,7 @@ Next we'll implement `GetPlayerScore`.
 ## Write the test first
 
 ```go
+//file_system_store_test.go
 t.Run("get player score", func(t *testing.T) {
     database := strings.NewReader(`[
         {"Name": "Cleo", "Wins": 10},
@@ -345,7 +355,7 @@ t.Run("get player score", func(t *testing.T) {
 ## Try to run the test
 
 ```
-./FileSystemStore_test.go:38:15: store.GetPlayerScore undefined (type FileSystemPlayerStore has no field or method GetPlayerScore)
+./file_system_store_test.go:38:15: store.GetPlayerScore undefined (type FileSystemPlayerStore has no field or method GetPlayerScore)
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
@@ -353,6 +363,7 @@ t.Run("get player score", func(t *testing.T) {
 We need to add the method to our new type to get the test to compile.
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
     return 0
 }
@@ -363,7 +374,7 @@ Now it compiles and the test fails
 ```
 === RUN   TestFileSystemStore/get_player_score
     --- FAIL: TestFileSystemStore//get_player_score (0.00s)
-        FileSystemStore_test.go:43: got 0 want 33
+        file_system_store_test.go:43: got 0 want 33
 ```
 
 ## Write enough code to make it pass
@@ -371,6 +382,7 @@ Now it compiles and the test fails
 We can iterate over the league to find the player and return their score
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
     var wins int
@@ -391,7 +403,8 @@ func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 You will have seen dozens of test helper refactorings so I'll leave this to you to make it work
 
 ```go
-t.Run("/get player score", func(t *testing.T) {
+//file_system_store_test.go
+t.Run("get player score", func(t *testing.T) {
     database := strings.NewReader(`[
         {"Name": "Cleo", "Wins": 10},
         {"Name": "Chris", "Wins": 33}]`)
@@ -415,6 +428,7 @@ How do we write? We'd normally use a `Writer` but we already have our `ReadSeeke
 Let's update our type
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database io.ReadWriteSeeker
 }
@@ -423,9 +437,9 @@ type FileSystemPlayerStore struct {
 See if it compiles
 
 ```go
-./FileSystemStore_test.go:15:34: cannot use database (type *strings.Reader) as type io.ReadWriteSeeker in field value:
+./file_system_store_test.go:15:34: cannot use database (type *strings.Reader) as type io.ReadWriteSeeker in field value:
     *strings.Reader does not implement io.ReadWriteSeeker (missing Write method)
-./FileSystemStore_test.go:36:34: cannot use database (type *strings.Reader) as type io.ReadWriteSeeker in field value:
+./file_system_store_test.go:36:34: cannot use database (type *strings.Reader) as type io.ReadWriteSeeker in field value:
     *strings.Reader does not implement io.ReadWriteSeeker (missing Write method)
 ```
 
@@ -443,6 +457,7 @@ Before adding our test we need to make our other tests compile by replacing the 
 Let's create a helper function which will create a temporary file with some data inside it
 
 ```go
+//file_system_store_test.go
 func createTempFile(t testing.TB, initialData string) (io.ReadWriteSeeker, func()) {
     t.Helper()
 
@@ -468,6 +483,7 @@ func createTempFile(t testing.TB, initialData string) (io.ReadWriteSeeker, func(
 You'll notice we're not only returning our `ReadWriteSeeker` (the file) but also a function. We need to make sure that the file is removed once the test is finished. We don't want to leak details of the files into the test as it's prone to error and uninteresting for the reader. By returning a `removeFile` function, we can take care of the details in our helper and all the caller has to do is run `defer cleanDatabase()`.
 
 ```go
+//file_system_store_test.go
 func TestFileSystemStore(t *testing.T) {
 
     t.Run("league from a reader", func(t *testing.T) {
@@ -512,6 +528,7 @@ Run the tests and they should be passing! There were a fair amount of changes bu
 Let's get the first iteration of recording a win for an existing player
 
 ```go
+//file_system_store_test.go
 t.Run("store wins for existing players", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
@@ -530,13 +547,14 @@ t.Run("store wins for existing players", func(t *testing.T) {
 
 ## Try to run the test
 
-`./FileSystemStore_test.go:67:8: store.RecordWin undefined (type FileSystemPlayerStore has no field or method RecordWin)`
+`./file_system_store_test.go:67:8: store.RecordWin undefined (type FileSystemPlayerStore has no field or method RecordWin)`
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
 Add the new method
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) RecordWin(name string) {
 
 }
@@ -545,7 +563,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 ```
 === RUN   TestFileSystemStore/store_wins_for_existing_players
     --- FAIL: TestFileSystemStore/store_wins_for_existing_players (0.00s)
-        FileSystemStore_test.go:71: got 33 want 34
+        file_system_store_test.go:71: got 33 want 34
 ```
 
 Our implementation is empty so the old score is getting returned.
@@ -553,6 +571,7 @@ Our implementation is empty so the old score is getting returned.
 ## Write enough code to make it pass
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) RecordWin(name string) {
     league := f.GetLeague()
 
@@ -582,6 +601,7 @@ We could refactor this common code in the internals of `FileSystemStore` but to 
 Inside `league.go` add the following
 
 ```go
+//league.go
 type League []Player
 
 func (l League) Find(name string) *Player {
@@ -598,9 +618,10 @@ Now if anyone has a `League` they can easily find a given player.
 
 Change our `PlayerStore` interface to return `League` rather than `[]Player`. Try to re-run the tests, you'll get a compilation problem because we've changed the interface but it's very easy to fix; just change the return type from `[]Player` to `League`.
 
-This lets us simplify our methods in `FileSystemStore`.
+This lets us simplify our methods in `file_system_store`.
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
     player := f.GetLeague().Find(name)
@@ -632,6 +653,7 @@ We now need to handle the scenario of recording wins of new players.
 ## Write the test first
 
 ```go
+//file_system_store.go
 t.Run("store wins for new players", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
@@ -653,7 +675,7 @@ t.Run("store wins for new players", func(t *testing.T) {
 ```
 === RUN   TestFileSystemStore/store_wins_for_new_players#01
     --- FAIL: TestFileSystemStore/store_wins_for_new_players#01 (0.00s)
-        FileSystemStore_test.go:86: got 0 want 1
+        file_system_store_test.go:86: got 0 want 1
 ```
 
 ## Write enough code to make it pass
@@ -661,6 +683,7 @@ t.Run("store wins for new players", func(t *testing.T) {
 We just need to handle the scenario where `Find` returns `nil` because it couldn't find the player.
 
 ```go
+//file_system_store_test.go
 func (f *FileSystemPlayerStore) RecordWin(name string) {
     league := f.GetLeague()
     player := league.Find(name)
@@ -681,6 +704,7 @@ The happy path is looking ok so we can now try using our new `Store` in the inte
 In `TestRecordingWinsAndRetrievingThem` replace the old store.
 
 ```go
+//server_integration_test.go
 database, cleanDatabase := createTempFile(t, "")
 defer cleanDatabase()
 store := &FileSystemPlayerStore{database}
@@ -689,6 +713,7 @@ store := &FileSystemPlayerStore{database}
 If you run the test it should pass and now we can delete `InMemoryPlayerStore`. `main.go` will now have compilation problems which will motivate us to now use our new store in the "real" code.
 
 ```go
+//main.go
 package main
 
 import (
@@ -728,6 +753,7 @@ Every time someone calls `GetLeague()` or `GetPlayerScore()` we are reading the 
 We can create a constructor which can do some of this initialisation for us and store the league as a value in our `FileSystemStore` to be used on the reads instead.
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database io.ReadWriteSeeker
     league League
@@ -746,6 +772,7 @@ func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStor
 This way we only have to read from disk once. We can now replace all of our previous calls to getting the league from disk and just use `f.league` instead.
 
 ```go
+//file_system_store.go
 func (f *FileSystemPlayerStore) GetLeague() League {
     return f.league
 }
@@ -790,6 +817,7 @@ How will we test for this though? What we need to do is first refactor our code 
 We'll create a new type to encapsulate our "when we write we go from the beginning" functionality. I'm going to call it `Tape`. Create a new file with the following:
 
 ```go
+//tape.go
 package main
 
 import "io"
@@ -807,6 +835,7 @@ func (t *tape) Write(p []byte) (n int, err error) {
 Notice that we're only implementing `Write` now, as it encapsulates the `Seek` part. This means our `FileSystemStore` can just have a reference to a `Writer` instead.
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database io.Writer
     league   League
@@ -816,6 +845,7 @@ type FileSystemPlayerStore struct {
 Update the constructor to use `Tape`
 
 ```go
+//file_system_store.go
 func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
     database.Seek(0, 0)
     league, _ := NewLeague(database)
@@ -836,6 +866,7 @@ Let's write the test where we want to update the entire contents of a file with 
 Our test will create a file with some content, try to write to it using the `tape`, and read it all again to see what's in the file. In `tape_test.go`:
 
 ```go
+//tape_test.go
 func TestTape_Write(t *testing.T) {
     file, clean := createTempFile(t, "12345")
     defer clean()
@@ -873,6 +904,7 @@ As we thought! It writes the data we want, but leaves the rest of the original d
 Change `tape` to the following:
 
 ```go
+//tape.go
 type tape struct {
     file *os.File
 }
@@ -894,18 +926,15 @@ In `RecordWin` we have the line `json.NewEncoder(f.database).Encode(f.league)`.
 
 We don't need to create a new encoder every time we write, we can initialise one in our constructor and use that instead.
 
-Store a reference to an `Encoder` in our type:
+Store a reference to an `Encoder` in our type and initialise it in the constructor:
 
 ```go
+//file_system_store.go
 type FileSystemPlayerStore struct {
     database *json.Encoder
     league   League
 }
-```
 
-Initialise it in the constructor:
-
-```go
 func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
     file.Seek(0, 0)
     league, _ := NewLeague(file)
@@ -918,6 +947,20 @@ func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
 ```
 
 Use it in `RecordWin`.
+
+```go
+func (f *FileSystemPlayerStore) RecordWin(name string) {
+	player := f.league.Find(name)
+
+	if player != nil {
+		player.Wins++
+	} else {
+		f.league = append(f.league, Player{name, 1})
+	}
+
+	f.database.Encode(f.league)
+}
+```
 
 ## Didn't we just break some rules there? Testing private things? No interfaces?
 
@@ -961,6 +1004,7 @@ It was pragmatic to ignore that at the time as we already had failing tests. If 
 Let's make it so our constructor is capable of returning an error.
 
 ```go
+//file_system_store.go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
     file.Seek(0, 0)
     league, err := NewLeague(file)
@@ -990,16 +1034,17 @@ If you try to compile you'll get some errors.
 
 ```
 ./main.go:18:35: multiple-value NewFileSystemPlayerStore() in single-value context
-./FileSystemStore_test.go:35:36: multiple-value NewFileSystemPlayerStore() in single-value context
-./FileSystemStore_test.go:57:36: multiple-value NewFileSystemPlayerStore() in single-value context
-./FileSystemStore_test.go:70:36: multiple-value NewFileSystemPlayerStore() in single-value context
-./FileSystemStore_test.go:85:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./file_system_store_test.go:35:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./file_system_store_test.go:57:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./file_system_store_test.go:70:36: multiple-value NewFileSystemPlayerStore() in single-value context
+./file_system_store_test.go:85:36: multiple-value NewFileSystemPlayerStore() in single-value context
 ./server_integration_test.go:12:35: multiple-value NewFileSystemPlayerStore() in single-value context
 ```
 
 In main we'll want to exit the program, printing the error.
 
 ```go
+//main.go
 store, err := NewFileSystemPlayerStore(db)
 
 if err != nil {
@@ -1010,6 +1055,7 @@ if err != nil {
 In the tests we should assert there is no error. We can make a helper to help with this.
 
 ```go
+//file_system_store_test.go
 func assertNoError(t testing.TB, err error) {
     t.Helper()
     if err != nil {
@@ -1031,6 +1077,7 @@ We cannot parse the league because the file is empty. We weren't getting errors 
 Let's fix our big integration test by putting some valid JSON in it:
 
 ```go
+//server_integration_test.go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[]`)
     //etc...
@@ -1041,6 +1088,7 @@ Now that all the tests are passing, we need to handle the scenario where the fil
 ## Write the test first
 
 ```go
+//file_system_store_test.go
 t.Run("works with an empty file", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, "")
     defer cleanDatabase()
@@ -1056,7 +1104,7 @@ t.Run("works with an empty file", func(t *testing.T) {
 ```
 === RUN   TestFileSystemStore/works_with_an_empty_file
     --- FAIL: TestFileSystemStore/works_with_an_empty_file (0.00s)
-        FileSystemStore_test.go:108: didn't expect an error but got one, problem loading player store from file /var/folders/nj/r_ccbj5d7flds0sf63yy4vb80000gn/T/db019548018, problem parsing league, EOF
+        file_system_store_test.go:108: didn't expect an error but got one, problem loading player store from file /var/folders/nj/r_ccbj5d7flds0sf63yy4vb80000gn/T/db019548018, problem parsing league, EOF
 ```
 
 ## Write enough code to make it pass
@@ -1064,6 +1112,7 @@ t.Run("works with an empty file", func(t *testing.T) {
 Change our constructor to the following
 
 ```go
+//file_system_store.go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
     file.Seek(0, 0)
@@ -1099,6 +1148,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 Our constructor is a bit messy now, so let's extract the initialise code into a function:
 
 ```go
+//file_system_store.go
 func initialisePlayerDBFile(file *os.File) error {
     file.Seek(0, 0)
 
@@ -1118,6 +1168,7 @@ func initialisePlayerDBFile(file *os.File) error {
 ```
 
 ```go
+//file_system_store.go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
     err := initialisePlayerDBFile(file)
@@ -1150,6 +1201,7 @@ The main decision to make here is where in the software should this happen. If w
 We can update the assertion on our first test in `TestFileSystemStore`:
 
 ```go
+//file_system_store_test.go
 t.Run("league sorted", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
@@ -1182,8 +1234,8 @@ The order of the JSON coming in is in the wrong order and our `want` will check 
 ```
 === RUN   TestFileSystemStore/league_from_a_reader,_sorted
     --- FAIL: TestFileSystemStore/league_from_a_reader,_sorted (0.00s)
-        FileSystemStore_test.go:46: got [{Cleo 10} {Chris 33}] want [{Chris 33} {Cleo 10}]
-        FileSystemStore_test.go:51: got [{Cleo 10} {Chris 33}] want [{Chris 33} {Cleo 10}]
+        file_system_store_test.go:46: got [{Cleo 10} {Chris 33}] want [{Chris 33} {Cleo 10}]
+        file_system_store_test.go:51: got [{Cleo 10} {Chris 33}] want [{Chris 33} {Cleo 10}]
 ```
 
 ## Write enough code to make it pass

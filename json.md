@@ -102,6 +102,7 @@ We'll start by making the league table endpoint.
 We'll extend the existing suite as we have some useful test functions and a fake `PlayerStore` to use.
 
 ```go
+//server_test.go
 func TestLeague(t *testing.T) {
 	store := StubPlayerStore{}
 	server := &PlayerServer{&store}
@@ -150,6 +151,7 @@ Go has a built-in routing mechanism called [`ServeMux`](https://golang.org/pkg/n
 Let's commit some sins and get the tests passing in the quickest way we can, knowing we can refactor it with safety once we know the tests are passing.
 
 ```go
+//server.go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	router := http.NewServeMux()
@@ -185,6 +187,7 @@ The tests should now pass.
 `ServeHTTP` is looking quite big, we can separate things out a bit by refactoring our handlers into separate methods.
 
 ```go
+//server.go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	router := http.NewServeMux()
@@ -213,6 +216,7 @@ func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
 It's quite odd (and inefficient) to be setting up a router as a request comes in and then calling it. What we ideally want to do is have some kind of `NewPlayerServer` function which will take our dependencies and do the one-time setup of creating the router. Each request can then just use that one instance of the router.
 
 ```go
+//server.go
 type PlayerServer struct {
 	store  PlayerStore
 	router *http.ServeMux
@@ -263,6 +267,8 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 	return p
 }
 ```
+
+Then replace `server := &PlayerServer{&store}` with `server := NewPlayerServer(&store)` in `server_test.go`, `server_integration_test.go`, and `main.go`. 
 
 Finally make sure you **delete** `func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request)` as it is no longer needed!
 
@@ -323,6 +329,7 @@ We should return some JSON that looks something like this.
 We'll start by trying to parse the response into something meaningful.
 
 ```go
+//server_test.go
 func TestLeague(t *testing.T) {
 	store := StubPlayerStore{}
 	server := NewPlayerServer(&store)
@@ -364,6 +371,7 @@ Instead, we should look to parse the JSON into data structures that are relevant
 Given the JSON data model, it looks like we need an array of `Player` with some fields so we have created a new type to capture this.
 
 ```go
+//server.go
 type Player struct {
 	Name string
 	Wins int
@@ -373,6 +381,7 @@ type Player struct {
 ### JSON decoding
 
 ```go
+//server_test.go
 var got []Player
 err := json.NewDecoder(response.Body).Decode(&got)
 ```
@@ -396,6 +405,7 @@ Our endpoint currently does not return a body so it cannot be parsed into JSON.
 ## Write enough code to make it pass
 
 ```go
+//server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	leagueTable := []Player{
 		{"Chris", 20},
@@ -423,6 +433,7 @@ Throughout this book, we have used `io.Writer` and this is another demonstration
 It would be nice to introduce a separation of concern between our handler and getting the `leagueTable` as we know we're going to not hard-code that very soon.
 
 ```go
+//server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(p.getLeagueTable())
 	w.WriteHeader(http.StatusOK)
@@ -444,6 +455,7 @@ We can update the test to assert that the league table contains some players tha
 Update `StubPlayerStore` to let it store a league, which is just a slice of `Player`. We'll store our expected data in there.
 
 ```go
+//server_test.go
 type StubPlayerStore struct {
 	scores   map[string]int
 	winCalls []string
@@ -454,6 +466,7 @@ type StubPlayerStore struct {
 Next, update our current test by putting some players in the league property of our stub and assert they get returned from our server.
 
 ```go
+//server_test.go
 func TestLeague(t *testing.T) {
 
 	t.Run("it returns the league table as JSON", func(t *testing.T) {
@@ -512,6 +525,7 @@ Try running the tests again and you should get
 We know the data is in our `StubPlayerStore` and we've abstracted that away into an interface `PlayerStore`. We need to update this so anyone passing us in a `PlayerStore` can provide us with the data for leagues.
 
 ```go
+//server.go
 type PlayerStore interface {
 	GetPlayerScore(name string) int
 	RecordWin(name string)
@@ -522,6 +536,7 @@ type PlayerStore interface {
 Now we can update our handler code to call that rather than returning a hard-coded list. Delete our method `getLeagueTable()` and then update `leagueHandler` to call `GetLeague()`.
 
 ```go
+//server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(p.store.GetLeague())
 	w.WriteHeader(http.StatusOK)
@@ -549,6 +564,7 @@ The compiler is complaining because `InMemoryPlayerStore` and `StubPlayerStore` 
 For `StubPlayerStore` it's pretty easy, just return the `league` field we added earlier.
 
 ```go
+//server_test.go
 func (s *StubPlayerStore) GetLeague() []Player {
 	return s.league
 }
@@ -557,6 +573,7 @@ func (s *StubPlayerStore) GetLeague() []Player {
 Here's a reminder of how `InMemoryStore` is implemented.
 
 ```go
+//in_memory_player_store.go
 type InMemoryPlayerStore struct {
 	store map[string]int
 }
@@ -567,6 +584,7 @@ Whilst it would be pretty straightforward to implement `GetLeague` "properly" by
 So let's just get the compiler happy for now and live with the uncomfortable feeling of an incomplete implementation in our `InMemoryStore`.
 
 ```go
+//in_memory_player_store.go
 func (i *InMemoryPlayerStore) GetLeague() []Player {
 	return nil
 }
@@ -581,6 +599,7 @@ Try and run the tests, the compiler should pass and the tests should be passing!
 The test code does not convey out intent very well and has a lot of boilerplate we can refactor away.
 
 ```go
+//server_test.go
 t.Run("it returns the league table as JSON", func(t *testing.T) {
 	wantedLeague := []Player{
 		{"Cleo", 32},
@@ -605,6 +624,7 @@ t.Run("it returns the league table as JSON", func(t *testing.T) {
 Here are the new helpers
 
 ```go
+//server_test.go
 func getLeagueFromResponse(t testing.TB, body io.Reader) (league []Player) {
 	t.Helper()
 	err := json.NewDecoder(body).Decode(&league)
@@ -636,6 +656,7 @@ One final thing we need to do for our server to work is make sure we return a `c
 Add this assertion to the existing test
 
 ```go
+//server_test.go
 if response.Result().Header.Get("content-type") != "application/json" {
 	t.Errorf("response did not have content-type of application/json, got %v", response.Result().Header)
 }
@@ -654,6 +675,7 @@ if response.Result().Header.Get("content-type") != "application/json" {
 Update `leagueHandler`
 
 ```go
+//server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	json.NewEncoder(w).Encode(p.store.GetLeague())
@@ -664,12 +686,23 @@ The test should pass.
 
 ## Refactor
 
-Add a helper for `assertContentType`.
+Create a constant for "application/json" and use it in `leagueHandler`
 
 ```go
+//server.go
 const jsonContentType = "application/json"
 
-func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want string) {
+func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", jsonContentType)
+	json.NewEncoder(w).Encode(p.store.GetLeague())
+}
+```
+
+Then add a helper for `assertContentType`.
+
+```go
+//server_test.go
+func assertContentType(t *testing.TB, response *httptest.ResponseRecorder, want string) {
 	t.Helper()
 	if response.Result().Header.Get("content-type") != want {
 		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
@@ -680,6 +713,7 @@ func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want s
 Use it in the test.
 
 ```go
+//server_test.go
 assertContentType(t, response, jsonContentType)
 ```
 
@@ -692,6 +726,7 @@ The quickest way for us to get some confidence is to add to our integration test
 We can use `t.Run` to break up this test a bit and we can reuse the helpers from our server tests - again showing the importance of refactoring tests.
 
 ```go
+//server_integration_test.go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	store := NewInMemoryPlayerStore()
 	server := NewPlayerServer(store)
@@ -736,6 +771,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 `InMemoryPlayerStore` is returning `nil` when you call `GetLeague()` so we'll need to fix that.
 
 ```go
+//in_memory_player_store.go
 func (i *InMemoryPlayerStore) GetLeague() []Player {
 	var league []Player
 	for name, wins := range i.store {
