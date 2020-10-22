@@ -2,11 +2,12 @@ package poker_test
 
 import (
 	"bytes"
-	"github.com/quii/learn-go-with-tests/websockets/v2"
 	"io"
 	"strings"
 	"testing"
 	"time"
+
+	poker "github.com/quii/learn-go-with-tests/websockets/v2"
 )
 
 var dummyBlindAlerter = &poker.SpyBlindAlerter{}
@@ -89,7 +90,7 @@ func TestCLI(t *testing.T) {
 	})
 }
 
-func assertGameStartedWith(t *testing.T, game *GameSpy, numberOfPlayersWanted int) {
+func assertGameStartedWith(t testing.TB, game *GameSpy, numberOfPlayersWanted int) {
 	t.Helper()
 
 	passed := retryUntil(500*time.Millisecond, func() bool {
@@ -101,21 +102,21 @@ func assertGameStartedWith(t *testing.T, game *GameSpy, numberOfPlayersWanted in
 	}
 }
 
-func assertGameNotFinished(t *testing.T, game *GameSpy) {
+func assertGameNotFinished(t testing.TB, game *GameSpy) {
 	t.Helper()
 	if game.FinishedCalled {
 		t.Errorf("game should not have finished")
 	}
 }
 
-func assertGameNotStarted(t *testing.T, game *GameSpy) {
+func assertGameNotStarted(t testing.TB, game *GameSpy) {
 	t.Helper()
 	if game.StartCalled {
 		t.Errorf("game should not have started")
 	}
 }
 
-func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
+func assertFinishCalledWith(t testing.TB, game *GameSpy, winner string) {
 	t.Helper()
 
 	passed := retryUntil(500*time.Millisecond, func() bool {
@@ -127,7 +128,7 @@ func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
 	}
 }
 
-func assertMessagesSentToUser(t *testing.T, stdout *bytes.Buffer, messages ...string) {
+func assertMessagesSentToUser(t testing.TB, stdout *bytes.Buffer, messages ...string) {
 	t.Helper()
 	want := strings.Join(messages, "")
 	got := stdout.String()
@@ -136,7 +137,7 @@ func assertMessagesSentToUser(t *testing.T, stdout *bytes.Buffer, messages ...st
 	}
 }
 
-func assertScheduledAlert(t *testing.T, got, want poker.ScheduledAlert) {
+func assertScheduledAlert(t testing.TB, got, want poker.ScheduledAlert) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got %+v, want %+v", got, want)

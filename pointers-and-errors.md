@@ -324,7 +324,7 @@ There's some duplication in our tests, lets refactor that out.
 ```go
 func TestWallet(t *testing.T) {
 
-    assertBalance := func(t *testing.T, wallet Wallet, want Bitcoin) {
+    assertBalance := func(t testing.TB, wallet Wallet, want Bitcoin) {
         t.Helper()
         got := wallet.Balance()
 
@@ -420,7 +420,7 @@ Remember to import `errors` into your code.
 Let's make a quick test helper for our error check just to help our test read clearer
 
 ```go
-assertError := func(t *testing.T, err error) {
+assertError := func(t testing.TB, err error) {
     t.Helper()
     if err == nil {
         t.Error("wanted an error but didn't get one")
@@ -449,7 +449,7 @@ Assuming that the error ultimately gets returned to the user, let's update our t
 Update our helper for a `string` to compare against.
 
 ```go
-assertError := func(t *testing.T, got error, want string) {
+assertError := func(t testing.TB, got error, want string) {
     t.Helper()
     if got == nil {
         t.Fatal("didn't get an error but wanted one")
@@ -546,7 +546,7 @@ func TestWallet(t *testing.T) {
     })
 }
 
-func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
+func assertBalance(t testing.TB, wallet Wallet, want Bitcoin) {
     t.Helper()
     got := wallet.Balance()
 
@@ -555,7 +555,7 @@ func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
     }
 }
 
-func assertError(t *testing.T, got error, want error) {
+func assertError(t testing.TB, got error, want error) {
     t.Helper()
     if got == nil {
         t.Fatal("didn't get an error but wanted one")
@@ -618,7 +618,7 @@ func TestWallet(t *testing.T) {
     })
 }
 
-func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
+func assertBalance(t testing.TB, wallet Wallet, want Bitcoin) {
     t.Helper()
     got := wallet.Balance()
 
@@ -627,14 +627,14 @@ func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
     }
 }
 
-func assertNoError(t *testing.T, got error) {
+func assertNoError(t testing.TB, got error) {
     t.Helper()
     if got != nil {
         t.Fatal("got an error but didn't want one")
     }
 }
 
-func assertError(t *testing.T, got error, want error) {
+func assertError(t testing.TB, got error, want error) {
     t.Helper()
     if got == nil {
         t.Fatal("didn't get an error but wanted one")

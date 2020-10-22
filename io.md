@@ -458,7 +458,7 @@ Let's create a helper function which will create a temporary file with some data
 
 ```go
 //file_system_store_test.go
-func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func()) {
+func createTempFile(t testing.TB, initialData string) (io.ReadWriteSeeker, func()) {
     t.Helper()
 
     tmpfile, err := ioutil.TempFile("", "db")
@@ -1056,7 +1056,7 @@ In the tests we should assert there is no error. We can make a helper to help wi
 
 ```go
 //file_system_store_test.go
-func assertNoError(t *testing.T, err error) {
+func assertNoError(t testing.TB, err error) {
     t.Helper()
     if err != nil {
         t.Fatalf("didn't expect an error but got one, %v", err)

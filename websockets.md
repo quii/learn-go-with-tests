@@ -414,7 +414,7 @@ func mustDialWS(t *testing.T, url string) *websocket.Conn {
 Finally in our test code we can create a helper to tidy up sending messages
 
 ```go
-func writeWSMessage(t *testing.T, conn *websocket.Conn, message string) {
+func writeWSMessage(t testing.TB, conn *websocket.Conn, message string) {
 	t.Helper()
 	if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
 		t.Fatalf("could not send message over ws connection %v", err)
@@ -947,7 +947,7 @@ You should find the test hangs forever. This is because `ws.ReadMessage()` will 
 We should never have tests that hang so let's introduce a way of handling code that we want to timeout.
 
 ```go
-func within(t *testing.T, d time.Duration, assert func()) {
+func within(t testing.TB, d time.Duration, assert func()) {
 	t.Helper()
 
 	done := make(chan struct{}, 1)
@@ -1042,7 +1042,7 @@ We can refactor our helpers `assertGameStartedWith` and `assertFinishCalledWith`
 Here's how you can do it for `assertFinishCalledWith` and you can use the same approach for the other helper.
 
 ```go
-func assertFinishCalledWith(t *testing.T, game *GameSpy, winner string) {
+func assertFinishCalledWith(t testing.TB, game *GameSpy, winner string) {
 	t.Helper()
 
 	passed := retryUntil(500*time.Millisecond, func() bool {

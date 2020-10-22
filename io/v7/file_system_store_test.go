@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func createTempFile(t *testing.T, initialData string) (*os.File, func()) {
+func createTempFile(t testing.TB, initialData string) (*os.File, func()) {
 	t.Helper()
 
 	tmpfile, err := ioutil.TempFile("", "db")
@@ -93,7 +93,7 @@ func TestFileSystemStore(t *testing.T) {
 	})
 }
 
-func assertScoreEquals(t *testing.T, got, want int) {
+func assertScoreEquals(t testing.TB, got, want int) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got %d want %d", got, want)

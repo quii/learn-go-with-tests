@@ -625,7 +625,7 @@ Here are the new helpers
 
 ```go
 //server_test.go
-func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
+func getLeagueFromResponse(t testing.TB, body io.Reader) (league []Player) {
 	t.Helper()
 	err := json.NewDecoder(body).Decode(&league)
 
@@ -636,7 +636,7 @@ func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
 	return
 }
 
-func assertLeague(t *testing.T, got, want []Player) {
+func assertLeague(t testing.TB, got, want []Player) {
 	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v want %v", got, want)
@@ -702,7 +702,7 @@ Then add a helper for `assertContentType`.
 
 ```go
 //server_test.go
-func assertContentType(t *testing.T, response *httptest.ResponseRecorder, want string) {
+func assertContentType(t *testing.TB, response *httptest.ResponseRecorder, want string) {
 	t.Helper()
 	if response.Result().Header.Get("content-type") != want {
 		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)

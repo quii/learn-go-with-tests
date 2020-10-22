@@ -31,7 +31,7 @@ func (s *StubPlayerStore) GetLeague() League {
 }
 
 // AssertPlayerWin allows you to spy on the store's calls to RecordWin.
-func AssertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
+func AssertPlayerWin(t testing.TB, store *StubPlayerStore, winner string) {
 	t.Helper()
 
 	if len(store.WinCalls) != 1 {
