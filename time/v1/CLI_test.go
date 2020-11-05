@@ -1,12 +1,12 @@
 package poker_test
 
 import (
-        "fmt"
+	"fmt"
 	"github.com/quii/learn-go-with-tests/time/v1"
-        "io"
-        "strings"
-        "testing"
-        "time"
+	"io"
+	"strings"
+	"testing"
+	"time"
 )
 
 type scheduledAlert struct {
