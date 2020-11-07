@@ -155,7 +155,7 @@ func Hello(name string) string {
 }
 ```
 
-If you try and run your tests again your `main.go` will fail to compile because you're not passing an argument. Send in "world" to make it pass.
+If you try and run your tests again your `hello.go` will fail to compile because you're not passing an argument. Send in "world" to make it pass.
 
 ```go
 func main() {
