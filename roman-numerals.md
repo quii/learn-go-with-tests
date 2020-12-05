@@ -835,7 +835,7 @@ total++ // this is fishy...
 We should never be just incrementing `total` as that implies every symbol is a `I`. Replace it with:
 
 ```go
-total += allRomanNumerals.ValueOf(symbol)
+total += RomanNumerals(allRomanNumerals).ValueOf(symbol)
 ```
 
 And all the tests pass! Now that we have fully working software we can indulge ourselves in some refactoring, with confidence.
