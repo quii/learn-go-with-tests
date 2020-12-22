@@ -205,6 +205,12 @@ To manage this we run `Fetch` in a goroutine and it will write the result into a
 We can refactor our test code a bit by making assertion methods on our spy
 
 ```go
+type SpyStore struct {
+	response  string
+	cancelled bool
+	t         *testing.T
+}
+
 func (s *SpyStore) assertWasCancelled() {
 	s.t.Helper()
 	if !s.cancelled {
