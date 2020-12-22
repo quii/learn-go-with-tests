@@ -355,6 +355,7 @@ Finally we can update our tests. Comment out our cancellation test so we can fix
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
+    data := "hello, world"
     store := &SpyStore{response: data, t: t}
     svr := Server(store)
 
