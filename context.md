@@ -152,6 +152,7 @@ We'll need to update our happy path test to assert that it does not get cancelle
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
+    data := "hello, world"
     store := &SpyStore{response: data}
     svr := Server(store)
 
