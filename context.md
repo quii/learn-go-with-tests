@@ -93,6 +93,7 @@ Let's add a new test where we cancel the request before 100 milliseconds and che
 
 ```go
 t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
+      data := "hello, world"
       store := &SpyStore{response: data}
       svr := Server(store)
 
