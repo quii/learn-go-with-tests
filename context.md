@@ -43,7 +43,7 @@ func (s *StubStore) Fetch() string {
 	return s.response
 }
 
-func TestHandler(t *testing.T) {
+func TestServer(t *testing.T) {
 	data := "hello, world"
 	svr := Server(&StubStore{data})
 
