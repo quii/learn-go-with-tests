@@ -93,6 +93,7 @@ Let's add a new test where we cancel the request before 100 milliseconds and che
 
 ```go
 t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
+      data := "hello, world"
       store := &SpyStore{response: data}
       svr := Server(store)
 
@@ -151,6 +152,7 @@ We'll need to update our happy path test to assert that it does not get cancelle
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
+    data := "hello, world"
     store := &SpyStore{response: data}
     svr := Server(store)
 
@@ -203,6 +205,12 @@ To manage this we run `Fetch` in a goroutine and it will write the result into a
 We can refactor our test code a bit by making assertion methods on our spy
 
 ```go
+type SpyStore struct {
+	response  string
+	cancelled bool
+	t         *testing.T
+}
+
 func (s *SpyStore) assertWasCancelled() {
 	s.t.Helper()
 	if !s.cancelled {
@@ -347,6 +355,7 @@ Finally we can update our tests. Comment out our cancellation test so we can fix
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
+    data := "hello, world"
     store := &SpyStore{response: data, t: t}
     svr := Server(store)
 
