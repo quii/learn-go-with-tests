@@ -102,15 +102,13 @@ package clockface_test
 import (
 	"testing"
 	"time"
-
-	"github.com/gypsydave5/learn-go-with-tests/math/v1/clockface"
 )
 
 func TestSecondHandAtMidnight(t *testing.T) {
 	tm := time.Date(1337, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-	want := clockface.Point{X: 150, Y: 150 - 90}
-	got := clockface.SecondHand(tm)
+	want := Point{X: 150, Y: 150 - 90}
+	got := SecondHand(tm)
 
 	if got != want {
 		t.Errorf("Got %v, wanted %v", got, want)
@@ -130,8 +128,8 @@ This drives out the expected failures around the missing functions and types:
 ```
 --- FAIL: TestSecondHandAtMidnight (0.00s)
 # github.com/gypsydave5/learn-go-with-tests/math/v1/clockface_test [github.com/gypsydave5/learn-go-with-tests/math/v1/clockface.test]
-./clockface_test.go:13:10: undefined: clockface.Point
-./clockface_test.go:14:9: undefined: clockface.SecondHand
+./clockface_test.go:13:10: undefined: Point
+./clockface_test.go:14:9: undefined: SecondHand
 FAIL	github.com/gypsydave5/learn-go-with-tests/math/v1/clockface [build failed]
 ```
 
@@ -857,8 +855,6 @@ import (
 	"io"
 	"os"
 	"time"
-
-	"github.com/gypsydave5/learn-go-with-tests/math/v6/clockface"
 )
 
 func main() {
@@ -1136,8 +1132,6 @@ package main
 import (
 	"os"
 	"time"
-
-	"github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface"
 )
 
 func main() {
