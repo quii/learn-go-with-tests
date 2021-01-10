@@ -8,7 +8,7 @@ At some point you may wish to use structs to manage state, exposing methods to l
 
 **Fintech loves Go** and uhhh bitcoins? So let's show what an amazing banking system we can make.
 
-Let's make a `Wallet` struct which let's us deposit `Bitcoin`.
+Let's make a `Wallet` struct which lets us deposit `Bitcoin`.
 
 ## Write the test first
 
