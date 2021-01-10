@@ -20,7 +20,7 @@
 - [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
 - [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
 
-[Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii)!
+[Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii) or [sponsor me on GitHub](https://github.com/sponsors/quii)
 
 ## Why
 

@@ -6,13 +6,13 @@
 
 [Art by Denise](https://twitter.com/deniseyu21)
 
-[Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii)!
+[Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii) or [sponsor me on GitHub](https://github.com/sponsors/quii)
 
 _Learn test-driven development with Go_
 
 Translations:
 
-- [中文](https://studygolang.gitbook.io/learn-go-with-tests) 
+- [中文](https://studygolang.gitbook.io/learn-go-with-tests)
 - [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
 - [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
 
