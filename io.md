@@ -683,7 +683,7 @@ t.Run("store wins for new players", func(t *testing.T) {
 We just need to handle the scenario where `Find` returns `nil` because it couldn't find the player.
 
 ```go
-//file_system_store_test.go
+//file_system_store.go
 func (f *FileSystemPlayerStore) RecordWin(name string) {
     league := f.GetLeague()
     player := league.Find(name)
