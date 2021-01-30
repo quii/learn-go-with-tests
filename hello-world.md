@@ -288,7 +288,7 @@ We've refactored our assertion into a function. This reduces duplication and imp
 
 For helper functions, it's a good idea to accept a `testing.TB` which is an interface that `*testing.T` and `*testing.B` both satisfy, so you can call helper functions from a test, or a benchmark.
 
-`t.Helper()` is needed to tell the test suite that this method is a helper. By doing this when it fails the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems easier. If you still don't understand, comment it out, make a test fail and observe the test output.
+`t.Helper()` is needed to tell the test suite that this method is a helper. By doing this when it fails the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems easier. If you still don't understand, comment it out, make a test fail and observe the test output. Comments in Go are a great way to add additional information to your code, or in this case, a quick way to tell the compiler to ignore a line. You can comment out the `t.Helper()` code by adding two forward slashes `//` at the beginning of the line. You should see that line turn grey or change to another color than the rest of your code to indicate it's now commented out.
 
 Now that we have a well-written failing test, let's fix the code, using an `if`.
 
@@ -498,7 +498,7 @@ A few new concepts:
 
 * In our function signature we have made a _named return value_ `(prefix string)`.
 * This will create a variable called `prefix` in your function.
-  * It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for strings it is `""`.
+  * It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for `string`s it is `""`.
     * You can return whatever it's set to by just calling `return` rather than `return prefix`.
   * This will display in the Go Doc for your function so it can make the intent of your code clearer.
 * `default` in the switch case will be branched to if none of the other `case` statements match.
