@@ -137,23 +137,23 @@ func NewRegistrationHandler(userService UserService) http.HandlerFunc {
 - Simple to test the handler ✅
 - Changes to the rules around registration are isolated away from HTTP, so they are also simpler to test ✅
 
-### Lots of assertions
+## Lots of assertions
 
 Many assertions can make tests difficult to read and challenging to debug when they fail.
 
 They often creep in gradually, especially if test setup is complicated because you're reluctant to replicate the same horrible setup to assert on something else. Instead of this you should fix the problems in your design which are making it difficult to cheaply assert on new things.
 
-A helpful rule of thumb is to aim to do make one assertion per test. In Go you can take advantage of subtests to clearly delineate between assertions on the occasions where you need to. This is also a handy technique to separate assertions on behaviour vs implementation detail
+A helpful rule of thumb is to aim to do make one assertion per test. In Go take advantage of subtests to clearly delineate between assertions on the occasions where you need to. This is also a handy technique to separate assertions on behaviour vs implementation detail.
 
-### Violating encapsulation
+## Violating encapsulation
 
-Encapsulation is very important. There's a reason why we don't make everything in a package exported (or public). We want coherent APIs with a small surface area to avoid unneccessary coupling.
+Encapsulation is very important. There's a reason why we don't make everything in a package exported (or public). We want coherent APIs with a small surface area to avoid tight coupling.
 
-People will sometimes be tempted to make a function or method public in order to test something. By doing this you make your design worse and send confusing messages to maintainers.
+People will sometimes be tempted to make a function or method public in order to test something. By doing this you make your design worse and send confusing messages to maintainers and users of your code.
 
-The classic result of this are developers desperately trying to debug a test and then eventually realising the function being tested is _only called from tests_. Which is obviously **a terrible outcome and a waste of time**. Sadly I have come across this a number of times during my career.
+The classic result of this are developers desperately trying to debug a test and then eventually realising the function being tested is _only called from tests_. Which is obviously **a terrible outcome, and a waste of time**. Sadly I have come across this a number of times during my career.
 
-In Go, consider your default position for you to write tests from the perspective of a consumer of your package. You can make this a compile time constraint by having your tests live in a test package e.g `package gocoin_test`. If you do this, you'll only have access to the exported members of the package and you'll be unable to couple yourself to implementation detail
+In Go, consider your default position for you to write tests from the perspective of a consumer of your package. You can make this a compile time constraint by having your tests live in a test package e.g `package gocoin_test`. If you do this, you'll only have access to the exported members of the package, and you'll be unable to couple yourself to implementation detail
 
 ## Summary
 
