@@ -54,20 +54,16 @@ Simply put, if testing your code is difficult, then _using_ your code is difficu
 
 I've emphasised this a lot in the book, and I'll say it again **listen to your tests**.
 
-### Excessive setup
+### Excessive setup, too many test doubles, etc.
 
 Ever looked at a test with 20, 50, 100, 200 lines of setup code before anything interesting in the test happens? Do you then have to change the code and then have to revisit this mess and wish you had a different career?
 
-What are the signals here?
+What are the signals here? _Listen_
 
 Complicated tests == complicated code. Why is your code complicated? Does it have to be?
 
-### Too many test doubles with lots of setup
-
-A specialisation of excessive setup.
-
-- If you have lots of test doubles in your tests that means the code you're testing has lots of dependencies which means your design needs work.
-- If your test is reliant on setting up various interactions with mocks that means your code has to do lots of interactions with its dependencies, which you may be able to simplify and consolidate
+- When you have lots of test doubles in your tests that means the code you're testing has lots of dependencies which means your design needs work.
+- If your test is reliant on setting up various interactions with mocks that means your code has to do lots of interactions with its dependencies. This might mean the dependency itself has a leaky abstraction which is falling out into your code that depends on it, and your test doubles.
 
 #### Think about the types of test doubles you use
 
@@ -118,9 +114,9 @@ To exercise this code, you're going to have to write many tests with varying deg
 
 - What if the requirements expand? Translations for the emails? Sending an SMS confirmation too? Does it make sense to you that you have to change a HTTP handler to accommodate this change?
 - Does it feel right that the important rule of "we should send an email" resides within a HTTP handler?
-- Why do you have to go through the ceremony of creating HTTP requests and reading responses to verify that rule?
+    - Why do you have to go through the ceremony of creating HTTP requests and reading responses to verify that rule?
 
-**Listen to your tests**. Writing tests for this code in a TDD fashion should quickly make you feel uncomfortable. If it feels painful, stop and think.
+**Listen to your tests**. Writing tests for this code in a TDD fashion should quickly make you feel uncomfortable (or at least, make the lazy developer in you be annoyed). If it feels painful, stop and think.
 
 What if the design was like this instead?
 
@@ -145,26 +141,31 @@ func NewRegistrationHandler(userService UserService) http.HandlerFunc {
 
 Many assertions can make tests difficult to read and challenging to debug when they fail.
 
-A helpful rule of thumb is to aim to do make one assertion per test.
+They often creep in gradually, especially if test setup is complicated because you're reluctant to replicate the same horrible setup to assert on something else. Instead of this you should fix the problems in your design which are making it difficult to cheaply assert on new things.
 
+A helpful rule of thumb is to aim to do make one assertion per test. In Go you can take advantage of subtests to clearly delineate between assertions on the occasions where you need to. This is also a handy technique to separate assertions on behaviour vs implementation detail
 
 ### Violating encapsulation
 
+Encapsulation is very important. There's a reason why we don't make everything in a package exported (or public). We want coherent APIs with a small surface area to avoid unneccessary coupling.
 
+People will sometimes be tempted to make a function or method public in order to test something. By doing this you make your design worse and send confusing messages to maintainers.
 
+The classic result of this are developers desperately trying to debug a test and then eventually realising the function being tested is _only called from tests_. Which is obviously **a terrible outcome and a waste of time**. Sadly I have come across this a number of times during my career.
 
-
-
-
-- `package foo_test`
+In Go, consider your default position for you to write tests from the perspective of a consumer of your package. You can make this a compile time constraint by having your tests live in a test package e.g `package gocoin_test`. If you do this, you'll only have access to the exported members of the package and you'll be unable to couple yourself to implementation detail
 
 ## Summary
 
-- Not actually following the TDD process
+Most problems with unit tests can normally be traced to
+
+- Developers not following the TDD process
 - Poor design
 
 So learn about good software design!
 
-The good news is TDD can help you learn them because as stated in the beginning:
+The good news is TDD can help you improve your design skills because as stated in the beginning:
 
 **TDD's main purpose is to provide feedback on your design.**
+
+The TDD process is conceptually simple to follow but as you do it you'll find it challenging your design skills. Don't give up, work through it, be honest about the quality of your tests by listening to them, and you'll become a better developer for it.
