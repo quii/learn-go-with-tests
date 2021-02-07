@@ -71,7 +71,7 @@ I've emphasised this a lot in the book, and I'll say it again **listen to your t
 
 ### Excessive setup, too many test doubles, etc.
 
-Ever looked at a test with 20, 50, 100, 200 lines of setup code before anything interesting in the test happens? Do you then have to change the code and then have to revisit this mess and wish you had a different career?
+Ever looked at a test with 20, 50, 100, 200 lines of setup code before anything interesting in the test happens? Do you then have to change the code and then have to revisit the mess and wish you had a different career?
 
 What are the signals here? _Listen_
 
@@ -88,6 +88,7 @@ If you have declared an `interface` that has many methods, that points to a leak
 
 - Mocks are sometimes helpful, but they're extremely powerful and therefore easy to misuse. Try giving yourself the constraint of using stubs instead.
 - Verifying implementation detail with spies is sometimes helpful, but try to avoid it. Remember your implementation detail is usually not important, and you don't want your tests coupled to them if possible. Look to couple your tests to **useful behaviour rather than incidental details**.
+- [Read my posts on naming test doubles](https://quii.dev/Start_naming_your_test_doubles_correctly) if the taxonomy of test doubles is a little unclear
 
 #### Consolidate dependencies
 
@@ -180,7 +181,25 @@ Table tests are a great way of exercising a number of different scenarios when t
 
 They can get messy to read and understand though, when you try to shoehorn other kinds of tests under the name of having one, glorious table.
 
+```go
+cases := []struct {
+    X int
+    Y int
+    Z int
+    err error
+    IsFullMoon bool
+    IsLeapYear bool
+    AtWarWithEurasia bool
+}
+```
+
 **Don't be afraid to break out of your table and write new tests** rather than adding new fields and booleans to the table `struct`.
+
+A thing to bear in mind when writing software is
+
+> [Simple is not easy](https://www.infoq.com/presentations/Simple-Made-Easy/)
+
+"Just" adding a field to a table might be easy, but it can make things far from simple.
 
 ## Summary
 
