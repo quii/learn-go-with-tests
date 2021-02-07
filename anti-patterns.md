@@ -1,12 +1,16 @@
 # TDD Anti-patterns
 
-From time to time it's necessary to review your TDD techniques and in particular remind yourself the kind of things you should be avoiding. This chapter lists a number of TDD and testing anti-patterns, and how to remedy them.
+From time to time it's necessary to review your TDD techniques and in particular remind yourself the kind of things you should be avoiding.
 
-## Not doing it at all
+This chapter lists a number of TDD and testing anti-patterns, and how to remedy them.
+
+## Not doing TDD at all
 
 Of course, it is possible to write great software without TDD, but a lot of problems I've seen with the design of code, and the quality of tests would be very difficult to arrive at if a disciplined approach to TDD had been used.
 
-One of the strengths of TDD is it gives you a formal process for you to break down problems, understand what you're trying to achieve (red), get it done (green) and then have a good think about how to make it right (blue/refactor). Without this the process is often quite ad-hoc and loose which _can_ result in not the best engineering.
+One of the strengths of TDD is it gives you a formal process for you to break down problems, understand what you're trying to achieve (red), get it done (green) and then have a good think about how to make it right (blue/refactor).
+
+Without this the process is often quite ad-hoc and loose which _can_ result in not the best engineering.
 
 ## Misunderstanding the constraints of the refactoring step
 
@@ -30,11 +34,13 @@ This is almost always a done by developers writing tests _after_ code is written
 
 ## Useless assertions
 
-Ever worked on a system, and you've broken a test and you see this?
+Ever worked on a system, and you've broken a test, and you see this?
 
 > `false was not equal to true`
 
-I already know false is not equal to true. This is not a helpful message, it doesn't tell me what I've broken.
+I already know false is not equal to true.
+
+This is not a helpful message, it doesn't tell me what I've broken.
 
 This is another symptom of not following the TDD process and writing tests after the fact.
 
@@ -58,7 +64,7 @@ This not only makes your test more difficult to read, but it also needlessly cou
 
 From my own experience, a lot of developers are trying to practice TDD but frequently ignore the signals coming back to them from the TDD process. So they're still stuck with fragile, annoying systems with a poor test suite.
 
-Simply put, if testing your code is difficult, then _using_ your code is difficult too. Treat your tests as the first user of your code and then you'll see if your code is pleasant to work with or not.
+Simply put, if testing your code is difficult, then _using_ your code is difficult to work with too. Treat your tests as the first user of your code and then you'll see if your code is pleasant to work with or not.
 
 I've emphasised this a lot in the book, and I'll say it again **listen to your tests**.
 
@@ -68,15 +74,17 @@ Ever looked at a test with 20, 50, 100, 200 lines of setup code before anything 
 
 What are the signals here? _Listen_
 
-Complicated tests == complicated code. Why is your code complicated? Does it have to be?
+Complicated tests `==` complicated code. Why is your code complicated? Does it have to be?
 
-- When you have lots of test doubles in your tests that means the code you're testing has lots of dependencies which means your design needs work.
-- If your test is reliant on setting up various interactions with mocks that means your code has to do lots of interactions with its dependencies. This might mean the dependency itself has a leaky abstraction which is falling out into your code that depends on it, and your test doubles.
+- When you have lots of test doubles in your tests that means the code you're testing has lots of dependencies, which means your design needs work.
+- If your test is reliant on setting up various interactions with mocks, that means your code has to do lots of interactions with its dependencies. This might mean the dependency itself has a leaky abstraction which is falling out into your code that depends on it, and your test doubles.
+
+**Pro-tip** If you have declared an `interface` that has many methods, that points to a leaky abstraction, think about how you could define that collaboration with a more consolidated set of methods, ideally one.
 
 #### Think about the types of test doubles you use
 
 - Mocks are sometimes helpful, but they're extremely powerful and therefore easy to misuse. Try giving yourself the constraint of using stubs instead.
-- Verifying implementation detail with spies is sometimes helpful, but try to avoid it. Remember your implementation detail is usually not important, and you don't want your tests coupled to them. Look to couple your tests to **useful behaviour rather than incidental details**.
+- Verifying implementation detail with spies is sometimes helpful, but try to avoid it. Remember your implementation detail is usually not important, and you don't want your tests coupled to them if possible. Look to couple your tests to **useful behaviour rather than incidental details**.
 
 #### Consolidate dependencies
 
@@ -109,13 +117,13 @@ func NewRegistrationHandler(userStore UserStore, emailer Emailer) http.HandlerFu
 
 At first pass it's reasonable to say the design isn't so bad. It only has 2 dependencies!
 
-Let's re-evaluate this by considering the handler's responsibilities
+Re-evaluate the design by considering the handler's responsibilities
 
 - Parse the request body into a `User` ✅
-- Go to a storage abstraction and check if the user exists ❓
-- Go to the storage abstraction and store the user ❓
+- Use `UserStore` to check if the user exists ❓
+- Use `UserStore` to store the user ❓
 - Compose an email ❓
-- Use an emailer abstraction to send the email ❓
+- Use `Emailer` to send the email ❓
 - Return an appropriate http response, depending on success, errors, etc ✅
 
 To exercise this code, you're going to have to write many tests with varying degrees of test double setups, spies, etc
@@ -159,9 +167,17 @@ Encapsulation is very important. There's a reason why we don't make everything i
 
 People will sometimes be tempted to make a function or method public in order to test something. By doing this you make your design worse and send confusing messages to maintainers and users of your code.
 
-The humerous result of this are developers desperately trying to debug a test and then eventually realising the function being tested is _only called from tests_. Which is obviously **a terrible outcome, and a waste of time**.
+A result of this can be developers trying to debug a test and then eventually realising the function being tested is _only called from tests_. Which is obviously **a terrible outcome, and a waste of time**.
 
 In Go, consider your default position for you to write tests from the perspective of a consumer of your package. You can make this a compile-time constraint by having your tests live in a test package e.g `package gocoin_test`. If you do this, you'll only have access to the exported members of the package, and you'll be unable to couple yourself to implementation detail.
+
+## Complicated table tests
+
+Table tests are a great way of exercising a number of different scenarios when the test setup is the same, and you only wish to vary the inputs.
+
+They can get messy to read and understand though, when you try to shoehorn other kinds of tests under the name of having one, glorious table.
+
+**Don't be afraid to break out of your table and write new tests** rather than adding new fields and booleans to the table `struct`.
 
 ## Summary
 
@@ -176,4 +192,6 @@ The good news is TDD can help you improve your design skills because as stated i
 
 **TDD's main purpose is to provide feedback on your design.**
 
-The TDD process is conceptually simple to follow but as you do it you'll find it challenging your design skills. Don't give up, work through it, be honest about the quality of your tests by listening to them, and you'll become a better developer for it.
+The TDD process is conceptually simple to follow but as you do it you'll find it challenging your design skills. **Don't mistake this for TDD being hard, it's design that's hard!**
+
+Don't give up, work through it, be honest about the quality of your tests by listening to them, and you'll become a better developer for it.
