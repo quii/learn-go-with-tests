@@ -1,20 +1,20 @@
 # TDD Anti-patterns
 
-From time to time it's necessary to review your TDD techniques and in particular remind yourself the kind of things you should be avoiding.
+From time to time it's necessary to review your TDD techniques and remind yourself of behaviours to avoid.
 
 This chapter lists a number of TDD and testing anti-patterns, and how to remedy them.
 
 ## Not doing TDD at all
 
-Of course, it is possible to write great software without TDD, but a lot of problems I've seen with the design of code, and the quality of tests would be very difficult to arrive at if a disciplined approach to TDD had been used.
+Of course, it is possible to write great software without TDD but, a lot of problems I've seen with the design of code and the quality of tests would be very difficult to arrive at if a disciplined approach to TDD had been used.
 
-One of the strengths of TDD is it gives you a formal process for you to break down problems, understand what you're trying to achieve (red), get it done (green) and then have a good think about how to make it right (blue/refactor).
+One of the strengths of TDD is that gives you a formal process to break down problems, understand what you're trying to achieve (red), get it done (green), then have a good think about how to make it right (blue/refactor).
 
-Without this the process is often quite ad-hoc and loose which _can_ make engineering more difficult than it could be.
+Without this, the process is often ad-hoc and loose, which _can_ make engineering more difficult than it _could_ be.
 
 ## Misunderstanding the constraints of the refactoring step
 
-I have been in a number of workshops, mobbing or pairing sessions where someone has made the test pass and is now doing the refactoring stage. After some thought she thinks it would be good to abstract away some code into a new struct, a budding pedant yells:
+I have been in a number of workshops, mobbing or pairing sessions where someone has made a test pass and is in the refactoring stage. After some thought, they think it would be good to abstract away some code into a new struct; a budding pedant yells:
 
 > You're not allowed to do this! You should write a test for this first, we're doing TDD!
 
@@ -22,63 +22,67 @@ This seems to be a common misunderstanding. **You can do whatever you like to th
 
 The point of these tests are to give you the _freedom to refactor_, find the right abstractions and make the code easier to change and understand.
 
-## Having tests that won't fail
+## Having tests that won't fail (or, evergreen tests)
 
-It's astonishing how often this comes up. You start debugging or changing some tests and then realise that there are no scenarios where a test can fail, or at least it won't fail the way the test is supposed to be protecting against.
+It's astonishing how often this comes up. You start debugging or changing some tests and realise: there are no scenarios where this test can fail. Or at least, it won't fail in the way the test is _supposed_ to be protecting against.
 
-This is _next to impossible_ with TDD if you're following **the first step**
+This is _next to impossible_ with TDD if you're following **the first step**,
 
 > Write a test, see it fail
 
-This is almost always a done by developers writing tests _after_ code is written and are probably chasing test coverage rather than a useful test suite.
+This is almost always done when developers write tests _after_ code is written, and/or chasing test coverage rather than creating a useful test suite.
 
 ## Useless assertions
 
-Ever worked on a system, and you've broken a test, and you see this?
+Ever worked on a system, and you've broken a test, then you see this?
 
 > `false was not equal to true`
 
-I already know false is not equal to true.
+I know that false is not equal to true. This is not a helpful message; it doesn't tell me what I've broken. This is a symptom of not following the TDD process and not reading the failure error message.
 
-This is not a helpful message, it doesn't tell me what I've broken. This is a symptom of not following the TDD process and writing tests after the fact.
-
-Going back to the drawing board
+Going back to the drawing board,
 
 > Write a test, see it fail (and don't be ashamed of the error message)
 
 ## Asserting on irrelevant detail
 
-This is making an assertion on a complex object where in practice all you care about for the test is the value of one of the fields.
+This could mean making an assertion on a complex object, when in practice all you care about in the test is the value of one of the fields.
 
-This is a failure of not following the red stage strictly enough
+This is a failure of not following the red stage strictly enough.
 
-- Letting an existing design influence your writing of your test **rather than thinking of the desired behaviour**
+- Letting an existing design influence how you write your test **rather than thinking of the desired behaviour**
 - Not giving enough consideration to the failing test's error message
 
-This not only makes your test more difficult to read, but it also needlessly couples the test to data it doesn't care about, so if it gets refactored your test will start causing problems for no real reason.
+Additional assertions not only make your test more difficult to read by creating 'noise' in your documentation, but also needlessly couple the test with data it doesn't care about, so when the test gets refactored it will cause problems for no good reason.
+
+## Lots of assertions
+
+Many assertions can make tests difficult to read and challenging to debug when they fail.
+
+They often creep in gradually, especially if test setup is complicated because you're reluctant to replicate the same horrible setup to assert on something else. Instead of this you should fix the problems in your design which are making it difficult to assert on new things.
+
+A helpful rule of thumb is to aim to make one assertion per test. In Go, take advantage of subtests to clearly delineate between assertions on the occasions where you need to. This is also a handy technique to separate assertions on behaviour vs implementation detail.
 
 ## Not listening to your tests
 
-[Dave Farley in his video "When TDD goes wrong"](https://www.youtube.com/watch?v=UWtEVKVPBQ0&feature=youtu.be) points out
+[Dave Farley in his video "When TDD goes wrong"](https://www.youtube.com/watch?v=UWtEVKVPBQ0&feature=youtu.be) points out,
 
 > TDD gives you the fastest feedback possible on your design
 
-From my own experience, a lot of developers are trying to practice TDD but frequently ignore the signals coming back to them from the TDD process. So they're still stuck with fragile, annoying systems with a poor test suite.
+From my own experience, a lot of developers are trying to practice TDD but frequently ignore the signals coming back to them from the TDD process. So they're still stuck with fragile, annoying systems, with a poor test suite.
 
-Simply put, if testing your code is difficult, then _using_ your code is difficult to work with too. Treat your tests as the first user of your code and then you'll see if your code is pleasant to work with or not.
+Simply put, if testing your code is difficult, then _using_ your code is difficult too. Treat your tests as the first user of your code and then you'll see if your code is pleasant to work with or not.
 
 I've emphasised this a lot in the book, and I'll say it again **listen to your tests**.
 
 ### Excessive setup, too many test doubles, etc.
 
-Ever looked at a test with 20, 50, 100, 200 lines of setup code before anything interesting in the test happens? Do you then have to change the code and then have to revisit the mess and wish you had a different career?
+Ever looked at a test with 20, 50, 100, 200 lines of setup code before anything interesting in the test happens? Do you then have to change the code and revisit the mess and wish you had a different career?
 
-What are the signals here? _Listen_
+What are the signals here? _Listen_, complicated tests `==` complicated code. Why is your code complicated? Does it have to be?
 
-Complicated tests `==` complicated code. Why is your code complicated? Does it have to be?
-
-- When you have lots of test doubles in your tests that means the code you're testing has lots of dependencies, which means your design needs work.
-- If your test is reliant on setting up various interactions with mocks, that means your code has to do lots of interactions with its dependencies. Ask yourself whether these interactions could be simpler
+- When you have lots of test doubles in your tests, that means the code you're testing has lots of dependencies - which means your design needs work.
+- If your test is reliant on setting up various interactions with mocks, that means your code is making lots of interactions with its dependencies. Ask yourself whether these interactions could be simpler.
 
 #### Leaky interfaces
 
@@ -121,7 +125,7 @@ func NewRegistrationHandler(userStore UserStore, emailer Emailer) http.HandlerFu
 
 At first pass it's reasonable to say the design isn't so bad. It only has 2 dependencies!
 
-Re-evaluate the design by considering the handler's responsibilities
+Re-evaluate the design by considering the handler's responsibilities:
 
 - Parse the request body into a `User` ✅
 - Use `UserStore` to check if the user exists ❓
@@ -157,29 +161,21 @@ func NewRegistrationHandler(userService UserService) http.HandlerFunc {
 - Simple to test the handler ✅
 - Changes to the rules around registration are isolated away from HTTP, so they are also simpler to test ✅
 
-## Lots of assertions
-
-Many assertions can make tests difficult to read and challenging to debug when they fail.
-
-They often creep in gradually, especially if test setup is complicated because you're reluctant to replicate the same horrible setup to assert on something else. Instead of this you should fix the problems in your design which are making it difficult to cheaply assert on new things.
-
-A helpful rule of thumb is to aim to do make one assertion per test. In Go take advantage of subtests to clearly delineate between assertions on the occasions where you need to. This is also a handy technique to separate assertions on behaviour vs implementation detail.
-
 ## Violating encapsulation
 
-Encapsulation is very important. There's a reason why we don't make everything in a package exported (or public). We want coherent APIs with a small surface area to avoid tight coupling.
+Encapsulation is very important. There's a reason we don't make everything in a package `exported` (or `public`). We want coherent APIs with a small surface area to avoid tight coupling.
 
 People will sometimes be tempted to make a function or method public in order to test something. By doing this you make your design worse and send confusing messages to maintainers and users of your code.
 
 A result of this can be developers trying to debug a test and then eventually realising the function being tested is _only called from tests_. Which is obviously **a terrible outcome, and a waste of time**.
 
-In Go, consider your default position for you to write tests from the perspective of a consumer of your package. You can make this a compile-time constraint by having your tests live in a test package e.g `package gocoin_test`. If you do this, you'll only have access to the exported members of the package, and you'll be unable to couple yourself to implementation detail.
+In Go, consider your default position for writing tests as _from the perspective of a consumer of your package_. You can make this a compile-time constraint by having your tests live in a test package e.g `package gocoin_test`. If you do this, you'll only have access to the exported members of the package so it won't be possible to couple yourself to implementation detail.
 
 ## Complicated table tests
 
 Table tests are a great way of exercising a number of different scenarios when the test setup is the same, and you only wish to vary the inputs.
 
-They can get messy to read and understand though, when you try to shoehorn other kinds of tests under the name of having one, glorious table.
+_But_ they can be messy to read and understand when you try to shoehorn other kinds of tests under the name of having one, glorious table.
 
 ```go
 cases := []struct {
@@ -195,7 +191,7 @@ cases := []struct {
 
 **Don't be afraid to break out of your table and write new tests** rather than adding new fields and booleans to the table `struct`.
 
-A thing to bear in mind when writing software is
+A thing to bear in mind when writing software is,
 
 > [Simple is not easy](https://www.infoq.com/presentations/Simple-Made-Easy/)
 
@@ -203,17 +199,17 @@ A thing to bear in mind when writing software is
 
 ## Summary
 
-Most problems with unit tests can normally be traced to
+Most problems with unit tests can normally be traced to:
 
 - Developers not following the TDD process
 - Poor design
 
-So learn about good software design!
+So, learn about good software design!
 
-The good news is TDD can help you improve your design skills because as stated in the beginning:
+The good news is TDD can help you _improve your design skills_ because as stated in the beginning:
 
 **TDD's main purpose is to provide feedback on your design.** For the millionth time, listen to your tests, they are reflecting your design back at you.
 
-The TDD process is conceptually simple to follow but as you do it you'll find it challenging your design skills. **Don't mistake this for TDD being hard, it's design that's hard!**
+The TDD process is conceptually simple to follow, but as you do it you'll find it challenging your design skills. **Don't mistake this for TDD being hard, it's design that's hard!**
 
 Don't give up, work through it, be honest about the quality of your tests by listening to them, and you'll become a better developer for it.
