@@ -10,7 +10,7 @@ Of course, it is possible to write great software without TDD, but a lot of prob
 
 One of the strengths of TDD is it gives you a formal process for you to break down problems, understand what you're trying to achieve (red), get it done (green) and then have a good think about how to make it right (blue/refactor).
 
-Without this the process is often quite ad-hoc and loose which _can_ result in not the best engineering.
+Without this the process is often quite ad-hoc and loose which _can_ make engineering more difficult than it could be.
 
 ## Misunderstanding the constraints of the refactoring step
 
@@ -40,9 +40,7 @@ Ever worked on a system, and you've broken a test, and you see this?
 
 I already know false is not equal to true.
 
-This is not a helpful message, it doesn't tell me what I've broken.
-
-This is another symptom of not following the TDD process and writing tests after the fact.
+This is not a helpful message, it doesn't tell me what I've broken. This is a symptom of not following the TDD process and writing tests after the fact.
 
 Going back to the drawing board
 
@@ -52,7 +50,10 @@ Going back to the drawing board
 
 This is making an assertion on a complex object where in practice all you care about for the test is the value of one of the fields.
 
-This is usually a function of again not following the red stage strictly enough and reading the error.
+This is a failure of not following the red stage strictly enough
+
+- Letting an existing design influence your writing of your test **rather than thinking of the desired behaviour**
+- Not giving enough consideration to the failing test's error message
 
 This not only makes your test more difficult to read, but it also needlessly couples the test to data it doesn't care about, so if it gets refactored your test will start causing problems for no real reason.
 
@@ -77,9 +78,11 @@ What are the signals here? _Listen_
 Complicated tests `==` complicated code. Why is your code complicated? Does it have to be?
 
 - When you have lots of test doubles in your tests that means the code you're testing has lots of dependencies, which means your design needs work.
-- If your test is reliant on setting up various interactions with mocks, that means your code has to do lots of interactions with its dependencies. This might mean the dependency itself has a leaky abstraction which is falling out into your code that depends on it, and your test doubles.
+- If your test is reliant on setting up various interactions with mocks, that means your code has to do lots of interactions with its dependencies. Ask yourself whether these interactions could be simpler
 
-**Pro-tip** If you have declared an `interface` that has many methods, that points to a leaky abstraction, think about how you could define that collaboration with a more consolidated set of methods, ideally one.
+#### Leaky interfaces
+
+If you have declared an `interface` that has many methods, that points to a leaky abstraction. Think about how you could define that collaboration with a more consolidated set of methods, ideally one.
 
 #### Think about the types of test doubles you use
 
@@ -190,7 +193,7 @@ So learn about good software design!
 
 The good news is TDD can help you improve your design skills because as stated in the beginning:
 
-**TDD's main purpose is to provide feedback on your design.**
+**TDD's main purpose is to provide feedback on your design.** For the millionth time, listen to your tests, they are reflecting your design back at you.
 
 The TDD process is conceptually simple to follow but as you do it you'll find it challenging your design skills. **Don't mistake this for TDD being hard, it's design that's hard!**
 
