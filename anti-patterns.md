@@ -8,7 +8,7 @@ This chapter lists a number of TDD and testing anti-patterns, and how to remedy 
 
 Of course, it is possible to write great software without TDD but, a lot of problems I've seen with the design of code and the quality of tests would be very difficult to arrive at if a disciplined approach to TDD had been used.
 
-One of the strengths of TDD is that gives you a formal process to break down problems, understand what you're trying to achieve (red), get it done (green), then have a good think about how to make it right (blue/refactor).
+One of the strengths of TDD is that it gives you a formal process to break down problems, understand what you're trying to achieve (red), get it done (green), then have a good think about how to make it right (blue/refactor).
 
 Without this, the process is often ad-hoc and loose, which _can_ make engineering more difficult than it _could_ be.
 
@@ -163,7 +163,7 @@ func NewRegistrationHandler(userService UserService) http.HandlerFunc {
 
 ## Violating encapsulation
 
-Encapsulation is very important. There's a reason we don't make everything in a package `exported` (or `public`). We want coherent APIs with a small surface area to avoid tight coupling.
+Encapsulation is very important. There's a reason we don't make everything in a package exported (or public). We want coherent APIs with a small surface area to avoid tight coupling.
 
 People will sometimes be tempted to make a function or method public in order to test something. By doing this you make your design worse and send confusing messages to maintainers and users of your code.
 
