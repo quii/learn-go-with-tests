@@ -1,6 +1,6 @@
 # TDD Anti-patterns
 
-This book tries to teach you some good habits in respect to TDD but from time to time it's still necessary to review your own technique and in particular remind yourself the kind of things you should be avoiding. This chapter lists a number of TDD anti-patterns and how to remedy them.
+From time to time it's necessary to review your TDD techniques and in particular remind yourself the kind of things you should be avoiding. This chapter lists a number of TDD and testing anti-patterns, and how to remedy them.
 
 ## Not doing it at all
 
@@ -26,11 +26,11 @@ This is _next to impossible_ with TDD if you're following **the first step**
 
 > Write a test, see it fail
 
-This is almost always a function of developers writing tests _after_ code is written and are probably chasing test coverage rather than a useful test suite.
+This is almost always a done by developers writing tests _after_ code is written and are probably chasing test coverage rather than a useful test suite.
 
 ## Useless assertions
 
-Ever worked on a system and you've broken a test and you see this?
+Ever worked on a system, and you've broken a test and you see this?
 
 > `false was not equal to true`
 
@@ -41,6 +41,14 @@ This is another symptom of not following the TDD process and writing tests after
 Going back to the drawing board
 
 > Write a test, see it fail (and don't be ashamed of the error message)
+
+## Asserting on irrelevant detail
+
+This is making an assertion on a complex object where in practice all you care about for the test is the value of one of the fields.
+
+This is usually a function of again not following the red stage strictly enough and reading the error.
+
+This not only makes your test more difficult to read, but it also needlessly couples the test to data it doesn't care about, so if it gets refactored your test will start causing problems for no real reason.
 
 ## Not listening to your tests
 
@@ -151,9 +159,9 @@ Encapsulation is very important. There's a reason why we don't make everything i
 
 People will sometimes be tempted to make a function or method public in order to test something. By doing this you make your design worse and send confusing messages to maintainers and users of your code.
 
-The classic result of this are developers desperately trying to debug a test and then eventually realising the function being tested is _only called from tests_. Which is obviously **a terrible outcome, and a waste of time**. Sadly I have come across this a number of times during my career.
+The humerous result of this are developers desperately trying to debug a test and then eventually realising the function being tested is _only called from tests_. Which is obviously **a terrible outcome, and a waste of time**.
 
-In Go, consider your default position for you to write tests from the perspective of a consumer of your package. You can make this a compile time constraint by having your tests live in a test package e.g `package gocoin_test`. If you do this, you'll only have access to the exported members of the package, and you'll be unable to couple yourself to implementation detail
+In Go, consider your default position for you to write tests from the perspective of a consumer of your package. You can make this a compile-time constraint by having your tests live in a test package e.g `package gocoin_test`. If you do this, you'll only have access to the exported members of the package, and you'll be unable to couple yourself to implementation detail.
 
 ## Summary
 
