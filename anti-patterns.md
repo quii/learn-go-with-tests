@@ -48,6 +48,19 @@ Going back to the drawing board,
 
 An example of this is making an assertion on a complex object, when in practice all you care about in the test is the value of one of the fields.
 
+```go
+// not this, now your test is tightly coupled to the whole object
+if !cmp.Equal(complexObject, want) {
+    t.Error("got %+v, want %+v", complexObject, want)
+}
+
+// be specific, and loosen the coupling
+got := complexObject.fieldYouCareAboutForThisTest
+if got != want{
+    t.Error("got %q, want %q", got, want)
+}
+```
+
 This is a failure of not following the red stage strictly enough.
 
 - Letting an existing design influence how you write your test **rather than thinking of the desired behaviour**
