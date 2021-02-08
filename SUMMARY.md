@@ -42,6 +42,6 @@
 ## Meta
 
 * [Why unit tests and how to make them work for you](why.md)
-* [A short chapter on TDD and unit testing anti-patterns](anti-patterns.md)
+* [Anti-patterns](anti-patterns.md)
 * [Contributing](contributing.md)
 * [Chapter Template](template.md)
