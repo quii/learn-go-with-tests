@@ -61,12 +61,12 @@ if got != want{
 }
 ```
 
-This is a failure of not following the red stage strictly enough.
+Additional assertions not only make your test more difficult to read by creating 'noise' in your documentation, but also needlessly couples the test with data it doesn't care about. This means if you happen to change the fields for your object, or the way they behave you may get unexpected compilation problems or failures with your tests.
+
+This is an example of not following the red stage strictly enough.
 
 - Letting an existing design influence how you write your test **rather than thinking of the desired behaviour**
 - Not giving enough consideration to the failing test's error message
-
-Additional assertions not only make your test more difficult to read by creating 'noise' in your documentation, but also needlessly couples the test with data it doesn't care about, so during refactoring the tests could start causing issues for no real reason.
 
 ## Lots of assertions
 
