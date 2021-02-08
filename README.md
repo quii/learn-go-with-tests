@@ -83,6 +83,11 @@ If you have such a question raise it as an issue on github and I'll try and find
 * [Context-aware Reader](context-aware-reader.md) - Learn how to TDD augmenting `io.Reader` with cancellation. Based on [Context-aware io.Reader for Go](https://pace.dev/blog/2020/02/03/context-aware-ioreader-for-golang-by-mat-ryer)
 * [Revisiting HTTP Handlers](http-handlers-revisited.md) - Testing HTTP handlers seems to be the bane of many a developer's existence. This chapter explores the issues around designing handlers correctly.
 
+### Meta / Discussion
+
+* [Why](why.md) - Watch a video, or read about why unit testing and TDD is important
+* [Anti-patterns](anti-patterns.md) - A short chapter on TDD and unit testing anti-patterns
+
 ## Contributing
 
 * _This project is work in progress_ If you would like to contribute, please do get in touch.
