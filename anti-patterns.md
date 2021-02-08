@@ -46,14 +46,14 @@ Going back to the drawing board,
 
 ## Asserting on irrelevant detail
 
-This could mean making an assertion on a complex object, when in practice all you care about in the test is the value of one of the fields.
+An example of this is making an assertion on a complex object, when in practice all you care about in the test is the value of one of the fields.
 
 This is a failure of not following the red stage strictly enough.
 
 - Letting an existing design influence how you write your test **rather than thinking of the desired behaviour**
 - Not giving enough consideration to the failing test's error message
 
-Additional assertions not only make your test more difficult to read by creating 'noise' in your documentation, but also needlessly couple the test with data it doesn't care about, so when the test gets refactored it will cause problems for no good reason.
+Additional assertions not only make your test more difficult to read by creating 'noise' in your documentation, but also needlessly couples the test with data it doesn't care about, so during refactoring the tests could start causing issues for no real reason.
 
 ## Lots of assertions
 
