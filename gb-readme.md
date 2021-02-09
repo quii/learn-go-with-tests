@@ -6,9 +6,14 @@
 
 [Art by Denise](https://twitter.com/deniseyu21)
 
-[Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii) or [sponsor me on GitHub](https://github.com/sponsors/quii)
+## Support me
 
-_Learn test-driven development with Go_
+I am proud to offer this resource for free, but if you wish to give some appreciation, [Tweet me @quii](https://twitter.com/quii) or:
+
+- [Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii) 
+- [Sponsor me on GitHub](https://github.com/sponsors/quii)
+
+## Learn test-driven development with Go
 
 * Explore the Go language by writing tests
 * **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
