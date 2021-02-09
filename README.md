@@ -22,7 +22,7 @@
 
 ## Support me
 
-I am proud to offer this resource for free, but if you wish to give some appreciation, [https://twitter.com/quii](Tweet me @quii) or:
+I am proud to offer this resource for free, but if you wish to give some appreciation, [Tweet me @quii](https://twitter.com/quii) or:
 
 - [Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii) 
 - [Sponsor me on GitHub](https://github.com/sponsors/quii)
