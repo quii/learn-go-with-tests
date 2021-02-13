@@ -93,7 +93,7 @@ t.Run("it schedules printing of blind values", func(t *testing.T) {
 })
 ```
 
-You'll notice we've made a `SpyBlindAlerter` which we are trying to inject into our `CLI` and then checking that after we call `PlayerPoker` that an alert is scheduled.
+You'll notice we've made a `SpyBlindAlerter` which we are trying to inject into our `CLI` and then checking that after we call `PlayPoker` that an alert is scheduled.
 
 (Remember we are just going for the simplest scenario first and then we'll iterate.)
 
