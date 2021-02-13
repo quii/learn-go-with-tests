@@ -283,7 +283,7 @@ From the [Go Blog: Context](https://blog.golang.org/context) again:
 
 (Pause for a moment and think of the ramifications of every function having to send in a context, and the ergonomics of that.)
 
-Feeling a bit uneasy? Good. Let's try and follow that approach though and instead pass through the `context` to our `Store` and let it be responsible. That way it can also pass the `context` through to it's dependants and they too can be responsible for stopping themselves.
+Feeling a bit uneasy? Good. Let's try and follow that approach though and instead pass through the `context` to our `Store` and let it be responsible. That way it can also pass the `context` through to its dependants and they too can be responsible for stopping themselves.
 
 ## Write the test first
 
