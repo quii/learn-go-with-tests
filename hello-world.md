@@ -4,15 +4,8 @@
 
 It is traditional for your first program in a new language to be [Hello, World](https://en.m.wikipedia.org/wiki/%22Hello,_World!%22_program).
 
-In the [previous chapter](install-go.md#go-environment) we discussed how Go is opinionated as to where you put your files.
-
-Make a directory in the following path `$GOPATH/src/github.com/{your-user-id}/hello`.
-
-So if you're on a unix based OS and you are happy to stick with Go's conventions about `$GOPATH` (which is the easiest way of setting up) you could run `mkdir -p $GOPATH/src/github.com/$USER/hello`.
-
-For subsequent chapters, you can make a new folder with whatever name you like to put the code in e.g `$GOPATH/src/github.com/{your-user-id}/integers` for the next chapter might be sensible. Some readers of this book like to make an enclosing folder for all the work such as "learn-go-with-tests/hello". In short, it's up to you how you structure your folders.
-
-Create a file in this directory called `hello.go` and write this code. To run it type `go run hello.go`.
+- Create a folder wherever you like
+- Put a new file in it called `hello.go` and put the following code inside it
 
 ```go
 package main
@@ -23,6 +16,8 @@ func main() {
 	fmt.Println("Hello, world")
 }
 ```
+
+To run it type `go run hello.go`.
 
 ## How it works
 
@@ -82,8 +77,9 @@ Writing a test is just like writing a function, with a few rules
 * It needs to be in a file with a name like `xxx_test.go`
 * The test function must start with the word `Test`
 * The test function takes one argument only `t *testing.T`
+* In order to use the `*testing.T` type, you need to `import "testing"`, like we did with `fmt` in the other file
 
-For now it's enough to know that your `t` of type `*testing.T` is your "hook" into the testing framework so you can do things like `t.Fail()` when you want to fail.
+For now, it's enough to know that your `t` of type `*testing.T` is your "hook" into the testing framework so you can do things like `t.Fail()` when you want to fail.
 
 We've covered some new topics:
 
