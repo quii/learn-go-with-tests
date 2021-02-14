@@ -13,7 +13,7 @@ Let's use our TDD skills
 
 ## Write the test first
 
-In `sum_test.go`
+Create a new folder to work in. Create a new file called `sum_test.go` and insert the following:
 
 ```go
 package main
