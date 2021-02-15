@@ -347,7 +347,7 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 }
 ```
 
-The test should pass and no longer taking 4 seconds.
+The test should pass and no longer take 4 seconds.
 
 ### Still some problems
 
