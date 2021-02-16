@@ -2,6 +2,8 @@
 
 From time to time it's necessary to review your TDD techniques and remind yourself of behaviours to avoid.
 
+The TDD process is conceptually simple to follow, but as you do it you'll find it challenging your design skills. **Don't mistake this for TDD being hard, it's design that's hard!**
+
 This chapter lists a number of TDD and testing anti-patterns, and how to remedy them.
 
 ## Not doing TDD at all
@@ -225,6 +227,4 @@ The good news is TDD can help you _improve your design skills_ because as stated
 
 **TDD's main purpose is to provide feedback on your design.** For the millionth time, listen to your tests, they are reflecting your design back at you.
 
-The TDD process is conceptually simple to follow, but as you do it you'll find it challenging your design skills. **Don't mistake this for TDD being hard, it's design that's hard!**
-
-Don't give up, work through it, be honest about the quality of your tests by listening to them, and you'll become a better developer for it.
+Be honest about the quality of your tests by listening to the feedback they give you, and you'll become a better developer for it.
