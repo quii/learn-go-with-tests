@@ -155,7 +155,7 @@ For this work to be complete we'll need to implement `PlayerStore` so we'll writ
 //file_system_store_test.go
 func TestFileSystemStore(t *testing.T) {
 
-    t.Run("/league from a reader", func(t *testing.T) {
+    t.Run("league from a reader", func(t *testing.T) {
         database := strings.NewReader(`[
             {"Name": "Cleo", "Wins": 10},
             {"Name": "Chris", "Wins": 33}]`)
