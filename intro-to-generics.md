@@ -71,4 +71,4 @@ A common path I've taken in other programming languages has been:
 
 ### Abstraction is not a dirty word
 
-It's easy to dunk on AbstractSingletonMethodFactory but let's not pretend a code base with no abstraction isn't just as bad.
+It's easy to dunk on [AbstractSingletonProxyFactoryBean](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/aop/framework/AbstractSingletonProxyFactoryBean.html) but let's not pretend a code base with no abstraction at all isn't also bad. It's your job to _gather_ related concepts when appropriate, so your system is easier to understand and change; rather than being a collection of disparate functions and types with a lack of clarity.
