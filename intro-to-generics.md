@@ -69,3 +69,6 @@ A common path I've taken in other programming languages has been:
 - I can now delete a number of tests, I've captured the _essence_ of the behaviour and removed unnecessary detail
 
 
+### Abstraction is not a dirty word
+
+It's easy to dunk on AbstractSingletonMethodFactory but let's not pretend a code base with no abstraction isn't just as bad.
