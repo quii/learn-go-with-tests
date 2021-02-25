@@ -386,7 +386,7 @@ You get a compiler error, showing the weakness of losing type-safety
 prog.go2:59:14: invalid operation: operator + not defined for firstNum (variable of type interface{})
 ```
 
-Returning `interface{}` means the compiler has no information about what the data is and therefore severely limits what we can do. It can't know that it is an integer, so it does not let us use the `+` operator. To get around this, the caller would have to do a [type assertion](https://golang.org/ref/spec#Type_assertions) for each value. Yuck.
+`Pop` returning `interface{}` means the compiler has no information about what the data is and therefore severely limits what we can do. It can't know that it is an integer, so it does not let us use the `+` operator. To get around this, the caller would have to do a [type assertion](https://golang.org/ref/spec#Type_assertions) for each value. Yuck.
 
 ### Generic data structures to the rescue
 
@@ -452,13 +452,15 @@ func main() {
 }
 ```
 
-You'll notice the syntax for defining generic data structures is consistent with defining generic arguments to functions. Now that we have done this refactoring we can safely remove the string stack test because we don't need to prove the same logic over and over.
+You'll notice the syntax for defining generic data structures is consistent with defining generic arguments to functions.
 
-Using a generic data type we have
+Now that we have done this refactoring we can safely remove the string stack test because we don't need to prove the same logic over and over.
+
+Using a generic data type we have:
 
 - Reduced duplication of important logic
-- Made an easier to use abstraction vs one that uses `interface{}` which would require extra work to manage the data and error cases
-- Prevented misuse at compile time. You cannot add oranges to an apple stack
+- `Pop` now returns `T` so that means if we create a `Stack[int]` we in practice get back `int` from `Pop` which means we can now use `+` without the need for type assertion gymnastics.
+- Prevented misuse at compile time. You cannot `Push` oranges to an apple stack.
 
 ## Wrapping up
 
