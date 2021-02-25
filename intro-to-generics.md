@@ -386,7 +386,7 @@ You get a compiler error, showing the weakness of losing type-safety
 prog.go2:59:14: invalid operation: operator + not defined for firstNum (variable of type interface{})
 ```
 
-Returning `interface{}` means the compiler has no information about what the data is and therefore severely limits what we can do. It can't know that it is an integer so it does not let us use the `+` operator. To get around this, the caller would have to do a [type assertion](https://golang.org/ref/spec#Type_assertions) for each value. Yuck.
+Returning `interface{}` means the compiler has no information about what the data is and therefore severely limits what we can do. It can't know that it is an integer, so it does not let us use the `+` operator. To get around this, the caller would have to do a [type assertion](https://golang.org/ref/spec#Type_assertions) for each value. Yuck.
 
 ### Generic data structures to the rescue
 
