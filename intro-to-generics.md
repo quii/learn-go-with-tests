@@ -189,14 +189,18 @@ prog.go2:15:5: cannot compare got != want (operator != not defined for T)
 
 Which makes a lot of sense, because you can't use those operators on every (or `any`) type.
 
+## Next: Generic data types
+
+//todo: Implement a generic stack (start with stack of ints, stack of strings, refactor into generic version)
+// https://go2goplay.golang.org/p/suKwqFdDNRi
+
 ## Wrapping up
 
-Hopefully this chapter has given you a taste of generics syntax and give you some ideas as to why they might be helpful. We've written our own `Assert` functions which we can safely re-use to experiment with other ideas around generics.
+Hopefully this chapter has given you a taste of generics syntax and give you some ideas as to why they might be helpful. We've written our own `Assert` functions which we can safely re-use to experiment with other ideas around generics, and we implemented a simple data structure where it can store any type of data we wish in a type-safe manner.
 
 The next chapters will explore:
 
 - Defining our own type parameters
-- Defining generic types
 - Multiple type parameters
 
 ### Will generics turn Go into Java?
