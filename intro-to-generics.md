@@ -187,12 +187,22 @@ You'll get the following error
 prog.go2:15:5: cannot compare got != want (operator != not defined for T)
 ```
 
-Which makes a lot of sense!
-
+Which makes a lot of sense, because you can't use those operators on every (or `any`) type.
 
 ## Wrapping up
 
-There's a lot of FUD in the Go community about generics leading to nightmare abstractions and baffling code bases.
+Hopefully this chapter has given you a taste of generics syntax and give you some ideas as to why they might be helpful. Later chapters we'll get onto
+
+- Multiple type parameters
+- Defining our own type parameters
+- Defining generic types
+
+### Will generics turn Go into Java?
+
+- No.
+- Stop being rude about Java, it's not nice. It's nice to be nice.
+
+There's a lot of [FUD](https://en.wikipedia.org/wiki/Fear,_uncertainty,_and_doubt) in the Go community about generics leading to nightmare abstractions and baffling code bases.
 
 This is usually caveatted with "they must be used carefully". Whilst this is true, it's not especially useful advice because this is true of any language feature.
 
@@ -200,7 +210,7 @@ I know this because I have written extremely awful code _without_ generics.
 
 ### You're already using generics
 
-The [FUD](https://en.wikipedia.org/wiki/Fear,_uncertainty,_and_doubt) becomes even sillier when you consider that if you've used arrays, slices or maps; you've already been a consumer of generic code.
+The FUD becomes even sillier when you consider that if you've used arrays, slices or maps; you've already been a consumer of generic code.
 
 ```go
 var myApples []Apples
