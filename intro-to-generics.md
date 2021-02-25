@@ -2,7 +2,7 @@
 
 (At the time of writing) Go does not have support for user-defined generics, but [the proposal](https://blog.golang.org/generics-proposal) [has been accepted](https://github.com/golang/go/issues/43651#issuecomment-776944155) and will be included in 1.18
 
-However, there are ways to experiment with the upcoming implementation using the [go2go playground](https://go2goplay.golang.org/) _today_.
+However, there are ways to experiment with the upcoming implementation using the [go2go playground](https://go2goplay.golang.org/) _today_. So to work through this chapter you'll have to leave your precious editor of choice and instead do the work within the playground. 
 
 This chapter will give you a brief introduction to generics, hopefully dispel any reservations you may have about them and give you an idea of how you will be able to simplify some of your code in the future.
 
