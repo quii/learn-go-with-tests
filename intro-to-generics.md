@@ -191,9 +191,6 @@ Which makes a lot of sense, because you can't use those operators on every (or `
 
 ## Next: Generic data types
 
-//todo: Implement a generic stack (start with stack of ints, stack of strings, refactor into generic version)
-// https://go2goplay.golang.org/p/fjg3If9nPP7
-
 We're going to create a [stack](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)) data type. Stacks should be fairly straightforward to understand from a requirements point of view. They're a collection of items where you can `Push` items to the "top" and to get items back again you `Pop` items from the top (LIFO - last in, first out).
 
 For the sake of brevity I've omitted the TDD process that arrived me at the [following code](https://go2goplay.golang.org/p/HghXymv1OKm) for a stack of `int`s, and a stack of `string`s.
