@@ -120,7 +120,7 @@ func (is *I) Equal(a, b interface{}) {
 
 So what's the problem?
 
-By using `interface{}` the compiler can't help us write more valid code. Go back to the go2go playground and try comparing two different types
+By using `interface{}` the compiler can't help us when writing our code, because we're not telling it anything useful about the types of things passed to the function. Go back to the go2go playground and try comparing two different types
 
 ```go
 AssertNotEqual(1, "1")
