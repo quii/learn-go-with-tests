@@ -194,6 +194,275 @@ Which makes a lot of sense, because you can't use those operators on every (or `
 //todo: Implement a generic stack (start with stack of ints, stack of strings, refactor into generic version)
 // https://go2goplay.golang.org/p/fjg3If9nPP7
 
+We're going to create a [stack](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)) data type. Stacks should be fairly straightforward to understand from a requirements point of view. They're a collection of items where you can `Push` items to the "top" and to get items back again you `Pop` items from the top (LIFO - last in, first out).
+
+For the sake of brevity I've omitted the TDD process that arrived me at the [following code](https://go2goplay.golang.org/p/HghXymv1OKm) for a stack of `int`s, and a stack of `string`s.
+
+```go
+package main
+
+import (
+	"log"
+)
+
+type StackOfInts struct {
+	values []int
+}
+
+func (s *StackOfInts) Push(value int) {
+	s.values = append(s.values, value)
+}
+
+func (s *StackOfInts) IsEmpty() bool {
+	return len(s.values) == 0
+}
+
+func (s *StackOfInts) Pop() (int, bool) {
+	if s.IsEmpty() {
+		return 0, false
+	}
+
+	index := len(s.values) - 1
+	el := s.values[index]
+	s.values = s.values[:index]
+	return el, true
+}
+
+type StackOfStrings struct {
+	values []string
+}
+
+func (s *StackOfStrings) Push(value string) {
+	s.values = append(s.values, value)
+}
+
+func (s *StackOfStrings) IsEmpty() bool {
+	return len(s.values) == 0
+}
+
+func (s *StackOfStrings) Pop() (string, bool) {
+	if s.IsEmpty() {
+		return "", false
+	}
+
+	index := len(s.values) - 1
+	el := s.values[index]
+	s.values = s.values[:index]
+	return el, true
+}
+
+func main() {
+	// INT STACK
+
+	myStackOfInts := new(StackOfInts)
+
+	// check stack is empty
+	AssertTrue(myStackOfInts.IsEmpty())
+
+	// add a thing, then check it's not empty
+	myStackOfInts.Push(123)
+	AssertFalse(myStackOfInts.IsEmpty())
+
+	// add another thing, pop it back again
+	myStackOfInts.Push(456)
+	value, _ := myStackOfInts.Pop()
+	AssertEqual(value, 456)
+	value, _ = myStackOfInts.Pop()
+	AssertEqual(value, 123)
+	AssertTrue(myStackOfInts.IsEmpty())
+
+	// STRING STACK
+
+	myStackOfStrings := new(StackOfStrings)
+
+	// check stack is empty
+	AssertTrue(myStackOfStrings.IsEmpty())
+
+	// add a thing, then check it's not empty
+	myStackOfStrings.Push("one two three")
+	AssertFalse(myStackOfStrings.IsEmpty())
+
+	// add another thing, pop it back again
+	myStackOfStrings.Push("four five six")
+	strValue, _ := myStackOfStrings.Pop()
+	AssertEqual(strValue, "four five six")
+	strValue, _ = myStackOfStrings.Pop()
+	AssertEqual(strValue, "one two three")
+	AssertTrue(myStackOfStrings.IsEmpty())
+}
+
+func AssertTrue(thing bool) {
+    if thing {
+        log.Printf("PASSED: Expected thing to be true and it was\n")
+    } else {
+        log.Fatalf("FAILED: expected true but got false")
+    }
+}
+
+func AssertFalse(thing bool) {
+    if !thing {
+        log.Printf("PASSED: Expected thing to be false and it was\n")
+    } else {
+        log.Fatalf("FAILED: expected false but got true")
+    }
+}
+
+func AssertEqual[T comparable](got, want T) {
+    if got != want {
+        log.Fatalf("FAILED: got %+v, want %+v", got, want)
+    } else {
+        log.Printf("PASSED: %+v did equal %+v\n", got, want)
+    }
+}
+
+func AssertNotEqual[T comparable](got, want T) {
+    if got == want {
+        log.Fatalf("FAILED: got %+v, want %+v", got, want)
+    } else {
+        log.Printf("PASSED: %+v did not equal %+v\n", got, want)
+    }
+}
+```
+
+### Problems
+
+- The code for both `StackOfStrings` and `StackOfInts` is almost identical. Whilst duplication isn't always the end of the world, this doesn't feel great and does add an increased maintenance cost
+- As we're duplicating the logic across two types, we've had to duplicate the tests too.
+
+We really want to capture the _idea_ of a stack in one type, and have one set of tests for them. We should be wearing our refactoring hat right now which means we should not be changing the tests because we want to maintain the same behaviour.
+
+Pre-generics, this is what we _could_ do
+
+```go
+type StackOfInts = Stack
+type StackOfStrings = Stack
+
+type Stack struct {
+	values []interface{}
+}
+
+func (s *Stack) Push(value interface{}) {
+	s.values = append(s.values, value)
+}
+
+func (s *Stack) IsEmpty() bool {
+	return len(s.values) == 0
+}
+
+func (s *Stack) Pop() (interface{}, bool) {
+	if s.IsEmpty() {
+		var zero interface{}
+		return zero, false
+	}
+
+	index := len(s.values) - 1
+	el := s.values[index]
+	s.values = s.values[:index]
+	return el, true
+}
+```
+
+- We're aliasing our previous implementations of `StackOfInts` and `StackOfStrings` to a new unified type `Stack`
+- We've removed the type safety from the `Stack` by making it so `values` is a slice of `interface{}`
+
+... And our tests still pass. Who needs generics?
+
+### The problem with throwing out type safety
+
+The first problem is the same with our `AssertEquals`, we've lost type safety. I can `Push` apples onto a stack of oranges
+
+Even if we have discipline not to do this, the code is still unpleasant to work with because when methods **return `interface{} they are horrible to work with`.
+
+Add the following test
+
+```go
+myStackOfInts.Push(1)
+myStackOfInts.Push(2)
+firstNum, _ := myStackOfInts.Pop()
+secondNum, _ := myStackOfInts.Pop()
+AssertEqual(firstNum+secondNum, 3)
+```
+
+You get a compiler error, showing the weakness of losing type-safety
+
+```go
+prog.go2:59:14: invalid operation: operator + not defined for firstNum (variable of type interface{})
+```
+
+To get around this, the caller would have to do a [type assertion](https://golang.org/ref/spec#Type_assertions) for each value. Yuck.
+
+### Generic data structures to the rescue
+
+As well as defining generic arguments to functions, you can define generic data structures
+
+Here's our new `Stack` implementation, featuring a generic data type, and the tests showing them working how we'd like them to work, with full type-safety. ([Full code listing here](https://go2goplay.golang.org/p/xAWcaMelgQV))
+
+```go
+package main
+
+import (
+    "log"
+)
+
+type Stack[T any] struct {
+    values []T
+}
+
+func (s *Stack[T]) Push(value T) {
+    s.values = append(s.values, value)
+}
+
+func (s *Stack[T]) IsEmpty() bool {
+    return len(s.values)==0
+}
+
+func (s *Stack[T]) Pop() (T, bool) {
+    if s.IsEmpty() {
+        var zero T
+        return zero, false
+    }
+
+    index := len(s.values) -1
+    el := s.values[index]
+    s.values = s.values[:index]
+    return el, true
+}
+
+func main() {
+    myStackOfInts := new(Stack[int])
+
+    // check stack is empty
+    AssertTrue(myStackOfInts.IsEmpty())
+
+    // add a thing, then check it's not empty
+    myStackOfInts.Push(123)
+    AssertFalse(myStackOfInts.IsEmpty())
+
+    // add another thing, pop it back again
+    myStackOfInts.Push(456)
+    value, _ := myStackOfInts.Pop()
+    AssertEqual(value, 456)
+    value, _ = myStackOfInts.Pop()
+    AssertEqual(value, 123)
+    AssertTrue(myStackOfInts.IsEmpty())
+
+    // can get the numbers we put in as numbers, not untyped interface{}
+    myStackOfInts.Push(1)
+    myStackOfInts.Push(2)
+    firstNum, _ := myStackOfInts.Pop()
+    secondNum, _ := myStackOfInts.Pop()
+    AssertEqual(firstNum+secondNum, 3)
+}
+```
+
+You'll notice the syntax for defining generic data structures is consistent with defining generic arguments to functions. Now that we have done this refactoring we can safely remove the string stack test because we don't need to prove the same logic over and over.
+
+Using a generic data type we have
+
+- Reduced duplication of important logic
+- Made an easier to use abstraction vs one that uses `interface{}` which would require extra work to manage the data and error cases
+- Prevented misuse at compile time. You cannot add oranges to an apple stack
+
 ## Wrapping up
 
 Hopefully this chapter has given you a taste of generics syntax and give you some ideas as to why they might be helpful. We've written our own `Assert` functions which we can safely re-use to experiment with other ideas around generics, and we implemented a simple data structure where it can store any type of data we wish in a type-safe manner.
