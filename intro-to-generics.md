@@ -16,18 +16,179 @@ The playground _does_ let us execute code, and because we're programmers that me
 
 ## Our own test helpers (`AssertEqual`, `AssertNotEqual`)
 
-//TODO: without generics
+To explore generics in future chapters we need to write some test helpers that'll kill the program and print something useful if a test fails.
+
+### Assert on integers
+
+Let's start with something basic and iterate toward our goal
+
+```go
+package main
+
+import (
+	"log"
+)
+
+func main() {
+	AssertEqual(1, 1)
+	AssertNotEqual(1, 2)
+
+	AssertEqual(50, 100)
+
+	AssertNotEqual(2, 2) // wont see this
+}
+
+func AssertEqual(got, want int) {
+	if got != want {
+		log.Fatalf("FAILED: got %d, want %d", got, want)
+	} else {
+		log.Printf("PASSED: %d did equal %d\n", got, want)
+	}
+}
+
+func AssertNotEqual(got, want int) {
+	if got == want {
+		log.Fatalf("FAILED: got %d, want %d", got, want)
+	} else {
+		log.Printf("PASSED: %d did not equal %d\n", got, want)
+	}
+}
+```
+
+[This program prints](https://go2goplay.golang.org/p/WywgJnAp34v)
+
+```
+2009/11/10 23:00:00 PASSED: 1 did equal 1
+2009/11/10 23:00:00 PASSED: 1 did not equal 2
+2009/11/10 23:00:00 FAILED: got 50, want 100
+```
+
+### Iteration 2
+
+Being able to assert on the equality of integers is great but what if we want to assert on `string` ?
+
+```go
+func main() {
+	AssertEqual("CJ", "CJ")
+}
+```
+
+You'll get an error
+
+```
+type checking failed for main
+prog.go2:8:14: cannot use "CJ" (untyped string constant) as int value in argument to AssertEqual
+```
+
+If you take your time to read the error, you'll see the compiler is complaining we're trying to pass a `string` to a function that expects an `integer`.
+
+#### Recap on type-safety
+
+If you've read the previous chapters of this book, or have experience with statically typed languages this should not surprise you. The Go compiler expects you to write your functions, structs etc by describing what types you wish to work with.
+
+You can't pass a `string` to a function that expects an `integer`.
+
+Whilst this can feel like ceremony, it can be extremely helpful. By describing these constraints you
+
+- Make function implementation simpler. By describing to the compiler what types you work with you **constrain the number of possible valid implementations**. You can't "add" a `Person` and a `BankAccount`. You can't capitalise an `integer`. In software constraints are often extremely helpful.
+- Prevents you accidentally passing data to a function that you didn't mean to
+
+Go currently offers you a way to be more abstract with your types with interfaces so that you can design functions that do not take concrete types but instead types that offer the behaviour you need. This gives you some flexibility whilst maintaining type-safety.
+
+### A function that takes a string or an integer? (or indeed, other things)
+
+The other option that Go _currently_ gives you saying the type of your argument is `interface{}` which means "anything".
+
+Try changing the signatures to use this type instead
+
+```go
+func AssertEqual(got, want interface{}) {
+
+func AssertNotEqual(got, want interface{}) {
+
+```
+
+The tests should now compile and pass. The output will be a bit ropey because we're using the `%d` format string to print our messages so change them to `%+v` for a better output.
 
 ### Tradeoffs made without generics
 
-- Can't use `==`
-- Not typesafe
+Our `AssertX` functions are quite naive but conceptually aren't too different to how other [popular libraries offer this functionality](https://github.com/matryer/is/blob/master/is.go#L150)
+
+```go
+func (is *I) Equal(a, b interface{}) {
+```
+
+So what's the problem?
+
+By using `interface{}` the compiler can't help us write more valid code. Go back to the go2go playground and try comparing two different types
+
+```go
+AssertNotEqual(1, "1")
+```
+
+Now to be fair in this case, we get away with it; the test compiles, and it fails as we'd hope; but in a cosy type-safe world do we want to be able to compare strings and integers?
+
+In our case we get away with it but writing functions that take `interface{}` can be extremely challenging and bug-prone because we've _lost_ our constraints, and we have no information at compile time as to what kind of data we're dealing with.
+
+Developers often have to use reflection to implement these *ahem* generic functions, which is usually painful and can hurt the performance of your program.
 
 ## Our own test helpers with generics
 
-- Typesafe
-- Probably marginally faster due to no reflection
-- Simpler code because we've given the compiler more information vs just `interface{}`
+Ideally, we don't want to have to make specific `AssertX` functions for every type we ever deal with. We'd like to be able to have _one_ `AssertEqual` function that works with _any_ type but does not let you compare apples with oranges.
+
+Generics offer us a new way to make abstractions (like interfaces) by letting us **describe our constraints** in ways we cannot currently do.
+
+```go
+package main
+
+import (
+    "log"
+)
+
+func main() {
+    AssertEqual(1, 1)
+    AssertEqual("1", "1")
+    AssertNotEqual(1, 2)
+    //AssertEqual(1, "1") - uncomment me to see compilation error
+}
+
+func AssertEqual[T comparable](got, want T) {
+    if got != want {
+        log.Fatalf("FAILED: got %+v, want %+v", got, want)
+    } else {
+        log.Printf("PASSED: %+v did equal %+v\n", got, want)
+    }
+}
+
+func AssertNotEqual[T comparable](got, want T) {
+    if got == want {
+        log.Fatalf("FAILED: got %+v, want %+v", got, want)
+    } else {
+        log.Printf("PASSED: %+v did not equal %+v\n", got, want)
+    }
+}
+```
+
+[go2go playground link](https://go2goplay.golang.org/p/a-6MzWrjeAx)
+
+To write generic functions in Go, you need to provide "type parameters" which is just a fancy way of saying "describe your generic type and give it a label".
+
+In our case the type of our type parameter is [`comparable`](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md#comparable-types-in-constraints) and we've given it the label of `T`. This label then lets us describe the types for the arguments to our function.
+
+We're using `comparable` because we want to describe to the compiler that we wish to use `==` and `!=` - we want to compare! If you try changing the type to `any`
+
+```go
+func AssertNotEqual[T any](got, want T) {
+```
+
+You'll get the following error
+
+```
+prog.go2:15:5: cannot compare got != want (operator != not defined for T)
+```
+
+Which makes a lot of sense!
+
 
 ## Wrapping up
 
@@ -39,9 +200,13 @@ I know this because I have written extremely awful code _without_ generics.
 
 ### You're already using generics
 
-The FUD becomes an even sillier statement when you consider that if you've used arrays, slices or maps; you've already been a consumer of generic code.
+The [FUD](https://en.wikipedia.org/wiki/Fear,_uncertainty,_and_doubt) becomes even sillier when you consider that if you've used arrays, slices or maps; you've already been a consumer of generic code.
 
-//TODO, some examples of how it's typesafe
+```go
+var myApples []Apples
+// You cant do this!
+append(myApples, Orange{})
+```
 
 ### Make it work, make it right, make it fast
 
