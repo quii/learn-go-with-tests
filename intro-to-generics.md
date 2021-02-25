@@ -368,7 +368,7 @@ func (s *Stack) Pop() (interface{}, bool) {
 
 The first problem is the same with our `AssertEquals`, we've lost type safety. I can `Push` apples onto a stack of oranges
 
-Even if we have discipline not to do this, the code is still unpleasant to work with because when methods **return `interface{} they are horrible to work with`**.
+Even if we have discipline not to do this, the code is still unpleasant to work with because when methods **return `interface{}` they are horrible to work with**.
 
 Add the following test
 
