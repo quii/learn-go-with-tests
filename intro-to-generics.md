@@ -192,7 +192,7 @@ Which makes a lot of sense, because you can't use those operators on every (or `
 ## Next: Generic data types
 
 //todo: Implement a generic stack (start with stack of ints, stack of strings, refactor into generic version)
-// https://go2goplay.golang.org/p/O2q2S0ETryV
+// https://go2goplay.golang.org/p/cbtP3zCNh7v
 
 ## Wrapping up
 
