@@ -97,9 +97,9 @@ Go currently offers you a way to be more abstract with your types with interface
 
 ### A function that takes a string or an integer? (or indeed, other things)
 
-The other option that Go _currently_ gives you is declaring the type of your argument as `interface{}` which means "anything".
+The other option that Go _currently_ gives is declaring the type of your argument as `interface{}` which means "anything".
 
-Try changing the signatures to use this type instead
+Try changing the signatures to use this type instead.
 
 ```go
 func AssertEqual(got, want interface{}) {
