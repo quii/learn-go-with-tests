@@ -2,7 +2,7 @@
 
 (At the time of writing) Go does not have support for user-defined generics, but [the proposal](https://blog.golang.org/generics-proposal) [has been accepted](https://github.com/golang/go/issues/43651#issuecomment-776944155) and will be included in 1.18
 
-However, there are ways to experiment with the upcoming implementation using the go2go playground _today_.
+However, there are ways to experiment with the upcoming implementation using the [go2go playground](https://go2goplay.golang.org/) _today_.
 
 This chapter will give you a brief introduction to generics, hopefully dispel any reservations you may have about them and give you an idea of how you will be able to simplify some of your code in the future.
 
@@ -97,7 +97,7 @@ Go currently offers you a way to be more abstract with your types with interface
 
 ### A function that takes a string or an integer? (or indeed, other things)
 
-The other option that Go _currently_ gives you saying the type of your argument is `interface{}` which means "anything".
+The other option that Go _currently_ gives you is declaring the type of your argument as `interface{}` which means "anything".
 
 Try changing the signatures to use this type instead
 
@@ -191,11 +191,13 @@ Which makes a lot of sense, because you can't use those operators on every (or `
 
 ## Wrapping up
 
-Hopefully this chapter has given you a taste of generics syntax and give you some ideas as to why they might be helpful. Later chapters we'll get onto
+Hopefully this chapter has given you a taste of generics syntax and give you some ideas as to why they might be helpful. We've written our own `Assert` functions which we can safely re-use to experiment with other ideas around generics.
 
-- Multiple type parameters
+The next chapters will explore:
+
 - Defining our own type parameters
 - Defining generic types
+- Multiple type parameters
 
 ### Will generics turn Go into Java?
 
