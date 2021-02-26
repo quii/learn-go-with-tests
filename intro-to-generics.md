@@ -475,7 +475,7 @@ If you're inexperienced with statically-typed languages the point of generics ma
 - Less expressive, `interface{}` tells you nothing about the data
 - Often requires users to use reflection, type-assertions e.t.c. just to get at the actual type you want
 
-Generics, with very little ceremony solves these problems for us.
+Generics allow us to express our types with the constraints we need while giving us the freedom to have more generalised functions and data-types.
 
 ### Will generics turn Go into Java?
 
