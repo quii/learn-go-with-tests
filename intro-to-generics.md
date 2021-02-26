@@ -496,7 +496,7 @@ var myApples []Apples
 append(myApples, Orange{})
 ```
 
-### Make it work, make it right, make it fast
+### [Make it work, make it right, make it fast](https://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast#:~:text=%22Make%20it%20work%2C%20make%20it,to%20DesignForPerformance%20ahead%20of%20time.)
 
 People run in to problems with generics when they're abstracting too quickly without enough information.
 
