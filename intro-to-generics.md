@@ -4,7 +4,7 @@
 
 However, there are ways to experiment with the upcoming implementation using the [go2go playground](https://go2goplay.golang.org/) _today_. So to work through this chapter you'll have to leave your precious editor of choice and instead do the work within the playground.
 
-This chapter will give you an introduction to generics, hopefully dispel any reservations you may have about them and give you an idea of how you will be able to simplify some of your code in the future. After reading this you'll know how to write
+This chapter will give you an introduction to generics, dispel reservations you may have about them and, give you an idea how to simplify some of your code in the future. After reading this you'll know how to write:
 
 - A function that takes generic aguments
 - A generic data-structure
@@ -13,7 +13,7 @@ The code we write here will be the foundation for future chapters around generic
 
 ## Setting up the playground
 
-In the go2go playground we can't run `go test`, so how are we going to write tests to explore generic code?
+In the _go2go playground_ we can't run `go test`. How are we going to write tests to explore generic code?
 
 The playground _does_ let us execute code, and because we're programmers that means we can work around the lack of a test runner by **making one of our own**.
 
@@ -58,7 +58,7 @@ func AssertNotEqual(got, want int) {
 }
 ```
 
-[This program prints](https://go2goplay.golang.org/p/WywgJnAp34v)
+[This program prints](https://go2goplay.golang.org/p/WywgJnAp34v):
 
 ```
 2009/11/10 23:00:00 PASSED: 1 did equal 1
@@ -66,7 +66,7 @@ func AssertNotEqual(got, want int) {
 2009/11/10 23:00:00 FAILED: got 50, want 100
 ```
 
-### Iteration 2
+### Assert on strings
 
 Being able to assert on the equality of integers is great but what if we want to assert on `string` ?
 
@@ -87,16 +87,16 @@ If you take your time to read the error, you'll see the compiler is complaining 
 
 #### Recap on type-safety
 
-If you've read the previous chapters of this book, or have experience with statically typed languages this should not surprise you. The Go compiler expects you to write your functions, structs etc by describing what types you wish to work with.
+If you've read the previous chapters of this book, or have experience with statically typed languages, this should not surprise you. The Go compiler expects you to write your functions, structs etc by describing what types you wish to work with.
 
 You can't pass a `string` to a function that expects an `integer`.
 
-Whilst this can feel like ceremony, it can be extremely helpful. By describing these constraints you
+Whilst this can feel like ceremony, it can be extremely helpful. By describing these constraints you,
 
-- Make function implementation simpler. By describing to the compiler what types you work with you **constrain the number of possible valid implementations**. You can't "add" a `Person` and a `BankAccount`. You can't capitalise an `integer`. In software constraints are often extremely helpful.
-- Prevents you accidentally passing data to a function that you didn't mean to
+- Make function implementation simpler. By describing to the compiler what types you work with, you **constrain the number of possible valid implementations**. You can't "add" a `Person` and a `BankAccount`. You can't capitalise an `integer`. In software, constraints are often extremely helpful.
+- Are prevented from accidentally passing data to a function you didn't mean to
 
-Go currently offers you a way to be more abstract with your types with interfaces so that you can design functions that do not take concrete types but instead types that offer the behaviour you need. This gives you some flexibility whilst maintaining type-safety.
+Go currently offers you a way to be more abstract with your types with interfaces, so that you can design functions that do not take concrete types but instead, types that offer the behaviour you need. This gives you some flexibility whilst maintaining type-safety.
 
 ### A function that takes a string or an integer? (or indeed, other things)
 
@@ -111,7 +111,7 @@ func AssertNotEqual(got, want interface{}) {
 
 ```
 
-The tests should now compile and pass. The output will be a bit ropey because we're using the `%d` format string to print our messages so change them to `%+v` for a better output.
+The tests should now compile and pass. The output will be a bit ropey because we're using the integer `%d` format string to print our messages, so change them to the general `%+v` format for a better output of the value's field name.
 
 ### Tradeoffs made without generics
 
@@ -123,17 +123,17 @@ func (is *I) Equal(a, b interface{}) {
 
 So what's the problem?
 
-By using `interface{}` the compiler can't help us when writing our code, because we're not telling it anything useful about the types of things passed to the function. Go back to the go2go playground and try comparing two different types
+By using `interface{}` the compiler can't help us when writing our code, because we're not telling it anything useful about the types of things passed to the function. Go back to the _go2go playground_ and try comparing two different types,
 
 ```go
 AssertNotEqual(1, "1")
 ```
 
-In this case, we get away with it; the test compiles, and it fails as we'd hope; but do we want to be able to compare strings and integers? What about a `Person` with an `Airport` ?
+In this case, we get away with it; the test compiles, and it fails as we'd hope, although the error message `got 1, want 1` is unclear; but do we want to be able to compare strings with integers? What about comparing a `Person` with an `Airport`?
 
-Writing functions that take `interface{}` can be extremely challenging and bug-prone because we've _lost_ our constraints, and we have no information at compile time as to what kind of data we're dealing with.
+Writing functions that take `interface{}` can be extremely challenging and bug-prone because we've _lost_ our constraints, and we have no information at compile time as to what kinds of data we're dealing with.
 
-Developers often have to use reflection to implement these *ahem* generic functions, which is usually painful and can hurt the performance of your program.
+Often developers have to use reflection to implement these *ahem* generic functions, which is usually painful and can hurt the performance of your program.
 
 ## Our own test helpers with generics
 
@@ -178,13 +178,13 @@ To write generic functions in Go, you need to provide "type parameters" which is
 
 In our case the type of our type parameter is [`comparable`](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md#comparable-types-in-constraints) and we've given it the label of `T`. This label then lets us describe the types for the arguments to our function.
 
-We're using `comparable` because we want to describe to the compiler that we wish to use `==` and `!=` - we want to compare! If you try changing the type to `any`
+We're using `comparable` because we want to describe to the compiler that we wish to use the `==` and `!=` operators - we want to compare! If you try changing the type to `any`,
 
 ```go
 func AssertNotEqual[T any](got, want T) {
 ```
 
-You'll get the following error
+You'll get the following error:
 
 ```
 prog.go2:15:5: cannot compare got != want (operator != not defined for T)
@@ -369,11 +369,11 @@ func (s *Stack) Pop() (interface{}, bool) {
 
 ### The problem with throwing out type safety
 
-The first problem is the same with our `AssertEquals`, we've lost type safety. I can `Push` apples onto a stack of oranges
+The first problem is the same as we saw with our `AssertEquals` - we've lost type safety. I can now `Push` apples onto a stack of oranges.
 
-Even if we have discipline not to do this, the code is still unpleasant to work with because when methods **return `interface{}` they are horrible to work with**.
+Even if we have the discipline not to do this, the code is still unpleasant to work with because when methods **return `interface{}` they are horrible to work with**.
 
-Add the following test
+Add the following test,
 
 ```go
 myStackOfInts.Push(1)
@@ -383,19 +383,19 @@ secondNum, _ := myStackOfInts.Pop()
 AssertEqual(firstNum+secondNum, 3)
 ```
 
-You get a compiler error, showing the weakness of losing type-safety
+You get a compiler error, showing the weakness of losing type-safety:
 
 ```go
 prog.go2:59:14: invalid operation: operator + not defined for firstNum (variable of type interface{})
 ```
 
-`Pop` returning `interface{}` means the compiler has no information about what the data is and therefore severely limits what we can do. It can't know that it is an integer, so it does not let us use the `+` operator. To get around this, the caller would have to do a [type assertion](https://golang.org/ref/spec#Type_assertions) for each value. Yuck.
+When `Pop` returns `interface{}` it means the compiler has no information about what the data is and therefore severely limits what we can do. It can't know that it should be an integer, so it does not let us use the `+` operator. To get around this, the caller would have to do a [type assertion](https://golang.org/ref/spec#Type_assertions) for each value. Yuck.
 
 ### Generic data structures to the rescue
 
-As well as defining generic arguments to functions, you can define generic data structures
+Just like you can define generic arguments to functions, you can define generic data structures.
 
-Here's our new `Stack` implementation, featuring a generic data type, and the tests showing them working how we'd like them to work, with full type-safety. ([Full code listing here](https://go2goplay.golang.org/p/xAWcaMelgQV))
+Here's our new `Stack` implementation, featuring a generic data type and the tests, showing them working how we'd like them to work, with full type-safety. ([Full code listing here](https://go2goplay.golang.org/p/xAWcaMelgQV))
 
 ```go
 package main
@@ -457,23 +457,23 @@ func main() {
 
 You'll notice the syntax for defining generic data structures is consistent with defining generic arguments to functions.
 
-Now that we have done this refactoring we can safely remove the string stack test because we don't need to prove the same logic over and over.
+Now that we have done this refactoring, we can safely remove the string stack test because we don't need to prove the same logic over and over.
 
 Using a generic data type we have:
 
-- Reduced duplication of important logic
-- `Pop` now returns `T` so that means if we create a `Stack[int]` we in practice get back `int` from `Pop` which means we can now use `+` without the need for type assertion gymnastics.
+- Reduced duplication of important logic.
+- Made `Pop` return `T` so that if we create a `Stack[int]` we in practice get back `int` from `Pop`; we can now use `+` without the need for type assertion gymnastics.
 - Prevented misuse at compile time. You cannot `Push` oranges to an apple stack.
 
 ## Wrapping up
 
-Hopefully this chapter has given you a taste of generics syntax and give you some ideas as to why they might be helpful. We've written our own `Assert` functions which we can safely re-use to experiment with other ideas around generics, and we implemented a simple data structure where it can store any type of data we wish in a type-safe manner.
+This chapter should have given you a taste of generics syntax and some ideas as to why generics might be helpful. We've written our own `Assert` functions which we can safely re-use to experiment with other ideas around generics, and we've implemented a simple data structure to store any type of data we wish, in a type-safe manner.
 
-If you're inexperienced with statically-typed languages the point of generics may not be immediately obvious but hopefully the examples in this chapter have illustrated where the Go language isn't as expressive as we'd like. In particular using `interface{}` makes your code:
+If you're inexperienced with statically-typed languages, the point of generics may not be immediately obvious but I hope the examples in this chapter have illustrated where the Go language isn't as expressive as we'd like. In particular using `interface{}` makes your code:
 
 - Less safe (mix apples and oranges), requires more error handling
 - Less expressive, `interface{}` tells you nothing about the data
-- Often requires users to use reflection, type-assertions e.t.c. just to get at the actual type you want
+- More likely to need reflection, type-assertions etc., just to get at the type you want
 
 Generics allow us to express our types with the constraints we need while giving us the freedom to have more generalised functions and data-types.
 
@@ -482,9 +482,7 @@ Generics allow us to express our types with the constraints we need while giving
 - No.
 - Stop being rude about Java, it's not nice. It's nice to be nice.
 
-There's a lot of [FUD](https://en.wikipedia.org/wiki/Fear,_uncertainty,_and_doubt) in the Go community about generics leading to nightmare abstractions and baffling code bases.
-
-This is usually caveatted with "they must be used carefully". Whilst this is true, it's not especially useful advice because this is true of any language feature.
+There's a lot of [FUD (fear, uncertainty and doubt)](https://en.wikipedia.org/wiki/Fear,_uncertainty,_and_doubt) in the Go community about generics leading to nightmare abstractions and baffling code bases. This is usually caveatted with "they must be used carefully". Whilst this is true, it's not especially useful advice because this is true of any language feature.
 
 I know this because I have written extremely awful code _without_ generics.
 
@@ -504,9 +502,9 @@ People run in to problems with generics when they're abstracting too quickly wit
 
 The TDD cycle of red, green, refactor means that you have more guidance as to what code you _actually need_ to deliver your behaviour, **rather than imagining abstractions up front**; but you still need to be careful.
 
-There's no hard and fast rules here but resist making things generic until you can see that you have a useful generalisation. When we created the various `Stack` implementations we importantly started with _concrete_ behaviour like `StackOfStrings` and `StackOfInts` backed by tests. From our real code we could start to see real patterns and backed by our tests we could explore refactoring toward a more general-purpose solution.
+There's no hard and fast rules here but resist making things generic until you can see that you have a useful generalisation. When we created the various `Stack` implementations we importantly started with _concrete_ behaviour like `StackOfStrings` and `StackOfInts` backed by tests. From our real code we could start to see real patterns, and backed by our tests, we could explore refactoring toward a more general-purpose solution.
 
-People often advise you to only generalise when you see the same code 3 times, which seems like a good starting rule of thumb.
+People often advise you to only generalise when you see the same code three times, which seems like a good starting rule of thumb.
 
 A common path I've taken in other programming languages has been:
 
@@ -518,7 +516,7 @@ A common path I've taken in other programming languages has been:
 - Sleep on it
 - Another TDD cycle
 
-> OK, I'd like to try to see if I can generalise this thing. Thank goodness I am so smart and handsome because I use TDD, so I can refactor whenever I wish, and the process has helped me understand what behaviour I actually need before designing too much.
+> OK, I'd like to try to see if I can generalise this thing. Thank goodness I am so smart and good-looking because I use TDD, so I can refactor whenever I wish, and the process has helped me understand what behaviour I actually need before designing too much.
 
 - The abstraction feels nice! The tests are still passing, and the code is simpler
 - I can now delete a number of tests, I've captured the _essence_ of the behaviour and removed unnecessary detail
