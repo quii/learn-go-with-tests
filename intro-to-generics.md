@@ -363,7 +363,7 @@ func (s *Stack) Pop() (interface{}, bool) {
 ```
 
 - We're aliasing our previous implementations of `StackOfInts` and `StackOfStrings` to a new unified type `Stack`
-- We've removed the type safety from the `Stack` by making it so `values` is a slice of `interface{}`
+- We've removed the type safety from the `Stack` by making it so `values` is a [slice](https://github.com/quii/learn-go-with-tests/blob/main/arrays-and-slices.md) of `interface{}`
 
 ... And our tests still pass. Who needs generics?
 
