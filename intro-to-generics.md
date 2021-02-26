@@ -2,9 +2,12 @@
 
 (At the time of writing) Go does not have support for user-defined generics, but [the proposal](https://blog.golang.org/generics-proposal) [has been accepted](https://github.com/golang/go/issues/43651#issuecomment-776944155) and will be included in 1.18
 
-However, there are ways to experiment with the upcoming implementation using the [go2go playground](https://go2goplay.golang.org/) _today_. So to work through this chapter you'll have to leave your precious editor of choice and instead do the work within the playground. 
+However, there are ways to experiment with the upcoming implementation using the [go2go playground](https://go2goplay.golang.org/) _today_. So to work through this chapter you'll have to leave your precious editor of choice and instead do the work within the playground.
 
-This chapter will give you a brief introduction to generics, hopefully dispel any reservations you may have about them and give you an idea of how you will be able to simplify some of your code in the future.
+This chapter will give you an introduction to generics, hopefully dispel any reservations you may have about them and give you an idea of how you will be able to simplify some of your code in the future. After reading this you'll know how to write
+
+- A function that takes generic aguments
+- A generic data-structure
 
 The code we write here will be the foundation for future chapters around generics.
 
@@ -126,9 +129,9 @@ By using `interface{}` the compiler can't help us when writing our code, because
 AssertNotEqual(1, "1")
 ```
 
-Now to be fair in this case, we get away with it; the test compiles, and it fails as we'd hope; but in a cosy type-safe world do we want to be able to compare strings and integers?
+In this case, we get away with it; the test compiles, and it fails as we'd hope; but do we want to be able to compare strings and integers? What about a `Person` with an `Airport` ?
 
-In our case we get away with it but writing functions that take `interface{}` can be extremely challenging and bug-prone because we've _lost_ our constraints, and we have no information at compile time as to what kind of data we're dealing with.
+Writing functions that take `interface{}` can be extremely challenging and bug-prone because we've _lost_ our constraints, and we have no information at compile time as to what kind of data we're dealing with.
 
 Developers often have to use reflection to implement these *ahem* generic functions, which is usually painful and can hurt the performance of your program.
 
@@ -466,10 +469,13 @@ Using a generic data type we have:
 
 Hopefully this chapter has given you a taste of generics syntax and give you some ideas as to why they might be helpful. We've written our own `Assert` functions which we can safely re-use to experiment with other ideas around generics, and we implemented a simple data structure where it can store any type of data we wish in a type-safe manner.
 
-The next chapters will explore:
+If you're inexperienced with statically-typed languages the point of generics may not be immediately obvious but hopefully the examples in this chapter have illustrated where the Go language isn't as expressive as we'd like. In particular using `interface{}` makes your code:
 
-- Defining our own type parameters
-- Multiple type parameters
+- Less safe (mix apples and oranges), requires more error handling
+- Less expressive, `interface{}` tells you nothing about the data
+- Often requires users to use reflection, type-assertions e.t.c. just to get at the actual type you want
+
+Generics, with very little ceremony solves these problems for us.
 
 ### Will generics turn Go into Java?
 
@@ -498,7 +504,7 @@ People run in to problems with generics when they're abstracting too quickly wit
 
 The TDD cycle of red, green, refactor means that you have more guidance as to what code you _actually need_ to deliver your behaviour, **rather than imagining abstractions up front**; but you still need to be careful.
 
-There's no hard and fast rules here but resist making things generic until you can see that you have a useful generalisation. This may take the form of writing a number of tests and _then_ noticing a pattern when you're refactoring.
+There's no hard and fast rules here but resist making things generic until you can see that you have a useful generalisation. When we created the various `Stack` implementations we importantly started with _concrete_ behaviour like `StackOfStrings` and `StackOfInts` backed by tests. From our real code we could start to see real patterns and backed by our tests we could explore refactoring toward a more general-purpose solution.
 
 People often advise you to only generalise when you see the same code 3 times, which seems like a good starting rule of thumb.
 
