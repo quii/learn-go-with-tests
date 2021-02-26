@@ -36,9 +36,9 @@ func main() {
 	AssertEqual(1, 1)
 	AssertNotEqual(1, 2)
 
-	AssertEqual(50, 100)
+	AssertEqual(50, 100) // this should fail
 
-	AssertNotEqual(2, 2) // wont see this
+	AssertNotEqual(2, 2) // so you wont see this print
 }
 
 func AssertEqual(got, want int) {
