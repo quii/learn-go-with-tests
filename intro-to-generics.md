@@ -109,7 +109,7 @@ func AssertNotEqual(got, want interface{}) {
 
 ```
 
-The tests should now compile and pass. The output will be a bit ropey because we're using the integer `%d` format string to print our messages, so change them to the general `%+v` format for a better output of the value's field name.
+The tests should now compile and pass. The output will be a bit ropey because we're using the integer `%d` format string to print our messages, so change them to the general `%+v` format for a better output of any kind of value.
 
 ### Tradeoffs made without generics
 
