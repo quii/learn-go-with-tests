@@ -92,7 +92,7 @@ You can't pass a `string` to a function that expects an `integer`.
 Whilst this can feel like ceremony, it can be extremely helpful. By describing these constraints you,
 
 - Make function implementation simpler. By describing to the compiler what types you work with, you **constrain the number of possible valid implementations**. You can't "add" a `Person` and a `BankAccount`. You can't capitalise an `integer`. In software, constraints are often extremely helpful.
-- Are prevented from accidentally passing data to a function you didn't mean to
+- Are prevented from accidentally passing data to a function you didn't mean to.
 
 Go currently offers you a way to be more abstract with your types with interfaces, so that you can design functions that do not take concrete types but instead, types that offer the behaviour you need. This gives you some flexibility whilst maintaining type-safety.
 
@@ -324,7 +324,7 @@ func AssertNotEqual[T comparable](got, want T) {
 
 ### Problems
 
-- The code for both `StackOfStrings` and `StackOfInts` is almost identical. Whilst duplication isn't always the end of the world, this doesn't feel great and does add an increased maintenance cost
+- The code for both `StackOfStrings` and `StackOfInts` is almost identical. Whilst duplication isn't always the end of the world, this doesn't feel great and does add an increased maintenance cost.
 - As we're duplicating the logic across two types, we've had to duplicate the tests too.
 
 We really want to capture the _idea_ of a stack in one type, and have one set of tests for them. We should be wearing our refactoring hat right now which means we should not be changing the tests because we want to maintain the same behaviour.
@@ -471,14 +471,13 @@ If you're inexperienced with statically-typed languages, the point of generics m
 
 - Less safe (mix apples and oranges), requires more error handling
 - Less expressive, `interface{}` tells you nothing about the data
-- More likely to need to use [reflection](https://github.com/quii/learn-go-with-tests/blob/main/reflection.md), type-assertions etc., just to get at the type you want
+- More likely to rely on [reflection](https://github.com/quii/learn-go-with-tests/blob/main/reflection.md), type-assertions etc., just to get at the type you want
 
-Generics allow us to express our types with the constraints we need while giving us the freedom to have more generalised functions and data-types.
+Generics allow us to express our types with the constraints we need, while maintaining type safety and giving us the freedom to have more generalised functions and data-types.
 
 ### Will generics turn Go into Java?
 
 - No.
-- Stop being rude about Java, it's not nice. It's nice to be nice.
 
 There's a lot of [FUD (fear, uncertainty and doubt)](https://en.wikipedia.org/wiki/Fear,_uncertainty,_and_doubt) in the Go community about generics leading to nightmare abstractions and baffling code bases. This is usually caveatted with "they must be used carefully". Whilst this is true, it's not especially useful advice because this is true of any language feature.
 
@@ -486,7 +485,7 @@ I know this because I have written extremely awful code _without_ generics.
 
 ### You're already using generics
 
-The FUD becomes even sillier when you consider that if you've used arrays, slices or maps; you've already been a consumer of generic code.
+When you consider that if you've used arrays, slices or maps; you've _already been a consumer of generic code_.
 
 ```go
 var myApples []Apples
@@ -494,13 +493,17 @@ var myApples []Apples
 append(myApples, Orange{})
 ```
 
+### Abstraction is not a dirty word
+
+It's easy to dunk on [AbstractSingletonProxyFactoryBean](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/aop/framework/AbstractSingletonProxyFactoryBean.html) but let's not pretend a code base with no abstraction at all isn't also bad. It's your job to _gather_ related concepts when appropriate, so your system is easier to understand and change; rather than being a collection of disparate functions and types with a lack of clarity.
+
 ### [Make it work, make it right, make it fast](https://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast#:~:text=%22Make%20it%20work%2C%20make%20it,to%20DesignForPerformance%20ahead%20of%20time.)
 
-People run in to problems with generics when they're abstracting too quickly without enough information.
+People run in to problems with generics when they're abstracting too quickly without enough information to make good design decisions.
 
 The TDD cycle of red, green, refactor means that you have more guidance as to what code you _actually need_ to deliver your behaviour, **rather than imagining abstractions up front**; but you still need to be careful.
 
-There's no hard and fast rules here but resist making things generic until you can see that you have a useful generalisation. When we created the various `Stack` implementations we importantly started with _concrete_ behaviour like `StackOfStrings` and `StackOfInts` backed by tests. From our real code we could start to see real patterns, and backed by our tests, we could explore refactoring toward a more general-purpose solution.
+There's no hard and fast rules here but resist making things generic until you can see that you have a useful generalisation. When we created the various `Stack` implementations we importantly started with _concrete_ behaviour like `StackOfStrings` and `StackOfInts` backed by tests. From our _real_ code we could start to see real patterns, and backed by our tests, we could explore refactoring toward a more general-purpose solution.
 
 People often advise you to only generalise when you see the same code three times, which seems like a good starting rule of thumb.
 
@@ -516,10 +519,5 @@ A common path I've taken in other programming languages has been:
 
 > OK, I'd like to try to see if I can generalise this thing. Thank goodness I am so smart and good-looking because I use TDD, so I can refactor whenever I wish, and the process has helped me understand what behaviour I actually need before designing too much.
 
-- The abstraction feels nice! The tests are still passing, and the code is simpler
+- This abstraction feels nice! The tests are still passing, and the code is simpler
 - I can now delete a number of tests, I've captured the _essence_ of the behaviour and removed unnecessary detail
-
-
-### Abstraction is not a dirty word
-
-It's easy to dunk on [AbstractSingletonProxyFactoryBean](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/aop/framework/AbstractSingletonProxyFactoryBean.html) but let's not pretend a code base with no abstraction at all isn't also bad. It's your job to _gather_ related concepts when appropriate, so your system is easier to understand and change; rather than being a collection of disparate functions and types with a lack of clarity.
