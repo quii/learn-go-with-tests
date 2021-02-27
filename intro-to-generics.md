@@ -9,8 +9,6 @@ This chapter will give you an introduction to generics, dispel reservations you 
 - A function that takes generic aguments
 - A generic data-structure
 
-The code we write here will be the foundation for future chapters around generics.
-
 ## Setting up the playground
 
 In the _go2go playground_ we can't run `go test`. How are we going to write tests to explore generic code?
