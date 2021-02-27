@@ -17,7 +17,7 @@ The playground _does_ let us execute code, and because we're programmers that me
 
 ## Our own test helpers (`AssertEqual`, `AssertNotEqual`)
 
-To explore generics in future chapters we need to write some test helpers that'll kill the program and print something useful if a test fails.
+To explore generics we'll write some test helpers that'll kill the program and print something useful if a test fails.
 
 ### Assert on integers
 
