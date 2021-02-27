@@ -81,7 +81,7 @@ type checking failed for main
 prog.go2:8:14: cannot use "CJ" (untyped string constant) as int value in argument to AssertEqual
 ```
 
-If you take your time to read the error, you'll see the compiler is complaining we're trying to pass a `string` to a function that expects an `integer`.
+If you take your time to read the error, you'll see the compiler is complaining that we're trying to pass a `string` to a function that expects an `integer`.
 
 #### Recap on type-safety
 
