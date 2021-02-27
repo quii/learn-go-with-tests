@@ -471,7 +471,7 @@ If you're inexperienced with statically-typed languages, the point of generics m
 
 - Less safe (mix apples and oranges), requires more error handling
 - Less expressive, `interface{}` tells you nothing about the data
-- More likely to need reflection, type-assertions etc., just to get at the type you want
+- More likely to need to use reflection, type-assertions etc., just to get at the type you want
 
 Generics allow us to express our types with the constraints we need while giving us the freedom to have more generalised functions and data-types.
 
