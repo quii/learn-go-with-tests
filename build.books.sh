@@ -48,6 +48,7 @@ docker run -v `pwd`:/source jagregory/pandoc -o learn-go-with-tests.epub --latex
     context.md \
     roman-numerals.md \
     math.md \
+    intro-to-generics.md \
     app-intro.md \
     http-server.md \
     json.md \
