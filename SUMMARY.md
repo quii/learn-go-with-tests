@@ -21,6 +21,7 @@
 * [Context](context.md)
 * [Intro to property based tests](roman-numerals.md)
 * [Maths](math.md)
+* [Intro to generics](intro-to-generics.md)
 
 ## Build an application
 
