@@ -467,6 +467,8 @@ Using a generic data type we have:
 
 This chapter should have given you a taste of generics syntax and some ideas as to why generics might be helpful. We've written our own `Assert` functions which we can safely re-use to experiment with other ideas around generics, and we've implemented a simple data structure to store any type of data we wish, in a type-safe manner.
 
+### Generics are simpler than using `interface{}` in most cases
+
 If you're inexperienced with statically-typed languages, the point of generics may not be immediately obvious but I hope the examples in this chapter have illustrated where the Go language isn't as expressive as we'd like. In particular using `interface{}` makes your code:
 
 - Less safe (mix apples and oranges), requires more error handling
