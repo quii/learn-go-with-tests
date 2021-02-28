@@ -387,7 +387,27 @@ You get a compiler error, showing the weakness of losing type-safety:
 prog.go2:59:14: invalid operation: operator + not defined for firstNum (variable of type interface{})
 ```
 
-When `Pop` returns `interface{}` it means the compiler has no information about what the data is and therefore severely limits what we can do. It can't know that it should be an integer, so it does not let us use the `+` operator. To get around this, the caller would have to do a [type assertion](https://golang.org/ref/spec#Type_assertions) for each value. Yuck.
+When `Pop` returns `interface{}` it means the compiler has no information about what the data is and therefore severely limits what we can do. It can't know that it should be an integer, so it does not let us use the `+` operator.
+
+To get around this, the caller has to do a [type assertion](https://golang.org/ref/spec#Type_assertions) for each value.
+
+```go
+myStackOfInts.Push(1)
+myStackOfInts.Push(2)
+firstNum, _ := myStackOfInts.Pop()
+secondNum, _ := myStackOfInts.Pop()
+
+// get our ints from out interface{}
+reallyFirstNum, ok := firstNum.(int)
+AssertTrue(ok) // need to check we definitely got an int out of the interface{}
+
+reallySecondNum, ok := secondNum.(int)
+AssertTrue(ok) // and again!
+
+AssertEqual(reallyFirstNum+reallySecondNum, 3)
+```
+
+The unpleasantness radiating from this test would be repeated for every potential user of our `Stack` implementation, yuck.
 
 ### Generic data structures to the rescue
 
@@ -455,6 +475,30 @@ func main() {
 
 You'll notice the syntax for defining generic data structures is consistent with defining generic arguments to functions.
 
+```go
+type Stack[T any] struct {
+    values []T
+}
+```
+
+It's _almost_ the same as before, it's just that what we're saying is the **type of the stack constrains what type of values you can work with**.
+
+Once you create a `Stack[Orange]` or a `Stack[Apple]` the methods defined on our stack will only let you pass in and will only return the particular type of the stack you're working with:
+
+```go
+func (s *Stack[T]) Pop() (T, bool) {
+```
+
+You can imagine the types of implementation being somehow generated for you, depending on what type of stack you create:
+
+```go
+func (s *Stack[Orange]) Pop() (Orange, bool) {
+```
+
+```go
+func (s *Stack[Apple]) Pop() (Apple, bool) {
+```
+
 Now that we have done this refactoring, we can safely remove the string stack test because we don't need to prove the same logic over and over.
 
 Using a generic data type we have:
@@ -465,17 +509,19 @@ Using a generic data type we have:
 
 ## Wrapping up
 
-This chapter should have given you a taste of generics syntax and some ideas as to why generics might be helpful. We've written our own `Assert` functions which we can safely re-use to experiment with other ideas around generics, and we've implemented a simple data structure to store any type of data we wish, in a type-safe manner.
+This chapter should have given you a taste of generics syntax, and some ideas as to why generics might be helpful. We've written our own `Assert` functions which we can safely re-use to experiment with other ideas around generics, and we've implemented a simple data structure to store any type of data we wish, in a type-safe manner.
 
 ### Generics are simpler than using `interface{}` in most cases
 
-If you're inexperienced with statically-typed languages, the point of generics may not be immediately obvious but I hope the examples in this chapter have illustrated where the Go language isn't as expressive as we'd like. In particular using `interface{}` makes your code:
+If you're inexperienced with statically-typed languages, the point of generics may not be immediately obvious, but I hope the examples in this chapter have illustrated where the Go language isn't as expressive as we'd like. In particular using `interface{}` makes your code:
 
 - Less safe (mix apples and oranges), requires more error handling
 - Less expressive, `interface{}` tells you nothing about the data
-- More likely to rely on [reflection](https://github.com/quii/learn-go-with-tests/blob/main/reflection.md), type-assertions etc., just to get at the type you want
+- More likely to rely on [reflection](https://github.com/quii/learn-go-with-tests/blob/main/reflection.md), type-assertions etc which makes your code more difficult to work with and more error prone as it pushes checks from compile-time to runtime
 
-Generics allow us to express our types with the constraints we need, while maintaining type safety and giving us the freedom to have more generalised functions and data-types.
+Using statically typed languages is an act of describing constraints. If you do it well you create code that is not only safe and simple to use but also simpler to write because the possible solution space is smaller.
+
+Generics gives us a new way to express constraints in our code, which as demonstrated will allow us to consolidate and simplify code that is not possible to do today.
 
 ### Will generics turn Go into Java?
 
