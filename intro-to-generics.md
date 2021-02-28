@@ -527,9 +527,11 @@ Generics gives us a new way to express constraints in our code, which as demonst
 
 - No.
 
-There's a lot of [FUD (fear, uncertainty and doubt)](https://en.wikipedia.org/wiki/Fear,_uncertainty,_and_doubt) in the Go community about generics leading to nightmare abstractions and baffling code bases. This is usually caveatted with "they must be used carefully". Whilst this is true, it's not especially useful advice because this is true of any language feature.
+There's a lot of [FUD (fear, uncertainty and doubt)](https://en.wikipedia.org/wiki/Fear,_uncertainty,_and_doubt) in the Go community about generics leading to nightmare abstractions and baffling code bases. This is usually caveatted with "they must be used carefully".
 
-I know this because I have written extremely awful code _without_ generics.
+Whilst this is true, it's not especially useful advice because this is true of any language feature.
+
+When you define your own interfaces you are describing constraints (to use this function, give me something with this method) just like you do with generics. It is possible to make poor design decisions when you do this, generics are not unique in this respect.
 
 ### You're already using generics
 
