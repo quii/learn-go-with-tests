@@ -190,6 +190,33 @@ prog.go2:15:5: cannot compare got != want (operator != not defined for T)
 
 Which makes a lot of sense, because you can't use those operators on every (or `any`) type.
 
+### Is [`any`](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md#the-constraint) the same as `interface{}` ?
+
+Consider two functions
+
+```go
+func GenericFoo[T any](x, y any)
+```
+
+```go
+func InterfaceyFoo(x, y interface{})
+```
+
+What's the point of generics here? Doesn't `any` describe... anything?
+
+In terms of constraints, `any` does mean "anything" and so does `interface{}`. The difference with the generic version is _you're still describing a specific type_ and what that means is we've still constrained this function to only work with _one_ type.
+
+What this means is you can call `InterfaceyFoo` with any combination of types (e.g `InterfaceyFoo(apple, orange)`); so you can compare apples and oranges which is probably _not_ what you want to do. However `GenericFoo` still offers some constraints.
+
+Valid:
+
+- `GenericFoo(apple1, apple2)`
+- `GenericFoo(orange1, orange2`
+
+Not valid (fails compilation):
+
+- `GenericFoo(apple1, orange1)`
+
 ## Next: Generic data types
 
 We're going to create a [stack](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)) data type. Stacks should be fairly straightforward to understand from a requirements point of view. They're a collection of items where you can `Push` items to the "top" and to get items back again you `Pop` items from the top (LIFO - last in, first out).
