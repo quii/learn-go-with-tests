@@ -195,7 +195,7 @@ Which makes a lot of sense, because you can't use those operators on every (or `
 Consider two functions
 
 ```go
-func GenericFoo[T any](x, y any)
+func GenericFoo[T any](x, y T)
 ```
 
 ```go
