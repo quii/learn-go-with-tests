@@ -56,7 +56,6 @@ I am proud to offer this resource for free, but if you wish to give some appreci
 13. [Context](context.md) - Use the context package to manage and cancel long-running processes
 14. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
 15. [Maths](math.md) - Use the `math` package to draw an SVG clock
-16. [Intro to generics](intro-to-generics.md) - Learn how to write functions that take generic arguments and make your own generic data-structure
 
 ### Build an application
 
@@ -93,6 +92,7 @@ If you have such a question raise it as an issue on github and I'll try and find
 ### Meta / Discussion
 
 * [Why](why.md) - Watch a video, or read about why unit testing and TDD is important
+* [Intro to generics](intro-to-generics.md) - Learn how to write functions that take generic arguments and make your own generic data-structure
 * [Anti-patterns](anti-patterns.md) - A short chapter on TDD and unit testing anti-patterns
 
 ## Contributing

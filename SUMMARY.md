@@ -21,7 +21,6 @@
 * [Context](context.md)
 * [Intro to property based tests](roman-numerals.md)
 * [Maths](math.md)
-* [Intro to generics](intro-to-generics.md)
 
 ## Build an application
 
@@ -44,5 +43,6 @@
 
 * [Why unit tests and how to make them work for you](why.md)
 * [Anti-patterns](anti-patterns.md)
+* [Intro to generics](intro-to-generics.md)
 * [Contributing](contributing.md)
 * [Chapter Template](template.md)
