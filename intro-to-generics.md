@@ -174,9 +174,9 @@ func AssertNotEqual[T comparable](got, want T) {
 
 To write generic functions in Go, you need to provide "type parameters" which is just a fancy way of saying "describe your generic type and give it a label".
 
-In our case the type of our type parameter is [`comparable`](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md#comparable-types-in-constraints) and we've given it the label of `T`. This label then lets us describe the types for the arguments to our function.
+In our case the type of our type parameter is [`comparable`](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md#comparable-types-in-constraints) and we've given it the label of `T`. This label then lets us describe the types for the arguments to our function (`got, want T`).
 
-We're using `comparable` because we want to describe to the compiler that we wish to use the `==` and `!=` operators - we want to compare! If you try changing the type to `any`,
+We're using `comparable` because we want to describe to the compiler that we wish to use the `==` and `!=` operators on things of type `T` in our function, we want to compare! If you try changing the type to `any`,
 
 ```go
 func AssertNotEqual[T any](got, want T) {
@@ -531,7 +531,7 @@ There's a lot of [FUD (fear, uncertainty and doubt)](https://en.wikipedia.org/wi
 
 Whilst this is true, it's not especially useful advice because this is true of any language feature.
 
-Not many people complain about our ability to define interfaces which, like generics is a way of describing constraints within our code. When you describe an interface you are making a design choice that _could be poor_, generics are not unique in their ability to make confusing, annoying to use code. 
+Not many people complain about our ability to define interfaces which, like generics is a way of describing constraints within our code. When you describe an interface you are making a design choice that _could be poor_, generics are not unique in their ability to make confusing, annoying to use code.
 
 ### You're already using generics
 
