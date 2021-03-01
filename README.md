@@ -92,6 +92,7 @@ If you have such a question raise it as an issue on github and I'll try and find
 ### Meta / Discussion
 
 * [Why](why.md) - Watch a video, or read about why unit testing and TDD is important
+* [Intro to generics](intro-to-generics.md) - Learn how to write functions that take generic arguments and make your own generic data-structure
 * [Anti-patterns](anti-patterns.md) - A short chapter on TDD and unit testing anti-patterns
 
 ## Contributing
