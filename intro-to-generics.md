@@ -519,7 +519,7 @@ If you're inexperienced with statically-typed languages, the point of generics m
 - Less expressive, `interface{}` tells you nothing about the data
 - More likely to rely on [reflection](https://github.com/quii/learn-go-with-tests/blob/main/reflection.md), type-assertions etc which makes your code more difficult to work with and more error prone as it pushes checks from compile-time to runtime
 
-Using statically typed languages is an act of describing constraints. If you do it well you create code that is not only safe and simple to use but also simpler to write because the possible solution space is smaller.
+Using statically typed languages is an act of describing constraints. If you do it well, you create code that is not only safe and simple to use but also simpler to write because the possible solution space is smaller.
 
 Generics gives us a new way to express constraints in our code, which as demonstrated will allow us to consolidate and simplify code that is not possible to do today.
 
@@ -531,7 +531,7 @@ There's a lot of [FUD (fear, uncertainty and doubt)](https://en.wikipedia.org/wi
 
 Whilst this is true, it's not especially useful advice because this is true of any language feature.
 
-When you define your own interfaces you are describing constraints (to use this function, give me something with this method) just like you do with generics. It is possible to make poor design decisions when you do this, generics are not unique in this respect.
+Not many people complain about our ability to define interfaces which, like generics is a way of describing constraints within our code. When you describe an interface you are making a design choice that _could be poor_, generics are not unique in their ability to make confusing, annoying to use code. 
 
 ### You're already using generics
 
