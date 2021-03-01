@@ -206,16 +206,21 @@ What's the point of generics here? Doesn't `any` describe... anything?
 
 In terms of constraints, `any` does mean "anything" and so does `interface{}`. The difference with the generic version is _you're still describing a specific type_ and what that means is we've still constrained this function to only work with _one_ type.
 
-What this means is you can call `InterfaceyFoo` with any combination of types (e.g `InterfaceyFoo(apple, orange)`); so you can compare apples and oranges which is probably _not_ what you want to do. However `GenericFoo` still offers some constraints.
+What this means is you can call `InterfaceyFoo` with any combination of types (e.g `InterfaceyFoo(apple, orange)`). However `GenericFoo` still offers some constraints because we've said that it only works with _one_ type, `T`.
 
 Valid:
 
 - `GenericFoo(apple1, apple2)`
-- `GenericFoo(orange1, orange2`
+- `GenericFoo(orange1, orange2)`
+- `GenericFoo(1, 2)`
+- `GenericFoo("one", "two")`
 
 Not valid (fails compilation):
 
 - `GenericFoo(apple1, orange1)`
+- `GenericFoo("1", 1)`
+
+`any` is especially useful when making data types where you want it to work with various types, but you don't actually _use_ the type in your own data structure (typically you're just storing it). Things like, `Set` and `LinkedList`, are all good candidates for using `any`.
 
 ## Next: Generic data types
 
