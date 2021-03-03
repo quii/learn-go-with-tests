@@ -35,6 +35,7 @@ docker run -v `pwd`:/source jagregory/pandoc -o learn-go-with-tests.epub --latex
     why.md \
     hello-world.md \
     integers.md \
+    iteration.md \
     arrays-and-slices.md \
     structs-methods-and-interfaces.md \
     pointers-and-errors.md \
