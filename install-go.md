@@ -64,7 +64,7 @@ mkdir -p $GOPATH/src $GOPATH/pkg $GOPATH/bin
 At this point you can `go get` and the `src/package/bin` will be installed correctly in the appropriate `$GOPATH/xxx` directory.
 
 ### Go Modules
-Go 1.11 introduced [Modules](https://github.com/golang/go/wiki/Modules), enabling an alternative workflow. This new approach will gradually [become the default](https://blog.golang.org/modules2019) mode, deprecating the use of `GOPATH`.
+Go 1.11 introduced [Modules](https://github.com/golang/go/wiki/Modules), enabling an alternative workflow. This new approach is the default build mode since Go 1.16, therefore the use of `GOPATH` is not recommended.
 
 Modules aim to solve problems related to dependency management, version selection and reproducible builds; they also enable users to run Go code outside of `GOPATH`.
 
@@ -85,13 +85,8 @@ A `go.mod` file could look like this:
 ```
 module cmd
 
-go 1.14
+go 1.16
 
-require (
-        github.com/google/pprof v0.0.0-20190515194954-54271f7e092f
-        golang.org/x/arch v0.0.0-20190815191158-8a70ba74b3a1
-        golang.org/x/tools v0.0.0-20190611154301-25a4f137592f
-)
 ```
 
 The built-in documentation provides an overview of all available `go mod` commands.
