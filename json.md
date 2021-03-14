@@ -702,7 +702,7 @@ Then add a helper for `assertContentType`.
 
 ```go
 //server_test.go
-func assertContentType(t *testing.TB, response *httptest.ResponseRecorder, want string) {
+func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want string) {
 	t.Helper()
 	if response.Result().Header.Get("content-type") != want {
 		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
