@@ -2205,7 +2205,7 @@ make us feel uncomfortable? Shouldn't we do something like
 - use an SVG library?
 
 We could refactor our code to do any of these things, and we can do so because
-because it doesn't matter _how_ we produce our SVG, what's important is _that
+it doesn't matter _how_ we produce our SVG, what's important is _that
 it's an SVG that we produce_. As such, the part of our system that needs to know
 the most about SVGs - that needs to be the strictest about what constitutes an
 SVG - is the test for the SVG output; it needs to have enough context and
