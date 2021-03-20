@@ -37,34 +37,8 @@ go version go1.14 darwin/amd64
 
 ## Go Environment
 
-### $GOPATH
-Go is opinionated.
-
-By convention, all Go code lives within a single workspace (folder). This workspace could be anywhere in your machine. If you don't specify, Go will assume `$HOME/go` as the default workspace. The workspace is identified (and modified) by the environment variable [GOPATH](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable).
-
-You should set the environment variable so that you can use it later in scripts, shells, etc.
-
-Update your `.bash_profile` to contain the following exports:
-
-```sh
-export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
-```
-
-*Note* you should open a new shell to pickup these environment variables.
-
-Go assumes that your workspace contains a specific directory structure.
-
-Go places its files in three directories: All source code lives in src, package objects lives in pkg, and the compiled programs live in bin. You can create these directories as follows:
-
-```sh
-mkdir -p $GOPATH/src $GOPATH/pkg $GOPATH/bin
-```
-
-At this point you can `go get` and the `src/package/bin` will be installed correctly in the appropriate `$GOPATH/xxx` directory.
-
 ### Go Modules
-Go 1.11 introduced [Modules](https://github.com/golang/go/wiki/Modules), enabling an alternative workflow. This new approach is the default build mode since Go 1.16, therefore the use of `GOPATH` is not recommended.
+Go 1.11 introduced [Modules](https://github.com/golang/go/wiki/Modules). This approach is the default build mode since Go 1.16, therefore the use of `GOPATH` is not recommended.
 
 Modules aim to solve problems related to dependency management, version selection and reproducible builds; they also enable users to run Go code outside of `GOPATH`.
 
