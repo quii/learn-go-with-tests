@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -70,5 +71,5 @@ func (m MongoUserService) Register(user User) (insertedID string, err error) {
 func main() {
 	mongoService := NewMongoUserService()
 	server := NewUserServer(mongoService)
-	http.ListenAndServe(":8000", http.HandlerFunc(server.RegisterUser))
+	log.Fatal(http.ListenAndServe(":8000", http.HandlerFunc(server.RegisterUser)))
 }

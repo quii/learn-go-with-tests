@@ -158,9 +158,7 @@ import (
 
 func main() {
 	handler := http.HandlerFunc(PlayerServer)
-	if err := http.ListenAndServe(":5000", handler); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
-	}
+    log.Fatal(http.ListenAndServe(":5000", handler))
 }
 ```
 
@@ -185,7 +183,7 @@ By type casting our `PlayerServer` function with it, we have now implemented the
 
 ### `http.ListenAndServe(":5000"...)`
 
-`ListenAndServe` takes a port to listen on a `Handler`. If the port is already being listened to it will return an `error` so we are using an `if` statement to capture that scenario and log the problem to the user.
+`ListenAndServe` takes a port to listen on a `Handler`. If there is a problem the web server will return an error, an example of that might be the port already being listened to. For that reason we wrap the call in `log.Fatal` to log the error to the user.
 
 What we're going to do now is write _another_ test to force us into making a positive change to try and move away from the hard-coded value.
 
@@ -409,10 +407,7 @@ Now `main.go` won't compile for the same reason.
 ```go
 func main() {
 	server := &PlayerServer{}
-
-	if err := http.ListenAndServe(":5000", server); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
-	}
+    log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 
@@ -491,10 +486,7 @@ func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 
 func main() {
 	server := &PlayerServer{&InMemoryPlayerStore{}}
-
-	if err := http.ListenAndServe(":5000", server); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
-	}
+    log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 
@@ -1037,10 +1029,7 @@ import (
 
 func main() {
 	server := &PlayerServer{NewInMemoryPlayerStore()}
-
-	if err := http.ListenAndServe(":5000", server); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
-	}
+    log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 

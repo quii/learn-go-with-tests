@@ -168,21 +168,22 @@ Run the following
 package main
 
 import (
-	"fmt"
-	"io"
-	"net/http"
+    "fmt"
+    "io"
+    "log"
+    "net/http"
 )
 
 func Greet(writer io.Writer, name string) {
-	fmt.Fprintf(writer, "Hello, %s", name)
+    fmt.Fprintf(writer, "Hello, %s", name)
 }
 
 func MyGreeterHandler(w http.ResponseWriter, r *http.Request) {
-	Greet(w, "world")
+    Greet(w, "world")
 }
 
 func main() {
-	http.ListenAndServe(":5000", http.HandlerFunc(MyGreeterHandler))
+    log.Fatal(http.ListenAndServe(":5000", http.HandlerFunc(MyGreeterHandler)))
 }
 ```
 
