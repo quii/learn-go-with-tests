@@ -599,7 +599,7 @@ Next, let's create a function to `Delete` a word in the dictionary.
 ```go
 func TestDelete(t *testing.T) {
     word := "test"
-    dictionary := Dictionary{word: "test definition"}
+    dictionary := Dictionary{word: word}
 
     dictionary.Delete(word)
 
