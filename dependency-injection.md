@@ -80,7 +80,7 @@ func TestGreet(t *testing.T) {
 }
 ```
 
-The `buffer` type from the `bytes` package implements the `Writer` interface.
+The `Buffer` type from the `bytes` package implements the `Writer` interface.
 
 So we'll use it in our test to send in as our `Writer` and then we can check what was written to it after we invoke `Greet`
 
