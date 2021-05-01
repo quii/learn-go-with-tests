@@ -4,7 +4,7 @@
 
 It is assumed that you have read the structs section before as some understanding of interfaces will be needed for this.
 
-There is _a lot_ of misunderstandings around dependency injection around the programming community. Hopefully, this guide will show you how
+There are _a lot_ of misunderstandings around dependency injection around the programming community. Hopefully, this guide will show you how
 
 * You don't need a framework
 * It does not overcomplicate your design
