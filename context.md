@@ -394,7 +394,7 @@ Our happy path should be... happy. Now we can fix the other test.
 
 ## Write the test first
 
-We need to test that we do not write any kind of response on the error case. Sadly `httptest.ResponseRecorder` doesn't have a way of figuring this out so we'll have to role our own spy to test for this.
+We need to test that we do not write any kind of response on the error case. Sadly `httptest.ResponseRecorder` doesn't have a way of figuring this out so we'll have to roll our own spy to test for this.
 
 ```go
 type SpyResponseWriter struct {
