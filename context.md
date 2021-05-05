@@ -108,7 +108,7 @@ t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
       svr.ServeHTTP(response, request)
 
       if !store.cancelled {
-          t.Errorf("store was not told to cancel")
+          t.Error("store was not told to cancel")
       }
   })
 ```
@@ -214,14 +214,14 @@ type SpyStore struct {
 func (s *SpyStore) assertWasCancelled() {
 	s.t.Helper()
 	if !s.cancelled {
-		s.t.Errorf("store was not told to cancel")
+		s.t.Error("store was not told to cancel")
 	}
 }
 
 func (s *SpyStore) assertWasNotCancelled() {
 	s.t.Helper()
 	if s.cancelled {
-		s.t.Errorf("store was told to cancel")
+		s.t.Error("store was told to cancel")
 	}
 }
 ```
