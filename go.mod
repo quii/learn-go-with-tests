@@ -1,10 +1,19 @@
-module github.com/quii/learn-go-with-tests
+module github.com/mohamedmehdigara/go-modules
 
-go 1.14
+go 1.16
 
 require (
-	github.com/client9/misspell v0.3.4 // indirect
-	github.com/gorilla/websocket v1.4.2
-	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/tools v0.0.0-20201105001634-bc3cf281b174 // indirect
+	github.com/go-delve/delve v1.6.0 // indirect
+	github.com/google/go-dap v0.5.0 // indirect
+	github.com/mattn/go-colorable v0.1.8 // indirect
+	github.com/mattn/go-runewidth v0.0.12 // indirect
+	github.com/peterh/liner v1.2.1 // indirect
+	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/russross/blackfriday v1.6.0 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/spf13/cobra v1.1.3 // indirect
+	go.starlark.net v0.0.0-20210429133630-0c63ff3779a6 // indirect
+	golang.org/x/arch v0.0.0-20210502124803-cbf565b21d1e // indirect
+	golang.org/x/sys v0.0.0-20210503173754-0981d6026fa6 // indirect
 )
