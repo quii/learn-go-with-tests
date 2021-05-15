@@ -37,7 +37,9 @@ If you've got this far in the book this is hopefully feeling very boring and rou
 
 ## Try to run the test
 
-`./numeral_test.go:6:9: undefined: ConvertToRoman`
+```console
+./numeral_test.go:6:9: undefined: ConvertToRoman
+```
 
 Let the compiler guide the way
 
@@ -53,7 +55,7 @@ func ConvertToRoman(arabic int) string {
 
 It should run now
 
-```go
+```console
 === RUN   TestRomanNumerals
 --- FAIL: TestRomanNumerals (0.00s)
     numeral_test.go:10: got '', want 'I'
@@ -104,7 +106,7 @@ func TestRomanNumerals(t *testing.T) {
 
 ## Try to run the test
 
-```
+```console
 === RUN   TestRomanNumerals/2_gets_converted_to_II
     --- FAIL: TestRomanNumerals/2_gets_converted_to_II (0.00s)
         numeral_test.go:20: got 'I', want 'II'
@@ -165,7 +167,7 @@ Add the following to our cases
 
 ## Try to run the test
 
-```
+```console
 === RUN   TestRomanNumerals/3_gets_converted_to_III
     --- FAIL: TestRomanNumerals/3_gets_converted_to_III (0.00s)
         numeral_test.go:20: got 'I', want 'III'
@@ -220,8 +222,6 @@ Things start getting more complicated now. The Romans in their wisdom thought re
 
 Instead you take the next highest symbol and then "subtract" by putting a symbol to the left of it. Not all symbols can be used as subtractors; only I (1), X (10) and C (100).
 
-
-
 For example `5` in Roman Numerals is `V`. To create 4 you do not do `IIII`, instead you do `IV`.
 
 ## Write the test first
@@ -232,7 +232,7 @@ For example `5` in Roman Numerals is `V`. To create 4 you do not do `IIII`, inst
 
 ## Try to run the test
 
-```
+```console
 === RUN   TestRomanNumerals/4_gets_converted_to_IV_(cant_repeat_more_than_3_times)
     --- FAIL: TestRomanNumerals/4_gets_converted_to_IV_(cant_repeat_more_than_3_times) (0.00s)
         numeral_test.go:24: got 'IIII', want 'IV'
@@ -290,7 +290,7 @@ Let's make 5 work
 
 ## Try to run the test
 
-```
+```console
 === RUN   TestRomanNumerals/5_gets_converted_to_V
     --- FAIL: TestRomanNumerals/5_gets_converted_to_V (0.00s)
         numeral_test.go:25: got 'IIV', want 'V'
@@ -348,7 +348,6 @@ func ConvertToRoman(arabic int) string {
 
 	return result.String()
 }
-
 ```
 
 - Given the signals I'm reading from our code, driven from our tests of some very basic scenarios I can see that to build a Roman Numeral I need to subtract from `arabic` as I apply symbols
@@ -365,7 +364,7 @@ I'm pretty sure this approach will be valid for 6 (VI), 7 (VII) and 8 (VIII) too
 ```
 ## Try to run the test
 
-```
+```console
 === RUN   TestRomanNumerals/9_gets_converted_to_IX
     --- FAIL: TestRomanNumerals/9_gets_converted_to_IX (0.00s)
         numeral_test.go:29: got 'VIV', want 'IX'
@@ -448,7 +447,6 @@ Here are some test cases, try and make them pass.
 ```
 
 Need help? You can see what symbols to add in [this gist](https://gist.github.com/pamelafox/6c7b948213ba55332d86efd0f0b037de).
-
 
 ## And the rest!
 
@@ -540,7 +538,6 @@ var allRomanNumerals = []RomanNumeral{
 
 We're not done yet. Next we're going to write a function that converts _from_ a Roman Numeral to an `int`
 
-
 ## Write the test first
 
 We can re-use our test cases here with a little refactoring
@@ -564,7 +561,7 @@ Notice I am using the slice functionality to just run one of the tests for now (
 
 ## Try to run the test
 
-```
+```console
 ./numeral_test.go:60:11: undefined: ConvertToArabic
 ```
 
@@ -580,7 +577,7 @@ func ConvertToArabic(roman string) int {
 
 The test should now run and fail
 
-```
+```console
 --- FAIL: TestConvertingToArabic (0.00s)
     --- FAIL: TestConvertingToArabic/'I'_gets_converted_to_1 (0.00s)
         numeral_test.go:62: got 0, want 1
@@ -722,7 +719,7 @@ func couldBeSubtractive(index int, currentSymbol uint8, roman string) bool {
 
 Let's move on to `cases[:5]`
 
-```
+```console
 === RUN   TestConvertingToArabic/'V'_gets_converted_to_5
     --- FAIL: TestConvertingToArabic/'V'_gets_converted_to_5 (0.00s)
         numeral_test.go:62: got 1, want 5
@@ -805,7 +802,7 @@ It's still pretty nasty, but it's getting there.
 
 If you start moving our `cases[:xx]` number through you'll see that quite a few are passing now. Remove the slice operator entirely and see which ones fail, here's some examples from my suite
 
-```
+```console
 === RUN   TestConvertingToArabic/'XL'_gets_converted_to_40
     --- FAIL: TestConvertingToArabic/'XL'_gets_converted_to_40 (0.00s)
         numeral_test.go:62: got 60, want 40
@@ -990,7 +987,7 @@ This feels like a good test to build us confidence because it should break if th
 
  Our `assertion` function above takes a random number and runs our functions to test the property.
 
- ### Run our test
+### Run our test
 
  Try running it; your computer may hang for a while, so kill it when you're bored :)
 
@@ -1010,7 +1007,7 @@ assertion := func(arabic int) bool {
 
 You should see something like this:
 
-```
+```console
 === RUN   TestPropertiesOfConversion
 2019/07/09 14:41:27 6849766357708982977
 2019/07/09 14:41:27 -7028152357875163913
@@ -1103,14 +1100,18 @@ chapter so, in the interests of full disclosure, here's what he said.
 > for 'finger', as we usually have ten of them. In the Arabic (also called
 > Hindu-Arabic) number system there are ten of them. These Arabic digits are:
 >
->     0 1 2 3 4 5 6 7 8 9
+> ```console
+>   0 1 2 3 4 5 6 7 8 9
+> ```
 >
 > A _numeral_ is the representation of a number using a collection of digits.
 > An Arabic numeral is a number represented by Arabic digits in a base 10
 > positional number system. We say 'positional' because each digit has
 > a different value based upon its position in the numeral. So
 >
->     1337
+> ```console
+>   1337
+> ```
 >
 > The `1` has a value of one thousand because its the first digit in a four
 > digit numeral.
@@ -1123,11 +1124,13 @@ chapter so, in the interests of full disclosure, here's what he said.
 > all tied to its representation - we can see this if we ask ourselves what the
 > correct representation of this number is:
 >
->     255
->     11111111
->     two-hundred and fifty-five
->     FF
->     377
+> ```console
+> 255
+> 11111111
+> two-hundred and fifty-five
+> FF
+> 377
+> ```
 >
 > Yes, this is a trick question. They're all correct. They're the representation
 > of the same number in the decimal,  binary, English, hexadecimal and octal
@@ -1137,7 +1140,7 @@ chapter so, in the interests of full disclosure, here's what he said.
 > as a number - and we can see this when we look at integer literals in Go:
 >
 > ```go
->  0xFF == 255 // true
+>   0xFF == 255 // true
 > ```
 >
 > And how we can print integers in a format string:
@@ -1156,13 +1159,13 @@ chapter so, in the interests of full disclosure, here's what he said.
 > sometimes `arabic` will be written as a decimal integer literal
 >
 > ```go
-> ConvertToRoman(255)
+>   ConvertToRoman(255)
 > ```
 >
 > But it could just as well be written
 >
 > ```go
-> ConvertToRoman(0xFF)
+>   ConvertToRoman(0xFF)
 > ```
 >
 > Really, we're not 'converting' from an Arabic numeral at all, we're 'printing'  -
