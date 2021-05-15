@@ -76,10 +76,10 @@ func (w windowedRoman) Symbols() (symbols [][]byte) {
 		notAtEnd := i+1 < len(w)
 
 		if notAtEnd && isSubtractive(symbol) && allRomanNumerals.Exists(symbol, w[i+1]) {
-			symbols = append(symbols, []byte{byte(symbol), byte(w[i+1])})
+			symbols = append(symbols, []byte{symbol, w[i+1]})
 			i++
 		} else {
-			symbols = append(symbols, []byte{byte(symbol)})
+			symbols = append(symbols, []byte{symbol})
 		}
 	}
 	return

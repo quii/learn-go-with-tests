@@ -454,11 +454,11 @@ Need help? You can see what symbols to add in [this gist](https://gist.github.co
 
 Here are the remaining symbols
 
-| Arabic        | Roman           |
-| ------------- |:-------------:|
-| 100     | C      |
-| 500 | D      |
-| 1000 | M      |
+| Arabic | Roman |
+| ------ | :---: |
+| 100    |   C   |
+| 500    |   D   |
+| 1000   |   M   |
 
 Take the same approach for the remaining symbols, it should just be a matter of adding data to both the tests and our array of symbols.
 
@@ -919,10 +919,10 @@ func (w windowedRoman) Symbols() (symbols [][]byte) {
 		notAtEnd := i+1 < len(w)
 
 		if notAtEnd && isSubtractive(symbol) && allRomanNumerals.Exists(symbol, w[i+1]) {
-			symbols = append(symbols, []byte{byte(symbol), byte(w[i+1])})
+			symbols = append(symbols, []byte{symbol, w[i+1]})
 			i++
 		} else {
-			symbols = append(symbols, []byte{byte(symbol)})
+			symbols = append(symbols, []byte{symbol})
 		}
 	}
 	return
