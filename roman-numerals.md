@@ -454,11 +454,11 @@ Need help? You can see what symbols to add in [this gist](https://gist.github.co
 
 Here are the remaining symbols
 
-| Arabic        | Roman           |
-| ------------- |:-------------:|
-| 100     | C      |
-| 500 | D      |
-| 1000 | M      |
+| Arabic | Roman |
+| ------ | :---: |
+| 100    |   C   |
+| 500    |   D   |
+| 1000   |   M   |
 
 Take the same approach for the remaining symbols, it should just be a matter of adding data to both the tests and our array of symbols.
 
