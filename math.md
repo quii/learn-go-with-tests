@@ -660,6 +660,10 @@ Remember our unit circle picture?
 
 ![picture of the unit circle with the x and y elements of a ray defined as cos(a) and sin(a) respectively, where a is the angle made by the ray with the x axis](math/images/unit_circle_params.png)
 
+Also recall that we want to measure the angle from 12 o'clock which is the Y axis instead of from the X axis which we would like measuring the angle between the second hand and 3 o'clock.
+
+![unit circle ray defined from by angle from y axis](math/images/unit_circle_12_oclock.png)
+
 We now want the equation that produces X and Y. Let's write it into seconds:
 
 ```go
