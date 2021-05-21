@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // PlayerStore stores score information about players.
@@ -46,7 +47,7 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
+	player := strings.TrimPrefix(r.URL.Path, "/players/")
 
 	switch r.Method {
 	case http.MethodPost:

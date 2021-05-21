@@ -15,6 +15,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type PlayerStore interface {
@@ -27,7 +28,7 @@ type PlayerServer struct {
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
+	player := strings.TrimPrefix(r.URL.Path, "/players/")
 
 	switch r.Method {
 	case http.MethodPost:
@@ -121,25 +122,39 @@ Before worrying about actual scores and JSON we will try and keep the changes sm
 
 ```
 === RUN   TestLeague/it_returns_200_on_/league
-panic: runtime error: slice bounds out of range [recovered]
-    panic: runtime error: slice bounds out of range
-
-goroutine 6 [running]:
-testing.tRunner.func1(0xc42010c3c0)
-    /usr/local/Cellar/go/1.10/libexec/src/testing/testing.go:742 +0x29d
-panic(0x1274d60, 0x1438240)
-    /usr/local/Cellar/go/1.10/libexec/src/runtime/panic.go:505 +0x229
-github.com/quii/learn-go-with-tests/json-and-io/v2.(*PlayerServer).ServeHTTP(0xc420048d30, 0x12fc1c0, 0xc420010940, 0xc420116000)
-    /Users/quii/go/src/github.com/quii/learn-go-with-tests/json-and-io/v2/server.go:20 +0xec
+    server_test.go:107: did not get correct status, got 404, want 200
+    --- FAIL: TestLeague/it_returns_200_on_/league (0.00s)
 ```
 
-Your `PlayerServer` should be panicking like this. Go to the line of code in the stack trace which is pointing to `server.go`.
+Your `PlayerServer` should return the 404 status code like this. Go to the line of code highlighted in the test output. `server_test.go:107` is the statement `assertStatus(t, response.Code, http.StatusOK)`.
 
 ```go
-player := r.URL.Path[len("/players/"):]
+t.Run("it returns 200 on /league", func(t *testing.T) {
+    request, _ := http.NewRequest(http.MethodGet, "/league", nil)
+    response := httptest.NewRecorder()
+
+    server.ServeHTTP(response, request)
+
+    assertStatus(t, response.Code, http.StatusOK)
+})
 ```
 
-In the previous chapter, we mentioned this was a fairly naive way of doing our routing. What is happening is it's trying to split the string of the path starting at an index beyond `/league` so it is `slice bounds out of range`.
+The unexpected response code is created by `server.ServeHTTP(response, request)`:
+
+```go
+func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	player := strings.TrimPrefix(r.URL.Path, "/players/")
+
+	switch r.Method {
+	case http.MethodPost:
+		p.processWin(w, player)
+	case http.MethodGet:
+		p.showScore(w, player)
+	}
+}
+```
+
+In the previous chapter we considered assigning the trimmed path to `player` a fairly naive way of doing our routing. In our new test, the prefix `/players/` does not exist and `TrimPrefix` returns `/league`. With this value in the `player` variable we call `showScore` which stores the status code `404` in the `ResponseWriter w`, because the player named `/league` does not exist.
 
 ## Write enough code to make it pass
 
@@ -158,7 +173,7 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}))
 
 	router.Handle("/players/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		player := r.URL.Path[len("/players/"):]
+		player := strings.TrimPrefix(r.URL.Path, "/players/")
 
 		switch r.Method {
 		case http.MethodPost:
@@ -199,7 +214,7 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
-	player := r.URL.Path[len("/players/"):]
+	player := strings.TrimPrefix(r.URL.Path, "/players/")
 
 	switch r.Method {
 	case http.MethodPost:
