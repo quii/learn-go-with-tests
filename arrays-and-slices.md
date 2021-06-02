@@ -160,7 +160,7 @@ The problem here is we can either
 
 * Break the existing API by changing the argument to `Sum` to be a slice rather
   than an array. When we do this, we will potentially ruin
-	someone's day because our _other_ test will no longer compile!
+  someone's day because our _other_ test will no longer compile!
 * Create a new function
 
 In our case, no one else is using our function, so rather than having two functions to maintain, let's have just one.
