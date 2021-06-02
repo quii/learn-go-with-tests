@@ -593,7 +593,7 @@ Try and run the tests, the compiler should pass and the tests should be passing!
 
 ## Refactor
 
-The test code does not convey out intent very well and has a lot of boilerplate we can refactor away.
+The test code does not convey our intent very well and has a lot of boilerplate we can refactor away.
 
 ```go
 //server_test.go
