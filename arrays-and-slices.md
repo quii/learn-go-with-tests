@@ -39,9 +39,8 @@ We can initialize an array in two ways:
 * \[N\]type{value1, value2, ..., valueN} e.g. `numbers := [5]int{1, 2, 3, 4, 5}`
 * \[...\]type{value1, value2, ..., valueN} e.g. `numbers := [...]int{1, 2, 3, 4, 5}`
 
-It is sometimes useful to also print the inputs to the function in the error
-message and we are using the `%v` placeholder which is the "default" format,
-which works well for arrays.
+It is sometimes useful to also print the inputs to the function in the error message.
+Here, we are using the `%v` placeholder to print the "default" format, which works well for arrays.
 
 [Read more about the format strings](https://golang.org/pkg/fmt/)
 
@@ -95,9 +94,8 @@ func Sum(numbers [5]int) int {
 }
 ```
 
-`range` lets you iterate over an array. Every time it is called it returns two
-values, the index and the value. We are choosing to ignore the index value by
-using `_` [blank identifier](https://golang.org/doc/effective_go.html#blank).
+`range` lets you iterate over an array. On each iteration, `range` returns two values - the index and the value.
+We are choosing to ignore the index value by using `_` [blank identifier](https://golang.org/doc/effective_go.html#blank).
 
 ### Arrays and their type
 
@@ -161,11 +159,11 @@ This does not compile
 The problem here is we can either
 
 * Break the existing API by changing the argument to `Sum` to be a slice rather
-  than an array. When we do this we will know we have potentially ruined
-  someone's day because our _other_ test will not compile!
+  than an array. When we do this, we will potentially ruin
+	someone's day because our _other_ test will no longer compile!
 * Create a new function
 
-In our case, no-one else is using our function so rather than having two functions to maintain let's just have one.
+In our case, no one else is using our function, so rather than having two functions to maintain, let's have just one.
 
 ```go
 func Sum(numbers []int) int {
@@ -185,7 +183,8 @@ It turns out that fixing the compiler problems were all we need to do here and t
 
 ## Refactor
 
-We had already refactored `Sum` and all we've done is changing from arrays to slices, so there's not a lot to do here. Remember that we must not neglect our test code in the refactoring stage and we have some to do here.
+We already refactored `Sum` - all we did was replace arrays with slices, so no extra changes are required.
+Remember that we must not neglect our test code in the refactoring stage - we can further improve our `Sum` tests.
 
 ```go
 func TestSum(t *testing.T) {
@@ -224,12 +223,10 @@ In our case, you can see that having two tests for this function is redundant.
 If it works for a slice of one size it's very likely it'll work for a slice of
 any size \(within reason\).
 
-Go's built-in testing toolkit features a [coverage
-tool](https://blog.golang.org/cover), which can help identify areas of your code
-you have not covered. I do want to stress that having 100% coverage should not
-be your goal, it's just a tool to give you an idea of your coverage. If you have
-been strict with TDD, it's quite likely you'll have close to 100% coverage
-anyway.
+Go's built-in testing toolkit features a [coverage tool](https://blog.golang.org/cover).
+Whilst striving for 100% coverage should not be your end goal, the coverage tool can help
+identify areas of your code not covered by tests. If you have been strict with TDD,
+it's quite likely you'll have close to 100% coverage anyway.
 
 Try running
 
@@ -278,7 +275,7 @@ func TestSumAll(t *testing.T) {
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-We need to define SumAll according to what our test wants.
+We need to define `SumAll` according to what our test wants.
 
 Go can let you write [_variadic functions_](https://gobyexample.com/variadic-functions) that can take a variable number of arguments.
 
@@ -288,7 +285,7 @@ func SumAll(numbersToSum ...[]int) (sums []int) {
 }
 ```
 
-Try to compile but our tests still don't compile!
+This is valid, but our tests still won't compile!
 
 `./sum_test.go:26:9: invalid operation: got != want (slice can only be compared to nil)`
 
@@ -311,7 +308,7 @@ func TestSumAll(t *testing.T) {
 
 \(make sure you `import reflect` in the top of your file to have access to `DeepEqual`\)
 
-It's important to note that `reflect.DeepEqual` is not "type safe", the code
+It's important to note that `reflect.DeepEqual` is not "type safe" - the code
 will compile even if you did something a bit silly. To see this in action,
 temporarily change the test to:
 
@@ -327,19 +324,19 @@ func TestSumAll(t *testing.T) {
 }
 ```
 
-What we have done here is try to compare a `slice` with a `string`. Which makes
+What we have done here is try to compare a `slice` with a `string`. This makes
 no sense, but the test compiles! So while using `reflect.DeepEqual` is
 a convenient way of comparing slices \(and other things\) you must be careful
 when using it.
 
-Change the test back again and run it, you should have test output looking like this
+Change the test back again and run it. You should have test output like the following
 
 `sum_test.go:30: got [] want [3 9]`
 
 ## Write enough code to make it pass
 
 What we need to do is iterate over the varargs, calculate the sum using our
-`Sum` function from before and then add it to the slice we will return
+existing `Sum` function, then add it to the slice we will return
 
 ```go
 func SumAll(numbersToSum ...[]int) []int {
@@ -362,7 +359,7 @@ a starting capacity of the `len` of the `numbersToSum` we need to work through.
 You can index slices like arrays with `mySlice[N]` to get the value out or
 assign it a new value with `=`
 
-The tests should now pass
+The tests should now pass.
 
 ## Refactor
 
@@ -370,7 +367,7 @@ As mentioned, slices have a capacity. If you have a slice with a capacity of
 2 and try to do `mySlice[10] = 1` you will get a _runtime_ error.
 
 However, you can use the `append` function which takes a slice and a new value,
-returning a new slice with all the items in it.
+then returns a new slice with all the items in it.
 
 ```go
 func SumAll(numbersToSum ...[]int) []int {
@@ -386,9 +383,9 @@ func SumAll(numbersToSum ...[]int) []int {
 In this implementation, we are worrying less about capacity. We start with an
 empty slice `sums` and append to it the result of `Sum` as we work through the varargs.
 
-Our next requirement is to change `SumAll` to `SumAllTails`, where it now
-calculates the totals of the "tails" of each slice. The tail of a collection is
-all the items apart from the first one \(the "head"\)
+Our next requirement is to change `SumAll` to `SumAllTails`, where it will
+calculate the totals of the "tails" of each slice. The tail of a collection is
+all items in the collection except the first one \(the "head"\).
 
 ## Write the test first
 
@@ -427,11 +424,11 @@ func SumAllTails(numbersToSum ...[]int) []int {
 }
 ```
 
-Slices can be sliced! The syntax is `slice[low:high]` If you omit the value on
-one of the sides of the `:` it captures everything to the side of it. In our
-case, we are saying "take from 1 to the end" with `numbers[1:]`. You might want to
-invest some time in writing other tests around slices and experimenting with the
-slice operator so you can be familiar with it.
+Slices can be sliced! The syntax is `slice[low:high]`. If you omit the value on
+one of the sides of the `:` it captures everything to that side of it. In our
+case, we are saying "take from 1 to the end" with `numbers[1:]`. You may wish to
+spend some time writing other tests around slices and experiment with the
+slice operator to get more familiar with it.
 
 ## Refactor
 
@@ -498,7 +495,7 @@ func SumAllTails(numbersToSum ...[]int) []int {
 
 ## Refactor
 
-Our tests have some repeated code around assertion again, let's extract that into a function
+Our tests have some repeated code around the assertions again, so let's extract those into a function
 
 ```go
 func TestSumAllTails(t *testing.T) {
@@ -526,7 +523,7 @@ func TestSumAllTails(t *testing.T) {
 ```
 
 A handy side-effect of this is this adds a little type-safety to our code. If
-a silly developer adds a new test with `checkSums(t, got, "dave")` the compiler
+a developer mistakenly adds a new test with `checkSums(t, got, "dave")` the compiler
 will stop them in their tracks.
 
 ```bash
@@ -553,7 +550,7 @@ too, including arrays/slices themselves. So you can declare a variable of
 `[][]string` if you need to.
 
 [Check out the Go blog post on slices][blog-slice] for an in-depth look into
-slices. Try writing more tests to demonstrate what you learn from reading it.
+slices. Try writing more tests to solidify what you learn from reading it.
 
 Another handy way to experiment with Go other than writing tests is the Go
 playground. You can try most things out and you can easily share your code if
