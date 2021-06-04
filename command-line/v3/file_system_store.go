@@ -39,7 +39,7 @@ func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(),
 	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		return nil, nil, fmt.Errorf("problem opening %s %v", path, err)
+		return nil, nil, fmt.Errorf("problem opening %s, %v", path, err)
 	}
 
 	closeFunc := func() {
@@ -49,6 +49,7 @@ func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(),
 	store, err := NewFileSystemPlayerStore(db)
 
 	if err != nil {
+		db.Close()
 		return nil, nil, fmt.Errorf("problem creating file system player store, %v ", err)
 	}
 
