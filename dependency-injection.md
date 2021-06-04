@@ -160,7 +160,7 @@ func main() {
 
 What other places can we write data to using `io.Writer`? Just how general purpose is our `Greet` function?
 
-### The internet
+### The Internet
 
 Run the following
 

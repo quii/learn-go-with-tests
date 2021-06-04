@@ -491,12 +491,12 @@ func main() {
 ```
 
 If you run `go build` again and hit the same URL you should get `"123"`. Not great, but until we store data that's the best we can do.
+It also didn't feel great that our main application was starting up but not actually working. We had to manually test to see the problem.
 
 We have a few options as to what to do next
 
 -   Handle the scenario where the player doesn't exist
 -   Handle the `POST /players/{name}` scenario
--   It didn't feel great that our main application was starting up but not actually working. We had to manually test to see the problem.
 
 Whilst the `POST` scenario gets us closer to the "happy path", I feel it'll be easier to tackle the missing player scenario first as we're in that context already. We'll get to the rest later.
 
