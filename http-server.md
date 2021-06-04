@@ -984,7 +984,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 
 I am going to take some liberties here and write more code than you may be comfortable with without writing a test.
 
-_This is allowed_! We still have a test checking things should be working correctly but it is not around the specific unit we're working with (`InMemoryPlayerStore`).
+_This is allowed!_ We still have a test checking things should be working correctly but it is not around the specific unit we're working with (`InMemoryPlayerStore`).
 
 If I were to get stuck in this scenario, I would revert my changes back to the failing test and then write more specific unit tests around `InMemoryPlayerStore` to help me drive out a solution.
 
