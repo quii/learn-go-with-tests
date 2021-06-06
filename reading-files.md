@@ -1,6 +1,6 @@
 # Reading files
 
-In this chapter we're going to learn how to read some files, get some data out of them and do something useful. Naturally it'll be in a test-driven manner so we have some modular, nicely tested and simple to maintain code.
+In this chapter we're going to learn how to read some files, get some data out of them and do something useful.
 
 We've been asked to create a package that converts a given folder of blog posts and return a collection of `Post` which represents each file parsed with information about its contents.
 
@@ -31,9 +31,15 @@ type Post struct {
 
 As always we'll take an iterative approach where we're always taking simple, safe steps toward our goal.
 
-This requires us to break up our work into iterative steps, but we should be careful not to fall in to the trap of taking a "bottom up" approach. That might involve us making some kind of abstraction that is only validated once we stick everything together. This is _not_ iterative! This is missing out on the tight feedback loops that TDD is supposed to bring us.
+This requires us to break up our work into iterative steps, but we should be careful not to fall in to the trap of taking a "bottom up" approach. That might involve us making some kind of abstraction that is only validated once we stick everything together.
 
-Iterative means we work in "thin" vertical slices, as end-to-end as possible, keeping scope small but useful and validated.
+This is _not_ iterative! This is missing out on the tight feedback loops that TDD is supposed to bring us.
+
+Kent Beck says:
+
+> Optimism is an occupational hazard of programming. Feedback is the treatment.
+
+Iterative means we work in "thin" vertical slices, as end-to-end as possible, keeping scope small but useful and validated with tight feedback loops.
 
 Let's remind ourselves of our mindset and goals when starting:
 
