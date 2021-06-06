@@ -86,7 +86,12 @@ posts = blogposts.New(someFS)
 
 As discussed, we should try to keep scope as small and end-to-end as possible. A good first start to give us confidence is to prove we can read all the files in a directory and check the count of posts is the same as the number of files inside.
 
-Create a new project (`mkdir blogposts`, cd into it, `go mod init github.com/{your-name}/blogposts`) and then create a new file `blogposts_test.go`.
+Create a new project to work through this chapter
+
+- `mkdir blogposts`
+- `cd blogposts`
+- `go mod init github.com/{your-name}/blogposts`
+- `touch blogposts_test.go`.
 
 ```go
 package blogposts_test
