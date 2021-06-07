@@ -453,7 +453,7 @@ func newPost(postFile io.Reader) (Post, error) {
 }
 ```
 
-You can make a similar argument for our `getPost` function which takes an `fs.DirEntry` argument but simply causes `Name()` to get the file name. We don't need all that, decouple ourselves from that type and just pass the file name through as a string. Here's the fully refactored code:
+You can make a similar argument for our `getPost` function which takes an `fs.DirEntry` argument but simply calls `Name()` to get the file name. We don't need all that, decouple ourselves from that type and just pass the file name through as a string. Here's the fully refactored code:
 
 ```go
 func New(fileSystem fs.FS) ([]Post, error) {
@@ -492,7 +492,16 @@ func newPost(postFile io.Reader) (Post, error) {
 }
 ```
 
-From now on, most of our efforts can be neatly contained within `newPost`. The concerns of opening and iterating over files are done, and now we can focus on extracting the data for our `Post` type.
+From now on, most of our efforts can be neatly contained within `newPost`. The concerns of opening and iterating over files are done, and now we can focus on extracting the data for our `Post` type. Whilst not technically neccessary, files are a nice way to logically group related things together so I also moved the `Post` type and `newPost` into a new `post.go` file.
+
+## Write the test first
+
+Let's extend our test further to extract the next line from the file, the description.
+
+## Try to run the test
+## Write the minimal amount of code for the test to run and check the failing test output
+## Write enough code to make it pass
+## Refactor
 
 ## Wrapping up
 
