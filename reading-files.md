@@ -155,7 +155,7 @@ The tests still wont compile because our new package does not have a `New` funct
 ./blogpost_test.go:16:12: undefined: blogposts.New
 ```
 
-This forces us to make the skeleton of our function to make the test run. Remember not to overthink the code at this point, we're just trying to get a running test.
+This forces us to make the skeleton of our function to make the test run. Remember not to overthink the code at this point, we're just trying to get a running test and make sure it fails as we'd expect. If we skip this step we might be skipping over assumptions and not write a useful test.
 
 ```go
 package blogposts
@@ -166,7 +166,7 @@ type Post struct {
 
 }
 
-func New(fs fstest.MapFS) []Post {
+func New(fileSystem fstest.MapFS) []Post {
 	return nil
 }
 ```
