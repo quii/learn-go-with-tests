@@ -57,7 +57,7 @@ var posts blogposts.Post
 posts = blogposts.New("some-folder")
 ```
 
-To write a test around this, we'd need some kind of test folder with some example posts in it. _There's nothing wrong with this_, but it's not strictly a unit test because it goes to the file system. This means it'll be slightly slower, and a little more difficult to maintain although admittedly, not by a huge amount. We're also at risk of our code coupling itself to a specific file-system implementation that we don't really need to do.
+To write a test around this, we'd need some kind of test folder with some example posts in it. _There's nothing wrong with this_, but it's not strictly a unit test because it goes to the file system. This means it'll be slightly slower, and a little more difficult to maintain although admittedly, not by a huge amount. We're also unnecessarily coupling ourselves to a specific file-system implementation.
 
 ### File system abstractions introduced in Go 1.16
 
