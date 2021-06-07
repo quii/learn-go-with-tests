@@ -888,6 +888,8 @@ This is when consumer-driven, top-down TDD _feels correct_.
 
 A user of our package can look at our tests and quickly get up to speed with what it's supposed to do and how to use it. As maintainers, we can be confident our tests are useful because they're from a consumer's point of view. We're not testing implementation details or other incidental details.
 
-By relying on good software engineering practices like **polymorphism** and **dependency injection** our code is simple to test and use.
+By relying on good software engineering practices like  **dependency injection** our code is simple to test and use.
 
 When you're creating packages, even if they're only internal to your project, prefer a top-down consumer driven approach. This will stop you over-imagining designs and making abstractions you may not even need and will help ensure the tests you write are useful.
+
+The iterative approach kept every step small, and helped us uncover unclear requirements possibly sooner than with other, more ad-hoc approaches. 
