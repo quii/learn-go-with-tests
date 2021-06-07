@@ -28,9 +28,11 @@ type Post struct {
 
 ## Iterative, test-driven development
 
-As always we'll take an iterative approach where we're always taking simple, safe steps toward our goal.
+As always, we'll take an iterative approach where we're always taking simple, safe steps toward our goal.
 
-This requires us to break up our work into iterative steps, but we should be careful not to fall in to the trap of taking a "bottom up" approach. That might involve us making some kind of abstraction that is only validated once we stick everything together.
+This requires us to break up our work into iterative steps, but we should be careful not to fall in to the trap of taking a "bottom up" approach.
+
+We should not trust our over-active imaginations when we start work. You could be tempted into making some kind of abstraction that is only validated once we stick everything together, such as some kind of `BlogPostFileParser`.
 
 This is _not_ iterative! This is missing out on the tight feedback loops that TDD is supposed to bring us.
 
@@ -128,7 +130,7 @@ We've imported [`testing/fstest`](https://golang.org/pkg/testing/fstest/) which 
 
 This feels simpler than maintaining a folder of test files and will execute quicker too.
 
-Finally, we've written down the usage of our API from a consumer's point of view and then check if it at least creates the correct number of posts
+Finally, we've codified the usage of our API from a consumer's point of view, and then check if it at least creates the correct number of posts
 
 ## Try to run the test
 
@@ -138,7 +140,7 @@ Finally, we've written down the usage of our API from a consumer's point of view
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-The package doesn't exist, create a new file `blogposts.go` and put `package blogposts` inside it. You'll need to then import that package into your tests. For me the imports now look like:
+The package doesn't exist, create a new file `blogposts.go` and put `package blogposts` inside it. You'll need to then import that package into your tests. For me, the imports now look like:
 
 ```go
 import (
@@ -192,7 +194,7 @@ But, as Denise wrote:
 
 >Sliming is useful for giving a “skeleton” to your object. Designing an interface and executing logic are two concerns, and sliming tests strategically lets you focus on one at a time.
 
-We already have our structure. So what do we do instead?
+We already have our structure. So, what do we do instead?
 
 As we've cut scope, all we need to do is read the directory and create a post for each file we encounter. We don't have to worry about opening files and parsing them just yet.
 
@@ -209,13 +211,13 @@ func New(fileSystem fstest.MapFS) []Post {
 
 [`fs.ReadDir`](https://golang.org/pkg/io/fs/#ReadDir) reads a directory inside a given `fs.FS` returning [`[]DirEntry`](https://golang.org/pkg/io/fs/#DirEntry).
 
-Already our idealised view of the world has been foiled because errors can happen but remember right now our focus is to make the test pass, not changing design, so we'll ignore the error for now.
+Already our idealised view of the world has been foiled because errors can happen but remember now our focus is to make the test pass, not changing design, so we'll ignore the error for now.
 
 The rest of the code is straightforward, iterate over the entries and create a `Post` for each one and return the slice.
 
 ## Refactor
 
-Whilst our tests are passing, in practice we would not be able to use our new package outside this context because it is coupled to a concrete implementation, `fstest.MapFS` but as discussed it doesn't have to be. Change the argument to our `New` function to accept the interface from the standard library.
+Whilst our tests are passing, we can't use our new package outside this context because it is coupled to a concrete implementation `fstest.MapFS`, but as discussed, it doesn't have to be. Change the argument to our `New` function to accept the interface from the standard library.
 
 ```go
 func New(fileSystem fs.FS) []Post {
@@ -511,7 +513,7 @@ Description: Description 2`
 		"hello-world2.md": {Data: []byte(secondBody)},
 	}
 
-    // SNIP: all the previous test stuff
+    // rest of test code cut for brevity
 
 	t.Run("it parses the description", func(t *testing.T) {
 		got := posts[0].Description
@@ -552,7 +554,7 @@ The tests should now compile, and fail.
     blogpost_test.go:51: got "", want "Description 1"
 ```
 
-You'll notice that not only does our new test fail, but the title test fails too. This is because both tests are coupled to the test data and implementation. There are probably things you could do to prevent this but at some level you have to acknowledge that these things are _just coupled_ and you may as well live with it, at least for the short term.
+You'll notice that not only does our new test fail, but the title test fails too. This is because both tests are coupled to the test data and implementation. There are probably things you could do to prevent this but at some level you have to acknowledge that these things are _just coupled_ and, you may as well live with it, at least for the short term.
 
 ## Write enough code to make it pass
 
@@ -574,11 +576,11 @@ func newPost(postFile io.Reader) (Post, error) {
 }
 ```
 
-Handily, it also takes an `io.Reader` to read through (thank you again, loose-coupling) so we don't need to change our function arguments at all.
+Handily, it also takes an `io.Reader` to read through (thank you again, loose-coupling), we don't need to change our function arguments.
 
 Call `Scan` to read a line, and then extract the data using `Text`.
 
-This function could never return an `error`. It would be tempting at this point to remove it from the return type, but we know we'll have to handle invalid file structures later so we may as well leave it.
+This function could never return an `error`. It would be tempting at this point to remove it from the return type, but we know we'll have to handle invalid file structures later so, we may as well leave it.
 
 ## Refactor
 
@@ -600,7 +602,7 @@ func newPost(postFile io.Reader) (Post, error) {
 }
 ```
 
-This has barely saved any lines of code but that's rarely the point of refactoring. What I'm trying to do here is just separating the _what_ from the _how_ of reading lines to make the code a little more declarative to the reader.
+This has barely saved any lines of code, but that's rarely the point of refactoring. What I'm trying to do here is just separating the _what_ from the _how_ of reading lines to make the code a little more declarative to the reader.
 
 Whilst the magic numbers of 7 and 13 get the job done, they're not awfully descriptive.
 
@@ -643,9 +645,9 @@ func newPost(postBody io.Reader) (Post, error) {
 }
 ```
 
-You may or may not like this, I do though. The point is in the refactoring state we are free to play with the internal details, and you can keep running your tests to check things still behave correctly. We can always go back to previous states if we're not happy.
+You may or may not like this idea, but I do. The point is in the refactoring state we are free to play with the internal details, and you can keep running your tests to check things still behave correctly. We can always go back to previous states if we're not happy. The TDD approach gives us this license to frequently experiment with ideas, so we have more shots at writing great code.
 
-The next requirement is extracting the post's tags. If you're following along, i'd recommend trying to implement it yourself before reading on. You should now have a good, iterative rhythm and feel confident to extract the next line and parse out the data.
+The next requirement is extracting the post's tags. If you're following along, I'd recommend trying to implement it yourself before reading on. You should now have a good, iterative rhythm and feel confident to extract the next line and parse out the data.
 
 For brevity, I will not go through the TDD steps, but here's the test for tags.
 
@@ -660,43 +662,7 @@ Description: Description 2
 Tags: rust, borrow-checker`
 	)
 
-	fs := fstest.MapFS{
-		"hello world.md":  {Data: []byte(firstBody)},
-		"hello-world2.md": {Data: []byte(secondBody)},
-	}
-
-	posts, err := blogposts.New(fs)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Run("it creates a post for each file in the file system", func(t *testing.T) {
-		got := len(posts)
-		want := len(fs)
-
-		if got != want {
-			t.Errorf("got %d, want %d", got, want)
-		}
-	})
-
-	t.Run("it parses the title", func(t *testing.T) {
-		got := posts[0].Title
-		want := "Post 1"
-
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
-	})
-
-	t.Run("it parses the description", func(t *testing.T) {
-		got := posts[0].Description
-		want := "Description 1"
-
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
-	})
+    // rest of test code cut for brevity
 
 	t.Run("it extracts the tags", func(t *testing.T) {
 		got := posts[0].Tags
@@ -709,7 +675,7 @@ Tags: rust, borrow-checker`
 }
 ```
 
-You're only cheating yourself if you just copy and paste what I write, but to make sure we're all on the same page; here's my code which includes extracting the tags.
+You're only cheating yourself if you just copy and paste what I write. To make sure we're all on the same page, here's my code which includes extracting the tags.
 
 ```go
 const (
@@ -754,7 +720,7 @@ We've read the first 3 lines already. We then need to read one more line, discar
 
 ## Write the test first
 
-Change the test data to have the separator and a body with a few newlines to check we grab all the content
+Change the test data to have the separator, and a body with a few newlines to check we grab all the content.
 
 ```go
 	const (
@@ -793,11 +759,11 @@ World`
 ./blogpost_test.go:75:18: posts[0].Body undefined (type blogposts.Post has no field or method Body)
 ```
 
-As we'd expect
+As we'd expect.
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-Add `Body` to `Post` and it should fail how you'd expect.
+Add `Body` to `Post` and the test should fail.
 
 ```
 === RUN   TestNewBlogPosts
@@ -824,11 +790,13 @@ func newPost(postBody io.Reader) (Post, error) {
 	tags := strings.Split(readMetaLine(tagsSeparator), ", ")
 
 	scanner.Scan() // ignore a line
+
 	buf := bytes.Buffer{}
 	for scanner.Scan() {
 		fmt.Fprintln(&buf, scanner.Text())
 	}
 	body := strings.TrimSuffix(buf.String(), "\n")
+
 	return Post{
 		Title:       title,
 		Description: description,
@@ -839,12 +807,12 @@ func newPost(postBody io.Reader) (Post, error) {
 ```
 
 - `scanner.Scan()` returns a `bool` which indicates whether there's more data to scan, so we can use that with a `for` loop to keep reading through the data until the end.
-- After every `Scan()` we write the data into the buffer using `fmt.Fprintln`. We use the version that adds a newline because the scanner removes the newlines from each line but we need to maintain them.
-- Because of the above, we need to trim the final newline so we don't have a trailing one.
+- After every `Scan()` we write the data into the buffer using `fmt.Fprintln`. We use the version that adds a newline because the scanner removes the newlines from each line, but we need to maintain them.
+- Because of the above, we need to trim the final newline, so we don't have a trailing one.
 
 ## Refactor
 
-I think encapsulating the idea of getting the rest of the data into a helper function will help future readers quickly understand _what_ is happening in `newPost` without having to initially concern themselves with implementation specifics.
+Encapsulating the idea of getting the rest of the data into a function will help future readers quickly understand _what_ is happening in `newPost`, without having to concern themselves with implementation specifics.
 
 ```go
 func newPost(postBody io.Reader) (Post, error) {
@@ -873,7 +841,7 @@ func readBody(scanner *bufio.Scanner) string {
 }
 ```
 
-We've ignored error handling on the whole, purely for brevity but it may be a good exercise for yourself to add some test cases where the files have invalid content inside and make sure the code behaves appropriately. Our code is extremely easy to unit test so you're setup well for this task
+For brevity we've ignored error handling, but it may be a good exercise for yourself. Add some test cases where the files have invalid content inside and make sure the code behaves appropriately. Our code is extremely easy to unit test, so you're setup well for this task.
 
 ## Wrapping up
 
@@ -900,7 +868,7 @@ func main() {
 }
 ```
 
-- Add some markdown files into the `posts` folder and run the program!
+- Add some markdown files into a `posts` folder and run the program!
 
 Notice the symmetry between the production code:
 
