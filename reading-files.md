@@ -492,16 +492,159 @@ func newPost(postFile io.Reader) (Post, error) {
 }
 ```
 
-From now on, most of our efforts can be neatly contained within `newPost`. The concerns of opening and iterating over files are done, and now we can focus on extracting the data for our `Post` type. Whilst not technically neccessary, files are a nice way to logically group related things together so I also moved the `Post` type and `newPost` into a new `post.go` file.
+From now on, most of our efforts can be neatly contained within `newPost`. The concerns of opening and iterating over files are done, and now we can focus on extracting the data for our `Post` type. Whilst not technically necessary, files are a nice way to logically group related things together so I also moved the `Post` type and `newPost` into a new `post.go` file.
 
 ## Write the test first
 
-Let's extend our test further to extract the next line from the file, the description.
+Let's extend our test further to extract the next line from the file, the description. Up until making it pass should now feel comfortable and familiar.
+
+```go
+func TestNewBlogPosts(t *testing.T) {
+	const (
+		firstBody = `Title: Post 1
+Description: Description 1`
+		secondBody = `Title: Post 2
+Description: Description 2`
+	)
+
+	fs := fstest.MapFS{
+		"hello world.md":  {Data: []byte(firstBody)},
+		"hello-world2.md": {Data: []byte(secondBody)},
+	}
+
+    // SNIP: all the previous test stuff
+
+	t.Run("it parses the description", func(t *testing.T) {
+		got := posts[0].Description
+		want := "Description 1"
+
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+}
+```
 
 ## Try to run the test
+
+```
+./blogpost_test.go:47:18: posts[0].Description undefined (type blogposts.Post has no field or method Description)
+```
+
 ## Write the minimal amount of code for the test to run and check the failing test output
+
+Add the new field to `Post`.
+
+```go
+type Post struct {
+	Title       string
+	Description string
+}
+```
+
+The tests should now compile, and fail.
+
+```
+=== RUN   TestNewBlogPosts
+=== RUN   TestNewBlogPosts/it_creates_a_post_for_each_file_in_the_file_system
+=== RUN   TestNewBlogPosts/it_parses_the_title
+    blogpost_test.go:42: got "Post 1\nDescription: Description 1", want "Post 1"
+=== RUN   TestNewBlogPosts/it_parses_the_description
+    blogpost_test.go:51: got "", want "Description 1"
+```
+
+You'll notice that not only does our new test fail, but the title test fails too. This is because both tests are coupled to the test data and implementation. There are probably things you could do to prevent this but at some level you have to acknowledge that these things are _just coupled_ and you may as well live with it, at least for the short term.
+
 ## Write enough code to make it pass
+
+The standard library has a handy library for helping you scan through data, line by line; [`bufio.Scanner`](https://golang.org/pkg/bufio/#Scanner)
+
+> Scanner provides a convenient interface for reading data such as a file of newline-delimited lines of text.
+
+```go
+func newPost(postFile io.Reader) (Post, error) {
+	scanner := bufio.NewScanner(postFile)
+
+	scanner.Scan()
+	titleLine := scanner.Text()
+
+	scanner.Scan()
+	descriptionLine := scanner.Text()
+
+	return Post{Title: titleLine[7:], Description: descriptionLine[13:]}, nil
+}
+```
+
+Handily, it also takes an `io.Reader` to read through (thank you again, loose-coupling) so we don't need to change our function arguments at all.
+
+We then just `Scan` to read a line, and then extract the data using `Text`.
+
+You'll notice this function as it stands could never return an `error`. It would be tempting at this point to remove the argument, but we do know we'll have to handle invalid file structures at some point so we may as well leave it. This has the benefit of us not having to edit the calling code back and forth.
+
 ## Refactor
+
+We have some repitition around scanning a line and then reading the text. We know we're going to do this operation at least one more time, it's a simple refactor to DRY up so let's start with that.
+
+```go
+func newPost(postFile io.Reader) (Post, error) {
+	scanner := bufio.NewScanner(postFile)
+
+	readLine := func() string {
+		scanner.Scan()
+		return scanner.Text()
+	}
+
+	title := readLine()[7:]
+	description := readLine()[13:]
+
+	return Post{Title: title, Description: description}, nil
+}
+```
+
+This has barely saved any lines of code but that's rarely the point of refactoring. What I'm trying to do here is just separating the _what_ from the _how_ of reading lines to make the code a little more declarative to the reader.
+
+Whilst the magic numbers of 7 and 13 get the job done, they're not awfully descriptive.
+
+```go
+const (
+	titleSeparator = "Title: "
+	descriptionSeparator = "Description: "
+)
+
+func newPost(postFile io.Reader) (Post, error) {
+	scanner := bufio.NewScanner(postFile)
+
+	readLine := func() string {
+		scanner.Scan()
+		return scanner.Text()
+	}
+
+	title := readLine()[len(titleSeparator):]
+	description := readLine()[len(descriptionSeparator):]
+
+	return Post{Title: title, Description: description}, nil
+}
+```
+
+Now that I'm staring at the code with my creative refactoring mind, I'd like to try making our readLine function take care of removing the tag.
+
+```go
+func newPost(postFile io.Reader) (Post, error) {
+	scanner := bufio.NewScanner(postFile)
+
+	readMetaLine := func(tagName string) string {
+		scanner.Scan()
+		return scanner.Text()[len(tagName):]
+	}
+
+	return Post{
+		Title: readMetaLine(titleSeparator),
+		Description: readMetaLine(descriptionSeparator),
+	}, nil
+}
+```
+
+You may or may not like this, I do though. The point is in the refactoring state we are free to play with the internal details, and you can keep running your tests to check things still behave correctly. We can always go back to previous states if we're not happy.
 
 ## Wrapping up
 
