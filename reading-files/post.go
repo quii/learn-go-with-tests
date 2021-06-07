@@ -11,7 +11,7 @@ type Post struct {
 }
 
 const (
-	titleSeparator = "Title: "
+	titleSeparator       = "Title: "
 	descriptionSeparator = "Description: "
 )
 
@@ -24,7 +24,7 @@ func newPost(postFile io.Reader) (Post, error) {
 	}
 
 	return Post{
-		Title: readMetaLine(titleSeparator),
+		Title:       readMetaLine(titleSeparator),
 		Description: readMetaLine(descriptionSeparator),
 	}, nil
 }

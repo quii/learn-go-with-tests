@@ -28,4 +28,3 @@ func getPost(fileSystem fs.FS, fileName string) (Post, error) {
 	defer postFile.Close()
 	return newPost(postFile)
 }
-

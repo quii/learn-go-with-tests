@@ -607,7 +607,7 @@ Whilst the magic numbers of 7 and 13 get the job done, they're not awfully descr
 
 ```go
 const (
-	titleSeparator = "Title: "
+	titleSeparator       = "Title: "
 	descriptionSeparator = "Description: "
 )
 
