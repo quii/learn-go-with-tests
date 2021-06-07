@@ -12,7 +12,6 @@ Title: Hello, TDD world!
 Description: First post on our wonderful blog
 Tags: tdd, go
 ---
-
 Hello world!
 
 The body of posts starts after the `---`
@@ -645,6 +644,113 @@ func newPost(postBody io.Reader) (Post, error) {
 ```
 
 You may or may not like this, I do though. The point is in the refactoring state we are free to play with the internal details, and you can keep running your tests to check things still behave correctly. We can always go back to previous states if we're not happy.
+
+The next requirement is extracting the post's tags. If you're following along, i'd recommend trying to implement it yourself before reading on. You should now have a good, iterative rhythm and feel confident to extract the next line and parse out the data.
+
+For brevity, I will not go through the TDD steps, but here's the test for tags.
+
+```go
+func TestNewBlogPosts(t *testing.T) {
+	const (
+		firstBody = `Title: Post 1
+Description: Description 1
+Tags: tdd, go`
+		secondBody = `Title: Post 2
+Description: Description 2
+Tags: rust, borrow-checker`
+	)
+
+	fs := fstest.MapFS{
+		"hello world.md":  {Data: []byte(firstBody)},
+		"hello-world2.md": {Data: []byte(secondBody)},
+	}
+
+	posts, err := blogposts.New(fs)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("it creates a post for each file in the file system", func(t *testing.T) {
+		got := len(posts)
+		want := len(fs)
+
+		if got != want {
+			t.Errorf("got %d, want %d", got, want)
+		}
+	})
+
+	t.Run("it parses the title", func(t *testing.T) {
+		got := posts[0].Title
+		want := "Post 1"
+
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("it parses the description", func(t *testing.T) {
+		got := posts[0].Description
+		want := "Description 1"
+
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("it extracts the tags", func(t *testing.T) {
+		got := posts[0].Tags
+		want := []string{"tdd", "go"}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+}
+```
+
+You're only cheating yourself if you just copy and paste what I write, but to make sure we're all on the same page; here's my code which includes extracting the tags.
+
+```go
+const (
+	titleSeparator       = "Title: "
+	descriptionSeparator = "Description: "
+	tagsSeparator        = "Tags: "
+)
+
+func newPost(postBody io.Reader) (Post, error) {
+	scanner := bufio.NewScanner(postBody)
+
+	readMetaLine := func(tagName string) string {
+		scanner.Scan()
+		return scanner.Text()[len(tagName):]
+	}
+
+	return Post{
+		Title:       readMetaLine(titleSeparator),
+		Description: readMetaLine(descriptionSeparator),
+		Tags:        strings.Split(readMetaLine(tagsSeparator), ", "),
+	}, nil
+}
+```
+
+Hopefully no surprises here. We were able to re-use `readMetaLine` to get the next line for the tags and then split them up using `strings.Split`.
+
+The last iteration on our happy path is to extract the body.
+
+Here's a reminder of the proposed file format.
+
+```
+Title: Hello, TDD world!
+Description: First post on our wonderful blog
+Tags: tdd, go
+---
+Hello world!
+
+The body of posts starts after the `---`
+```
+
+We've read the first 3 lines already. We then need to read one more line, discard it and then the remainder of the file contains the post's body
 
 ## Wrapping up
 

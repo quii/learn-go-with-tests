@@ -2,6 +2,7 @@ package blogposts_test
 
 import (
 	blogposts "github.com/quii/learn-go-with-tests/reading-files"
+	"reflect"
 	"testing"
 	"testing/fstest"
 )
@@ -9,9 +10,11 @@ import (
 func TestNewBlogPosts(t *testing.T) {
 	const (
 		firstBody = `Title: Post 1
-Description: Description 1`
+Description: Description 1
+Tags: tdd, go`
 		secondBody = `Title: Post 2
-Description: Description 2`
+Description: Description 2
+Tags: rust, borrow-checker`
 	)
 
 	fs := fstest.MapFS{
@@ -49,6 +52,15 @@ Description: Description 2`
 
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("it extracts the tags", func(t *testing.T) {
+		got := posts[0].Tags
+		want := []string{"tdd", "go"}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v, want %v", got, want)
 		}
 	})
 }
