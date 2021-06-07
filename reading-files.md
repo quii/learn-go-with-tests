@@ -750,9 +750,174 @@ Hello world!
 The body of posts starts after the `---`
 ```
 
-We've read the first 3 lines already. We then need to read one more line, discard it and then the remainder of the file contains the post's body
+We've read the first 3 lines already. We then need to read one more line, discard it and then the remainder of the file contains the post's body.
+
+## Write the test first
+
+Change the test data to have the separator and a body with a few newlines to check we grab all the content
+
+```go
+	const (
+		firstBody = `Title: Post 1
+Description: Description 1
+Tags: tdd, go
+---
+Hello
+World`
+		secondBody = `Title: Post 2
+Description: Description 2
+Tags: rust, borrow-checker
+---
+B
+L
+M`
+```
+
+And then add another assertion like the others
+
+```go
+	t.Run("it extracts the body", func(t *testing.T) {
+		got := posts[0].Body
+		want := `Hello
+World`
+
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+```
+
+## Try to run the test
+
+```
+./blogpost_test.go:75:18: posts[0].Body undefined (type blogposts.Post has no field or method Body)
+```
+
+As we'd expect
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+Add `Body` to `Post` and it should fail how you'd expect.
+
+```
+=== RUN   TestNewBlogPosts
+=== RUN   TestNewBlogPosts/it_extracts_the_body
+    blogpost_test.go:80: got "", want "Hello\nWorld"
+```
+
+## Write enough code to make it pass
+
+1. Scan the next line to ignore the `---` separator.
+2. Keep scanning until there's nothing left to scan.
+
+```go
+func newPost(postBody io.Reader) (Post, error) {
+	scanner := bufio.NewScanner(postBody)
+
+	readMetaLine := func(tagName string) string {
+		scanner.Scan()
+		return scanner.Text()[len(tagName):]
+	}
+
+	title := readMetaLine(titleSeparator)
+	description := readMetaLine(descriptionSeparator)
+	tags := strings.Split(readMetaLine(tagsSeparator), ", ")
+
+	scanner.Scan() // ignore a line
+	buf := bytes.Buffer{}
+	for scanner.Scan() {
+		fmt.Fprintln(&buf, scanner.Text())
+	}
+	body := strings.TrimSuffix(buf.String(), "\n")
+	return Post{
+		Title:       title,
+		Description: description,
+		Tags:        tags,
+		Body:        body,
+	}, nil
+}
+```
+
+- `scanner.Scan()` returns a `bool` which indicates whether there's more data to scan, so we can use that with a `for` loop to keep reading through the data until the end.
+- After every `Scan()` we write the data into the buffer using `fmt.Fprintln`. We use the version that adds a newline because the scanner removes the newlines from each line but we need to maintain them.
+- Because of the above, we need to trim the final newline so we don't have a trailing one.
+
+## Refactor
+
+I think encapsulating the idea of getting the rest of the data into a helper function will help future readers quickly understand _what_ is happening in `newPost` without having to initially concern themselves with implementation specifics.
+
+```go
+func newPost(postBody io.Reader) (Post, error) {
+	scanner := bufio.NewScanner(postBody)
+
+	readMetaLine := func(tagName string) string {
+		scanner.Scan()
+		return scanner.Text()[len(tagName):]
+	}
+
+	return Post{
+		Title:       readMetaLine(titleSeparator),
+		Description: readMetaLine(descriptionSeparator),
+		Tags:        strings.Split(readMetaLine(tagsSeparator), ", "),
+		Body:        readBody(scanner),
+	}, nil
+}
+
+func readBody(scanner *bufio.Scanner) string {
+	scanner.Scan() // ignore a line
+	buf := bytes.Buffer{}
+	for scanner.Scan() {
+		fmt.Fprintln(&buf, scanner.Text())
+	}
+	return strings.TrimSuffix(buf.String(), "\n")
+}
+```
+
+We've ignored error handling on the whole, purely for brevity but it may be a good exercise for yourself to add some test cases where the files have invalid content inside and make sure the code behaves appropriately. Our code is extremely easy to unit test so you're setup well for this task
 
 ## Wrapping up
 
-# Notes
-- Make a recording on twitch
+`fs.FS` and the other changes in Go 1.16 give us some elegant ways of reading data from file systems and testing them simply.
+
+If you wish to try out the code "for real":
+
+- Create a `cmd` folder within the project, add a `main.go` file
+- Add the following code
+
+```go
+import (
+    blogposts "github.com/quii/fstest-spike"
+    "log"
+    "os"
+)
+
+func main() {
+	posts, err := blogposts.New(os.DirFS("posts"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(posts)
+}
+```
+
+- Add some markdown files into the `posts` folder and run the program!
+
+Notice the symmetry between the production code:
+
+```go
+posts, err := blogposts.New(os.DirFS("posts"))
+```
+
+And the tests:
+
+```go
+posts, err := blogposts.New(fs)
+```
+
+This is when consumer-driven, top-down TDD _feels correct_.
+
+A user of our package can look at our tests and quickly get up to speed with what it's supposed to do and how to use it. As maintainers, we can be confident our tests are useful because they're from a consumer's point of view. We're not testing implementation details or other incidental details.
+
+By relying on good software engineering practices like **polymorphism** and **dependency injection** our code is simple to test and use.
+
+When you're creating packages, even if they're only internal to your project, prefer a top-down consumer driven approach. This will stop you over-imagining designs and making abstractions you may not even need and will help ensure the tests you write are useful.
