@@ -15,8 +15,8 @@ const (
 	descriptionSeparator = "Description: "
 )
 
-func newPost(postFile io.Reader) (Post, error) {
-	scanner := bufio.NewScanner(postFile)
+func newPost(postBody io.Reader) (Post, error) {
+	scanner := bufio.NewScanner(postBody)
 
 	readMetaLine := func(tagName string) string {
 		scanner.Scan()

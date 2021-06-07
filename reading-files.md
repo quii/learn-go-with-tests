@@ -577,9 +577,9 @@ func newPost(postFile io.Reader) (Post, error) {
 
 Handily, it also takes an `io.Reader` to read through (thank you again, loose-coupling) so we don't need to change our function arguments at all.
 
-We then just `Scan` to read a line, and then extract the data using `Text`.
+Call `Scan` to read a line, and then extract the data using `Text`.
 
-You'll notice this function as it stands could never return an `error`. It would be tempting at this point to remove the argument, but we do know we'll have to handle invalid file structures at some point so we may as well leave it. This has the benefit of us not having to edit the calling code back and forth.
+This function could never return an `error`. It would be tempting at this point to remove it from the return type, but we know we'll have to handle invalid file structures later so we may as well leave it.
 
 ## Refactor
 
@@ -629,8 +629,8 @@ func newPost(postFile io.Reader) (Post, error) {
 Now that I'm staring at the code with my creative refactoring mind, I'd like to try making our readLine function take care of removing the tag.
 
 ```go
-func newPost(postFile io.Reader) (Post, error) {
-	scanner := bufio.NewScanner(postFile)
+func newPost(postBody io.Reader) (Post, error) {
+	scanner := bufio.NewScanner(postBody)
 
 	readMetaLine := func(tagName string) string {
 		scanner.Scan()
@@ -638,7 +638,7 @@ func newPost(postFile io.Reader) (Post, error) {
 	}
 
 	return Post{
-		Title: readMetaLine(titleSeparator),
+		Title:       readMetaLine(titleSeparator),
 		Description: readMetaLine(descriptionSeparator),
 	}, nil
 }
