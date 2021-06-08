@@ -29,7 +29,7 @@ M`
 		"hello-world2.md": {Data: []byte(secondBody)},
 	}
 
-	posts, err := blogposts.New(fs)
+	posts, err := blogposts.NewPostsFromFS(fs)
 
 	if err != nil {
 		t.Fatal(err)

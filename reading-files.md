@@ -4,7 +4,9 @@
 
 In this chapter we're going to learn how to read some files, get some data out of them and do something useful.
 
-We've been asked to create a package that converts a given folder of blog posts and return a collection of `Post` which represents each file parsed with information about its contents.
+Pretend you're working with your friend to create some blog software. The idea is an author will write their posts in markdown with some metadata at the top of the file. On startup the web server will read a folder to create some `Post`s and then a separate `NewHandler` function will use them as a datasource for the blog's webserver.
+
+We've been asked to create the package that converts a given folder of blog posts and return the collection of `Post`s.
 
 ### Example data
 
@@ -81,7 +83,7 @@ Given this information, the following feels like a better approach
 
 ```go
 var posts blogposts.Post
-posts = blogposts.New(someFS)
+posts = blogposts.NewPostsFromFS(someFS)
 ```
 
 
@@ -111,7 +113,7 @@ func TestNewBlogPosts(t *testing.T) {
 			"hello-world2.md": {Data: []byte("hola")},
 		}
 
-		posts := blogposts.New(fs)
+		posts := blogposts.NewPostsFromFS(fs)
 
 		got := len(posts)
 		want := len(fs)
@@ -155,7 +157,7 @@ import (
 The tests still wont compile because our new package does not have a `New` function that returns some kind of collection
 
 ```
-./blogpost_test.go:16:12: undefined: blogposts.New
+./blogpost_test.go:16:12: undefined: blogposts.NewPostsFromFS
 ```
 
 This forces us to make the skeleton of our function to make the test run. Remember not to overthink the code at this point, we're just trying to get a running test and make sure it fails as we'd expect. If we skip this step we might be skipping over assumptions and not write a useful test.
@@ -246,7 +248,7 @@ func TestNewBlogPosts(t *testing.T) {
 			"hello-world2.md": {Data: []byte("hola")},
 		}
 
-		posts, err := blogposts.New(fs)
+		posts, err := blogposts.NewPostsFromFS(fs)
 
 		if err != nil {
 			t.Fatal(err)
@@ -291,7 +293,7 @@ func TestNewBlogPosts(t *testing.T) {
 		"hello-world2.md": {Data: []byte("hola")},
 	}
 
-	posts, err := blogposts.New(fs)
+	posts, err := blogposts.NewPostsFromFS(fs)
 
 	if err != nil {
 		t.Fatal(err)
@@ -320,7 +322,7 @@ func TestNewBlogPosts(t *testing.T) {
 		"hello-world2.md": {Data: []byte("Title: Post 2")},
 	}
 
-	posts, err := blogposts.New(fs)
+	posts, err := blogposts.NewPostsFromFS(fs)
 
 	if err != nil {
 		t.Fatal(err)
@@ -843,7 +845,7 @@ func readBody(scanner *bufio.Scanner) string {
 }
 ```
 
-For brevity we've ignored error handling, but it may be a good exercise for yourself. Add some test cases where the files have invalid content inside and make sure the code behaves appropriately. Our code is extremely easy to unit test, so you're setup well for this task.
+For brevity, we've ignored error handling, but it may be a good exercise for yourself. Add some test cases where the files have invalid content inside and make sure the code behaves appropriately. Our code is extremely easy to unit test, so you're setup well for this task.
 
 ## Wrapping up
 
@@ -862,7 +864,7 @@ import (
 )
 
 func main() {
-	posts, err := blogposts.New(os.DirFS("posts"))
+	posts, err := blogposts.NewPostsFromFS(os.DirFS("posts"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -875,13 +877,13 @@ func main() {
 Notice the symmetry between the production code:
 
 ```go
-posts, err := blogposts.New(os.DirFS("posts"))
+posts, err := blogposts.NewPostsFromFS(os.DirFS("posts"))
 ```
 
 And the tests:
 
 ```go
-posts, err := blogposts.New(fs)
+posts, err := blogposts.NewPostsFromFS(fs)
 ```
 
 This is when consumer-driven, top-down TDD _feels correct_.
@@ -892,4 +894,4 @@ By relying on good software engineering practices like  **dependency injection**
 
 When you're creating packages, even if they're only internal to your project, prefer a top-down consumer driven approach. This will stop you over-imagining designs and making abstractions you may not even need and will help ensure the tests you write are useful.
 
-The iterative approach kept every step small, and helped us uncover unclear requirements possibly sooner than with other, more ad-hoc approaches. 
+The iterative approach kept every step small, and helped us uncover unclear requirements possibly sooner than with other, more ad-hoc approaches.

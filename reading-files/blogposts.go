@@ -4,8 +4,8 @@ import (
 	"io/fs"
 )
 
-// New returns a collection of blog posts from a file system. If it does not conform to the format then it'll return an error
-func New(fileSystem fs.FS) ([]Post, error) {
+// NewPostsFromFS returns a collection of blog posts from a file system. If it does not conform to the format then it'll return an error
+func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
 	dir, err := fs.ReadDir(fileSystem, ".")
 	if err != nil {
 		return nil, err
