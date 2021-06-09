@@ -59,7 +59,11 @@ var posts blogposts.Post
 posts = blogposts.New("some-folder")
 ```
 
-To write a test around this, we'd need some kind of test folder with some example posts in it. _There's nothing wrong with this_, but it's not strictly a unit test because it goes to the file system. This means it'll be slightly slower, and a little more difficult to maintain although admittedly, not by a huge amount. We're also unnecessarily coupling ourselves to a specific file-system implementation.
+To write a test around this, we'd need some kind of test folder with some example posts in it. _There's nothing wrong with this_, but:
+- for each test you may need to create new files to test a particular behaviour
+- the tests will run slower because of accessing the file system
+
+We're also unnecessarily coupling ourselves to a specific file-system implementation.
 
 ### File system abstractions introduced in Go 1.16
 
@@ -132,7 +136,7 @@ We've imported [`testing/fstest`](https://golang.org/pkg/testing/fstest/) which 
 
 This feels simpler than maintaining a folder of test files and will execute quicker too.
 
-Finally, we've codified the usage of our API from a consumer's point of view, and then check if it at least creates the correct number of posts
+Finally, we've codified the usage of our API from a consumer's point of view, and then check if it at least creates the correct number of posts.
 
 ## Try to run the test
 
