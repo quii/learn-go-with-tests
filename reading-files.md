@@ -152,7 +152,7 @@ import (
 )
 ```
 
-The tests still wont compile because our new package does not have a `New` function that returns some kind of collection
+The tests still won't compile because our new package does not have a `NewPostsFromFS` function that returns some kind of collection.
 
 ```
 ./blogpost_test.go:16:12: undefined: blogposts.NewPostsFromFS
@@ -169,7 +169,7 @@ type Post struct {
 
 }
 
-func New(fileSystem fstest.MapFS) []Post {
+func NewPostsFromFS(fileSystem fstest.MapFS) []Post {
 	return nil
 }
 ```
@@ -187,7 +187,7 @@ The test should now correctly fail
 We _could_ ["slime"](https://deniseyu.github.io/leveling-up-tdd/) this to make it pass:
 
 ```go
-func New(fileSystem fstest.MapFS) []Post {
+func NewPostsFromFS(fileSystem fstest.MapFS) []Post {
 	return []Post{{},{}}
 }
 ```
@@ -201,7 +201,7 @@ We already have our structure. So, what do we do instead?
 As we've cut scope, all we need to do is read the directory and create a post for each file we encounter. We don't have to worry about opening files and parsing them just yet.
 
 ```go
-func New(fileSystem fstest.MapFS) []Post {
+func NewPostsFromFS(fileSystem fstest.MapFS) []Post {
 	dir, _ := fs.ReadDir(fileSystem, ".")
 	var posts []Post
 	for range dir {
@@ -219,10 +219,10 @@ The rest of the code is straightforward, iterate over the entries and create a `
 
 ## Refactor
 
-Whilst our tests are passing, we can't use our new package outside this context because it is coupled to a concrete implementation `fstest.MapFS`, but as discussed, it doesn't have to be. Change the argument to our `New` function to accept the interface from the standard library.
+Whilst our tests are passing, we can't use our new package outside this context because it is coupled to a concrete implementation `fstest.MapFS`, but as discussed, it doesn't have to be. Change the argument to our `NewPostsFromFS` function to accept the interface from the standard library.
 
 ```go
-func New(fileSystem fs.FS) []Post {
+func NewPostsFromFS(fileSystem fs.FS) []Post {
 	dir, _ := fs.ReadDir(fileSystem, ".")
 	var posts []Post
 	for range dir {
@@ -265,7 +265,7 @@ func TestNewBlogPosts(t *testing.T) {
 Run the test, and it should complain about the wrong number of return values, fixing the code is straightforward.
 
 ```go
-func New(fileSystem fs.FS) ([]Post, error) {
+func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
 	dir, err := fs.ReadDir(fileSystem, ".")
 	if err != nil {
 		return nil, err
@@ -280,9 +280,9 @@ func New(fileSystem fs.FS) ([]Post, error) {
 
 This will make the test pass. The TDD practitioner in you might be annoyed we didn't see a failing test before writing the code to propagate the error from `fs.ReadDir`. To do this "properly", we'd need a new test where we inject a failing `fs.FS` to make `fs.ReadDir` return an `error`.
 
-In some cases that might be the pragmatic thing to do but in our case we're not doing anything _interesting_ with the error, we're just propagating it; so it's probably not worth the hassle of writing a new test.
+In some cases that might be the pragmatic thing to do but in our case we're not doing anything _interesting_ with the error, we're just propagating it; so its probably not worth the hassle of writing a new test.
 
-Logically our next iterations will be around expanding our `Post` type, so it has some useful data. As we are iterating on the same functionality it might be simpler to re-use some of the setup in our existing test rather than creating new test data for each step toward our goal. Re-work the test to allow us to make further assertions a bit easier
+Logically our next iterations will be around expanding our `Post` type, so it has some useful data. As we are iterating on the same functionality it might be simpler to re-use the setup in our existing test rather than creating new test data for each step toward our goal. Re-work the test to allow us to make further assertions a bit easier
 
 ```go
 func TestNewBlogPosts(t *testing.T) {
@@ -361,7 +361,7 @@ type Post struct {
 }
 ```
 
-Re-run the test and you should get a clear, failing test
+Re-run the test, and you should get a clear, failing test
 
 ```
 === RUN   TestNewBlogPosts
@@ -374,7 +374,7 @@ Re-run the test and you should get a clear, failing test
 We'll need to open each file and then extract the title
 
 ```go
-func New(fileSystem fs.FS) ([]Post, error) {
+func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
 	dir, err := fs.ReadDir(fileSystem, ".")
 	if err != nil {
 		return nil, err
@@ -459,7 +459,7 @@ func newPost(postFile io.Reader) (Post, error) {
 You can make a similar argument for our `getPost` function which takes an `fs.DirEntry` argument but simply calls `Name()` to get the file name. We don't need all that, decouple ourselves from that type and just pass the file name through as a string. Here's the fully refactored code:
 
 ```go
-func New(fileSystem fs.FS) ([]Post, error) {
+func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
 	dir, err := fs.ReadDir(fileSystem, ".")
 	if err != nil {
 		return nil, err
@@ -495,7 +495,7 @@ func newPost(postFile io.Reader) (Post, error) {
 }
 ```
 
-From now on, most of our efforts can be neatly contained within `newPost`. The concerns of opening and iterating over files are done, and now we can focus on extracting the data for our `Post` type. Whilst not technically necessary, files are a nice way to logically group related things together so I also moved the `Post` type and `newPost` into a new `post.go` file.
+From now on, most of our efforts can be neatly contained within `newPost`. The concerns of opening and iterating over files are done, and now we can focus on extracting the data for our `Post` type. Whilst not technically necessary, files are a nice way to logically group related things together, so I also moved the `Post` type and `newPost` into a new `post.go` file.
 
 ## Write the test first
 
@@ -886,7 +886,7 @@ posts, err := blogposts.NewPostsFromFS(fs)
 
 This is when consumer-driven, top-down TDD _feels correct_.
 
-A user of our package can look at our tests and quickly get up to speed with what it's supposed to do and how to use it. As maintainers, we can be confident our tests are useful because they're from a consumer's point of view. We're not testing implementation details or other incidental details so we can be reasonably confident that our tests will help us, rather than hinder us when refactoring.
+A user of our package can look at our tests and quickly get up to speed with what it's supposed to do and how to use it. As maintainers, we can be confident our tests are useful because they're from a consumer's point of view. We're not testing implementation details or other incidental details, so we can be reasonably confident that our tests will help us, rather than hinder us when refactoring.
 
 By relying on good software engineering practices like  **dependency injection** our code is simple to test and re-use.
 
