@@ -843,7 +843,16 @@ func readBody(scanner *bufio.Scanner) string {
 }
 ```
 
-For brevity, we've ignored error handling, but it may be a good exercise for yourself. Add some test cases where the files have invalid content inside and make sure the code behaves appropriately. Our code is extremely easy to unit test, so you're setup well for this task.
+## Iterating further
+
+We've made our "steel thread" of functionality, taking the shortest route to get to our happy path, but clearly there's some distance to go before it is production ready.
+
+We haven't handled:
+
+- when the file's format is not correct
+- the file is not a `.md`
+
+Crucially though, we have working software, and we have defined our interface. The above are just further iterations, more tests to write and drive our behaviour. By keeping focused on our goal we have made the important decisions and validated them against the consumer's desired behaviour, rather than getting boggged down on less important details.
 
 ## Wrapping up
 
