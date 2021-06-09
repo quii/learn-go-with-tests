@@ -32,19 +32,19 @@ type Post struct {
 
 ## Iterative, test-driven development
 
-As always, we'll take an iterative approach where we're always taking simple, safe steps toward our goal.
+We'll take an iterative approach where we're always taking simple, safe steps toward our goal. Iterative means we work in "thin" vertical slices, as end-to-end as possible, keeping scope small but useful and validated with tight feedback loops.
 
-This requires us to break up our work into iterative steps, but we should be careful not to fall in to the trap of taking a "bottom up" approach.
+This requires us to break up our work, but we should be careful not to fall in to the trap of taking a "bottom up" approach.
 
 We should not trust our over-active imaginations when we start work. You could be tempted into making some kind of abstraction that is only validated once we stick everything together, such as some kind of `BlogPostFileParser`.
 
-This is _not_ iterative! This is missing out on the tight feedback loops that TDD is supposed to bring us.
+This is _not_ iterative and is missing out on the tight feedback loops that TDD is supposed to bring us.
 
 Kent Beck says:
 
 > Optimism is an occupational hazard of programming. Feedback is the treatment.
 
-Iterative means we work in "thin" vertical slices, as end-to-end as possible, keeping scope small but useful and validated with tight feedback loops.
+## Thinking about the kind of test we want to see
 
 Let's remind ourselves of our mindset and goals when starting:
 
@@ -52,9 +52,7 @@ Let's remind ourselves of our mindset and goals when starting:
 - Focused on the what, rather than the how
 - Consumer focused
 
-## Thinking about the kind of test we want to see
-
-Our package needs to offer a function that can be pointed at some kind of folder, do the hard work and return us some posts.
+Our package needs to offer a function that can be pointed at a folder, and return us some posts.
 
 ```go
 var posts blogposts.Post
@@ -73,7 +71,7 @@ This lets us loosen our coupling to a specific file system, which will then let 
 
 > [On the producer side of the interface, the new embed.FS type implements fs.FS, as does zip.Reader. The new os.DirFS function provides an implementation of fs.FS backed by a tree of operating system files.](https://golang.org/doc/go1.16#fs)
 
-If we use this interface, users of our package have a number of options baked in to the standard library to use. Learning to leverage interfaces defined in Go's standard library (like this, but also `io.Reader` and `io.Writer`) is vital to writing loosely coupled packages that can be re-used in contexts different to what you imagined with minimal fuss from your consumers.
+If we use this interface, users of our package have a number of options baked in to the standard library to use. Learning to leverage interfaces defined in Go's standard library (like this, but also [`io.Reader`](https://golang.org/pkg/io/#Reader) and [`io.Writer`](https://golang.org/pkg/io/#Writer)) is vital to writing loosely coupled packages that can be re-used in contexts different to what you imagined with minimal fuss from your consumers.
 
 In our case maybe our consumer wants the posts to be embedded into the Go binary rather than files in a "real" filesystem, either way _our code doesn't need to care_.
 
@@ -849,7 +847,7 @@ For brevity, we've ignored error handling, but it may be a good exercise for you
 
 ## Wrapping up
 
-`fs.FS` and the other changes in Go 1.16 give us some elegant ways of reading data from file systems and testing them simply.
+`fs.FS`, and the other changes in Go 1.16 give us some elegant ways of reading data from file systems and testing them simply.
 
 If you wish to try out the code "for real":
 
@@ -888,10 +886,10 @@ posts, err := blogposts.NewPostsFromFS(fs)
 
 This is when consumer-driven, top-down TDD _feels correct_.
 
-A user of our package can look at our tests and quickly get up to speed with what it's supposed to do and how to use it. As maintainers, we can be confident our tests are useful because they're from a consumer's point of view. We're not testing implementation details or other incidental details.
+A user of our package can look at our tests and quickly get up to speed with what it's supposed to do and how to use it. As maintainers, we can be confident our tests are useful because they're from a consumer's point of view. We're not testing implementation details or other incidental details so we can be reasonably confident that our tests will help us, rather than hinder us when refactoring.
 
-By relying on good software engineering practices like  **dependency injection** our code is simple to test and use.
+By relying on good software engineering practices like  **dependency injection** our code is simple to test and re-use.
 
 When you're creating packages, even if they're only internal to your project, prefer a top-down consumer driven approach. This will stop you over-imagining designs and making abstractions you may not even need and will help ensure the tests you write are useful.
 
-The iterative approach kept every step small, and helped us uncover unclear requirements possibly sooner than with other, more ad-hoc approaches.
+The iterative approach kept every step small, and the continuous feedback helped us uncover unclear requirements possibly sooner than with other, more ad-hoc approaches.
