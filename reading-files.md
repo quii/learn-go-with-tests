@@ -59,7 +59,7 @@ var posts blogposts.Post
 posts = blogposts.New("some-folder")
 ```
 
-To write a test around this, we'd need some kind of test folder with some example posts in it. _There's nothing wrong with this_, but:
+To write a test around this, we'd need some kind of test folder with some example posts in it. _There's nothing terribly wrong with this_, but you are making some trade-offs:
 - for each test you may need to create new files to test a particular behaviour
 - the tests will run slower because of accessing the file system
 
