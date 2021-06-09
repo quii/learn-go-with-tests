@@ -852,7 +852,9 @@ We haven't handled:
 - when the file's format is not correct
 - the file is not a `.md`
 
-Crucially though, we have working software, and we have defined our interface. The above are just further iterations, more tests to write and drive our behaviour. By keeping focused on our goal we have made the important decisions and validated them against the consumer's desired behaviour, rather than getting boggged down on less important details.
+Crucially though, we have working software, and we have defined our interface. The above are just further iterations, more tests to write and drive our behaviour.
+
+Keeping focused on the goal means we made the important decisions, and validated them against the desired behaviour, rather than getting bogged down on matters that won't affect the overall design.
 
 ## Wrapping up
 
