@@ -57,7 +57,7 @@ I am proud to offer this resource for free, but if you wish to give some appreci
 13. [Context](context.md) - Use the context package to manage and cancel long-running processes
 14. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
 15. [Maths](math.md) - Use the `math` package to draw an SVG clock
-16. [Reading files](reading-files.md) - Read files
+16. [Reading files](reading-files.md) - Read files and process them
 
 ### Build an application
 
