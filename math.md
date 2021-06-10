@@ -1115,7 +1115,7 @@ of precision we're expecting for the coordinates. Let's say three decimal
 places.
 
 ```go
-s := fmt.Sprintf(`<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
+    fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
 ```
 
 And after we update our expectations in the test
@@ -1264,6 +1264,16 @@ func TestSVGWriterSecondHand(t *testing.T) {
 		})
 	}
 }
+
+func containsLine(want Line, lines []Line) bool {
+	for _, line := range lines {
+		if line == want {
+			return true
+		}
+	}
+
+	return false
+}
 ```
 
 Now _that's_ what I call an acceptance test!
@@ -1277,7 +1287,7 @@ Here ends v7c
 So that's the second hand done. Now let's get started on the minute hand.
 
 ```go
-func TestSVGWriterMinutedHand(t *testing.T) {
+func TestSVGWriterMinuteHand(t *testing.T) {
 	cases := []struct {
 		time time.Time
 		line Line
@@ -2199,7 +2209,7 @@ make us feel uncomfortable? Shouldn't we do something like
 - use an SVG library?
 
 We could refactor our code to do any of these things, and we can do so because
-because it doesn't matter _how_ we produce our SVG, what's important is _that
+it doesn't matter _how_ we produce our SVG, what's important is _that
 it's an SVG that we produce_. As such, the part of our system that needs to know
 the most about SVGs - that needs to be the strictest about what constitutes an
 SVG - is the test for the SVG output; it needs to have enough context and
