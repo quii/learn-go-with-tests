@@ -56,8 +56,8 @@ Let's remind ourselves of our mindset and goals when starting:
 Our package needs to offer a function that can be pointed at a folder, and return us some posts.
 
 ```go
-var posts blogposts.Post
-posts = blogposts.New("some-folder")
+var posts []blogposts.Post
+posts = blogposts.NewPostsFromFS("some-folder")
 ```
 
 To write a test around this, we'd need some kind of test folder with some example posts in it. _There's nothing terribly wrong with this_, but you are making some trade-offs:
@@ -924,7 +924,7 @@ The iterative approach kept every step small, and the continuous feedback helped
 
 ### Writing?
 
-It's important to note that these new features only have operations for _reading_ files. If your work needs to do writing, you'll need to look elsewhere. Remember to keep thinking about what the standard library offers currently, if you're writing data you should probably look into leveraging existing interfaces such as `io.Writer`. 
+It's important to note that these new features only have operations for _reading_ files. If your work needs to do writing, you'll need to look elsewhere. Remember to keep thinking about what the standard library offers currently, if you're writing data you should probably look into leveraging existing interfaces such as `io.Writer`.
 
 ### Further reading
 
