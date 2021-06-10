@@ -6,7 +6,7 @@ In this chapter we're going to learn how to read some files, get some data out o
 
 Pretend you're working with your friend to create some blog software. The idea is an author will write their posts in markdown with some metadata at the top of the file. On startup the web server will read a folder to create some `Post`s and then a separate `NewHandler` function will use them as a datasource for the blog's webserver.
 
-We've been asked to create the package that converts a given folder of blog posts and return the collection of `Post`s.
+We've been asked to create the package that converts a given folder of blog post files into a collection of `Post`s.
 
 ### Example data
 
@@ -32,11 +32,11 @@ type Post struct {
 
 ## Iterative, test-driven development
 
-We'll take an iterative approach where we're always taking simple, safe steps toward our goal. Iterative means we work in "thin" vertical slices, as end-to-end as possible, keeping scope small but useful and validated with tight feedback loops.
+We'll take an iterative approach where we're always taking simple, safe steps toward our goal.
 
 This requires us to break up our work, but we should be careful not to fall in to the trap of taking a "bottom up" approach.
 
-We should not trust our over-active imaginations when we start work. You could be tempted into making some kind of abstraction that is only validated once we stick everything together, such as some kind of `BlogPostFileParser`.
+We should not trust our over-active imaginations when we start work. We could be tempted into making some kind of abstraction that is only validated once we stick everything together, such as some kind of `BlogPostFileParser`.
 
 This is _not_ iterative and is missing out on the tight feedback loops that TDD is supposed to bring us.
 
@@ -44,13 +44,14 @@ Kent Beck says:
 
 > Optimism is an occupational hazard of programming. Feedback is the treatment.
 
+Instead, our approach should strive to be as close to delivering _real_ consumer value as quickly as possible (often called a "happy path"). Once we have delivered a small amount of consumer value end-to-end, further iteration of the rest of the requirements is usually straightforward.
+
 ## Thinking about the kind of test we want to see
 
 Let's remind ourselves of our mindset and goals when starting:
 
-- Write the test we want to see
-- Focused on the what, rather than the how
-- Consumer focused
+- **Write the test we want to see**. Think about how we'd like to use the code we're going to write from a consumer's point of view.
+- Focus on the what, why and don't get distracted by how.
 
 Our package needs to offer a function that can be pointed at a folder, and return us some posts.
 
@@ -196,7 +197,7 @@ func NewPostsFromFS(fileSystem fstest.MapFS) []Post {
 }
 ```
 
-But, as Denise wrote:
+But, as Denise Yu wrote:
 
 >Sliming is useful for giving a “skeleton” to your object. Designing an interface and executing logic are two concerns, and sliming tests strategically lets you focus on one at a time.
 
@@ -217,7 +218,7 @@ func NewPostsFromFS(fileSystem fstest.MapFS) []Post {
 
 [`fs.ReadDir`](https://golang.org/pkg/io/fs/#ReadDir) reads a directory inside a given `fs.FS` returning [`[]DirEntry`](https://golang.org/pkg/io/fs/#DirEntry).
 
-Already our idealised view of the world has been foiled because errors can happen but remember now our focus is to make the test pass, not changing design, so we'll ignore the error for now.
+Already our idealised view of the world has been foiled because errors can happen but remember now our focus is making the test pass, not changing design, so we'll ignore the error for now.
 
 The rest of the code is straightforward, iterate over the entries and create a `Post` for each one and return the slice.
 
@@ -282,9 +283,21 @@ func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
 }
 ```
 
-This will make the test pass. The TDD practitioner in you might be annoyed we didn't see a failing test before writing the code to propagate the error from `fs.ReadDir`. To do this "properly", we'd need a new test where we inject a failing `fs.FS` to make `fs.ReadDir` return an `error`.
+This will make the test pass. The TDD practitioner in you might be annoyed we didn't see a failing test before writing the code to propagate the error from `fs.ReadDir`. To do this "properly", we'd need a new test where we inject a failing `fs.FS` test-double to make `fs.ReadDir` return an `error`.
 
-In some cases that might be the pragmatic thing to do but in our case we're not doing anything _interesting_ with the error, we're just propagating it; so its probably not worth the hassle of writing a new test.
+```go
+type StubFailingFS struct {
+}
+
+func (s StubFailingFS) Open(name string) (fs.File, error) {
+	return nil, errors.New("oh no, i always fail")
+}
+
+// later
+_, err := blogposts.NewPostsFromFS(StubFailingFS{})
+```
+
+In some cases that might be the pragmatic thing to test but in our case we're not doing anything _interesting_ with the error, we're just propagating it; so its not worth the hassle of writing a new test.
 
 Logically our next iterations will be around expanding our `Post` type, so it has some useful data. As we are iterating on the same functionality it might be simpler to re-use the setup in our existing test rather than creating new test data for each step toward our goal. Re-work the test to allow us to make further assertions a bit easier
 
@@ -903,8 +916,17 @@ This is when consumer-driven, top-down TDD _feels correct_.
 
 A user of our package can look at our tests and quickly get up to speed with what it's supposed to do and how to use it. As maintainers, we can be confident our tests are useful because they're from a consumer's point of view. We're not testing implementation details or other incidental details, so we can be reasonably confident that our tests will help us, rather than hinder us when refactoring.
 
-By relying on good software engineering practices like  **dependency injection** our code is simple to test and re-use.
+By relying on good software engineering practices like  [**dependency injection**](dependency-injection.md) our code is simple to test and re-use.
 
 When you're creating packages, even if they're only internal to your project, prefer a top-down consumer driven approach. This will stop you over-imagining designs and making abstractions you may not even need and will help ensure the tests you write are useful.
 
 The iterative approach kept every step small, and the continuous feedback helped us uncover unclear requirements possibly sooner than with other, more ad-hoc approaches.
+
+### Writing?
+
+It's important to note that these new features only have operations for _reading_ files. If your work needs to do writing, you'll need to look elsewhere. Remember to keep thinking about what the standard library offers currently, if you're writing data you should probably look into leveraging existing interfaces such as `io.Writer`. 
+
+### Further reading
+
+- This was a light intro to `io/fs`. [Ben Congdon has done an excellent write-up](https://benjamincongdon.me/blog/2021/01/21/A-Tour-of-Go-116s-iofs-package/) which was a lot of help for writing this chapter.
+- [Discussion on the file system interfaces](https://github.com/golang/go/issues/41190)
