@@ -77,7 +77,7 @@ Editor preference is very individualistic, you may already have a preference tha
 You can install it using the following command:
 
 ```sh
-brew cask install visual-studio-code
+brew install --cask visual-studio-code
 ```
 
 You can confirm VS Code installed correctly you can run the following in your shell.
