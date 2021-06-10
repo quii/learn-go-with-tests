@@ -2,16 +2,16 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/fstest/reading-files)**
 
-In this chapter we're going to learn how to read some files, get some data out of them and do something useful.
+In this chapter we're going to learn how to read some files, get some data out of them, and do something useful.
 
-Pretend you're working with your friend to create some blog software. The idea is an author will write their posts in markdown with some metadata at the top of the file. On startup the web server will read a folder to create some `Post`s and then a separate `NewHandler` function will use them as a datasource for the blog's webserver.
+Pretend you're working with your friend to create some blog software. The idea is an author will write their posts in markdown, with some metadata at the top of the file. On startup, the web server will read a folder to create some `Post`s, and then a separate `NewHandler` function will use those `Post`s as a datasource for the blog's webserver.
 
 We've been asked to create the package that converts a given folder of blog post files into a collection of `Post`s.
 
 ### Example data
 
 hello world.md
-```
+```markdown
 Title: Hello, TDD world!
 Description: First post on our wonderful blog
 Tags: tdd, go
@@ -34,7 +34,7 @@ type Post struct {
 
 We'll take an iterative approach where we're always taking simple, safe steps toward our goal.
 
-This requires us to break up our work, but we should be careful not to fall in to the trap of taking a "bottom up" approach.
+This requires us to break up our work, but we should be careful not to fall into the trap of taking a ["bottom up"](https://en.wikipedia.org/wiki/Top-down_and_bottom-up_design) approach.
 
 We should not trust our over-active imaginations when we start work. We could be tempted into making some kind of abstraction that is only validated once we stick everything together, such as some kind of `BlogPostFileParser`.
 
@@ -51,7 +51,7 @@ Instead, our approach should strive to be as close to delivering _real_ consumer
 Let's remind ourselves of our mindset and goals when starting:
 
 - **Write the test we want to see**. Think about how we'd like to use the code we're going to write from a consumer's point of view.
-- Focus on the what, why and don't get distracted by how.
+- Focus on _what_ and _why_, but don't get distracted by _how_.
 
 Our package needs to offer a function that can be pointed at a folder, and return us some posts.
 
@@ -63,13 +63,13 @@ posts = blogposts.NewPostsFromFS("some-folder")
 To write a test around this, we'd need some kind of test folder with some example posts in it. _There's nothing terribly wrong with this_, but you are making some trade-offs:
 - for each test you may need to create new files to test a particular behaviour
 - some behaviour will be challenging to test, such as failing to load files
-- the tests will run a little slower because of accessing the file system
+- the tests will run a little slower because they will need to access the file system
 
-We're also unnecessarily coupling ourselves to a specific file-system implementation.
+We're also unnecessarily coupling ourselves to a specific implementation of the file system.
 
 ### File system abstractions introduced in Go 1.16
 
-Go 1.16 introduced an abstraction for file-systems; the [io/fs](https://golang.org/pkg/io/fs/) package.
+Go 1.16 introduced an abstraction for file systems; the [io/fs](https://golang.org/pkg/io/fs/) package.
 
 > Package fs defines basic interfaces to a file system. A file system can be provided by the host operating system but also by other packages.
 
@@ -77,13 +77,13 @@ This lets us loosen our coupling to a specific file system, which will then let 
 
 > [On the producer side of the interface, the new embed.FS type implements fs.FS, as does zip.Reader. The new os.DirFS function provides an implementation of fs.FS backed by a tree of operating system files.](https://golang.org/doc/go1.16#fs)
 
-If we use this interface, users of our package have a number of options baked in to the standard library to use. Learning to leverage interfaces defined in Go's standard library (like this, but also [`io.Reader`](https://golang.org/pkg/io/#Reader) and [`io.Writer`](https://golang.org/pkg/io/#Writer)) is vital to writing loosely coupled packages that can be re-used in contexts different to what you imagined with minimal fuss from your consumers.
+If we use this interface, users of our package have a number of options baked-in to the standard library to use. Learning to leverage interfaces defined in Go's standard library (e.g. `io.fs`, [`io.Reader`](https://golang.org/pkg/io/#Reader), [`io.Writer`](https://golang.org/pkg/io/#Writer)), is vital to writing loosely coupled packages. These packages can then be re-used in contexts different to those you imagined, with minimal fuss from your consumers.
 
-In our case maybe our consumer wants the posts to be embedded into the Go binary rather than files in a "real" filesystem, either way _our code doesn't need to care_.
+In our case, maybe our consumer wants the posts to be embedded into the Go binary rather than files in a "real" filesystem? Either way, _our code doesn't need to care_.
 
-For our tests, the package [testing/fstest](https://golang.org/pkg/testing/fstest/), offers us an implementation of [io/FS](https://golang.org/pkg/io/fs/#FS) to use, similar to the tools we're familiar with in [net/http/httptest](https://golang.org/pkg/net/http/httptest/).
+For our tests, the package [testing/fstest](https://golang.org/pkg/testing/fstest/) offers us an implementation of [io/FS](https://golang.org/pkg/io/fs/#FS) to use, similar to the tools we're familiar with in [net/http/httptest](https://golang.org/pkg/net/http/httptest/).
 
-Given this information, the following feels like a better approach
+Given this information, the following feels like a better approach,
 
 ```go
 var posts blogposts.Post
@@ -93,9 +93,9 @@ posts = blogposts.NewPostsFromFS(someFS)
 
 ## Write the test first
 
-As discussed, we should try to keep scope as small and end-to-end as possible. A good first start to give us confidence is to prove we can read all the files in a directory and check the count of posts is the same as the number of files inside.
+We should keep scope as small and useful as possible. A good start to give us confidence is to prove that we can read all the files in a directory.  We can also check that the count of posts is the same as the number of files in the directory.
 
-Create a new project to work through this chapter
+Create a new project to work through this chapter.
 
 - `mkdir blogposts`
 - `cd blogposts`
