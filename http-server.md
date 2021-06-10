@@ -491,12 +491,12 @@ func main() {
 ```
 
 If you run `go build` again and hit the same URL you should get `"123"`. Not great, but until we store data that's the best we can do.
+It also didn't feel great that our main application was starting up but not actually working. We had to manually test to see the problem.
 
 We have a few options as to what to do next
 
 -   Handle the scenario where the player doesn't exist
 -   Handle the `POST /players/{name}` scenario
--   It didn't feel great that our main application was starting up but not actually working. We had to manually test to see the problem.
 
 Whilst the `POST` scenario gets us closer to the "happy path", I feel it'll be easier to tackle the missing player scenario first as we're in that context already. We'll get to the rest later.
 
@@ -984,7 +984,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 
 I am going to take some liberties here and write more code than you may be comfortable with without writing a test.
 
-_This is allowed_! We still have a test checking things should be working correctly but it is not around the specific unit we're working with (`InMemoryPlayerStore`).
+_This is allowed!_ We still have a test checking things should be working correctly but it is not around the specific unit we're working with (`InMemoryPlayerStore`).
 
 If I were to get stuck in this scenario, I would revert my changes back to the failing test and then write more specific unit tests around `InMemoryPlayerStore` to help me drive out a solution.
 

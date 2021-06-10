@@ -122,7 +122,7 @@ func TestArea(t *testing.T) {
 }
 ```
 
-Remember to run your tests before attempting to fix, you should get a helpful error like
+Remember to run your tests before attempting to fix. The tests should show a helpful error like
 
 ```text
 ./shapes_test.go:7:18: not enough arguments in call to Perimeter
@@ -144,7 +144,7 @@ func Area(rectangle Rectangle) float64 {
 }
 ```
 
-I hope you'll agree that passing a `Rectangle` to a function conveys our intent more clearly but there are more benefits of using structs that we will get on to.
+I hope you'll agree that passing a `Rectangle` to a function conveys our intent more clearly, but there are more benefits of using structs that we will cover later.
 
 Our next requirement is to write an `Area` function for circles.
 
@@ -176,7 +176,9 @@ func TestArea(t *testing.T) {
 }
 ```
 
-As you can see, the 'f' has been replaced by 'g', using 'f' it could be difficult to know the exact decimal number, with 'g' we get a complete decimal number in the error message \([fmt options](https://golang.org/pkg/fmt/)\).
+As you can see, the `f` has been replaced by `g`, with good reason.
+Use of `g` will print a more precise decimal number in the error message \([fmt options](https://golang.org/pkg/fmt/)\).
+For example, using a radius of 1.5 in a circle area calculation, `f` would show `7.068583` whereas `g` would show `7.0685834705770345`.
 
 ## Try to run the test
 
@@ -216,7 +218,8 @@ We have two choices:
 
 So far we have only been writing _functions_ but we have been using some methods. When we call `t.Errorf` we are calling the method `Errorf` on the instance of our `t` \(`testing.T`\).
 
-A method is a function with a receiver. A method declaration binds an identifier, the method name, to a method, and associates the method with the receiver's base type.
+A method is a function with a receiver.
+A method declaration binds an identifier, the method name, to a method, and associates the method with the receiver's base type.
 
 Methods are very similar to functions but they are called by invoking them on an instance of a particular type. Where you can just call functions wherever you like, such as `Area(rectangle)` you can only call methods on "things".
 
@@ -381,7 +384,7 @@ In Go **interface resolution is implicit**. If the type you pass in matches what
 
 ### Decoupling
 
-Notice how our helper does not need to concern itself with whether the shape is a `Rectangle` or a `Circle` or a `Triangle`. By declaring an interface the helper is _decoupled_ from the concrete types and just has the method it needs to do its job.
+Notice how our helper does not need to concern itself with whether the shape is a `Rectangle` or a `Circle` or a `Triangle`. By declaring an interface, the helper is _decoupled_ from the concrete types and only has the method it needs to do its job.
 
 This kind of approach of using interfaces to declare **only what you need** is very important in software design and will be covered in more detail in later sections.
 
@@ -412,13 +415,14 @@ func TestArea(t *testing.T) {
 }
 ```
 
-The only new syntax here is creating an "anonymous struct", areaTests. We are declaring a slice of structs by using `[]struct` with two fields, the `shape` and the `want`. Then we fill the slice with cases.
+The only new syntax here is creating an "anonymous struct", `areaTests`. We are declaring a slice of structs by using `[]struct` with two fields, the `shape` and the `want`. Then we fill the slice with cases.
 
 We then iterate over them just like we do any other slice, using the struct fields to run our tests.
 
 You can see how it would be very easy for a developer to introduce a new shape, implement `Area` and then add it to the test cases. In addition, if a bug is found with `Area` it is very easy to add a new test case to exercise it before fixing it.
 
-Table based tests can be a great item in your toolbox but be sure that you have a need for the extra noise in the tests. If you wish to test various implementations of an interface, or if the data being passed in to a function has lots of different requirements that need testing then they are a great fit.
+Table driven tests can be a great item in your toolbox, but be sure that you have a need for the extra noise in the tests.
+They are a great fit when you wish to test various implementations of an interface, or if the data being passed in to a function has lots of different requirements that need testing.
 
 Let's demonstrate all this by adding another shape and testing it; a triangle.
 
@@ -456,7 +460,7 @@ Remember, keep trying to run the test and let the compiler guide you toward a so
 
 `./shapes_test.go:25:4: undefined: Triangle`
 
-We have not defined Triangle yet
+We have not defined `Triangle` yet
 
 ```go
 type Triangle struct {
@@ -472,7 +476,7 @@ Try again
     Triangle does not implement Shape (missing Area method)
 ```
 
-It's telling us we cannot use a Triangle as a shape because it does not have an `Area()` method, so add an empty implementation to get the test working
+It's telling us we cannot use a `Triangle` as a shape because it does not have an `Area()` method, so add an empty implementation to get the test working
 
 ```go
 func (t Triangle) Area() float64 {
@@ -522,19 +526,22 @@ In [Test-Driven Development by Example](https://g.co/kgs/yCzDLF) Kent Beck refac
 
 > The test speaks to us more clearly, as if it were an assertion of truth, **not a sequence of operations**
 
-\(emphasis mine\)
+\(emphasis in the quote is mine\)
 
-Now our tests \(at least the list of cases\) make assertions of truth about shapes and their areas.
+Now our tests - rather, the list of test cases - make assertions of truth about shapes and their areas.
 
 ## Make sure your test output is helpful
 
 Remember earlier when we were implementing `Triangle` and we had the failing test? It printed `shapes_test.go:31: got 0.00 want 36.00`.
 
-We knew this was in relation to `Triangle` because we were just working with it, but what if a bug slipped in to the system in one of 20 cases in the table? How would a developer know which case failed? This is not a great experience for the developer, they will have to manually look through the cases to find out which case actually failed.
+We knew this was in relation to `Triangle` because we were just working with it.
+But what if a bug slipped in to the system in one of 20 cases in the table?
+How would a developer know which case failed?
+This is not a great experience for the developer, they will have to manually look through the cases to find out which case actually failed.
 
 We can change our error message into `%#v got %g want %g`. The `%#v` format string will print out our struct with the values in its field, so the developer can see at a glance the properties that are being tested.
 
-To increase the readability of our test cases further we can rename the `want` field into something more descriptive like `hasArea`.
+To increase the readability of our test cases further, we can rename the `want` field into something more descriptive like `hasArea`.
 
 One final tip with table driven tests is to use `t.Run` and to name the test cases.
 
@@ -584,10 +591,10 @@ This was more TDD practice, iterating over our solutions to basic mathematic pro
 * Declaring structs to create your own data types which lets you bundle related data together and make the intent of your code clearer
 * Declaring interfaces so you can define functions that can be used by different types \([parametric polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism)\)
 * Adding methods so you can add functionality to your data types and so you can implement interfaces
-* Table based tests to make your assertions clearer and your suites easier to extend & maintain
+* Table driven tests to make your assertions clearer and your test suites easier to extend & maintain
 
 This was an important chapter because we are now starting to define our own types. In statically typed languages like Go, being able to design your own types is essential for building software that is easy to understand, to piece together and to test.
 
 Interfaces are a great tool for hiding complexity away from other parts of the system. In our case our test helper _code_ did not need to know the exact shape it was asserting on, only how to "ask" for its area.
 
-As you become more familiar with Go you start to see the real strength of interfaces and the standard library. You'll learn about interfaces defined in the standard library that are used _everywhere_ and by implementing them against your own types you can very quickly re-use a lot of great functionality.
+As you become more familiar with Go you will start to see the real strength of interfaces and the standard library. You'll learn about interfaces defined in the standard library that are used _everywhere_ and by implementing them against your own types, you can very quickly re-use a lot of great functionality.

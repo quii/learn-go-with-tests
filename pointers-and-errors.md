@@ -79,9 +79,9 @@ type Wallet struct {
 }
 ```
 
-In Go if a symbol (so variables, types, functions et al) starts with a lowercase symbol then it is private _outside the package it's defined in_.
+In Go if a symbol (variables, types, functions et al) starts with a lowercase symbol then it is private _outside the package it's defined in_.
 
-In our case we want our methods to be able to manipulate this value but no one else.
+In our case we want our methods to be able to manipulate this value, but no one else.
 
 Remember we can access the internal `balance` field in the struct using the "receiver" variable.
 
@@ -95,13 +95,14 @@ func (w Wallet) Balance() int {
 }
 ```
 
-With our career in fintech secured, run our tests and bask in the passing test
+With our career in fintech secured, run the test suite and bask in the passing test
 
 `wallet_test.go:15: got 0 want 10`
 
 ### ????
 
-Well this is confusing, our code looks like it should work, we add the new amount onto our balance and then the balance method should return the current state of it.
+Well this is confusing, our code looks like it should work.
+We add the new amount onto our balance and then the balance method should return the current state of it.
 
 In Go, **when you call a function or a method the arguments are** _**copied**_.
 
@@ -137,7 +138,8 @@ func (w Wallet) Deposit(amount int) {
 }
 ```
 
-The `\n` escape character, prints new line after outputting the memory address. We get the pointer to a thing with the address of symbol; `&`.
+The `\n` escape character prints a new line after outputting the memory address.
+We get the pointer (memory address) of something by placing an `&` character at the beginning of the symbol.
 
 Now re-run the test
 
@@ -148,7 +150,8 @@ address of balance in test is 0xc420012260
 
 You can see that the addresses of the two balances are different. So when we change the value of the balance inside the code, we are working on a copy of what came from the test. Therefore the balance in the test is unchanged.
 
-We can fix this with _pointers_. [Pointers](https://gobyexample.com/pointers) let us _point_ to some values and then let us change them. So rather than taking a copy of the Wallet, we take a pointer to the wallet so we can change it.
+We can fix this with _pointers_. [Pointers](https://gobyexample.com/pointers) let us _point_ to some values and then let us change them.
+So rather than taking a copy of the whole Wallet, we instead take a pointer to that wallet so that we can change the original values within it.
 
 ```go
 func (w *Wallet) Deposit(amount int) {
@@ -172,10 +175,10 @@ func (w *Wallet) Balance() int {
 }
 ```
 
-and seemingly addressed the object directly. In fact, the code above using `(*w)` is absolutely valid. However, the makers of Go deemed this notation cumbersome, so the language permits us to write `w.balance`, without explicit dereference.
+and seemingly addressed the object directly. In fact, the code above using `(*w)` is absolutely valid. However, the makers of Go deemed this notation cumbersome, so the language permits us to write `w.balance`, without an explicit dereference.
 These pointers to structs even have their own name: _struct pointers_ and they are [automatically dereferenced](https://golang.org/ref/spec#Method_values).
 
-Technically you do not need to change `Balance` to use a pointer receiver as taking a copy of the balance is fine. However by convention you should keep your method receiver types to be the same for consistency.
+Technically you do not need to change `Balance` to use a pointer receiver as taking a copy of the balance is fine. However, by convention you should keep your method receiver types the same for consistency.
 
 ## Refactor
 
@@ -350,7 +353,7 @@ func TestWallet(t *testing.T) {
 
 What should happen if you try to `Withdraw` more than is left in the account? For now, our requirement is to assume there is not an overdraft facility.
 
-How do we signal a problem when using `Withdraw` ?
+How do we signal a problem when using `Withdraw`?
 
 In Go, if you want to indicate an error it is idiomatic for your function to return an `err` for the caller to check and act on.
 
@@ -417,7 +420,7 @@ Remember to import `errors` into your code.
 
 ## Refactor
 
-Let's make a quick test helper for our error check just to help our test read clearer
+Let's make a quick test helper for our error check to improve the test's readability
 
 ```go
 assertError := func(t testing.TB, err error) {
@@ -651,19 +654,19 @@ func assertError(t testing.TB, got error, want error) {
 
 ### Pointers
 
-* Go copies values when you pass them to functions/methods so if you're writing a function that needs to mutate state you'll need it to take a pointer to the thing you want to change.
-* The fact that Go takes a copy of values is useful a lot of the time but sometimes you won't want your system to make a copy of something, in which case you need to pass a reference. Examples could be very large data or perhaps things you intend only to have one instance of \(like database connection pools\).
+* Go copies values when you pass them to functions/methods, so if you're writing a function that needs to mutate state you'll need it to take a pointer to the thing you want to change.
+* The fact that Go takes a copy of values is useful a lot of the time but sometimes you won't want your system to make a copy of something, in which case you need to pass a reference. Examples include referencing very large data structures or things where only one instance is necessary \(like database connection pools\).
 
 ### nil
 
 * Pointers can be nil
-* When a function returns a pointer to something, you need to make sure you check if it's nil or you might raise a runtime exception, the compiler won't help you here.
+* When a function returns a pointer to something, you need to make sure you check if it's nil or you might raise a runtime exception - the compiler won't help you here.
 * Useful for when you want to describe a value that could be missing
 
 ### Errors
 
 * Errors are the way to signify failure when calling a function/method.
-* By listening to our tests we concluded that checking for a string in an error would result in a flaky test. So we refactored to use a meaningful value instead and this resulted in easier to test code and concluded this would be easier for users of our API too.
+* By listening to our tests we concluded that checking for a string in an error would result in a flaky test. So we refactored our implementation to use a meaningful value instead and this resulted in easier to test code and concluded this would be easier for users of our API too.
 * This is not the end of the story with error handling, you can do more sophisticated things but this is just an intro. Later sections will cover more strategies.
 * [Don’t just check errors, handle them gracefully](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully)
 
