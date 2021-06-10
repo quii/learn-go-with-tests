@@ -21,6 +21,7 @@
 * [Context](context.md)
 * [Intro to property based tests](roman-numerals.md)
 * [Maths](math.md)
+* [Reading files](reading-files.md)
 
 ## Build an application
 
