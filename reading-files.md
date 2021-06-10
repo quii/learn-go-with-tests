@@ -297,7 +297,9 @@ func (s StubFailingFS) Open(name string) (fs.File, error) {
 _, err := blogposts.NewPostsFromFS(StubFailingFS{})
 ```
 
-In some cases that might be the pragmatic thing to test but in our case we're not doing anything _interesting_ with the error, we're just propagating it; so its not worth the hassle of writing a new test.
+This should give you confidence in our approach. The interface we're using has one method which means creating test-doubles to test different scenarios is trivial.
+
+In some cases, testing error handling is the pragmatic thing to do, but in our case we're not doing anything _interesting_ with the error, we're just propagating it; so its not worth the hassle of writing a new test.
 
 Logically our next iterations will be around expanding our `Post` type, so it has some useful data. As we are iterating on the same functionality it might be simpler to re-use the setup in our existing test rather than creating new test data for each step toward our goal. Re-work the test to allow us to make further assertions a bit easier
 
