@@ -1,9 +1,7 @@
 package blogposts_test
 
 import (
-	"errors"
 	blogposts "github.com/quii/learn-go-with-tests/reading-files"
-	"io/fs"
 	"reflect"
 	"testing"
 	"testing/fstest"
