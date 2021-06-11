@@ -750,7 +750,7 @@ L
 M`
 ```
 
-And then add another assertion like the others
+Add another assertion like the others.
 
 ```go
 	t.Run("it extracts the body", func(t *testing.T) {
@@ -893,13 +893,13 @@ func main() {
 
 - Add some markdown files into a `posts` folder and run the program!
 
-Notice the symmetry between the production code:
+Notice the symmetry between the production code
 
 ```go
 posts, err := blogposts.NewPostsFromFS(os.DirFS("posts"))
 ```
 
-And the tests:
+And the tests
 
 ```go
 posts, err := blogposts.NewPostsFromFS(fs)
@@ -907,7 +907,7 @@ posts, err := blogposts.NewPostsFromFS(fs)
 
 This is when consumer-driven, top-down TDD _feels correct_.
 
-A user of our package can look at our tests and quickly get up to speed with what it's supposed to do and how to use it. As maintainers, we can be confident our tests are useful because they're from a consumer's point of view. We're not testing implementation details or other incidental details, so we can be reasonably confident that our tests will help us, rather than hinder us when refactoring.
+A user of our package can look at our tests and quickly get up to speed with what it's supposed to do and how to use it. As maintainers, we can be _confident our tests are useful because they're from a consumer's point of view_. We're not testing implementation details or other incidental details, so we can be reasonably confident that our tests will help us, rather than hinder us when refactoring.
 
 By relying on good software engineering practices like  [**dependency injection**](dependency-injection.md) our code is simple to test and re-use.
 
