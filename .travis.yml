@@ -2,7 +2,7 @@ dist: bionic
 language: go
 
 go:
-  - 1.14.x
+  - 1.16.x
 
 before_install:
   - go get github.com/quii/learn-go-with-tests/command-line/v1
