@@ -339,7 +339,7 @@ func TestNewBlogPosts(t *testing.T) {
 		"hello world.md":  {Data: []byte("Title: Post 1")},
 		"hello-world2.md": {Data: []byte("Title: Post 2")},
 	}
-	
+
 	// rest of test code cut for brevity
 
 	t.Run("it parses the title", func(t *testing.T) {
@@ -416,7 +416,9 @@ func getPost(fileSystem fs.FS, f fs.DirEntry) (Post, error) {
 
 Remember our focus at this point is not to write elegant code, it's just to get to a point where we have working software.
 
-Even though this feels like a small increment forward it still required us to write a fair amount of code and make some assumptions in respect to error handling. This would be a point where you should talk to your colleagues and decide the best approach. Fast feedback loops and iterative development give us a better chance of raising these issues sooner so that we can make better decisions.
+Even though this feels like a small increment forward it still required us to write a fair amount of code and make some assumptions in respect to error handling. This would be a point where you should talk to your colleagues and decide the best approach.
+
+The iterative approach has given us fast feedback that our understanding of the requirements is incomplete.
 
 `fs.FS` gives us a way of opening a file within it by name with its `Open` method. From there we read the data from the file and for now we do not need any sophisticated parsing, just cut out the `Title: ` text by slicing the string.
 
