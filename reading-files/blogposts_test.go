@@ -9,13 +9,6 @@ import (
 	"testing/fstest"
 )
 
-type StubFailingFS struct {
-}
-
-func (s StubFailingFS) Open(name string) (fs.File, error) {
-	return nil, errors.New("oh no, i always fail")
-}
-
 func TestNewBlogPosts(t *testing.T) {
 	const (
 		firstBody = `Title: Post 1
