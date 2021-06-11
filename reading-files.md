@@ -61,6 +61,7 @@ posts = blogposts.NewPostsFromFS("some-folder")
 ```
 
 To write a test around this, we'd need some kind of test folder with some example posts in it. _There's nothing terribly wrong with this_, but you are making some trade-offs:
+
 - for each test you may need to create new files to test a particular behaviour
 - some behaviour will be challenging to test, such as failing to load files
 - the tests will run a little slower because they will need to access the file system
