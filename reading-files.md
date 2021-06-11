@@ -730,7 +730,7 @@ Add to our assertion like the others
         Description: "Description 1",
         Tags:        []string{"tdd", "go"},
         Body: `Hello
-        World`,
+World`,
     })
 ```
 
