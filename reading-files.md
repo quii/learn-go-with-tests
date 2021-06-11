@@ -112,21 +112,16 @@ import (
 )
 
 func TestNewBlogPosts(t *testing.T) {
-	t.Run("it creates a post for each file in the file system", func(t *testing.T) {
-		fs := fstest.MapFS{
-			"hello world.md":  {Data: []byte("hi")},
-			"hello-world2.md": {Data: []byte("hola")},
-		}
+    fs := fstest.MapFS{
+        "hello world.md":  {Data: []byte("hi")},
+        "hello-world2.md": {Data: []byte("hola")},
+    }
 
-		posts := blogposts.NewPostsFromFS(fs)
+    posts := blogposts.NewPostsFromFS(fs)
 
-		got := len(posts)
-		want := len(fs)
-
-		if got != want {
-			t.Errorf("got %d, want %d", got, want)
-		}
-	})
+    if len(posts) != len(fs) {
+        t.Errorf("got %d posts, wanted %d posts", len(posts), len(fs))
+    }
 }
 
 ```
@@ -184,9 +179,8 @@ func NewPostsFromFS(fileSystem fstest.MapFS) []Post {
 The test should now correctly fail
 
 ```
-=== RUN   TestNewBlogPosts/it_creates_a_post_for_each_file_in_the_file_system
-    blogpost_test.go:22: got 0, want 2
-    --- FAIL: TestNewBlogPosts/it_creates_a_post_for_each_file_in_the_file_system (0.00s)
+=== RUN   TestNewBlogPosts
+    blogposts_test.go:48: got 0 posts, wanted 2 posts
 ```
 
 ## Write enough code to make it pass
@@ -247,25 +241,20 @@ We parked error handling before as we were focused on making the happy-path work
 
 ```go
 func TestNewBlogPosts(t *testing.T) {
-	t.Run("it creates a post for each file in the file system", func(t *testing.T) {
-		fs := fstest.MapFS{
-			"hello world.md":  {Data: []byte("hi")},
-			"hello-world2.md": {Data: []byte("hola")},
-		}
+    fs := fstest.MapFS{
+        "hello world.md":  {Data: []byte("hi")},
+        "hello-world2.md": {Data: []byte("hola")},
+    }
 
-		posts, err := blogposts.NewPostsFromFS(fs)
+    posts, err := blogposts.NewPostsFromFS(fs)
 
-		if err != nil {
-			t.Fatal(err)
-		}
+    if err != nil {
+        t.Fatal(err)
+    }
 
-		got := len(posts)
-		want := len(fs)
-
-		if got != want {
-			t.Errorf("got %d, want %d", got, want)
-		}
-	})
+    if len(posts) != len(fs) {
+        t.Errorf("got %d posts, wanted %d posts", len(posts), len(fs))
+    }
 }
 ```
 
@@ -303,31 +292,7 @@ This should give you confidence in our approach. The interface we're using has o
 
 In some cases, testing error handling is the pragmatic thing to do, but in our case we're not doing anything _interesting_ with the error, we're just propagating it; so its not worth the hassle of writing a new test.
 
-Logically our next iterations will be around expanding our `Post` type, so it has some useful data. As we are iterating on the same functionality it's simpler to re-use the setup in our existing test rather than creating new test data for each step toward our goal. Re-work the test to allow us to make further assertions a bit easier.
-
-```go
-func TestNewBlogPosts(t *testing.T) {
-	fs := fstest.MapFS{
-		"hello world.md":  {Data: []byte("hi")},
-		"hello-world2.md": {Data: []byte("hola")},
-	}
-
-	posts, err := blogposts.NewPostsFromFS(fs)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Run("it creates a post for each file in the file system", func(t *testing.T) {
-		got := len(posts)
-		want := len(fs)
-
-		if got != want {
-			t.Errorf("got %d, want %d", got, want)
-		}
-	})
-}
-```
+Logically our next iterations will be around expanding our `Post` type, so it has some useful data.
 
 ## Write the test first
 
@@ -342,21 +307,18 @@ func TestNewBlogPosts(t *testing.T) {
 	}
 
 	// rest of test code cut for brevity
+    got := posts[0]
+    want := blogposts.Post{Title: "Post 1"}
 
-	t.Run("it parses the title", func(t *testing.T) {
-		got := posts[0].Title
-		want := "Post 1"
-
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
-	})
+    if !reflect.DeepEqual(got, want) {
+        t.Errorf("got %+v, want %+v", got, want)
+    }
 }
 ```
 
 ## Try to run the test
 ```
-./blogpost_test.go:31:18: posts[0].Title undefined (type blogposts.Post has no field or method Title)
+./blogpost_test.go:58:26: unknown field 'Title' in struct literal of type blogposts.Post
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
@@ -373,8 +335,10 @@ Re-run the test, and you should get a clear, failing test
 
 ```
 === RUN   TestNewBlogPosts
-=== RUN   TestNewBlogPosts/it_parses_the_title
-    blogpost_test.go:35: got "", want "Post 1"
+=== RUN   TestNewBlogPosts/parses_the_post
+    blogpost_test.go:61: got {Title:}, want {Title:Post 1}
+--- FAIL: TestNewBlogPosts (0.00s)
+    --- FAIL: TestNewBlogPosts/parses_the_post (0.00s)
 ```
 
 ## Write enough code to make it pass
@@ -507,6 +471,23 @@ func newPost(postFile io.Reader) (Post, error) {
 
 From now on, most of our efforts can be neatly contained within `newPost`. The concerns of opening and iterating over files are done, and now we can focus on extracting the data for our `Post` type. Whilst not technically necessary, files are a nice way to logically group related things together, so I also moved the `Post` type and `newPost` into a new `post.go` file.
 
+### Test helper
+
+We should take care of our tests too. We're going to be making assertions on `Posts` a lot, so we should write some code to help with that
+
+```go
+func assertPost(t *testing.T, got blogposts.Post, want blogposts.Post) {
+	t.Helper()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %+v, want %+v", got, want)
+	}
+}
+```
+
+```go
+assertPost(t, posts[0], blogposts.Post{Title: "Post 1"})
+```
+
 ## Write the test first
 
 Let's extend our test further to extract the next line from the file, the description. Up until making it pass should now feel comfortable and familiar.
@@ -526,22 +507,18 @@ Description: Description 2`
 	}
 
     // rest of test code cut for brevity
+    assertPost(t, posts[0], blogposts.Post{
+        Title: "Post 1",
+        Description: "Description 1",
+    })
 
-	t.Run("it parses the description", func(t *testing.T) {
-		got := posts[0].Description
-		want := "Description 1"
-
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
-	})
 }
 ```
 
 ## Try to run the test
 
 ```
-./blogpost_test.go:47:18: posts[0].Description undefined (type blogposts.Post has no field or method Description)
+./blogpost_test.go:47:58: unknown field 'Description' in struct literal of type blogposts.Post
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
@@ -560,13 +537,10 @@ The tests should now compile, and fail.
 ```
 === RUN   TestNewBlogPosts
 === RUN   TestNewBlogPosts/it_creates_a_post_for_each_file_in_the_file_system
-=== RUN   TestNewBlogPosts/it_parses_the_title
-    blogpost_test.go:42: got "Post 1\nDescription: Description 1", want "Post 1"
-=== RUN   TestNewBlogPosts/it_parses_the_description
-    blogpost_test.go:51: got "", want "Description 1"
+=== CONT  TestNewBlogPosts
+    blogpost_test.go:47: got {Title:Post 1
+        Description: Description 1 Description:}, want {Title:Post 1 Description:Description 1}
 ```
-
-You'll notice that not only does our new test fail, but the title test fails too. This is because both tests are coupled to the test data and implementation. There are probably things you could do to prevent this but at some level you have to acknowledge that these things are _just coupled_ and, you may as well live with it, at least for the short term.
 
 ## Write enough code to make it pass
 
@@ -661,7 +635,7 @@ You may or may not like this idea, but I do. The point is in the refactoring sta
 
 The next requirement is extracting the post's tags. If you're following along, I'd recommend trying to implement it yourself before reading on. You should now have a good, iterative rhythm and feel confident to extract the next line and parse out the data.
 
-For brevity, I will not go through the TDD steps, but here's the test for tags.
+For brevity, I will not go through the TDD steps, but here's the test with tags added.
 
 ```go
 func TestNewBlogPosts(t *testing.T) {
@@ -675,15 +649,11 @@ Tags: rust, borrow-checker`
 	)
 
     // rest of test code cut for brevity
-
-	t.Run("it extracts the tags", func(t *testing.T) {
-		got := posts[0].Tags
-		want := []string{"tdd", "go"}
-
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("got %v, want %v", got, want)
-		}
-	})
+    assertPost(t, posts[0], blogposts.Post{
+        Title:       "Post 1",
+        Description: "Description 1",
+        Tags:        []string{"tdd", "go"},
+    })
 }
 ```
 
@@ -749,26 +719,25 @@ Tags: rust, borrow-checker
 B
 L
 M`
+    )
 ```
 
-Add another assertion like the others.
+Add to our assertion like the others
 
 ```go
-	t.Run("it extracts the body", func(t *testing.T) {
-		got := posts[0].Body
-		want := `Hello
-World`
-
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
-	})
+	assertPost(t, posts[0], blogposts.Post{
+        Title:       "Post 1",
+        Description: "Description 1",
+        Tags:        []string{"tdd", "go"},
+        Body: `Hello
+        World`,
+    })
 ```
 
 ## Try to run the test
 
 ```
-./blogpost_test.go:75:18: posts[0].Body undefined (type blogposts.Post has no field or method Body)
+./blogpost_test.go:60:3: unknown field 'Body' in struct literal of type blogposts.Post
 ```
 
 As we'd expect.
