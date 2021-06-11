@@ -27,7 +27,7 @@ func newPost(postBody io.Reader) (Post, error) {
 
 	readMetaLine := func(tagName string) string {
 		scanner.Scan()
-		return scanner.Text()[len(tagName):]
+		return strings.TrimPrefix(scanner.Text(), tagName)
 	}
 
 	return Post{

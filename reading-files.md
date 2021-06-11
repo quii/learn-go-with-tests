@@ -595,7 +595,7 @@ This function could never return an `error`. It would be tempting at this point 
 
 ## Refactor
 
-We have some repitition around scanning a line and then reading the text. We know we're going to do this operation at least one more time, it's a simple refactor to DRY up so let's start with that.
+We have repetition around scanning a line and then reading the text. We know we're going to do this operation at least one more time, it's a simple refactor to DRY up so let's start with that.
 
 ```go
 func newPost(postFile io.Reader) (Post, error) {
@@ -638,7 +638,7 @@ func newPost(postFile io.Reader) (Post, error) {
 }
 ```
 
-Now that I'm staring at the code with my creative refactoring mind, I'd like to try making our readLine function take care of removing the tag.
+Now that I'm staring at the code with my creative refactoring mind, I'd like to try making our readLine function take care of removing the tag. There's also a more readable way of trimming a prefix from a string with the function `strings.TrimPrefix`.
 
 ```go
 func newPost(postBody io.Reader) (Post, error) {
@@ -646,7 +646,7 @@ func newPost(postBody io.Reader) (Post, error) {
 
 	readMetaLine := func(tagName string) string {
 		scanner.Scan()
-		return scanner.Text()[len(tagName):]
+		return strings.TrimPrefix(scanner.Text(), tagName)
 	}
 
 	return Post{
@@ -700,7 +700,7 @@ func newPost(postBody io.Reader) (Post, error) {
 
 	readMetaLine := func(tagName string) string {
 		scanner.Scan()
-		return scanner.Text()[len(tagName):]
+		return strings.TrimPrefix(scanner.Text(), tagName)
 	}
 
 	return Post{
@@ -793,7 +793,7 @@ func newPost(postBody io.Reader) (Post, error) {
 
 	readMetaLine := func(tagName string) string {
 		scanner.Scan()
-		return scanner.Text()[len(tagName):]
+		return strings.TrimPrefix(scanner.Text(), tagName)
 	}
 
 	title := readMetaLine(titleSeparator)
@@ -831,7 +831,7 @@ func newPost(postBody io.Reader) (Post, error) {
 
 	readMetaLine := func(tagName string) string {
 		scanner.Scan()
-		return scanner.Text()[len(tagName):]
+		return strings.TrimPrefix(scanner.Text(), tagName)
 	}
 
 	return Post{
@@ -860,8 +860,9 @@ We haven't handled:
 
 - when the file's format is not correct
 - the file is not a `.md`
+- what if the order of the metadata fields is different? Should that be allowed? Should we be able to handle it?
 
-Crucially though, we have working software, and we have defined our interface. The above are just further iterations, more tests to write and drive our behaviour.
+Crucially though, we have working software, and we have defined our interface. The above are just further iterations, more tests to write and drive our behaviour. To support any of the above we shouldn't have to change our _design_, just implementation details.
 
 Keeping focused on the goal means we made the important decisions, and validated them against the desired behaviour, rather than getting bogged down on matters that won't affect the overall design.
 
@@ -916,7 +917,7 @@ The iterative approach kept every step small, and the continuous feedback helped
 
 ### Writing?
 
-It's important to note that these new features only have operations for _reading_ files. If your work needs to do writing, you'll need to look elsewhere. Remember to keep thinking about what the standard library offers currently, if you're writing data you should probably look into leveraging existing interfaces such as `io.Writer`.
+It's important to note that these new features only have operations for _reading_ files. If your work needs to do writing, you'll need to look elsewhere. Remember to keep thinking about what the standard library offers currently, if you're writing data you should probably look into leveraging existing interfaces such as `io.Writer` to keep your code loosely-coupled and re-usable.
 
 ### Further reading
 
