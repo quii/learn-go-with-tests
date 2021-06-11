@@ -4,7 +4,7 @@
 
 For all the power of modern computers to perform huge sums at
 lightning speed, the average developer rarely uses any mathematics
-to do their job. But not today!  Today we'll use mathematics to
+to do their job. But not today! Today we'll use mathematics to
 solve a _real_ problem. And not boring mathematics - we're going
 to use trigonometry and vectors and all sorts of stuff that you
 always said you'd never have to use after highschool.
@@ -59,8 +59,39 @@ so they point in the appropriate directions for a given time.
 
 ## An Acceptance Test
 
-Before we get too stuck in, lets think about an acceptance test. We've got an
-example clock, so let's think about what the important parameters are going to be.
+Before we get too stuck in, lets think about an acceptance test.
+
+Wait, you don't know what an acceptance test is yet. Look, let me try to
+explain.
+
+Let me ask you: what does winning look like? How do we know we've finished
+work? TDD provides a good way of knowing when you've finished: when the test
+passes. Sometimes it's nice - actually, almost all of the time it's nice -
+to write a test that tells you when you've finished writing the whole usable
+feature. Not just a test that tells you that a particular function is
+working in the way you expect, but a test that tells you that the whole
+thing you're trying to achieve - the 'feature' - is complete.
+
+These tests are sometimes called 'acceptance tests', sometimes called
+'feature test'. The idea is that you write a really high level test to
+describe what you're trying to achieve - a user clicks a button on a website,
+and they see a complete list of the Pokémon they've caught, for instance.
+When we've written that test, we can then write test more tests - unit tests -
+that build towards a working system that will pass the acceptance test. So
+for our example these tests might be about rendering a webpage with a button,
+testing route handlers on a web server, performing database look ups, etc.
+All of these things will be TDD'd, and all of them will go towards making
+the original acceptance test pass.
+
+Something like this _classic_ picture by Nat Pryce and Steve Freeman
+
+![img.png](TDD-outside-in.jpg)
+
+Anyway, let's try and write that acceptance test - the one that will let us
+know when we're done.
+
+We've got an example clock, so let's think about what the important parameters are going to be.
+
 
 ```
 <line x1="150" y1="150" x2="114.150000" y2="132.260000"
@@ -129,10 +160,8 @@ This drives out the expected failures around the missing functions and types:
 
 ```
 --- FAIL: TestSecondHandAtMidnight (0.00s)
-# github.com/gypsydave5/learn-go-with-tests/math/v1/clockface_test [github.com/gypsydave5/learn-go-with-tests/math/v1/clockface.test]
 ./clockface_test.go:13:10: undefined: clockface.Point
 ./clockface_test.go:14:9: undefined: clockface.SecondHand
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v1/clockface [build failed]
 ```
 
 So a `Point` where the tip of the second hand should go, and a function to get it.
@@ -159,7 +188,7 @@ func SecondHand(t time.Time) Point {
 }
 ```
 
-and now we get
+and now we get:
 
 ```
 --- FAIL: TestSecondHandAtMidnight (0.00s)
@@ -171,7 +200,7 @@ FAIL	github.com/gypsydave5/learn-go-with-tests/math/v1/clockface	0.006s
 
 ### Write enough code to make it pass
 
-When we get the expected failure, we can fill in the return value of `HandsAt`:
+When we get the expected failure, we can fill in the return value of `SecondHand`:
 
 ```go
 // SecondHand is the unit vector of the second hand of an analogue clock at time `t`
@@ -185,7 +214,7 @@ Behold, a passing test.
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v1/clockface	0.006s
+ok  	    clockface	0.006s
 ```
 
 ### Refactor
@@ -323,9 +352,7 @@ us with a value for π.
 ### Try to run the test
 
 ```
-# github.com/gypsydave5/learn-go-with-tests/math/v2/clockface [github.com/gypsydave5/learn-go-with-tests/math/v2/clockface.test]
 ./clockface_test.go:12:9: undefined: secondsInRadians
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v2/clockface [build failed]
 ```
 
 ### Write the minimal amount of code for the test to run and check the failing test output
@@ -337,11 +364,7 @@ func secondsInRadians(t time.Time) float64 {
 ```
 
 ```
---- FAIL: TestSecondsInRadians (0.00s)
-    clockface_test.go:15: Wanted 3.141592653589793 radians, but got 0
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v2/clockface	0.007s
+clockface_test.go:15: Wanted 3.141592653589793 radians, but got 0
 ```
 
 ### Write enough code to make it pass
@@ -354,7 +377,7 @@ func secondsInRadians(t time.Time) float64 {
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v2/clockface	0.011s
+ok  	clockface	0.011s
 ```
 
 ### Refactor
@@ -393,7 +416,8 @@ func TestSecondsInRadians(t *testing.T) {
 I added a couple of helper functions to make writing this table based test
 a little less tedious. `testName` converts a time into a digital watch
 format (HH:MM:SS), and `simpleTime` constructs a `time.Time` using only the
-parts we actually care about (again, hours, minutes and seconds).[^1]
+parts we actually care about (again, hours, minutes and seconds).[^1] Here
+they are:
 
 ```go
 func simpleTime(hours, minutes, seconds int) time.Time {
@@ -412,16 +436,9 @@ This gives us some nice test output:
 
 
 ```
---- FAIL: TestSecondsInRadians (0.00s)
-    --- FAIL: TestSecondsInRadians/00:00:00 (0.00s)
-        clockface_test.go:24: Wanted 0 radians, but got 3.141592653589793
-    --- FAIL: TestSecondsInRadians/00:00:45 (0.00s)
-        clockface_test.go:24: Wanted 4.71238898038469 radians, but got 3.141592653589793
-    --- FAIL: TestSecondsInRadians/00:00:07 (0.00s)
-        clockface_test.go:24: Wanted 0.7330382858376184 radians, but got 3.141592653589793
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface	0.007s
+clockface_test.go:24: Wanted 0 radians, but got 3.141592653589793
+
+clockface_test.go:24: Wanted 4.71238898038469 radians, but got 3.141592653589793
 ```
 
 Time to implement all of that maths stuff we were talking about above:
@@ -438,12 +455,7 @@ all the tests passing...
 
 
 ```
---- FAIL: TestSecondsInRadians (0.00s)
-    --- FAIL: TestSecondsInRadians/00:00:30 (0.00s)
-        clockface_test.go:24: Wanted 3.141592653589793 radians, but got 3.1415926535897936
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v3/clockface	0.006s
+clockface_test.go:24: Wanted 3.141592653589793 radians, but got 3.1415926535897936
 ```
 
 Wait, what?
@@ -459,7 +471,7 @@ same as `math.Pi`_.
 
 There are two ways around this:
 
-1. Live with the it
+1. Live with it
 2. Refactor our function by refactoring our equation
 
 Now (1) may not seem all that appealing, but it's often the only way to make
@@ -492,8 +504,10 @@ And we get a pass.
 
 ```
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v2/clockface     0.005s
+ok      clockface     0.005s
 ```
+
+It should all look [something like this](https://github.com/quii/learn-go-with-tests/tree/main/math/v3/clockface).
 
 ### A note on dividing by zero
 
@@ -585,9 +599,7 @@ func TestSecondHandVector(t *testing.T) {
 ### Try to run the test
 
 ```
-# github.com/gypsydave5/learn-go-with-tests/math/v4/clockface [github.com/gypsydave5/learn-go-with-tests/math/v4/clockface.test]
 ./clockface_test.go:40:11: undefined: secondHandPoint
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface [build failed]
 ```
 
 ### Write the minimal amount of code for the test to run and check the failing test output
@@ -599,12 +611,7 @@ func secondHandPoint(t time.Time) Point {
 ```
 
 ```
---- FAIL: TestSecondHandPoint (0.00s)
-    --- FAIL: TestSecondHandPoint/00:00:30 (0.00s)
-        clockface_test.go:42: Wanted {0 -1} Point, but got {0 0}
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.010s
+clockface_test.go:42: Wanted {0 -1} Point, but got {0 0}
 ```
 
 ### Write enough code to make it pass
@@ -617,7 +624,7 @@ func secondHandPoint(t time.Time) Point {
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.007s
+ok  	clockface	0.007s
 ```
 
 ### Repeat for new requirements
@@ -646,12 +653,7 @@ func TestSecondHandPoint(t *testing.T) {
 ### Try to run the test
 
 ```
---- FAIL: TestSecondHandPoint (0.00s)
-    --- FAIL: TestSecondHandPoint/00:00:45 (0.00s)
-        clockface_test.go:43: Wanted {-1 0} Point, but got {0 -1}
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.006s
+clockface_test.go:43: Wanted {-1 0} Point, but got {0 -1}
 ```
 
 ### Write enough code to make it pass
@@ -679,14 +681,9 @@ Now we get
 
 
 ```
---- FAIL: TestSecondHandPoint (0.00s)
-    --- FAIL: TestSecondHandPoint/00:00:30 (0.00s)
-        clockface_test.go:43: Wanted {0 -1} Point, but got {1.2246467991473515e-16 -1}
-    --- FAIL: TestSecondHandPoint/00:00:45 (0.00s)
-        clockface_test.go:43: Wanted {-1 0} Point, but got {-1 -1.8369701987210272e-16}
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.007s
+clockface_test.go:43: Wanted {0 -1} Point, but got {1.2246467991473515e-16 -1}
+
+clockface_test.go:43: Wanted {-1 0} Point, but got {-1 -1.8369701987210272e-16}
 ```
 
 Wait, what (again)? Looks like we've been cursed by the floats once more - both
@@ -696,7 +693,8 @@ say that they're roughly equal and get on with our lives.
 
 One option to increase the accuracy of these angles would be to use the rational
 type `Rat` from the `math/big` package. But given the objective is to draw an
-SVG and not the moon landings I think we can live with a bit of fuzziness.
+SVG and not land on the moon landings I think we can live with a bit of
+fuzziness.
 
 ```go
 func TestSecondHandPoint(t *testing.T) {
@@ -729,21 +727,23 @@ func roughlyEqualPoint(a, b Point) bool {
 }
 ```
 
-We've defined two functions to define approximate equality between two `Points`
-- they'll work if the X and Y elements are within 0.0000001 of each other.
-  That's still pretty accurate.
+We've defined two functions to define approximate equality between two
+`Points` - they'll work if the X and Y elements are within 0.0000001 of each
+other.  That's still pretty accurate.
 
-and now we get
+And now we get:
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v4/clockface	0.007s
+ok  	clockface	0.007s
 ```
 
 ### Refactor
 
 I'm still pretty happy with this.
 
+
+Here's [what it looks like now](https://github.com/quii/learn-go-with-tests/tree/main/math/v4/clockface)
 
 <!---
 v4 ends
@@ -772,11 +772,7 @@ func TestSecondHandAt30Seconds(t *testing.T) {
 
 
 ```
---- FAIL: TestSecondHandAt30Seconds (0.00s)
-    clockface_acceptance_test.go:28: Got {150 60}, wanted {150 240}
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v5/clockface	0.007s
+clockface_acceptance_test.go:28: Got {150 60}, wanted {150 240}
 ```
 
 ### Write enough code to make it pass
@@ -803,11 +799,11 @@ func SecondHand(t time.Time) Point {
 }
 ```
 
-Scale, flip, and translated in exactly that order. Hooray maths!
+Scale, flip, and translate in exactly that order. Hooray maths!
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v5/clockface	0.007s
+ok  	clockface	0.007s
 ```
 
 ### Refactor
@@ -851,7 +847,8 @@ package that will create the binary that will build an SVG:
 └── clockface_test.go
 ```
 
-and inside `main.go`
+Inside `main.go`, you'll start with this code but change the import for the
+clockface package to point at your own version:
 
 ```go
 package main
@@ -862,7 +859,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gypsydave5/learn-go-with-tests/math/v6/clockface"
+	"github.com/quii/learn-go-with-tests/math/clockface" // REPLACE THIS!
 )
 
 func main() {
@@ -911,6 +908,8 @@ We should see something like
 
 ![a clock with only a second hand](math/v6/clockface/clockface/clock.svg)
 
+And this is [how the code looks](https://github.com/quii/learn-go-with-tests/tree/main/math/v6/clockface).
+
 <!--
 Here ends v6
 -->
@@ -924,7 +923,7 @@ This stinks. Well, it doesn't quite _stink_ stink, but I'm not happy about it.
    mentioning SVGs or actually producing an SVG...
 2. ... while at the same time I'm not testing any of my SVG code.
 
-Yeah, I guess I screwed up. This feels wrong. Let's try and recover with a more
+Yeah, I guess I screwed up. This feels wrong. Let's try to recover with a more
 SVG-centric test.
 
 What are our options? Well, we could try testing that the characters spewing out
@@ -954,7 +953,7 @@ that a string appears in the output), but it will also fail if I make the
 smallest, unimportant change to that string - if I add an extra space between
 the attributes, for instance.
 
-The biggest smell is really that I'm testing a data structure - XML - by looking
+The _biggest_ smell is that I'm testing a data structure - XML - by looking
 at its representation as a series of characters - as a string. This is _never_,
 _ever_ a good idea as it produces problems just like the ones I outline above:
 a test that's both too fragile and not sensitive enough. A test that's testing
@@ -969,7 +968,7 @@ to parse it.
 simple XML parsing.
 
 The function [`xml.Unmarshall`](https://godoc.org/encoding/xml#Unmarshal) takes
-a `[]byte` of XML data and a pointer to a struct for it to get unmarshalled in
+a `[]byte` of XML data, and a pointer to a struct for it to get unmarshalled in
 to.
 
 So we'll need a struct to unmarshall our XML into. We could spend some time
@@ -978,8 +977,7 @@ to write the correct structure but, happily, someone has written
 [`zek`](https://github.com/miku/zek) a program that will automate all of that
 hard work for us.  Even better, there's an online version at
 [https://www.onlinetool.io/xmltogo/](https://www.onlinetool.io/xmltogo/). Just
-paste the SVG from the top of the file into one box and - bam
-- out pops:
+paste the SVG from the top of the file into one box and - bam - out pops:
 
 ```go
 type Svg struct {
@@ -1009,7 +1007,8 @@ type Svg struct {
 ```
 
 We could make adjustments to this if we needed to (like changing the name of the
-struct to `SVG`) but it's definitely good enough to start us off.
+struct to `SVG`) but it's definitely good enough to start us off. Paste the
+struct into the `clockface_test` file and let's write a test with it:
 
 ```go
 func TestSVGWriterAtMidnight(t *testing.T) {
@@ -1042,9 +1041,7 @@ informative message.
 
 
 ```sh
-# github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface_test [github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface.test]
 ./clockface_acceptance_test.go:41:2: undefined: clockface.SVGWriter
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface [build failed]
 ```
 
 Looks like we'd better write that `SVGWriter`...
@@ -1096,17 +1093,13 @@ const svgEnd = `</svg>`
 The most beautiful SVG writer? No. But hopefully it'll do the job...
 
 ```
---- FAIL: TestSVGWriterAtMidnight (0.00s)
-    clockface_acceptance_test.go:56: Expected to find the second hand with x2 of 150 and y2 of 60, in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-        <svg xmlns="http://www.w3.org/2000/svg"
-             width="100%"
-             height="100%"
-             viewBox="0 0 300 300"
-             version="2.0"><circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/><line x1="150" y1="150" x2="150.000000" y2="60.000000" style="fill:none;stroke:#f00;stroke-width:3px;"/></svg>
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface	0.008s
+clockface_acceptance_test.go:56: Expected to find the second hand with x2 of 150 and y2 of 60, in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="100%"
+         height="100%"
+         viewBox="0 0 300 300"
+         version="2.0"><circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/><line x1="150" y1="150" x2="150.000000" y2="60.000000" style="fill:none;stroke:#f00;stroke-width:3px;"/></svg>
 ```
 
 Oooops! The `%f` format directive is printing our coordinates to the default
@@ -1129,7 +1122,7 @@ We get:
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface	0.006s
+ok  	clockface	0.006s
 ```
 
 We can now shorten our `main` function:
@@ -1149,6 +1142,8 @@ func main() {
 	clockface.SVGWriter(os.Stdout, t)
 }
 ```
+
+This is what [things should look like now](https://github.com/quii/learn-go-with-tests/blob/main/math/v7b/clockface).
 
 And we can write a test for another time following the same pattern, but not
 before...
@@ -1265,16 +1260,18 @@ func TestSVGWriterSecondHand(t *testing.T) {
 	}
 }
 
-func containsLine(want Line, lines []Line) bool {
-	for _, line := range lines {
-		if line == want {
-			return true
-		}
-	}
 
-	return false
+func containsLine(l Line, ls []Line) bool {
+    for _, line := range ls {
+        if line == l {
+            return true
+        }
+    }
+    return false
 }
 ```
+
+Here's what [it looks like](https://github.com/quii/learn-go-with-tests/blob/main/math/v7c/clockface)
 
 Now _that's_ what I call an acceptance test!
 
@@ -1317,15 +1314,10 @@ func TestSVGWriterMinuteHand(t *testing.T) {
 ### Try to run the test
 
 ```
---- FAIL: TestSVGWriterMinutedHand (0.00s)
-    --- FAIL: TestSVGWriterMinutedHand/00:00:00 (0.00s)
-        clockface_acceptance_test.go:87: Expected to find the minute hand line {X1:150 Y1:150 X2:150 Y2:70}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60}]
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v8/clockface	0.007s
+clockface_acceptance_test.go:87: Expected to find the minute hand line {X1:150 Y1:150 X2:150 Y2:70}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60}]
 ```
 
-We'd better start building some other clockhands, Much in the same way as we
+We'd better start building some other clock hands, Much in the same way as we
 produced the tests for the second hand, we can iterate to produce the following
 set of tests. Again we'll comment out our acceptance test while we get this
 working:
@@ -1353,9 +1345,7 @@ func TestMinutesInRadians(t *testing.T) {
 ### Try to run the test
 
 ```
-# github.com/gypsydave5/learn-go-with-tests/math/v8/clockface [github.com/gypsydave5/learn-go-with-tests/math/v8/clockface.test]
 ./clockface_test.go:59:11: undefined: minutesInRadians
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v8/clockface [build failed]
 ```
 
 ### Write the minimal amount of code for the test to run and check the failing test output
@@ -1406,18 +1396,12 @@ How much is that tiny little bit? Well...
 ### Try to run the test
 
 ```go
---- FAIL: TestMinutesInRadians (0.00s)
-    --- FAIL: TestMinutesInRadians/00:00:07 (0.00s)
-        clockface_test.go:62: Wanted 0.012217304763960306 radians, but got 3.141592653589793
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v8/clockface	0.009s
+clockface_test.go:62: Wanted 0.012217304763960306 radians, but got 3.141592653589793
 ```
 
 ### Write enough code to make it pass
 
-In the immortal words of Jennifer Aniston: [Here comes the science
-bit](https://www.youtube.com/watch?v=29Im23SPNok)
+In the immortal words of Jennifer Aniston: [Here comes the science bit](https://www.youtube.com/watch?v=29Im23SPNok)
 
 ```go
 func minutesInRadians(t time.Time) float64 {
@@ -1446,10 +1430,10 @@ And...
 
 ```go
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v8/clockface	0.007s
+ok  	clockface	0.007s
 ```
 
-Nice and easy.
+Nice and easy. This is what things [look like now](https://github.com/quii/learn-go-with-tests/blob/main/math/v8/clockface/clockface_acceptance_test.go)
 
 ### Repeat for new requirements
 
@@ -1494,9 +1478,7 @@ func TestMinuteHandPoint(t *testing.T) {
 ### Try to run the test
 
 ```
-# github.com/gypsydave5/learn-go-with-tests/math/v9/clockface [github.com/gypsydave5/learn-go-with-tests/math/v9/clockface.test]
 ./clockface_test.go:79:11: undefined: minuteHandPoint
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface [build failed]
 ```
 
 ### Write the minimal amount of code for the test to run and check the failing test output
@@ -1508,12 +1490,7 @@ func minuteHandPoint(t time.Time) Point {
 ```
 
 ```
---- FAIL: TestMinuteHandPoint (0.00s)
-    --- FAIL: TestMinuteHandPoint/00:30:00 (0.00s)
-        clockface_test.go:80: Wanted {0 -1} Point, but got {0 0}
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
+clockface_test.go:80: Wanted {0 -1} Point, but got {0 0}
 ```
 
 ### Write enough code to make it pass
@@ -1526,7 +1503,7 @@ func minuteHandPoint(t time.Time) Point {
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
+ok  	clockface	0.007s
 ```
 
 ### Repeat for new requirements
@@ -1555,12 +1532,7 @@ func TestMinuteHandPoint(t *testing.T) {
 ```
 
 ```
---- FAIL: TestMinuteHandPoint (0.00s)
-    --- FAIL: TestMinuteHandPoint/00:45:00 (0.00s)
-        clockface_test.go:81: Wanted {-1 0} Point, but got {0 -1}
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
+clockface_test.go:81: Wanted {-1 0} Point, but got {0 -1}
 ```
 
 ### Write enough code to make it pass
@@ -1580,7 +1552,7 @@ func minuteHandPoint(t time.Time) Point {
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.009s
+ok  	clockface	0.009s
 ```
 
 ### Refactor
@@ -1614,16 +1586,22 @@ func secondHandPoint(t time.Time) Point {
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
+ok  	clockface	0.007s
 ```
 
-Now we can uncomment the acceptance test and get to work drawing the minute hand
+Now we can uncomment the acceptance test and get to work drawing the minute
+hand.
 
 ### Write enough code to make it pass
 
-Another quick copy-and-paste with some minor adjustments
+The `minuteHand` function is a copy-and-paste of `secondHand` with some
+minor adjustments, such as declaring a `minuteHandLength`:
 
 ```go
+const minuteHandLength = 80
+
+//...
+
 func minuteHand(w io.Writer, t time.Time) {
 	p := minuteHandPoint(t)
 	p = Point{p.X * minuteHandLength, p.Y * minuteHandLength}
@@ -1633,9 +1611,23 @@ func minuteHand(w io.Writer, t time.Time) {
 }
 ```
 
+And a call to it in our `SVGWriter` function:
+
+```go
+func SVGWriter(w io.Writer, t time.Time) {
+	io.WriteString(w, svgStart)
+	io.WriteString(w, bezel)
+	secondHand(w, t)
+	minuteHand(w, t)
+	io.WriteString(w, svgEnd)
+}
+```
+
+Now we should see that `TestSVGWriterMinuteHand` passes:
+
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.006s
+ok  	clockface	0.006s
 ```
 
 But the proof of the pudding is in the eating - if we now compile and run our
@@ -1668,8 +1660,10 @@ func makeHand(p Point, length float64) Point {
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v9/clockface	0.007s
+ok  	clockface	0.007s
 ```
+
+This is [where we're up to now](https://github.com/quii/learn-go-with-tests/tree/main/math/v9/clockface).
 
 There... now it's just the hour hand to do!
 
@@ -1710,12 +1704,7 @@ func TestSVGWriterHourHand(t *testing.T) {
 ### Try to run the test
 
 ```
---- FAIL: TestSVGWriterHourHand (0.00s)
-    --- FAIL: TestSVGWriterHourHand/06:00:00 (0.00s)
-        clockface_acceptance_test.go:113: Expected to find the hour hand line {X1:150 Y1:150 X2:150 Y2:200}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.013s
+clockface_acceptance_test.go:113: Expected to find the hour hand line {X1:150 Y1:150 X2:150 Y2:200}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
 ```
 
 Again, let's comment this one out until we've got the some coverage with the
@@ -1746,9 +1735,7 @@ func TestHoursInRadians(t *testing.T) {
 ### Try to run the test
 
 ```
-# github.com/gypsydave5/learn-go-with-tests/math/v10/clockface [github.com/gypsydave5/learn-go-with-tests/math/v10/clockface.test]
 ./clockface_test.go:97:11: undefined: hoursInRadians
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface [build failed]
 ```
 
 ### Write the minimal amount of code for the test to run and check the failing test output
@@ -1761,7 +1748,7 @@ func hoursInRadians(t time.Time) float64 {
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
+ok  	clockface	0.007s
 ```
 
 ### Repeat for new requirements
@@ -1790,12 +1777,7 @@ func TestHoursInRadians(t *testing.T) {
 ### Try to run the test
 
 ```
---- FAIL: TestHoursInRadians (0.00s)
-    --- FAIL: TestHoursInRadians/00:00:00 (0.00s)
-        clockface_test.go:100: Wanted 0 radians, but got 3.141592653589793
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
+clockface_test.go:100: Wanted 0 radians, but got 3.141592653589793
 ```
 
 ### Write enough code to make it pass
@@ -1833,12 +1815,7 @@ func TestHoursInRadians(t *testing.T) {
 ### Try to run the test
 
 ```
---- FAIL: TestHoursInRadians (0.00s)
-    --- FAIL: TestHoursInRadians/21:00:00 (0.00s)
-        clockface_test.go:101: Wanted 4.71238898038469 radians, but got 10.995574287564276
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.014s
+clockface_test.go:101: Wanted 4.71238898038469 radians, but got 10.995574287564276
 ```
 
 ### Write enough code to make it pass
@@ -1849,7 +1826,7 @@ func hoursInRadians(t time.Time) float64 {
 }
 ```
 
-Remember, this is not a 24 hour clock; we have to use the remainder operator to
+Remember, this is not a 24-hour clock; we have to use the remainder operator to
 get the remainder of the current hour divided by 12.
 
 ```
@@ -1858,7 +1835,7 @@ ok  	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.008s
 ```
 ### Write the test first
 
-Now let's try and move the hour hand around the clockface based on the minutes
+Now let's try to move the hour hand around the clockface based on the minutes
 and the seconds that have passed.
 
 ```go
@@ -1887,12 +1864,7 @@ func TestHoursInRadians(t *testing.T) {
 ### Try to run the test
 
 ```
---- FAIL: TestHoursInRadians (0.00s)
-    --- FAIL: TestHoursInRadians/00:01:30 (0.00s)
-        clockface_test.go:102: Wanted 0.013089969389957472 radians, but got 0
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
+clockface_test.go:102: Wanted 0.013089969389957472 radians, but got 0
 ```
 
 ### Write enough code to make it pass
@@ -1916,15 +1888,10 @@ func hoursInRadians(t time.Time) float64 {
 and behold:
 
 ```
---- FAIL: TestHoursInRadians (0.00s)
-    --- FAIL: TestHoursInRadians/00:01:30 (0.00s)
-        clockface_test.go:104: Wanted 0.013089969389957472 radians, but got 0.01308996938995747
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
+clockface_test.go:104: Wanted 0.013089969389957472 radians, but got 0.01308996938995747
 ```
 
-AAAAARGH BLOODY FLOATING POINT ARITHMETIC!
+Floating point arithmetic strikes again.
 
 Let's update our test to use `roughlyEqualFloat64` for the comparison of the
 angles.
@@ -1954,13 +1921,14 @@ func TestHoursInRadians(t *testing.T) {
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.007s
+ok  	clockface	0.007s
 ```
 
 ### Refactor
 
 If we're going to use `roughlyEqualFloat64` in _one_ of our radians tests, we
-should probably use it for _all_ of them. That's a nice and simple refactor.
+should probably use it for _all_ of them. That's a nice and simple refactor,
+which will leave things [looking like this](https://github.com/quii/learn-go-with-tests/tree/main/math/v10/clockface).
 
 <!--
 end of v10
@@ -1994,36 +1962,37 @@ func TestHourHandPoint(t *testing.T) {
 }
 ```
 
-Wait, am I just going to throw _two_ test cases out there _at once_? Isn't this _bad TDD_?
+Wait, am I going to write _two_ test cases _at once_? Isn't this _bad TDD_?
 
 ### On TDD Zealotry
 
 Test driven development is not a religion. Some people might
-act like it is - usually people who don't do TDD but who are happy to moan
+act like it is - usually people who don't do TDD but are happy to moan
 on Twitter or Dev.to that it's only done by zealots and that they're 'being
-pragmatic' when they don't write tests. But it's not a religion. It's tool.
+pragmatic' when they don't write tests. But it's not a religion. It's a tool.
 
 I _know_ what the two tests are going to be - I've tested two other clock hands
 in exactly the same way - and I already know what my implementation is going to
 be - I wrote a function for the general case of changing an angle into a point
 in the minute hand iteration.
 
-I'm not going to plough through TDD ceremony for the sake of it. Tests are
-a tool to help me write better code. TDD is a technique to help me write better
-code. Neither tests nor TDD are an end in themselves.
+I'm not going to plough through TDD ceremony for the sake of it. TDD is a
+technique that helps me understand the code I'm writing - and the code that
+I'm going to write - better. TDD gives me feedback, knowledge and insight.
+But if I've already got that knowledge, then I'm not going to plough
+through the ceremony for no reason. Neither tests nor TDD are an end in themselves.
 
 My confidence has increased, so I feel I can make larger strides forward. I'm
 going to 'skip' a few steps, because I know where I am, I know where I'm going
 and I've been down this road before.
 
-But also note: I'm not skipping writing the tests entirely.
+But also note: I'm not skipping writing the tests entirely - I'm still
+writing them first. They're just appearing in less granular chunks.
 
 ### Try to run the test
 
 ```
-# github.com/gypsydave5/learn-go-with-tests/math/v11/clockface [github.com/gypsydave5/learn-go-with-tests/math/v11/clockface.test]
 ./clockface_test.go:119:11: undefined: hourHandPoint
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v11/clockface [build failed]
 ```
 
 ### Write enough code to make it pass
@@ -2034,7 +2003,7 @@ func hourHandPoint(t time.Time) Point {
 }
 ```
 
-As I said, I know where I am and I know where I'm going. Why pretend otherwise?
+As I said, I know where I am, and I know where I'm going. Why pretend otherwise?
 The tests will soon tell me if I'm wrong.
 
 ```
@@ -2081,17 +2050,13 @@ func TestSVGWriterHourHand(t *testing.T) {
 ### Try to run the test
 
 ```
---- FAIL: TestSVGWriterHourHand (0.00s)
-    --- FAIL: TestSVGWriterHourHand/06:00:00 (0.00s)
-        clockface_acceptance_test.go:113: Expected to find the hour hand line {X1:150 Y1:150 X2:150 Y2:200}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
-FAIL
-exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.013s
+clockface_acceptance_test.go:113: Expected to find the hour hand line {X1:150 Y1:150 X2:150 Y2:200},
+    in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
 ```
 
 ### Write enough code to make it pass
 
-And we can now make our final adjustments to `svgWriter.go`
+And we can now make our final adjustments to the SVG writing constants and functions:
 
 ```go
 const (
@@ -2121,11 +2086,10 @@ func hourHand(w io.Writer, t time.Time) {
 
 ```
 
-and so...
+And so...
 
 ```
-PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v12/clockface	0.007s
+ok  	clockface	0.007s
 ```
 
 Let's just check by compiling and running our `clockface` program.
@@ -2189,7 +2153,7 @@ document how it works.
 > a C program.
 >			-- Henry Spencer, in _The Art of Unix Programming_
 
-In [my final take on this program](math/vFinal/clockface), I've made the
+In [my final take on this program](https://github.com/quii/learn-go-with-tests/tree/main/math/vFinal/clockface), I've made the
 unexported functions within `clockface` into a public API for the library, with
 functions to calculate the angle and unit vector for each of the clock hands.
 I've also split the SVG generation part into its own package, `svg`, which is
@@ -2209,11 +2173,12 @@ make us feel uncomfortable? Shouldn't we do something like
 - use an SVG library?
 
 We could refactor our code to do any of these things, and we can do so because
-it doesn't matter _how_ we produce our SVG, what's important is _that
-it's an SVG that we produce_. As such, the part of our system that needs to know
+it doesn't matter _how_ we produce our SVG, what is important is _what_ we
+produce -  _an SVG_. As such, the part of our system that needs to know
 the most about SVGs - that needs to be the strictest about what constitutes an
-SVG - is the test for the SVG output; it needs to have enough context and
-knowledge about SVGs for us to be confident that we're outputting an SVG.
+SVG - is the test for the SVG output: it needs to have enough context and
+knowledge about what an SVG is for us to be confident that we're outputting an
+SVG. The _what_ of an SVG lives in our tests; the _how_ in the code.
 
 We may have felt odd that we were pouring a lot of time and effort into those
 SVG tests - importing an XML library, parsing XML, refactoring the structs - but
@@ -2222,15 +2187,15 @@ the current production code. It will help guarantee that the output is always
 a valid SVG, no matter what we choose to use to produce it.
 
 Tests are not second class citizens - they are not 'throwaway' code. Good tests
-will last a lot longer than the particular version of the code they are
+will last a lot longer than the version of the code they are
 testing. You should never feel like you're spending 'too much time' writing your
-tests. It's usually a wise investment.
+tests. It is an investment.
 
 [^1]: This is a lot easier than writing a name out by hand as a string and then having to keep it in sync with the actual time. Believe me you don't want to do that...
 
 [^2]: In short it makes it easier to do calculus with circles as π just keeps coming up as an angle if you use normal degrees, so if you count your angles in πs it makes all the equations simpler.
 
-[^3]: Missattributed because, like all great authors, Kent Beck is more quoted than read. Beck himself attributes it to [Phlip][phlip].
+[^3]: Misattributed because, like all great authors, Kent Beck is more quoted than read. Beck himself attributes it to [Phlip][phlip].
 
 [texttemplate]: https://golang.org/pkg/text/template/
 [circle]: https://en.wikipedia.org/wiki/Sine#Unit_circle_definition
