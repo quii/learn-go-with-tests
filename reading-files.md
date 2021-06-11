@@ -748,8 +748,8 @@ Add `Body` to `Post` and the test should fail.
 
 ```
 === RUN   TestNewBlogPosts
-=== RUN   TestNewBlogPosts/it_extracts_the_body
-    blogpost_test.go:80: got "", want "Hello\nWorld"
+    blogposts_test.go:38: got {Title:Post 1 Description:Description 1 Tags:[tdd go] Body:}, want {Title:Post 1 Description:Description 1 Tags:[tdd go] Body:Hello
+        World}
 ```
 
 ## Write enough code to make it pass
