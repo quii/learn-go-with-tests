@@ -164,7 +164,7 @@ The tests still won't compile because our new package does not have a `NewPostsF
 ./blogpost_test.go:16:12: undefined: blogposts.NewPostsFromFS
 ```
 
-This forces us to make the skeleton of our function to make the test run. Remember not to overthink the code at this point, we're just trying to get a running test and make sure it fails as we'd expect. If we skip this step we might be skipping over assumptions and not write a useful test.
+This forces us to make the skeleton of our function to make the test run. Remember not to overthink the code at this point, we're just trying to get a running test and make sure it fails as we'd expect. If we skip this step we may skip over assumptions and not write a useful test.
 
 ```go
 package blogposts
@@ -302,7 +302,7 @@ This should give you confidence in our approach. The interface we're using has o
 
 In some cases, testing error handling is the pragmatic thing to do, but in our case we're not doing anything _interesting_ with the error, we're just propagating it; so its not worth the hassle of writing a new test.
 
-Logically our next iterations will be around expanding our `Post` type, so it has some useful data. As we are iterating on the same functionality it might be simpler to re-use the setup in our existing test rather than creating new test data for each step toward our goal. Re-work the test to allow us to make further assertions a bit easier
+Logically our next iterations will be around expanding our `Post` type, so it has some useful data. As we are iterating on the same functionality it's simpler to re-use the setup in our existing test rather than creating new test data for each step toward our goal. Re-work the test to allow us to make further assertions a bit easier.
 
 ```go
 func TestNewBlogPosts(t *testing.T) {
