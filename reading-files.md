@@ -1,6 +1,6 @@
 # Reading files
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/fstest/reading-files)**
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/reading-files)**
 
 In this chapter we're going to learn how to read some files, get some data out of them, and do something useful.
 
