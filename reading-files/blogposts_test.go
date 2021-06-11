@@ -40,13 +40,9 @@ M`
 
 	posts, err := blogposts.NewPostsFromFS(fs)
 
-	if err != nil {
-		t.Fatal(err)
-	}
+	assertNoError(t, err)
 
-	if len(posts) != len(fs) {
-		t.Errorf("got %d posts, wanted %d posts", len(posts), len(fs))
-	}
+	assertPostsLength(t, posts, fs)
 
 	assertPost(t, posts[0], blogposts.Post{
 		Title:       "Post 1",
@@ -55,6 +51,20 @@ M`
 		Body: `Hello
 World`,
 	})
+}
+
+func assertNoError(t *testing.T, err error) {
+	t.Helper()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func assertPostsLength(t *testing.T, posts []blogposts.Post, fs fstest.MapFS) {
+	t.Helper()
+	if len(posts) != len(fs) {
+		t.Errorf("got %d posts, wanted %d posts", len(posts), len(fs))
+	}
 }
 
 func assertPost(t *testing.T, got blogposts.Post, want blogposts.Post) {
