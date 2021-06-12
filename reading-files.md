@@ -94,14 +94,14 @@ posts = blogposts.NewPostsFromFS(someFS)
 
 ## Write the test first
 
-We should keep scope as small and useful as possible. A good start to give us confidence is to prove that we can read all the files in a directory.  We can check that the count of `[]Post` returned is the same as the number of files in our fake file system.
+We should keep scope as small and useful as possible. If we prove that we can read all the files in a directory, that will be a good start.  This will give us confidence in the software we're writing.  We can check that the count of `[]Post` returned is the same as the number of files in our fake file system.
 
 Create a new project to work through this chapter.
 
 - `mkdir blogposts`
 - `cd blogposts`
 - `go mod init github.com/{your-name}/blogposts`
-- `touch blogposts_test.go`.
+- `touch blogposts_test.go`
 
 ```go
 package blogposts_test
@@ -126,15 +126,15 @@ func TestNewBlogPosts(t *testing.T) {
 
 ```
 
-Notice that the package of our test is `blogposts_test`. Remember when TDD is practiced well we take a consumer-driven approach, we don't want to test internal details because consumers don't care about that. By appending `_test` to our intended package name it means we can only access exported members from our package, just like a real user of our package.
+Notice that the package of our test is `blogposts_test`. Remember, when TDD is practiced well we take a _consumer-driven_ approach: we don't want to test internal details because _consumers_ don't care about them. By appending `_test` to our intended package name, we only access exported members from our package - just like a real user of our package.
 
-We've imported [`testing/fstest`](https://golang.org/pkg/testing/fstest/) which gives us access to the [`fstest.MapFS`](https://golang.org/pkg/testing/fstest/#MapFS) type for our fake file-system to pass to our package.
+We've imported [`testing/fstest`](https://golang.org/pkg/testing/fstest/) which gives us access to the [`fstest.MapFS`](https://golang.org/pkg/testing/fstest/#MapFS) type. Our fake file system will pass `fstest.MapFS` to our package.
 
 > A MapFS is a simple in-memory file system for use in tests, represented as a map from path names (arguments to Open) to information about the files or directories they represent.
 
-This feels simpler than maintaining a folder of test files and will execute quicker too.
+This feels simpler than maintaining a folder of test files, and it will execute quicker.
 
-Finally, we've codified the usage of our API from a consumer's point of view, and then check if it at least creates the correct number of posts.
+Finally, we codified the usage of our API from a consumer's point of view, then checked if it creates the correct number of posts.
 
 ## Try to run the test
 
@@ -142,9 +142,9 @@ Finally, we've codified the usage of our API from a consumer's point of view, an
 ./blogpost_test.go:15:12: undefined: blogposts
 ```
 
-## Write the minimal amount of code for the test to run and check the failing test output
+## Write the minimal amount of code for the test to run and _check the failing test output_
 
-The package doesn't exist, create a new file `blogposts.go` and put `package blogposts` inside it. You'll need to then import that package into your tests. For me, the imports now look like:
+The package doesn't exist. Create a new file `blogposts.go` and put `package blogposts` inside it. You'll need to then import that package into your tests. For me, the imports now look like:
 
 ```go
 import (
@@ -154,13 +154,13 @@ import (
 )
 ```
 
-The tests still won't compile because our new package does not have a `NewPostsFromFS` function that returns some kind of collection.
+Now the tests won't compile because our new package does not have a `NewPostsFromFS` function, that returns some kind of collection.
 
 ```
 ./blogpost_test.go:16:12: undefined: blogposts.NewPostsFromFS
 ```
 
-This forces us to make the skeleton of our function to make the test run. Remember not to overthink the code at this point, we're just trying to get a running test and make sure it fails as we'd expect. If we skip this step we may skip over assumptions and not write a useful test.
+This forces us to make the skeleton of our function to make the test run. Remember not to overthink the code at this point; we're only trying to get a running test, and to make sure it fails as we'd expect. If we skip this step we may skip over assumptions and, write a test which is not useful.
 
 ```go
 package blogposts
@@ -214,13 +214,13 @@ func NewPostsFromFS(fileSystem fstest.MapFS) []Post {
 
 [`fs.ReadDir`](https://golang.org/pkg/io/fs/#ReadDir) reads a directory inside a given `fs.FS` returning [`[]DirEntry`](https://golang.org/pkg/io/fs/#DirEntry).
 
-Already our idealised view of the world has been foiled because errors can happen but remember now our focus is making the test pass, not changing design, so we'll ignore the error for now.
+Already our idealised view of the world has been foiled because errors can happen, but remember now our focus is _making the test pass_, not changing design, so we'll ignore the error for now.
 
-The rest of the code is straightforward, iterate over the entries and create a `Post` for each one and return the slice.
+The rest of the code is straightforward: iterate over the entries, create a `Post` for each one and, return the slice.
 
 ## Refactor
 
-Whilst our tests are passing, we can't use our new package outside this context because it is coupled to a concrete implementation `fstest.MapFS`, but as discussed, it doesn't have to be. Change the argument to our `NewPostsFromFS` function to accept the interface from the standard library.
+Even though our tests are passing, we can't use our new package outside of this context, because it is coupled to a concrete implementation `fstest.MapFS`. But, it doesn't have to be. Change the argument to our `NewPostsFromFS` function to accept the interface from the standard library.
 
 ```go
 func NewPostsFromFS(fileSystem fs.FS) []Post {
@@ -233,11 +233,11 @@ func NewPostsFromFS(fileSystem fs.FS) []Post {
 }
 ```
 
-Re-run the tests and everything should still be working.
+Re-run the tests: everything should be working.
 
 ### Error handling
 
-We parked error handling before as we were focused on making the happy-path work. Before continuing to iterate on the functionality we should acknowledge that errors can happen when working with files. Beyond reading the directory, when we open the individual files we can also get problems so let's change our API (via our tests first, naturally) so that it can return an `error`.
+We parked error handling earlier when we focused on making the happy-path work. Before continuing to iterate on the functionality, we should acknowledge that errors can happen when working with files. Beyond reading the directory, we can run into problems when we open individual files. Let's change our API (via our tests first, naturally) so that it can return an `error`.
 
 ```go
 func TestNewBlogPosts(t *testing.T) {
@@ -258,7 +258,7 @@ func TestNewBlogPosts(t *testing.T) {
 }
 ```
 
-Run the test, and it should complain about the wrong number of return values, fixing the code is straightforward.
+Run the test: it should complain about the wrong number of return values. Fixing the code is straightforward.
 
 ```go
 func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
@@ -288,17 +288,17 @@ func (s StubFailingFS) Open(name string) (fs.File, error) {
 _, err := blogposts.NewPostsFromFS(StubFailingFS{})
 ```
 
-This should give you confidence in our approach. The interface we're using has one method which means creating test-doubles to test different scenarios is trivial.
+This should give you confidence in our approach. The interface we're using has one method, which makes creating test-doubles to test different scenarios trivial.
 
-In some cases, testing error handling is the pragmatic thing to do, but in our case we're not doing anything _interesting_ with the error, we're just propagating it; so its not worth the hassle of writing a new test.
+In some cases, testing error handling is the pragmatic thing to do but, in our case, we're not doing anything _interesting_ with the error, we're just propagating it, so it's not worth the hassle of writing a new test.
 
-Logically our next iterations will be around expanding our `Post` type, so it has some useful data.
+Logically, our next iterations will be around expanding our `Post` type so that it has some useful data.
 
 ## Write the test first
 
 We'll start with the first line in the proposed blog post schema, the title field.
 
-We need to change the contents of the test files, so they match what was specified, and then we can make an assertion that we parse it correctly.
+We need to change the contents of the test files so they match what was specified, and then we can make an assertion that it is parsed correctly.
 ```go
 func TestNewBlogPosts(t *testing.T) {
 	fs := fstest.MapFS{
@@ -385,11 +385,11 @@ Even though this feels like a small increment forward it still required us to wr
 
 The iterative approach has given us fast feedback that our understanding of the requirements is incomplete.
 
-`fs.FS` gives us a way of opening a file within it by name with its `Open` method. From there we read the data from the file and for now we do not need any sophisticated parsing, just cut out the `Title: ` text by slicing the string.
+`fs.FS` gives us a way of opening a file within it by name with its `Open` method. From there we read the data from the file and, for now, we do not need any sophisticated parsing, just cutting out the `Title: ` text by slicing the string.
 
 ## Refactor
 
-Separating out the opening file part code from parsing its contents will make the code simpler to understand and work with.
+Separating the 'opening file code' from the 'parsing file contents code' will make the code simpler to understand and work with.
 
 ```go
 func getPost(fileSystem fs.FS, f fs.DirEntry) (Post, error) {
@@ -412,11 +412,11 @@ func newPost(postFile fs.File) (Post, error) {
 }
 ```
 
-When you refactor out new functions or methods, take care and think about the arguments. You're designing here and because we have passing tests we are free to think deeply about what is appropriate. Think about coupling and cohesion. In this case you should ask yourself:
+When you refactor out new functions or methods, take care and think about the arguments. You're designing here, and are free to think deeply about what is appropriate because you have passing tests. Think about coupling and cohesion. In this case you should ask yourself:
 
 > Does `newPost` have to be coupled to an `fs.File` ? Do we use all the methods and data from this type? What do we _really_ need?
 
-In our case we only use it as an argument to `io.ReadAll` which needs an `io.Reader`. So we should just loosen our coupling in our function and also ask for an `io.Reader`.
+In our case we only use it as an argument to `io.ReadAll` which needs an `io.Reader`. So we should loosen the coupling in our function and ask for an `io.Reader`.
 
 ```go
 func newPost(postFile io.Reader) (Post, error) {
@@ -430,7 +430,7 @@ func newPost(postFile io.Reader) (Post, error) {
 }
 ```
 
-You can make a similar argument for our `getPost` function which takes an `fs.DirEntry` argument but simply calls `Name()` to get the file name. We don't need all that, decouple ourselves from that type and just pass the file name through as a string. Here's the fully refactored code:
+You can make a similar argument for our `getPost` function, which takes an `fs.DirEntry` argument but simply calls `Name()` to get the file name. We don't need all that; let's decouple from that type and pass the file name through as a string. Here's the fully refactored code:
 
 ```go
 func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
@@ -469,7 +469,7 @@ func newPost(postFile io.Reader) (Post, error) {
 }
 ```
 
-From now on, most of our efforts can be neatly contained within `newPost`. The concerns of opening and iterating over files are done, and now we can focus on extracting the data for our `Post` type. Whilst not technically necessary, files are a nice way to logically group related things together, so I also moved the `Post` type and `newPost` into a new `post.go` file.
+From now on, most of our efforts can be neatly contained within `newPost`. The concerns of opening and iterating over files are done, and now we can focus on extracting the data for our `Post` type. Whilst not technically necessary, files are a nice way to logically group related things together, so I moved the `Post` type and `newPost` into a new `post.go` file.
 
 ### Test helper
 
