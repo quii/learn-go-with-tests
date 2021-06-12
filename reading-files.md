@@ -94,7 +94,7 @@ posts = blogposts.NewPostsFromFS(someFS)
 
 ## Write the test first
 
-We should keep scope as small and useful as possible. A good start to give us confidence is to prove that we can read all the files in a directory.  We can also check that the count of posts is the same as the number of files in the directory.
+We should keep scope as small and useful as possible. A good start to give us confidence is to prove that we can read all the files in a directory.  We can check that the count of `[]Post` returned is the same as the number of files in our fake file system.
 
 Create a new project to work through this chapter.
 
