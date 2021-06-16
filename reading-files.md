@@ -337,8 +337,6 @@ Re-run the test, and you should get a clear, failing test
 === RUN   TestNewBlogPosts
 === RUN   TestNewBlogPosts/parses_the_post
     blogpost_test.go:61: got {Title:}, want {Title:Post 1}
---- FAIL: TestNewBlogPosts (0.00s)
-    --- FAIL: TestNewBlogPosts/parses_the_post (0.00s)
 ```
 
 ## Write enough code to make it pass
@@ -536,8 +534,6 @@ The tests should now compile, and fail.
 
 ```
 === RUN   TestNewBlogPosts
-=== RUN   TestNewBlogPosts/it_creates_a_post_for_each_file_in_the_file_system
-=== CONT  TestNewBlogPosts
     blogpost_test.go:47: got {Title:Post 1
         Description: Description 1 Description:}, want {Title:Post 1 Description:Description 1}
 ```
