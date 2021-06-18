@@ -1,6 +1,7 @@
 # Reading files
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/reading-files)**
+- **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/reading-files)**
+- [Here is a video of me working through the problem and taking questions from the Twitch stream](https://www.youtube.com/watch?v=nXts4dEJnkU)
 
 In this chapter we're going to learn how to read some files, get some data out of them, and do something useful.
 
