@@ -232,7 +232,7 @@ When we pass our `Counter` (by value) to `assertCounter` it will try and create 
 To solve this we should pass in a pointer to our `Counter` instead, so change the signature of `assertCounter`
 
 ```go
-func assertCounter(t *testing.T, got *Counter, want int)
+func assertCounter(t testing.TB, got *Counter, want int)
 ```
 
 Our tests will no longer compile because we are trying to pass in a `Counter` rather than a `*Counter`. To solve this I prefer to create a constructor which shows readers of your API that it would be better to not initialise the type yourself.
