@@ -127,10 +127,10 @@ t.Run("it runs safely concurrently", func(t *testing.T) {
     wg.Add(wantedCount)
 
     for i := 0; i < wantedCount; i++ {
-        go func(w *sync.WaitGroup) {
+        go func() {
             counter.Inc()
-            w.Done()
-        }(&wg)
+            wg.Done()
+        }()
     }
     wg.Wait()
 
