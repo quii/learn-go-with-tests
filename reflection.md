@@ -839,7 +839,7 @@ func walk(x interface{}, fn func(input string)) {
 		}
 	case reflect.Chan:
 		for v, ok := val.Recv(); ok; v, ok = val.Recv() {
-			walk(v.Interface(), fn)
+			walkValue(v)
 		}
 	}
 }
@@ -904,12 +904,12 @@ func walk(x interface{}, fn func(input string)) {
 		}
 	case reflect.Chan:
 		for v, ok := val.Recv(); ok; v, ok = val.Recv() {
-			walk(v.Interface(), fn)
+			walkValue(v)
 		}
 	case reflect.Func:
 		valFnResult := val.Call(nil)
 		for _, res := range valFnResult {
-			walk(res.Interface(), fn)
+			walkValue(res)
 		}
 	}
 }
