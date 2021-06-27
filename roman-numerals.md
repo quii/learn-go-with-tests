@@ -642,6 +642,10 @@ func (r RomanNumerals) ValueOf(symbol string) int {
 	return 0
 }
 
+var allRomanNumerals = RomanNumerals{
+	// content remains unchanged
+}
+
 // later..
 func ConvertToArabic(roman string) int {
 	total := 0
