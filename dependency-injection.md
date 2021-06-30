@@ -60,6 +60,8 @@ type Writer interface {
 }
 ```
 
+From this we can infer that `os.Stdout` implements `io.Writer`; `Printf` passes `os.Stdout` to `Fprintf` which expects an `io.Writer`.
+
 As you write more Go code you will find this interface popping up a lot because it's a great general purpose interface for "put this data somewhere".
 
 So we know under the covers we're ultimately using `Writer` to send our greeting somewhere. Let's use this existing abstraction to make our code testable and more reusable.
@@ -80,7 +82,7 @@ func TestGreet(t *testing.T) {
 }
 ```
 
-The `Buffer` type from the `bytes` package implements the `Writer` interface.
+The `Buffer` type from the `bytes` package implements the `Writer` interface, because it has the method `Write(p []byte) (n int, err error)`.
 
 So we'll use it in our test to send in as our `Writer` and then we can check what was written to it after we invoke `Greet`
 
