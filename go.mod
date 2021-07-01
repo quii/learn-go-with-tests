@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/client9/misspell v0.3.4 // indirect
 	github.com/gorilla/websocket v1.4.2
-	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
-	golang.org/x/tools v0.1.0 // indirect
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
+	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
+	golang.org/x/tools v0.1.4 // indirect
 )
