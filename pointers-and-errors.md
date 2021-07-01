@@ -439,8 +439,8 @@ t.Run("Withdraw insufficient funds", func(t *testing.T) {
     wallet := Wallet{startingBalance}
     err := wallet.Withdraw(Bitcoin(100))
 
-    assertBalance(t, wallet, startingBalance)
     assertError(t, err)
+    assertBalance(t, wallet, startingBalance)
 })
 ```
 
@@ -473,8 +473,8 @@ t.Run("Withdraw insufficient funds", func(t *testing.T) {
     wallet := Wallet{startingBalance}
     err := wallet.Withdraw(Bitcoin(100))
 
-    assertBalance(t, wallet, startingBalance)
     assertError(t, err, "cannot withdraw, insufficient funds")
+    assertBalance(t, wallet, startingBalance)
 })
 ```
 
@@ -545,8 +545,8 @@ func TestWallet(t *testing.T) {
         wallet := Wallet{Bitcoin(20)}
         err := wallet.Withdraw(Bitcoin(100))
 
-        assertBalance(t, wallet, Bitcoin(20))
         assertError(t, err, ErrInsufficientFunds)
+        assertBalance(t, wallet, Bitcoin(20))
     })
 }
 
@@ -609,16 +609,16 @@ func TestWallet(t *testing.T) {
         wallet := Wallet{Bitcoin(20)}
         err := wallet.Withdraw(Bitcoin(10))
 
-        assertBalance(t, wallet, Bitcoin(10))
         assertNoError(t, err)
+        assertBalance(t, wallet, Bitcoin(10))
     })
 
     t.Run("Withdraw insufficient funds", func(t *testing.T) {
         wallet := Wallet{Bitcoin(20)}
         err := wallet.Withdraw(Bitcoin(100))
 
-        assertBalance(t, wallet, Bitcoin(20))
         assertError(t, err, ErrInsufficientFunds)
+        assertBalance(t, wallet, Bitcoin(20))
     })
 }
 
