@@ -651,7 +651,7 @@ We now need to handle the scenario of recording wins of new players.
 ## Write the test first
 
 ```go
-//file_system_store.go
+//file_system_store_test.go
 t.Run("store wins for new players", func(t *testing.T) {
     database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
