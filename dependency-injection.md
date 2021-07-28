@@ -62,6 +62,8 @@ type Writer interface {
 
 From this we can infer that `os.Stdout` implements `io.Writer`; `Printf` passes `os.Stdout` to `Fprintf` which expects an `io.Writer`.
 
+Answers to questions like these can be found in the docs [online](https://pkg.go.dev/fmt#Printf) or [offline](http://localhost:8000/pkg/fmt/#Printf)
+
 As you write more Go code you will find this interface popping up a lot because it's a great general purpose interface for "put this data somewhere".
 
 So we know under the covers we're ultimately using `Writer` to send our greeting somewhere. Let's use this existing abstraction to make our code testable and more reusable.
