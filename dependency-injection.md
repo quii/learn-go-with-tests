@@ -29,7 +29,7 @@ What we need to do is to be able to **inject** \(which is just a fancy word for 
 
 If we do that, we can then change the implementation to print to something we control so that we can test it. In "real life" you would inject in something that writes to stdout.
 
-If you look at the source code of `fmt.Printf` you can see a way for us to hook in
+If you look at the source code of [`fmt.Printf`](https://pkg.go.dev/fmt#Printf) you can see a way for us to hook in
 
 ```go
 // It returns the number of bytes written and any write error encountered.
@@ -61,8 +61,6 @@ type Writer interface {
 ```
 
 From this we can infer that `os.Stdout` implements `io.Writer`; `Printf` passes `os.Stdout` to `Fprintf` which expects an `io.Writer`.
-
-Answers to questions like these can be found in the docs [online](https://pkg.go.dev/fmt#Printf) or [offline](http://localhost:8000/pkg/fmt/#Printf)
 
 As you write more Go code you will find this interface popping up a lot because it's a great general purpose interface for "put this data somewhere".
 
