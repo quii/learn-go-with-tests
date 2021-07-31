@@ -532,7 +532,7 @@ We added yet another error type for when the word does not exist. We also modifi
 ## Try and run the test
 
 ```
-./dictionary_test.go:53:16: dictionary.Update(word, "new test") used as value
+./dictionary_test.go:53:16: dictionary.Update(word, newDefinition) used as value
 ./dictionary_test.go:64:16: dictionary.Update(word, definition) used as value
 ./dictionary_test.go:66:23: undefined: ErrWordDoesNotExist
 ```
