@@ -23,6 +23,3 @@ jobs:
 
     - name: Build books
       run: ./build.books.sh
-
-    - name: Test
-      run: go test -v ./...
