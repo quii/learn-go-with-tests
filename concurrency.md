@@ -95,7 +95,7 @@ func BenchmarkCheckWebsites(b *testing.B) {
 	for i := 0; i < len(urls); i++ {
 		urls[i] = "a url"
 	}
-
+    b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		CheckWebsites(slowStubWebsiteChecker, urls)
 	}
@@ -105,7 +105,9 @@ func BenchmarkCheckWebsites(b *testing.B) {
 The benchmark tests `CheckWebsites` using a slice of one hundred urls and uses
 a new fake implementation of `WebsiteChecker`. `slowStubWebsiteChecker` is
 deliberately slow. It uses `time.Sleep` to wait exactly twenty milliseconds and
-then it returns true.
+then it returns true. We use `b.ResetTimer()` in this test to reset the time of our 
+test before it actually runs
+
 
 When we run the benchmark using `go test -bench=.` (or if you're in Windows Powershell `go test -bench="."`):
 
