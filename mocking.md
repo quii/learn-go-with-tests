@@ -389,15 +389,15 @@ Let's use spying again with a new test to check the order of operations is corre
 We have two different dependencies and we want to record all of their operations into one list. So we'll create _one spy for them both_.
 
 ```go
-type CountdownOperationsSpy struct {
+type SpyCountdownOperations struct {
     Calls []string
 }
 
-func (s *CountdownOperationsSpy) Sleep() {
+func (s *SpyCountdownOperations) Sleep() {
     s.Calls = append(s.Calls, sleep)
 }
 
-func (s *CountdownOperationsSpy) Write(p []byte) (n int, err error) {
+func (s *SpyCountdownOperations) Write(p []byte) (n int, err error) {
     s.Calls = append(s.Calls, write)
     return
 }
@@ -406,13 +406,13 @@ const write = "write"
 const sleep = "sleep"
 ```
 
-Our `CountdownOperationsSpy` implements both `io.Writer` and `Sleeper`, recording every call into one slice. In this test we're only concerned about the order of operations, so just recording them as list of named operations is sufficient.
+Our `SpyCountdownOperations` implements both `io.Writer` and `Sleeper`, recording every call into one slice. In this test we're only concerned about the order of operations, so just recording them as list of named operations is sufficient.
 
 We can now add a sub-test into our test suite which verifies our sleeps and prints operate in the order we hope
 
 ```go
 t.Run("sleep before every print", func(t *testing.T) {
-    spySleepPrinter := &CountdownOperationsSpy{}
+    spySleepPrinter := &SpyCountdownOperations{}
     Countdown(spySleepPrinter, spySleepPrinter)
 
     want := []string{
@@ -441,7 +441,7 @@ func TestCountdown(t *testing.T) {
 
     t.Run("prints 3 to Go!", func(t *testing.T) {
         buffer := &bytes.Buffer{}
-        Countdown(buffer, &CountdownOperationsSpy{})
+        Countdown(buffer, &SpyCountdownOperations{})
 
         got := buffer.String()
         want := `3
@@ -455,7 +455,7 @@ Go!`
     })
 
     t.Run("sleep before every print", func(t *testing.T) {
-        spySleepPrinter := &CountdownOperationsSpy{}
+        spySleepPrinter := &SpyCountdownOperations{}
         Countdown(spySleepPrinter, spySleepPrinter)
 
         want := []string{
