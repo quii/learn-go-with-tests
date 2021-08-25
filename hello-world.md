@@ -339,7 +339,7 @@ Not only does it ensure that you have _relevant tests_, it helps ensure _you des
 
 Seeing the test fail is an important check because it also lets you see what the error message looks like. As a developer it can be very hard to work with a codebase when failing tests do not give a clear idea as to what the problem is.
 
-By ensuring your tests are _fast_ and setting up your tools so that running tests is simple you can get in to a state of flow when writing your code.
+By ensuring your tests are _past_ and setting up your tools so that running tests is simple you can get in to a state of flow when writing your code.
 
 By not writing tests you are committing to manually checking your code by running your software which breaks your state of flow and you won't be saving yourself any time, especially in the long run.
 
