@@ -243,7 +243,7 @@ func (b Bitcoin) String() string {
 }
 ```
 
-As you can see, the syntax for creating a method on a type alias is the same as it is on a struct.
+As you can see, the syntax for creating a method on a type declaration is the same as it is on a struct.
 
 Next we need to update our test format strings so they will use `String()` instead.
 
