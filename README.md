@@ -19,6 +19,7 @@
 - [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
 - [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
 - [한국어](https://miryang.gitbook.io/learn-go-with-tests/)
+- [Türkçe](https://halilkocaoz.gitbook.io/go-programlama-dilini-ogren/)
 
 ## Support me
 
