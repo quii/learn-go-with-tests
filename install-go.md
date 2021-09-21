@@ -46,7 +46,7 @@ Using Modules is pretty straightforward. Select any directory outside `GOPATH` a
 
 A `go.mod` file will be generated, containing the module path, a Go version, and its dependency requirements, which are the other modules needed for a successful build.
 
-If no `<modulepath>` is specified, `go mod init` will try to guess the module path from the directory structure, but it can also be overrided, by supplying an argument.
+If no `<modulepath>` is specified, `go mod init` will try to guess the module path from the directory structure. It can also be overridden by supplying an argument.
 
 ```sh
 mkdir my-project
