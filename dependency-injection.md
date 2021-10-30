@@ -144,13 +144,13 @@ If we change our code to use the more general purpose interface we can now use i
 package main
 
 import (
-    "fmt"
-    "os"
-    "io"
+	"fmt"
+	"io"
+	"os"
 )
 
 func Greet(writer io.Writer, name string) {
-    fmt.Fprintf(writer, "Hello, %s", name)
+	fmt.Fprintf(writer, "Hello, %s", name)
 }
 
 func main() {
@@ -170,22 +170,22 @@ Run the following
 package main
 
 import (
-    "fmt"
-    "io"
-    "log"
-    "net/http"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
 )
 
 func Greet(writer io.Writer, name string) {
-    fmt.Fprintf(writer, "Hello, %s", name)
+	fmt.Fprintf(writer, "Hello, %s", name)
 }
 
 func MyGreeterHandler(w http.ResponseWriter, r *http.Request) {
-    Greet(w, "world")
+	Greet(w, "world")
 }
 
 func main() {
-    log.Fatal(http.ListenAndServe(":5000", http.HandlerFunc(MyGreeterHandler)))
+	log.Fatal(http.ListenAndServe(":5000", http.HandlerFunc(MyGreeterHandler)))
 }
 ```
 

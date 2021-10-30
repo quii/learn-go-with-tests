@@ -158,7 +158,7 @@ import (
 
 func main() {
 	handler := http.HandlerFunc(PlayerServer)
-    log.Fatal(http.ListenAndServe(":5000", handler))
+	log.Fatal(http.ListenAndServe(":5000", handler))
 }
 ```
 
@@ -407,7 +407,7 @@ Now `main.go` won't compile for the same reason.
 ```go
 func main() {
 	server := &PlayerServer{}
-    log.Fatal(http.ListenAndServe(":5000", server))
+	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 
@@ -486,7 +486,7 @@ func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 
 func main() {
 	server := &PlayerServer{&InMemoryPlayerStore{}}
-    log.Fatal(http.ListenAndServe(":5000", server))
+	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 
@@ -1029,7 +1029,7 @@ import (
 
 func main() {
 	server := &PlayerServer{NewInMemoryPlayerStore()}
-    log.Fatal(http.ListenAndServe(":5000", server))
+	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 

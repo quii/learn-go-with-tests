@@ -13,77 +13,77 @@ Our product owner is somewhat perturbed by the software losing the scores when t
 package main
 
 import (
-    "encoding/json"
-    "fmt"
-    "net/http"
-    "strings"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strings"
 )
 
 // PlayerStore stores score information about players
 type PlayerStore interface {
-    GetPlayerScore(name string) int
-    RecordWin(name string)
-    GetLeague() []Player
+	GetPlayerScore(name string) int
+	RecordWin(name string)
+	GetLeague() []Player
 }
 
 // Player stores a name with a number of wins
 type Player struct {
-    Name string
-    Wins int
+	Name string
+	Wins int
 }
 
 // PlayerServer is a HTTP interface for player information
 type PlayerServer struct {
-    store PlayerStore
-    http.Handler
+	store PlayerStore
+	http.Handler
 }
 
 const jsonContentType = "application/json"
 
 // NewPlayerServer creates a PlayerServer with routing configured
 func NewPlayerServer(store PlayerStore) *PlayerServer {
-    p := new(PlayerServer)
+	p := new(PlayerServer)
 
-    p.store = store
+	p.store = store
 
-    router := http.NewServeMux()
-    router.Handle("/league", http.HandlerFunc(p.leagueHandler))
-    router.Handle("/players/", http.HandlerFunc(p.playersHandler))
+	router := http.NewServeMux()
+	router.Handle("/league", http.HandlerFunc(p.leagueHandler))
+	router.Handle("/players/", http.HandlerFunc(p.playersHandler))
 
-    p.Handler = router
+	p.Handler = router
 
-    return p
+	return p
 }
 
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("content-type", jsonContentType)
-    json.NewEncoder(w).Encode(p.store.GetLeague())
+	w.Header().Set("content-type", jsonContentType)
+	json.NewEncoder(w).Encode(p.store.GetLeague())
 }
 
 func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
-    player := strings.TrimPrefix(r.URL.Path, "/players/")
+	player := strings.TrimPrefix(r.URL.Path, "/players/")
 
-    switch r.Method {
-    case http.MethodPost:
-        p.processWin(w, player)
-    case http.MethodGet:
-        p.showScore(w, player)
-    }
+	switch r.Method {
+	case http.MethodPost:
+		p.processWin(w, player)
+	case http.MethodGet:
+		p.showScore(w, player)
+	}
 }
 
 func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
-    score := p.store.GetPlayerScore(player)
+	score := p.store.GetPlayerScore(player)
 
-    if score == 0 {
-        w.WriteHeader(http.StatusNotFound)
-    }
+	if score == 0 {
+		w.WriteHeader(http.StatusNotFound)
+	}
 
-    fmt.Fprint(w, score)
+	fmt.Fprint(w, score)
 }
 
 func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
-    p.store.RecordWin(player)
-    w.WriteHeader(http.StatusAccepted)
+	p.store.RecordWin(player)
+	w.WriteHeader(http.StatusAccepted)
 }
 ```
 
@@ -92,27 +92,27 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 package main
 
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
-    return &InMemoryPlayerStore{map[string]int{}}
+	return &InMemoryPlayerStore{map[string]int{}}
 }
 
 type InMemoryPlayerStore struct {
-    store map[string]int
+	store map[string]int
 }
 
 func (i *InMemoryPlayerStore) GetLeague() []Player {
-    var league []Player
-    for name, wins := range i.store {
-        league = append(league, Player{name, wins})
-    }
-    return league
+	var league []Player
+	for name, wins := range i.store {
+		league = append(league, Player{name, wins})
+	}
+	return league
 }
 
 func (i *InMemoryPlayerStore) RecordWin(name string) {
-    i.store[name]++
+	i.store[name]++
 }
 
 func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
-    return i.store[name]
+	return i.store[name]
 }
 ```
 
@@ -121,13 +121,13 @@ func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 package main
 
 import (
-    "log"
-    "net/http"
+	"log"
+	"net/http"
 )
 
 func main() {
-    server := NewPlayerServer(NewInMemoryPlayerStore())
-    log.Fatal(http.ListenAndServe(":5000", server))
+	server := NewPlayerServer(NewInMemoryPlayerStore())
+	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 
@@ -153,22 +153,22 @@ For this work to be complete we'll need to implement `PlayerStore` so we'll writ
 //file_system_store_test.go
 func TestFileSystemStore(t *testing.T) {
 
-    t.Run("league from a reader", func(t *testing.T) {
-        database := strings.NewReader(`[
+	t.Run("league from a reader", func(t *testing.T) {
+		database := strings.NewReader(`[
             {"Name": "Cleo", "Wins": 10},
             {"Name": "Chris", "Wins": 33}]`)
 
-        store := FileSystemPlayerStore{database}
+		store := FileSystemPlayerStore{database}
 
-        got := store.GetLeague()
+		got := store.GetLeague()
 
-        want := []Player{
-            {"Cleo", 10},
-            {"Chris", 33},
-        }
+		want := []Player{
+			{"Cleo", 10},
+			{"Chris", 33},
+		}
 
-        assertLeague(t, got, want)
-    })
+		assertLeague(t, got, want)
+	})
 }
 ```
 
@@ -187,7 +187,7 @@ Let's define `FileSystemPlayerStore` in a new file
 
 ```go
 //file_system_store.go
-type FileSystemPlayerStore struct {}
+type FileSystemPlayerStore struct{}
 ```
 
 Try again
@@ -203,11 +203,11 @@ It's complaining because we're passing in a `Reader` but not expecting one and i
 ```go
 //file_system_store.go
 type FileSystemPlayerStore struct {
-    database io.Reader
+	database io.Reader
 }
 
 func (f *FileSystemPlayerStore) GetLeague() []Player {
-    return nil
+	return nil
 }
 ```
 
@@ -226,9 +226,9 @@ We've read JSON from a reader before
 ```go
 //file_system_store.go
 func (f *FileSystemPlayerStore) GetLeague() []Player {
-    var league []Player
-    json.NewDecoder(f.database).Decode(&league)
-    return league
+	var league []Player
+	json.NewDecoder(f.database).Decode(&league)
+	return league
 }
 ```
 
@@ -245,13 +245,13 @@ Create a new file called `league.go` and put this inside.
 ```go
 //league.go
 func NewLeague(rdr io.Reader) ([]Player, error) {
-    var league []Player
-    err := json.NewDecoder(rdr).Decode(&league)
-    if err != nil {
-        err = fmt.Errorf("problem parsing league, %v", err)
-    }
+	var league []Player
+	err := json.NewDecoder(rdr).Decode(&league)
+	if err != nil {
+		err = fmt.Errorf("problem parsing league, %v", err)
+	}
 
-    return league, err
+	return league, err
 }
 ```
 
@@ -260,8 +260,8 @@ Call this in our implementation and in our test helper `getLeagueFromResponse` i
 ```go
 //file_system_store.go
 func (f *FileSystemPlayerStore) GetLeague() []Player {
-    league, _ := NewLeague(f.database)
-    return league
+	league, _ := NewLeague(f.database)
+	return league
 }
 ```
 
@@ -273,7 +273,7 @@ There is a flaw in our implementation. First of all, let's remind ourselves how 
 
 ```go
 type Reader interface {
-    Read(p []byte) (n int, err error)
+	Read(p []byte) (n int, err error)
 }
 ```
 
@@ -285,7 +285,7 @@ Add the following to the end of our current test.
 //file_system_store_test.go
 
 // read again
-got = store.GetLeague()
+got := store.GetLeague()
 assertLeague(t, got, want)
 ```
 
@@ -297,8 +297,8 @@ The problem is our `Reader` has reached the end so there is nothing more to read
 
 ```go
 type ReadSeeker interface {
-    Reader
-    Seeker
+	Reader
+	Seeker
 }
 ```
 
@@ -306,7 +306,7 @@ Remember embedding? This is an interface comprised of `Reader` and [`Seeker`](ht
 
 ```go
 type Seeker interface {
-    Seek(offset int64, whence int) (int64, error)
+	Seek(offset int64, whence int) (int64, error)
 }
 ```
 
@@ -315,13 +315,13 @@ This sounds good, can we change `FileSystemPlayerStore` to take this interface i
 ```go
 //file_system_store.go
 type FileSystemPlayerStore struct {
-    database io.ReadSeeker
+	database io.ReadSeeker
 }
 
 func (f *FileSystemPlayerStore) GetLeague() []Player {
-    f.database.Seek(0, 0)
-    league, _ := NewLeague(f.database)
-    return league
+	f.database.Seek(0, 0)
+	league, _ := NewLeague(f.database)
+	return league
 }
 ```
 
@@ -334,19 +334,19 @@ Next we'll implement `GetPlayerScore`.
 ```go
 //file_system_store_test.go
 t.Run("get player score", func(t *testing.T) {
-    database := strings.NewReader(`[
+	database := strings.NewReader(`[
         {"Name": "Cleo", "Wins": 10},
         {"Name": "Chris", "Wins": 33}]`)
 
-    store := FileSystemPlayerStore{database}
+	store := FileSystemPlayerStore{database}
 
-    got := store.GetPlayerScore("Chris")
+	got := store.GetPlayerScore("Chris")
 
-    want := 33
+	want := 33
 
-    if got != want {
-        t.Errorf("got %d want %d", got, want)
-    }
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
 })
 ```
 
@@ -363,7 +363,7 @@ We need to add the method to our new type to get the test to compile.
 ```go
 //file_system_store.go
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
-    return 0
+	return 0
 }
 ```
 
@@ -383,16 +383,16 @@ We can iterate over the league to find the player and return their score
 //file_system_store.go
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
-    var wins int
+	var wins int
 
-    for _, player := range f.GetLeague() {
-        if player.Name == name {
-            wins = player.Wins
-            break
-        }
-    }
+	for _, player := range f.GetLeague() {
+		if player.Name == name {
+			wins = player.Wins
+			break
+		}
+	}
 
-    return wins
+	return wins
 }
 ```
 
@@ -403,15 +403,15 @@ You will have seen dozens of test helper refactorings so I'll leave this to you 
 ```go
 //file_system_store_test.go
 t.Run("get player score", func(t *testing.T) {
-    database := strings.NewReader(`[
+	database := strings.NewReader(`[
         {"Name": "Cleo", "Wins": 10},
         {"Name": "Chris", "Wins": 33}]`)
 
-    store := FileSystemPlayerStore{database}
+	store := FileSystemPlayerStore{database}
 
-    got := store.GetPlayerScore("Chris")
-    want := 33
-    assertScoreEquals(t, got, want)
+	got := store.GetPlayerScore("Chris")
+	want := 33
+	assertScoreEquals(t, got, want)
 })
 ```
 
@@ -428,13 +428,13 @@ Let's update our type
 ```go
 //file_system_store.go
 type FileSystemPlayerStore struct {
-    database io.ReadWriteSeeker
+	database io.ReadWriteSeeker
 }
 ```
 
 See if it compiles
 
-```go
+```
 ./file_system_store_test.go:15:34: cannot use database (type *strings.Reader) as type io.ReadWriteSeeker in field value:
     *strings.Reader does not implement io.ReadWriteSeeker (missing Write method)
 ./file_system_store_test.go:36:34: cannot use database (type *strings.Reader) as type io.ReadWriteSeeker in field value:
@@ -457,22 +457,22 @@ Let's create a helper function which will create a temporary file with some data
 ```go
 //file_system_store_test.go
 func createTempFile(t testing.TB, initialData string) (io.ReadWriteSeeker, func()) {
-    t.Helper()
+	t.Helper()
 
-    tmpfile, err := ioutil.TempFile("", "db")
+	tmpfile, err := ioutil.TempFile("", "db")
 
-    if err != nil {
-        t.Fatalf("could not create temp file %v", err)
-    }
+	if err != nil {
+		t.Fatalf("could not create temp file %v", err)
+	}
 
-    tmpfile.Write([]byte(initialData))
+	tmpfile.Write([]byte(initialData))
 
-    removeFile := func() {
-    	tmpfile.Close()
-        os.Remove(tmpfile.Name())
-    }
+	removeFile := func() {
+		tmpfile.Close()
+		os.Remove(tmpfile.Name())
+	}
 
-    return tmpfile, removeFile
+	return tmpfile, removeFile
 }
 ```
 
@@ -484,40 +484,40 @@ You'll notice we're not only returning our `ReadWriteSeeker` (the file) but also
 //file_system_store_test.go
 func TestFileSystemStore(t *testing.T) {
 
-    t.Run("league from a reader", func(t *testing.T) {
-        database, cleanDatabase := createTempFile(t, `[
+	t.Run("league from a reader", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, `[
             {"Name": "Cleo", "Wins": 10},
             {"Name": "Chris", "Wins": 33}]`)
-        defer cleanDatabase()
+		defer cleanDatabase()
 
-        store := FileSystemPlayerStore{database}
+		store := FileSystemPlayerStore{database}
 
-        got := store.GetLeague()
+		got := store.GetLeague()
 
-        want := []Player{
-            {"Cleo", 10},
-            {"Chris", 33},
-        }
+		want := []Player{
+			{"Cleo", 10},
+			{"Chris", 33},
+		}
 
-        assertLeague(t, got, want)
+		assertLeague(t, got, want)
 
-        // read again
-        got = store.GetLeague()
-        assertLeague(t, got, want)
-    })
+		// read again
+		got = store.GetLeague()
+		assertLeague(t, got, want)
+	})
 
-    t.Run("get player score", func(t *testing.T) {
-        database, cleanDatabase := createTempFile(t, `[
+	t.Run("get player score", func(t *testing.T) {
+		database, cleanDatabase := createTempFile(t, `[
             {"Name": "Cleo", "Wins": 10},
             {"Name": "Chris", "Wins": 33}]`)
-        defer cleanDatabase()
+		defer cleanDatabase()
 
-        store := FileSystemPlayerStore{database}
+		store := FileSystemPlayerStore{database}
 
-        got := store.GetPlayerScore("Chris")
-        want := 33
-        assertScoreEquals(t, got, want)
-    })
+		got := store.GetPlayerScore("Chris")
+		want := 33
+		assertScoreEquals(t, got, want)
+	})
 }
 ```
 
@@ -528,18 +528,18 @@ Let's get the first iteration of recording a win for an existing player
 ```go
 //file_system_store_test.go
 t.Run("store wins for existing players", func(t *testing.T) {
-    database, cleanDatabase := createTempFile(t, `[
+	database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
         {"Name": "Chris", "Wins": 33}]`)
-    defer cleanDatabase()
+	defer cleanDatabase()
 
-    store := FileSystemPlayerStore{database}
+	store := FileSystemPlayerStore{database}
 
-    store.RecordWin("Chris")
+	store.RecordWin("Chris")
 
-    got := store.GetPlayerScore("Chris")
-    want := 34
-    assertScoreEquals(t, got, want)
+	got := store.GetPlayerScore("Chris")
+	want := 34
+	assertScoreEquals(t, got, want)
 })
 ```
 
@@ -571,16 +571,16 @@ Our implementation is empty so the old score is getting returned.
 ```go
 //file_system_store.go
 func (f *FileSystemPlayerStore) RecordWin(name string) {
-    league := f.GetLeague()
+	league := f.GetLeague()
 
-    for i, player := range league {
-        if player.Name == name {
-            league[i].Wins++
-        }
-    }
+	for i, player := range league {
+		if player.Name == name {
+			league[i].Wins++
+		}
+	}
 
-    f.database.Seek(0,0)
-    json.NewEncoder(f.database).Encode(league)
+	f.database.Seek(0, 0)
+	json.NewEncoder(f.database).Encode(league)
 }
 ```
 
@@ -603,12 +603,12 @@ Inside `league.go` add the following
 type League []Player
 
 func (l League) Find(name string) *Player {
-    for i, p := range l {
-        if p.Name==name {
-            return &l[i]
-        }
-    }
-    return nil
+	for i, p := range l {
+		if p.Name == name {
+			return &l[i]
+		}
+	}
+	return nil
 }
 ```
 
@@ -622,25 +622,25 @@ This lets us simplify our methods in `file_system_store`.
 //file_system_store.go
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
-    player := f.GetLeague().Find(name)
+	player := f.GetLeague().Find(name)
 
-    if player != nil {
-        return player.Wins
-    }
+	if player != nil {
+		return player.Wins
+	}
 
-    return 0
+	return 0
 }
 
 func (f *FileSystemPlayerStore) RecordWin(name string) {
-    league := f.GetLeague()
-    player := league.Find(name)
+	league := f.GetLeague()
+	player := league.Find(name)
 
-    if player != nil {
-        player.Wins++
-    }
+	if player != nil {
+		player.Wins++
+	}
 
-    f.database.Seek(0, 0)
-    json.NewEncoder(f.database).Encode(league)
+	f.database.Seek(0, 0)
+	json.NewEncoder(f.database).Encode(league)
 }
 ```
 
@@ -653,18 +653,18 @@ We now need to handle the scenario of recording wins of new players.
 ```go
 //file_system_store_test.go
 t.Run("store wins for new players", func(t *testing.T) {
-    database, cleanDatabase := createTempFile(t, `[
+	database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
         {"Name": "Chris", "Wins": 33}]`)
-    defer cleanDatabase()
+	defer cleanDatabase()
 
-    store := FileSystemPlayerStore{database}
+	store := FileSystemPlayerStore{database}
 
-    store.RecordWin("Pepper")
+	store.RecordWin("Pepper")
 
-    got := store.GetPlayerScore("Pepper")
-    want := 1
-    assertScoreEquals(t, got, want)
+	got := store.GetPlayerScore("Pepper")
+	want := 1
+	assertScoreEquals(t, got, want)
 })
 ```
 
@@ -683,17 +683,17 @@ We just need to handle the scenario where `Find` returns `nil` because it couldn
 ```go
 //file_system_store.go
 func (f *FileSystemPlayerStore) RecordWin(name string) {
-    league := f.GetLeague()
-    player := league.Find(name)
+	league := f.GetLeague()
+	player := league.Find(name)
 
-    if player != nil {
-        player.Wins++
-    } else {
-        league = append(league, Player{name, 1})
-    }
+	if player != nil {
+		player.Wins++
+	} else {
+		league = append(league, Player{name, 1})
+	}
 
-    f.database.Seek(0, 0)
-    json.NewEncoder(f.database).Encode(league)
+	f.database.Seek(0, 0)
+	json.NewEncoder(f.database).Encode(league)
 }
 ```
 
@@ -715,26 +715,26 @@ If you run the test it should pass and now we can delete `InMemoryPlayerStore`. 
 package main
 
 import (
-    "log"
-    "net/http"
-    "os"
+	"log"
+	"net/http"
+	"os"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-    db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
 
-    if err != nil {
-        log.Fatalf("problem opening %s %v", dbFileName, err)
-    }
+	if err != nil {
+		log.Fatalf("problem opening %s %v", dbFileName, err)
+	}
 
-    store := &FileSystemPlayerStore{db}
-    server := NewPlayerServer(store)
+	store := &FileSystemPlayerStore{db}
+	server := NewPlayerServer(store)
 
-    if err := http.ListenAndServe(":5000", server); err != nil {
-        log.Fatalf("could not listen on port 5000 %v", err)
-    }
+	if err := http.ListenAndServe(":5000", server); err != nil {
+		log.Fatalf("could not listen on port 5000 %v", err)
+	}
 }
 ```
 
@@ -753,17 +753,17 @@ We can create a constructor which can do some of this initialisation for us and 
 ```go
 //file_system_store.go
 type FileSystemPlayerStore struct {
-    database io.ReadWriteSeeker
-    league League
+	database io.ReadWriteSeeker
+	league   League
 }
 
 func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
-    database.Seek(0, 0)
-    league, _ := NewLeague(database)
-    return &FileSystemPlayerStore{
-        database:database,
-        league:league,
-    }
+	database.Seek(0, 0)
+	league, _ := NewLeague(database)
+	return &FileSystemPlayerStore{
+		database: database,
+		league:   league,
+	}
 }
 ```
 
@@ -772,31 +772,31 @@ This way we only have to read from disk once. We can now replace all of our prev
 ```go
 //file_system_store.go
 func (f *FileSystemPlayerStore) GetLeague() League {
-    return f.league
+	return f.league
 }
 
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 
-    player := f.league.Find(name)
+	player := f.league.Find(name)
 
-    if player != nil {
-        return player.Wins
-    }
+	if player != nil {
+		return player.Wins
+	}
 
-    return 0
+	return 0
 }
 
 func (f *FileSystemPlayerStore) RecordWin(name string) {
-    player := f.league.Find(name)
+	player := f.league.Find(name)
 
-    if player != nil {
-        player.Wins++
-    } else {
-        f.league = append(f.league, Player{name, 1})
-    }
+	if player != nil {
+		player.Wins++
+	} else {
+		f.league = append(f.league, Player{name, 1})
+	}
 
-    f.database.Seek(0, 0)
-    json.NewEncoder(f.database).Encode(f.league)
+	f.database.Seek(0, 0)
+	json.NewEncoder(f.database).Encode(f.league)
 }
 ```
 
@@ -821,12 +821,12 @@ package main
 import "io"
 
 type tape struct {
-    file io.ReadWriteSeeker
+	file io.ReadWriteSeeker
 }
 
 func (t *tape) Write(p []byte) (n int, err error) {
-    t.file.Seek(0, 0)
-    return t.file.Write(p)
+	t.file.Seek(0, 0)
+	return t.file.Write(p)
 }
 ```
 
@@ -835,8 +835,8 @@ Notice that we're only implementing `Write` now, as it encapsulates the `Seek` p
 ```go
 //file_system_store.go
 type FileSystemPlayerStore struct {
-    database io.Writer
-    league   League
+	database io.Writer
+	league   League
 }
 ```
 
@@ -845,13 +845,13 @@ Update the constructor to use `Tape`
 ```go
 //file_system_store.go
 func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
-    database.Seek(0, 0)
-    league, _ := NewLeague(database)
+	database.Seek(0, 0)
+	league, _ := NewLeague(database)
 
-    return &FileSystemPlayerStore{
-        database: &tape{database},
-        league:   league,
-    }
+	return &FileSystemPlayerStore{
+		database: &tape{database},
+		league:   league,
+	}
 }
 ```
 
@@ -866,22 +866,22 @@ Our test will create a file with some content, try to write to it using the `tap
 ```go
 //tape_test.go
 func TestTape_Write(t *testing.T) {
-    file, clean := createTempFile(t, "12345")
-    defer clean()
+	file, clean := createTempFile(t, "12345")
+	defer clean()
 
-    tape := &tape{file}
+	tape := &tape{file}
 
-    tape.Write([]byte("abc"))
+	tape.Write([]byte("abc"))
 
-    file.Seek(0, 0)
-    newFileContents, _ := ioutil.ReadAll(file)
+	file.Seek(0, 0)
+	newFileContents, _ := ioutil.ReadAll(file)
 
-    got := string(newFileContents)
-    want := "abc"
+	got := string(newFileContents)
+	want := "abc"
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 }
 ```
 
@@ -904,13 +904,13 @@ Change `tape` to the following:
 ```go
 //tape.go
 type tape struct {
-    file *os.File
+	file *os.File
 }
 
 func (t *tape) Write(p []byte) (n int, err error) {
-    t.file.Truncate(0)
-    t.file.Seek(0, 0)
-    return t.file.Write(p)
+	t.file.Truncate(0)
+	t.file.Seek(0, 0)
+	return t.file.Write(p)
 }
 ```
 
@@ -929,18 +929,18 @@ Store a reference to an `Encoder` in our type and initialise it in the construct
 ```go
 //file_system_store.go
 type FileSystemPlayerStore struct {
-    database *json.Encoder
-    league   League
+	database *json.Encoder
+	league   League
 }
 
 func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
-    file.Seek(0, 0)
-    league, _ := NewLeague(file)
+	file.Seek(0, 0)
+	league, _ := NewLeague(file)
 
-    return &FileSystemPlayerStore{
-        database: json.NewEncoder(&tape{file}),
-        league:   league,
-    }
+	return &FileSystemPlayerStore{
+		database: json.NewEncoder(&tape{file}),
+		league:   league,
+	}
 }
 ```
 
@@ -980,8 +980,8 @@ Finally, we needed `Truncate` which is also on `*os.File`. It would've been an o
 
 ```go
 type ReadWriteSeekTruncate interface {
-    io.ReadWriteSeeker
-    Truncate(size int64) error
+	io.ReadWriteSeeker
+	Truncate(size int64) error
 }
 ```
 
@@ -1004,17 +1004,17 @@ Let's make it so our constructor is capable of returning an error.
 ```go
 //file_system_store.go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
-    file.Seek(0, 0)
-    league, err := NewLeague(file)
+	file.Seek(0, 0)
+	league, err := NewLeague(file)
 
-    if err != nil {
-        return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
-    }
+	if err != nil {
+		return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
+	}
 
-    return &FileSystemPlayerStore{
-        database: json.NewEncoder(&tape{file}),
-        league:   league,
-    }, nil
+	return &FileSystemPlayerStore{
+		database: json.NewEncoder(&tape{file}),
+		league:   league,
+	}, nil
 }
 ```
 
@@ -1022,7 +1022,7 @@ Remember it is very important to give helpful error messages (just like your tes
 
 ```go
 if err != nil {
-    return err
+	return err
 }
 ```
 
@@ -1046,7 +1046,7 @@ In main we'll want to exit the program, printing the error.
 store, err := NewFileSystemPlayerStore(db)
 
 if err != nil {
-    log.Fatalf("problem creating file system player store, %v ", err)
+	log.Fatalf("problem creating file system player store, %v ", err)
 }
 ```
 
@@ -1055,10 +1055,10 @@ In the tests we should assert there is no error. We can make a helper to help wi
 ```go
 //file_system_store_test.go
 func assertNoError(t testing.TB, err error) {
-    t.Helper()
-    if err != nil {
-        t.Fatalf("didn't expect an error but got one, %v", err)
-    }
+	t.Helper()
+	if err != nil {
+		t.Fatalf("didn't expect an error but got one, %v", err)
+	}
 }
 ```
 
@@ -1077,8 +1077,9 @@ Let's fix our big integration test by putting some valid JSON in it:
 ```go
 //server_integration_test.go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
-    database, cleanDatabase := createTempFile(t, `[]`)
-    //etc...
+	database, cleanDatabase := createTempFile(t, `[]`)
+	//etc...
+}
 ```
 
 Now that all the tests are passing, we need to handle the scenario where the file is empty.
@@ -1088,12 +1089,12 @@ Now that all the tests are passing, we need to handle the scenario where the fil
 ```go
 //file_system_store_test.go
 t.Run("works with an empty file", func(t *testing.T) {
-    database, cleanDatabase := createTempFile(t, "")
-    defer cleanDatabase()
+	database, cleanDatabase := createTempFile(t, "")
+	defer cleanDatabase()
 
-    _, err := NewFileSystemPlayerStore(database)
+	_, err := NewFileSystemPlayerStore(database)
 
-    assertNoError(t, err)
+	assertNoError(t, err)
 })
 ```
 
@@ -1113,29 +1114,29 @@ Change our constructor to the following
 //file_system_store.go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
-    file.Seek(0, 0)
+	file.Seek(0, 0)
 
-    info, err := file.Stat()
+	info, err := file.Stat()
 
-    if err != nil {
-        return nil, fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
-    }
+	if err != nil {
+		return nil, fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
+	}
 
-    if info.Size() == 0 {
-        file.Write([]byte("[]"))
-        file.Seek(0, 0)
-    }
+	if info.Size() == 0 {
+		file.Write([]byte("[]"))
+		file.Seek(0, 0)
+	}
 
-    league, err := NewLeague(file)
+	league, err := NewLeague(file)
 
-    if err != nil {
-        return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
-    }
+	if err != nil {
+		return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
+	}
 
-    return &FileSystemPlayerStore{
-        database: json.NewEncoder(&tape{file}),
-        league:   league,
-    }, nil
+	return &FileSystemPlayerStore{
+		database: json.NewEncoder(&tape{file}),
+		league:   league,
+	}, nil
 }
 ```
 
@@ -1148,20 +1149,20 @@ Our constructor is a bit messy now, so let's extract the initialise code into a 
 ```go
 //file_system_store.go
 func initialisePlayerDBFile(file *os.File) error {
-    file.Seek(0, 0)
+	file.Seek(0, 0)
 
-    info, err := file.Stat()
+	info, err := file.Stat()
 
-    if err != nil {
-        return fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
-    }
+	if err != nil {
+		return fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
+	}
 
-    if info.Size()==0 {
-        file.Write([]byte("[]"))
-        file.Seek(0, 0)
-    }
+	if info.Size() == 0 {
+		file.Write([]byte("[]"))
+		file.Seek(0, 0)
+	}
 
-    return nil
+	return nil
 }
 ```
 
@@ -1169,22 +1170,22 @@ func initialisePlayerDBFile(file *os.File) error {
 //file_system_store.go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
-    err := initialisePlayerDBFile(file)
+	err := initialisePlayerDBFile(file)
 
-    if err != nil {
-        return nil, fmt.Errorf("problem initialising player db file, %v", err)
-    }
+	if err != nil {
+		return nil, fmt.Errorf("problem initialising player db file, %v", err)
+	}
 
-    league, err := NewLeague(file)
+	league, err := NewLeague(file)
 
-    if err != nil {
-        return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
-    }
+	if err != nil {
+		return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
+	}
 
-    return &FileSystemPlayerStore{
-        database: json.NewEncoder(&tape{file}),
-        league:   league,
-    }, nil
+	return &FileSystemPlayerStore{
+		database: json.NewEncoder(&tape{file}),
+		league:   league,
+	}, nil
 }
 ```
 
@@ -1201,27 +1202,27 @@ We can update the assertion on our first test in `TestFileSystemStore`:
 ```go
 //file_system_store_test.go
 t.Run("league sorted", func(t *testing.T) {
-    database, cleanDatabase := createTempFile(t, `[
+	database, cleanDatabase := createTempFile(t, `[
         {"Name": "Cleo", "Wins": 10},
         {"Name": "Chris", "Wins": 33}]`)
-    defer cleanDatabase()
+	defer cleanDatabase()
 
-    store, err := NewFileSystemPlayerStore(database)
+	store, err := NewFileSystemPlayerStore(database)
 
-    assertNoError(t, err)
+	assertNoError(t, err)
 
-    got := store.GetLeague()
+	got := store.GetLeague()
 
-    want := []Player{
-        {"Chris", 33},
-        {"Cleo", 10},
-    }
+	want := []Player{
+		{"Chris", 33},
+		{"Cleo", 10},
+	}
 
-    assertLeague(t, got, want)
+	assertLeague(t, got, want)
 
-    // read again
-    got = store.GetLeague()
-    assertLeague(t, got, want)
+	// read again
+	got = store.GetLeague()
+	assertLeague(t, got, want)
 })
 ```
 
@@ -1240,10 +1241,10 @@ The order of the JSON coming in is in the wrong order and our `want` will check 
 
 ```go
 func (f *FileSystemPlayerStore) GetLeague() League {
-    sort.Slice(f.league, func(i, j int) bool {
-        return f.league[i].Wins > f.league[j].Wins
-    })
-    return f.league
+	sort.Slice(f.league, func(i, j int) bool {
+		return f.league[i].Wins > f.league[j].Wins
+	})
+	return f.league
 }
 ```
 

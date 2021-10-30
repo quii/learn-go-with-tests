@@ -53,13 +53,13 @@ An example of this is making an assertion on a complex object, when in practice 
 ```go
 // not this, now your test is tightly coupled to the whole object
 if !cmp.Equal(complexObject, want) {
-    t.Error("got %+v, want %+v", complexObject, want)
+	t.Error("got %+v, want %+v", complexObject, want)
 }
 
 // be specific, and loosen the coupling
 got := complexObject.fieldYouCareAboutForThisTest
-if got != want{
-    t.Error("got %q, want %q", got, want)
+if got != want {
+	t.Error("got %q, want %q", got, want)
 }
 ```
 
@@ -78,7 +78,7 @@ They often creep in gradually, especially if test setup is complicated because y
 
 A helpful rule of thumb is to aim to make one assertion per test. In Go, take advantage of subtests to clearly delineate between assertions on the occasions where you need to. This is also a handy technique to separate assertions on behaviour vs implementation detail.
 
-For other tests where setup or execution time may be a constraint (e.g an acceptance test driving a web browser), you need to weigh up the pros and cons of slightly trickier to debug tests against test execution time. 
+For other tests where setup or execution time may be a constraint (e.g an acceptance test driving a web browser), you need to weigh up the pros and cons of slightly trickier to debug tests against test execution time.
 
 ## Not listening to your tests
 
@@ -196,14 +196,14 @@ _But_ they can be messy to read and understand when you try to shoehorn other ki
 
 ```go
 cases := []struct {
-    X int
-    Y int
-    Z int
-    err error
-    IsFullMoon bool
-    IsLeapYear bool
-    AtWarWithEurasia bool
-}
+	X                int
+	Y                int
+	Z                int
+	err              error
+	IsFullMoon       bool
+	IsLeapYear       bool
+	AtWarWithEurasia bool
+}{}
 ```
 
 **Don't be afraid to break out of your table and write new tests** rather than adding new fields and booleans to the table `struct`.
