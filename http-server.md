@@ -89,6 +89,10 @@ In order to test our server, we will need a `Request` to send in and we'll want 
 
 ## Try to run the test
 
+The command:
+`go test .\server_test.go`
+
+The result:
 `./server_test.go:13:2: undefined: PlayerServer`
 
 ## Write the minimal amount of code for the test to run and check the failing test output
