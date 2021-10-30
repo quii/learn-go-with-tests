@@ -124,6 +124,10 @@ func PlayerServer(w http.ResponseWriter, r *http.Request) {
 ```
 
 The code now compiles and the test fails
+The command:
+`go test .`
+
+The result:
 
 ```
 === RUN   TestGETPlayers/returns_Pepper's_score
@@ -195,6 +199,12 @@ What we're going to do now is write _another_ test to force us into making a pos
 
 We'll add another subtest to our suite which tries to get the score of a different player, which will break our hard-coded approach.
 
+You need to change the previouscode as well and add the next text: 
+```go 
+	request, _ := http.NewRequest(http.MethodGet, "/players/Pepper", nil)
+
+```
+
 ```go
 t.Run("returns Floyd's score", func(t *testing.T) {
 	request, _ := http.NewRequest(http.MethodGet, "/players/Floyd", nil)
@@ -218,6 +228,11 @@ You may have been thinking
 Remember we are just trying to take as small as steps as reasonably possible, so we're just trying to break the constant for now.
 
 ## Try to run the test
+
+The command:
+`go test .`
+
+The result:
 
 ```
 === RUN   TestGETPlayers/returns_Pepper's_score
