@@ -53,7 +53,7 @@ func ConvertToRoman(arabic int) string {
 
 It should run now
 
-```go
+```
 === RUN   TestRomanNumerals
 --- FAIL: TestRomanNumerals (0.00s)
     numeral_test.go:10: got '', want 'I'
@@ -159,7 +159,7 @@ Let's push on and go for 3
 
 Add the following to our cases
 
-```go
+```
 {"3 gets converted to III", 3, "III"},
 ```
 
@@ -198,7 +198,7 @@ func ConvertToRoman(arabic int) string {
 
 	var result strings.Builder
 
-	for i:=0; i<arabic; i++ {
+	for i := 0; i < arabic; i++ {
 		result.WriteString("I")
 	}
 
@@ -226,7 +226,7 @@ For example `5` in Roman Numerals is `V`. To create 4 you do not do `IIII`, inst
 
 ## Write the test first
 
-```go
+```
 {"4 gets converted to IV (can't repeat more than 3 times)", 4, "IV"},
 ```
 
@@ -249,7 +249,7 @@ func ConvertToRoman(arabic int) string {
 
 	var result strings.Builder
 
-	for i:=0; i<arabic; i++ {
+	for i := 0; i < arabic; i++ {
 		result.WriteString("I")
 	}
 
@@ -284,7 +284,7 @@ Let's make 5 work
 
 ## Write the test first
 
-```go
+```
 {"5 gets converted to V", 5, "V"},
 ```
 
@@ -360,7 +360,7 @@ I'm pretty sure this approach will be valid for 6 (VI), 7 (VII) and 8 (VIII) too
 
 ## Write the test first
 
-```go
+```
 {"9 gets converted to IX", 9, "IX"}
 ```
 ## Try to run the test
@@ -375,7 +375,7 @@ I'm pretty sure this approach will be valid for 6 (VI), 7 (VII) and 8 (VIII) too
 
 We should be able to adopt the same approach as before
 
-```go
+```
 case arabic > 8:
     result.WriteString("IX")
     arabic -= 9
@@ -389,7 +389,7 @@ I'll skip the code for this too, but add to your test cases a test for `10` whic
 
 Here are a few tests I added as I'm confident up to 39 our code should work
 
-```go
+```
 {"10 gets converted to X", 10, "X"},
 {"14 gets converted to XIV", 14, "XIV"},
 {"18 gets converted to XVIII", 18, "XVIII"},
@@ -411,7 +411,7 @@ type RomanNumeral struct {
 	Symbol string
 }
 
-var allRomanNumerals = []RomanNumeral {
+var allRomanNumerals = []RomanNumeral{
 	{10, "X"},
 	{9, "IX"},
 	{5, "V"},
@@ -440,7 +440,7 @@ Does this abstraction work for bigger numbers? Extend the test suite so it works
 
 Here are some test cases, try and make them pass.
 
-```go
+```
 {"40 gets converted to XL", 40, "XL"},
 {"47 gets converted to XLVII", 47, "XLVII"},
 {"49 gets converted to XLIX", 49, "XLIX"},
@@ -753,7 +753,7 @@ func ConvertToArabic(roman string) int {
 				total++ // this is fishy...
 			}
 		} else {
-			total+=allRomanNumerals.ValueOf(string([]byte{symbol}))
+			total += allRomanNumerals.ValueOf(string([]byte{symbol}))
 		}
 	}
 	return total
@@ -794,7 +794,7 @@ func ConvertToArabic(roman string) int {
 				total++ // this is fishy...
 			}
 		} else {
-			total+=allRomanNumerals.ValueOf(symbol)
+			total += allRomanNumerals.ValueOf(symbol)
 		}
 	}
 	return total
@@ -821,7 +821,7 @@ I think all we're missing is an update to `couldBeSubtractive` so that it accoun
 
 ```go
 func couldBeSubtractive(index int, currentSymbol uint8, roman string) bool {
-	isSubtractiveSymbol := currentSymbol == 'I' || currentSymbol == 'X' || currentSymbol =='C'
+	isSubtractiveSymbol := currentSymbol == 'I' || currentSymbol == 'X' || currentSymbol == 'C'
 	return index+1 < len(roman) && isSubtractiveSymbol
 }
 ```
@@ -998,13 +998,13 @@ This feels like a good test to build us confidence because it should break if th
 
  ```go
 assertion := func(arabic int) bool {
-    if arabic <0 || arabic > 3999 {
-        log.Println(arabic)
-        return true
-    }
-    roman := ConvertToRoman(arabic)
-    fromRoman := ConvertToArabic(roman)
-    return fromRoman == arabic
+	if arabic < 0 || arabic > 3999 {
+		log.Println(arabic)
+		return true
+	}
+	roman := ConvertToRoman(arabic)
+	fromRoman := ConvertToArabic(roman)
+	return fromRoman == arabic
 }
 ```
 
@@ -1037,13 +1037,13 @@ Try updating the code to use `uint16` rather than `int`. I updated `assertion` i
 
 ```go
 assertion := func(arabic uint16) bool {
-    if arabic > 3999 {
-        return true
-    }
-    t.Log("testing", arabic)
-    roman := ConvertToRoman(arabic)
-    fromRoman := ConvertToArabic(roman)
-    return fromRoman == arabic
+	if arabic > 3999 {
+		return true
+	}
+	t.Log("testing", arabic)
+	roman := ConvertToRoman(arabic)
+	fromRoman := ConvertToArabic(roman)
+	return fromRoman == arabic
 }
 ```
 
@@ -1053,9 +1053,9 @@ The default number of runs `quick.Check` performs is 100 but you can change that
 
 ```go
 if err := quick.Check(assertion, &quick.Config{
-    MaxCount:1000,
+	MaxCount: 1000,
 }); err != nil {
-    t.Error("failed checks", err)
+	t.Error("failed checks", err)
 }
 ```
 
@@ -1137,7 +1137,7 @@ chapter so, in the interests of full disclosure, here's what he said.
 > as a number - and we can see this when we look at integer literals in Go:
 >
 > ```go
->  0xFF == 255 // true
+> 	0xFF == 255 // true
 > ```
 >
 > And how we can print integers in a format string:

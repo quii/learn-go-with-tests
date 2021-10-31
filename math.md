@@ -533,11 +533,11 @@ Try this
 
 ```go
 func main() {
-  fmt.Println(10.0/zero())
+	fmt.Println(10.0 / zero())
 }
 
 func zero() float64 {
-  return 0.0
+	return 0.0
 }
 ```
 
@@ -552,15 +552,15 @@ import (
 )
 
 func main() {
-  fmt.Println(secondsinradians())
+	fmt.Println(secondsinradians())
 }
 
 func zero() float64 {
-  return 0.0
+	return 0.0
 }
 
 func secondsinradians() float64 {
-    return (math.Pi / (30 / (float64(zero()))))
+	return (math.Pi / (30 / (float64(zero()))))
 }
 ```
 
@@ -670,7 +670,7 @@ We now want the equation that produces X and Y. Let's write it into seconds:
 
 ```go
 func secondHandPoint(t time.Time) Point {
-    angle := secondsInRadians(t)
+	angle := secondsInRadians(t)
 	x := math.Sin(angle)
 	y := math.Cos(angle)
 
@@ -1108,7 +1108,7 @@ of precision we're expecting for the coordinates. Let's say three decimal
 places.
 
 ```go
-    fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
+	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
 ```
 
 And after we update our expectations in the test
@@ -1260,14 +1260,13 @@ func TestSVGWriterSecondHand(t *testing.T) {
 	}
 }
 
-
 func containsLine(l Line, ls []Line) bool {
-    for _, line := range ls {
-        if line == l {
-            return true
-        }
-    }
-    return false
+	for _, line := range ls {
+		if line == l {
+			return true
+		}
+	}
+	return false
 }
 ```
 
@@ -1395,7 +1394,7 @@ How much is that tiny little bit? Well...
 
 ### Try to run the test
 
-```go
+```
 clockface_test.go:62: Wanted 0.012217304763960306 radians, but got 3.141592653589793
 ```
 
@@ -1428,7 +1427,7 @@ math.Pi / (30 / float64(t.Minute()))
 
 And...
 
-```go
+```
 PASS
 ok  	clockface	0.007s
 ```

@@ -75,7 +75,7 @@ We will need to adjust our spy so it takes some time to return `data` and a way 
 
 ```go
 type SpyStore struct {
-	response string
+	response  string
 	cancelled bool
 }
 
@@ -93,24 +93,24 @@ Let's add a new test where we cancel the request before 100 milliseconds and che
 
 ```go
 t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
-      data := "hello, world"
-      store := &SpyStore{response: data}
-      svr := Server(store)
+	data := "hello, world"
+	store := &SpyStore{response: data}
+	svr := Server(store)
 
-      request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
 
-      cancellingCtx, cancel := context.WithCancel(request.Context())
-      time.AfterFunc(5 * time.Millisecond, cancel)
-      request = request.WithContext(cancellingCtx)
+	cancellingCtx, cancel := context.WithCancel(request.Context())
+	time.AfterFunc(5*time.Millisecond, cancel)
+	request = request.WithContext(cancellingCtx)
 
-      response := httptest.NewRecorder()
+	response := httptest.NewRecorder()
 
-      svr.ServeHTTP(response, request)
+	svr.ServeHTTP(response, request)
 
-      if !store.cancelled {
-          t.Error("store was not told to cancel")
-      }
-  })
+	if !store.cancelled {
+		t.Error("store was not told to cancel")
+	}
+})
 ```
 
 From the [Go Blog: Context](https://blog.golang.org/context)
@@ -125,7 +125,7 @@ What we do is derive a new `cancellingCtx` from our `request` which returns us a
 
 The test fails as we'd expect.
 
-```go
+```
 --- FAIL: TestServer (0.00s)
     --- FAIL: TestServer/tells_store_to_cancel_work_if_request_is_cancelled (0.00s)
     	context_test.go:62: store was not told to cancel
@@ -152,22 +152,22 @@ We'll need to update our happy path test to assert that it does not get cancelle
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
-    data := "hello, world"
-    store := &SpyStore{response: data}
-    svr := Server(store)
+	data := "hello, world"
+	store := &SpyStore{response: data}
+	svr := Server(store)
 
-    request := httptest.NewRequest(http.MethodGet, "/", nil)
-    response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
 
-    svr.ServeHTTP(response, request)
+	svr.ServeHTTP(response, request)
 
-    if response.Body.String() != data {
-        t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
-    }
+	if response.Body.String() != data {
+		t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
+	}
 
-    if store.cancelled {
-        t.Error("it should not have cancelled the store")
-    }
+	if store.cancelled {
+		t.Error("it should not have cancelled the store")
+	}
 })
 ```
 
@@ -355,18 +355,18 @@ Finally we can update our tests. Comment out our cancellation test so we can fix
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
-    data := "hello, world"
-    store := &SpyStore{response: data, t: t}
-    svr := Server(store)
+	data := "hello, world"
+	store := &SpyStore{response: data, t: t}
+	svr := Server(store)
 
-    request := httptest.NewRequest(http.MethodGet, "/", nil)
-    response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
 
-    svr.ServeHTTP(response, request)
+	svr.ServeHTTP(response, request)
 
-    if response.Body.String() != data {
-        t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
-    }
+	if response.Body.String() != data {
+		t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
+	}
 })
 ```
 
@@ -420,22 +420,22 @@ Our `SpyResponseWriter` implements `http.ResponseWriter` so we can use it in the
 
 ```go
 t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
-    store := &SpyStore{response: data, t: t}
-    svr := Server(store)
+	store := &SpyStore{response: data, t: t}
+	svr := Server(store)
 
-    request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
 
-    cancellingCtx, cancel := context.WithCancel(request.Context())
-    time.AfterFunc(5*time.Millisecond, cancel)
-    request = request.WithContext(cancellingCtx)
+	cancellingCtx, cancel := context.WithCancel(request.Context())
+	time.AfterFunc(5*time.Millisecond, cancel)
+	request = request.WithContext(cancellingCtx)
 
-    response := &SpyResponseWriter{}
+	response := &SpyResponseWriter{}
 
-    svr.ServeHTTP(response, request)
+	svr.ServeHTTP(response, request)
 
-    if response.written {
-        t.Error("a response should not have been written")
-    }
+	if response.written {
+		t.Error("a response should not have been written")
+	}
 })
 ```
 

@@ -77,7 +77,7 @@ go: cannot find main module; see 'go help modules'
 
 What's the problem? In a word, [modules](https://blog.golang.org/go116-module-changes). Luckily, the problem is easy to fix. Enter `go mod init hello` in your terminal. That will create a new file with the following contents:
 
-```go
+```
 module hello
 
 go 1.16

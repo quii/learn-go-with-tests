@@ -103,9 +103,9 @@ The other option that Go _currently_ gives is declaring the type of your argumen
 Try changing the signatures to use this type instead.
 
 ```go
-func AssertEqual(got, want interface{}) {
+func AssertEqual(got, want interface{})
 
-func AssertNotEqual(got, want interface{}) {
+func AssertNotEqual(got, want interface{})
 
 ```
 
@@ -116,7 +116,7 @@ The tests should now compile and pass. The output will be a bit ropey because we
 Our `AssertX` functions are quite naive but conceptually aren't too different to how other [popular libraries offer this functionality](https://github.com/matryer/is/blob/master/is.go#L150)
 
 ```go
-func (is *I) Equal(a, b interface{}) {
+func (is *I) Equal(a, b interface{})
 ```
 
 So what's the problem?
@@ -139,7 +139,7 @@ Ideally, we don't want to have to make specific `AssertX` functions for every ty
 
 Generics offer us a new way to make abstractions (like interfaces) by letting us **describe our constraints** in ways we cannot currently do.
 
-```go
+```
 package main
 
 import (
@@ -178,8 +178,8 @@ In our case the type of our type parameter is [`comparable`](https://go.googleso
 
 We're using `comparable` because we want to describe to the compiler that we wish to use the `==` and `!=` operators on things of type `T` in our function, we want to compare! If you try changing the type to `any`,
 
-```go
-func AssertNotEqual[T any](got, want T) {
+```
+func AssertNotEqual[T any](got, want T)
 ```
 
 You'll get the following error:
@@ -194,7 +194,7 @@ Which makes a lot of sense, because you can't use those operators on every (or `
 
 Consider two functions
 
-```go
+```
 func GenericFoo[T any](x, y T)
 ```
 
@@ -228,7 +228,7 @@ We're going to create a [stack](https://en.wikipedia.org/wiki/Stack_(abstract_da
 
 For the sake of brevity I've omitted the TDD process that arrived me at the [following code](https://go2goplay.golang.org/p/HghXymv1OKm) for a stack of `int`s, and a stack of `string`s.
 
-```go
+```
 package main
 
 import (
@@ -415,7 +415,7 @@ AssertEqual(firstNum+secondNum, 3)
 
 You get a compiler error, showing the weakness of losing type-safety:
 
-```go
+```
 prog.go2:59:14: invalid operation: operator + not defined for firstNum (variable of type interface{})
 ```
 
@@ -447,7 +447,7 @@ Just like you can define generic arguments to functions, you can define generic 
 
 Here's our new `Stack` implementation, featuring a generic data type and the tests, showing them working how we'd like them to work, with full type-safety. ([Full code listing here](https://go2goplay.golang.org/p/xAWcaMelgQV))
 
-```go
+```
 package main
 
 import (
@@ -507,7 +507,7 @@ func main() {
 
 You'll notice the syntax for defining generic data structures is consistent with defining generic arguments to functions.
 
-```go
+```
 type Stack[T any] struct {
     values []T
 }
@@ -517,18 +517,18 @@ It's _almost_ the same as before, it's just that what we're saying is the **type
 
 Once you create a `Stack[Orange]` or a `Stack[Apple]` the methods defined on our stack will only let you pass in and will only return the particular type of the stack you're working with:
 
-```go
-func (s *Stack[T]) Pop() (T, bool) {
+```
+func (s *Stack[T]) Pop() (T, bool)
 ```
 
 You can imagine the types of implementation being somehow generated for you, depending on what type of stack you create:
 
-```go
-func (s *Stack[Orange]) Pop() (Orange, bool) {
+```
+func (s *Stack[Orange]) Pop() (Orange, bool)
 ```
 
-```go
-func (s *Stack[Apple]) Pop() (Apple, bool) {
+```
+func (s *Stack[Apple]) Pop() (Apple, bool)
 ```
 
 Now that we have done this refactoring, we can safely remove the string stack test because we don't need to prove the same logic over and over.
@@ -569,7 +569,7 @@ Not many people complain about our ability to define interfaces which, like gene
 
 When you consider that if you've used arrays, slices or maps; you've _already been a consumer of generic code_.
 
-```go
+```
 var myApples []Apples
 // You cant do this!
 append(myApples, Orange{})

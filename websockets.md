@@ -17,7 +17,7 @@ The product owner is thrilled with the command line application but would prefer
 
 On the face of it, it sounds quite simple but as always we must emphasise taking an _iterative_ approach to writing software.
 
-First of all we will need to serve HTML. So far all of our HTTP endpoints have returned either plaintext or JSON. We _could_ use the same techniques we know (as they're all ultimately strings) but we can also use the [html/template](https://golang.org/pkg/html/template/) package for a cleaner solution.
+First we will need to serve HTML. So far all of our HTTP endpoints have returned either plaintext or JSON. We _could_ use the same techniques we know (as they're all ultimately strings) but we can also use the [html/template](https://golang.org/pkg/html/template/) package for a cleaner solution.
 
 We also need to be able to asynchronously send messages to the user saying `The blind is now *y*` without having to refresh the browser. We can use [WebSockets](https://en.wikipedia.org/wiki/WebSocket) to facilitate this.
 
@@ -120,7 +120,7 @@ func TestGame(t *testing.T) {
 	t.Run("GET /game returns 200", func(t *testing.T) {
 		server := NewPlayerServer(&StubPlayerStore{})
 
-		request :=  newGameRequest()
+		request := newGameRequest()
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)
@@ -222,24 +222,24 @@ This will fetch the code for the excellent [Gorilla WebSocket](https://github.co
 
 ```go
 t.Run("when we get a message over a websocket it is a winner of a game", func(t *testing.T) {
-    store := &StubPlayerStore{}
-    winner := "Ruth"
-    server := httptest.NewServer(NewPlayerServer(store))
-    defer server.Close()
+	store := &StubPlayerStore{}
+	winner := "Ruth"
+	server := httptest.NewServer(NewPlayerServer(store))
+	defer server.Close()
 
-    wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
+	wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
 
-    ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-    if err != nil {
-        t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
-    }
-    defer ws.Close()
+	ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
+	}
+	defer ws.Close()
 
-    if err := ws.WriteMessage(websocket.TextMessage, []byte(winner)); err != nil {
-        t.Fatalf("could not send message over ws connection %v", err)
-    }
+	if err := ws.WriteMessage(websocket.TextMessage, []byte(winner)); err != nil {
+		t.Fatalf("could not send message over ws connection %v", err)
+	}
 
-    AssertPlayerWin(t, store, winner)
+	AssertPlayerWin(t, store, winner)
 })
 ```
 
@@ -251,7 +251,7 @@ Our previous tests around our server just called methods on our server but now w
 
 Using `websocket.DefaultDialer.Dial` we try to dial in to our server and then we'll try and send a message with our `winner`.
 
-Finally we assert on the player store to check the winner was recorded.
+Finally, we assert on the player store to check the winner was recorded.
 
 ## Try to run the test
 ```
@@ -397,7 +397,7 @@ func mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer {
 }
 ```
 
-Similarly I created another helper `mustDialWS` so that I could hide nasty error noise when creating the WebSocket connection.
+Similarly, I created another helper `mustDialWS` so that I could hide nasty error noise when creating the WebSocket connection.
 
 ```go
 func mustDialWS(t *testing.T, url string) *websocket.Conn {
@@ -411,7 +411,7 @@ func mustDialWS(t *testing.T, url string) *websocket.Conn {
 }
 ```
 
-Finally in our test code we can create a helper to tidy up sending messages
+Finally, in our test code we can create a helper to tidy up sending messages
 
 ```go
 func writeWSMessage(t testing.TB, conn *websocket.Conn, message string) {
@@ -426,7 +426,7 @@ Now the tests are passing try running the server and declare some winners in `/g
 
 We've made a trivial web form that lets users record the winner of a game. Let's iterate on it to make it so the user can start a game by providing a number of players and the server will push messages to the client informing them of what the blind value is as time passes.
 
-First of all update `game.html` to update our client side code for the new requirements
+First update `game.html` to update our client side code for the new requirements
 
 ```html
 <!DOCTYPE html>
@@ -604,16 +604,16 @@ Let's take a look at our `CLI` test for inspiration.
 
 ```go
 t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t *testing.T) {
-    game := &GameSpy{}
+	game := &GameSpy{}
 
-    out := &bytes.Buffer{}
-    in := userSends("3", "Chris wins")
+	out := &bytes.Buffer{}
+	in := userSends("3", "Chris wins")
 
-    poker.NewCLI(in, out, game).PlayPoker()
+	poker.NewCLI(in, out, game).PlayPoker()
 
-    assertMessagesSentToUser(t, out, poker.PlayerPrompt)
-    assertGameStartedWith(t, game, 3)
-    assertFinishCalledWith(t, game, "Chris")
+	assertMessagesSentToUser(t, out, poker.PlayerPrompt)
+	assertGameStartedWith(t, game, 3)
+	assertFinishCalledWith(t, game, "Chris")
 })
 ```
 
@@ -623,20 +623,20 @@ Replace the old websocket test with the following
 
 ```go
 t.Run("start a game with 3 players and declare Ruth the winner", func(t *testing.T) {
-    game := &poker.GameSpy{}
-    winner := "Ruth"
-    server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
-    ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+	game := &poker.GameSpy{}
+	winner := "Ruth"
+	server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+	ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
 
-    defer server.Close()
-    defer ws.Close()
+	defer server.Close()
+	defer ws.Close()
 
-    writeWSMessage(t, ws, "3")
-    writeWSMessage(t, ws, winner)
+	writeWSMessage(t, ws, "3")
+	writeWSMessage(t, ws, winner)
 
-    time.Sleep(10 * time.Millisecond)
-    assertGameStartedWith(t, game, 3)
-    assertFinishCalledWith(t, game, winner)
+	time.Sleep(10 * time.Millisecond)
+	assertGameStartedWith(t, game, 3)
+	assertFinishCalledWith(t, game, winner)
 })
 ```
 
@@ -667,7 +667,7 @@ The final error is where we are trying to pass in `Game` to `NewPlayerServer` bu
 Just add it as an argument for now just to get the test running
 
 ```go
-func NewPlayerServer(store PlayerStore, game Game) (*PlayerServer, error) {
+func NewPlayerServer(store PlayerStore, game Game) (*PlayerServer, error)
 ```
 
 Finally!
@@ -690,7 +690,7 @@ type PlayerServer struct {
 	store PlayerStore
 	http.Handler
 	template *template.Template
-	game Game
+	game     Game
 }
 ```
 
@@ -711,6 +711,7 @@ func NewPlayerServer(store PlayerStore, game Game) (*PlayerServer, error) {
 	p.game = game
 
 	// etc
+}
 ```
 
 Now we can use our `Game` within `webSocket`.
@@ -756,7 +757,7 @@ func main() {
 		log.Fatalf("problem creating player server %v", err)
 	}
 
-    log.Fatal(http.ListenAndServe(":5000", server))
+	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 
@@ -833,6 +834,7 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 	numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
 	p.game.Start(numberOfPlayers, ws)
 	//etc...
+}
 ```
 
 The compiler complains
@@ -876,7 +878,7 @@ Our test currently opens a websocket connection to our running server and sends 
 
 We'll edit our existing test.
 
-Currently our `GameSpy` does not send any data to `out` when you call `Start`. We should change it so we can configure it to send a canned message and then we can check that message gets sent to the websocket. This should give us confidence that we have configured things correctly whilst still exercising the real behaviour we want.
+Currently, our `GameSpy` does not send any data to `out` when you call `Start`. We should change it so we can configure it to send a canned message and then we can check that message gets sent to the websocket. This should give us confidence that we have configured things correctly whilst still exercising the real behaviour we want.
 
 ```go
 type GameSpy struct {
@@ -903,32 +905,32 @@ func (g *GameSpy) Start(numberOfPlayers int, out io.Writer) {
 
 This now means when we exercise `PlayerServer` when it tries to `Start` the game it should end up sending messages through the websocket if things are working right.
 
-Finally we can update the test
+Finally, we can update the test
 
 ```go
 t.Run("start a game with 3 players, send some blind alerts down WS and declare Ruth the winner", func(t *testing.T) {
-    wantedBlindAlert := "Blind is 100"
-    winner := "Ruth"
+	wantedBlindAlert := "Blind is 100"
+	winner := "Ruth"
 
-    game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
-    server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
-    ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+	game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
+	server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+	ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
 
-    defer server.Close()
-    defer ws.Close()
+	defer server.Close()
+	defer ws.Close()
 
-    writeWSMessage(t, ws, "3")
-    writeWSMessage(t, ws, winner)
+	writeWSMessage(t, ws, "3")
+	writeWSMessage(t, ws, winner)
 
-    time.Sleep(10 * time.Millisecond)
-    assertGameStartedWith(t, game, 3)
-    assertFinishCalledWith(t, game, winner)
+	time.Sleep(10 * time.Millisecond)
+	assertGameStartedWith(t, game, 3)
+	assertFinishCalledWith(t, game, winner)
 
-    _, gotBlindAlert, _ := ws.ReadMessage()
+	_, gotBlindAlert, _ := ws.ReadMessage()
 
-    if string(gotBlindAlert) != wantedBlindAlert {
-        t.Errorf("got blind alert %q, want %q", string(gotBlindAlert), wantedBlindAlert)
-    }
+	if string(gotBlindAlert) != wantedBlindAlert {
+		t.Errorf("got blind alert %q, want %q", string(gotBlindAlert), wantedBlindAlert)
+	}
 })
 ```
 
@@ -967,7 +969,7 @@ What `within` does is take a function `assert` as an argument and then runs it i
 
 While that happens we use a `select` statement which lets us wait for a channel to send a message. From here it is a race between the `assert` function and `time.After` which will send a signal when the duration has occurred.
 
-Finally I made a helper function for our assertion just to make things a bit neater
+Finally, I made a helper function for our assertion just to make things a bit neater
 
 ```go
 func assertWebsocketGotMsg(t *testing.T, ws *websocket.Conn, want string) {
@@ -982,24 +984,24 @@ Here's how the test reads now
 
 ```go
 t.Run("start a game with 3 players, send some blind alerts down WS and declare Ruth the winner", func(t *testing.T) {
-    wantedBlindAlert := "Blind is 100"
-    winner := "Ruth"
+	wantedBlindAlert := "Blind is 100"
+	winner := "Ruth"
 
-    game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
-    server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
-    ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+	game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
+	server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+	ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
 
-    defer server.Close()
-    defer ws.Close()
+	defer server.Close()
+	defer ws.Close()
 
-    writeWSMessage(t, ws, "3")
-    writeWSMessage(t, ws, winner)
+	writeWSMessage(t, ws, "3")
+	writeWSMessage(t, ws, winner)
 
-    time.Sleep(tenMS)
+	time.Sleep(tenMS)
 
-    assertGameStartedWith(t, game, 3)
-    assertFinishCalledWith(t, game, winner)
-    within(t, tenMS, func() { assertWebsocketGotMsg(t, ws, wantedBlindAlert) })
+	assertGameStartedWith(t, game, 3)
+	assertFinishCalledWith(t, game, winner)
+	within(t, tenMS, func() { assertWebsocketGotMsg(t, ws, wantedBlindAlert) })
 })
 ```
 
@@ -1016,7 +1018,7 @@ Now if you run the test...
 
 ## Write enough code to make it pass
 
-Finally we can now change our server code so it sends our WebSocket connection to the game when it starts
+Finally, we can now change our server code, so it sends our WebSocket connection to the game when it starts
 
 ```go
 func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {

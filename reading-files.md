@@ -27,7 +27,7 @@ The body of posts starts after the `---`
 ```go
 type Post struct {
 	Title, Description, Body string
-	Tags []string
+	Tags                     []string
 }
 ```
 
@@ -113,16 +113,16 @@ import (
 )
 
 func TestNewBlogPosts(t *testing.T) {
-    fs := fstest.MapFS{
-        "hello world.md":  {Data: []byte("hi")},
-        "hello-world2.md": {Data: []byte("hola")},
-    }
+	fs := fstest.MapFS{
+		"hello world.md":  {Data: []byte("hi")},
+		"hello-world2.md": {Data: []byte("hola")},
+	}
 
-    posts := blogposts.NewPostsFromFS(fs)
+	posts := blogposts.NewPostsFromFS(fs)
 
-    if len(posts) != len(fs) {
-        t.Errorf("got %d posts, wanted %d posts", len(posts), len(fs))
-    }
+	if len(posts) != len(fs) {
+		t.Errorf("got %d posts, wanted %d posts", len(posts), len(fs))
+	}
 }
 
 ```
@@ -169,7 +169,6 @@ package blogposts
 import "testing/fstest"
 
 type Post struct {
-
 }
 
 func NewPostsFromFS(fileSystem fstest.MapFS) []Post {
@@ -190,7 +189,7 @@ We _could_ ["slime"](https://deniseyu.github.io/leveling-up-tdd/) this to make i
 
 ```go
 func NewPostsFromFS(fileSystem fstest.MapFS) []Post {
-	return []Post{{},{}}
+	return []Post{{}, {}}
 }
 ```
 
@@ -242,20 +241,20 @@ We parked error handling earlier when we focused on making the happy-path work. 
 
 ```go
 func TestNewBlogPosts(t *testing.T) {
-    fs := fstest.MapFS{
-        "hello world.md":  {Data: []byte("hi")},
-        "hello-world2.md": {Data: []byte("hola")},
-    }
+	fs := fstest.MapFS{
+		"hello world.md":  {Data: []byte("hi")},
+		"hello-world2.md": {Data: []byte("hola")},
+	}
 
-    posts, err := blogposts.NewPostsFromFS(fs)
+	posts, err := blogposts.NewPostsFromFS(fs)
 
-    if err != nil {
-        t.Fatal(err)
-    }
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    if len(posts) != len(fs) {
-        t.Errorf("got %d posts, wanted %d posts", len(posts), len(fs))
-    }
+	if len(posts) != len(fs) {
+		t.Errorf("got %d posts, wanted %d posts", len(posts), len(fs))
+	}
 }
 ```
 
@@ -284,7 +283,8 @@ type StubFailingFS struct {
 func (s StubFailingFS) Open(name string) (fs.File, error) {
 	return nil, errors.New("oh no, i always fail")
 }
-
+```
+```go
 // later
 _, err := blogposts.NewPostsFromFS(StubFailingFS{})
 ```
@@ -308,12 +308,12 @@ func TestNewBlogPosts(t *testing.T) {
 	}
 
 	// rest of test code cut for brevity
-    got := posts[0]
-    want := blogposts.Post{Title: "Post 1"}
+	got := posts[0]
+	want := blogposts.Post{Title: "Post 1"}
 
-    if !reflect.DeepEqual(got, want) {
-        t.Errorf("got %+v, want %+v", got, want)
-    }
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %+v, want %+v", got, want)
+	}
 }
 ```
 
@@ -505,11 +505,11 @@ Description: Description 2`
 		"hello-world2.md": {Data: []byte(secondBody)},
 	}
 
-    // rest of test code cut for brevity
-    assertPost(t, posts[0], blogposts.Post{
-        Title: "Post 1",
-        Description: "Description 1",
-    })
+	// rest of test code cut for brevity
+	assertPost(t, posts[0], blogposts.Post{
+		Title:       "Post 1",
+		Description: "Description 1",
+	})
 
 }
 ```
@@ -545,7 +545,7 @@ The standard library has a handy library for helping you scan through data, line
 
 > Scanner provides a convenient interface for reading data such as a file of newline-delimited lines of text.
 
-```go
+```
 func newPost(postFile io.Reader) (Post, error) {
 	scanner := bufio.NewScanner(postFile)
 
@@ -569,7 +569,7 @@ This function could never return an `error`. It would be tempting at this point 
 
 We have repetition around scanning a line and then reading the text. We know we're going to do this operation at least one more time, it's a simple refactor to DRY up so let's start with that.
 
-```go
+```
 func newPost(postFile io.Reader) (Post, error) {
 	scanner := bufio.NewScanner(postFile)
 
@@ -589,7 +589,7 @@ This has barely saved any lines of code, but that's rarely the point of refactor
 
 Whilst the magic numbers of 7 and 13 get the job done, they're not awfully descriptive.
 
-```go
+```
 const (
 	titleSeparator       = "Title: "
 	descriptionSeparator = "Description: "
@@ -612,7 +612,7 @@ func newPost(postFile io.Reader) (Post, error) {
 
 Now that I'm staring at the code with my creative refactoring mind, I'd like to try making our readLine function take care of removing the tag. There's also a more readable way of trimming a prefix from a string with the function `strings.TrimPrefix`.
 
-```go
+```
 func newPost(postBody io.Reader) (Post, error) {
 	scanner := bufio.NewScanner(postBody)
 
@@ -634,7 +634,7 @@ The next requirement is extracting the post's tags. If you're following along, I
 
 For brevity, I will not go through the TDD steps, but here's the test with tags added.
 
-```go
+```
 func TestNewBlogPosts(t *testing.T) {
 	const (
 		firstBody = `Title: Post 1
@@ -656,7 +656,7 @@ Tags: rust, borrow-checker`
 
 You're only cheating yourself if you just copy and paste what I write. To make sure we're all on the same page, here's my code which includes extracting the tags.
 
-```go
+```
 const (
 	titleSeparator       = "Title: "
 	descriptionSeparator = "Description: "
@@ -701,7 +701,7 @@ We've read the first 3 lines already. We then need to read one more line, discar
 
 Change the test data to have the separator, and a body with a few newlines to check we grab all the content.
 
-```go
+```
 	const (
 		firstBody = `Title: Post 1
 Description: Description 1
@@ -721,7 +721,7 @@ M`
 
 Add to our assertion like the others
 
-```go
+```
 	assertPost(t, posts[0], blogposts.Post{
         Title:       "Post 1",
         Description: "Description 1",
@@ -754,7 +754,7 @@ Add `Body` to `Post` and the test should fail.
 1. Scan the next line to ignore the `---` separator.
 2. Keep scanning until there's nothing left to scan.
 
-```go
+```
 func newPost(postBody io.Reader) (Post, error) {
 	scanner := bufio.NewScanner(postBody)
 
@@ -792,7 +792,7 @@ func newPost(postBody io.Reader) (Post, error) {
 
 Encapsulating the idea of getting the rest of the data into a function will help future readers quickly understand _what_ is happening in `newPost`, without having to concern themselves with implementation specifics.
 
-```go
+```
 func newPost(postBody io.Reader) (Post, error) {
 	scanner := bufio.NewScanner(postBody)
 
@@ -842,7 +842,7 @@ If you wish to try out the code "for real":
 - Create a `cmd` folder within the project, add a `main.go` file
 - Add the following code
 
-```go
+```
 import (
     blogposts "github.com/quii/fstest-spike"
     "log"
@@ -862,13 +862,13 @@ func main() {
 
 Notice the symmetry between the production code
 
-```go
+```
 posts, err := blogposts.NewPostsFromFS(os.DirFS("posts"))
 ```
 
 And the tests
 
-```go
+```
 posts, err := blogposts.NewPostsFromFS(fs)
 ```
 
