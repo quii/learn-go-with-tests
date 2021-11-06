@@ -30,7 +30,7 @@ set -e
 #    os-exec.md \
 #    error-types.md \
 
-docker run -v `pwd`:/source jagregory/pandoc -o learn-go-with-tests.epub --latex-engine=xelatex --toc --toc-depth=1 title.txt \
+docker run --rm -v `pwd`:/data pandoc/latex --from=gfm --to=epub --file-scope title.txt -o learn-go-with-tests.epub --pdf-engine=xelatex --toc --toc-depth=1  \
     gb-readme.md \
     why.md \
     hello-world.md \

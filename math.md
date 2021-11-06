@@ -976,7 +976,7 @@ working out what the correct names for all of the nodes and attributes, and how
 to write the correct structure but, happily, someone has written
 [`zek`](https://github.com/miku/zek) a program that will automate all of that
 hard work for us.  Even better, there's an online version at
-[https://www.onlinetool.io/xmltogo/](https://www.onlinetool.io/xmltogo/). Just
+https://www.onlinetool.io/xmltogo/. Just
 paste the SVG from the top of the file into one box and - bam - out pops:
 
 ```go

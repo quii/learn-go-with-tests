@@ -1,8 +1,8 @@
 # Learn Go with Tests
 
-<p align="center">
+<div style="text-align: center">
   <img src="red-green-blue-gophers-smaller.png" />
-</p>
+</div>
 
 [Art by Denise](https://twitter.com/deniseyu21)
 
@@ -85,4 +85,4 @@ Taking my experience of learning with a group and my own personal way I am going
 
 * Add issues/submit PRs [here](https://github.com/quii/learn-go-with-tests) or [tweet me @quii](https://twitter.com/quii)
 
-[MIT license](LICENSE.md)
+[MIT license](https://github.com/quii/learn-go-with-tests/blob/main/LICENSE.md)
