@@ -2,8 +2,9 @@
 
 set -e
 
-docker run --rm -v `pwd`:/data uppalabharath/pandoc-latex-cjk:latest --from=gfm+rebase_relative_paths --to=latex -o learn-go-with-tests.pdf -H meta.tex --pdf-engine=xelatex --variable urlcolor=blue --toc --toc-depth=1 \
-    pdf-cover.md \
+docker run --rm -v `pwd`:/data uppalabharath/pandoc-latex-cjk:latest --from=gfm+rebase_relative_paths -o learn-go-with-tests.pdf \
+    -H meta.tex --pdf-engine=xelatex --variable urlcolor=blue --toc --toc-depth=1 \
+    -B pdf-cover.tex \
     gb-readme.md \
     why.md \
     hello-world.md \
