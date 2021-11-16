@@ -41,8 +41,8 @@ jobs:
         asset_name: learn-go-with-tests.epub
         asset_content_type: application/epub+zip
       uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
     
     - name: Attach generated PDF upon release publish
       if: github.event_name == 'release' && github.event.action == 'published'
@@ -52,6 +52,6 @@ jobs:
         asset_name: learn-go-with-tests.pdf
         asset_content_type: application/pdf
       uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}       
+      env:
+        GITHUB_TOKEN: ${{ github.token }}       
       
