@@ -840,11 +840,11 @@ directory, called (confusingly), `clockface`. In there we'll put the `main`
 package that will create the binary that will build an SVG:
 
 ```
-├── clockface
-│   └── main.go
-├── clockface.go
-├── clockface_acceptance_test.go
-└── clockface_test.go
+|-- clockface
+|       |-- main.go
+|-- clockface.go
+|-- clockface_acceptance_test.go
+|-- clockface_test.go
 ```
 
 Inside `main.go`, you'll start with this code but change the import for the

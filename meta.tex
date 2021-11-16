@@ -1,5 +1,14 @@
 \usepackage{fancyhdr}
 
+\usepackage{xeCJK}
+\usepackage{fontspec}% set Chinese fonts, as follows
+\setmainfont{DejaVu Sans}
+\setmonofont{DejaVu Sans}
+\setsansfont{DejaVu Sans}
+\setCJKmainfont[BoldFont=Noto Sans CJK TC,ItalicFont=Noto Sans CJK TC]{Noto Sans CJK TC}
+\setCJKsansfont[BoldFont=Noto Sans CJK TC]{Noto Sans CJK TC}
+\setCJKmonofont{Noto Sans Mono CJK TC}
+
 \pagestyle{fancy}
 \fancyhf{}
 \cfoot{v 10.0.0}
