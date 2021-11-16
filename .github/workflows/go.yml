@@ -5,6 +5,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  release:
+    types: [ published ]
 
 jobs:
 
@@ -23,3 +25,33 @@ jobs:
 
     - name: Build books
       run: ./build.books.sh
+    
+    - name: Get release
+      id: get_release
+      if: github.event_name == 'release' && github.event.action == 'published'
+      uses: bruceadams/get-release@v1.2.3
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      
+    - name: Attach generated epub upon release publish
+      if: github.event_name == 'release' && github.event.action == 'published'
+      with:
+        upload_url: ${{ steps.get_release.outputs.upload_url }}
+        asset_path: ./learn-go-with-tests.epub
+        asset_name: learn-go-with-tests.epub
+        asset_content_type: application/epub+zip
+      uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+    
+    - name: Attach generated PDF upon release publish
+      if: github.event_name == 'release' && github.event.action == 'published'
+      with:
+        upload_url: ${{ steps.get_release.outputs.upload_url }}
+        asset_path: ./learn-go-with-tests.pdf
+        asset_name: learn-go-with-tests.pdf
+        asset_content_type: application/pdf
+      uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}       
+      
