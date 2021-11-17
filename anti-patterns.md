@@ -144,12 +144,12 @@ At first pass it's reasonable to say the design isn't so bad. It only has 2 depe
 
 Re-evaluate the design by considering the handler's responsibilities:
 
-- Parse the request body into a `User` ✅
-- Use `UserStore` to check if the user exists ❓
-- Use `UserStore` to store the user ❓
-- Compose an email ❓
-- Use `Emailer` to send the email ❓
-- Return an appropriate http response, depending on success, errors, etc ✅
+- Parse the request body into a `User` :white_check_mark:
+- Use `UserStore` to check if the user exists :question:
+- Use `UserStore` to store the user :question:
+- Compose an email :question:
+- Use `Emailer` to send the email :question:
+- Return an appropriate http response, depending on success, errors, etc :white_check_mark:
 
 To exercise this code, you're going to have to write many tests with varying degrees of test double setups, spies, etc
 
