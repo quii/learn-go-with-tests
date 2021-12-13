@@ -273,7 +273,7 @@ This is called the 'unit circle' because... well, the radius is 1 unit!
 
 The circumference of the circle is made of points on the grid - more
 coordinates. The x and y components of each of these coordinates form
-a triangle, the hypotenuse of which is always 1 - the radius of the circle
+a triangle, the hypotenuse of which is always 1 (i.e. the radius of the circle).
 
 ![picture of the unit circle with a point defined on the circumference](math/images/unit_circle_coords.png)
 
