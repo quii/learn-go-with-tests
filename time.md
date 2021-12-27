@@ -1138,6 +1138,8 @@ Consider that you can not only define types of functions, but also define types 
 type Blog map[string]string
 
 func (b Blog) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintln(w, b[r.URL.Path])
+	fmt.Fprintln(w, b[r.URL.Path])
 }
 ```
+
+Here we've created an HTTP handler that implements a very simple "blog" where it will use URL paths as keys to posts stored in a map.
