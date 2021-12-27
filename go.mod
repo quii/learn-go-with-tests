@@ -8,5 +8,5 @@ require (
 	github.com/po3rin/gofmtmd v0.1.3 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
-	golang.org/x/tools v0.1.7 // indirect
+	golang.org/x/tools v0.1.8 // indirect
 )

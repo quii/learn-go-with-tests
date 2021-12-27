@@ -322,7 +322,7 @@ func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
 		for _, c := range s.response {
 			select {
 			case <-ctx.Done():
-				s.t.Log("spy store got cancelled")
+				log.Println("spy store got cancelled")
 				return
 			default:
 				time.Sleep(10 * time.Millisecond)
