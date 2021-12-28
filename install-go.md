@@ -2,39 +2,6 @@
 
 The official installation instructions for Go are available [here](https://golang.org/doc/install).
 
-This guide will assume that you are using a package manager for e.g. [Homebrew](https://brew.sh), [Chocolatey](https://chocolatey.org), [Apt](https://help.ubuntu.com/community/AptGet/Howto) or [yum](https://access.redhat.com/solutions/9934).
-
-For demonstration purposes we will show the installation procedure for OSX using Homebrew.
-
-## Installation
-
-The process of installation is very easy. First, what you have to do is to run this command to install homebrew. It has a dependency on Xcode so you should ensure this is installed first.
-
-```sh
-xcode-select --install
-```
-
-Then you run the following to install homebrew:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-```
-
-At this point you can now install Go with:
-
-```sh
-brew install go
-```
-
-*You should follow any instructions recommended by your package manager. **Note** these may be host os specific*.
-
-You can verify the installation with:
-
-```sh
-$ go version
-go version go1.14 darwin/amd64
-```
-
 ## Go Environment
 
 ### Go Modules
@@ -69,40 +36,6 @@ The built-in documentation provides an overview of all available `go mod` comman
 go help mod
 go help mod init
 ```
-
-## Go Editor
-
-Editor preference is very individualistic, you may already have a preference that supports Go. If you don't you should consider an Editor such as [Visual Studio Code](https://code.visualstudio.com), which has exceptional Go support.
-
-You can install it using the following command:
-
-```sh
-brew install --cask visual-studio-code
-```
-
-You can confirm VS Code installed correctly you can run the following in your shell.
-
-```sh
-code .
-```
-
-VS Code is shipped with very little software enabled, you can enable new software by installing extensions. To add Go support you must install an extension, there are a variety available for VS Code, an exceptional one is [Luke Hoban's package](https://github.com/golang/vscode-go). This can be installed as follows:
-
-```sh
-code --install-extension golang.go
-```
-
-When you open a Go file for the first time in VS Code, it will indicate that the Analysis tools are missing, you should click the button to install these. The list of tools that gets installed (and used) by VS Code are available [here](https://github.com/golang/vscode-go/blob/master/docs/tools.md).
-
-## Go Debugger
-
-A good option for debugging Go (that's integrated with VS Code) is Delve. This can be installed as follows:
-
-```sh
-go get -u github.com/go-delve/delve/cmd/dlv
-```
-
-For additional help configuring and running the Go debugger in VS Code, please reference the [VS Code debugging documentation](https://github.com/golang/vscode-go/blob/master/docs/debugging.md).
 
 ## Go Linting
 
