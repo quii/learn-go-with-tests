@@ -99,7 +99,7 @@ With our career in fintech secured, run the test suite and bask in the passing t
 
 `wallet_test.go:15: got 0 want 10`
 
-### ????
+### That's not quite right
 
 Well this is confusing, our code looks like it should work.
 We add the new amount onto our balance and then the balance method should return the current state of it.
@@ -586,7 +586,7 @@ There is one scenario we have not tested. To find it, run the following in a ter
 `go get -u github.com/kisielk/errcheck` ()
 ```
 in Golang 1.17 installing by 'go get' deprecated. Need to use combination:
-`go get github.com/kisielk/errcheck` 
+`go get github.com/kisielk/errcheck`
 `go install github.com/kisielk/errcheck`
 ```
 
