@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>My amazing blog!</title>
+    <meta charset="UTF-8"/>
+    <meta name="description" content="Wow, like and subscribe, it really helps the channel guys" lang="en"/>
+</head>
+<body>
+<nav role="navigation">
+    <div>
+        <h1>Budding Gopher's blog</h1>
+        <ul>
+            <li><a href="/">home</a></li>
+            <li><a href="about">about</a></li>
+            <li><a href="archive">archive</a></li>
+        </ul>
+    </div>
+</nav>
+<main>
+
+<h1>hello world</h1>
+
+<p>This is a description</p>
+
+Tags: <ul><li>go</li><li>tdd</li></ul>
+
+<footer>
+    <ul>
+        <li><a href="https://twitter.com/quii">Twitter</a></li>
+        <li><a href="https://github.com/quii">GitHub</a></li>
+    </ul>
+</footer>
+</main>
+</body>
+</html>
+
