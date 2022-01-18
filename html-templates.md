@@ -1000,7 +1000,7 @@ Go is wonderful for web development, especially when you think clearly about wha
 ### What we've learned
 
 - How to create and render HTML templates.
-- How to compose templates together and [DRY](https://en.wikipedia.org/wiki/Don't_repeat_yourself) up related markup.
+- How to compose templates together and [DRY](https://en.wikipedia.org/wiki/Don't_repeat_yourself) up related markup and help us keep a consistent look and feel.
 - How to pass functions into templates, and why you should think twice about it.
 - How to write "Approval Tests", which help us test the big ugly output of things like template renderers. 
 
