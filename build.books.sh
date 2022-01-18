@@ -24,6 +24,7 @@ docker run --rm -v `pwd`:/data uppalabharath/pandoc-latex-cjk:latest --from=gfm+
     roman-numerals.md \
     math.md \
     reading-files.md \
+    html-templates.md \
     intro-to-generics.md \
     app-intro.md \
     http-server.md \
@@ -58,6 +59,7 @@ docker run --rm -v `pwd`:/data uppalabharath/pandoc-latex-cjk:latest --from=gfm+
     roman-numerals.md \
     math.md \
     reading-files.md \
+    html-templates.md \
     intro-to-generics.md \
     app-intro.md \
     http-server.md \

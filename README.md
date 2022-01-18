@@ -58,6 +58,7 @@ I am proud to offer this resource for free, but if you wish to give some appreci
 14. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
 15. [Maths](math.md) - Use the `math` package to draw an SVG clock
 16. [Reading files](reading-files.md) - Read files and process them
+17. [Templating](html-templates.md) - Use Go's html/template package to render html from data, and also learn about approval testing
 
 ### Build an application
 
