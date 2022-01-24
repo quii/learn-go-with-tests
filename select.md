@@ -18,7 +18,7 @@ Let's start with something naive to get us going.
 ```go
 func TestRacer(t *testing.T) {
 	slowURL := "http://www.facebook.com"
-	fastURL := "http://www.quii.co.uk"
+	fastURL := "http://www.quii.dev"
 
 	want := fastURL
 	got := Racer(slowURL, fastURL)
@@ -43,7 +43,7 @@ func Racer(a, b string) (winner string) {
 }
 ```
 
-`racer_test.go:25: got '', want 'http://www.quii.co.uk'`
+`racer_test.go:25: got '', want 'http://www.quii.dev'`
 
 ## Write enough code to make it pass
 
