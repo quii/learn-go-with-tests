@@ -134,7 +134,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gypsydave5/learn-go-with-tests/math/v1/clockface"
+	"github.com/quii/learn-go-with-tests/math/v1/clockface"
 )
 
 func TestSecondHandAtMidnight(t *testing.T) {
@@ -195,7 +195,7 @@ and now we get:
     clockface_test.go:17: Got {0 0}, wanted {150 60}
 FAIL
 exit status 1
-FAIL	github.com/gypsydave5/learn-go-with-tests/math/v1/clockface	0.006s
+FAIL	github.com/quii/learn-go-with-tests/math/v1/clockface	0.006s
 ```
 
 ### Write enough code to make it pass
@@ -1134,7 +1134,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface"
+	"github.com/quii/learn-go-with-tests/math/v7b/clockface"
 )
 
 func main() {
@@ -1830,7 +1830,7 @@ get the remainder of the current hour divided by 12.
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v10/clockface	0.008s
+ok  	github.com/quii/learn-go-with-tests/math/v10/clockface	0.008s
 ```
 ### Write the test first
 
@@ -2007,7 +2007,7 @@ The tests will soon tell me if I'm wrong.
 
 ```
 PASS
-ok  	github.com/gypsydave5/learn-go-with-tests/math/v11/clockface	0.009s
+ok  	github.com/quii/learn-go-with-tests/math/v11/clockface	0.009s
 ```
 <!--
 Here endeth v11
