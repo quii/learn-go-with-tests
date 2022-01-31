@@ -190,7 +190,7 @@ Taking the idea of a more ideal separation of concerns I'd want it to be more li
 
 1. Decode the request's body into a `User`
 2. Call a `UserService.Register(user)` (this is our `ServiceThing`)
-3. If there's an error act on it (the example always sends a `400 BadRequest` which I don't think is right, I'll just have a catch-all handler of a `500 Internal Server Error` _for now_. I must stress that returning `500` for all errors makes for a terrible API! Later on we can make the error handling more sophisticated, perhaps with [error types](error-types.md).
+3. If there's an error act on it (the example always sends a `400 BadRequest` which I don't think is right), I'll just have a catch-all handler of a `500 Internal Server Error` _for now_. I must stress that returning `500` for all errors makes for a terrible API! Later on we can make the error handling more sophisticated, perhaps with [error types](error-types.md).
 4. If there's no error, `201 Created` with the ID as the response body (again for terseness/laziness)
 
 For the sake of brevity I won't go over the usual TDD process, check all the other chapters for examples.
