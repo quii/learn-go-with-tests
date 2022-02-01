@@ -28,7 +28,7 @@ They combined two simple abstractions (`context.Context` and `io.Reader`) to sol
 
 Let's try and TDD some functionality so that we can wrap an `io.Reader` so it can be cancelled.
 
-Testing this poses an interesting challenge. Normally when using an `io.Reader` you're usually supplying it to some other function and you dont really concern yourself with the details; such as `json.NewDecoder` or `ioutil.ReadAll`.
+Testing this poses an interesting challenge. Normally when using an `io.Reader` you're usually supplying it to some other function and you don't really concern yourself with the details; such as `json.NewDecoder` or `ioutil.ReadAll`.
 
 What we want to demonstrate is something like
 
