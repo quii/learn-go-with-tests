@@ -975,7 +975,7 @@ func newPostVM(p Post, r *PostRenderer) postViewModel {
 }
 ```
 
-I used the excellent [gomarkdown](github.com/gomarkdown/markdown) library which worked exactly how I'd hope. 
+I used the excellent [gomarkdown](https://github.com/gomarkdown/markdown) library which worked exactly how I'd hope. 
 
 If you tried to do this yourself you may have found that your body render had the HTML escaped. This is a security feature of Go's html/template package to stop malicious 3rd-party HTML being outputted. 
 
