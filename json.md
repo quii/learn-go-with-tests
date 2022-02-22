@@ -374,8 +374,22 @@ type Player struct {
 
 ```go
 //server_test.go
-var got []Player
-err := json.NewDecoder(response.Body).Decode(&got)
+    t.Run("it returns 200 on /league", func(t *testing.T) {
+        request, _ := http.NewRequest(http.MethodGet, "/league", nil)
+        response := httptest.NewRecorder()
+
+        server.ServeHTTP(response, request)
+
+        var got []Player
+
+        err := json.NewDecoder(response.Body).Decode(&got)
+
+        if err != nil {
+            t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", response.Body, err)
+        }
+
+        assertStatus(t, response.Code, http.StatusOK)
+    })
 ```
 
 To parse JSON into our data model we create a `Decoder` from `encoding/json` package and then call its `Decode` method. To create a `Decoder` it needs an `io.Reader` to read from which in our case is our response spy's `Body`.
