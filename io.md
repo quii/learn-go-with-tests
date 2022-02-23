@@ -285,7 +285,7 @@ Add the following to the end of our current test.
 //file_system_store_test.go
 
 // read again
-got := store.GetLeague()
+got = store.GetLeague()
 assertLeague(t, got, want)
 ```
 
