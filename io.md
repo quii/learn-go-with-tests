@@ -452,7 +452,7 @@ I don't think there's an especially wrong answer here, but by choosing to use a 
 
 Before adding our test we need to make our other tests compile by replacing the `strings.Reader` with an `os.File`.
 
-Let's create a helper function which will create a temporary file with some data inside it
+Let's create some helper functions which will create a temporary file with some data inside it, and abstract our score tests
 
 ```go
 //file_system_store_test.go
@@ -473,6 +473,13 @@ func createTempFile(t testing.TB, initialData string) (io.ReadWriteSeeker, func(
 	}
 
 	return tmpfile, removeFile
+}
+
+func assertScoreEquals(t testing.TB, got, want int) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
 }
 ```
 
