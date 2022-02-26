@@ -952,6 +952,14 @@ In the interest of brevity, I am going to show you the final refactored integrat
 
 ```go
 //server_integration_test.go
+package main
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	store := InMemoryPlayerStore{}
 	server := PlayerServer{&store}
