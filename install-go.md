@@ -44,7 +44,7 @@ An improvement over the default linter can be configured using [GolangCI-Lint](h
 This can be installed as follows:
 
 ```sh
-brew install golangci/tap/golangci-lint
+brew install golangci-lint
 ```
 
 ## Refactoring and your tooling
