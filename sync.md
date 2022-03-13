@@ -250,7 +250,7 @@ Use this function in your tests when initialising `Counter`.
 We've covered a few things from the [sync package](https://golang.org/pkg/sync/)
 
 - `Mutex` allows us to add locks to our data
-- `Waitgroup` is a means of waiting for goroutines to finish jobs
+- `WaitGroup` is a means of waiting for goroutines to finish jobs
 
 ### When to use locks over channels and goroutines?
 
