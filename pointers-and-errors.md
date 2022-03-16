@@ -583,12 +583,7 @@ Whilst the Go compiler helps you a lot, sometimes there are things you can still
 
 There is one scenario we have not tested. To find it, run the following in a terminal to install `errcheck`, one of many linters available for Go.
 
-`go get -u github.com/kisielk/errcheck` ()
-```
-in Golang 1.17 installing by 'go get' deprecated. Need to use combination:
-`go get github.com/kisielk/errcheck`
-`go install github.com/kisielk/errcheck`
-```
+`go install github.com/kisielk/errcheck@latest`
 
 Then, inside the directory with your code run `errcheck .`
 
