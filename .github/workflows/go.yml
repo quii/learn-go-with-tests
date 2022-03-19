@@ -18,21 +18,21 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.18
 
     - name: Build
       run: ./build.sh
 
     - name: Build books
       run: ./build.books.sh
-    
+
     - name: Get release
       id: get_release
       if: github.event_name == 'release' && github.event.action == 'published'
       uses: bruceadams/get-release@v1.2.3
       env:
         GITHUB_TOKEN: ${{ github.token }}
-      
+
     - name: Attach generated epub upon release publish
       if: github.event_name == 'release' && github.event.action == 'published'
       with:
@@ -43,7 +43,7 @@ jobs:
       uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ github.token }}
-    
+
     - name: Attach generated PDF upon release publish
       if: github.event_name == 'release' && github.event.action == 'published'
       with:
@@ -53,5 +53,5 @@ jobs:
         asset_content_type: application/pdf
       uses: actions/upload-release-asset@v1.0.2
       env:
-        GITHUB_TOKEN: ${{ github.token }}       
-      
+        GITHUB_TOKEN: ${{ github.token }}
+
