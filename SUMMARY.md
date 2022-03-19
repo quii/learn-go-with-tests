@@ -23,6 +23,7 @@
 * [Maths](math.md)
 * [Reading files](reading-files.md)
 * [Templating](html-templates.md)
+* [Generics](generics.md)
 
 ## Build an application
 
