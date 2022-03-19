@@ -120,7 +120,7 @@ Often developers have to use reflection to implement these *ahem* generic functi
 
 Ideally, we don't want to have to make specific `AssertX` functions for every type we ever deal with. We'd like to be able to have _one_ `AssertEqual` function that works with _any_ type but does not let you compare [apples and oranges](https://en.wikipedia.org/wiki/Apples_and_oranges).
 
-Generics offer us a way to make abstractions (like interfaces) by letting us **describe our constraints** in ways we cannot currently do.
+Generics offer us a way to make abstractions (like interfaces) by letting us **describe our constraints**. They allow us to write functions that have a similar level of flexibility that `interface{}` offers but retain type-safety and provide a better developer experience for callers.
 
 ```go
 func TestAssertFunctions(t *testing.T) {
