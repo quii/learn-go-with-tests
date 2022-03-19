@@ -170,7 +170,7 @@ prog.go2:15:5: cannot compare got != want (operator != not defined for T)
 
 Which makes a lot of sense, because you can't use those operators on every (or `any`) type.
 
-### Is [`any`](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md#the-constraint) the same as `interface{}` ?
+### Is a generic function with [`T any`](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md#the-constraint) the same as `interface{}` ?
 
 Consider two functions
 
