@@ -92,7 +92,7 @@ func AssertNotEqual(got, want interface{})
 
 The tests should now compile and pass. If you try making them fail you'll see the output is a bit ropey because we're using the integer `%d` format string to print our messages, so change them to the general `%+v` format for a better output of any kind of value.
 
-### Tradeoffs made without generics
+### The problem with `interface{}`
 
 Our `AssertX` functions are quite naive but conceptually aren't too different to how other [popular libraries offer this functionality](https://github.com/matryer/is/blob/master/is.go#L150)
 
@@ -102,7 +102,7 @@ func (is *I) Equal(a, b interface{})
 
 So what's the problem?
 
-By using `interface{}` the compiler can't help us when writing our code, because we're not telling it anything useful about the types of things passed to the function. Try comparing two different types,
+By using `interface{}` the compiler can't help us when writing our code, because we're not telling it anything useful about the types of things passed to the function. Try comparing two different types.
 
 ```go
 AssertNotEqual(1, "1")
@@ -114,7 +114,7 @@ Writing functions that take `interface{}` can be extremely challenging and bug-p
 
 This means **the compiler can't help us** and we're instead more likely to have **runtime errors** which could affect our users, cause outages, or worse.
 
-Often developers have to use reflection to implement these *ahem* generic functions, which is usually painful and can hurt the performance of your program.
+Often developers have to use reflection to implement these *ahem* generic functions, which can get complicated to read and write, and can hurt the performance of your program.
 
 ## Our own test helpers with generics
 
@@ -158,7 +158,7 @@ In our case the type of our type parameter is `comparable` and we've given it th
 
 We're using `comparable` because we want to describe to the compiler that we wish to use the `==` and `!=` operators on things of type `T` in our function, we want to compare! If you try changing the type to `any`,
 
-```
+```go
 func AssertNotEqual[T any](got, want T)
 ```
 
@@ -174,7 +174,7 @@ Which makes a lot of sense, because you can't use those operators on every (or `
 
 Consider two functions
 
-```
+```go
 func GenericFoo[T any](x, y T)
 ```
 
@@ -200,7 +200,9 @@ Not valid (fails compilation):
 - `GenericFoo(apple1, orange1)`
 - `GenericFoo("1", 1)`
 
-`any` is especially useful when making data types where you want it to work with various types, but you don't actually _use_ the type in your own data structure (typically you're just storing it). Things like, `Set` and `LinkedList`, are all good candidates for using `any`. If your functions returns the generic type, the caller can also use the type as it was, rather than having to make a type assertion because when a function returns `interface{}` the compiler cannot make any guarantees about the type.
+`any` is especially useful when making data types where you want it to work with various types, but you don't actually _use_ the type in your own data structure (typically you're just storing it). Things like, `Set` and `LinkedList`, are all good candidates for using `any`.
+
+If your function returns the generic type, the caller can also use the type as it was, rather than having to make a type assertion because when a function returns `interface{}` the compiler cannot make any guarantees about the type.
 
 ## Next: Generic data types
 
@@ -320,7 +322,7 @@ func TestStack(t *testing.T) {
 
 ### Problems
 
-- The code for both `StackOfStrings` and `StackOfInts` is almost identical. Whilst duplication isn't always the end of the world, this doesn't feel great and does add an increased maintenance cost.
+- The code for both `StackOfStrings` and `StackOfInts` is almost identical. Whilst duplication isn't always the end of the world, it's more code to read, write and maintain.
 - As we're duplicating the logic across two types, we've had to duplicate the tests too.
 
 We really want to capture the _idea_ of a stack in one type, and have one set of tests for them. We should be wearing our refactoring hat right now which means we should not be changing the tests because we want to maintain the same behaviour.
@@ -376,15 +378,15 @@ Even if we have the discipline not to do this, the code is still unpleasant to w
 Add the following test,
 
 ```go
-	t.Run("interface stack dx is horrid", func(t *testing.T) {
-		myStackOfInts := new(StackOfInts)
+t.Run("interface stack dx is horrid", func(t *testing.T) {
+    myStackOfInts := new(StackOfInts)
 
-		myStackOfInts.Push(1)
-		myStackOfInts.Push(2)
-		firstNum, _ := myStackOfInts.Pop()
-		secondNum, _ := myStackOfInts.Pop()
-		AssertEqual(firstNum+secondNum, 3)
-	})
+    myStackOfInts.Push(1)
+    myStackOfInts.Push(2)
+    firstNum, _ := myStackOfInts.Pop()
+    secondNum, _ := myStackOfInts.Pop()
+    AssertEqual(firstNum+secondNum, 3)
+})
 ```
 
 You get a compiler error, showing the weakness of losing type-safety:
@@ -485,7 +487,7 @@ func TestStack(t *testing.T) {
 
 You'll notice the syntax for defining generic data structures is consistent with defining generic arguments to functions.
 
-```
+```go
 type Stack[T any] struct {
     values []T
 }
@@ -495,17 +497,17 @@ It's _almost_ the same as before, it's just that what we're saying is the **type
 
 Once you create a `Stack[Orange]` or a `Stack[Apple]` the methods defined on our stack will only let you pass in and will only return the particular type of the stack you're working with:
 
-```
+```go
 func (s *Stack[T]) Pop() (T, bool)
 ```
 
 You can imagine the types of implementation being somehow generated for you, depending on what type of stack you create:
 
-```
+```go
 func (s *Stack[Orange]) Pop() (Orange, bool)
 ```
 
-```
+```go
 func (s *Stack[Apple]) Pop() (Apple, bool)
 ```
 
