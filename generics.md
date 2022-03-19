@@ -200,8 +200,6 @@ Not valid (fails compilation):
 - `GenericFoo(apple1, orange1)`
 - `GenericFoo("1", 1)`
 
-`any` is especially useful when making data types where you want it to work with various types, but you don't actually _use_ the type in your own data structure (typically you're just storing it). Things like, `Set` and `LinkedList`, are all good candidates for using `any`.
-
 If your function returns the generic type, the caller can also use the type as it was, rather than having to make a type assertion because when a function returns `interface{}` the compiler cannot make any guarantees about the type.
 
 ## Next: Generic data types
