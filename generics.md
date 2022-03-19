@@ -75,11 +75,11 @@ Whilst this can feel like ceremony, it can be extremely helpful. By describing t
 - Make function implementation simpler. By describing to the compiler what types you work with, you **constrain the number of possible valid implementations**. You can't "add" a `Person` and a `BankAccount`. You can't capitalise an `integer`. In software, constraints are often extremely helpful.
 - Are prevented from accidentally passing data to a function you didn't mean to.
 
-Go currently offers you a way to be more abstract with your types with interfaces, so that you can design functions that do not take concrete types but instead, types that offer the behaviour you need. This gives you some flexibility whilst maintaining type-safety.
+Go offers you a way to be more abstract with your types with [interfaces](./structs-methods-and-interfaces.md), so that you can design functions that do not take concrete types but instead, types that offer the behaviour you need. This gives you some flexibility whilst maintaining type-safety.
 
 ### A function that takes a string or an integer? (or indeed, other things)
 
-An option Go has is declaring the type of your argument as `interface{}` which means "anything".
+Another option Go has to make your functions more flexible is by declaring the type of your argument as `interface{}` which means "anything".
 
 Try changing the signatures to use this type instead.
 
@@ -111,6 +111,8 @@ AssertNotEqual(1, "1")
 In this case, we get away with it; the test compiles, and it fails as we'd hope, although the error message `got 1, want 1` is unclear; but do we want to be able to compare strings with integers? What about comparing a `Person` with an `Airport`?
 
 Writing functions that take `interface{}` can be extremely challenging and bug-prone because we've _lost_ our constraints, and we have no information at compile time as to what kinds of data we're dealing with.
+
+This means **the compiler can't help us** and we're instead more likely to have **runtime errors** which could affect our users, cause outages, or worse.
 
 Often developers have to use reflection to implement these *ahem* generic functions, which is usually painful and can hurt the performance of your program.
 
