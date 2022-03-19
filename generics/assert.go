@@ -12,7 +12,7 @@ func AssertEqual[T comparable](t *testing.T, got, want T) {
 func AssertNotEqual[T comparable](t *testing.T, got, want T) {
 	t.Helper()
 	if got == want {
-		t.Errorf("didn't want %v", got, want)
+		t.Errorf("didn't want %v", got)
 	}
 }
 
