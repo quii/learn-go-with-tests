@@ -145,9 +145,12 @@ If you wish to sound clever with your nerd friends, you'd call this [The Identit
 
 > In mathematics, an identity element, or neutral element, of a binary operation operating on a set is an element of the set which leaves unchanged every element of the set when the operation is applied.
 
-In addition, the identity element is 0, and with multiplication it is 1.
+In addition, the identity element is 0.
 
 `1 + 0 = 1`
+
+With multiplication, it is 1.
+
 `1 * 1 = 1`
 
 ## Wrapping up
@@ -161,4 +164,4 @@ Now that Go has generics, combining with higher-order-functions we can reduce a 
 
 No longer do you need to write specific `Find` functions for each type of collection you want to search, instead re-use or write a `Find` function. If you understood the `Reduce` function above, writing a `Find` function will be trivial.
 
-When done tastefully, this will make your code simpler to read and maintain, but remember the rule of thumb: Use the TDD process to drive out real, specific behaviour that you actually need, in the refactoring stage you then _might_ discover some useful abstractions to help tidy the code up. 
+When done tastefully, this will make your code simpler to read and maintain, but remember the rule of thumb: Use the TDD process to drive out real, specific behaviour that you actually need, in the refactoring stage you then _might_ discover some useful abstractions to help tidy the code up.
