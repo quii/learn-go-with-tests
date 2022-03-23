@@ -533,7 +533,7 @@ If you're inexperienced with statically-typed languages, the point of generics m
 
 Using statically typed languages is an act of describing constraints. If you do it well, you create code that is not only safe and simple to use but also simpler to write because the possible solution space is smaller.
 
-Generics gives us a new way to express constraints in our code, which as demonstrated will allow us to consolidate and simplify code that is not possible to do today.
+Generics gives us a new way to express constraints in our code, which as demonstrated will allow us to consolidate and simplify code that was not possible until Go 1.18.
 
 ### Will generics turn Go into Java?
 
