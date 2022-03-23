@@ -25,7 +25,7 @@ But how can we test this? Calling `fmt.Printf` prints to stdout, which is pretty
 
 What we need to do is to be able to **inject** \(which is just a fancy word for pass in\) the dependency of printing.
 
-**Our function doesn't need to care **_**where**_** or **_**how**_** the printing happens, so we should accept an **_**interface**_** rather than a concrete type.**
+**Our function doesn't need to care _where_ or _how_ the printing happens, so we should accept an _interface_ rather than a concrete type.**
 
 If we do that, we can then change the implementation to print to something we control so that we can test it. In "real life" you would inject in something that writes to stdout.
 
