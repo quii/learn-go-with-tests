@@ -162,6 +162,67 @@ The possibilities are endless™️. Try a few other applications of `Reduce`!
 
 Now that Go has generics, combining with higher-order-functions we can reduce a lot of boilerplate code within our projects.
 
+## Find
+
 No longer do you need to write specific `Find` functions for each type of collection you want to search, instead re-use or write a `Find` function. If you understood the `Reduce` function above, writing a `Find` function will be trivial.
 
-When done tastefully, this will make your code simpler to read and maintain, but remember the rule of thumb: Use the TDD process to drive out real, specific behaviour that you actually need, in the refactoring stage you then _might_ discover some useful abstractions to help tidy the code up.
+Here's a test
+
+```go
+func TestFind(t *testing.T) {
+	t.Run("find first even number", func(t *testing.T) {
+		numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+		firstEvenNumber, found := Find(numbers, func(x int) bool {
+			return x%2 == 0
+		})
+		AssertTrue(t, found)
+		AssertEqual(t, firstEvenNumber, 2)
+	})
+}
+```
+
+And here's the implementation
+
+```go
+func Find[A any](items []A, predicate func(A) bool) (A, bool) {
+	var item A
+	for _, v := range items {
+		if predicate(v) {
+			return v, true
+		}
+	}
+	return item, false
+}
+```
+
+Again, because it takes a generic type, we can re-use it in many ways
+
+```go
+type Person struct {
+    Name string
+}
+
+t.Run("Find the best programmer", func(t *testing.T) {
+    people := []Person{
+        Person{Name: "Kent Beck"},
+        Person{Name: "Martin Fowler"},
+        Person{Name: "Chris James"},
+    }
+
+    king, found := Find(people, func(p Person) bool {
+        return strings.Contains(p.Name, "Chris")
+    })
+
+    AssertTrue(t, found)
+    AssertEqual(t, king, Person{Name: "Chris James"})
+})
+```
+
+As you can see, this code is flawless.
+
+## Wrapping up
+
+When done tastefully, higher-order functions like these will make your code simpler to read and maintain, but remember the rule of thumb:
+
+Use the TDD process to drive out real, specific behaviour that you actually need, in the refactoring stage you then _might_ discover some useful abstractions to help tidy the code up.
