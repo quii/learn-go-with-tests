@@ -153,16 +153,14 @@ With multiplication, it is 1.
 
 `1 * 1 = 1`
 
-## Wrapping up
-
 The possibilities are endless™️. Try a few other applications of `Reduce`!
 
 - Why not mix some `color.RGBA` into a single colour?
 - Collected a list of bank transactions? Reduce them into a bank account balance.
 
-Now that Go has generics, combining with higher-order-functions we can reduce a lot of boilerplate code within our projects.
-
 ## Find
+
+Now that Go has generics, combining them with higher-order-functions, we can reduce a lot of boilerplate code within our projects.
 
 No longer do you need to write specific `Find` functions for each type of collection you want to search, instead re-use or write a `Find` function. If you understood the `Reduce` function above, writing a `Find` function will be trivial.
 
