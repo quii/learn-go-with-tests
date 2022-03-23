@@ -107,7 +107,7 @@ func Reduce[A any](collection []A, initialValue A, f func(A, A) A) A {
 
 ## Further applications of reduce
 
-Using tests we can play around with our reduce function to see how re-usable it is.
+Using tests we can play around with our reduce function to see how re-usable it is. I have copied over our generic assertion functions from the previous chapter.
 
 ```go
 func TestReduce(t *testing.T) {
@@ -139,15 +139,26 @@ func TestReduce(t *testing.T) {
 
 ### The zero value
 
-In the multiplication example, we show the reason for having a default value. If we relied on Go's default value of 0, we'd multiply our initial value by 0, and then the following ones, so you'd only ever get 0. The "zero value" (TODO: look up clever comp-sci term, cant remember) when multiplying is 1.
+In the multiplication example, we show the reason for having a default value as an argument to `Reduce`. If we relied on Go's default value of 0, we'd multiply our initial value by 0, and then the following ones, so you'd only ever get 0. By setting it to 1, the first element in the slice will stay the same, and the rest will multiply by the next elements.
+
+If you wish to sound clever with your nerd friends, you'd call this [The Identity Element](https://en.wikipedia.org/wiki/Identity_element).
+
+> In mathematics, an identity element, or neutral element, of a binary operation operating on a set is an element of the set which leaves unchanged every element of the set when the operation is applied.
+
+In addition, the identity element is 0, and with multiplication it is 1.
+
+`1 + 0 = 1`
+`1 * 1 = 1`
 
 ## Wrapping up
 
-The possibilities are endless™️. Try a few other applications!
+The possibilities are endless™️. Try a few other applications of `Reduce`!
 
 - Why not mix some `color.RGBA` into a single colour?
 - Collected a list of bank transactions? Reduce them into a bank account balance.
 
-Now that go has generics, combining with higher-order-functions we can reduce a lot of boilerplate code within our projects. No longer do you need to write specific `Find` functions for each type of collection you want to search, instead re-use or write a `Find` function. If you understood the `Reduce` function above, writing a `Find` function will be trivial.
+Now that Go has generics, combining with higher-order-functions we can reduce a lot of boilerplate code within our projects.
 
-When done tastefully, this will make your code simpler to read and maintain.
+No longer do you need to write specific `Find` functions for each type of collection you want to search, instead re-use or write a `Find` function. If you understood the `Reduce` function above, writing a `Find` function will be trivial.
+
+When done tastefully, this will make your code simpler to read and maintain, but remember the rule of thumb: Use the TDD process to drive out real, specific behaviour that you actually need, in the refactoring stage you then _might_ discover some useful abstractions to help tidy the code up. 
