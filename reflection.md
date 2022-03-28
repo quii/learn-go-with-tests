@@ -20,7 +20,7 @@ This means that we get some documentation for free and the compiler will complai
 
 You may come across scenarios though where you want to write a function where you don't know the type at compile time.
 
-Go lets us get around this with the type `interface{}` which you can think of as just _any_ type.
+Go lets us get around this with the type `interface{}` which you can think of as just _any_ type (in fact, in Go `any` is an [alias](https://cs.opensource.google/go/go/+/master:test/typeparam/cons.go;drc=master;l=13) for `interface{}`).
 
 So `walk(x interface{}, fn func(string))` will accept any value for `x`.
 
