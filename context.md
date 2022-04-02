@@ -420,6 +420,7 @@ Our `SpyResponseWriter` implements `http.ResponseWriter` so we can use it in the
 
 ```go
 t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
+	data := "hello, world"
 	store := &SpyStore{response: data, t: t}
 	svr := Server(store)
 
