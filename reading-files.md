@@ -88,7 +88,7 @@ For our tests, the package [testing/fstest](https://golang.org/pkg/testing/fstes
 Given this information, the following feels like a better approach,
 
 ```go
-var posts blogposts.Post
+var posts []blogposts.Post
 posts = blogposts.NewPostsFromFS(someFS)
 ```
 
