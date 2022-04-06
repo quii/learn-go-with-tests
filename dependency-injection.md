@@ -2,7 +2,7 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/di)**
 
-It is assumed that you have read the [structs section](./structs-methods-and-interfaces) before as some understanding of interfaces will be needed for this.
+It is assumed that you have read the [structs section](./structs-methods-and-interfaces.md) before as some understanding of interfaces will be needed for this.
 
 There are _a lot_ of misunderstandings around dependency injection around the programming community. Hopefully, this guide will show you how
 
