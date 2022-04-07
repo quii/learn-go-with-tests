@@ -212,7 +212,7 @@ help us know when we're handling concurrency predictably.
 
 ### ... and we're back.
 
-We are caught by the original tests `CheckWebsites` is now returning an
+We are caught by the original test `CheckWebsites`, it's now returning an
 empty map. What went wrong?
 
 None of the goroutines that our `for` loop started had enough time to add
