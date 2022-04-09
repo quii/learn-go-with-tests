@@ -46,7 +46,7 @@ Now, I know some of you are probably cringing at this.
 
 > Go is supposed to be simple
 
-**Don't conflate easiness, with simplicity**. Doing loops and copying pasting code is easy, but it's not necessairily simple. For more on simple vs easy, watch [Rich Hickey's masterpiece of a talk - Simple Made Easy](https://www.youtube.com/watch?v=SxdOUGdseq4).
+**Don't conflate easiness, with simplicity**. Doing loops and copy-pasting code is easy, but it's not necessarily simple. For more on simple vs easy, watch [Rich Hickey's masterpiece of a talk - Simple Made Easy](https://www.youtube.com/watch?v=SxdOUGdseq4).
 
 **Don't conflate unfamiliarity, with complexity**. Fold/reduce may initially sound scary and computer-sciencey but all it really is, is an abstraction over a very common operation. Taking a collection, and combining it into one item. When you step back, you'll realise you probably do this _a lot_.
 
