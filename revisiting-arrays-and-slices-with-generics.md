@@ -84,7 +84,9 @@ func Reduce[A any](collection []A, accumulator A, f func(A, A) A) A {
 }
 ```
 
-Reduce captures the _essence_ of the pattern, it's a function that takes a collection and a combining function, and returns a single value. There's no messy distractions around concrete types. If you understand generics syntax, you should have no problem understanding what this function does. By using the recognised term `Reduce`, programmers from other languages understand the intent too.
+Reduce captures the _essence_ of the pattern, it's a function that takes a collection, an initial value and a combining function, and returns a single value. There's no messy distractions around concrete types.
+
+If you understand generics syntax, you should have no problem understanding what this function does. By using the recognised term `Reduce`, programmers from other languages understand the intent too.
 
 ### The usage
 
@@ -233,9 +235,9 @@ When done tastefully, higher-order functions like these will make your code simp
 
 Use the TDD process to drive out real, specific behaviour that you actually need, in the refactoring stage you then _might_ discover some useful abstractions to help tidy the code up.
 
-Make an effort to do some research outside of Go so you don't re-invent patterns that already exist with an already established name.
+Make an effort to do some research outside of Go, so you don't re-invent patterns that already exist with an already established name.
 
-Writing a function takes a collection of `A` and converts them to `B`? Don't call it `Convert`, that's `Map`. Using the "proper" name for these items will reduce the cognitive burden for others and make it more search engine friendly to learn more.
+Writing a function takes a collection of `A` and converts them to `B`? Don't call it `Convert`, that's [`Map`](https://en.wikipedia.org/wiki/Map_(higher-order_function)). Using the "proper" name for these items will reduce the cognitive burden for others and make it more search engine friendly to learn more.
 
 ### Resources
 
