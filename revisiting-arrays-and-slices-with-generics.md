@@ -76,13 +76,11 @@ You should be familiar with the generics syntax [from the previous chapter](gene
 ### My reduce function
 
 ```go
-
-func Reduce[A any](collection []A, initialValue A, f func(A, A) A) A { // AAAAH!
-	var result = initialValue
+func Reduce[A any](collection []A, accumulator A, f func(A, A) A) A {
 	for _, x := range collection {
-		result = f(result, x)
+		accumulator = f(accumulator, x)
 	}
-	return result
+	return accumulator
 }
 ```
 
@@ -194,14 +192,13 @@ func TestFind(t *testing.T) {
 And here's the implementation
 
 ```go
-func Find[A any](items []A, predicate func(A) bool) (A, bool) {
-	var item A
+func Find[A any](items []A, predicate func(A) bool) (value A, found bool) {
 	for _, v := range items {
 		if predicate(v) {
 			return v, true
 		}
 	}
-	return item, false
+	return
 }
 ```
 
@@ -238,4 +235,4 @@ Use the TDD process to drive out real, specific behaviour that you actually need
 
 Make an effort to do some research outside of Go so you don't re-invent patterns that already exist with an already established name.
 
-Writing a function takes a collection of `A` and converts them to `B`? Don't call it `Convert`, that's `Map`. Using the "proper" name for these items will reduce the cognitive burden for others and make it more search engine friendly to learn more. 
+Writing a function takes a collection of `A` and converts them to `B`? Don't call it `Convert`, that's `Map`. Using the "proper" name for these items will reduce the cognitive burden for others and make it more search engine friendly to learn more.
