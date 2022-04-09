@@ -273,7 +273,7 @@ func Reduce[A, B any](collection []A, accumulator B, f func(B, A) B) B {
 }
 ```
 
-We've added a second type constraint which has allowed us to loosen the constraints on `Reduce`, whilst keeping it type-safe. This makes it more general-purpose and reusable.
+We've added a second type constraint which has allowed us to loosen the constraints on `Reduce`, whilst keeping it type-safe. This makes it more general-purpose and reusable. If you try and run the tests again they should compile, and pass.
 
 ### Fold/reduce are pretty universal
 
@@ -361,7 +361,7 @@ Writing a function takes a collection of `A` and converts them to `B`? Don't cal
 
 Try to have an open-mind.
 
-Whilst the idioms of Go won't, and shouldn't _radically_ change due to generics being released, they _will_ change - due to the language changing!
+Whilst the idioms of Go won't, and shouldn't _radically_ change due to generics being released, the idioms _will_ change - due to the language changing! This should not be a controversial point.
 
 Discuss with your colleagues patterns and style of code based on their merits rather than dogma. So long as you have well-designed tests, you'll always be able to refactor and shift things as you understand what works well for you, and your team.
 
