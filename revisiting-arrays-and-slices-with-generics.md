@@ -121,23 +121,19 @@ Using tests we can play around with our reduce function to see how re-usable it 
 ```go
 func TestReduce(t *testing.T) {
 	t.Run("multiplication of all elements", func(t *testing.T) {
-		numbers := []int{1, 2, 3}
-
 		multiply := func(x, y int) int {
 			return x * y
 		}
 
-		AssertEqual(t, Reduce(numbers, 1, multiply), 6)
+		AssertEqual(t, Reduce([]int{1, 2, 3}, 1, multiply), 6)
 	})
 
 	t.Run("concatenate strings", func(t *testing.T) {
-		strings := []string{"a", "b", "c"}
-
 		concatenate := func(x, y string) string {
 			return x + y
 		}
 
-		AssertEqual(t, Reduce(strings, "", concatenate), "abc")
+		AssertEqual(t, Reduce([]string{"a", "b", "c"}, "", concatenate), "abc")
 	})
 }
 ```
