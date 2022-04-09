@@ -20,7 +20,7 @@ func SumAllTails(numbers ...[]int) []int {
 	return Reduce(numbers, []int{}, sumTail)
 }
 
-func Reduce[A any](collection []A, accumulator A, f func(A, A) A) A {
+func Reduce[A, B any](collection []A, accumulator B, f func(B, A) B) B {
 	for _, x := range collection {
 		accumulator = f(accumulator, x)
 	}

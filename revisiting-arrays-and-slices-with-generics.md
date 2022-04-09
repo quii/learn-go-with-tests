@@ -154,10 +154,127 @@ With multiplication, it is 1.
 
 `1 * 1 = 1`
 
+## What if we wish to reduce into a different type from `A`?
+
+Suppose we had a list of transactions `Transaction` and wanted to reduce them into a list of `Balances` (`type Balances map[string]float64`)?
+
+Let's follow the TDD process.
+
+## Write the test first
+
+```go
+func TestBadBank(t *testing.T) {
+	transactions := []Transaction{
+		{
+			From: "Chris",
+			To:   "Riya",
+			Sum:  100,
+		},
+		{
+			From: "Adil",
+			To:   "Chris",
+			Sum:  25,
+		},
+	}
+	balances := CalculateBalances(transactions)
+
+	AssertEqual(t, balances["Riya"], 100)
+	AssertEqual(t, balances["Chris"], -75)
+	AssertEqual(t, balances["Adil"], -25)
+}
+```
+
+## Try to run the test
+```
+# github.com/quii/learn-go-with-tests/arrays/v8 [github.com/quii/learn-go-with-tests/arrays/v8.test]
+./bad_bank_test.go:6:20: undefined: Transaction
+./bad_bank_test.go:18:14: undefined: CalculateBalances
+```
+
+We don't have our types or functions yet, add them to make the test run
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+```go
+type Transaction struct {
+	From string
+	To   string
+	Sum  float64
+}
+
+type Balances map[string]float64
+
+func CalculateBalances(transactions []Transaction) Balances {
+	return nil
+}
+```
+
+When you run the test you should see the following:
+
+```
+=== RUN   TestBadBank
+    bad_bank_test.go:19: got 0, want 100
+    bad_bank_test.go:20: got 0, want -75
+    bad_bank_test.go:21: got 0, want -25
+--- FAIL: TestBadBank (0.00s)
+```
+
+## Write enough code to make it pass
+
+Let's write the code as if we didn't have a `Reduce` function first.
+
+```go
+func CalculateBalances(transactions []Transaction) Balances {
+	balances := make(Balances)
+	for _, t := range transactions {
+		balances[t.From] -= t.Sum
+		balances[t.To] += t.Sum
+	}
+	return balances
+}
+```
+
+## Refactor
+
+At this point, have some source control discipline and commit your work. We have working software, ready to challenge Monzo, Barclays, et al.
+
+Now our work is committed, we are free to play around with it, and try some different ideas out in the refactoring phase. To be fair, the code we have isn't exactly bad, but for the sake of this exercise, I want to demonstrate the same code using `Reduce`.
+
+```go
+func CalculateBalances(transactions []Transaction) Balances {
+	adjustAccountsByTransaction := func(b Balances, t Transaction) Balances {
+		b[t.From] -= t.Sum
+		b[t.To] += t.Sum
+		return b
+	}
+	return Reduce(transactions, make(Balances), adjustAccountsByTransaction)
+}
+```
+
+But this won't compile.
+
+```
+./bad_bank.go:17:30: type Balances of make(Balances) does not match inferred type Transaction for A
+```
+
+The reason is we're trying to reduce to a _different_ type than the type of the collection. This sounds scary, but actually just requires us to adjust the type signature of `Reduce` to make it work. We won't have to change the function body, and we won't have to change any of our existing callers.
+
+```go
+func Reduce[A, B any](collection []A, accumulator B, f func(B, A) B) B {
+	for _, x := range collection {
+		accumulator = f(accumulator, x)
+	}
+	return accumulator
+}
+```
+
+We've added a second type constraint which has allowed us to loosen the constraints on `Reduce`, whilst keeping it type-safe. This makes it more general-purpose and reusable.
+
+### Fold/reduce are pretty universal
+
 The possibilities are endless™️ with `Reduce` (or `Fold`). It's a common pattern for a reason, it's not just for arithmetic or string concatenation. Try a few other applications.
 
 - Why not mix some `color.RGBA` into a single colour?
-- Collected a list of bank transactions? Reduce them into a bank account balance.
 - Total up the number of votes in a poll, or items in a shopping basket.
 - More or less anything involving processing a list.
 
