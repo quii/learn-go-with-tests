@@ -190,9 +190,9 @@ func TestBadBank(t *testing.T) {
 ./bad_bank_test.go:18:14: undefined: BalanceFor
 ```
 
-We don't have our types or functions yet, add them to make the test run
-
 ## Write the minimal amount of code for the test to run and check the failing test output
+
+We don't have our types or functions yet, add them to make the test run.
 
 ```go
 type Transaction struct {
@@ -351,9 +351,19 @@ Use the TDD process to drive out real, specific behaviour that you actually need
 
 Practice combining TDD with good source control habits. Commit your work when your test is passing, _before_ trying to refactor. This way if you make a mess, you can easily get yourself back to your working state.
 
+### Names matter
+
 Make an effort to do some research outside of Go, so you don't re-invent patterns that already exist with an already established name.
 
 Writing a function takes a collection of `A` and converts them to `B`? Don't call it `Convert`, that's [`Map`](https://en.wikipedia.org/wiki/Map_(higher-order_function)). Using the "proper" name for these items will reduce the cognitive burden for others and make it more search engine friendly to learn more.
+
+### This doesn't feel idiomatic?
+
+Try to have an open-mind.
+
+Whilst the idioms of Go won't, and shouldn't _radically_ change due to generics being released, they _will_ change - due to the language changing!
+
+Discuss with your colleagues patterns and style of code based on their merits rather than dogma. So long as you have well-designed tests, you'll always be able to refactor and shift things as you understand what works well for you, and your team.
 
 ### Resources
 
