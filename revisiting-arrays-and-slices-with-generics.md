@@ -403,13 +403,13 @@ func TestBadBank(t *testing.T) {
 		adil  = Account{Name: "Adil", Balance: 200}
 	)
 
-	newBalanceFor := func(account Account) Account {
-		return NewBalanceFor(transactions, account)
+	newBalanceFor := func(account Account) float64 {
+		return NewBalanceFor(account, transactions).Balance
 	}
 
-	AssertEqual(t, newBalanceFor(riya).Balance, 200)
-	AssertEqual(t, newBalanceFor(chris).Balance, 0)
-	AssertEqual(t, newBalanceFor(adil).Balance, 175)
+	AssertEqual(t, newBalanceFor(riya), 200)
+	AssertEqual(t, newBalanceFor(chris), 0)
+	AssertEqual(t, newBalanceFor(adil), 175)
 }
 ```
 
@@ -429,7 +429,15 @@ type Account struct {
 	Balance float64
 }
 
-func ApplyTransaction(a Account, transaction Transaction) Account {
+func NewBalanceFor(account Account, transactions []Transaction) Account {
+	return Reduce(
+		transactions,
+		account,
+		applyTransaction,
+	)
+}
+
+func applyTransaction(a Account, transaction Transaction) Account {
 	if transaction.From == a.Name {
 		a.Balance -= transaction.Sum
 	}
@@ -438,14 +446,6 @@ func ApplyTransaction(a Account, transaction Transaction) Account {
 	}
 	return a
 }
-
-func NewBalanceFor(transactions []Transaction, account Account) Account {
-	return Reduce(
-		transactions,
-		account,
-		ApplyTransaction,
-	)
-}
 ```
 
-I feel this really shows the power of using concepts like `Reduce`. The `NewBalanceFor` feels more _declarative_, describing more about _what_ happens, rather than _how_. Often when we're reading code, we're darting through lots of files and we're trying to understand _what_ is happening, rather than _how_, and this style of code facilitates this well. 
+I feel this really shows the power of using concepts like `Reduce`. The `NewBalanceFor` feels more _declarative_, describing more about _what_ happens, rather than _how_. Often when we're reading code, we're darting through lots of files and we're trying to understand _what_ is happening, rather than _how_, and this style of code facilitates this well.

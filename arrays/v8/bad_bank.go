@@ -11,7 +11,15 @@ type Account struct {
 	Balance float64
 }
 
-func ApplyTransaction(a Account, transaction Transaction) Account {
+func NewBalanceFor(account Account, transactions []Transaction) Account {
+	return Reduce(
+		transactions,
+		account,
+		applyTransaction,
+	)
+}
+
+func applyTransaction(a Account, transaction Transaction) Account {
 	if transaction.From == a.Name {
 		a.Balance -= transaction.Sum
 	}
@@ -19,12 +27,4 @@ func ApplyTransaction(a Account, transaction Transaction) Account {
 		a.Balance += transaction.Sum
 	}
 	return a
-}
-
-func NewBalanceFor(transactions []Transaction, account Account) Account {
-	return Reduce(
-		transactions,
-		account,
-		ApplyTransaction,
-	)
 }

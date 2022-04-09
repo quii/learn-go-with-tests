@@ -21,11 +21,11 @@ func TestBadBank(t *testing.T) {
 		adil  = Account{Name: "Adil", Balance: 200}
 	)
 
-	newBalanceFor := func(account Account) Account {
-		return NewBalanceFor(transactions, account)
+	newBalanceFor := func(account Account) float64 {
+		return NewBalanceFor(account, transactions).Balance
 	}
 
-	AssertEqual(t, newBalanceFor(riya).Balance, 200)
-	AssertEqual(t, newBalanceFor(chris).Balance, 0)
-	AssertEqual(t, newBalanceFor(adil).Balance, 175)
+	AssertEqual(t, newBalanceFor(riya), 200)
+	AssertEqual(t, newBalanceFor(chris), 0)
+	AssertEqual(t, newBalanceFor(adil), 175)
 }
