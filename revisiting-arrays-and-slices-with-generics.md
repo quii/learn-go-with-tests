@@ -376,3 +376,76 @@ Discuss with your colleagues patterns and style of code based on their merits ra
 Fold is a real fundamental in computer science. Here's some interesting resources if you wish to dig more into it
 - [Wikipedia: Fold](https://en.wikipedia.org/wiki/Fold)
 - [A tutorial on the universality and expressiveness of fold](http://www.cs.nott.ac.uk/~pszgmh/fold.pdf)
+
+## Extending the bank
+
+It wasn't important for the chapter, but for fun I extended the bank code to make it "feel" better.
+
+Here's the updated test
+
+```go
+func TestBadBank(t *testing.T) {
+	var (
+		transactions = []Transaction{
+			{
+				From: "Chris",
+				To:   "Riya",
+				Sum:  100,
+			},
+			{
+				From: "Adil",
+				To:   "Chris",
+				Sum:  25,
+			},
+		}
+		riya  = Account{Name: "Riya", Balance: 100}
+		chris = Account{Name: "Chris", Balance: 75}
+		adil  = Account{Name: "Adil", Balance: 200}
+	)
+
+	newBalanceFor := func(account Account) Account {
+		return NewBalanceFor(transactions, account)
+	}
+
+	AssertEqual(t, newBalanceFor(riya).Balance, 200)
+	AssertEqual(t, newBalanceFor(chris).Balance, 0)
+	AssertEqual(t, newBalanceFor(adil).Balance, 175)
+}
+```
+
+And here's the updated code
+
+```go
+package main
+
+type Transaction struct {
+	From string
+	To   string
+	Sum  float64
+}
+
+type Account struct {
+	Name    string
+	Balance float64
+}
+
+func ApplyTransaction(a Account, transaction Transaction) Account {
+	if transaction.From == a.Name {
+		a.Balance -= transaction.Sum
+	}
+	if transaction.To == a.Name {
+		a.Balance += transaction.Sum
+	}
+	return a
+}
+
+func NewBalanceFor(transactions []Transaction, account Account) Account {
+	return Reduce(
+		transactions,
+		account,
+		ApplyTransaction,
+	)
+}
+```
+
+I feel this really shows the power of using concepts like `Reduce`. The `NewBalanceFor` feels more _declarative_, describing more about _what_ happens, rather than _how_. Often when we're reading code, we're darting through lots of files and we're trying to understand _what_ is happening, rather than _how_, and this style of code facilitates this well. 
