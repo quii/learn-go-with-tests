@@ -6,13 +6,15 @@ type Transaction struct {
 	Sum  float64
 }
 
-type Balances map[string]float64
-
-func CalculateBalances(transactions []Transaction) Balances {
-	adjustAccountsByTransaction := func(b Balances, t Transaction) Balances {
-		b[t.From] -= t.Sum
-		b[t.To] += t.Sum
-		return b
+func BalanceFor(transactions []Transaction, name string) float64 {
+	adjustBalance := func(acc float64, t Transaction) float64 {
+		if t.From == name {
+			return acc - t.Sum
+		}
+		if t.To == name {
+			return acc + t.Sum
+		}
+		return acc
 	}
-	return Reduce(transactions, make(Balances), adjustAccountsByTransaction)
+	return Reduce(transactions, 0.0, adjustBalance)
 }

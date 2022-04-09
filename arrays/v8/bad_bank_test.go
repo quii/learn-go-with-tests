@@ -15,8 +15,8 @@ func TestBadBank(t *testing.T) {
 			Sum:  25,
 		},
 	}
-	balances := CalculateBalances(transactions)
-	AssertEqual(t, balances["Riya"], 100)
-	AssertEqual(t, balances["Chris"], -75)
-	AssertEqual(t, balances["Adil"], -25)
+
+	AssertEqual(t, BalanceFor(transactions, "Riya"), 100)
+	AssertEqual(t, BalanceFor(transactions, "Chris"), -75)
+	AssertEqual(t, BalanceFor(transactions, "Adil"), -25)
 }

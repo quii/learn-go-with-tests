@@ -156,7 +156,7 @@ With multiplication, it is 1.
 
 ## What if we wish to reduce into a different type from `A`?
 
-Suppose we had a list of transactions `Transaction` and wanted to reduce them into a list of `Balances` (`type Balances map[string]float64`)?
+Suppose we had a list of transactions `Transaction` and we wanted a function that would take them plus a name to figure out their bank balance.
 
 Let's follow the TDD process.
 
@@ -176,11 +176,10 @@ func TestBadBank(t *testing.T) {
 			Sum:  25,
 		},
 	}
-	balances := CalculateBalances(transactions)
 
-	AssertEqual(t, balances["Riya"], 100)
-	AssertEqual(t, balances["Chris"], -75)
-	AssertEqual(t, balances["Adil"], -25)
+	AssertEqual(t, BalanceFor(transactions, "Riya"), 100)
+	AssertEqual(t, BalanceFor(transactions, "Chris"), -75)
+	AssertEqual(t, BalanceFor(transactions, "Adil"), -25)
 }
 ```
 
@@ -188,7 +187,7 @@ func TestBadBank(t *testing.T) {
 ```
 # github.com/quii/learn-go-with-tests/arrays/v8 [github.com/quii/learn-go-with-tests/arrays/v8.test]
 ./bad_bank_test.go:6:20: undefined: Transaction
-./bad_bank_test.go:18:14: undefined: CalculateBalances
+./bad_bank_test.go:18:14: undefined: BalanceFor
 ```
 
 We don't have our types or functions yet, add them to make the test run
@@ -202,10 +201,8 @@ type Transaction struct {
 	Sum  float64
 }
 
-type Balances map[string]float64
-
-func CalculateBalances(transactions []Transaction) Balances {
-	return nil
+func BalanceFor(transactions []Transaction, name string) float64 {
+	return 0.0
 }
 ```
 
@@ -224,13 +221,17 @@ When you run the test you should see the following:
 Let's write the code as if we didn't have a `Reduce` function first.
 
 ```go
-func CalculateBalances(transactions []Transaction) Balances {
-	balances := make(Balances)
+func BalanceFor(transactions []Transaction, name string) float64 {
+	var balance float64
 	for _, t := range transactions {
-		balances[t.From] -= t.Sum
-		balances[t.To] += t.Sum
+		if t.From == name {
+			balance -= t.Sum
+		}
+		if t.To == name {
+			balance += t.Sum
+		}
 	}
-	return balances
+	return balance
 }
 ```
 
@@ -241,20 +242,24 @@ At this point, have some source control discipline and commit your work. We have
 Now our work is committed, we are free to play around with it, and try some different ideas out in the refactoring phase. To be fair, the code we have isn't exactly bad, but for the sake of this exercise, I want to demonstrate the same code using `Reduce`.
 
 ```go
-func CalculateBalances(transactions []Transaction) Balances {
-	adjustAccountsByTransaction := func(b Balances, t Transaction) Balances {
-		b[t.From] -= t.Sum
-		b[t.To] += t.Sum
-		return b
+func BalanceFor(transactions []Transaction, name string) float64 {
+	adjustBalance := func(acc float64, t Transaction) float64 {
+		if t.From == name {
+			return acc - t.Sum
+		}
+		if t.To == name {
+			return acc + t.Sum
+		}
+		return acc
 	}
-	return Reduce(transactions, make(Balances), adjustAccountsByTransaction)
+	return Reduce(transactions, 0.0, adjustBalance)
 }
 ```
 
 But this won't compile.
 
 ```
-./bad_bank.go:17:30: type Balances of make(Balances) does not match inferred type Transaction for A
+./bad_bank.go:19:35: type func(acc float64, t Transaction) float64 of adjustBalance does not match inferred type func(Transaction, Transaction) Transaction for func(A, A) A
 ```
 
 The reason is we're trying to reduce to a _different_ type than the type of the collection. This sounds scary, but actually just requires us to adjust the type signature of `Reduce` to make it work. We won't have to change the function body, and we won't have to change any of our existing callers.
