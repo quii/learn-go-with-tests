@@ -40,13 +40,15 @@ This idea is commonly talked about in functional programming circles, often time
 
 > In functional programming, fold (also termed reduce, accumulate, aggregate, compress, or inject) refers to a family of higher-order functions that analyze a recursive data structure and through use of a given combining operation, recombine the results of recursively processing its constituent parts, building up a return value. Typically, a fold is presented with a combining function, a top node of a data structure, and possibly some default values to be used under certain conditions. The fold then proceeds to combine elements of the data structure's hierarchy, using the function in a systematic way.
 
-Go has always had higher-order functions, and as of version 1.18 it also has generics, so it is now possible to define some of these functions discussed in our wider field. There's no point burying your head in the sand, this is a very common abstraction outside the Go ecosystem and it'll be beneficial to understand it.
+Go has always had higher-order functions, and as of version 1.18 it also has [generics](./generics.md), so it is now possible to define some of these functions discussed in our wider field. There's no point burying your head in the sand, this is a very common abstraction outside the Go ecosystem and it'll be beneficial to understand it.
 
-Now I know some of you are probably cringing at this.
+Now, I know some of you are probably cringing at this.
 
 > Go is supposed to be simple
 
-All I say is, **don't conflate unfamiliarity, with complexity**. Fold/reduce may initially sound scary and computer-sciencey but all it really is, is an abstraction over a very common operation. Taking a collection, and combining it into one item. When you step back, you'll realise you probably do this _a lot_.
+**Don't conflate easiness, with simplicity**. Doing loops and copying pasting code is easy, but it's not necessairily simple. For more on simple vs easy, watch [Rich Hickey's masterpiece of a talk - Simple Made Easy](https://www.youtube.com/watch?v=SxdOUGdseq4).
+
+**Don't conflate unfamiliarity, with complexity**. Fold/reduce may initially sound scary and computer-sciencey but all it really is, is an abstraction over a very common operation. Taking a collection, and combining it into one item. When you step back, you'll realise you probably do this _a lot_.
 
 ## A generic refactor
 
@@ -71,7 +73,22 @@ You should be familiar with the generics syntax [from the previous chapter](gene
 
 > In practice, it is convenient and natural to have an initial value
 
-### My solution
+### My reduce function
+
+```go
+
+func Reduce[A any](collection []A, initialValue A, f func(A, A) A) A { // AAAAH!
+	var result = initialValue
+	for _, x := range collection {
+		result = f(result, x)
+	}
+	return result
+}
+```
+
+Reduce captures the _essence_ of the pattern, it's a function that takes a collection and a combining function, and returns a single value. There's no messy distractions around concrete types. If you understand generics syntax, you should have no problem understanding what this function does. By using the recognised term `Reduce`, programmers from other languages understand the intent too.
+
+### The usage
 
 ```go
 // Sum calculates the total from a slice of numbers.
@@ -92,14 +109,6 @@ func SumAllTails(numbers ...[]int) []int {
 	}
 
 	return Reduce(numbers, []int{}, sumTail)
-}
-
-func Reduce[A any](collection []A, initialValue A, f func(A, A) A) A {
-	var result = initialValue
-	for _, x := range collection {
-		result = f(result, x)
-	}
-	return result
 }
 ```
 
@@ -153,10 +162,12 @@ With multiplication, it is 1.
 
 `1 * 1 = 1`
 
-The possibilities are endless™️. Try a few other applications of `Reduce`!
+The possibilities are endless™️ with `Reduce`. It's a common pattern for a reason, it's not just for artihmetic or string concatenation. Try a few other applications.
 
 - Why not mix some `color.RGBA` into a single colour?
 - Collected a list of bank transactions? Reduce them into a bank account balance.
+- Total up the number of votes in a poll, or items in a shopping basket
+-
 
 ## Find
 
@@ -224,3 +235,7 @@ As you can see, this code is flawless.
 When done tastefully, higher-order functions like these will make your code simpler to read and maintain, but remember the rule of thumb:
 
 Use the TDD process to drive out real, specific behaviour that you actually need, in the refactoring stage you then _might_ discover some useful abstractions to help tidy the code up.
+
+Make an effort to do some research outside of Go so you don't re-invent patterns that already exist with an already established name.
+
+Writing a function takes a collection of `A` and converts them to `B`? Don't call it `Convert`, that's `Map`. Using the "proper" name for these items will reduce the cognitive burden for others and make it more search engine friendly to learn more. 
