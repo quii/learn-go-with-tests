@@ -243,14 +243,14 @@ Now our work is committed, we are free to play around with it, and try some diff
 
 ```go
 func BalanceFor(transactions []Transaction, name string) float64 {
-	adjustBalance := func(acc float64, t Transaction) float64 {
+	adjustBalance := func(currentBalance float64, t Transaction) float64 {
 		if t.From == name {
-			return acc - t.Sum
+			return currentBalance - t.Sum
 		}
 		if t.To == name {
-			return acc + t.Sum
+			return currentBalance + t.Sum
 		}
-		return acc
+		return currentBalance
 	}
 	return Reduce(transactions, 0.0, adjustBalance)
 }
