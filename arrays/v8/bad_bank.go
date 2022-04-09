@@ -6,6 +6,10 @@ type Transaction struct {
 	Sum  float64
 }
 
+func NewTransaction(from, to Account, sum float64) Transaction {
+	return Transaction{From: from.Name, To: to.Name, Sum: sum}
+}
+
 type Account struct {
 	Name    string
 	Balance float64

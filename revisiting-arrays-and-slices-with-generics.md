@@ -386,21 +386,14 @@ Here's the updated test
 ```go
 func TestBadBank(t *testing.T) {
 	var (
-		transactions = []Transaction{
-			{
-				From: "Chris",
-				To:   "Riya",
-				Sum:  100,
-			},
-			{
-				From: "Adil",
-				To:   "Chris",
-				Sum:  25,
-			},
-		}
 		riya  = Account{Name: "Riya", Balance: 100}
 		chris = Account{Name: "Chris", Balance: 75}
 		adil  = Account{Name: "Adil", Balance: 200}
+
+		transactions = []Transaction{
+			NewTransaction(chris, riya, 100),
+			NewTransaction(adil, chris, 25),
+		}
 	)
 
 	newBalanceFor := func(account Account) float64 {
@@ -422,6 +415,10 @@ type Transaction struct {
 	From string
 	To   string
 	Sum  float64
+}
+
+func NewTransaction(from, to Account, sum float64) Transaction {
+	return Transaction{From: from.Name, To: to.Name, Sum: sum}
 }
 
 type Account struct {
