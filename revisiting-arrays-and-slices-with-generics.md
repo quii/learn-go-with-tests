@@ -160,12 +160,12 @@ With multiplication, it is 1.
 
 `1 * 1 = 1`
 
-The possibilities are endless™️ with `Reduce`. It's a common pattern for a reason, it's not just for artihmetic or string concatenation. Try a few other applications.
+The possibilities are endless™️ with `Reduce` (or `Fold`). It's a common pattern for a reason, it's not just for arithmetic or string concatenation. Try a few other applications.
 
 - Why not mix some `color.RGBA` into a single colour?
 - Collected a list of bank transactions? Reduce them into a bank account balance.
-- Total up the number of votes in a poll, or items in a shopping basket
--
+- Total up the number of votes in a poll, or items in a shopping basket.
+- More or less anything involving processing a list.
 
 ## Find
 
@@ -236,3 +236,9 @@ Use the TDD process to drive out real, specific behaviour that you actually need
 Make an effort to do some research outside of Go so you don't re-invent patterns that already exist with an already established name.
 
 Writing a function takes a collection of `A` and converts them to `B`? Don't call it `Convert`, that's `Map`. Using the "proper" name for these items will reduce the cognitive burden for others and make it more search engine friendly to learn more.
+
+### Resources
+
+Fold is a real fundamental in computer science. Here's some interesting resources if you wish to dig more into it
+- [Wikipedia: Fold](https://en.wikipedia.org/wiki/Fold)
+- [A tutorial on the universality and expressiveness of fold](http://www.cs.nott.ac.uk/~pszgmh/fold.pdf)
