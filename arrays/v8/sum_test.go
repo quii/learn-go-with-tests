@@ -48,25 +48,21 @@ func TestReduce(t *testing.T) {
 	t.Run("multiplication of all elements", func(t *testing.T) {
 		numbers := []int{1, 2, 3}
 
-		AssertEqual(
-			t,
-			Reduce(numbers, 1, func(x, y int) int {
-				return x * y
-			}),
-			6,
-		)
+		multiply := func(x, y int) int {
+			return x * y
+		}
+
+		AssertEqual(t, Reduce(numbers, 1, multiply), 6)
 	})
 
 	t.Run("concatenate strings", func(t *testing.T) {
 		strings := []string{"a", "b", "c"}
 
-		AssertEqual(
-			t,
-			Reduce(strings, "", func(x, y string) string {
-				return x + y
-			}),
-			"abc",
-		)
+		concatenate := func(x, y string) string {
+			return x + y
+		}
+
+		AssertEqual(t, Reduce(strings, "", concatenate), "abc")
 	})
 }
 
