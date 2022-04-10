@@ -64,8 +64,7 @@ You should be familiar with the generics syntax [from the previous chapter](gene
 
 ### Hints
 
-- You only need to work with one type, but one will return `int`, the other `[]int`.
-- If you think about the arguments to your function first, it'll give you a very small set of valid solutions
+If you think about the arguments to your function first, it'll give you a very small set of valid solutions
   - The array you want to reduce
   - Some kind of combining function
 
@@ -273,7 +272,80 @@ func Reduce[A, B any](collection []A, accumulator B, f func(B, A) B) B {
 }
 ```
 
-We've added a second type constraint which has allowed us to loosen the constraints on `Reduce`, whilst keeping it type-safe. This makes it more general-purpose and reusable. If you try and run the tests again they should compile, and pass.
+We've added a second type constraint which has allowed us to loosen the constraints on `Reduce`. This allows people to `Reduce` from a collection of `A` into a `B`. In our case from `Transaction` to `float64`.
+
+This makes `Reduce` more general-purpose and reusable, and still type-safe. If you try and run the tests again they should compile, and pass.
+
+## Extending the bank
+
+For fun, I wanted to improve the ergonomics of the bank code. I've omitted the TDD process for brevity.
+
+```go
+func TestBadBank(t *testing.T) {
+	var (
+		riya  = Account{Name: "Riya", Balance: 100}
+		chris = Account{Name: "Chris", Balance: 75}
+		adil  = Account{Name: "Adil", Balance: 200}
+
+		transactions = []Transaction{
+			NewTransaction(chris, riya, 100),
+			NewTransaction(adil, chris, 25),
+		}
+	)
+
+	newBalanceFor := func(account Account) float64 {
+		return NewBalanceFor(account, transactions).Balance
+	}
+
+	AssertEqual(t, newBalanceFor(riya), 200)
+	AssertEqual(t, newBalanceFor(chris), 0)
+	AssertEqual(t, newBalanceFor(adil), 175)
+}
+```
+
+And here's the updated code
+
+```go
+package main
+
+type Transaction struct {
+	From string
+	To   string
+	Sum  float64
+}
+
+func NewTransaction(from, to Account, sum float64) Transaction {
+	return Transaction{From: from.Name, To: to.Name, Sum: sum}
+}
+
+type Account struct {
+	Name    string
+	Balance float64
+}
+
+func NewBalanceFor(account Account, transactions []Transaction) Account {
+	return Reduce(
+		transactions,
+		account,
+		applyTransaction,
+	)
+}
+
+func applyTransaction(a Account, transaction Transaction) Account {
+	if transaction.From == a.Name {
+		a.Balance -= transaction.Sum
+	}
+	if transaction.To == a.Name {
+		a.Balance += transaction.Sum
+	}
+	return a
+}
+```
+
+I feel this really shows the power of using concepts like `Reduce`. The `NewBalanceFor` feels more _declarative_, describing _what_ happens, rather than _how_. Often when we're reading code, we're darting through lots of files and we're trying to understand _what_ is happening, rather than _how_, and this style of code facilitates this well.
+
+If I wish to dig in to the detail I can, and I can see the _business logic_ of `applyTransaction` without worrying about loops and mutating state; `Reduce` takes care of that separately.
+
 
 ### Fold/reduce are pretty universal
 
@@ -376,73 +448,3 @@ Discuss with your colleagues patterns and style of code based on their merits ra
 Fold is a real fundamental in computer science. Here's some interesting resources if you wish to dig more into it
 - [Wikipedia: Fold](https://en.wikipedia.org/wiki/Fold)
 - [A tutorial on the universality and expressiveness of fold](http://www.cs.nott.ac.uk/~pszgmh/fold.pdf)
-
-## Extending the bank
-
-It wasn't important for the chapter, but for fun I extended the bank code to make it "feel" better.
-
-Here's the updated test
-
-```go
-func TestBadBank(t *testing.T) {
-	var (
-		riya  = Account{Name: "Riya", Balance: 100}
-		chris = Account{Name: "Chris", Balance: 75}
-		adil  = Account{Name: "Adil", Balance: 200}
-
-		transactions = []Transaction{
-			NewTransaction(chris, riya, 100),
-			NewTransaction(adil, chris, 25),
-		}
-	)
-
-	newBalanceFor := func(account Account) float64 {
-		return NewBalanceFor(account, transactions).Balance
-	}
-
-	AssertEqual(t, newBalanceFor(riya), 200)
-	AssertEqual(t, newBalanceFor(chris), 0)
-	AssertEqual(t, newBalanceFor(adil), 175)
-}
-```
-
-And here's the updated code
-
-```go
-package main
-
-type Transaction struct {
-	From string
-	To   string
-	Sum  float64
-}
-
-func NewTransaction(from, to Account, sum float64) Transaction {
-	return Transaction{From: from.Name, To: to.Name, Sum: sum}
-}
-
-type Account struct {
-	Name    string
-	Balance float64
-}
-
-func NewBalanceFor(account Account, transactions []Transaction) Account {
-	return Reduce(
-		transactions,
-		account,
-		applyTransaction,
-	)
-}
-
-func applyTransaction(a Account, transaction Transaction) Account {
-	if transaction.From == a.Name {
-		a.Balance -= transaction.Sum
-	}
-	if transaction.To == a.Name {
-		a.Balance += transaction.Sum
-	}
-	return a
-}
-```
-
-I feel this really shows the power of using concepts like `Reduce`. The `NewBalanceFor` feels more _declarative_, describing more about _what_ happens, rather than _how_. Often when we're reading code, we're darting through lots of files and we're trying to understand _what_ is happening, rather than _how_, and this style of code facilitates this well.
