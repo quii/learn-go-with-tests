@@ -155,7 +155,7 @@ With multiplication, it is 1.
 
 ## What if we wish to reduce into a different type from `A`?
 
-Suppose we had a list of transactions `Transaction` and we wanted a function that would take them plus a name to figure out their bank balance.
+Suppose we had a list of transactions `Transaction` and we wanted a function that would take them, plus a name to figure out their bank balance.
 
 Let's follow the TDD process.
 
@@ -342,7 +342,7 @@ func applyTransaction(a Account, transaction Transaction) Account {
 }
 ```
 
-I feel this really shows the power of using concepts like `Reduce`. The `NewBalanceFor` feels more _declarative_, describing _what_ happens, rather than _how_. Often when we're reading code, we're darting through lots of files and we're trying to understand _what_ is happening, rather than _how_, and this style of code facilitates this well.
+I feel this really shows the power of using concepts like `Reduce`. The `NewBalanceFor` feels more _declarative_, describing _what_ happens, rather than _how_. Often when we're reading code, we're darting through lots of files, and we're trying to understand _what_ is happening, rather than _how_, and this style of code facilitates this well.
 
 If I wish to dig in to the detail I can, and I can see the _business logic_ of `applyTransaction` without worrying about loops and mutating state; `Reduce` takes care of that separately.
 
@@ -357,7 +357,7 @@ The possibilities are endless™️ with `Reduce` (or `Fold`). It's a common pat
 
 ## Find
 
-Now that Go has generics, combining them with higher-order-functions, we can reduce a lot of boilerplate code within our projects.
+Now that Go has generics, combining them with higher-order-functions, we can reduce a lot of boilerplate code within our projects, to help our systems be easier to understand and manage.
 
 No longer do you need to write specific `Find` functions for each type of collection you want to search, instead re-use or write a `Find` function. If you understood the `Reduce` function above, writing a `Find` function will be trivial.
 
