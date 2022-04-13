@@ -24,6 +24,7 @@
 * [Reading files](reading-files.md)
 * [Templating](html-templates.md)
 * [Generics](generics.md)
+* [Revisiting arrays and slices with generics](revisiting-arrays-and-slices-with-generics.md)
 
 ## Build an application
 

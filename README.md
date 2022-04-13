@@ -60,6 +60,7 @@ I am proud to offer this resource for free, but if you wish to give some appreci
 18. [Reading files](reading-files.md) - Read files and process them
 19. [Templating](html-templates.md) - Use Go's html/template package to render html from data, and also learn about approval testing
 20. [Generics](generics.md) - Learn how to write functions that take generic arguments and make your own generic data-structure
+21. [Revisiting arrays and slices with generics](revisiting-arrays-and-slices-with-generics.md) - Generics are very useful when working with collections. Learn how to write your own `Reduce` function and tidy up some common patterns.
 
 ### Build an application
 
