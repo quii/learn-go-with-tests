@@ -18,8 +18,8 @@ type Account struct {
 func NewBalanceFor(account Account, transactions []Transaction) Account {
 	return Reduce(
 		transactions,
-		account,
 		applyTransaction,
+		account,
 	)
 }
 

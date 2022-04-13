@@ -9,9 +9,10 @@ func Find[A any](items []A, predicate func(A) bool) (value A, found bool) {
 	return
 }
 
-func Reduce[A, B any](collection []A, accumulator B, f func(B, A) B) B {
+func Reduce[A, B any](collection []A, accumulator func(B, A) B, initialValue B) B {
+	var result = initialValue
 	for _, x := range collection {
-		accumulator = f(accumulator, x)
+		result = accumulator(result, x)
 	}
-	return accumulator
+	return result
 }

@@ -50,7 +50,7 @@ func TestReduce(t *testing.T) {
 			return x * y
 		}
 
-		AssertEqual(t, Reduce([]int{1, 2, 3}, 1, multiply), 6)
+		AssertEqual(t, Reduce([]int{1, 2, 3}, multiply, 1), 6)
 	})
 
 	t.Run("concatenate strings", func(t *testing.T) {
@@ -58,7 +58,7 @@ func TestReduce(t *testing.T) {
 			return x + y
 		}
 
-		AssertEqual(t, Reduce([]string{"a", "b", "c"}, "", concatenate), "abc")
+		AssertEqual(t, Reduce([]string{"a", "b", "c"}, concatenate, ""), "abc")
 	})
 }
 

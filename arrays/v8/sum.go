@@ -3,7 +3,7 @@ package main
 // Sum calculates the total from a slice of numbers.
 func Sum(numbers []int) int {
 	add := func(acc, x int) int { return acc + x }
-	return Reduce(numbers, 0, add)
+	return Reduce(numbers, add, 0)
 }
 
 // SumAllTails calculates the sums of all but the first number given a collection of slices.
@@ -17,5 +17,5 @@ func SumAllTails(numbers ...[]int) []int {
 		}
 	}
 
-	return Reduce(numbers, []int{}, sumTail)
+	return Reduce(numbers, sumTail, []int{})
 }
