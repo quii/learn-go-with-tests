@@ -268,7 +268,7 @@ Pretty much the opposite of `Deposit()`
 ```go
 func TestWallet(t *testing.T) {
 
-	t.Run("Deposit", func(t *testing.T) {
+	t.Run("deposit", func(t *testing.T) {
 		wallet := Wallet{}
 
 		wallet.Deposit(Bitcoin(10))
@@ -282,7 +282,7 @@ func TestWallet(t *testing.T) {
 		}
 	})
 
-	t.Run("Withdraw", func(t *testing.T) {
+	t.Run("withdraw", func(t *testing.T) {
 		wallet := Wallet{balance: Bitcoin(20)}
 
 		wallet.Withdraw(Bitcoin(10))
@@ -336,13 +336,13 @@ func TestWallet(t *testing.T) {
 		}
 	}
 
-	t.Run("Deposit", func(t *testing.T) {
+	t.Run("deposit", func(t *testing.T) {
 		wallet := Wallet{}
 		wallet.Deposit(Bitcoin(10))
 		assertBalance(t, wallet, Bitcoin(10))
 	})
 
-	t.Run("Withdraw", func(t *testing.T) {
+	t.Run("withdraw", func(t *testing.T) {
 		wallet := Wallet{balance: Bitcoin(20)}
 		wallet.Withdraw(Bitcoin(10))
 		assertBalance(t, wallet, Bitcoin(10))
@@ -362,7 +362,7 @@ Let's try this out in a test.
 ## Write the test first
 
 ```go
-t.Run("Withdraw insufficient funds", func(t *testing.T) {
+t.Run("withdraw insufficient funds", func(t *testing.T) {
 	startingBalance := Bitcoin(20)
 	wallet := Wallet{startingBalance}
 	err := wallet.Withdraw(Bitcoin(100))
@@ -434,7 +434,7 @@ assertError := func(t testing.TB, err error) {
 And in our test
 
 ```go
-t.Run("Withdraw insufficient funds", func(t *testing.T) {
+t.Run("withdraw insufficient funds", func(t *testing.T) {
 	startingBalance := Bitcoin(20)
 	wallet := Wallet{startingBalance}
 	err := wallet.Withdraw(Bitcoin(100))
@@ -468,7 +468,7 @@ assertError := func(t testing.TB, got error, want string) {
 And then update the caller
 
 ```go
-t.Run("Withdraw insufficient funds", func(t *testing.T) {
+t.Run("withdraw insufficient funds", func(t *testing.T) {
 	startingBalance := Bitcoin(20)
 	wallet := Wallet{startingBalance}
 	err := wallet.Withdraw(Bitcoin(100))
@@ -529,19 +529,19 @@ Next we can refactor our test code to use this value instead of specific strings
 ```go
 func TestWallet(t *testing.T) {
 
-	t.Run("Deposit", func(t *testing.T) {
+	t.Run("deposit", func(t *testing.T) {
 		wallet := Wallet{}
 		wallet.Deposit(Bitcoin(10))
 		assertBalance(t, wallet, Bitcoin(10))
 	})
 
-	t.Run("Withdraw with funds", func(t *testing.T) {
+	t.Run("withdraw with funds", func(t *testing.T) {
 		wallet := Wallet{Bitcoin(20)}
 		wallet.Withdraw(Bitcoin(10))
 		assertBalance(t, wallet, Bitcoin(10))
 	})
 
-	t.Run("Withdraw insufficient funds", func(t *testing.T) {
+	t.Run("withdraw insufficient funds", func(t *testing.T) {
 		wallet := Wallet{Bitcoin(20)}
 		err := wallet.Withdraw(Bitcoin(100))
 
@@ -598,14 +598,14 @@ Here is the final test code that accounts for this.
 ```go
 func TestWallet(t *testing.T) {
 
-	t.Run("Deposit", func(t *testing.T) {
+	t.Run("deposit", func(t *testing.T) {
 		wallet := Wallet{}
 		wallet.Deposit(Bitcoin(10))
 
 		assertBalance(t, wallet, Bitcoin(10))
 	})
 
-	t.Run("Withdraw with funds", func(t *testing.T) {
+	t.Run("withdraw with funds", func(t *testing.T) {
 		wallet := Wallet{Bitcoin(20)}
 		err := wallet.Withdraw(Bitcoin(10))
 
@@ -613,7 +613,7 @@ func TestWallet(t *testing.T) {
 		assertBalance(t, wallet, Bitcoin(10))
 	})
 
-	t.Run("Withdraw insufficient funds", func(t *testing.T) {
+	t.Run("withdraw insufficient funds", func(t *testing.T) {
 		wallet := Wallet{Bitcoin(20)}
 		err := wallet.Withdraw(Bitcoin(100))
 
