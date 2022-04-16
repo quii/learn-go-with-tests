@@ -63,7 +63,7 @@ func TestCheckWebsites(t *testing.T) {
 	got := CheckWebsites(mockWebsiteChecker, websites)
 
 	if !reflect.DeepEqual(want, got) {
-		t.Fatalf("Wanted %v, got %v", want, got)
+		t.Fatalf("wanted %v, got %v", want, got)
 	}
 }
 ```
@@ -105,7 +105,7 @@ func BenchmarkCheckWebsites(b *testing.B) {
 The benchmark tests `CheckWebsites` using a slice of one hundred urls and uses
 a new fake implementation of `WebsiteChecker`. `slowStubWebsiteChecker` is
 deliberately slow. It uses `time.Sleep` to wait exactly twenty milliseconds and
-then it returns true. We use `b.ResetTimer()` in this test to reset the time of our 
+then it returns true. We use `b.ResetTimer()` in this test to reset the time of our
 test before it actually runs
 
 
