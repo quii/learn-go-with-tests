@@ -651,7 +651,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 }
 ```
 
-This is looking much better and we can see how we might be able to find other useful functionality around `League` can be refactored.
+This is looking much better and we can see how we might be able to find other useful functionality around `League` that can be refactored.
 
 We now need to handle the scenario of recording wins of new players.
 
