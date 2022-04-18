@@ -325,7 +325,7 @@ func (f *FileSystemPlayerStore) GetLeague() []Player {
 }
 ```
 
-Try running the test, it now passes! Happily for us `string.NewReader` that we used in our test also implements `ReadSeeker` so we didn't have to make any other changes.
+Try running the test, it now passes! Happily for us `strings.NewReader` that we used in our test also implements `ReadSeeker` so we didn't have to make any other changes.
 
 Next we'll implement `GetPlayerScore`.
 
@@ -483,7 +483,7 @@ func assertScoreEquals(t testing.TB, got, want int) {
 }
 ```
 
-[TempFile](https://golang.org/pkg/io/ioutil/#TempDir) creates a temporary file for us to use. The `"db"` value we've passed in is a prefix put on a random file name it will create. This is to ensure it won't clash with other files by accident.
+[TempFile](https://golang.org/pkg/io/ioutil/#TempFile) creates a temporary file for us to use. The `"db"` value we've passed in is a prefix put on a random file name it will create. This is to ensure it won't clash with other files by accident.
 
 You'll notice we're not only returning our `ReadWriteSeeker` (the file) but also a function. We need to make sure that the file is removed once the test is finished. We don't want to leak details of the files into the test as it's prone to error and uninteresting for the reader. By returning a `removeFile` function, we can take care of the details in our helper and all the caller has to do is run `defer cleanDatabase()`.
 
@@ -651,7 +651,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 }
 ```
 
-This is looking much better and we can see how we might be able to find other useful functionality around `League` can be refactored.
+This is looking much better and we can see how we might be able to find other useful functionality around `League` that can be refactored.
 
 We now need to handle the scenario of recording wins of new players.
 
