@@ -375,7 +375,7 @@ Try running the app and it won't compile, complaining about not enough args to `
 
 Let's create an implementation of `BlindAlerter` that we can use in our application.
 
-Create `BlindAlerter.go` and move our `BlindAlerter` interface and add the new things below
+Create `blind_alerter.go` and move our `BlindAlerter` interface and add the new things below
 
 ```go
 package poker
