@@ -551,7 +551,7 @@ This works in CLI because we _always want to send the alerts to `os.Stdout`_ but
 
 For that reason we need to change `BlindAlerter.ScheduleAlertAt` so that it takes a destination for the alerts so that we can re-use it in our webserver.
 
-Open blind_alerter.go and add the parameter `to io.Writer`
+Open `blind_alerter.go` and add the parameter to `io.Writer`
 
 ```go
 type BlindAlerter interface {
