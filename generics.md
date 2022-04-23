@@ -27,16 +27,16 @@ func TestAssertFunctions(t *testing.T) {
 }
 
 func AssertEqual(t *testing.T, got, want int) {
-    t.Helper()
+	t.Helper()
 	if got != want {
 		t.Errorf("got %d, want %d", got, want)
 	}
 }
 
 func AssertNotEqual(t *testing.T, got, want int) {
-    t.Helper()
+	t.Helper()
 	if got == want {
-        t.Errorf("didn't want %d", got)
+		t.Errorf("didn't want %d", got)
 	}
 }
 ```
@@ -48,8 +48,8 @@ Being able to assert on the equality of integers is great but what if we want to
 
 ```go
 t.Run("asserting on strings", func(t *testing.T) {
-    AssertEqual(t, "hello", "hello")
-    AssertNotEqual(t, "hello", "Grace")
+	AssertEqual(t, "hello", "hello")
+	AssertNotEqual(t, "hello", "Grace")
 })
 ```
 
@@ -138,14 +138,14 @@ func TestAssertFunctions(t *testing.T) {
 }
 
 func AssertEqual[T comparable](t *testing.T, got, want T) {
-    t.Helper()
+	t.Helper()
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
 func AssertNotEqual[T comparable](t *testing.T, got, want T) {
-    t.Helper()
+	t.Helper()
 	if got == want {
 		t.Errorf("didn't want %v", got)
 	}
@@ -379,13 +379,13 @@ Add the following test,
 
 ```go
 t.Run("interface stack dx is horrid", func(t *testing.T) {
-    myStackOfInts := new(StackOfInts)
+	myStackOfInts := new(StackOfInts)
 
-    myStackOfInts.Push(1)
-    myStackOfInts.Push(2)
-    firstNum, _ := myStackOfInts.Pop()
-    secondNum, _ := myStackOfInts.Pop()
-    AssertEqual(firstNum+secondNum, 3)
+	myStackOfInts.Push(1)
+	myStackOfInts.Push(2)
+	firstNum, _ := myStackOfInts.Pop()
+	secondNum, _ := myStackOfInts.Pop()
+	AssertEqual(firstNum+secondNum, 3)
 })
 ```
 
@@ -401,21 +401,21 @@ To get around this, the caller has to do a [type assertion](https://golang.org/r
 
 ```go
 t.Run("interface stack dx is horrid", func(t *testing.T) {
-    myStackOfInts := new(StackOfInts)
+	myStackOfInts := new(StackOfInts)
 
-    myStackOfInts.Push(1)
-    myStackOfInts.Push(2)
-    firstNum, _ := myStackOfInts.Pop()
-    secondNum, _ := myStackOfInts.Pop()
+	myStackOfInts.Push(1)
+	myStackOfInts.Push(2)
+	firstNum, _ := myStackOfInts.Pop()
+	secondNum, _ := myStackOfInts.Pop()
 
-    // get our ints from out interface{}
-    reallyFirstNum, ok := firstNum.(int)
-    AssertTrue(t, ok) // need to check we definitely got an int out of the interface{}
+	// get our ints from out interface{}
+	reallyFirstNum, ok := firstNum.(int)
+	AssertTrue(t, ok) // need to check we definitely got an int out of the interface{}
 
-    reallySecondNum, ok := secondNum.(int)
-    AssertTrue(t, ok) // and again!
+	reallySecondNum, ok := secondNum.(int)
+	AssertTrue(t, ok) // and again!
 
-    AssertEqual(t, reallyFirstNum+reallySecondNum, 3)
+	AssertEqual(t, reallyFirstNum+reallySecondNum, 3)
 })
 ```
 
@@ -429,27 +429,27 @@ Here's our new `Stack` implementation, featuring a generic data type.
 
 ```go
 type Stack[T any] struct {
-    values []T
+	values []T
 }
 
 func (s *Stack[T]) Push(value T) {
-    s.values = append(s.values, value)
+	s.values = append(s.values, value)
 }
 
 func (s *Stack[T]) IsEmpty() bool {
-    return len(s.values)==0
+	return len(s.values)==0
 }
 
 func (s *Stack[T]) Pop() (T, bool) {
-    if s.IsEmpty() {
-        var zero T
-        return zero, false
-    }
+	if s.IsEmpty() {
+		var zero T
+		return zero, false
+	}
 
-    index := len(s.values) -1
-    el := s.values[index]
-    s.values = s.values[:index]
-    return el, true
+	index := len(s.values) -1
+	el := s.values[index]
+	s.values = s.values[:index]
+	return el, true
 }
 ```
 
@@ -489,7 +489,7 @@ You'll notice the syntax for defining generic data structures is consistent with
 
 ```go
 type Stack[T any] struct {
-    values []T
+	values []T
 }
 ```
 
