@@ -8,7 +8,7 @@ import (
 
 func TestContextAwareReader(t *testing.T) {
 	t.Run("behaves like a normal reader", func(t *testing.T) {
-		rdr := NewCancellableReader(context.Background(), strings.NewReader("123456"))
+		rdr := NewCancelableReader(context.Background(), strings.NewReader("123456"))
 		got := make([]byte, 3)
 		_, err := rdr.Read(got)
 
@@ -27,9 +27,9 @@ func TestContextAwareReader(t *testing.T) {
 		assertBufferHas(t, got, "456")
 	})
 
-	t.Run("stops reading when cancelled", func(t *testing.T) {
+	t.Run("stops reading when canceled", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
-		rdr := NewCancellableReader(ctx, strings.NewReader("123456"))
+		rdr := NewCancelableReader(ctx, strings.NewReader("123456"))
 		got := make([]byte, 3)
 		_, err := rdr.Read(got)
 

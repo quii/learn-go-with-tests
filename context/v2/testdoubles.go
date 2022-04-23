@@ -7,9 +7,9 @@ import (
 
 // SpyStore allows you to simulate a store and see how its used.
 type SpyStore struct {
-	response  string
-	cancelled bool
-	t         *testing.T
+	response string
+	canceled bool
+	t        *testing.T
 }
 
 // Fetch returns response after a short delay.
@@ -20,19 +20,19 @@ func (s *SpyStore) Fetch() string {
 
 // Cancel will record the call.
 func (s *SpyStore) Cancel() {
-	s.cancelled = true
+	s.canceled = true
 }
 
-func (s *SpyStore) assertWasCancelled() {
+func (s *SpyStore) assertWasCanceled() {
 	s.t.Helper()
-	if !s.cancelled {
+	if !s.canceled {
 		s.t.Error("store was not told to cancel")
 	}
 }
 
-func (s *SpyStore) assertWasNotCancelled() {
+func (s *SpyStore) assertWasNotCanceled() {
 	s.t.Helper()
-	if s.cancelled {
+	if s.canceled {
 		s.t.Error("store was told to cancel")
 	}
 }

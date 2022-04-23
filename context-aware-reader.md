@@ -26,7 +26,7 @@ When you're using an `io.Reader` you have no guarantees over speed, it could tak
 
 They combined two simple abstractions (`context.Context` and `io.Reader`) to solve this problem.
 
-Let's try and TDD some functionality so that we can wrap an `io.Reader` so it can be cancelled.
+Let's try and TDD some functionality so that we can wrap an `io.Reader` so it can be canceled.
 
 Testing this poses an interesting challenge. Normally when using an `io.Reader` you're usually supplying it to some other function and you don't really concern yourself with the details; such as `json.NewDecoder` or `ioutil.ReadAll`.
 
@@ -102,7 +102,7 @@ From there let the compiler and failing test output can guide us to a solution
 
 ```go
 t.Run("behaves like a normal reader", func(t *testing.T) {
-	rdr := NewCancellableReader(strings.NewReader("123456"))
+	rdr := NewCancelableReader(strings.NewReader("123456"))
 	got := make([]byte, 3)
 	_, err := rdr.Read(got)
 
@@ -125,14 +125,14 @@ t.Run("behaves like a normal reader", func(t *testing.T) {
 ## Try to run the test
 
 ```
-./cancel_readers_test.go:12:10: undefined: NewCancellableReader
+./cancel_readers_test.go:12:10: undefined: NewCancelableReader
 ```
 ## Write the minimal amount of code for the test to run and check the failing test output
 
 We'll need to define this function and it should return an `io.Reader`
 
 ```go
-func NewCancellableReader(rdr io.Reader) io.Reader {
+func NewCancelableReader(rdr io.Reader) io.Reader {
 	return nil
 }
 ```
@@ -154,7 +154,7 @@ As expected
 For now, we'll just return the `io.Reader` we pass in
 
 ```go
-func NewCancellableReader(rdr io.Reader) io.Reader {
+func NewCancelableReader(rdr io.Reader) io.Reader {
 	return rdr
 }
 ```
@@ -168,9 +168,9 @@ I know, I know, this seems silly and pedantic but before charging in to the fanc
 Next we need to try and cancel.
 
 ```go
-t.Run("stops reading when cancelled", func(t *testing.T) {
+t.Run("stops reading when canceled", func(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-	rdr := NewCancellableReader(ctx, strings.NewReader("123456"))
+	rdr := NewCancelableReader(ctx, strings.NewReader("123456"))
 	got := make([]byte, 3)
 	_, err := rdr.Read(got)
 
@@ -202,7 +202,7 @@ We can more or less copy the first test but now we're:
 ## Try to run the test
 
 ```
-./cancel_readers_test.go:33:30: too many arguments in call to NewCancellableReader
+./cancel_readers_test.go:33:30: too many arguments in call to NewCancelableReader
 	have (context.Context, *strings.Reader)
 	want (io.Reader)
 ```
@@ -212,7 +212,7 @@ We can more or less copy the first test but now we're:
 The compiler is telling us what to do; update our signature to accept a context
 
 ```go
-func NewCancellableReader(ctx context.Context, rdr io.Reader) io.Reader {
+func NewCancelableReader(ctx context.Context, rdr io.Reader) io.Reader {
 	return rdr
 }
 ```
@@ -223,9 +223,9 @@ You should now see a very clear failing test output
 
 ```
 === RUN   TestCancelReaders
-=== RUN   TestCancelReaders/stops_reading_when_cancelled
+=== RUN   TestCancelReaders/stops_reading_when_canceled
 --- FAIL: TestCancelReaders (0.00s)
-    --- FAIL: TestCancelReaders/stops_reading_when_cancelled (0.00s)
+    --- FAIL: TestCancelReaders/stops_reading_when_canceled (0.00s)
         cancel_readers_test.go:48: expected an error but didnt get one
         cancel_readers_test.go:52: expected 0 bytes to be read after cancellation but 3 were read
 ```
@@ -237,7 +237,7 @@ At this point, it's copy and paste from the original post by Mat and David but w
 We know we need to have a type that encapsulates the `io.Reader` that we read from and the `context.Context` so let's create that and try and return it from our function instead of the original `io.Reader`
 
 ```go
-func NewCancellableReader(ctx context.Context, rdr io.Reader) io.Reader {
+func NewCancelableReader(ctx context.Context, rdr io.Reader) io.Reader {
 	return &readerCtx{
 		ctx:      ctx,
 		delegate: rdr,
@@ -277,7 +277,7 @@ func (r readerCtx) Read(p []byte) (n int, err error) {
 
 At this point we have our happy path test passing again and it feels like we have our stuff abstracted nicely
 
-To make our second test pass we need to check the `context.Context` to see if it has been cancelled.
+To make our second test pass we need to check the `context.Context` to see if it has been canceled.
 
 ```go
 func (r readerCtx) Read(p []byte) (n int, err error) {

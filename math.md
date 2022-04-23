@@ -967,11 +967,11 @@ to parse it.
 [`encoding/xml`][xml] is the Go package that can handle all things to do with
 simple XML parsing.
 
-The function [`xml.Unmarshall`](https://godoc.org/encoding/xml#Unmarshal) takes
-a `[]byte` of XML data, and a pointer to a struct for it to get unmarshalled in
+The function [`xml.Unmarshal`](https://godoc.org/encoding/xml#Unmarshal) takes
+a `[]byte` of XML data, and a pointer to a struct for it to get unmarshaled in
 to.
 
-So we'll need a struct to unmarshall our XML into. We could spend some time
+So we'll need a struct to unmarshal our XML into. We could spend some time
 working out what the correct names for all of the nodes and attributes, and how
 to write the correct structure but, happily, someone has written
 [`zek`](https://github.com/miku/zek) a program that will automate all of that
@@ -1034,7 +1034,7 @@ func TestSVGWriterAtMidnight(t *testing.T) {
 ```
 
 We write the output of `clockface.SVGWriter` to a `bytes.Buffer`
-and then `Unmarshall` it into an `Svg`. We then look at each `Line` in the `Svg`
+and then `Unmarshal` it into an `Svg`. We then look at each `Line` in the `Svg`
 to see if any of them have the expected `X2` and `Y2` values. If we get a match
 we return early (passing the test); if not we fail with a (hopefully)
 informative message.

@@ -2,7 +2,7 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/context)**
 
-Software often kicks off long-running, resource-intensive processes (often in goroutines). If the action that caused this gets cancelled or fails for some reason you need to stop these processes in a consistent way through your application.
+Software often kicks off long-running, resource-intensive processes (often in goroutines). If the action that caused this gets canceled or fails for some reason you need to stop these processes in a consistent way through your application.
 
 If you don't manage this your snappy Go application that you're so proud of could start having difficult to debug performance problems.
 
@@ -76,7 +76,7 @@ We will need to adjust our spy so it takes some time to return `data` and a way 
 ```go
 type SpyStore struct {
 	response  string
-	cancelled bool
+	canceled bool
 }
 
 func (s *SpyStore) Fetch() string {
@@ -85,29 +85,29 @@ func (s *SpyStore) Fetch() string {
 }
 
 func (s *SpyStore) Cancel() {
-	s.cancelled = true
+	s.canceled = true
 }
 ```
 
-Let's add a new test where we cancel the request before 100 milliseconds and check the store to see if it gets cancelled.
+Let's add a new test where we cancel the request before 100 milliseconds and check the store to see if it gets canceled.
 
 ```go
-t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
+t.Run("tells store to cancel work if request is canceled", func(t *testing.T) {
 	data := "hello, world"
 	store := &SpyStore{response: data}
 	svr := Server(store)
 
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 
-	cancellingCtx, cancel := context.WithCancel(request.Context())
+	cancelingCtx, cancel := context.WithCancel(request.Context())
 	time.AfterFunc(5*time.Millisecond, cancel)
-	request = request.WithContext(cancellingCtx)
+	request = request.WithContext(cancelingCtx)
 
 	response := httptest.NewRecorder()
 
 	svr.ServeHTTP(response, request)
 
-	if !store.cancelled {
+	if !store.canceled {
 		t.Error("store was not told to cancel")
 	}
 })
@@ -119,7 +119,7 @@ From the [Go Blog: Context](https://blog.golang.org/context)
 
 It's important that you derive your contexts so that cancellations are propagated throughout the call stack for a given request.
 
-What we do is derive a new `cancellingCtx` from our `request` which returns us a `cancel` function. We then schedule that function to be called in 5 milliseconds by using `time.AfterFunc`. Finally we use this new context in our request by calling `request.WithContext`.
+What we do is derive a new `cancelingCtx` from our `request` which returns us a `cancel` function. We then schedule that function to be called in 5 milliseconds by using `time.AfterFunc`. Finally we use this new context in our request by calling `request.WithContext`.
 
 ## Try to run the test
 
@@ -127,7 +127,7 @@ The test fails as we'd expect.
 
 ```
 --- FAIL: TestServer (0.00s)
-    --- FAIL: TestServer/tells_store_to_cancel_work_if_request_is_cancelled (0.00s)
+    --- FAIL: TestServer/tells_store_to_cancel_work_if_request_is_canceled (0.00s)
     	context_test.go:62: store was not told to cancel
 ```
 
@@ -144,11 +144,11 @@ func Server(store Store) http.HandlerFunc {
 }
 ```
 
-This makes this test pass but it doesn't feel good does it! We surely shouldn't be cancelling `Store` before we fetch on _every request_.
+This makes this test pass but it doesn't feel good does it! We surely shouldn't be canceling `Store` before we fetch on _every request_.
 
 By being disciplined it highlighted a flaw in our tests, this is a good thing!
 
-We'll need to update our happy path test to assert that it does not get cancelled.
+We'll need to update our happy path test to assert that it does not get canceled.
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
@@ -165,8 +165,8 @@ t.Run("returns data from store", func(t *testing.T) {
 		t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
 	}
 
-	if store.cancelled {
-		t.Error("it should not have cancelled the store")
+	if store.canceled {
+		t.Error("it should not have canceled the store")
 	}
 })
 ```
@@ -196,7 +196,7 @@ func Server(store Store) http.HandlerFunc {
 
 What have we done here?
 
-`context` has a method `Done()` which returns a channel which gets sent a signal when the context is "done" or "cancelled". We want to listen to that signal and call `store.Cancel` if we get it but we want to ignore it if our `Store` manages to `Fetch` before it.
+`context` has a method `Done()` which returns a channel which gets sent a signal when the context is "done" or "canceled". We want to listen to that signal and call `store.Cancel` if we get it but we want to ignore it if our `Store` manages to `Fetch` before it.
 
 To manage this we run `Fetch` in a goroutine and it will write the result into a new channel `data`. We then use `select` to effectively race to the two asynchronous processes and then we either write a response or `Cancel`.
 
@@ -207,20 +207,20 @@ We can refactor our test code a bit by making assertion methods on our spy
 ```go
 type SpyStore struct {
 	response  string
-	cancelled bool
+	canceled bool
 	t         *testing.T
 }
 
 func (s *SpyStore) assertWasCancelled() {
 	s.t.Helper()
-	if !s.cancelled {
+	if !s.canceled {
 		s.t.Error("store was not told to cancel")
 	}
 }
 
 func (s *SpyStore) assertWasNotCancelled() {
 	s.t.Helper()
-	if s.cancelled {
+	if s.canceled {
 		s.t.Error("store was told to cancel")
 	}
 }
@@ -248,15 +248,15 @@ func TestServer(t *testing.T) {
 		store.assertWasNotCancelled()
 	})
 
-	t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
+	t.Run("tells store to cancel work if request is canceled", func(t *testing.T) {
 		store := &SpyStore{response: data, t: t}
 		svr := Server(store)
 
 		request := httptest.NewRequest(http.MethodGet, "/", nil)
 
-		cancellingCtx, cancel := context.WithCancel(request.Context())
+		cancelingCtx, cancel := context.WithCancel(request.Context())
 		time.AfterFunc(5*time.Millisecond, cancel)
-		request = request.WithContext(cancellingCtx)
+		request = request.WithContext(cancelingCtx)
 
 		response := httptest.NewRecorder()
 
@@ -269,7 +269,7 @@ func TestServer(t *testing.T) {
 
 This approach is ok, but is it idiomatic?
 
-Does it make sense for our web server to be concerned with manually cancelling `Store`? What if `Store` also happens to depend on other slow-running processes? We'll have to make sure that `Store.Cancel` correctly propagates the cancellation to all of its dependants.
+Does it make sense for our web server to be concerned with manually canceling `Store`? What if `Store` also happens to depend on other slow-running processes? We'll have to make sure that `Store.Cancel` correctly propagates the cancellation to all of its dependants.
 
 One of the main points of `context` is that it is a consistent way of offering cancellation.
 
@@ -279,7 +279,7 @@ One of the main points of `context` is that it is a consistent way of offering c
 
 From the [Go Blog: Context](https://blog.golang.org/context) again:
 
-> At Google, we require that Go programmers pass a Context parameter as the first argument to every function on the call path between incoming and outgoing requests. This allows Go code developed by many different teams to interoperate well. It provides simple control over timeouts and cancelation and ensures that critical values like security credentials transit Go programs properly.
+> At Google, we require that Go programmers pass a Context parameter as the first argument to every function on the call path between incoming and outgoing requests. This allows Go code developed by many different teams to interoperate well. It provides simple control over timeouts and cancellation and ensures that critical values like security credentials transit Go programs properly.
 
 (Pause for a moment and think of the ramifications of every function having to send in a context, and the ergonomics of that.)
 
@@ -287,7 +287,7 @@ Feeling a bit uneasy? Good. Let's try and follow that approach though and instea
 
 ## Write the test first
 
-We'll have to change our existing tests as their responsibilities are changing. The only thing our handler is responsible for now is making sure it sends a context through to the downstream `Store` and that it handles the error that will come from the `Store` when it is cancelled.
+We'll have to change our existing tests as their responsibilities are changing. The only thing our handler is responsible for now is making sure it sends a context through to the downstream `Store` and that it handles the error that will come from the `Store` when it is canceled.
 
 Let's update our `Store` interface to show the new responsibilities.
 
@@ -322,7 +322,7 @@ func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
 		for _, c := range s.response {
 			select {
 			case <-ctx.Done():
-				log.Println("spy store got cancelled")
+				log.Println("spy store got canceled")
 				return
 			default:
 				time.Sleep(10 * time.Millisecond)
@@ -419,16 +419,16 @@ func (s *SpyResponseWriter) WriteHeader(statusCode int) {
 Our `SpyResponseWriter` implements `http.ResponseWriter` so we can use it in the test.
 
 ```go
-t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
+t.Run("tells store to cancel work if request is canceled", func(t *testing.T) {
 	data := "hello, world"
 	store := &SpyStore{response: data, t: t}
 	svr := Server(store)
 
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 
-	cancellingCtx, cancel := context.WithCancel(request.Context())
+	cancelingCtx, cancel := context.WithCancel(request.Context())
 	time.AfterFunc(5*time.Millisecond, cancel)
-	request = request.WithContext(cancellingCtx)
+	request = request.WithContext(cancelingCtx)
 
 	response := &SpyResponseWriter{}
 
@@ -444,9 +444,9 @@ t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
 
 ```
 === RUN   TestServer
-=== RUN   TestServer/tells_store_to_cancel_work_if_request_is_cancelled
+=== RUN   TestServer/tells_store_to_cancel_work_if_request_is_canceled
 --- FAIL: TestServer (0.01s)
-    --- FAIL: TestServer/tells_store_to_cancel_work_if_request_is_cancelled (0.01s)
+    --- FAIL: TestServer/tells_store_to_cancel_work_if_request_is_canceled (0.01s)
     	context_test.go:47: a response should not have been written
 ```
 
@@ -472,7 +472,7 @@ We can see after this that the server code has become simplified as it's no long
 
 ### What we've covered
 
-- How to test a HTTP handler that has had the request cancelled by the client.
+- How to test a HTTP handler that has had the request canceled by the client.
 - How to use context to manage cancellation.
 - How to write a function that accepts `context` and uses it to cancel itself by using goroutines, `select` and channels.
 - Follow Google's guidelines as to how to manage cancellation by propagating request scoped context through your call-stack.
