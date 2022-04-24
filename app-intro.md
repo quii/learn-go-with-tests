@@ -8,10 +8,11 @@ Each chapter will iterate on the previous one, expanding the application's funct
 
 New concepts will be introduced to help facilitate writing great code but most of the new material will be learning what can be accomplished from Go's standard library.
 
-By the end of this you should have a strong grasp as to how to iteratively write an application in Go, backed by tests.
+By the end of this, you should have a strong grasp as to how to iteratively write an application in Go, backed by tests.
 
 - [HTTP server](http-server.md) - We will create an application which listens to HTTP requests and responds to them.
-- [JSON, routing and embedding](json.md) - We will make our endpoints return JSON, explore how to do routing and learn about type embedding.
-- [IO ](io.md) - We will persist and read our data from disk and we'll cover sorting data.
-- [Command line](command-line.md) - We will create a new program leveraging the code we've made so far to make a command line interface. This will involve us restructuring our project to support multiple binaries
-- [Time](time.md) - We will schedule some activities that happen at different times depending on user input. 
+- [JSON, routing and embedding](json.md) - We will make our endpoints return JSON and explore how to do routing.
+- [IO and sorting](io.md) - We will persist and read our data from disk and we'll cover sorting data.
+- [Command line & project structure](command-line.md) - Support multiple applications from one code base and read input from command line.
+- [Time](time.md) - using the `time` package to schedule activities.
+- [WebSockets](websockets.md) - learn how to write and test a server that uses WebSockets.
