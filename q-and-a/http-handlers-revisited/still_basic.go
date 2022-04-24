@@ -17,7 +17,7 @@ type UserService interface {
 	Register(user User) (insertedID string, err error)
 }
 
-// UserServer provides a HTTP API for working with users.
+// UserServer provides an HTTP API for working with users.
 type UserServer struct {
 	service UserService
 }

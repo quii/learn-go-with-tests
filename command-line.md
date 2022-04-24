@@ -46,17 +46,17 @@ If you have `tree` installed you should run it and your structure should look li
 
 ```
 .
-├── file_system_store.go
-├── file_system_store_test.go
-├── cmd
-│   └── webserver
-│       └── main.go
-├── league.go
-├── server.go
-├── server_integration_test.go
-├── server_test.go
-├── tape.go
-└── tape_test.go
+|-- file_system_store.go
+|-- file_system_store_test.go
+|-- cmd
+|   |-- webserver
+|       |-- main.go
+|-- league.go
+|-- server.go
+|-- server_integration_test.go
+|-- server_test.go
+|-- tape.go
+|-- tape_test.go
 ```
 
 We now effectively have a separation between our application and the library code but we now need to change some package names. Remember when you build a Go application its package _must_ be `main`.
@@ -95,7 +95,7 @@ func main() {
 
 	server := poker.NewPlayerServer(store)
 
-    log.Fatal(http.ListenAndServe(":5000", server))
+	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 

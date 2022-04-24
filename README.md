@@ -6,7 +6,6 @@
 
 [Art by Denise](https://twitter.com/deniseyu21)
 
-[![Build Status](https://travis-ci.org/quii/learn-go-with-tests.svg?branch=main)](https://travis-ci.org/quii/learn-go-with-tests)
 [![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
 ## Formats
@@ -20,6 +19,7 @@
 - [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
 - [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
 - [한국어](https://miryang.gitbook.io/learn-go-with-tests/)
+- [Türkçe](https://halilkocaoz.gitbook.io/go-programlama-dilini-ogren/)
 
 ## Support me
 
@@ -53,11 +53,14 @@ I am proud to offer this resource for free, but if you wish to give some appreci
 11. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
 12. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
 13. [Reflection](reflection.md) - Learn about reflection
-13. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
-13. [Context](context.md) - Use the context package to manage and cancel long-running processes
-14. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
-15. [Maths](math.md) - Use the `math` package to draw an SVG clock
-16. [Reading files](reading-files.md) - Read files and process them
+14. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
+15. [Context](context.md) - Use the context package to manage and cancel long-running processes
+16. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
+17. [Maths](math.md) - Use the `math` package to draw an SVG clock
+18. [Reading files](reading-files.md) - Read files and process them
+19. [Templating](html-templates.md) - Use Go's html/template package to render html from data, and also learn about approval testing
+20. [Generics](generics.md) - Learn how to write functions that take generic arguments and make your own generic data-structure
+21. [Revisiting arrays and slices with generics](revisiting-arrays-and-slices-with-generics.md) - Generics are very useful when working with collections. Learn how to write your own `Reduce` function and tidy up some common patterns.
 
 ### Build an application
 
@@ -94,7 +97,6 @@ If you have such a question raise it as an issue on github and I'll try and find
 ### Meta / Discussion
 
 * [Why](why.md) - Watch a video, or read about why unit testing and TDD is important
-* [Intro to generics](intro-to-generics.md) - Learn how to write functions that take generic arguments and make your own generic data-structure
 * [Anti-patterns](anti-patterns.md) - A short chapter on TDD and unit testing anti-patterns
 
 ## Contributing

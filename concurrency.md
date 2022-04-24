@@ -63,7 +63,7 @@ func TestCheckWebsites(t *testing.T) {
 	got := CheckWebsites(mockWebsiteChecker, websites)
 
 	if !reflect.DeepEqual(want, got) {
-		t.Fatalf("Wanted %v, got %v", want, got)
+		t.Fatalf("wanted %v, got %v", want, got)
 	}
 }
 ```
@@ -95,7 +95,7 @@ func BenchmarkCheckWebsites(b *testing.B) {
 	for i := 0; i < len(urls); i++ {
 		urls[i] = "a url"
 	}
-
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		CheckWebsites(slowStubWebsiteChecker, urls)
 	}
@@ -105,7 +105,9 @@ func BenchmarkCheckWebsites(b *testing.B) {
 The benchmark tests `CheckWebsites` using a slice of one hundred urls and uses
 a new fake implementation of `WebsiteChecker`. `slowStubWebsiteChecker` is
 deliberately slow. It uses `time.Sleep` to wait exactly twenty milliseconds and
-then it returns true.
+then it returns true. We use `b.ResetTimer()` in this test to reset the time of our
+test before it actually runs
+
 
 When we run the benchmark using `go test -bench=.` (or if you're in Windows Powershell `go test -bench="."`):
 
@@ -210,7 +212,7 @@ help us know when we're handling concurrency predictably.
 
 ### ... and we're back.
 
-We are caught by the original tests `CheckWebsites` is now returning an
+We are caught by the original test `CheckWebsites`, it's now returning an
 empty map. What went wrong?
 
 None of the goroutines that our `for` loop started had enough time to add

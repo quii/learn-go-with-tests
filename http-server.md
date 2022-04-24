@@ -158,7 +158,7 @@ import (
 
 func main() {
 	handler := http.HandlerFunc(PlayerServer)
-    log.Fatal(http.ListenAndServe(":5000", handler))
+	log.Fatal(http.ListenAndServe(":5000", handler))
 }
 ```
 
@@ -407,7 +407,7 @@ Now `main.go` won't compile for the same reason.
 ```go
 func main() {
 	server := &PlayerServer{}
-    log.Fatal(http.ListenAndServe(":5000", server))
+	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 
@@ -486,7 +486,7 @@ func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 
 func main() {
 	server := &PlayerServer{&InMemoryPlayerStore{}}
-    log.Fatal(http.ListenAndServe(":5000", server))
+	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 
@@ -854,24 +854,32 @@ Run the tests and it should be passing! Obviously `"Bob"` isn't exactly what we 
 
 ```go
 //server_test.go
-t.Run("it records wins on POST", func(t *testing.T) {
-	player := "Pepper"
-
-	request := newPostWinRequest(player)
-	response := httptest.NewRecorder()
-
-	server.ServeHTTP(response, request)
-
-	assertStatus(t, response.Code, http.StatusAccepted)
-
-	if len(store.winCalls) != 1 {
-		t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
+func TestStoreWins(t *testing.T) {
+	store := StubPlayerStore{
+		map[string]int{},
+		nil,
 	}
+	server := &PlayerServer{&store}
 
-	if store.winCalls[0] != player {
-		t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], player)
-	}
-})
+	t.Run("it records wins on POST", func(t *testing.T) {
+		player := "Pepper"
+
+		request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", player), nil)
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		assertStatus(t, response.Code, http.StatusAccepted)
+
+		if len(store.winCalls) != 1 {
+			t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
+		}
+
+		if store.winCalls[0] != player {
+			t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], player)
+		}
+	})
+}
 ```
 
 Now that we know there is one element in our `winCalls` slice we can safely reference the first one and check it is equal to `player`.
@@ -952,6 +960,14 @@ In the interest of brevity, I am going to show you the final refactored integrat
 
 ```go
 //server_integration_test.go
+package main
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	store := InMemoryPlayerStore{}
 	server := PlayerServer{&store}
@@ -1029,7 +1045,7 @@ import (
 
 func main() {
 	server := &PlayerServer{NewInMemoryPlayerStore()}
-    log.Fatal(http.ListenAndServe(":5000", server))
+	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 

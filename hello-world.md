@@ -77,7 +77,7 @@ go: cannot find main module; see 'go help modules'
 
 What's the problem? In a word, [modules](https://blog.golang.org/go116-module-changes). Luckily, the problem is easy to fix. Enter `go mod init hello` in your terminal. That will create a new file with the following contents:
 
-```go
+```
 module hello
 
 go 1.16
@@ -127,7 +127,7 @@ Another quality of life feature of Go is the documentation. You can launch the d
 
 The vast majority of the standard library has excellent documentation with examples. Navigating to [http://localhost:8000/pkg/testing/](http://localhost:8000/pkg/testing/) would be worthwhile to see what's available to you.
 
-If you don't have `godoc` command, then maybe you are using the newer version of Go (1.14 or later) which is [no longer including `godoc`](https://golang.org/doc/go1.14#godoc). You can manually install it with `go get golang.org/x/tools/cmd/godoc`.
+If you don't have `godoc` command, then maybe you are using the newer version of Go (1.14 or later) which is [no longer including `godoc`](https://golang.org/doc/go1.14#godoc). You can manually install it with `go install golang.org/x/tools/cmd/godoc@latest`.
 
 ### Hello, YOU
 
@@ -174,7 +174,7 @@ func Hello(name string) string {
 }
 ```
 
-If you try and run your tests again your `hello.go` will fail to compile because you're not passing an argument. Send in "world" to make it pass.
+If you try and run your tests again your `hello.go` will fail to compile because you're not passing an argument. Send in "world" to make it compile.
 
 ```go
 func main() {
@@ -242,7 +242,6 @@ Start by writing a new failing test
 
 ```go
 func TestHello(t *testing.T) {
-
 	t.Run("saying hello to people", func(t *testing.T) {
 		got := Hello("Chris")
 		want := "Hello, Chris"
@@ -251,7 +250,6 @@ func TestHello(t *testing.T) {
 			t.Errorf("got %q want %q", got, want)
 		}
 	})
-
 	t.Run("say 'Hello, World' when an empty string is supplied", func(t *testing.T) {
 		got := Hello("")
 		want := "Hello, World"
@@ -260,7 +258,6 @@ func TestHello(t *testing.T) {
 			t.Errorf("got %q want %q", got, want)
 		}
 	})
-
 }
 ```
 
@@ -278,7 +275,6 @@ We can and should refactor our tests.
 
 ```go
 func TestHello(t *testing.T) {
-
 	assertCorrectMessage := func(t testing.TB, got, want string) {
 		t.Helper()
 		if got != want {
@@ -291,13 +287,11 @@ func TestHello(t *testing.T) {
 		want := "Hello, Chris"
 		assertCorrectMessage(t, got, want)
 	})
-
 	t.Run("empty string defaults to 'World'", func(t *testing.T) {
 		got := Hello("")
 		want := "Hello, World"
 		assertCorrectMessage(t, got, want)
 	})
-
 }
 ```
 
@@ -409,7 +403,6 @@ func Hello(name string, language string) string {
 	if language == "Spanish" {
 		return "Hola, " + name
 	}
-
 	return englishHelloPrefix + name
 }
 ```
@@ -431,7 +424,6 @@ func Hello(name string, language string) string {
 	if language == spanish {
 		return spanishHelloPrefix + name
 	}
-
 	return englishHelloPrefix + name
 }
 ```
@@ -453,11 +445,9 @@ func Hello(name string, language string) string {
 	if language == spanish {
 		return spanishHelloPrefix + name
 	}
-
 	if language == french {
 		return frenchHelloPrefix + name
 	}
-
 	return englishHelloPrefix + name
 }
 ```

@@ -18,14 +18,14 @@ package main
 import "testing"
 
 func TestSearch(t *testing.T) {
-    dictionary := map[string]string{"test": "this is just a test"}
+	dictionary := map[string]string{"test": "this is just a test"}
 
-    got := Search(dictionary, "test")
-    want := "this is just a test"
+	got := Search(dictionary, "test")
+	want := "this is just a test"
 
-    if got != want {
-        t.Errorf("got %q want %q given, %q", got, want, "test")
-    }
+	if got != want {
+		t.Errorf("got %q want %q given, %q", got, want, "test")
+	}
 }
 ```
 
@@ -49,7 +49,7 @@ In `dictionary.go`
 package main
 
 func Search(dictionary map[string]string, word string) string {
-    return ""
+	return ""
 }
 ```
 
@@ -61,7 +61,7 @@ Your test should now fail with a *clear error message*
 
 ```go
 func Search(dictionary map[string]string, word string) string {
-    return dictionary[word]
+	return dictionary[word]
 }
 ```
 
@@ -71,20 +71,20 @@ Getting a value out of a Map is the same as getting a value out of Array `map[ke
 
 ```go
 func TestSearch(t *testing.T) {
-    dictionary := map[string]string{"test": "this is just a test"}
+	dictionary := map[string]string{"test": "this is just a test"}
 
-    got := Search(dictionary, "test")
-    want := "this is just a test"
+	got := Search(dictionary, "test")
+	want := "this is just a test"
 
-    assertStrings(t, got, want)
+	assertStrings(t, got, want)
 }
 
 func assertStrings(t testing.TB, got, want string) {
-    t.Helper()
+	t.Helper()
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 }
 ```
 
@@ -98,12 +98,12 @@ In `dictionary_test.go`:
 
 ```go
 func TestSearch(t *testing.T) {
-    dictionary := Dictionary{"test": "this is just a test"}
+	dictionary := Dictionary{"test": "this is just a test"}
 
-    got := dictionary.Search("test")
-    want := "this is just a test"
+	got := dictionary.Search("test")
+	want := "this is just a test"
 
-    assertStrings(t, got, want)
+	assertStrings(t, got, want)
 }
 ```
 
@@ -117,7 +117,7 @@ In `dictionary.go`:
 type Dictionary map[string]string
 
 func (d Dictionary) Search(word string) string {
-    return d[word]
+	return d[word]
 }
 ```
 
@@ -131,25 +131,25 @@ We actually get nothing back. This is good because the program can continue to r
 
 ```go
 func TestSearch(t *testing.T) {
-    dictionary := Dictionary{"test": "this is just a test"}
+	dictionary := Dictionary{"test": "this is just a test"}
 
-    t.Run("known word", func(t *testing.T) {
-        got, _ := dictionary.Search("test")
-        want := "this is just a test"
+	t.Run("known word", func(t *testing.T) {
+		got, _ := dictionary.Search("test")
+		want := "this is just a test"
 
-        assertStrings(t, got, want)
-    })
+		assertStrings(t, got, want)
+	})
 
-    t.Run("unknown word", func(t *testing.T) {
-        _, err := dictionary.Search("unknown")
-        want := "could not find the word you were looking for"
+	t.Run("unknown word", func(t *testing.T) {
+		_, err := dictionary.Search("unknown")
+		want := "could not find the word you were looking for"
 
-        if err == nil {
-            t.Fatal("expected to get an error.")
-        }
+		if err == nil {
+			t.Fatal("expected to get an error.")
+		}
 
-        assertStrings(t, err.Error(), want)
-    })
+		assertStrings(t, err.Error(), want)
+	})
 }
 ```
 
@@ -169,7 +169,7 @@ This does not compile
 
 ```go
 func (d Dictionary) Search(word string) (string, error) {
-    return d[word], nil
+	return d[word], nil
 }
 ```
 
@@ -181,12 +181,12 @@ Your test should now fail with a much clearer error message.
 
 ```go
 func (d Dictionary) Search(word string) (string, error) {
-    definition, ok := d[word]
-    if !ok {
-        return "", errors.New("could not find the word you were looking for")
-    }
+	definition, ok := d[word]
+	if !ok {
+		return "", errors.New("could not find the word you were looking for")
+	}
 
-    return definition, nil
+	return definition, nil
 }
 ```
 
@@ -200,12 +200,12 @@ This property allows us to differentiate between a word that doesn't exist and a
 var ErrNotFound = errors.New("could not find the word you were looking for")
 
 func (d Dictionary) Search(word string) (string, error) {
-    definition, ok := d[word]
-    if !ok {
-        return "", ErrNotFound
-    }
+	definition, ok := d[word]
+	if !ok {
+		return "", ErrNotFound
+	}
 
-    return definition, nil
+	return definition, nil
 }
 ```
 
@@ -213,17 +213,18 @@ We can get rid of the magic error in our `Search` function by extracting it into
 
 ```go
 t.Run("unknown word", func(t *testing.T) {
-    _, got := dictionary.Search("unknown")
+	_, got := dictionary.Search("unknown")
 
-    assertError(t, got, ErrNotFound)
+	assertError(t, got, ErrNotFound)
 })
-
+```
+```go
 func assertError(t testing.TB, got, want error) {
-    t.Helper()
+	t.Helper()
 
-    if got != want {
-        t.Errorf("got error %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got error %q want %q", got, want)
+	}
 }
 ```
 
@@ -235,18 +236,18 @@ We have a great way to search the dictionary. However, we have no way to add new
 
 ```go
 func TestAdd(t *testing.T) {
-    dictionary := Dictionary{}
-    dictionary.Add("test", "this is just a test")
+	dictionary := Dictionary{}
+	dictionary.Add("test", "this is just a test")
 
-    want := "this is just a test"
-    got, err := dictionary.Search("test")
-    if err != nil {
-        t.Fatal("should find added word:", err)
-    }
+	want := "this is just a test"
+	got, err := dictionary.Search("test")
+	if err != nil {
+		t.Fatal("should find added word:", err)
+	}
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 }
 ```
 
@@ -271,7 +272,7 @@ dictionary_test.go:31: should find added word: could not find the word you were 
 
 ```go
 func (d Dictionary) Add(word, definition string) {
-    d[word] = definition
+	d[word] = definition
 }
 ```
 
@@ -313,26 +314,26 @@ There isn't much to refactor in our implementation but the test could use a litt
 
 ```go
 func TestAdd(t *testing.T) {
-    dictionary := Dictionary{}
-    word := "test"
-    definition := "this is just a test"
+	dictionary := Dictionary{}
+	word := "test"
+	definition := "this is just a test"
 
-    dictionary.Add(word, definition)
+	dictionary.Add(word, definition)
 
-    assertDefinition(t, dictionary, word, definition)
+	assertDefinition(t, dictionary, word, definition)
 }
 
 func assertDefinition(t testing.TB, dictionary Dictionary, word, definition string) {
-    t.Helper()
+	t.Helper()
 
-    got, err := dictionary.Search(word)
-    if err != nil {
-        t.Fatal("should find added word:", err)
-    }
+	got, err := dictionary.Search(word)
+	if err != nil {
+		t.Fatal("should find added word:", err)
+	}
 
-    if definition != got {
-        t.Errorf("got %q want %q", got, definition)
-    }
+	if definition != got {
+		t.Errorf("got %q want %q", got, definition)
+	}
 }
 ```
 
@@ -346,28 +347,28 @@ Map will not throw an error if the value already exists. Instead, they will go a
 
 ```go
 func TestAdd(t *testing.T) {
-    t.Run("new word", func(t *testing.T) {
-        dictionary := Dictionary{}
-        word := "test"
-        definition := "this is just a test"
+	t.Run("new word", func(t *testing.T) {
+		dictionary := Dictionary{}
+		word := "test"
+		definition := "this is just a test"
 
-        err := dictionary.Add(word, definition)
+		err := dictionary.Add(word, definition)
 
-        assertError(t, err, nil)
-        assertDefinition(t, dictionary, word, definition)
-    })
+		assertError(t, err, nil)
+		assertDefinition(t, dictionary, word, definition)
+	})
 
-    t.Run("existing word", func(t *testing.T) {
-        word := "test"
-        definition := "this is just a test"
-        dictionary := Dictionary{word: definition}
-        err := dictionary.Add(word, "new test")
+	t.Run("existing word", func(t *testing.T) {
+		word := "test"
+		definition := "this is just a test"
+		dictionary := Dictionary{word: definition}
+		err := dictionary.Add(word, "new test")
 
-        assertError(t, err, ErrWordExists)
-        assertDefinition(t, dictionary, word, definition)
-    })
+		assertError(t, err, ErrWordExists)
+		assertDefinition(t, dictionary, word, definition)
+	})
 }
-...
+
 func assertError(t testing.TB, got, want error) {
 	t.Helper()
 	if got != want {
@@ -393,13 +394,13 @@ In `dictionary.go`
 
 ```go
 var (
-    ErrNotFound   = errors.New("could not find the word you were looking for")
-    ErrWordExists = errors.New("cannot add word because it already exists")
+	ErrNotFound   = errors.New("could not find the word you were looking for")
+	ErrWordExists = errors.New("cannot add word because it already exists")
 )
 
 func (d Dictionary) Add(word, definition string) error {
-    d[word] = definition
-    return nil
+	d[word] = definition
+	return nil
 }
 ```
 
@@ -414,18 +415,18 @@ dictionary_test.go:44: got 'new test' want 'this is just a test'
 
 ```go
 func (d Dictionary) Add(word, definition string) error {
-    _, err := d.Search(word)
+	_, err := d.Search(word)
 
-    switch err {
-    case ErrNotFound:
-        d[word] = definition
-    case nil:
-        return ErrWordExists
-    default:
-        return err
-    }
+	switch err {
+	case ErrNotFound:
+		d[word] = definition
+	case nil:
+		return ErrWordExists
+	default:
+		return err
+	}
 
-    return nil
+	return nil
 }
 ```
 
@@ -437,14 +438,14 @@ We don't have too much to refactor, but as our error usage grows we can make a f
 
 ```go
 const (
-    ErrNotFound   = DictionaryErr("could not find the word you were looking for")
-    ErrWordExists = DictionaryErr("cannot add word because it already exists")
+	ErrNotFound   = DictionaryErr("could not find the word you were looking for")
+	ErrWordExists = DictionaryErr("cannot add word because it already exists")
 )
 
 type DictionaryErr string
 
 func (e DictionaryErr) Error() string {
-    return string(e)
+	return string(e)
 }
 ```
 
@@ -456,14 +457,14 @@ Next, let's create a function to `Update` the definition of a word.
 
 ```go
 func TestUpdate(t *testing.T) {
-    word := "test"
-    definition := "this is just a test"
-    dictionary := Dictionary{word: definition}
-    newDefinition := "new definition"
+	word := "test"
+	definition := "this is just a test"
+	dictionary := Dictionary{word: definition}
+	newDefinition := "new definition"
 
-    dictionary.Update(word, newDefinition)
+	dictionary.Update(word, newDefinition)
 
-    assertDefinition(t, dictionary, word, newDefinition)
+	assertDefinition(t, dictionary, word, newDefinition)
 }
 ```
 
@@ -495,7 +496,7 @@ We already saw how to do this when we fixed the issue with `Add`. So let's imple
 
 ```go
 func (d Dictionary) Update(word, definition string) {
-    d[word] = definition
+	d[word] = definition
 }
 ```
 
@@ -505,25 +506,25 @@ There is no refactoring we need to do on this since it was a simple change. Howe
 
 ```go
 t.Run("existing word", func(t *testing.T) {
-    word := "test"
-    definition := "this is just a test"
-    newDefinition := "new definition"
-    dictionary := Dictionary{word: definition}
+	word := "test"
+	definition := "this is just a test"
+	newDefinition := "new definition"
+	dictionary := Dictionary{word: definition}
 
-    err := dictionary.Update(word, newDefinition)
+	err := dictionary.Update(word, newDefinition)
 
-    assertError(t, err, nil)
-    assertDefinition(t, dictionary, word, newDefinition)
+	assertError(t, err, nil)
+	assertDefinition(t, dictionary, word, newDefinition)
 })
 
 t.Run("new word", func(t *testing.T) {
-    word := "test"
-    definition := "this is just a test"
-    dictionary := Dictionary{}
+	word := "test"
+	definition := "this is just a test"
+	dictionary := Dictionary{}
 
-    err := dictionary.Update(word, definition)
+	err := dictionary.Update(word, definition)
 
-    assertError(t, err, ErrWordDoesNotExist)
+	assertError(t, err, ErrWordDoesNotExist)
 })
 ```
 
@@ -532,7 +533,7 @@ We added yet another error type for when the word does not exist. We also modifi
 ## Try and run the test
 
 ```
-./dictionary_test.go:53:16: dictionary.Update(word, "new test") used as value
+./dictionary_test.go:53:16: dictionary.Update(word, newDefinition) used as value
 ./dictionary_test.go:64:16: dictionary.Update(word, definition) used as value
 ./dictionary_test.go:66:23: undefined: ErrWordDoesNotExist
 ```
@@ -543,14 +544,14 @@ We get 3 errors this time, but we know how to deal with these.
 
 ```go
 const (
-    ErrNotFound         = DictionaryErr("could not find the word you were looking for")
-    ErrWordExists       = DictionaryErr("cannot add word because it already exists")
-    ErrWordDoesNotExist = DictionaryErr("cannot update word because it does not exist")
+	ErrNotFound         = DictionaryErr("could not find the word you were looking for")
+	ErrWordExists       = DictionaryErr("cannot add word because it already exists")
+	ErrWordDoesNotExist = DictionaryErr("cannot update word because it does not exist")
 )
 
 func (d Dictionary) Update(word, definition string) error {
-    d[word] = definition
-    return nil
+	d[word] = definition
+	return nil
 }
 ```
 
@@ -566,18 +567,18 @@ dictionary_test.go:66: got error '%!q(<nil>)' want 'cannot update word because i
 
 ```go
 func (d Dictionary) Update(word, definition string) error {
-    _, err := d.Search(word)
+	_, err := d.Search(word)
 
-    switch err {
-    case ErrNotFound:
-        return ErrWordDoesNotExist
-    case nil:
-        d[word] = definition
-    default:
-        return err
-    }
+	switch err {
+	case ErrNotFound:
+		return ErrWordDoesNotExist
+	case nil:
+		d[word] = definition
+	default:
+		return err
+	}
 
-    return nil
+	return nil
 }
 ```
 
@@ -597,15 +598,15 @@ Next, let's create a function to `Delete` a word in the dictionary.
 
 ```go
 func TestDelete(t *testing.T) {
-    word := "test"
-    dictionary := Dictionary{word: "test definition"}
+	word := "test"
+	dictionary := Dictionary{word: "test definition"}
 
-    dictionary.Delete(word)
+	dictionary.Delete(word)
 
-    _, err := dictionary.Search(word)
-    if err != ErrNotFound {
-        t.Errorf("Expected %q to be deleted", word)
-    }
+	_, err := dictionary.Search(word)
+	if err != ErrNotFound {
+		t.Errorf("Expected %q to be deleted", word)
+	}
 }
 ```
 
@@ -637,7 +638,7 @@ dictionary_test.go:78: Expected 'test' to be deleted
 
 ```go
 func (d Dictionary) Delete(word string) {
-    delete(d, word)
+	delete(d, word)
 }
 ```
 

@@ -12,7 +12,7 @@ If you've read other chapters in this book you will have ran into `io.Reader` wh
 
 ```go
 type Reader interface {
-  Read(p []byte) (n int, err error)
+	Read(p []byte) (n int, err error)
 }
 ```
 
@@ -28,7 +28,7 @@ They combined two simple abstractions (`context.Context` and `io.Reader`) to sol
 
 Let's try and TDD some functionality so that we can wrap an `io.Reader` so it can be cancelled.
 
-Testing this poses an interesting challenge. Normally when using an `io.Reader` you're usually supplying it to some other function and you dont really concern yourself with the details; such as `json.NewDecoder` or `ioutil.ReadAll`.
+Testing this poses an interesting challenge. Normally when using an `io.Reader` you're usually supplying it to some other function and you don't really concern yourself with the details; such as `json.NewDecoder` or `ioutil.ReadAll`.
 
 What we want to demonstrate is something like
 
@@ -38,7 +38,7 @@ Let's look at the interface again.
 
 ```go
 type Reader interface {
-  Read(p []byte) (n int, err error)
+	Read(p []byte) (n int, err error)
 }
 ```
 
@@ -102,23 +102,23 @@ From there let the compiler and failing test output can guide us to a solution
 
 ```go
 t.Run("behaves like a normal reader", func(t *testing.T) {
-    rdr := NewCancellableReader(strings.NewReader("123456"))
-    got := make([]byte, 3)
-    _, err := rdr.Read(got)
+	rdr := NewCancellableReader(strings.NewReader("123456"))
+	got := make([]byte, 3)
+	_, err := rdr.Read(got)
 
-    if err != nil {
-        t.Fatal(err)
-    }
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    assertBufferHas(t, got, "123")
+	assertBufferHas(t, got, "123")
 
-    _, err = rdr.Read(got)
+	_, err = rdr.Read(got)
 
-    if err != nil {
-        t.Fatal(err)
-    }
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    assertBufferHas(t, got, "456")
+	assertBufferHas(t, got, "456")
 })
 ```
 
@@ -169,28 +169,28 @@ Next we need to try and cancel.
 
 ```go
 t.Run("stops reading when cancelled", func(t *testing.T) {
-    ctx, cancel := context.WithCancel(context.Background())
-    rdr := NewCancellableReader(ctx, strings.NewReader("123456"))
-    got := make([]byte, 3)
-    _, err := rdr.Read(got)
+	ctx, cancel := context.WithCancel(context.Background())
+	rdr := NewCancellableReader(ctx, strings.NewReader("123456"))
+	got := make([]byte, 3)
+	_, err := rdr.Read(got)
 
-    if err != nil {
-        t.Fatal(err)
-    }
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    assertBufferHas(t, got, "123")
+	assertBufferHas(t, got, "123")
 
-    cancel()
+	cancel()
 
-    n, err := rdr.Read(got)
+	n, err := rdr.Read(got)
 
-    if err == nil {
-        t.Error("expected an error after cancellation but didnt get one")
-    }
+	if err == nil {
+		t.Error("expected an error after cancellation but didnt get one")
+	}
 
-    if n > 0 {
-        t.Errorf("expected 0 bytes to be read after cancellation but %d were read", n)
-    }
+	if n > 0 {
+		t.Errorf("expected 0 bytes to be read after cancellation but %d were read", n)
+	}
 })
 ```
 
@@ -252,7 +252,7 @@ type readerCtx struct {
 
 As I have stressed many times in this book, go slowly and let the compiler help you
 
-```go
+```
 ./cancel_readers_test.go:60:3: cannot use &readerCtx literal (type *readerCtx) as type io.Reader in return argument:
 	*readerCtx does not implement io.Reader (missing Read method)
 ```

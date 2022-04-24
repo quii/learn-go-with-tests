@@ -55,7 +55,7 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 ```
 
 ```go
-// InMemoryPlayerStore.go
+// in_memory_player_store.go
 package main
 
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
@@ -87,7 +87,7 @@ import (
 
 func main() {
 	server := &PlayerServer{NewInMemoryPlayerStore()}
-    log.Fatal(http.ListenAndServe(":5000", server))
+	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 

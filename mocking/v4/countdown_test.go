@@ -10,7 +10,7 @@ func TestCountdown(t *testing.T) {
 
 	t.Run("prints 3 to Go!", func(t *testing.T) {
 		buffer := &bytes.Buffer{}
-		Countdown(buffer, &CountdownOperationsSpy{})
+		Countdown(buffer, &SpyCountdownOperations{})
 
 		got := buffer.String()
 		want := `3
@@ -24,7 +24,7 @@ Go!`
 	})
 
 	t.Run("sleep before every print", func(t *testing.T) {
-		spySleepPrinter := &CountdownOperationsSpy{}
+		spySleepPrinter := &SpyCountdownOperations{}
 		Countdown(spySleepPrinter, spySleepPrinter)
 
 		want := []string{
@@ -44,15 +44,15 @@ Go!`
 	})
 }
 
-type CountdownOperationsSpy struct {
+type SpyCountdownOperations struct {
 	Calls []string
 }
 
-func (s *CountdownOperationsSpy) Sleep() {
+func (s *SpyCountdownOperations) Sleep() {
 	s.Calls = append(s.Calls, sleep)
 }
 
-func (s *CountdownOperationsSpy) Write(p []byte) (n int, err error) {
+func (s *SpyCountdownOperations) Write(p []byte) (n int, err error) {
 	s.Calls = append(s.Calls, write)
 	return
 }

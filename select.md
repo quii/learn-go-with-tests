@@ -18,7 +18,7 @@ Let's start with something naive to get us going.
 ```go
 func TestRacer(t *testing.T) {
 	slowURL := "http://www.facebook.com"
-	fastURL := "http://www.quii.co.uk"
+	fastURL := "http://www.quii.dev"
 
 	want := fastURL
 	got := Racer(slowURL, fastURL)
@@ -43,7 +43,7 @@ func Racer(a, b string) (winner string) {
 }
 ```
 
-`racer_test.go:25: got '', want 'http://www.quii.co.uk'`
+`racer_test.go:25: got '', want 'http://www.quii.dev'`
 
 ## Write enough code to make it pass
 
@@ -246,7 +246,7 @@ If you recall from the concurrency chapter, you can wait for values to be sent t
 
 What `select` lets you do is wait on _multiple_ channels. The first one to send a value "wins" and the code underneath the `case` is executed.
 
-We use `ping` in our `select` to set up two channels for each of our `URL`s. Whichever one writes to its channel first will have its code executed in the `select`, which results in its `URL` being returned (and being the winner).
+We use `ping` in our `select` to set up two channels, one for each of our `URL`s. Whichever one writes to its channel first will have its code executed in the `select`, which results in its `URL` being returned (and being the winner).
 
 After these changes, the intent behind our code is very clear and the implementation is actually simpler.
 

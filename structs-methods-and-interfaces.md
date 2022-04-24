@@ -10,12 +10,12 @@ The TDD cycle should be pretty familiar to you by now.
 
 ```go
 func TestPerimeter(t *testing.T) {
-    got := Perimeter(10.0, 10.0)
-    want := 40.0
+	got := Perimeter(10.0, 10.0)
+	want := 40.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
-    }
+	if got != want {
+		t.Errorf("got %.2f want %.2f", got, want)
+	}
 }
 ```
 
@@ -29,7 +29,7 @@ Notice the new format string? The `f` is for our `float64` and the `.2` means pr
 
 ```go
 func Perimeter(width float64, height float64) float64 {
-    return 0
+	return 0
 }
 ```
 
@@ -39,7 +39,7 @@ Results in `shapes_test.go:10: got 0.00 want 40.00`.
 
 ```go
 func Perimeter(width float64, height float64) float64 {
-    return 2 * (width + height)
+	return 2 * (width + height)
 }
 ```
 
@@ -51,21 +51,21 @@ You should end up with tests like this
 
 ```go
 func TestPerimeter(t *testing.T) {
-    got := Perimeter(10.0, 10.0)
-    want := 40.0
+	got := Perimeter(10.0, 10.0)
+	want := 40.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
-    }
+	if got != want {
+		t.Errorf("got %.2f want %.2f", got, want)
+	}
 }
 
 func TestArea(t *testing.T) {
-    got := Area(12.0, 6.0)
-    want := 72.0
+	got := Area(12.0, 6.0)
+	want := 72.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
-    }
+	if got != want {
+		t.Errorf("got %.2f want %.2f", got, want)
+	}
 }
 ```
 
@@ -73,11 +73,11 @@ And code like this
 
 ```go
 func Perimeter(width float64, height float64) float64 {
-    return 2 * (width + height)
+	return 2 * (width + height)
 }
 
 func Area(width float64, height float64) float64 {
-    return width * height
+	return width * height
 }
 ```
 
@@ -93,8 +93,8 @@ Declare a struct like this
 
 ```go
 type Rectangle struct {
-    Width float64
-    Height float64
+	Width  float64
+	Height float64
 }
 ```
 
@@ -102,23 +102,23 @@ Now let's refactor the tests to use `Rectangle` instead of plain `float64`s.
 
 ```go
 func TestPerimeter(t *testing.T) {
-    rectangle := Rectangle{10.0, 10.0}
-    got := Perimeter(rectangle)
-    want := 40.0
+	rectangle := Rectangle{10.0, 10.0}
+	got := Perimeter(rectangle)
+	want := 40.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
-    }
+	if got != want {
+		t.Errorf("got %.2f want %.2f", got, want)
+	}
 }
 
 func TestArea(t *testing.T) {
-    rectangle := Rectangle{12.0, 6.0}
-    got := Area(rectangle)
-    want := 72.0
+	rectangle := Rectangle{12.0, 6.0}
+	got := Area(rectangle)
+	want := 72.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
-    }
+	if got != want {
+		t.Errorf("got %.2f want %.2f", got, want)
+	}
 }
 ```
 
@@ -136,11 +136,11 @@ Change the two functions to fix the test.
 
 ```go
 func Perimeter(rectangle Rectangle) float64 {
-    return 2 * (rectangle.Width + rectangle.Height)
+	return 2 * (rectangle.Width + rectangle.Height)
 }
 
 func Area(rectangle Rectangle) float64 {
-    return rectangle.Width * rectangle.Height
+	return rectangle.Width * rectangle.Height
 }
 ```
 
@@ -153,25 +153,25 @@ Our next requirement is to write an `Area` function for circles.
 ```go
 func TestArea(t *testing.T) {
 
-    t.Run("rectangles", func(t *testing.T) {
-        rectangle := Rectangle{12, 6}
-        got := Area(rectangle)
-        want := 72.0
+	t.Run("rectangles", func(t *testing.T) {
+		rectangle := Rectangle{12, 6}
+		got := Area(rectangle)
+		want := 72.0
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %g want %g", got, want)
+		}
+	})
 
-    t.Run("circles", func(t *testing.T) {
-        circle := Circle{10}
-        got := Area(circle)
-        want := 314.1592653589793
+	t.Run("circles", func(t *testing.T) {
+		circle := Circle{10}
+		got := Area(circle)
+		want := 314.1592653589793
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %g want %g", got, want)
+		}
+	})
 
 }
 ```
@@ -190,7 +190,7 @@ We need to define our `Circle` type.
 
 ```go
 type Circle struct {
-    Radius float64
+	Radius float64
 }
 ```
 
@@ -201,8 +201,8 @@ Now try to run the tests again
 Some programming languages allow you to do something like this:
 
 ```go
-func Area(circle Circle) float64 { ... }
-func Area(rectangle Rectangle) float64 { ... }
+func Area(circle Circle) float64       {}
+func Area(rectangle Rectangle) float64 {}
 ```
 
 But you cannot in Go
@@ -228,25 +228,25 @@ An example will help so let's change our tests first to call methods instead and
 ```go
 func TestArea(t *testing.T) {
 
-    t.Run("rectangles", func(t *testing.T) {
-        rectangle := Rectangle{12, 6}
-        got := rectangle.Area()
-        want := 72.0
+	t.Run("rectangles", func(t *testing.T) {
+		rectangle := Rectangle{12, 6}
+		got := rectangle.Area()
+		want := 72.0
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %g want %g", got, want)
+		}
+	})
 
-    t.Run("circles", func(t *testing.T) {
-        circle := Circle{10}
-        got := circle.Area()
-        want := 314.1592653589793
+	t.Run("circles", func(t *testing.T) {
+		circle := Circle{10}
+		got := circle.Area()
+		want := 314.1592653589793
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %g want %g", got, want)
+		}
+	})
 
 }
 ```
@@ -268,20 +268,20 @@ Let's add some methods to our types
 
 ```go
 type Rectangle struct {
-    Width  float64
-    Height float64
+	Width  float64
+	Height float64
 }
 
-func (r Rectangle) Area() float64  {
-    return 0
+func (r Rectangle) Area() float64 {
+	return 0
 }
 
 type Circle struct {
-    Radius float64
+	Radius float64
 }
 
-func (c Circle) Area() float64  {
-    return 0
+func (c Circle) Area() float64 {
+	return 0
 }
 ```
 
@@ -291,7 +291,7 @@ When your method is called on a variable of that type, you get your reference to
 
 It is a convention in Go to have the receiver variable be the first letter of the type.
 
-```go
+```
 r Rectangle
 ```
 
@@ -302,8 +302,8 @@ If you try to re-run the tests they should now compile and give you some failing
 Now let's make our rectangle tests pass by fixing our new method
 
 ```go
-func (r Rectangle) Area() float64  {
-    return r.Width * r.Height
+func (r Rectangle) Area() float64 {
+	return r.Width * r.Height
 }
 ```
 
@@ -312,8 +312,8 @@ If you re-run the tests the rectangle tests should be passing but circle should 
 To make circle's `Area` function pass we will borrow the `Pi` constant from the `math` package \(remember to import it\).
 
 ```go
-func (c Circle) Area() float64  {
-    return math.Pi * c.Radius * c.Radius
+func (c Circle) Area() float64 {
+	return math.Pi * c.Radius * c.Radius
 }
 ```
 
@@ -334,23 +334,23 @@ Let's introduce this by refactoring our tests.
 ```go
 func TestArea(t *testing.T) {
 
-    checkArea := func(t testing.TB, shape Shape, want float64) {
-        t.Helper()
-        got := shape.Area()
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
-        }
-    }
+	checkArea := func(t testing.TB, shape Shape, want float64) {
+		t.Helper()
+		got := shape.Area()
+		if got != want {
+			t.Errorf("got %g want %g", got, want)
+		}
+	}
 
-    t.Run("rectangles", func(t *testing.T) {
-        rectangle := Rectangle{12, 6}
-        checkArea(t, rectangle, 72.0)
-    })
+	t.Run("rectangles", func(t *testing.T) {
+		rectangle := Rectangle{12, 6}
+		checkArea(t, rectangle, 72.0)
+	})
 
-    t.Run("circles", func(t *testing.T) {
-        circle := Circle{10}
-        checkArea(t, circle, 314.1592653589793)
-    })
+	t.Run("circles", func(t *testing.T) {
+		circle := Circle{10}
+		checkArea(t, circle, 314.1592653589793)
+	})
 
 }
 ```
@@ -361,7 +361,7 @@ How does something become a shape? We just tell Go what a `Shape` is using an in
 
 ```go
 type Shape interface {
-    Area() float64
+	Area() float64
 }
 ```
 
@@ -397,20 +397,20 @@ Now that you have some understanding of structs we can introduce "table driven t
 ```go
 func TestArea(t *testing.T) {
 
-    areaTests := []struct {
-        shape Shape
-        want  float64
-    }{
-        {Rectangle{12, 6}, 72.0},
-        {Circle{10}, 314.1592653589793},
-    }
+	areaTests := []struct {
+		shape Shape
+		want  float64
+	}{
+		{Rectangle{12, 6}, 72.0},
+		{Circle{10}, 314.1592653589793},
+	}
 
-    for _, tt := range areaTests {
-        got := tt.shape.Area()
-        if got != tt.want {
-            t.Errorf("got %g want %g", got, tt.want)
-        }
-    }
+	for _, tt := range areaTests {
+		got := tt.shape.Area()
+		if got != tt.want {
+			t.Errorf("got %g want %g", got, tt.want)
+		}
+	}
 
 }
 ```
@@ -433,21 +433,21 @@ Adding a new test for our new shape is very easy. Just add `{Triangle{12, 6}, 36
 ```go
 func TestArea(t *testing.T) {
 
-    areaTests := []struct {
-        shape Shape
-        want  float64
-    }{
-        {Rectangle{12, 6}, 72.0},
-        {Circle{10}, 314.1592653589793},
-        {Triangle{12, 6}, 36.0},
-    }
+	areaTests := []struct {
+		shape Shape
+		want  float64
+	}{
+		{Rectangle{12, 6}, 72.0},
+		{Circle{10}, 314.1592653589793},
+		{Triangle{12, 6}, 36.0},
+	}
 
-    for _, tt := range areaTests {
-        got := tt.shape.Area()
-        if got != tt.want {
-            t.Errorf("got %g want %g", got, tt.want)
-        }
-    }
+	for _, tt := range areaTests {
+		got := tt.shape.Area()
+		if got != tt.want {
+			t.Errorf("got %g want %g", got, tt.want)
+		}
+	}
 
 }
 ```
@@ -464,8 +464,8 @@ We have not defined `Triangle` yet
 
 ```go
 type Triangle struct {
-    Base   float64
-    Height float64
+	Base   float64
+	Height float64
 }
 ```
 
@@ -480,7 +480,7 @@ It's telling us we cannot use a `Triangle` as a shape because it does not have a
 
 ```go
 func (t Triangle) Area() float64 {
-    return 0
+	return 0
 }
 ```
 
@@ -492,7 +492,7 @@ Finally the code compiles and we get our error
 
 ```go
 func (t Triangle) Area() float64 {
-    return (t.Base * t.Height) * 0.5
+	return (t.Base * t.Height) * 0.5
 }
 ```
 
@@ -504,7 +504,7 @@ Again, the implementation is fine but our tests could do with some improvement.
 
 When you scan this
 
-```go
+```
 {Rectangle{12, 6}, 72.0},
 {Circle{10}, 314.1592653589793},
 {Triangle{12, 6}, 36.0},
@@ -516,7 +516,7 @@ So far you've only been shown syntax for creating instances of structs `MyStruct
 
 Let's see what it looks like
 
-```go
+```
         {shape: Rectangle{Width: 12, Height: 6}, want: 72.0},
         {shape: Circle{Radius: 10}, want: 314.1592653589793},
         {shape: Triangle{Base: 12, Height: 6}, want: 36.0},
@@ -560,26 +560,26 @@ Here is our final test code which captures this
 ```go
 func TestArea(t *testing.T) {
 
-    areaTests := []struct {
-        name    string
-        shape   Shape
-        hasArea float64
-    }{
-        {name: "Rectangle", shape: Rectangle{Width: 12, Height: 6}, hasArea: 72.0},
-        {name: "Circle", shape: Circle{Radius: 10}, hasArea: 314.1592653589793},
-        {name: "Triangle", shape: Triangle{Base: 12, Height: 6}, hasArea: 36.0},
-    }
+	areaTests := []struct {
+		name    string
+		shape   Shape
+		hasArea float64
+	}{
+		{name: "Rectangle", shape: Rectangle{Width: 12, Height: 6}, hasArea: 72.0},
+		{name: "Circle", shape: Circle{Radius: 10}, hasArea: 314.1592653589793},
+		{name: "Triangle", shape: Triangle{Base: 12, Height: 6}, hasArea: 36.0},
+	}
 
-    for _, tt := range areaTests {
-        // using tt.name from the case to use it as the `t.Run` test name
-        t.Run(tt.name, func(t *testing.T) {
-            got := tt.shape.Area()
-            if got != tt.hasArea {
-                t.Errorf("%#v got %g want %g", tt.shape, got, tt.hasArea)
-            }
-        })
+	for _, tt := range areaTests {
+		// using tt.name from the case to use it as the `t.Run` test name
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.shape.Area()
+			if got != tt.hasArea {
+				t.Errorf("%#v got %g want %g", tt.shape, got, tt.hasArea)
+			}
+		})
 
-    }
+	}
 
 }
 ```

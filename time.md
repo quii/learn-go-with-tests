@@ -66,7 +66,7 @@ As usual the standard library has us covered with [`func AfterFunc(d Duration, f
 
 The time library has a number of constants to let you multiply those nanoseconds so they're a bit more readable for the kind of scenarios we'll be doing
 
-```go
+```
 5 * time.Second
 ```
 
@@ -80,16 +80,16 @@ Add a new test to our suite
 
 ```go
 t.Run("it schedules printing of blind values", func(t *testing.T) {
-    in := strings.NewReader("Chris wins\n")
-    playerStore := &poker.StubPlayerStore{}
-    blindAlerter := &SpyBlindAlerter{}
+	in := strings.NewReader("Chris wins\n")
+	playerStore := &poker.StubPlayerStore{}
+	blindAlerter := &SpyBlindAlerter{}
 
-    cli := poker.NewCLI(playerStore, in, blindAlerter)
-    cli.PlayPoker()
+	cli := poker.NewCLI(playerStore, in, blindAlerter)
+	cli.PlayPoker()
 
-    if len(blindAlerter.alerts) != 1 {
-        t.Fatal("expected a blind alert to be scheduled")
-    }
+	if len(blindAlerter.alerts) != 1 {
+		t.Fatal("expected a blind alert to be scheduled")
+	}
 })
 ```
 
@@ -101,17 +101,17 @@ Here's the definition of `SpyBlindAlerter`
 
 ```go
 type SpyBlindAlerter struct {
-	alerts []struct{
+	alerts []struct {
 		scheduledAt time.Duration
-		amount int
+		amount      int
 	}
 }
 
 func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
 	s.alerts = append(s.alerts, struct {
 		scheduledAt time.Duration
-		amount int
-	}{duration,  amount})
+		amount      int
+	}{duration, amount})
 }
 
 ```
@@ -187,7 +187,7 @@ To make the test pass, we can call our `BlindAlerter` with anything we like
 
 ```go
 func (cli *CLI) PlayPoker() {
-	cli.alerter.ScheduleAlertAt(5 * time.Second, 100)
+	cli.alerter.ScheduleAlertAt(5*time.Second, 100)
 	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
@@ -206,10 +206,10 @@ Next we'll want to check it schedules all the alerts we'd hope for, for 5 player
 		cli := poker.NewCLI(playerStore, in, blindAlerter)
 		cli.PlayPoker()
 
-		cases := []struct{
+		cases := []struct {
 			expectedScheduleTime time.Duration
 			expectedAmount       int
-		} {
+		}{
 			{0 * time.Second, 100},
 			{10 * time.Minute, 200},
 			{20 * time.Minute, 300},
@@ -252,7 +252,7 @@ Table-based test works nicely here and clearly illustrate what our requirements 
 
 You should have a lot of failures looking like this
 
-```go
+```
 === RUN   TestCLI
 --- FAIL: TestCLI (0.00s)
 === RUN   TestCLI/it_schedules_printing_of_blind_values
@@ -274,7 +274,7 @@ func (cli *CLI) PlayPoker() {
 	blindTime := 0 * time.Second
 	for _, blind := range blinds {
 		cli.alerter.ScheduleAlertAt(blindTime, blind)
-		blindTime = blindTime + 10 * time.Minute
+		blindTime = blindTime + 10*time.Minute
 	}
 
 	userInput := cli.readLine()
@@ -309,7 +309,7 @@ Finally our tests are looking a little clunky. We have two anonymous structs rep
 
 ```go
 type scheduledAlert struct {
-	at time.Duration
+	at     time.Duration
 	amount int
 }
 
@@ -332,38 +332,38 @@ Update our test to use our new type
 
 ```go
 t.Run("it schedules printing of blind values", func(t *testing.T) {
-    in := strings.NewReader("Chris wins\n")
-    playerStore := &poker.StubPlayerStore{}
-    blindAlerter := &SpyBlindAlerter{}
+	in := strings.NewReader("Chris wins\n")
+	playerStore := &poker.StubPlayerStore{}
+	blindAlerter := &SpyBlindAlerter{}
 
-    cli := poker.NewCLI(playerStore, in, blindAlerter)
-    cli.PlayPoker()
+	cli := poker.NewCLI(playerStore, in, blindAlerter)
+	cli.PlayPoker()
 
-    cases := []scheduledAlert {
-        {0 * time.Second, 100},
-        {10 * time.Minute, 200},
-        {20 * time.Minute, 300},
-        {30 * time.Minute, 400},
-        {40 * time.Minute, 500},
-        {50 * time.Minute, 600},
-        {60 * time.Minute, 800},
-        {70 * time.Minute, 1000},
-        {80 * time.Minute, 2000},
-        {90 * time.Minute, 4000},
-        {100 * time.Minute, 8000},
-    }
+	cases := []scheduledAlert{
+		{0 * time.Second, 100},
+		{10 * time.Minute, 200},
+		{20 * time.Minute, 300},
+		{30 * time.Minute, 400},
+		{40 * time.Minute, 500},
+		{50 * time.Minute, 600},
+		{60 * time.Minute, 800},
+		{70 * time.Minute, 1000},
+		{80 * time.Minute, 2000},
+		{90 * time.Minute, 4000},
+		{100 * time.Minute, 8000},
+	}
 
-    for i, want := range cases {
-        t.Run(fmt.Sprint(want), func(t *testing.T) {
+	for i, want := range cases {
+		t.Run(fmt.Sprint(want), func(t *testing.T) {
 
-            if len(blindAlerter.alerts) <= i {
-                t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
-            }
+			if len(blindAlerter.alerts) <= i {
+				t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
+			}
 
-            got := blindAlerter.alerts[i]
-            assertScheduledAlert(t, got, want)
-        })
-    }
+			got := blindAlerter.alerts[i]
+			assertScheduledAlert(t, got, want)
+		})
+	}
 })
 ```
 
@@ -375,15 +375,15 @@ Try running the app and it won't compile, complaining about not enough args to `
 
 Let's create an implementation of `BlindAlerter` that we can use in our application.
 
-Create `BlindAlerter.go` and move our `BlindAlerter` interface and add the new things below
+Create `blind_alerter.go` and move our `BlindAlerter` interface and add the new things below
 
 ```go
 package poker
 
 import (
-	"time"
 	"fmt"
 	"os"
+	"time"
 )
 
 type BlindAlerter interface {
@@ -440,16 +440,16 @@ Here is our new test
 
 ```go
 t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
-    stdout := &bytes.Buffer{}
-    cli := poker.NewCLI(dummyPlayerStore, dummyStdIn, stdout, dummyBlindAlerter)
-    cli.PlayPoker()
+	stdout := &bytes.Buffer{}
+	cli := poker.NewCLI(dummyPlayerStore, dummyStdIn, stdout, dummyBlindAlerter)
+	cli.PlayPoker()
 
-    got := stdout.String()
-    want := "Please enter the number of players: "
+	got := stdout.String()
+	want := "Please enter the number of players: "
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 })
 ```
 
@@ -535,38 +535,38 @@ Now we need to send in a number and extract it out. The only way we'll know if i
 
 ```go
 t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
-    stdout := &bytes.Buffer{}
-    in := strings.NewReader("7\n")
-    blindAlerter := &SpyBlindAlerter{}
+	stdout := &bytes.Buffer{}
+	in := strings.NewReader("7\n")
+	blindAlerter := &SpyBlindAlerter{}
 
-    cli := poker.NewCLI(dummyPlayerStore, in, stdout, blindAlerter)
-    cli.PlayPoker()
+	cli := poker.NewCLI(dummyPlayerStore, in, stdout, blindAlerter)
+	cli.PlayPoker()
 
-    got := stdout.String()
-    want := poker.PlayerPrompt
+	got := stdout.String()
+	want := poker.PlayerPrompt
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 
-    cases := []scheduledAlert{
-        {0 * time.Second, 100},
-        {12 * time.Minute, 200},
-        {24 * time.Minute, 300},
-        {36 * time.Minute, 400},
-    }
+	cases := []scheduledAlert{
+		{0 * time.Second, 100},
+		{12 * time.Minute, 200},
+		{24 * time.Minute, 300},
+		{36 * time.Minute, 400},
+	}
 
-    for i, want := range cases {
-        t.Run(fmt.Sprint(want), func(t *testing.T) {
+	for i, want := range cases {
+		t.Run(fmt.Sprint(want), func(t *testing.T) {
 
-            if len(blindAlerter.alerts) <= i {
-                t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
-            }
+			if len(blindAlerter.alerts) <= i {
+				t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
+			}
 
-            got := blindAlerter.alerts[i]
-            assertScheduledAlert(t, got, want)
-        })
-    }
+			got := blindAlerter.alerts[i]
+			assertScheduledAlert(t, got, want)
+		})
+	}
 })
 ```
 
@@ -607,7 +607,7 @@ func (cli *CLI) PlayPoker() {
 }
 
 func (cli *CLI) scheduleBlindAlerts(numberOfPlayers int) {
-	blindIncrement := time.Duration(5 + numberOfPlayers) * time.Minute
+	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
 
 	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
 	blindTime := 0 * time.Second
@@ -667,9 +667,9 @@ func (p *Game) Finish(winner string) {
 
 // cli.go
 type CLI struct {
-	in          *bufio.Scanner
-	out         io.Writer
-	game        *Game
+	in   *bufio.Scanner
+	out  io.Writer
+	game *Game
 }
 
 func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
@@ -731,8 +731,8 @@ All we need to do right now is change `NewCLI`
 ```go
 func NewCLI(in io.Reader, out io.Writer, game *Game) *CLI {
 	return &CLI{
-		in:  bufio.NewScanner(in),
-		out: out,
+		in:   bufio.NewScanner(in),
+		out:  out,
 		game: game,
 	}
 }
@@ -747,8 +747,8 @@ To do this you'll need to make a constructor
 ```go
 func NewGame(alerter BlindAlerter, store PlayerStore) *Game {
 	return &Game{
-		alerter:alerter,
-		store:store,
+		alerter: alerter,
+		store:   store,
 	}
 }
 ```
@@ -911,17 +911,17 @@ We'll start by making sure the game doesn't start
 
 ```go
 t.Run("it prints an error when a non numeric value is entered and does not start the game", func(t *testing.T) {
-		stdout := &bytes.Buffer{}
-		in := strings.NewReader("Pies\n")
-		game := &GameSpy{}
+	stdout := &bytes.Buffer{}
+	in := strings.NewReader("Pies\n")
+	game := &GameSpy{}
 
-		cli := poker.NewCLI(in, stdout, game)
-		cli.PlayPoker()
+	cli := poker.NewCLI(in, stdout, game)
+	cli.PlayPoker()
 
-		if game.StartCalled {
-			t.Errorf("game should not have started")
-		}
-	})
+	if game.StartCalled {
+		t.Errorf("game should not have started")
+	}
+})
 ```
 
 You'll need to add to our `GameSpy` a field `StartCalled` which only gets set if `Start` is called
@@ -941,7 +941,7 @@ Around where we call `Atoi` we just need to check for the error
 numberOfPlayers, err := strconv.Atoi(cli.readLine())
 
 if err != nil {
-    return
+	return
 }
 ```
 
@@ -957,7 +957,7 @@ gotPrompt := stdout.String()
 wantPrompt := poker.PlayerPrompt + "you're so silly"
 
 if gotPrompt != wantPrompt {
-    t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
+	t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
 }
 ```
 
@@ -977,8 +977,8 @@ Change the error handling code
 
 ```go
 if err != nil {
-    fmt.Fprint(cli.out, "you're so silly")
-    return
+	fmt.Fprint(cli.out, "you're so silly")
+	return
 }
 ```
 
@@ -1108,7 +1108,7 @@ After refactoring the dependency list reflected our design goal. This is another
 
 ## An example of a function implementing an interface
 
-When you define an interface with one method in it you might want to consider defining a `MyInterfaceFunc` type to complement it so users can implement your interface with just a function
+When you define an interface with one method in it you might want to consider defining a `MyInterfaceFunc` type to complement it so users can implement your interface with just a function.
 
 ```go
 type BlindAlerter interface {
@@ -1123,3 +1123,23 @@ func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
 	a(duration, amount)
 }
 ```
+
+By doing this, people using your library can implement your interface with just a function. They can use [Type Conversion](https://go.dev/tour/basics/13) to convert their function into a `BlindAlerterFunc` and then use it as a BlindAlerter (as `BlindAlerterFunc` implements `BlindAlerter`).
+
+```go
+game := poker.NewTexasHoldem(poker.BlindAlerterFunc(poker.StdOutAlerter), store)
+```
+
+The broader point here is, in Go you can add methods to _types_, not just structs. This is a very powerful feature, and you can use it to implement interfaces in more convenient ways.
+
+Consider that you can not only define types of functions, but also define types around other types, so that you can add methods to them.
+
+```go
+type Blog map[string]string
+
+func (b Blog) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, b[r.URL.Path])
+}
+```
+
+Here we've created an HTTP handler that implements a very simple "blog" where it will use URL paths as keys to posts stored in a map.

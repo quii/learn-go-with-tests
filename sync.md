@@ -39,7 +39,6 @@ Let's define `Counter`.
 
 ```go
 type Counter struct {
-
 }
 ```
 
@@ -96,15 +95,16 @@ There's not a lot to refactor but given we're going to write more tests around `
 
 ```go
 t.Run("incrementing the counter 3 times leaves it at 3", func(t *testing.T) {
-    counter := Counter{}
-    counter.Inc()
-    counter.Inc()
-    counter.Inc()
+	counter := Counter{}
+	counter.Inc()
+	counter.Inc()
+	counter.Inc()
 
-    assertCounter(t, counter, 3)
+	assertCounter(t, counter, 3)
 })
-
-func assertCounter(t testing.TB, got Counter, want int)  {
+```
+```go
+func assertCounter(t testing.TB, got Counter, want int) {
 	t.Helper()
 	if got.Value() != want {
 		t.Errorf("got %d, want %d", got.Value(), want)
@@ -120,21 +120,21 @@ That was easy enough but now we have a requirement that it must be safe to use i
 
 ```go
 t.Run("it runs safely concurrently", func(t *testing.T) {
-    wantedCount := 1000
-    counter := Counter{}
+	wantedCount := 1000
+	counter := Counter{}
 
-    var wg sync.WaitGroup
-    wg.Add(wantedCount)
+	var wg sync.WaitGroup
+	wg.Add(wantedCount)
 
-    for i := 0; i < wantedCount; i++ {
-        go func() {
-            counter.Inc()
-            wg.Done()
-        }()
-    }
-    wg.Wait()
+	for i := 0; i < wantedCount; i++ {
+		go func() {
+			counter.Inc()
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 
-    assertCounter(t, counter, wantedCount)
+	assertCounter(t, counter, wantedCount)
 })
 ```
 
@@ -166,7 +166,7 @@ A simple solution is to add a lock to our `Counter`, a [`Mutex`](https://golang.
 
 ```go
 type Counter struct {
-	mu sync.Mutex
+	mu    sync.Mutex
 	value int
 }
 
@@ -250,7 +250,7 @@ Use this function in your tests when initialising `Counter`.
 We've covered a few things from the [sync package](https://golang.org/pkg/sync/)
 
 - `Mutex` allows us to add locks to our data
-- `Waitgroup` is a means of waiting for goroutines to finish jobs
+- `WaitGroup` is a means of waiting for goroutines to finish jobs
 
 ### When to use locks over channels and goroutines?
 

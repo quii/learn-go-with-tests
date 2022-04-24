@@ -15,16 +15,16 @@ Let's make a `Wallet` struct which lets us deposit `Bitcoin`.
 ```go
 func TestWallet(t *testing.T) {
 
-    wallet := Wallet{}
+	wallet := Wallet{}
 
-    wallet.Deposit(10)
+	wallet.Deposit(10)
 
-    got := wallet.Balance()
-    want := 10
+	got := wallet.Balance()
+	want := 10
 
-    if got != want {
-        t.Errorf("got %d want %d", got, want)
-    }
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
 }
 ```
 
@@ -39,12 +39,12 @@ In the [previous example](./structs-methods-and-interfaces.md) we accessed field
 The compiler doesn't know what a `Wallet` is so let's tell it.
 
 ```go
-type Wallet struct { }
+type Wallet struct{}
 ```
 
 Now we've made our wallet, try and run the test again
 
-```go
+```
 ./wallet_test.go:9:8: wallet.Deposit undefined (type Wallet has no field or method Deposit)
 ./wallet_test.go:11:15: wallet.Balance undefined (type Wallet has no field or method Balance)
 ```
@@ -59,7 +59,7 @@ func (w Wallet) Deposit(amount int) {
 }
 
 func (w Wallet) Balance() int {
-    return 0
+	return 0
 }
 ```
 
@@ -75,7 +75,7 @@ We will need some kind of _balance_ variable in our struct to store the state
 
 ```go
 type Wallet struct {
-    balance int
+	balance int
 }
 ```
 
@@ -87,11 +87,11 @@ Remember we can access the internal `balance` field in the struct using the "rec
 
 ```go
 func (w Wallet) Deposit(amount int) {
-    w.balance += amount
+	w.balance += amount
 }
 
 func (w Wallet) Balance() int {
-    return w.balance
+	return w.balance
 }
 ```
 
@@ -99,7 +99,7 @@ With our career in fintech secured, run the test suite and bask in the passing t
 
 `wallet_test.go:15: got 0 want 10`
 
-### ????
+### That's not quite right
 
 Well this is confusing, our code looks like it should work.
 We add the new amount onto our balance and then the balance method should return the current state of it.
@@ -115,26 +115,26 @@ Experiment by adding some prints to your code
 ```go
 func TestWallet(t *testing.T) {
 
-    wallet := Wallet{}
+	wallet := Wallet{}
 
-    wallet.Deposit(10)
+	wallet.Deposit(10)
 
-    got := wallet.Balance()
+	got := wallet.Balance()
 
-    fmt.Printf("address of balance in test is %v \n", &wallet.balance)
+	fmt.Printf("address of balance in test is %v \n", &wallet.balance)
 
-    want := 10
+	want := 10
 
-    if got != want {
-        t.Errorf("got %d want %d", got, want)
-    }
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
 }
 ```
 
 ```go
 func (w Wallet) Deposit(amount int) {
-    fmt.Printf("address of balance in Deposit is %v \n", &w.balance)
-    w.balance += amount
+	fmt.Printf("address of balance in Deposit is %v \n", &w.balance)
+	w.balance += amount
 }
 ```
 
@@ -155,11 +155,11 @@ So rather than taking a copy of the whole Wallet, we instead take a pointer to t
 
 ```go
 func (w *Wallet) Deposit(amount int) {
-    w.balance += amount
+	w.balance += amount
 }
 
 func (w *Wallet) Balance() int {
-    return w.balance
+	return w.balance
 }
 ```
 
@@ -171,7 +171,7 @@ Now you might wonder, why did they pass? We didn't dereference the pointer in th
 
 ```go
 func (w *Wallet) Balance() int {
-    return (*w).balance
+	return (*w).balance
 }
 ```
 
@@ -194,32 +194,32 @@ The syntax is `type MyName OriginalType`
 type Bitcoin int
 
 type Wallet struct {
-    balance Bitcoin
+	balance Bitcoin
 }
 
 func (w *Wallet) Deposit(amount Bitcoin) {
-    w.balance += amount
+	w.balance += amount
 }
 
 func (w *Wallet) Balance() Bitcoin {
-    return w.balance
+	return w.balance
 }
 ```
 
 ```go
 func TestWallet(t *testing.T) {
 
-    wallet := Wallet{}
+	wallet := Wallet{}
 
-    wallet.Deposit(Bitcoin(10))
+	wallet.Deposit(Bitcoin(10))
 
-    got := wallet.Balance()
+	got := wallet.Balance()
 
-    want := Bitcoin(10)
+	want := Bitcoin(10)
 
-    if got != want {
-        t.Errorf("got %d want %d", got, want)
-    }
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
 }
 ```
 
@@ -231,7 +231,7 @@ Let's implement [Stringer](https://golang.org/pkg/fmt/#Stringer) on Bitcoin
 
 ```go
 type Stringer interface {
-        String() string
+	String() string
 }
 ```
 
@@ -239,18 +239,18 @@ This interface is defined in the `fmt` package and lets you define how your type
 
 ```go
 func (b Bitcoin) String() string {
-    return fmt.Sprintf("%d BTC", b)
+	return fmt.Sprintf("%d BTC", b)
 }
 ```
 
-As you can see, the syntax for creating a method on a type alias is the same as it is on a struct.
+As you can see, the syntax for creating a method on a type declaration is the same as it is on a struct.
 
 Next we need to update our test format strings so they will use `String()` instead.
 
 ```go
-    if got != want {
-        t.Errorf("got %s want %s", got, want)
-    }
+	if got != want {
+		t.Errorf("got %s want %s", got, want)
+	}
 ```
 
 To see this in action, deliberately break the test so we can see it
@@ -268,33 +268,33 @@ Pretty much the opposite of `Deposit()`
 ```go
 func TestWallet(t *testing.T) {
 
-    t.Run("Deposit", func(t *testing.T) {
-        wallet := Wallet{}
+	t.Run("deposit", func(t *testing.T) {
+		wallet := Wallet{}
 
-        wallet.Deposit(Bitcoin(10))
+		wallet.Deposit(Bitcoin(10))
 
-        got := wallet.Balance()
+		got := wallet.Balance()
 
-        want := Bitcoin(10)
+		want := Bitcoin(10)
 
-        if got != want {
-            t.Errorf("got %s want %s", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %s want %s", got, want)
+		}
+	})
 
-    t.Run("Withdraw", func(t *testing.T) {
-        wallet := Wallet{balance: Bitcoin(20)}
+	t.Run("withdraw", func(t *testing.T) {
+		wallet := Wallet{balance: Bitcoin(20)}
 
-        wallet.Withdraw(Bitcoin(10))
+		wallet.Withdraw(Bitcoin(10))
 
-        got := wallet.Balance()
+		got := wallet.Balance()
 
-        want := Bitcoin(10)
+		want := Bitcoin(10)
 
-        if got != want {
-            t.Errorf("got %s want %s", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %s want %s", got, want)
+		}
+	})
 }
 ```
 
@@ -316,7 +316,7 @@ func (w *Wallet) Withdraw(amount Bitcoin) {
 
 ```go
 func (w *Wallet) Withdraw(amount Bitcoin) {
-    w.balance -= amount
+	w.balance -= amount
 }
 ```
 
@@ -327,26 +327,26 @@ There's some duplication in our tests, lets refactor that out.
 ```go
 func TestWallet(t *testing.T) {
 
-    assertBalance := func(t testing.TB, wallet Wallet, want Bitcoin) {
-        t.Helper()
-        got := wallet.Balance()
+	assertBalance := func(t testing.TB, wallet Wallet, want Bitcoin) {
+		t.Helper()
+		got := wallet.Balance()
 
-        if got != want {
-            t.Errorf("got %s want %s", got, want)
-        }
-    }
+		if got != want {
+			t.Errorf("got %s want %s", got, want)
+		}
+	}
 
-    t.Run("Deposit", func(t *testing.T) {
-        wallet := Wallet{}
-        wallet.Deposit(Bitcoin(10))
-        assertBalance(t, wallet, Bitcoin(10))
-    })
+	t.Run("deposit", func(t *testing.T) {
+		wallet := Wallet{}
+		wallet.Deposit(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-    t.Run("Withdraw", func(t *testing.T) {
-        wallet := Wallet{balance: Bitcoin(20)}
-        wallet.Withdraw(Bitcoin(10))
-        assertBalance(t, wallet, Bitcoin(10))
-    })
+	t.Run("withdraw", func(t *testing.T) {
+		wallet := Wallet{balance: Bitcoin(20)}
+		wallet.Withdraw(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
 }
 ```
@@ -362,16 +362,16 @@ Let's try this out in a test.
 ## Write the test first
 
 ```go
-t.Run("Withdraw insufficient funds", func(t *testing.T) {
-    startingBalance := Bitcoin(20)
-    wallet := Wallet{startingBalance}
-    err := wallet.Withdraw(Bitcoin(100))
+t.Run("withdraw insufficient funds", func(t *testing.T) {
+	startingBalance := Bitcoin(20)
+	wallet := Wallet{startingBalance}
+	err := wallet.Withdraw(Bitcoin(100))
 
-    assertBalance(t, wallet, startingBalance)
+	assertBalance(t, wallet, startingBalance)
 
-    if err == nil {
-        t.Error("wanted an error but didn't get one")
-    }
+	if err == nil {
+		t.Error("wanted an error but didn't get one")
+	}
 })
 ```
 
@@ -393,8 +393,8 @@ The wording is perhaps a little unclear, but our previous intent with `Withdraw`
 
 ```go
 func (w *Wallet) Withdraw(amount Bitcoin) error {
-    w.balance -= amount
-    return nil
+	w.balance -= amount
+	return nil
 }
 ```
 
@@ -405,12 +405,12 @@ Again, it is very important to just write enough code to satisfy the compiler. W
 ```go
 func (w *Wallet) Withdraw(amount Bitcoin) error {
 
-    if amount > w.balance {
-        return errors.New("oh no")
-    }
+	if amount > w.balance {
+		return errors.New("oh no")
+	}
 
-    w.balance -= amount
-    return nil
+	w.balance -= amount
+	return nil
 }
 ```
 
@@ -424,23 +424,23 @@ Let's make a quick test helper for our error check to improve the test's readabi
 
 ```go
 assertError := func(t testing.TB, err error) {
-    t.Helper()
-    if err == nil {
-        t.Error("wanted an error but didn't get one")
-    }
+	t.Helper()
+	if err == nil {
+		t.Error("wanted an error but didn't get one")
+	}
 }
 ```
 
 And in our test
 
 ```go
-t.Run("Withdraw insufficient funds", func(t *testing.T) {
-    startingBalance := Bitcoin(20)
-    wallet := Wallet{startingBalance}
-    err := wallet.Withdraw(Bitcoin(100))
+t.Run("withdraw insufficient funds", func(t *testing.T) {
+	startingBalance := Bitcoin(20)
+	wallet := Wallet{startingBalance}
+	err := wallet.Withdraw(Bitcoin(100))
 
-    assertBalance(t, wallet, startingBalance)
-    assertError(t, err)
+	assertError(t, err)
+	assertBalance(t, wallet, startingBalance)
 })
 ```
 
@@ -454,27 +454,27 @@ Update our helper for a `string` to compare against.
 
 ```go
 assertError := func(t testing.TB, got error, want string) {
-    t.Helper()
-    if got == nil {
-        t.Fatal("didn't get an error but wanted one")
-    }
+	t.Helper()
+	if got == nil {
+		t.Fatal("didn't get an error but wanted one")
+	}
 
-    if got.Error() != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got.Error() != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 ```
 
 And then update the caller
 
 ```go
-t.Run("Withdraw insufficient funds", func(t *testing.T) {
-    startingBalance := Bitcoin(20)
-    wallet := Wallet{startingBalance}
-    err := wallet.Withdraw(Bitcoin(100))
+t.Run("withdraw insufficient funds", func(t *testing.T) {
+	startingBalance := Bitcoin(20)
+	wallet := Wallet{startingBalance}
+	err := wallet.Withdraw(Bitcoin(100))
 
-    assertBalance(t, wallet, startingBalance)
-    assertError(t, err, "cannot withdraw, insufficient funds")
+	assertError(t, err, "cannot withdraw, insufficient funds")
+	assertBalance(t, wallet, startingBalance)
 })
 ```
 
@@ -489,12 +489,12 @@ We've introduced `t.Fatal` which will stop the test if it is called. This is bec
 ```go
 func (w *Wallet) Withdraw(amount Bitcoin) error {
 
-    if amount > w.balance {
-        return errors.New("cannot withdraw, insufficient funds")
-    }
+	if amount > w.balance {
+		return errors.New("cannot withdraw, insufficient funds")
+	}
 
-    w.balance -= amount
-    return nil
+	w.balance -= amount
+	return nil
 }
 ```
 
@@ -511,12 +511,12 @@ var ErrInsufficientFunds = errors.New("cannot withdraw, insufficient funds")
 
 func (w *Wallet) Withdraw(amount Bitcoin) error {
 
-    if amount > w.balance {
-        return ErrInsufficientFunds
-    }
+	if amount > w.balance {
+		return ErrInsufficientFunds
+	}
 
-    w.balance -= amount
-    return nil
+	w.balance -= amount
+	return nil
 }
 ```
 
@@ -529,45 +529,45 @@ Next we can refactor our test code to use this value instead of specific strings
 ```go
 func TestWallet(t *testing.T) {
 
-    t.Run("Deposit", func(t *testing.T) {
-        wallet := Wallet{}
-        wallet.Deposit(Bitcoin(10))
-        assertBalance(t, wallet, Bitcoin(10))
-    })
+	t.Run("deposit", func(t *testing.T) {
+		wallet := Wallet{}
+		wallet.Deposit(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-    t.Run("Withdraw with funds", func(t *testing.T) {
-        wallet := Wallet{Bitcoin(20)}
-        wallet.Withdraw(Bitcoin(10))
-        assertBalance(t, wallet, Bitcoin(10))
-    })
+	t.Run("withdraw with funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		wallet.Withdraw(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-    t.Run("Withdraw insufficient funds", func(t *testing.T) {
-        wallet := Wallet{Bitcoin(20)}
-        err := wallet.Withdraw(Bitcoin(100))
+	t.Run("withdraw insufficient funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(100))
 
-        assertBalance(t, wallet, Bitcoin(20))
-        assertError(t, err, ErrInsufficientFunds)
-    })
+		assertError(t, err, ErrInsufficientFunds)
+		assertBalance(t, wallet, Bitcoin(20))
+	})
 }
 
 func assertBalance(t testing.TB, wallet Wallet, want Bitcoin) {
-    t.Helper()
-    got := wallet.Balance()
+	t.Helper()
+	got := wallet.Balance()
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 }
 
-func assertError(t testing.TB, got error, want error) {
-    t.Helper()
-    if got == nil {
-        t.Fatal("didn't get an error but wanted one")
-    }
+func assertError(t testing.TB, got, want error) {
+	t.Helper()
+	if got == nil {
+		t.Fatal("didn't get an error but wanted one")
+	}
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 ```
 
@@ -583,7 +583,7 @@ Whilst the Go compiler helps you a lot, sometimes there are things you can still
 
 There is one scenario we have not tested. To find it, run the following in a terminal to install `errcheck`, one of many linters available for Go.
 
-`go get -u github.com/kisielk/errcheck`
+`go install github.com/kisielk/errcheck@latest`
 
 Then, inside the directory with your code run `errcheck .`
 
@@ -598,55 +598,55 @@ Here is the final test code that accounts for this.
 ```go
 func TestWallet(t *testing.T) {
 
-    t.Run("Deposit", func(t *testing.T) {
-        wallet := Wallet{}
-        wallet.Deposit(Bitcoin(10))
+	t.Run("deposit", func(t *testing.T) {
+		wallet := Wallet{}
+		wallet.Deposit(Bitcoin(10))
 
-        assertBalance(t, wallet, Bitcoin(10))
-    })
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-    t.Run("Withdraw with funds", func(t *testing.T) {
-        wallet := Wallet{Bitcoin(20)}
-        err := wallet.Withdraw(Bitcoin(10))
+	t.Run("withdraw with funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(10))
 
-        assertBalance(t, wallet, Bitcoin(10))
-        assertNoError(t, err)
-    })
+		assertNoError(t, err)
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-    t.Run("Withdraw insufficient funds", func(t *testing.T) {
-        wallet := Wallet{Bitcoin(20)}
-        err := wallet.Withdraw(Bitcoin(100))
+	t.Run("withdraw insufficient funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(100))
 
-        assertBalance(t, wallet, Bitcoin(20))
-        assertError(t, err, ErrInsufficientFunds)
-    })
+		assertError(t, err, ErrInsufficientFunds)
+		assertBalance(t, wallet, Bitcoin(20))
+	})
 }
 
 func assertBalance(t testing.TB, wallet Wallet, want Bitcoin) {
-    t.Helper()
-    got := wallet.Balance()
+	t.Helper()
+	got := wallet.Balance()
 
-    if got != want {
-        t.Errorf("got %s want %s", got, want)
-    }
+	if got != want {
+		t.Errorf("got %s want %s", got, want)
+	}
 }
 
 func assertNoError(t testing.TB, got error) {
-    t.Helper()
-    if got != nil {
-        t.Fatal("got an error but didn't want one")
-    }
+	t.Helper()
+	if got != nil {
+		t.Fatal("got an error but didn't want one")
+	}
 }
 
 func assertError(t testing.TB, got error, want error) {
-    t.Helper()
-    if got == nil {
-        t.Fatal("didn't get an error but wanted one")
-    }
+	t.Helper()
+	if got == nil {
+		t.Fatal("didn't get an error but wanted one")
+	}
 
-    if got != want {
-        t.Errorf("got %s, want %s", got, want)
-    }
+	if got != want {
+		t.Errorf("got %s, want %s", got, want)
+	}
 }
 ```
 

@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
+	poker "github.com/quii/learn-go-with-tests/time/v3"
 	"log"
 	"os"
-
-	poker "github.com/quii/learn-go-with-tests/time/v3"
 )
 
 const dbFileName = "game.db.json"
