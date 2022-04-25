@@ -133,7 +133,7 @@ This code is _very unsafe and very naive_, but remember: our goal when we are in
 
 We need to use reflection to have a look at `x` and try and look at its properties.
 
-The [reflect package](https://godoc.org/reflect) has a function `ValueOf` which returns us a `Value` of a given variable. This has ways for us to inspect a value, including its fields which we use on the next line.
+The [reflect package](https://pkg.go.dev/reflect) has a function `ValueOf` which returns us a `Value` of a given variable. This has ways for us to inspect a value, including its fields which we use on the next line.
 
 We then make some very optimistic assumptions about the value passed in
 
@@ -267,7 +267,7 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-We can do that by checking its [`Kind`](https://godoc.org/reflect#Kind).
+We can do that by checking its [`Kind`](https://pkg.go.dev/reflect#Kind).
 
 ## Refactor
 
