@@ -967,7 +967,8 @@ to parse it.
 [`encoding/xml`][xml] is the Go package that can handle all things to do with
 simple XML parsing.
 
-The function [`xml.Unmarshal`](https://godoc.org/encoding/xml#Unmarshal) takes
+
+The function [`xml.Unmarshal`](https://pkg.go.dev/encoding/xml#Unmarshal) takes
 a `[]byte` of XML data, and a pointer to a struct for it to get unmarshalled in
 to.
 
@@ -2201,4 +2202,4 @@ tests. It is an investment.
 [mathcos]: https://golang.org/pkg/math/#Cos
 [floatingpoint]: https://0.30000000000000004.com/
 [phlip]: http://wiki.c2.com/?PhlIp
-[xml]: https://godoc.org/encoding/xml
+[xml]: https://pkg.go.dev/encoding/xml
