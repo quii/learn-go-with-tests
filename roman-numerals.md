@@ -360,7 +360,7 @@ I'm pretty sure this approach will be valid for 6 (VI), 7 (VII) and 8 (VIII) too
 ## Write the test first
 
 ```
-{"9 gets converted to IX", 9, "IX"}
+{"9 gets converted to IX", 9, "IX"},
 ```
 ## Try to run the test
 
