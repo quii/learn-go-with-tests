@@ -1,9 +1,10 @@
 package poker_test
 
 import (
-	"github.com/quii/learn-go-with-tests/websockets/v2"
-	"io/ioutil"
+	"io"
 	"testing"
+
+	poker "github.com/quii/learn-go-with-tests/websockets/v2"
 )
 
 func TestTape_Write(t *testing.T) {
@@ -15,7 +16,7 @@ func TestTape_Write(t *testing.T) {
 	tape.Write([]byte("abc"))
 
 	file.Seek(0, 0)
-	newFileContents, _ := ioutil.ReadAll(file)
+	newFileContents, _ := io.ReadAll(file)
 
 	got := string(newFileContents)
 	want := "abc"

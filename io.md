@@ -459,7 +459,7 @@ Let's create some helper functions which will create a temporary file with some 
 func createTempFile(t testing.TB, initialData string) (io.ReadWriteSeeker, func()) {
 	t.Helper()
 
-	tmpfile, err := ioutil.TempFile("", "db")
+	tmpfile, err := os.CreateTemp("", "db")
 
 	if err != nil {
 		t.Fatalf("could not create temp file %v", err)
@@ -483,7 +483,7 @@ func assertScoreEquals(t testing.TB, got, want int) {
 }
 ```
 
-[TempFile](https://golang.org/pkg/io/ioutil/#TempFile) creates a temporary file for us to use. The `"db"` value we've passed in is a prefix put on a random file name it will create. This is to ensure it won't clash with other files by accident.
+[TempFile](https://pkg.go.dev/os#CreateTemp) creates a temporary file for us to use. The `"db"` value we've passed in is a prefix put on a random file name it will create. This is to ensure it won't clash with other files by accident.
 
 You'll notice we're not only returning our `ReadWriteSeeker` (the file) but also a function. We need to make sure that the file is removed once the test is finished. We don't want to leak details of the files into the test as it's prone to error and uninteresting for the reader. By returning a `removeFile` function, we can take care of the details in our helper and all the caller has to do is run `defer cleanDatabase()`.
 
@@ -881,7 +881,7 @@ func TestTape_Write(t *testing.T) {
 	tape.Write([]byte("abc"))
 
 	file.Seek(0, 0)
-	newFileContents, _ := ioutil.ReadAll(file)
+	newFileContents, _ := io.ReadAll(file)
 
 	got := string(newFileContents)
 	want := "abc"
