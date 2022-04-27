@@ -99,7 +99,7 @@ func getXMLFromCommand() io.Reader {
 	out, _ := cmd.StdoutPipe()
 
 	cmd.Start()
-	data, _ := ioutil.ReadAll(out)
+	data, _ := io.ReadAll(out)
 	cmd.Wait()
 
 	return bytes.NewReader(data)
