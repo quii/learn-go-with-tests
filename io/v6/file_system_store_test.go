@@ -2,7 +2,6 @@ package main
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -10,7 +9,7 @@ import (
 func createTempFile(t testing.TB, initialData string) (io.ReadWriteSeeker, func()) {
 	t.Helper()
 
-	tmpfile, err := ioutil.TempFile("", "db")
+	tmpfile, err := os.CreateTemp("", "db")
 
 	if err != nil {
 		t.Fatalf("could not create temp file %v", err)
