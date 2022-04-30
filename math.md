@@ -76,7 +76,7 @@ These tests are sometimes called 'acceptance tests', sometimes called
 'feature test'. The idea is that you write a really high level test to
 describe what you're trying to achieve - a user clicks a button on a website,
 and they see a complete list of the Pokémon they've caught, for instance.
-When we've written that test, we can then write test more tests - unit tests -
+When we've written that test, we can then write more tests - unit tests -
 that build towards a working system that will pass the acceptance test. So
 for our example these tests might be about rendering a webpage with a button,
 testing route handlers on a web server, performing database look ups, etc.
