@@ -613,7 +613,7 @@ It is sometimes hard to know _what level_ to test exactly but here are some thou
 Mocking requires no magic and is relatively simple; using a framework can make mocking seem more complicated than it is. We don't use automocking in this chapter so that we get:
 
 - a better understanding of how to mock
-- practise implementing interfaces
+- practice implementing interfaces
 
 In collaborative projects there is value in auto-generating mocks. In a team, a mock generation tool codifies consistency around the test doubles. This will avoid inconsistently written test doubles which can translate to inconsistently written tests.
 
