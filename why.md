@@ -6,11 +6,11 @@ Si no te van los vídeos, aquí va la versión escrita.
 
 ## Software 
 
-La promesa del software es que se puede cambiar. Por eso se llama _soft_ ware: es maleable comparado con el hardware. Un gran equipo de ingeniería ha de ser un activo increíble para una compañía, y desarrollar sistemas que pudieran evolucionar con un negocio para seguir aportando valor.
+La promesa del software es que se puede cambiar. Por eso se llama _soft_ ware: es maleable comparado con el hardware. Un gran equipo de ingeniería ha de ser un activo increíble para una compañía, y desarrollar sistemas que puedan evolucionar con el negocio para seguir aportando valor.
 
 ¿Por qué se nos da tan mal entonces? ¿Cuántos proyectos conoces que hayan terminado en fracaso absoluto? O convertidos en "legacy" para ser reescritos completamente (¡y esas nuevas versiones a menudo fracasan también!)
 
-¿Pero cómo puede fallar un sistema de software? ¿No se puede simplemente modificarlo hasta que funcione bien? ¡Esa era la promesa!
+¿Cómo puede fallar un sistema de software después de todo? ¿No se puede simplemente modificarlo hasta que funcione bien? ¡Esa era la promesa!
 
 Mucha gente está eligiendo Go para desarrollar sistemas porque ha hecho una serie de elecciones que se espera lo hagan más resistente a convertirse en "legacy":
 
