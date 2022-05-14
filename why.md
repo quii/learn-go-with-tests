@@ -6,22 +6,21 @@ Si no te van los vídeos, aquí va la versión escrita.
 
 ## Software 
 
-La promesa del software es que puede cambiar. Por eso se llama _soft_ ware, es maleable comparado con el hardware. Un gran equipo de ingeniería debería ser un activo increíble para una compañía, y escribir sistemas que pudieran evolucionar con un negocio para seguir aportando valor.
+La promesa del software es que se puede cambiar. Por eso se llama _soft_ ware: es maleable comparado con el hardware. Un gran equipo de ingeniería ha de ser un activo increíble para una compañía, y desarrollar sistemas que pudieran evolucionar con un negocio para seguir aportando valor.
 
-¿Por qué somos tan malos en eso entonces? ¿Cuántos proyectos que conoces terminan en fracaso absoluto? O se convierten en "legacy" para ser reescritos completamente (¡y esas nuevas versiones a menudo fracasan también!)
+¿Por qué se nos da tan mal entonces? ¿Cuántos proyectos conoces que hayan terminado en fracaso absoluto? O convertidos en "legacy" para ser reescritos completamente (¡y esas nuevas versiones a menudo fracasan también!)
 
-Pero ¿cómo puede fallar un sistema de software? ¿No se puede simplemente modificar hasta que sea correcto? ¡Eso es lo que nos prometieron!
+¿Pero cómo puede fallar un sistema de software? ¿No se puede simplemente modificarlo hasta que funcione bien? ¡Esa era la promesa!
 
-Mucha gente está eligiendo go para desarrollar sistemas porque ha hecho una serie de elecciones que se espera lo hagan más resistente a convertirse en "legacy".
+Mucha gente está eligiendo Go para desarrollar sistemas porque ha hecho una serie de elecciones que se espera lo hagan más resistente a convertirse en "legacy":
 
-
-- Comparado con mi vida previa de Scala donde [ya describí cómo tienes suficiente cuerda para ahorcarte tu sólo](http://www.quii.dev/Scala_-_Just_enough_rope_to_hang_yourself), Go cuenta únicamente con 25 palabras reservadas y se pueden construir _un montón_ de sistemas utilizando únicamente la librería estandar y unas pocas librerías más. La idea es que con Go puedas escribir código que al volver 6 meses más tarde siga teniendo sentido.
-- Las herramientas relacionadas con testing, métricas de rendimiento, revisión de código y empaquetado son de primera clase, comparadas con la mayoría de alternativas.
+- A diferencia de mi vida previa de Scala donde [ya describí cómo tienes suficiente cuerda para ahorcarte tu sólo](http://www.quii.dev/Scala_-_Just_enough_rope_to_hang_yourself), Go cuenta únicamente con 25 palabras reservadas y se pueden construir _un montón_ de sistemas utilizando únicamente la librería estandar y unas pocas librerías más. La idea es que con Go puedas escribir código que al volver 6 meses más tarde siga teniendo sentido.
+- Las herramientas relacionadas con testing, métricas de rendimiento, revisión de código y empaquetado son de primera categoría, comparadas con la mayoría de alternativas.
 - La librería estándar es brillante.
 - El tiempo de compilación es muy rápido, lo que permite bucles de feedback muy ajustados.
 - La promesa de compatibilidad hacia atrás. Parece que Go recibirá genéricos y otras funcionalidades en el futuro pero los diseñadores han prometido que incluso el código Go escrito hace 5 años seguirá compilando. He pasado literalmente semanas migrando un proyecto de Scala 2.8 a 2.10
 
-Incluso con todas estas grandes propiedades seguimos pudiendo escribir sistemas horribles, así que deberíamos mirar en el pasado para entender las lecciones de ingeniería de software que aplican independientemente de cómo de brillante sea (o no) tu lenguaje.
+Incluso con todas estas grandes propiedades seguimos pudiendo escribir sistemas horribles, así que deberíamos mirar hacia el pasado para entender las lecciones de ingeniería de software que aplican independientemente de cómo de brillante sea (o no) tu lenguaje.
 
 En 1974 un inteligente ingeniero de software llamado [Manny Lehman](https://en.wikipedia.org/wiki/Manny_Lehman_%28computer_scientist%29) escribió las [leyes de Lehman de la evolución del software](https://en.wikipedia.org/wiki/Lehman%27s_laws_of_software_evolution).
 
@@ -32,17 +31,17 @@ Parece importante entender estas fuerzas si queremos tener alguna esperanza de n
 
 ## La ley del Cambio Continuo
 
-> Cualquier sistema de software usada en el mundo real debe cambiar, o perderá utilidad en el entorno.
+> Cualquier sistema de software usado en el mundo real debe cambiar, o perderá utilidad en el entorno.
 
-Parece obvio que un sistema _tiene_ que cambiar para no volverse inútil, pero cuántas veces ignoramos esto?
+Parece obvio que un sistema _tiene_ que cambiar para no volverse inútil, pero ¿cuántas veces ignoramos esto?
 
-Muchos equipos son incentivados para entregar un proyecto en una fecha particular y después son trasladados al siguiente proyecto. Si el software es "afortunado" habrá al menos algún tipo de traspaso a otro conjunto de individuos para mantenerlo, pero por supuesto no serán los autores.
+Muchos equipos son presionados para entregar un proyecto en una fecha particular y después son trasladados al siguiente proyecto. Si hay suerte, habrá al menos algún tipo de traspaso a otro conjunto de individuos para mantenerlo, pero por supuesto no serán los autores.
 
 A menundo la gente se preocupa intentando elegir un framework que les ayude a "entregar rádido", sin preocuparse de la longevidad del sistema en términos de cómo necesitará evolucionar.
 
 Aunque seas un ingeniero de software increíble, tu también serás víctima de no saber las necesidades futuras de tu sistema. A medida que el negocio cambie partes de tu briallante código se volverán irrelevantes.
 
-Lehman estaba en racha en los 70 porque nos dio otra le más para masticar.
+Lehman estaba en racha en los 70 porque nos dio otra ley más para masticar.
 
 ## La ley de la Complejidad Incremental
 
@@ -56,18 +55,18 @@ Lo que nos está diciendo es que no podemos tener equipos de software como meras
 
 Hay _muchas_ facetas de la ingeniería de software que lo mantienen maleable, como:
 
-- Que los programadores tengan influencia
+- Que los programadores tengan capacidad de decisión.
 - Código "bueno" en general. Separación de responsabilidades, etc etc.
-- Habilidades comunicativas
-- Arquitectura
-- Observabilidad
-- Desplegabilidad
-- Pruebas automatizadas
-- Bucles de feedback
+- Habilidades comunicativas.
+- Arquitectura.
+- Observabilidad.
+- Desplegabilidad.
+- Pruebas automatizadas.
+- Bucles de feedback.
 
-Me voy a centrar en la refactorización. Es una frase que se lanza con mucha frecuencia, "tenemos que refactorizar esto", a un programador en su primer día si más razonamiento.
+Me voy a centrar en la refactorización. Frecuentemente decimos "hay que refactorizar esto" a un programador en su primer día, sin más razonamiento.
 
-¿De dónde viene esta frase? ¿En qué se diferencia refactorizar de escribir código?
+¿De dónde viene esta frase? ¿Qué diferencia hay entre refactorizar y escribir código?
 
 Sé que tanto yo como muchos otros _pensábamos_ que estábamos refactorizando, pero estábamos equivocados.
 
@@ -82,11 +81,11 @@ Sé que tanto yo como muchos otros _pensábamos_ que estábamos refactorizando, 
 Cuando estudiabas matemáticas en el colegio probablemente te enseñaron a factorizar. Veamos un ejemplo sencillo:
 Calcular `1/2 + 1/4`
 
-Para hacerlo _factorizamos_ los denominadores, convitiedo la expresión en
+Para hacerlo _factorizamos_ los denominadores, convirtiedo la expresión en
 
 `2/4 + 1/4` que finalmente nos da `3/4`
 
-Podemos aprender importantes lecciones aquí. Cuando _factorizaos la expresión_ no heos **cambiado el significado de la expresión**. Las dos son igualmente `3/4` pero hemos hecho que sea más sencillo de manejar para nosotros; cambiar `1/2` por `2/4` hace que encaje mejor en nuestro "dominio".
+Podemos aprender importantes lecciones aquí.  _Factorizar la expresión_ no **cambia su significado**. Las dos son igualmente `3/4` pero hemos hecho que sea más sencillo de manejar para nosotros; cambiar `1/2` por `2/4` hace que encaje mejor en nuestro "dominio".
 
 Cuando refactorizas tu código, intentas encontrar formas de hacerlo más sencillo de entender y que "encaje" en tu comprensión actual de lo que el sistema debe hacer. Es crucial **no modificar su comportamiento**.
 
@@ -142,13 +141,13 @@ Al refactorizar puedes hacer lo que quieras: añadir interfaces, nuevos tipos, f
 
 ### Al refactorizar código no debes modificar el comportamiento
 
-Esto es muy importante. Si cambias el comportamiento al mismo tiempo estás haciendo _dos_ cosas a la vez. Como ingenieros de software aprendemos a partir los sistemas en archivos/paquetes/funciones/eetc porque sabemos que intentar entender un montón de cosas es difícil.
+Esto es muy importante. Si cambias el comportamiento al mismo tiempo que la estructura, estás haciendo _dos_ cosas a la vez. Como ingenieros de software aprendemos a partir los sistemas en archivos/paquetes/funciones/etc porque sabemos que intentar entender un muchas cosas a la vez es difícil.
 
 No queremos tener que pensar sobre muchas cosas a la vez porque es entonces cuando cometemos errores. He visto fracasar muchos intentos de refactorización porque los programadores intentaban abarcar demasiado.
 
 Cuando hacía factorizaciones en clase de matemáticas con papel y lápiz tenía que comprobar manualmente que no había cambiado el significado de las expresiones ¿Cómo sabemos que no estamos cambiando el comportamiento al refactorizar cuando trabajamos con código, especialmente en sistemas que no son triviales?
 
-Quienes eligen no escribir tests típicamente confían en hacer pruebas manualmente. Para cualquier proyecto que no sea muy pequeño ésto es una trememenda pérdida de tiempo y no escala a largo plazo.
+Quienes eligen no escribir tests típicamente confían en hacer pruebas manualmente. Para cualquier proyecto que no sea muy pequeño ésto es una tremenda pérdida de tiempo y no escala a largo plazo.
  
 **Para refactorizar con seguridad necesitas tests** porque proporcionan
 
@@ -171,21 +170,21 @@ Un test unitario para nuestra función `Hello` tendría este aspecto:
 
 Puedo ejecutar `go test` en la línea de comandos y obtener feedback inmediato sobre si mi refactorización ha alterado el comportamiento. En la práctica es mejor que aprender el botón mágico que hay que tocar para ejecutar los tests dentro de tu editor/IDE.
 
-Lo quee buscamos es entrar en un estado en el que:
+Lo que buscamos es entrar en un estado en el que:
 
 - Hacemos una pequeña refactorización
 - Ejecutamos los tests
 - Repetimos
 
-Todo en un bucle de feedback muy ajustado, de forma que te metas por madrigueras de conejo y cometas errores.
+Todo en un bucle de feedback muy ajustado, evitando entrar por madrigueras de conejo y cometer errores.
 
-Tenes un proyecto en el que todos tus comportamientos tienen pruebas unitarias y te dan feedback en menos de un segundo es una red de seguridad que te habilita para refactorizar siempre que lo necesites. Ésto nos permitirá manejar la complejidad que vendrá según describe Lehman.
+Tener un proyecto en el que todos tus comportamientos tienen pruebas unitarias y te dan feedback en menos de un segundo es una red de seguridad que te habilita para refactorizar siempre que lo necesites. Ésto nos permitirá manejar la complejidad que vendrá, según describe Lehman.
 
 ## Si los tests unitarios son tan buenos ¿Por qué a veces hay resistencia a escribirlos?
 
 Por una parte tienes a gente (como yo) diciendo que los tests unitarios son importantes para la salud a largo plazo de tu sistema porque aseguran que puedes seguir refactorizando con confianza.
 
-Por otra, tienes a gente que describe experiencias en las que los unit tests han _impedido_ la refactorización
+Por otra, tienes a gente que describe experiencias en las que los tests unitarios han _impedido_ la refactorización
 
 Pregúntate a ti mismo ¿con qué frecuencia tienes que cambiar los tests para refactorizar? A lo largo de los años he estado en muchos proyectos con muy buena coberetura de test en los que sin embargo los ingenieros eran reticentes a refactorizar por el esfuerzo percibido de modificar los tests.
 
@@ -193,17 +192,17 @@ Pregúntate a ti mismo ¿con qué frecuencia tienes que cambiar los tests para r
 
 ### ¿Qué está pasando?
 
-Imagina que te pidieran desarrollar un cuadrado, y que pensáramos quee la mejor forma de conseguirlo es juntar dos triángulos.
+Imagina que te pidieran desarrollar un cuadrado, y que pensáramos que la mejor forma de conseguirlo es juntar dos triángulos.
 
 ![Dos triángulos rectángulos para formar un cuadrado](https://i.imgur.com/ela7SVf.jpg)
 
 Escribimos nuestros tests unitarios sobre nuestro cuadrado para asegurarnos de que los lados son iguales y entonces escribimos algunos tests sobre nuestros triángulos. Queremos asegurarnos de que los triángulos se renderizan correctamente, así que introducimos una aserción de que los ángulos suman 180 grados, quizá comprobamos que se construyen 2, etc etc. La cobertura de tests es muy importante y escribir estos tests es fácil, así que ¿Por qué no?
 
-Unas semanas más tarde la Ley del Cambio Continuo golpea nuestro sistema y una programadora nuevo hace algunos cambios. A ella le parece que sería mejor si los cuadrados se formaran con dos rectángulos, en lugar de dos triángulos.
+Unas semanas más tarde la Ley del Cambio Continuo golpea nuestro sistema y una programadora nueva hace algunos cambios. A ella le parece que sería mejor si los cuadrados se formaran con dos rectángulos, en lugar de dos triángulos.
 
 ![Dos rectángulos para formar un cuadrado](https://i.imgur.com/1G6rYqD.jpg)
 
-Ella intenta hacer esta refactorización y obtiene señales mezcladas de varios tests que fallan ¿Acaso ha roto algún comportamiento importante? Ahora tiene que revisar los tests de triángulos intentando entender qué está pasando.
+Al intentar hacer esta refactorización obtiene señales mezcladas de varios tests que fallan ¿Acaso ha roto algún comportamiento importante? Ahora tiene que revisar los tests de triángulos intentando entender qué está pasando.
 
 _En realidad no es imporante si los cuadrados se forman a partir de triángulos_ pero **nuestros tests han elevado falsamente la importancia de nuestros detalles de implementación**.
 
@@ -211,17 +210,17 @@ _En realidad no es imporante si los cuadrados se forman a partir de triángulos_
 
 Cuando oigo a gente quejándose sobre tests unitarios a menudo es porque los tests están en un nivel de abstracción incorrecto. Están probando detalles de implementación, espiando de más en los colaboradores y usando demasiados dobles ("mocks").
 
-En mi opinión ésto se debe a una malinterpretación de qué son los tests, y a peerseguir métricas de vanidad (cobertura de tests).
+En mi opinión ésto se debe a una malinterpretación de qué son los tests, y a perseguir métricas de vanidad (cobertura de tests).
 
-Si estoy diciendo que deberíamos probar únicamente el contenido ¿no deberíamos escribir sólo tests de sistema/caja negra? Este tipo de tests tienen un gran valor para verificar experiencias de usuario, pero suelen ser difíciles de escribir un lentos de eejecutar. Por esa razon no son demasiado útiles para _refactorizar_ porque el bucle de feedback es lento. Además los tests de caja negra tienden a no ser de mucha ayuda para comprender las causas de fallo en comparación con los tesets unitarios.
+Si estoy diciendo que deberíamos probar únicamente el contenido ¿no deberíamos escribir sólo tests de sistema/caja negra? Este tipo de tests tienen un gran valor para verificar experiencias de usuario, pero suelen ser difíciles de escribir y lentos de ejecutar. Por esa razon no son demasiado útiles para _refactorizar_ porque el bucle de feedback es lento. Además los tests de caja negra tienden a no ser de mucha ayuda para comprender las causas de fallo en comparación con los tesets unitarios.
 
 ¿_Cuál_ es el nivel de abstracción correcto entonces?
 
 ## Escribir tests unitarios eficaces es un problema de diseño
 
-Olvidándonos de los tests por un momento, es deseable que tu sistema esté formado por "unidadees" auto-contenidas y desacopladas, centradas alrededor de los conceptos principales de tu dominio.
+Olvidándonos de los tests por un momento, es deseable que tu sistema esté formado por "unidades" auto-contenidas y desacopladas, centradas alrededor de los conceptos principales de tu dominio.
 
-Me gusta imaginar éstas unidades como simples piezas de Lego que tienen APIs coherentes que puedo combinar con otras piezas para hacer sistemas más grandes. Bajo esas APIs puede haber docenas de cosas (tipos, funciones y demás) colaborando para hacerlos funcionar.
+Me gusta imaginar estas unidades como simples piezas de Lego que tienen APIs coherentes que puedo combinar con otras piezas para hacer sistemas más grandes. Bajo esas APIs puede haber docenas de cosas (tipos, funciones y demás) colaborando para hacerlas funcionar.
 
 Por ejemplo, si estuvieras escribiendo un banco en Go, probablemente tendrías un paquete "account" (cuenta). Presentaría un API que no expusiera detalles de implementación y que fuese sencilla de integrar.
 
@@ -243,7 +242,7 @@ Lo que empezamos a vislumbrar es que éstas facetas del diseño de software se r
 
 ### Refactorización
 
-- Nos da señales sobre nuestros tests unitarios. Si tenemos que hacer pruebas manuales, necesitamos más tesets. Si los tests están fallando erróneamente entonces nuestros tests están en un nivel de abstracción equivocado (o no tienen valor y habría que borrarlos).
+- Nos da señales sobre nuestros tests unitarios. Si tenemos que hacer pruebas manuales, necesitamos más tests. Si los tests están fallando erróneamente entonces nuestros tests están en un nivel de abstracción equivocado (o no tienen valor y habría que borrarlos).
 - Nos ayuda a gestionar la complejidad dentro de nuestras unidades, y entre ellas.
 
 ### Tests unitarios
@@ -256,37 +255,37 @@ Lo que empezamos a vislumbrar es que éstas facetas del diseño de software se r
 - Permiten escribir tests _relevantes_.
 - Son fáciles de refactorizar.
 
-Existe un proceso que nos ayude a llegar a un punto en el que poder refactorizar constantemente el código para gestionar la complejidad y mantener nuestros sistemas maleables?
+¿Existe un proceso que nos ayude a llegar a un punto en el que poder refactorizar constantemente el código para gestionar la complejidad y mantener nuestros sistemas maleables?
 
 ## Por qué hacer Desarrollo Guiado por Pruebas (Test Driven Development, TDD)
 
-Algunas personas quizá partan de las citas de Lehman sobre cómo el software debe cambiar y crean diseños demasiado elaborados, perdiendo un montón de tiempo al principio para crear el sistema extensible "perfecto" y terminan haciéndolo mal y llegando a ninguna parte.
+Puede que algunos partan de las citas de Lehman sobre cómo el software debe cambiar y creen diseños demasiado elaborados, dedicando un montón de tiempo al principio para crear el sistema extensible "perfecto", y terminen haciéndolo mal y llegando a ninguna parte.
 
 Así era en los malos viejos tiempos del software en los que un equipo de analistas se pasaba 6 meses escribiendo un documento de requisitos y un equipo de arquitectura otros 6 con el diseño para que unos años más tarde el proyecto fracasase.
 
 ¡Digo viejos malos tiempos, pero aún pasa!
 
-El desarrollo Ágil nos enseña que hay que trabajar de forma iterativa, comenzando con lo pequeño y haciendo evolucionar al software de forma que tengamos feedback rápidamente sobre el diseño de nuestro sistema y qué tal funciona para usuarios reales. El TDD refuerza este enfoque.
+El Desarrollo Ágil nos enseña que hay que trabajar de forma iterativa, comenzando por lo pequeño y haciendo evolucionar al software de forma que tengamos feedback rápidamente sobre el diseño de nuestro sistema y qué tal funciona para usuarios reales. El TDD refuerza este enfoque.
 
 El TDD aborda las las Leyes de Lehman y otras lecciones aprendidas por las malas a lo largo de la historia, al promover una metodología de refactorización constante y producción iterativa.
 
 ### Pequeños pasos
 
-- Escribe un peeequeeño test para un pequeño comportamiento
-- Comprueba que el test falla con un erro claro (rojo)
+- Escribe un pequeeño test para un pequeño comportamiento.
+- Comprueba que el test falla con un error claro (rojo).
 - Escribe la mínima cantidad de código para hacer que el test pase (verde)
-- Refactoriza
-- Repite
+- Refactoriza.
+- Repite.
 
 A medida que cojas práctica, esta forma de trabajar se volverá natural y rápida.
 
-Llegarás a esperar que éste bucle de feedback no tarde demasiado y te sentirás incómodo si el sistema no está "verde", porque significa que te puedes haber metido por una madriguera de conejo.
+Llegarás a esperar que este bucle de feedback sea rápido y te sentirás incómodo si el sistema no está "verde", porque significa que te puedes haber metido por una madriguera de conejo.
 
 Siempre estarás creando funcionalidades pequeñas y útiles confortablemente respaldadas por el feedback de tus tests.
 
 ## Resumiendo
 
-- La fortaleza del software está een que lo podemos cambiar. La _mayoría_ del software requerirá cambios a lo largo del tiempo de formas impredecibles; pero no intentamos sobre-diseñar porque predecir el futoro es demasiado difícil
+- La fortaleza del software está en que lo podemos cambiar. La _mayoría_ del software requerirá cambios a lo largo del tiempo de formas impredecibles; pero no intentamos sobre-diseñar porque predecir el futuro es demasiado difícil
 - En lugar de eso, necesitamos conseguir que nuesetro software siga siendo maleable. Para cambiar el software necesitamos refactorizarlo o se volverá un caos.
 - Un buen conjunto de test puede ayudarnos a refactorizar más rápido y con más tranquilidad.
 - Escribir buenos tests unitarios es un problema de diseño, así que piensa en organizar el código para que contenga unidades relevantes que puedas unir como piezas de Lego.
