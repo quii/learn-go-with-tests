@@ -185,11 +185,11 @@ func MyGreeterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	log.Fatal(http.ListenAndServe(":5000", http.HandlerFunc(MyGreeterHandler)))
+	log.Fatal(http.ListenAndServe(":5001", http.HandlerFunc(MyGreeterHandler)))
 }
 ```
 
-Run the program and go to [http://localhost:5000](http://localhost:5000). You'll see your greeting function being used.
+Run the program and go to [http://localhost:5001](http://localhost:5001). You'll see your greeting function being used.
 
 HTTP servers will be covered in a later chapter so don't worry too much about the details.
 
