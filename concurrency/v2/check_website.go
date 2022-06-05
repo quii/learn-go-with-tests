@@ -9,9 +9,5 @@ func CheckWebsite(url string) bool {
 		return false
 	}
 
-	if response.StatusCode != http.StatusOK {
-		return false
-	}
-
-	return true
+	return response.StatusCode == http.StatusOK
 }
