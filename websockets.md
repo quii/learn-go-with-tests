@@ -592,7 +592,7 @@ Let the compiler tell you what you need to fix. The change isn't so bad:
 
 - Update `TexasHoldem` so it properly implements `Game`
 - In `CLI` when we start the game, pass in our `out` property (`cli.game.Start(numberOfPlayers, cli.out)`)
-- In `TexasHoldem`'s test i use `game.Start(5, ioutil.Discard)` to fix the compilation problem and configure the alert output to be discarded
+- In `TexasHoldem`'s test i use `game.Start(5, io.Discard)` to fix the compilation problem and configure the alert output to be discarded
 
 If you've got everything right, everything should be green! Now we can try and use `Game` within `Server`.
 
@@ -722,7 +722,7 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 
 	_, numberOfPlayersMsg, _ := conn.ReadMessage()
 	numberOfPlayers, _ := strconv.Atoi(string(numberOfPlayersMsg))
-	p.game.Start(numberOfPlayers, ioutil.Discard) //todo: Don't discard the blinds messages!
+	p.game.Start(numberOfPlayers, io.Discard) //todo: Don't discard the blinds messages!
 
 	_, winner, _ := conn.ReadMessage()
 	p.game.Finish(string(winner))
@@ -731,7 +731,7 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 
 Hooray! The tests pass.
 
-We are not going to send the blind messages anywhere _just yet_ as we need to have a think about that. When we call `game.Start` we send in `ioutil.Discard` which will just discard any messages written to it.
+We are not going to send the blind messages anywhere _just yet_ as we need to have a think about that. When we call `game.Start` we send in `io.Discard` which will just discard any messages written to it.
 
 For now start the web server up. You'll need to update the `main.go` to pass a `Game` to the `PlayerServer`
 
@@ -801,7 +801,7 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 
 	numberOfPlayersMsg := ws.WaitForMsg()
 	numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
-	p.game.Start(numberOfPlayers, ioutil.Discard) //todo: Don't discard the blinds messages!
+	p.game.Start(numberOfPlayers, io.Discard) //todo: Don't discard the blinds messages!
 
 	winner := ws.WaitForMsg()
 	p.game.Finish(winner)
@@ -817,7 +817,7 @@ Sometimes when we're not sure how to do something, it's best just to play around
 The problematic line of code we have is
 
 ```go
-p.game.Start(numberOfPlayers, ioutil.Discard) //todo: Don't discard the blinds messages!
+p.game.Start(numberOfPlayers, io.Discard) //todo: Don't discard the blinds messages!
 ```
 
 We need to pass in an `io.Writer` for the game to write the blind alerts to.
@@ -868,7 +868,7 @@ blindIncrement := time.Duration(5+numberOfPlayers) * time.Second // (rather than
 
 You should see it working! The blind amount increments in the browser as if by magic.
 
-Now let's revert the code and think how to test it. In order to _implement_ it all we did was pass through to `StartGame` was `playerServerWS` rather than `ioutil.Discard` so that might make you think we should perhaps spy on the call to verify it works.
+Now let's revert the code and think how to test it. In order to _implement_ it all we did was pass through to `StartGame` was `playerServerWS` rather than `io.Discard` so that might make you think we should perhaps spy on the call to verify it works.
 
 Spying is great and helps us check implementation details but we should always try and favour testing the _real_ behaviour if we can because when you decide to refactor it's often spy tests that start failing because they are usually checking implementation details that you're trying to change.
 
