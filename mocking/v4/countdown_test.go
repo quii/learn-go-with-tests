@@ -23,12 +23,11 @@ Go!`
 		}
 	})
 
-	t.Run("sleep before every print", func(t *testing.T) {
+	t.Run("sleep in-between the prints", func(t *testing.T) {
 		spySleepPrinter := &SpyCountdownOperations{}
 		Countdown(spySleepPrinter, spySleepPrinter)
 
 		want := []string{
-			sleep,
 			write,
 			sleep,
 			write,

@@ -2,7 +2,7 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/mocking)**
 
-You have been asked to write a program which counts down from 3, printing each number on a new line (with a 1 second pause) and when it reaches zero it will print "Go!" and exit.
+You have been asked to write a program which counts down from 3, printing each number on a new line (with a 1-second pause) and when it reaches zero it will print "Go!" and exit.
 
 ```
 3
@@ -198,18 +198,17 @@ func Countdown(out io.Writer) {
 }
 ```
 
-If you run the program now, you should get the desired output but we don't have it as a dramatic countdown with the 1 second pauses.
+If you run the program now, you should get the desired output but we don't have it as a dramatic countdown with the 1-second pauses.
 
 Go lets you achieve this with `time.Sleep`. Try adding it in to our code.
 
 ```go
 func Countdown(out io.Writer) {
 	for i := countdownStart; i > 0; i-- {
-		time.Sleep(1 * time.Second)
 		fmt.Fprintln(out, i)
+		time.Sleep(1 * time.Second)
 	}
 
-	time.Sleep(1 * time.Second)
 	fmt.Fprint(out, finalWord)
 }
 ```
@@ -219,10 +218,10 @@ If you run the program it works as we want it to.
 ## Mocking
 
 The tests still pass and the software works as intended but we have some problems:
-- Our tests take 4 seconds to run.
-    - Every forward thinking post about software development emphasises the importance of quick feedback loops.
+- Our tests take 3 seconds to run.
+    - Every forward-thinking post about software development emphasises the importance of quick feedback loops.
     - **Slow tests ruin developer productivity**.
-    - Imagine if the requirements get more sophisticated warranting more tests. Are we happy with 4s added to the test run for every new test of `Countdown`?
+    - Imagine if the requirements get more sophisticated warranting more tests. Are we happy with 3s added to the test run for every new test of `Countdown`?
 - We have not tested an important property of our function.
 
 We have a dependency on `Sleep`ing which we need to extract so we can then control it in our tests.
@@ -255,7 +254,7 @@ func (s *SpySleeper) Sleep() {
 
 _Spies_ are a kind of _mock_ which can record how a dependency is used. They can record the arguments sent in, how many times it has been called, etc. In our case, we're keeping track of how many times `Sleep()` is called so we can check it in our test.
 
-Update the tests to inject a dependency on our Spy and assert that the sleep has been called 4 times.
+Update the tests to inject a dependency on our Spy and assert that the sleep has been called 3 times.
 
 ```go
 func TestCountdown(t *testing.T) {
@@ -274,8 +273,8 @@ Go!`
 		t.Errorf("got %q want %q", got, want)
 	}
 
-	if spySleeper.Calls != 4 {
-		t.Errorf("not enough calls to sleeper, want 4 got %d", spySleeper.Calls)
+	if spySleeper.Calls != 3 {
+		t.Errorf("not enough calls to sleeper, want 3 got %d", spySleeper.Calls)
 	}
 }
 ```
@@ -295,11 +294,10 @@ We need to update `Countdown` to accept our `Sleeper`
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
 	for i := countdownStart; i > 0; i-- {
-		time.Sleep(1 * time.Second)
 		fmt.Fprintln(out, i)
+		time.Sleep(1 * time.Second)
 	}
 
-	time.Sleep(1 * time.Second)
 	fmt.Fprint(out, finalWord)
 }
 ```
@@ -338,24 +336,22 @@ The test is now compiling but not passing because we're still calling the `time.
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
 	for i := countdownStart; i > 0; i-- {
-		sleeper.Sleep()
 		fmt.Fprintln(out, i)
+		sleeper.Sleep()
 	}
 
-	sleeper.Sleep()
 	fmt.Fprint(out, finalWord)
 }
 ```
 
-The test should pass and no longer take 4 seconds.
+The test should pass and no longer take 3 seconds.
 
 ### Still some problems
 
 There's still another important property we haven't tested.
 
-`Countdown` should sleep before each print, e.g:
+`Countdown` should sleep before each next print, e.g:
 
-- `Sleep`
 - `Print N`
 - `Sleep`
 - `Print N-1`
@@ -363,7 +359,7 @@ There's still another important property we haven't tested.
 - `Print Go!`
 - etc
 
-Our latest change only asserts that it has slept 4 times, but those sleeps could occur out of sequence.
+Our latest change only asserts that it has slept 3 times, but those sleeps could occur out of sequence.
 
 When writing tests if you're not confident that your tests are giving you sufficient confidence, just break it! (make sure you have committed your changes to source control first though). Change the code to the following
 
@@ -377,7 +373,6 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 		fmt.Fprintln(out, i)
 	}
 
-	sleeper.Sleep()
 	fmt.Fprint(out, finalWord)
 }
 ```
@@ -416,7 +411,6 @@ t.Run("sleep before every print", func(t *testing.T) {
 	Countdown(spySleepPrinter, spySleepPrinter)
 
 	want := []string{
-		sleep,
 		write,
 		sleep,
 		write,
@@ -434,7 +428,7 @@ t.Run("sleep before every print", func(t *testing.T) {
 
 This test should now fail. Revert `Countdown` back to how it was to fix the test.
 
-We now have two tests spying on the `Sleeper` so we can now refactor our test so one is testing what is being printed and the other one is ensuring we're sleeping in between the prints. Finally we can delete our first spy as it's not used anymore.
+We now have two tests spying on the `Sleeper` so we can now refactor our test so one is testing what is being printed and the other one is ensuring we're sleeping between the prints. Finally, we can delete our first spy as it's not used anymore.
 
 ```go
 func TestCountdown(t *testing.T) {
@@ -459,7 +453,6 @@ Go!`
 		Countdown(spySleepPrinter, spySleepPrinter)
 
 		want := []string{
-			sleep,
 			write,
 			sleep,
 			write,
@@ -521,7 +514,7 @@ func TestConfigurableSleeper(t *testing.T) {
 }
 ```
 
-There should be nothing new in this test and it is setup very similar to the previous mock tests.
+There should be nothing new in this test and it is set up very similar to the previous mock tests.
 
 ### Try and run the test
 ```
