@@ -194,4 +194,4 @@ t.Run("when you don't get a 200 you get a status error", func(t *testing.T) {
 })
 ```
 
-In this case we are using [`errors.As`](https://golang.org/pkg/errors/#example_As) to try and extract our error into our custom type. It returns a `bool` to denote success and extracts it into `got` for us.
+In this case we are using [`errors.As`](https://pkg.go.dev/errors#example-As) to try and extract our error into our custom type. It returns a `bool` to denote success and extracts it into `got` for us.
