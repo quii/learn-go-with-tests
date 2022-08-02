@@ -504,7 +504,7 @@ func SumAllTails(numbersToSum ...[]int) []int {
 
 ## Refactor
 
-Our tests have some repeated code around the assertions again, so let's extract those into a function
+Our tests have some repeated code around the assertions again, so let's extract those into a function.
 
 ```go
 func TestSumAllTails(t *testing.T) {
@@ -530,6 +530,12 @@ func TestSumAllTails(t *testing.T) {
 
 }
 ```
+
+We could've created a new function `checkSums` like we normally do, but in this case, we're showing a new technique, assigning a function to a variable. It might look strange but, it's no different to assigning a variable to a `string`, or an `int`, functions in effect are values too. 
+
+It's not shown here, but this technique can be useful when you want to bind a function to other local variables in "scope" (e.g between some `{}`). It also allows you to reduce the surface area of your API. 
+
+By defining this function inside the test, it cannot be used by other functions in this package. Hiding variables and functions that don't need to be exported is an important design consideration.
 
 A handy side-effect of this is this adds a little type-safety to our code. If
 a developer mistakenly adds a new test with `checkSums(t, got, "dave")` the compiler
