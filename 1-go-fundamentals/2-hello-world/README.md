@@ -17,7 +17,7 @@ func main() {
 }
 ```
 
-To run it type `go run hello.go`.
+ `go run hello.go` 명령어로 실행합니다.
 
 ## How it works
 
