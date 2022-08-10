@@ -362,9 +362,11 @@ Non-trivial systems don't tend to be single-process applications like the one we
 
 ### The next chapter
 
-In this post the acceptance test was written retrospectively. However, in [Growing Object-Oriented Software](http://www.growing-object-oriented-software.com) the authors show that we can use acceptance tests in a test-driven approach to act as a "north-star" to guide our efforts. This will be covered next in the next chapter.
+In this post the acceptance test was written retrospectively. However, in [Growing Object-Oriented Software](http://www.growing-object-oriented-software.com) the authors show that we can use acceptance tests in a test-driven approach to act as a "north-star" to guide our efforts.
 
-As systems get more complex, the costs of writing and maintaining acceptance tests can quickly spiral out of control. There are countless stories of development teams being hamstrung by expensive acceptance test suites. The next chapter will introduce principles and techniques for managing the costs of acceptance tests.
+As systems get more complex, the costs of writing and maintaining acceptance tests can quickly spiral out of control. There are countless stories of development teams being hamstrung by expensive acceptance test suites.
+
+The next chapter will introduce using acceptance test to guide our design and principles and techniques for managing the costs of acceptance tests.
 
 ### Improving the quality of open-source
 
