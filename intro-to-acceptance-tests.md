@@ -360,7 +360,11 @@ The nature of *how* to write acceptance tests depends on the system you're build
 
 Non-trivial systems don't tend to be single-process applications like the one we've discussed. Typically you'll depend on other systems such as a database. For these scenarios, you'll need to automate a local environment to test with. Tools like [docker-compose](https://docs.docker.com/compose/) are useful for spinning up containers of the environment you need to run your system locally.
 
-As systems get more complex, the costs of writing and maintaining acceptance tests can quickly spiral out of control. There are countless stories of development teams being hamstrung by expensive acceptance test suites. A future chapter will introduce principles and techniques for managing the costs of acceptance tests.
+### The next chapter
+
+In this post the acceptance test was written retrospectively. However, in [Growing Object-Oriented Software](http://www.growing-object-oriented-software.com) the authors show that we can use acceptance tests in a test-driven approach to act as a "north-star" to guide our efforts. This will be covered next in the next chapter.
+
+As systems get more complex, the costs of writing and maintaining acceptance tests can quickly spiral out of control. There are countless stories of development teams being hamstrung by expensive acceptance test suites. The next chapter will introduce principles and techniques for managing the costs of acceptance tests.
 
 ### Improving the quality of open-source
 
@@ -370,4 +374,4 @@ Like [Testable Examples](https://go.dev/blog/examples), seeing this little extra
 
 ## Recruitment plug for `$WORK`
 
-If you fancy working in an environment with other engineers solving interesting problems, live near or around London or Porto, and enjoy the contents of this chapter and book -  please [reach out to me on Twitter](https://twitter.com/quii) and maybe we can work together soon! 
+If you fancy working in an environment with other engineers solving interesting problems, live near or around London or Porto, and enjoy the contents of this chapter and book -  please [reach out to me on Twitter](https://twitter.com/quii) and maybe we can work together soon!
