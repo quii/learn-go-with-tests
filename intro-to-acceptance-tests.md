@@ -164,7 +164,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"syscall"
 	"time"
 )
@@ -198,10 +197,6 @@ func LaunchTestProgram(port string) (cleanup func(), sendInterrupt func() error,
 
 func buildBinary() (string, error) {
 	binName := randomString(10) + "-" + baseBinName
-
-	if runtime.GOOS == "windows" {
-		binName += ".exe"
-	}
 
 	build := exec.Command("go", "build", "-o", binName)
 
