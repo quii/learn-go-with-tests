@@ -48,7 +48,25 @@ By using these two features from the standard library, you can listen for `SIGTE
 
 ## Graceful shutdown package
 
-To that end, I wrote [https://pkg.go.dev/github.com/quii/go-graceful-shutdown](https://pkg.go.dev/github.com/quii/go-graceful-shutdown). The specifics around the code are not too important for this read, but it is worth having a quick look over the code before carrying on.
+To that end, I wrote [https://pkg.go.dev/github.com/quii/go-graceful-shutdown](https://pkg.go.dev/github.com/quii/go-graceful-shutdown). It provides a decorator function for a `*http.Server` to call its `Shutdown` method when a `SIGTERM` signal is detected
+
+```go
+func main() {
+	httpServer := &http.Server{Addr: ":8080", Handler: http.HandlerFunc(acceptancetests.SlowHandler)}
+
+	server := gracefulshutdown.NewServer(httpServer)
+
+	if err := server.ListenAndServe(); err != nil {
+		// this will typically happen if our responses aren't written before the ctx deadline, not much can be done
+		log.Fatalf("uh oh, didnt shutdown gracefully, some responses may have been lost %v", err)
+	}
+
+	// hopefully, you'll always see this instead
+	log.Println("shutdown gracefully! all responses were sent")
+}
+```
+
+The specifics around the code are not too important for this read, but it is worth having a quick look over the code before carrying on.
 
 ## Tests and feedback loops
 
@@ -352,4 +370,4 @@ Like [Testable Examples](https://go.dev/blog/examples), seeing this little extra
 
 ## Recruitment plug for `$WORK`
 
-If you fancy working in an environment with other engineers solving interesting problems, live near or around London or Porto, and enjoy the contents of this chapter and book -  please [reach out to me on Twitter](https://twitter.com/quii) and maybe we can work together soon!
+If you fancy working in an environment with other engineers solving interesting problems, live near or around London or Porto, and enjoy the contents of this chapter and book -  please [reach out to me on Twitter](https://twitter.com/quii) and maybe we can work together soon! 
