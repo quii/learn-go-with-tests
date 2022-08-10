@@ -26,6 +26,10 @@
 * [Generics](generics.md)
 * [Revisiting arrays and slices with generics](revisiting-arrays-and-slices-with-generics.md)
 
+## Testing fundamentals
+
+* [Introduction to acceptance tests](intro-to-acceptance-tests.md)
+
 ## Build an application
 
 * [Intro](app-intro.md)

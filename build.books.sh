@@ -27,6 +27,7 @@ docker run --rm -v `pwd`:/data uppalabharath/pandoc-latex-cjk:latest --from=gfm+
     html-templates.md \
     generics.md \
     revisiting-arrays-and-slices-with-generics.md \
+    intro-to-acceptance-tests.md \
     app-intro.md \
     http-server.md \
     json.md \
@@ -63,6 +64,7 @@ docker run --rm -v `pwd`:/data uppalabharath/pandoc-latex-cjk:latest --from=gfm+
     html-templates.md \
     generics.md \
     revisiting-arrays-and-slices-with-generics.md \
+    intro-to-acceptance-tests.md \
     app-intro.md \
     http-server.md \
     json.md \

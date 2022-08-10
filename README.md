@@ -81,6 +81,12 @@ By the end of this, you should have a strong grasp as to how to iteratively writ
 * [Time](time.md) - using the `time` package to schedule activities.
 * [WebSockets](websockets.md) - learn how to write and test a server that uses WebSockets.
 
+### Testing fundamentals
+
+Covering other subjects around testing.
+
+* [Introduction to acceptance tests] - Learn how to write acceptance tests for your code, with a real-world example for gracefully shutting down a HTTP server
+
 ### Questions and answers
 
 I often run in to questions on the internets like
