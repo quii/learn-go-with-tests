@@ -21,15 +21,16 @@ func main() {
 
 ## How it works
 
-When you write a program in Go you will have a `main` package defined with a `main` func inside it. Packages are ways of grouping up related Go code together.
+Go로 프로그램을 작성할 때 보통 `main` 함수로 정의된 `main` 패키지를 가지게 됩니다. 패키지란 관련된 Go 코드를 함께 그루핑하기 위한 방식입니다.
 
-The `func` keyword is how you define a function with a name and a body.
+`func` 키워드는 함수를 이름과 본문으로 정의합니다.
 
-With `import "fmt"` we are importing a package which contains the `Println` function that we use to print.
+`import "fmt"`로 출력할 때 사용하는 `PrintIn` 함수를 담고 있는 패키지를 임포트할 수 있습니다.
+
 
 ## How to test
 
-How do you test this? It is good to separate your "domain" code from the outside world \(side-effects\). The `fmt.Println` is a side effect \(printing to stdout\) and the string we send in is our domain.
+테스트를 하기전에, **도메인 코드**를 외부로 부터(사이드 이펙트)로 분리하는 것이 좋은 방법입니다. 여기서 fmt.PrintIn이 사이드 이펙트이고 문자열을 전달하는 곳이 도메인입니다.
 
 So let's separate these concerns so it's easier to test
 
@@ -46,8 +47,9 @@ func main() {
 	fmt.Println(Hello())
 }
 ```
+위와 같이 `func` 키워드로 새로운 함수를 생성하였지만, 이번에는 함수를 정의할 때 `string`이라는 다른 키워드가 추가되었습니다. 이는 이 함수가 `string`을 반환한다는 뜻입니다.
 
-We have created a new function again with `func` but this time we've added another keyword `string` in the definition. This means this function returns a `string`.
+
 
 Now create a new file called `hello_test.go` where we are going to write a test for our `Hello` function
 
@@ -95,12 +97,14 @@ Notice how you have not had to pick between multiple testing frameworks and then
 
 ### Writing tests
 
+테스트를 작성은 함수를 작성하는 것과 매우 비슷하며 다음과 같은 룰을 가집니다.
+
 Writing a test is just like writing a function, with a few rules
 
-* It needs to be in a file with a name like `xxx_test.go`
-* The test function must start with the word `Test`
-* The test function takes one argument only `t *testing.T`
-* In order to use the `*testing.T` type, you need to `import "testing"`, like we did with `fmt` in the other file
+* `xxx_test.go`와 같은 파일명으로 작성합니다.
+* 테스트 함수는 반드시 `Test`라는 단어로 시작해야합니다.
+* 테스트 함수는 `t *testing.T`라는 단 하나의 인자만 가집니다.
+* `*testing.T` 타입을 사용하기 위해 `fmt`를 임포트한 것처럼 `testing` 패키지를 임포트해야합니다.
 
 For now, it's enough to know that your `t` of type `*testing.T` is your "hook" into the testing framework so you can do things like `t.Fail()` when you want to fail.
 
@@ -154,7 +158,7 @@ func TestHello(t *testing.T) {
 }
 ```
 
-Now run `go test`, you should have a compilation error
+`go test`로 테스트를 실행하면 컴파일 에러를 겪게 됩니다.
 
 ```text
 ./hello_test.go:6:18: too many arguments in call to Hello
@@ -162,9 +166,9 @@ Now run `go test`, you should have a compilation error
     want ()
 ```
 
-When using a statically typed language like Go it is important to _listen to the compiler_. The compiler understands how your code should snap together and work so you don't have to.
+Go와 같은 정적 타이핑 언어를 사용할 때는 컴파일러에 귀기울이는 것이 중요합니다. 왜냐면 컴파일러는 코드가 어떻게 엮여서 작동해야하는지 이해하기 때문입니다.
 
-In this case the compiler is telling you what you need to do to continue. We have to change our function `Hello` to accept an argument.
+위와 같은 케이스에서는 컴파일러가 다음을 진행하기 위해 무엇이 필요한지 말해줍니다. 그러므로 `Hello` 함수가 인자를 허용하도록 코드를 수정해야합니다.
 
 Edit the `Hello` function to accept an argument of type string
 
@@ -212,13 +216,13 @@ There's not a lot to refactor here, but we can introduce another language featur
 
 ### Constants
 
-Constants are defined like so
+상수(Constants)는 다음과 같이 선언할 수 있습니다.
 
 ```go
 const englishHelloPrefix = "Hello, "
 ```
 
-We can now refactor our code
+그리고 코드를 다음과 같이 리팩토링할 수 있습니다.
 
 ```go
 const englishHelloPrefix = "Hello, "
@@ -230,7 +234,8 @@ func Hello(name string) string {
 
 After refactoring, re-run your tests to make sure you haven't broken anything.
 
-Constants should improve performance of your application as it saves you creating the `"Hello, "` string instance every time `Hello` is called.
+상수를 사용함으로써 어플리케이션의 퍼포먼스를 향상 시킬 수 있습니다. 왜냐면 `Hello` 함수가 매번 호출 될 때 마다 `"Hello, "` 문자열 인스턴스를 생성했기 때문입니다.
+
 
 To be clear, the performance boost is incredibly negligible for this example! But it's worth thinking about creating constants to capture the meaning of values and sometimes to aid performance.
 
@@ -261,17 +266,15 @@ func TestHello(t *testing.T) {
 }
 ```
 
-Here we are introducing another tool in our testing arsenal, subtests. Sometimes it is useful to group tests around a "thing" and then have subtests describing different scenarios.
+여기서는 이전의 테스트와 다른 형태의 서브 테스트가 사용되었습니다. 가끔은 여러 테스트를 하나의 그룹으로 묶고 서브 테스트들로 여러 다른 시나리오를 표현하는 것이 유용합니다.
 
-A benefit of this approach is you can set up shared code that can be used in the other tests.
+이런 접근의 베네핏은 공통으로 사용하는 코드를 작성하여 다른 테스트에서도 재사용할 수 있다는 점입니다.
 
-There is repeated code when we check if the message is what we expect.
+보이는 바와 같이 테스트에서 메시지가 예상한 바와 같은지를 체크하는 부분의 코드가 반복되고 있습니다.
 
-Refactoring is not _just_ for the production code!
+리팩토링은 프로덕션 코드만을 위한 것이 아닙니다. 왜냐면 실제 코드가 어떻게 작동해야 하는지의 대한 명확한 정의가 테스트에서 설명 되어야하기 때문입니다.
 
-It is important that your tests _are clear specifications_ of what the code needs to do.
-
-We can and should refactor our tests.
+그러므로 다음과 같이 테스트 코드를 리팩토링할 수 있습니다.
 
 ```go
 func TestHello(t *testing.T) {
@@ -297,13 +300,12 @@ func assertCorrectMessage(t testing.TB, got, want string) {
 }
 ```
 
-What have we done here?
+위와 같이 테스트 검증 코드를 하나의 함수로 만듬으로써 테스트의 가독성을 향상시키고 중복을 줄였습니다. 여기서 `t *testing.T`을 전달하므로 필요할 때 테스트 코드를 실패하게 할 수 있습니다.
 
-We've refactored our assertion into a new function. This reduces duplication and improves readability of our tests. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
+`*testing.T`와 `*testing.B`를 모두 만족하는 인터페이스인 `testing.TB`를 사용하는 것은 매우 좋은 아이디어입니다. 헬퍼 함수를 테스트로부터 혹은 벤치마크로부터 호출할 수 있기 때문입니다.
 
-For helper functions, it's a good idea to accept a `testing.TB` which is an interface that `*testing.T` and `*testing.B` both satisfy, so you can call helper functions from a test, or a benchmark (don't worry if words like "interface" mean nothing to you right now, it will be covered later).
 
-`t.Helper()` is needed to tell the test suite that this method is a helper. By doing this when it fails the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems easier. If you still don't understand, comment it out, make a test fail and observe the test output. Comments in Go are a great way to add additional information to your code, or in this case, a quick way to tell the compiler to ignore a line. You can comment out the `t.Helper()` code by adding two forward slashes `//` at the beginning of the line. You should see that line turn grey or change to another color than the rest of your code to indicate it's now commented out.
+`t.Helper()`는 test suite(test case들의 묶음)에게 이 함수가 헬퍼 함수라는 것을 알려주기 위해 필요합니다. 이렇게 함으로써 테스트가 실패할 경우 라인 넘버가 테스트 헬퍼 안에서 리포트 되지 않고 호출한 함수에서 리포트 되게 됩니다. 또한 다른 개발자들이 문제를 더 쉽게 파악하도록 해줍니다. If you still don't understand, comment it out, make a test fail and observe the test output. Comments in Go are a great way to add additional information to your code, or in this case, a quick way to tell the compiler to ignore a line. You can comment out the `t.Helper()` code by adding two forward slashes `//` at the beginning of the line. You should see that line turn grey or change to another color than the rest of your code to indicate it's now commented out.
 
 Now that we have a well-written failing test, let's fix the code, using an `if`.
 
@@ -327,13 +329,13 @@ check in the lovely version of our code with its test.
 
 ### Discipline
 
-Let's go over the cycle again
+개발 사이클을 다시 복습하면 다음과 같습니다.
 
-* Write a test
-* Make the compiler pass
-* Run the test, see that it fails and check the error message is meaningful
-* Write enough code to make the test pass
-* Refactor
+* 테스트 작성를 작성합니다
+* 컴파일러가 통과하도록 합니다
+* 테스트를 실행하고, 실패하는 것을 확인한 후에 에러 메시지가 유의미한지 체크합니다.
+* 테스트를 통과하기 위해 충분한 코드를 작성합니다
+* 리팩토링합니다.
 
 On the face of it this may seem tedious but sticking to the feedback loop is important.
 
@@ -456,7 +458,8 @@ func Hello(name string, language string) string {
 
 ## `switch`
 
-When you have lots of `if` statements checking a particular value it is common to use a `switch` statement instead. We can use `switch` to refactor the code to make it easier to read and more extensible if we wish to add more language support later
+만약 특정한 값을 체크하기위해 많은 `if`문을 사용해야한다면 `if`문 대신 `switch`문을 사용하는 것이 보편적입니다. `switch`문을 사용해 코드를 리팩토링함으로써 가독성을 향상시킬 수 있고 다양한 언어를 추후에 더 추가한다고 했을 때 확장성있는 코드를 작성할 수 있습니다.
+
 
 ```go
 func Hello(name string, language string) string {
@@ -481,7 +484,7 @@ Write a test to now include a greeting in the language of your choice and you sh
 
 ### one...last...refactor?
 
-You could argue that maybe our function is getting a little big. The simplest refactor for this would be to extract out some functionality into another function.
+이쯤되면 `Hello` 함수의 코드 사이즈가 크다는 논란의 여지가 생길 수 있습니다. 가장 간단하게 해결할 수 있는 방법은 특정 기능을 다른 함수로 분리하는 것입니다.
 
 ```go
 func Hello(name string, language string) string {
@@ -507,13 +510,12 @@ func greetingPrefix(language string) (prefix string) {
 
 A few new concepts:
 
-* In our function signature we have made a _named return value_ `(prefix string)`.
-* This will create a variable called `prefix` in your function.
-    * It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for `string`s it is `""`.
-        * You can return whatever it's set to by just calling `return` rather than `return prefix`.
+* 함수 시그니처에서 `(prefix string)`이라는 이름을 가진 반환값을 만들었습니다.
+* 이렇게 함으로써 함수 안에 `prefix`라는 변수가 생성됩니다.
+  * 기본으로 **"제로"** 값이 할당됩니다. 이는 타입에 기반하는데, 예를 들어 정수면 `0`, 문자열이면 `""`이 할당됩니다.
     * This will display in the Go Doc for your function so it can make the intent of your code clearer.
-* `default` in the switch case will be branched to if none of the other `case` statements match.
-* The function name starts with a lowercase letter. In Go public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposed to the world, so we made this function private.
+* 스위치문 안에 `default`는 매칭되는 케이스문이 없는 경우 `if none`으로 분기됩니다.
+* Go `public` 함수는 대문자로, `private` 함수는 소문자로 시작합니다. We don't want the internals of our algorithm to be exposed to the world, so we made this function private.
 
 ## Wrapping up
 
