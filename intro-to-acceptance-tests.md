@@ -253,7 +253,7 @@ func waitForServerListening(port string) error {
 
 Admittedly, this is not the nicest code in the world, but just focus on the exported function LaunchTestProgram, the un-exported functions it calls are uninteresting boilerplate.
 
-As discussed, acceptance testing tends to be trickier to set up. This code does make the *testing* code substantially simpler to read, and often with acceptance tests once you've written the ceremonious code once, it's done and you can forget about it.
+As discussed, acceptance testing tends to be trickier to set up. This code does make the *testing* code substantially simpler to read, and often with acceptance tests once you've written the ceremonious code, it's done, and you can forget about it.
 
 ### The acceptance test(s)
 
