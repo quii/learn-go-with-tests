@@ -149,7 +149,7 @@ You may have guessed that `SlowHandler` has a `time.Sleep` to delay responding s
 - Build the program;
 - Run it (and wait for it listen on `8080`);
 - Send an HTTP request to the server;
-- Before the server has a chance to respond to the rest, send SIGTERM;
+- Before the server has a chance to send a HTTP response, send SIGTERM;
 - See if we still get a response.
 
 ### Building and running the program
