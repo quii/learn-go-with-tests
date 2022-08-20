@@ -40,6 +40,6 @@ type Triangle struct {
 }
 
 // Area returns the area of the triangle.
-func (c Triangle) Area() float64 {
-	return (c.Base * c.Height) * 0.5
+func (t Triangle) Area() float64 {
+	return (t.Base * t.Height) * 0.5
 }
