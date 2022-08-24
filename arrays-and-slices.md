@@ -289,7 +289,7 @@ We need to define `SumAll` according to what our test wants.
 Go can let you write [_variadic functions_](https://gobyexample.com/variadic-functions) that can take a variable number of arguments.
 
 ```go
-func SumAll(numbersToSum ...[]int) (sums []int) {
+func SumAll(numbersToSum ...[]int) []int {
 	return
 }
 ```
