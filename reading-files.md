@@ -645,12 +645,12 @@ Description: Description 2
 Tags: rust, borrow-checker`
 	)
 
-    // rest of test code cut for brevity
-    assertPost(t, posts[0], blogposts.Post{
-        Title:       "Post 1",
-        Description: "Description 1",
-        Tags:        []string{"tdd", "go"},
-    })
+	// rest of test code cut for brevity
+	assertPost(t, posts[0], blogposts.Post{
+		Title:       "Post 1",
+		Description: "Description 1",
+		Tags:        []string{"tdd", "go"},
+	})
 }
 ```
 
@@ -716,19 +716,19 @@ Tags: rust, borrow-checker
 B
 L
 M`
-    )
+	)
 ```
 
 Add to our assertion like the others
 
 ```go
 	assertPost(t, posts[0], blogposts.Post{
-        Title:       "Post 1",
-        Description: "Description 1",
-        Tags:        []string{"tdd", "go"},
-        Body: `Hello
+		Title:       "Post 1",
+		Description: "Description 1",
+		Tags:        []string{"tdd", "go"},
+		Body: `Hello
 World`,
-    })
+	})
 ```
 
 ## Try to run the test
@@ -844,9 +844,9 @@ If you wish to try out the code "for real":
 
 ```go
 import (
-    blogposts "github.com/quii/fstest-spike"
-    "log"
-    "os"
+	blogposts "github.com/quii/fstest-spike"
+	"log"
+	"os"
 )
 
 func main() {

@@ -508,7 +508,7 @@ There is no refactoring we need to do on this since it was a simple change. Howe
 t.Run("existing word", func(t *testing.T) {
 	word := "test"
 	definition := "this is just a test"
-    dictionary := Dictionary{word: definition}
+	dictionary := Dictionary{word: definition}
 	newDefinition := "new definition"
 
 	err := dictionary.Update(word, newDefinition)
