@@ -34,7 +34,7 @@ These forces seem like important things to understand if we have any hope of not
 
 It feels obvious that a system _has_ to change or it becomes less useful but how often is this ignored? 
 
-Many teams are incentivised to deliver a project on a particular date and then moved on to the next project. If the software is "lucky" there is at least some kind of hand-off to another set of individuals to maintain it, but they didn't write it of course. 
+Many teams are incentivised to deliver a project on a particular date and then move on to the next project. If the software is "lucky" there is at least some kind of hand-off to another set of individuals to maintain it, but they didn't write it of course. 
 
 People often concern themselves with trying to pick a framework which will help them "deliver quickly" but not focusing on the longevity of the system in terms of how it needs to evolve.
 
