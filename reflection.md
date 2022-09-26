@@ -12,7 +12,7 @@ To do this we will need to use _reflection_.
 
 From [The Go Blog: Reflection](https://blog.golang.org/laws-of-reflection)
 
-## What is `interface`?
+## What is `interface{}`?
 
 We have enjoyed the type-safety that Go has offered us in terms of functions that work with known types, such as `string`, `int` and our own types like `BankAccount`.
 
@@ -24,14 +24,14 @@ Go lets us get around this with the type `interface{}` which you can think of as
 
 So `walk(x interface{}, fn func(string))` will accept any value for `x`.
 
-### So why not use `interface` for everything and have really flexible functions?
+### So why not use `interface{}` for everything and have really flexible functions?
 
-- As a user of a function that takes `interface` you lose type safety. What if you meant to pass `Foo.bar` of type `string` into a function but instead did `Foo.baz` which is an `int`? The compiler won't be able to inform you of your mistake. You also have no idea _what_ you're allowed to pass to a function. Knowing that a function takes a `UserService` for instance is very useful.
+- As a user of a function that takes `interface{}` you lose type safety. What if you meant to pass `Foo.bar` of type `string` into a function but instead did `Foo.baz` which is an `int`? The compiler won't be able to inform you of your mistake. You also have no idea _what_ you're allowed to pass to a function. Knowing that a function takes a `UserService` for instance is very useful.
 - As a writer of such a function, you have to be able to inspect _anything_ that has been passed to you and try and figure out what the type is and what you can do with it. This is done using _reflection_. This can be quite clumsy and difficult to read and is generally less performant (as you have to do checks at runtime).
 
 In short only use reflection if you really need to.
 
-If you want polymorphic functions, consider if you could design it around an interface (not `interface`, confusingly) so that users can use your function with multiple types if they implement whatever methods you need for your function to work.
+If you want polymorphic functions, consider if you could design it around an interface (not `interface{}`, confusingly) so that users can use your function with multiple types if they implement whatever methods you need for your function to work.
 
 Our function will need to be able to work with lots of different things. As always we'll take an iterative approach, writing tests for each new thing we want to support and refactoring along the way until we're done.
 

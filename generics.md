@@ -184,7 +184,7 @@ func InterfaceyFoo(x, y interface{})
 
 What's the point of generics here? Doesn't `any` describe... anything?
 
-In terms of constraints, `any` does mean "anything" and so does `interface{}`. In fact, `any` was added in 1.18 and is _just an alias for `interface`_.
+In terms of constraints, `any` does mean "anything" and so does `interface{}`. In fact, `any` was added in 1.18 and is _just an alias for `interface{}`_.
 
 The difference with the generic version is _you're still describing a specific type_ and what that means is we've still constrained this function to only work with _one_ type.
 
