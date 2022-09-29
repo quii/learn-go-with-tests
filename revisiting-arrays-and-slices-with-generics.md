@@ -396,22 +396,22 @@ Again, because it takes a generic type, we can re-use it in many ways
 
 ```go
 type Person struct {
-    Name string
+	Name string
 }
 
 t.Run("Find the best programmer", func(t *testing.T) {
-    people := []Person{
-        Person{Name: "Kent Beck"},
-        Person{Name: "Martin Fowler"},
-        Person{Name: "Chris James"},
-    }
+	people := []Person{
+		Person{Name: "Kent Beck"},
+		Person{Name: "Martin Fowler"},
+		Person{Name: "Chris James"},
+	}
 
-    king, found := Find(people, func(p Person) bool {
-        return strings.Contains(p.Name, "Chris")
-    })
+	king, found := Find(people, func(p Person) bool {
+		return strings.Contains(p.Name, "Chris")
+	})
 
-    AssertTrue(t, found)
-    AssertEqual(t, king, Person{Name: "Chris James"})
+	AssertTrue(t, found)
+	AssertEqual(t, king, Person{Name: "Chris James"})
 })
 ```
 

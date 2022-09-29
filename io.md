@@ -155,8 +155,8 @@ func TestFileSystemStore(t *testing.T) {
 
 	t.Run("league from a reader", func(t *testing.T) {
 		database := strings.NewReader(`[
-            {"Name": "Cleo", "Wins": 10},
-            {"Name": "Chris", "Wins": 33}]`)
+			{"Name": "Cleo", "Wins": 10},
+			{"Name": "Chris", "Wins": 33}]`)
 
 		store := FileSystemPlayerStore{database}
 
@@ -335,8 +335,8 @@ Next we'll implement `GetPlayerScore`.
 //file_system_store_test.go
 t.Run("get player score", func(t *testing.T) {
 	database := strings.NewReader(`[
-        {"Name": "Cleo", "Wins": 10},
-        {"Name": "Chris", "Wins": 33}]`)
+		{"Name": "Cleo", "Wins": 10},
+		{"Name": "Chris", "Wins": 33}]`)
 
 	store := FileSystemPlayerStore{database}
 
@@ -404,8 +404,8 @@ You will have seen dozens of test helper refactorings so I'll leave this to you 
 //file_system_store_test.go
 t.Run("get player score", func(t *testing.T) {
 	database := strings.NewReader(`[
-        {"Name": "Cleo", "Wins": 10},
-        {"Name": "Chris", "Wins": 33}]`)
+		{"Name": "Cleo", "Wins": 10},
+		{"Name": "Chris", "Wins": 33}]`)
 
 	store := FileSystemPlayerStore{database}
 
@@ -493,8 +493,8 @@ func TestFileSystemStore(t *testing.T) {
 
 	t.Run("league from a reader", func(t *testing.T) {
 		database, cleanDatabase := createTempFile(t, `[
-            {"Name": "Cleo", "Wins": 10},
-            {"Name": "Chris", "Wins": 33}]`)
+			{"Name": "Cleo", "Wins": 10},
+			{"Name": "Chris", "Wins": 33}]`)
 		defer cleanDatabase()
 
 		store := FileSystemPlayerStore{database}
@@ -515,8 +515,8 @@ func TestFileSystemStore(t *testing.T) {
 
 	t.Run("get player score", func(t *testing.T) {
 		database, cleanDatabase := createTempFile(t, `[
-            {"Name": "Cleo", "Wins": 10},
-            {"Name": "Chris", "Wins": 33}]`)
+			{"Name": "Cleo", "Wins": 10},
+			{"Name": "Chris", "Wins": 33}]`)
 		defer cleanDatabase()
 
 		store := FileSystemPlayerStore{database}
@@ -536,8 +536,8 @@ Let's get the first iteration of recording a win for an existing player
 //file_system_store_test.go
 t.Run("store wins for existing players", func(t *testing.T) {
 	database, cleanDatabase := createTempFile(t, `[
-        {"Name": "Cleo", "Wins": 10},
-        {"Name": "Chris", "Wins": 33}]`)
+		{"Name": "Cleo", "Wins": 10},
+		{"Name": "Chris", "Wins": 33}]`)
 	defer cleanDatabase()
 
 	store := FileSystemPlayerStore{database}
@@ -661,8 +661,8 @@ We now need to handle the scenario of recording wins of new players.
 //file_system_store_test.go
 t.Run("store wins for new players", func(t *testing.T) {
 	database, cleanDatabase := createTempFile(t, `[
-        {"Name": "Cleo", "Wins": 10},
-        {"Name": "Chris", "Wins": 33}]`)
+		{"Name": "Cleo", "Wins": 10},
+		{"Name": "Chris", "Wins": 33}]`)
 	defer cleanDatabase()
 
 	store := FileSystemPlayerStore{database}
@@ -1210,8 +1210,8 @@ We can update the assertion on our first test in `TestFileSystemStore`:
 //file_system_store_test.go
 t.Run("league sorted", func(t *testing.T) {
 	database, cleanDatabase := createTempFile(t, `[
-        {"Name": "Cleo", "Wins": 10},
-        {"Name": "Chris", "Wins": 33}]`)
+		{"Name": "Cleo", "Wins": 10},
+		{"Name": "Chris", "Wins": 33}]`)
 	defer cleanDatabase()
 
 	store, err := NewFileSystemPlayerStore(database)
