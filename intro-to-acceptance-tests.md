@@ -1,5 +1,4 @@
 # Introduction to acceptance testing
-TODO: Determine wes vs yous
 
 At `$WORK`, we've been running into the need to have "graceful shutdown" for our services. Graceful shutdown makes sure your system finishes its work properly before it is terminated. A real-world analogy would be someone trying to wrap up a phone call properly before moving on to the next meeting, rather than just hanging up mid-sentence.
 
