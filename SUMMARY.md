@@ -29,6 +29,7 @@
 ## Testing fundamentals
 
 * [Introduction to acceptance tests](intro-to-acceptance-tests.md)
+* [Scaling acceptance tests](scaling-acceptance-tests.md)
 
 ## Build an application
 
