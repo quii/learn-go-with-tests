@@ -290,7 +290,7 @@ Go can let you write [_variadic functions_](https://gobyexample.com/variadic-fun
 
 ```go
 func SumAll(numbersToSum ...[]int) []int {
-	return
+	return nil
 }
 ```
 
