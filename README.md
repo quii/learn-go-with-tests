@@ -85,8 +85,8 @@ By the end of this, you should have a strong grasp as to how to iteratively writ
 
 Covering other subjects around testing.
 
-* [Introduction to acceptance tests] - Learn how to write acceptance tests for your code, with a real-world example for gracefully shutting down a HTTP server
-* [Scaling acceptance tests] - Learn techniques to manage the complexity of writing acceptance tests for non-trivial systems.
+* [Introduction to acceptance tests](intro-to-acceptance-tests.md) - Learn how to write acceptance tests for your code, with a real-world example for gracefully shutting down a HTTP server
+* [Scaling acceptance tests](scaling-acceptance-tests.md) - Learn techniques to manage the complexity of writing acceptance tests for non-trivial systems.
 
 ### Questions and answers
 
