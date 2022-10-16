@@ -6,7 +6,7 @@ Acceptance tests are essential, and they directly impact your ability to confide
 
 They're also a fantastic tool to help you work with legacy code. When faced with a poor codebase without any tests, please resist the temptation to start refactoring. Instead, write some acceptance tests to give you a safety net to freely change the system's internals without affecting its functional external behaviour. ATs need not be concerned with internal quality, so they're a great fit in these situations.
 
-What you'll appreciate after reading this, is that not only are acceptance tests useful for verification but they can also be used in the development process, by helping us change our system more deliberately and methodically, and by reducing wasted effort.
+After reading this, you'll appreciate that acceptance tests are useful for verification and can also be used in the development process by helping us change our system more deliberately and methodically, reducing wasted effort.
 
 ## Prerequisite material
 
