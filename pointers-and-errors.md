@@ -121,7 +121,7 @@ func TestWallet(t *testing.T) {
 
 	got := wallet.Balance()
 
-	fmt.Printf("address of balance in test is %v \n", &wallet.balance)
+	fmt.Printf("address of balance in test is %p \n", &wallet.balance)
 
 	want := 10
 
@@ -133,7 +133,7 @@ func TestWallet(t *testing.T) {
 
 ```go
 func (w Wallet) Deposit(amount int) {
-	fmt.Printf("address of balance in Deposit is %v \n", &w.balance)
+	fmt.Printf("address of balance in Deposit is %p \n", &w.balance)
 	w.balance += amount
 }
 ```
