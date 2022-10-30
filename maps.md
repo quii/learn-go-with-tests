@@ -245,9 +245,7 @@ func TestAdd(t *testing.T) {
 		t.Fatal("should find added word:", err)
 	}
 
-	if got != want {
-		t.Errorf("got %q want %q", got, want)
-	}
+	assertStrings(t, got, want)
 }
 ```
 
