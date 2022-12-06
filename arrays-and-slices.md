@@ -509,7 +509,7 @@ Our tests have some repeated code around the assertions again, so let's extract 
 ```go
 func TestSumAllTails(t *testing.T) {
 
-	checkSums := func(t testing.TB, got, want []int) {
+	checkSums := func(t testing.T, got, want []int) {
 		t.Helper()
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("got %v want %v", got, want)
