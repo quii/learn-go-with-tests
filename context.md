@@ -108,7 +108,7 @@ t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
 	svr.ServeHTTP(response, request)
 
 	if !store.cancelled {
-		t.Error("store was not told to cancel")
+		t.Error("store was told to cancel")
 	}
 })
 ```
@@ -128,7 +128,7 @@ The test fails as we'd expect.
 ```
 --- FAIL: TestServer (0.00s)
     --- FAIL: TestServer/tells_store_to_cancel_work_if_request_is_cancelled (0.00s)
-    	context_test.go:62: store was not told to cancel
+    	context_test.go:62: store was told to cancel
 ```
 
 ## Write enough code to make it pass
@@ -214,14 +214,14 @@ type SpyStore struct {
 func (s *SpyStore) assertWasCancelled() {
 	s.t.Helper()
 	if !s.cancelled {
-		s.t.Error("store was not told to cancel")
+		s.t.Error("store was told to cancel")
 	}
 }
 
 func (s *SpyStore) assertWasNotCancelled() {
 	s.t.Helper()
 	if s.cancelled {
-		s.t.Error("store was told to cancel")
+		s.t.Error("store was not told to cancel")
 	}
 }
 ```
@@ -472,11 +472,11 @@ We can see after this that the server code has become simplified as it's no long
 
 ### What we've covered
 
-- How to test a HTTP handler that has had the request cancelled by the client.
-- How to use context to manage cancellation.
-- How to write a function that accepts `context` and uses it to cancel itself by using goroutines, `select` and channels.
-- Follow Google's guidelines as to how to manage cancellation by propagating request scoped context through your call-stack.
-- How to roll your own spy for `http.ResponseWriter` if you need it.
+-   How to test a HTTP handler that has had the request cancelled by the client.
+-   How to use context to manage cancellation.
+-   How to write a function that accepts `context` and uses it to cancel itself by using goroutines, `select` and channels.
+-   Follow Google's guidelines as to how to manage cancellation by propagating request scoped context through your call-stack.
+-   How to roll your own spy for `http.ResponseWriter` if you need it.
 
 ### What about context.Value ?
 
@@ -502,5 +502,5 @@ On other hand, it can be helpful to include information that is orthogonal to a 
 
 ### Additional material
 
-- I really enjoyed reading [Context should go away for Go 2 by Michal Štrba](https://faiface.github.io/post/context-should-go-away-go2/). His argument is that having to pass `context` everywhere is a smell, that it's pointing to a deficiency in the language in respect to cancellation. He says it would better if this was somehow solved at the language level, rather than at a library level. Until that happens, you will need `context` if you want to manage long running processes.
-- The [Go blog further describes the motivation for working with `context` and has some examples](https://blog.golang.org/context)
+-   I really enjoyed reading [Context should go away for Go 2 by Michal Štrba](https://faiface.github.io/post/context-should-go-away-go2/). His argument is that having to pass `context` everywhere is a smell, that it's pointing to a deficiency in the language in respect to cancellation. He says it would better if this was somehow solved at the language level, rather than at a library level. Until that happens, you will need `context` if you want to manage long running processes.
+-   The [Go blog further describes the motivation for working with `context` and has some examples](https://blog.golang.org/context)
