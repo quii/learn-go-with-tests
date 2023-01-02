@@ -160,7 +160,7 @@ The test will _probably_ fail with a different number, but nonetheless it demons
 
 ## Write enough code to make it pass
 
-A simple solution is to add a lock to our `Counter`, a [`Mutex`](https://golang.org/pkg/sync/#Mutex)
+A simple solution is to add a lock to our `Counter`, ensuring only one goroutine can increment the counter at a time. Go's [`Mutex`](https://golang.org/pkg/sync/#Mutex) provides such a lock:
 
 >A Mutex is a mutual exclusion lock. The zero value for a Mutex is an unlocked mutex.
 
