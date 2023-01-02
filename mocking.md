@@ -35,7 +35,7 @@ Here's how we can divide our work up and iterate on it:
 
 ## Write the test first
 
-Our software needs to print to stdout and we saw how we could use DI to facilitate testing this in the DI section.
+Our software needs to print to stdout and we saw how we could use Dependency Injection (DI) to facilitate testing this in the DI section.
 
 ```go
 func TestCountdown(t *testing.T) {
