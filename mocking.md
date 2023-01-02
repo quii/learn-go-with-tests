@@ -159,7 +159,7 @@ Go!`
 }
 ```
 
-The backtick syntax is another way of creating a `string` but lets you put things like newlines which is perfect for our test.
+The backtick syntax is another way of creating a `string` but lets you include things like newlines, which is perfect for our test.
 
 ## Try and run the test
 
