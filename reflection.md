@@ -135,10 +135,10 @@ We need to use reflection to have a look at `x` and try and look at its properti
 
 The [reflect package](https://pkg.go.dev/reflect) has a function `ValueOf` which returns us a `Value` of a given variable. This has ways for us to inspect a value, including its fields which we use on the next line.
 
-We then make some very optimistic assumptions about the value passed in
+We then make some very optimistic assumptions about the value passed in:
 
-- We look at the first and only field, there may be no fields at all which would cause a panic
-- We then call `String()` which returns the underlying value as a string but we know it would be wrong if the field was something other than a string.
+- We look at the first and only field. However, there may be no fields at all, which would cause a panic.
+- We then call `String()`, which returns the underlying value as a string. However, this would be wrong if the field was something other than a string.
 
 ## Refactor
 
