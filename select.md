@@ -189,7 +189,7 @@ We've refactored creating our fake servers into a function called `makeDelayedSe
 
 By prefixing a function call with `defer` it will now call that function _at the end of the containing function_.
 
-Sometimes you will need to cleanup resources, such as closing a file or in our case closing a server so that it does not continue to listen to a port.
+Sometimes you will need to clean up resources, such as closing a file or in our case closing a server so that it does not continue to listen to a port.
 
 You want this to execute at the end of the function, but keep the instruction near where you created the server for the benefit of future readers of the code.
 
