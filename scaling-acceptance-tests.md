@@ -543,7 +543,7 @@ The change in the specification has meant our driver needs to be updated.
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-Update the driver so it specifies a `name` query value in the request to ask for a particular `name` to be greeted.
+Update the driver so that it specifies a `name` query value in the request to ask for a particular `name` to be greeted.
 
 ```go
 func (d Driver) Greet(name string) (string, error) {
@@ -718,7 +718,7 @@ Sometimes, it makes sense to do some refactoring _before_ making a change.
 
 For that reason, let's move our `http` code - `driver.go` and `handler.go` - into a package called `httpserver` within an `adapters` folder and change their package names to `httpserver`.
 
-You'll now need to import the root package into handler.go to refer to the Greet method...
+You'll now need to import the root package into `handler.go` to refer to the Greet method...
 
 ```go
 package httpserver
@@ -737,7 +737,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 ```
 
-import your httpserver adapater into main.go:
+import your httpserver adapter into main.go:
 
 ```go
 package main
@@ -1372,7 +1372,7 @@ Let's extend our API to include a "curse" functionality.
 
 ## Write the test first
 
-This is brand new behaviour so we should start with an acceptance test. In our specification file, add the following
+This is brand-new behaviour, so we should start with an acceptance test. In our specification file, add the following
 
 ```go
 type MeanGreeter interface {
@@ -1444,7 +1444,7 @@ service Greeter {
 }
 ```
 
-You could argue that reusing the types `GreetRequest` and `GreetReply` is inappropriate coupling, but we can deal with that in the refactoring stage. As I keep stressing, we're just trying to get the test passing so we verify the software works, _then_ we can make it nice.
+You could argue that reusing the types `GreetRequest` and `GreetReply` is inappropriate coupling, but we can deal with that in the refactoring stage. As I keep stressing, we're just trying to get the test passing, so we verify the software works, _then_ we can make it nice.
 
 Re-generate our code with (inside `adapters/grpcserver`).
 
