@@ -328,7 +328,7 @@ func TestGreeterServer(t *testing.T) {
 			Context:    "../../.",
 			Dockerfile: "./cmd/httpserver/Dockerfile",
 	  // set to false if you want less spam, but this is helpful if you're having troubles
-	  PrintBuildLog: true, 
+	  PrintBuildLog: true,
 		},
 	ExposedPorts: []string{"8080:8080"},
 		WaitingFor:   wait.ForHTTP("/").WithPort("8080"),
@@ -341,7 +341,7 @@ func TestGreeterServer(t *testing.T) {
 	t.Cleanup(func() {
 		assert.NoError(t, container.Terminate(ctx))
 	})
-	
+
 	driver := go_specs_greet.Driver{BaseURL: "http://localhost:8080"}
 	specifications.GreetSpecification(t, driver)
 }
@@ -662,7 +662,7 @@ func (g GreetAdapter) Greet(name string) (string, error) {
 We can now use our adapter in our test to plug our `Greet` function into the specification.
 
 ```go
-package main_test
+package go_specs_greet_test
 
 import (
 	"testing"
@@ -718,13 +718,16 @@ Sometimes, it makes sense to do some refactoring _before_ making a change.
 
 For that reason, let's move our `http` code - `driver.go` and `handler.go` - into a package called `httpserver` within an `adapters` folder and change their package names to `httpserver`.
 
-You'll now need to  import the root package into handler.go to refer to the Greet method...
+You'll now need to import the root package into handler.go to refer to the Greet method...
 
 ```go
 package httpserver
 
 import (
-	go_specs_greet "github.com/quii/go-specs-greet"
+    "fmt"
+    "net/http"
+
+    go_specs_greet "github.com/quii/go-specs-greet/domain/interactions"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -757,7 +760,7 @@ and update the import and reference to `Driver` in greeter_server_test.go:
 ```go
 import (
 	...
-	"github.com/quii/go-specs-greet/adapters/httpserver" 
+	"github.com/quii/go-specs-greet/adapters/httpserver"
 	...
 )
 
@@ -806,6 +809,7 @@ quii@Chriss-MacBook-Pro go-specs-greet % tree
 ├── go.mod
 ├── go.sum
 └── specifications
+    └── adapters.go
     └── greet.go
 
 ```
@@ -1056,7 +1060,7 @@ func (d Driver) Greet(name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	return greeting.Message, nil
 }
 ```
@@ -1184,7 +1188,7 @@ func (d *Driver) Greet(name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	return greeting.Message, nil
 }
 
@@ -1205,7 +1209,6 @@ Let's take a look at the current state of our project structure before moving on
 ```
 quii@Chriss-MacBook-Pro go-specs-greet % tree
 .
-├── Dockerfile
 ├── Makefile
 ├── README.md
 ├── adapters
@@ -1221,9 +1224,11 @@ quii@Chriss-MacBook-Pro go-specs-greet % tree
 │       └── handler.go
 ├── cmd
 │   ├── grpcserver
+│   │   ├── Dockerfile
 │   │   ├── greeter_server_test.go
 │   │   └── main.go
 │   └── httpserver
+│       ├── Dockerfile
 │       ├── greeter_server_test.go
 │       └── main.go
 ├── domain
@@ -1466,7 +1471,7 @@ func (d *Driver) Curse(name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	return greeting.Message, nil
 }
 ```
@@ -1552,6 +1557,6 @@ Specifications should then double up as documentation. They should specify clear
 - In this example, our "DSL" is not much of a DSL; we just used interfaces to decouple our specification from the real world and allow us to express domain logic cleanly. As your system grows, this level of abstraction might become clumsy and unclear. [Read into the "Screenplay Pattern"](https://cucumber.io/blog/bdd/understanding-screenplay-(part-1)/) if you want to find more ideas as to how to structure your specifications.
 - For emphasis, [Growing Object-Oriented Software, Guided by Tests,](http://www.growing-object-oriented-software.com) is a classic. It demonstrates applying this "London style", "top-down" approach to writing software. Anyone who has enjoyed Learn Go with Tests should get much value from reading GOOS.
 - [In the example code repository](https://github.com/quii/go-specs-greet), there's more code and ideas I haven't written about here, such as multi-stage docker build, you may wish to check this out.
-  - In particular, *for fun*, I made a **third program**, a website with some HTML forms to `Greet` and `Curse`. The `Driver` leverages the excellent-looking [https://github.com/go-rod/rod](https://github.com/go-rod/rod) module, which allows it to work with the website with a browser, just like a user would. Looking at the git history, you can see how I started not using any templating tools "just to make it work" Then, once I passed my acceptance test, I had the freedom to do so without fear of breaking things. 
+  - In particular, *for fun*, I made a **third program**, a website with some HTML forms to `Greet` and `Curse`. The `Driver` leverages the excellent-looking [https://github.com/go-rod/rod](https://github.com/go-rod/rod) module, which allows it to work with the website with a browser, just like a user would. Looking at the git history, you can see how I started not using any templating tools "just to make it work" Then, once I passed my acceptance test, I had the freedom to do so without fear of breaking things.
 
 
