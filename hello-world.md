@@ -230,9 +230,7 @@ func Hello(name string) string {
 
 After refactoring, re-run your tests to make sure you haven't broken anything.
 
-Constants should improve performance of your application as it saves you creating the `"Hello, "` string instance every time `Hello` is called.
-
-To be clear, the performance boost is incredibly negligible for this example! But it's worth thinking about creating constants to capture the meaning of values and sometimes to aid performance.
+It's worth thinking about creating constants to capture the meaning of values and sometimes to aid performance.
 
 ## Hello, world... again
 
