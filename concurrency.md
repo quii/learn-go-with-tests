@@ -148,7 +148,7 @@ this operation is *blocking* - it makes us wait for it to finish. An operation
 that does not block in Go will run in a separate *process* called a *goroutine*.
 Think of a process as reading down the page of Go code from top to bottom, going
 'inside' each function when it gets called to read what it does. When a separate
-process starts it's like another reader begins reading inside the function,
+process starts, it's like another reader begins reading inside the function,
 leaving the original reader to carry on going down the page.
 
 To tell Go to start a new goroutine we turn a function call into a `go`
