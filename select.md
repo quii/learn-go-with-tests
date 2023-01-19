@@ -242,7 +242,7 @@ For channels the zero value is `nil` and if you try and send to it with `<-` it 
 [You can see this in action in The Go Playground](https://play.golang.org/p/IIbeAox5jKA)
 #### `select`
 
-If you recall from the concurrency chapter, you can wait for values to be sent to a channel with `myVar := <-ch`. This is a _blocking_ call, as you're waiting for a value.
+You'll recall from the concurrency chapter that you can wait for values to be sent to a channel with `myVar := <-ch`. This is a _blocking_ call, as you're waiting for a value.
 
 What `select` lets you do is wait on _multiple_ channels. The first one to send a value "wins" and the code underneath the `case` is executed.
 
