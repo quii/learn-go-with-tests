@@ -21,8 +21,8 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-It returns a map of each URL checked to a boolean value - `true` for a good
-response, `false` for a bad response.
+It returns a map of each URL checked to a boolean value: `true` for a good
+response; `false` for a bad response.
 
 You also have to pass in a `WebsiteChecker` which takes a single URL and returns
 a boolean. This is used by the function to check all the websites.
