@@ -181,9 +181,9 @@ but without a name (unsurprisingly). You can see one above in the body of the
 Anonymous functions have a number of features which make them useful, two of
 which we're using above. Firstly, they can be executed at the same time that
 they're declared - this is what the `()` at the end of the anonymous function is
-doing. Secondly they maintain access to the lexical scope they are defined in -
-all the variables that are available at the point when you declare the anonymous
-function are also available in the body of the function.
+doing. Secondly they maintain access to the lexical scope in which they are
+defined - all the variables that are available at the point when you declare the
+anonymous function are also available in the body of the function.
 
 The body of the anonymous function above is just the same as the loop body was
 before. The only difference is that each iteration of the loop will start a new
