@@ -126,7 +126,7 @@ Let's try and make this faster.
 ### Write enough code to make it pass
 
 Now we can finally talk about concurrency which, for the purposes of the
-following, means 'having more than one thing in progress'. This is something
+following, means "having more than one thing in progress." This is something
 that we do naturally everyday.
 
 For instance, this morning I made a cup of tea. I put the kettle on and then,
