@@ -4,7 +4,7 @@
 
 You have been asked to make a function called `WebsiteRacer` which takes two URLs and "races" them by hitting them with an HTTP GET and returning the URL which returned first. If none of them return within 10 seconds then it should return an `error`.
 
-For this, we will be using
+For this, we will be using:
 
 - `net/http` to make the HTTP calls.
 - `net/http/httptest` to help us test them.
@@ -29,7 +29,7 @@ func TestRacer(t *testing.T) {
 }
 ```
 
-We know this isn't perfect and has problems but it will get us going. It's important not to get too hung-up on getting things perfect first time.
+We know this isn't perfect and has problems, but it's a start. It's important not to get too hung-up on getting things perfect first time.
 
 ## Try to run the test
 
@@ -68,7 +68,7 @@ func Racer(a, b string) (winner string) {
 For each URL:
 
 1. We use `time.Now()` to record just before we try and get the `URL`.
-1. Then we use [`http.Get`](https://golang.org/pkg/net/http/#Client.Get) to try and get the contents of the `URL`. This function returns an [`http.Response`](https://golang.org/pkg/net/http/#Response) and an `error` but so far we are not interested in these values.
+1. Then we use [`http.Get`](https://golang.org/pkg/net/http/#Client.Get) to try and perform an HTTP `GET` request against the `URL`. This function returns an [`http.Response`](https://golang.org/pkg/net/http/#Response) and an `error` but so far we are not interested in these values.
 1. `time.Since` takes the start time and returns a `time.Duration` of the difference.
 
 Once we have done this we simply compare the durations to see which is the quickest.
@@ -85,7 +85,7 @@ In the mocking and dependency injection chapters, we covered how ideally we don'
 - Flaky
 - Can't test edge cases
 
-In the standard library, there is a package called [`net/http/httptest`](https://golang.org/pkg/net/http/httptest/) where you can easily create a mock HTTP server.
+In the standard library, there is a package called [`net/http/httptest`](https://golang.org/pkg/net/http/httptest/) which enables users to easily create a mock HTTP server.
 
 Let's change our tests to use mocks so we have reliable servers to test against that we can control.
 
@@ -242,9 +242,9 @@ For channels the zero value is `nil` and if you try and send to it with `<-` it 
 [You can see this in action in The Go Playground](https://play.golang.org/p/IIbeAox5jKA)
 #### `select`
 
-If you recall from the concurrency chapter, you can wait for values to be sent to a channel with `myVar := <-ch`. This is a _blocking_ call, as you're waiting for a value.
+You'll recall from the concurrency chapter that you can wait for values to be sent to a channel with `myVar := <-ch`. This is a _blocking_ call, as you're waiting for a value.
 
-What `select` lets you do is wait on _multiple_ channels. The first one to send a value "wins" and the code underneath the `case` is executed.
+`select` allows you to wait on _multiple_ channels. The first one to send a value "wins" and the code underneath the `case` is executed.
 
 We use `ping` in our `select` to set up two channels, one for each of our `URL`s. Whichever one writes to its channel first will have its code executed in the `select`, which results in its `URL` being returned (and being the winner).
 
@@ -422,4 +422,4 @@ I added one final check on the first test to verify we don't get an `error`.
 ### `httptest`
 
 - A convenient way of creating test servers so you can have reliable and controllable tests.
-- Using the same interfaces as the "real" `net/http` servers which is consistent and less for you to learn.
+- Uses the same interfaces as the "real" `net/http` servers which is consistent and less for you to learn.

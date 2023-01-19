@@ -21,8 +21,8 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-It returns a map of each URL checked to a boolean value - `true` for a good
-response, `false` for a bad response.
+It returns a map of each URL checked to a boolean value: `true` for a good
+response; `false` for a bad response.
 
 You also have to pass in a `WebsiteChecker` which takes a single URL and returns
 a boolean. This is used by the function to check all the websites.
@@ -126,7 +126,7 @@ Let's try and make this faster.
 ### Write enough code to make it pass
 
 Now we can finally talk about concurrency which, for the purposes of the
-following, means 'having more than one thing in progress'. This is something
+following, means "having more than one thing in progress." This is something
 that we do naturally everyday.
 
 For instance, this morning I made a cup of tea. I put the kettle on and then,
@@ -148,7 +148,7 @@ this operation is *blocking* - it makes us wait for it to finish. An operation
 that does not block in Go will run in a separate *process* called a *goroutine*.
 Think of a process as reading down the page of Go code from top to bottom, going
 'inside' each function when it gets called to read what it does. When a separate
-process starts it's like another reader begins reading inside the function,
+process starts, it's like another reader begins reading inside the function,
 leaving the original reader to carry on going down the page.
 
 To tell Go to start a new goroutine we turn a function call into a `go`
@@ -181,14 +181,14 @@ but without a name (unsurprisingly). You can see one above in the body of the
 Anonymous functions have a number of features which make them useful, two of
 which we're using above. Firstly, they can be executed at the same time that
 they're declared - this is what the `()` at the end of the anonymous function is
-doing. Secondly they maintain access to the lexical scope they are defined in -
-all the variables that are available at the point when you declare the anonymous
-function are also available in the body of the function.
+doing. Secondly they maintain access to the lexical scope in which they are
+defined - all the variables that are available at the point when you declare the
+anonymous function are also available in the body of the function.
 
 The body of the anonymous function above is just the same as the loop body was
 before. The only difference is that each iteration of the loop will start a new
-goroutine, concurrent with the current process (the `WebsiteChecker` function)
-each of which will add its result to the results map.
+goroutine, concurrent with the current process (the `WebsiteChecker` function).
+Each goroutine will add its result to the results map.
 
 But when we run `go test`:
 
@@ -380,7 +380,7 @@ is writing to the same block of memory as
 
 `Previous write at 0x00c420084d20 by goroutine 7:`
 
-On top of that we can see the line of code where the write is happening:
+On top of that, we can see the line of code where the write is happening:
 
 `/Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12`
 
