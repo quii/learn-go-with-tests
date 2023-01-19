@@ -380,7 +380,7 @@ is writing to the same block of memory as
 
 `Previous write at 0x00c420084d20 by goroutine 7:`
 
-On top of that we can see the line of code where the write is happening:
+On top of that, we can see the line of code where the write is happening:
 
 `/Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12`
 
