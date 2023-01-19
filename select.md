@@ -422,4 +422,4 @@ I added one final check on the first test to verify we don't get an `error`.
 ### `httptest`
 
 - A convenient way of creating test servers so you can have reliable and controllable tests.
-- Using the same interfaces as the "real" `net/http` servers which is consistent and less for you to learn.
+- Uses the same interfaces as the "real" `net/http` servers which is consistent and less for you to learn.
