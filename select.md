@@ -85,7 +85,7 @@ In the mocking and dependency injection chapters, we covered how ideally we don'
 - Flaky
 - Can't test edge cases
 
-In the standard library, there is a package called [`net/http/httptest`](https://golang.org/pkg/net/http/httptest/) where you can easily create a mock HTTP server.
+In the standard library, there is a package called [`net/http/httptest`](https://golang.org/pkg/net/http/httptest/) which enables users to easily create a mock HTTP server.
 
 Let's change our tests to use mocks so we have reliable servers to test against that we can control.
 
