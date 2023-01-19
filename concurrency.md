@@ -187,8 +187,8 @@ anonymous function are also available in the body of the function.
 
 The body of the anonymous function above is just the same as the loop body was
 before. The only difference is that each iteration of the loop will start a new
-goroutine, concurrent with the current process (the `WebsiteChecker` function)
-each of which will add its result to the results map.
+goroutine, concurrent with the current process (the `WebsiteChecker` function).
+Each goroutine will add its result to the results map.
 
 But when we run `go test`:
 
