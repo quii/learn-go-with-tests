@@ -120,8 +120,7 @@ Lead time refers to how long it takes from a commit being merged into your
 main branch to it being deployed in production. This number can vary from weeks and even months for some teams to a matter of minutes. Again, at `$WORK`, we value DORA's findings and want to keep our lead time to under 10 minutes.
 
 A balanced testing approach is required for a reliable system with excellent
-lead time, and this is usually described in terms of the [Test Pyramid]
-(https://martinfowler.com/articles/practical-test-pyramid.html).
+lead time, and this is usually described in terms of the [Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html).
 
 ## How to write basic acceptance tests
 
