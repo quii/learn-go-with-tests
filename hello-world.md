@@ -13,7 +13,7 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println("Hello, world")
+ fmt.Println("Hello, world")
 }
 ```
 
@@ -39,11 +39,11 @@ package main
 import "fmt"
 
 func Hello() string {
-	return "Hello, world"
+ return "Hello, world"
 }
 
 func main() {
-	fmt.Println(Hello())
+ fmt.Println(Hello())
 }
 ```
 
@@ -57,12 +57,12 @@ package main
 import "testing"
 
 func TestHello(t *testing.T) {
-	got := Hello()
-	want := "Hello, world"
+ got := Hello()
+ want := "Hello, world"
 
-	if got != want {
-		t.Errorf("got %q want %q", got, want)
-	}
+ if got != want {
+  t.Errorf("got %q want %q", got, want)
+ }
 }
 ```
 
@@ -97,16 +97,17 @@ Notice how you have not had to pick between multiple testing frameworks and then
 
 Writing a test is just like writing a function, with a few rules
 
-* It needs to be in a file with a name like `xxx_test.go`
-* The test function must start with the word `Test`
-* The test function takes one argument only `t *testing.T`
-* In order to use the `*testing.T` type, you need to `import "testing"`, like we did with `fmt` in the other file
+- It needs to be in a file with a name like `xxx_test.go`
+- The test function must start with the word `Test`
+- The test function takes one argument only `t *testing.T`
+- In order to use the `*testing.T` type, you need to `import "testing"`, like we did with `fmt` in the other file
 
 For now, it's enough to know that your `t` of type `*testing.T` is your "hook" into the testing framework so you can do things like `t.Fail()` when you want to fail.
 
 We've covered some new topics:
 
 #### `if`
+
 If statements in Go are very much like other programming languages.
 
 #### Declaring variables
@@ -145,12 +146,12 @@ package main
 import "testing"
 
 func TestHello(t *testing.T) {
-	got := Hello("Chris")
-	want := "Hello, Chris"
+ got := Hello("Chris")
+ want := "Hello, Chris"
 
-	if got != want {
-		t.Errorf("got %q want %q", got, want)
-	}
+ if got != want {
+  t.Errorf("got %q want %q", got, want)
+ }
 }
 ```
 
@@ -170,7 +171,7 @@ Edit the `Hello` function to accept an argument of type string
 
 ```go
 func Hello(name string) string {
-	return "Hello, world"
+ return "Hello, world"
 }
 ```
 
@@ -178,7 +179,7 @@ If you try and run your tests again your `hello.go` will fail to compile because
 
 ```go
 func main() {
-	fmt.Println(Hello("world"))
+ fmt.Println(Hello("world"))
 }
 ```
 
@@ -194,7 +195,7 @@ Let's make the test pass by using the name argument and concatenate it with `Hel
 
 ```go
 func Hello(name string) string {
-	return "Hello, " + name
+ return "Hello, " + name
 }
 ```
 
@@ -224,7 +225,7 @@ We can now refactor our code
 const englishHelloPrefix = "Hello, "
 
 func Hello(name string) string {
-	return englishHelloPrefix + name
+ return englishHelloPrefix + name
 }
 ```
 
@@ -240,22 +241,22 @@ Start by writing a new failing test
 
 ```go
 func TestHello(t *testing.T) {
-	t.Run("saying hello to people", func(t *testing.T) {
-		got := Hello("Chris")
-		want := "Hello, Chris"
+ t.Run("saying hello to people", func(t *testing.T) {
+  got := Hello("Chris")
+  want := "Hello, Chris"
 
-		if got != want {
-			t.Errorf("got %q want %q", got, want)
-		}
-	})
-	t.Run("say 'Hello, World' when an empty string is supplied", func(t *testing.T) {
-		got := Hello("")
-		want := "Hello, World"
+  if got != want {
+   t.Errorf("got %q want %q", got, want)
+  }
+ })
+ t.Run("say 'Hello, World' when an empty string is supplied", func(t *testing.T) {
+  got := Hello("")
+  want := "Hello, World"
 
-		if got != want {
-			t.Errorf("got %q want %q", got, want)
-		}
-	})
+  if got != want {
+   t.Errorf("got %q want %q", got, want)
+  }
+ })
 }
 ```
 
@@ -273,25 +274,25 @@ We can and should refactor our tests.
 
 ```go
 func TestHello(t *testing.T) {
-	t.Run("saying hello to people", func(t *testing.T) {
-		got := Hello("Chris")
-		want := "Hello, Chris"
-		assertCorrectMessage(t, got, want)
-	})
+ t.Run("saying hello to people", func(t *testing.T) {
+  got := Hello("Chris")
+  want := "Hello, Chris"
+  assertCorrectMessage(t, got, want)
+ })
 
-	t.Run("empty string defaults to 'world'", func(t *testing.T) {
-		got := Hello("")
-		want := "Hello, World"
-		assertCorrectMessage(t, got, want)
-	})
+ t.Run("empty string defaults to 'world'", func(t *testing.T) {
+  got := Hello("")
+  want := "Hello, World"
+  assertCorrectMessage(t, got, want)
+ })
 
 }
 
 func assertCorrectMessage(t testing.TB, got, want string) {
-	t.Helper()
-	if got != want {
-		t.Errorf("got %q want %q", got, want)
-	}
+ t.Helper()
+ if got != want {
+  t.Errorf("got %q want %q", got, want)
+ }
 }
 ```
 
@@ -309,10 +310,10 @@ Now that we have a well-written failing test, let's fix the code, using an `if`.
 const englishHelloPrefix = "Hello, "
 
 func Hello(name string) string {
-	if name == "" {
-		name = "World"
-	}
-	return englishHelloPrefix + name
+ if name == "" {
+  name = "World"
+ }
+ return englishHelloPrefix + name
 }
 ```
 
@@ -327,11 +328,11 @@ check in the lovely version of our code with its test.
 
 Let's go over the cycle again
 
-* Write a test
-* Make the compiler pass
-* Run the test, see that it fails and check the error message is meaningful
-* Write enough code to make the test pass
-* Refactor
+- Write a test
+- Make the compiler pass
+- Run the test, see that it fails and check the error message is meaningful
+- Write enough code to make the test pass
+- Refactor
 
 On the face of it this may seem tedious but sticking to the feedback loop is important.
 
@@ -352,11 +353,11 @@ We should be confident that we can use TDD to flesh out this functionality easil
 Write a test for a user passing in Spanish. Add it to the existing suite.
 
 ```go
-	t.Run("in Spanish", func(t *testing.T) {
-		got := Hello("Elodie", "Spanish")
-		want := "Hola, Elodie"
-		assertCorrectMessage(t, got, want)
-	})
+ t.Run("in Spanish", func(t *testing.T) {
+  got := Hello("Elodie", "Spanish")
+  want := "Hola, Elodie"
+  assertCorrectMessage(t, got, want)
+ })
 ```
 
 Remember not to cheat! _Test first_. When you try and run the test, the compiler _should_ complain because you are calling `Hello` with two arguments rather than one.
@@ -371,10 +372,10 @@ Fix the compilation problems by adding another string argument to `Hello`
 
 ```go
 func Hello(name string, language string) string {
-	if name == "" {
-		name = "World"
-	}
-	return englishHelloPrefix + name
+ if name == "" {
+  name = "World"
+ }
+ return englishHelloPrefix + name
 }
 ```
 
@@ -396,14 +397,14 @@ We can use `if` here to check the language is equal to "Spanish" and if so chang
 
 ```go
 func Hello(name string, language string) string {
-	if name == "" {
-		name = "World"
-	}
+ if name == "" {
+  name = "World"
+ }
 
-	if language == "Spanish" {
-		return "Hola, " + name
-	}
-	return englishHelloPrefix + name
+ if language == "Spanish" {
+  return "Hola, " + name
+ }
+ return englishHelloPrefix + name
 }
 ```
 
@@ -417,38 +418,38 @@ const englishHelloPrefix = "Hello, "
 const spanishHelloPrefix = "Hola, "
 
 func Hello(name string, language string) string {
-	if name == "" {
-		name = "World"
-	}
+ if name == "" {
+  name = "World"
+ }
 
-	if language == spanish {
-		return spanishHelloPrefix + name
-	}
-	return englishHelloPrefix + name
+ if language == spanish {
+  return spanishHelloPrefix + name
+ }
+ return englishHelloPrefix + name
 }
 ```
 
 ### French
 
-* Write a test asserting that if you pass in `"French"` you get `"Bonjour, "`
-* See it fail, check the error message is easy to read
-* Do the smallest reasonable change in the code
+- Write a test asserting that if you pass in `"French"` you get `"Bonjour, "`
+- See it fail, check the error message is easy to read
+- Do the smallest reasonable change in the code
 
 You may have written something that looks roughly like this
 
 ```go
 func Hello(name string, language string) string {
-	if name == "" {
-		name = "World"
-	}
+ if name == "" {
+  name = "World"
+ }
 
-	if language == spanish {
-		return spanishHelloPrefix + name
-	}
-	if language == french {
-		return frenchHelloPrefix + name
-	}
-	return englishHelloPrefix + name
+ if language == spanish {
+  return spanishHelloPrefix + name
+ }
+ if language == french {
+  return frenchHelloPrefix + name
+ }
+ return englishHelloPrefix + name
 }
 ```
 
@@ -458,24 +459,25 @@ When you have lots of `if` statements checking a particular value it is common t
 
 ```go
 func Hello(name string, language string) string {
-	if name == "" {
-		name = "World"
-	}
+ if name == "" {
+  name = "World"
+ }
 
-	prefix := englishHelloPrefix
+ prefix := englishHelloPrefix
 
-	switch language {
-	case french:
-		prefix = frenchHelloPrefix
-	case spanish:
-		prefix = spanishHelloPrefix
-	}
+ switch language {
+ case french:
+  prefix = frenchHelloPrefix
+ case spanish:
+  prefix = spanishHelloPrefix
+ }
 
-	return prefix + name
+ return prefix + name
 }
 ```
 
 Write a test to now include a greeting in the language of your choice and you should see how simple it is to extend our _amazing_ function.
+If you get an error on your test, then make sure you have a `const` on both french and spanish.
 
 ### one...last...refactor?
 
@@ -483,35 +485,35 @@ You could argue that maybe our function is getting a little big. The simplest re
 
 ```go
 func Hello(name string, language string) string {
-	if name == "" {
-		name = "World"
-	}
+ if name == "" {
+  name = "World"
+ }
 
-	return greetingPrefix(language) + name
+ return greetingPrefix(language) + name
 }
 
 func greetingPrefix(language string) (prefix string) {
-	switch language {
-	case french:
-		prefix = frenchHelloPrefix
-	case spanish:
-		prefix = spanishHelloPrefix
-	default:
-		prefix = englishHelloPrefix
-	}
-	return
+ switch language {
+ case french:
+  prefix = frenchHelloPrefix
+ case spanish:
+  prefix = spanishHelloPrefix
+ default:
+  prefix = englishHelloPrefix
+ }
+ return
 }
 ```
 
 A few new concepts:
 
-* In our function signature we have made a _named return value_ `(prefix string)`.
-* This will create a variable called `prefix` in your function.
-  * It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for `string`s it is `""`.
-    * You can return whatever it's set to by just calling `return` rather than `return prefix`.
-  * This will display in the Go Doc for your function so it can make the intent of your code clearer.
-* `default` in the switch case will be branched to if none of the other `case` statements match.
-* The function name starts with a lowercase letter. In Go, public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposed to the world, so we made this function private.
+- In our function signature we have made a _named return value_ `(prefix string)`.
+- This will create a variable called `prefix` in your function.
+  - It will be assigned the "zero" value. This depends on the type, for example `int`s are 0 and for `string`s it is `""`.
+    - You can return whatever it's set to by just calling `return` rather than `return prefix`.
+  - This will display in the Go Doc for your function so it can make the intent of your code clearer.
+- `default` in the switch case will be branched to if none of the other `case` statements match.
+- The function name starts with a lowercase letter. In Go, public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposed to the world, so we made this function private.
 
 ## Wrapping up
 
@@ -521,16 +523,16 @@ By now you should have some understanding of:
 
 ### Some of Go's syntax around
 
-* Writing tests
-* Declaring functions, with arguments and return types
-* `if`, `const` and `switch`
-* Declaring variables and constants
+- Writing tests
+- Declaring functions, with arguments and return types
+- `if`, `const` and `switch`
+- Declaring variables and constants
 
 ### The TDD process and _why_ the steps are important
 
-* _Write a failing test and see it fail_ so we know we have written a _relevant_ test for our requirements and seen that it produces an _easy to understand description of the failure_
-* Writing the smallest amount of code to make it pass so we know we have working software
-* _Then_ refactor, backed with the safety of our tests to ensure we have well-crafted code that is easy to work with
+- _Write a failing test and see it fail_ so we know we have written a _relevant_ test for our requirements and seen that it produces an _easy to understand description of the failure_
+- Writing the smallest amount of code to make it pass so we know we have working software
+- _Then_ refactor, backed with the safety of our tests to ensure we have well-crafted code that is easy to work with
 
 In our case we've gone from `Hello()` to `Hello("name")`, to `Hello("name", "French")` in small, easy to understand steps.
 
