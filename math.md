@@ -575,7 +575,7 @@ for us to swallow.
 ### Write the test first
 
 ```go
-func TestSecondHandVector(t *testing.T) {
+func TestSecondHandPoint(t *testing.T) {
 	cases := []struct {
 		time  time.Time
 		point Point
