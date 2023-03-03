@@ -36,10 +36,7 @@ func (d Dictionary) Add(word, definition string) error {
 		d[word] = definition
 	case nil:
 		return ErrWordExists
-	default:
-		return err
-
 	}
 
-	return nil
+	return err
 }

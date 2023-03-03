@@ -417,15 +417,13 @@ func (d Dictionary) Add(word, definition string) error {
 		d[word] = definition
 	case nil:
 		return ErrWordExists
-	default:
-		return err
 	}
 
-	return nil
+	return err
 }
 ```
 
-Here we are using a `switch` statement to match on the error. Having a `switch` like this provides an extra safety net, in case `Search` returns an error other than `ErrNotFound`.
+Here we are using a `switch` statement to match on the error. We return the error as it is in case `Search` returns an error other than `ErrNotFound` and does not match any case of our `switch` statement.
 
 ## Refactor
 
