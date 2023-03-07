@@ -43,8 +43,6 @@ func (d Dictionary) Add(word, definition string) error {
 		return err
 
 	}
-
-	return nil
 }
 
 // Update changes the definition of a given word.
@@ -59,8 +57,6 @@ func (d Dictionary) Update(word, definition string) error {
 		return err
 
 	}
-
-	return nil
 }
 
 // Delete removes a word from the dictionary.
