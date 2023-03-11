@@ -218,7 +218,6 @@ t.Run("unknown word", func(t *testing.T) {
 	assertError(t, got, ErrNotFound)
 })
 ```
-
 ```go
 func assertError(t testing.TB, got, want error) {
 	t.Helper()
@@ -652,5 +651,5 @@ In this section, we covered a lot. We made a full CRUD (Create, Read, Update and
 * Update items in maps
 * Delete items from a map
 * Learned more about errors
-    * How to create errors that are constants
-    * Writing error wrappers
+  * How to create errors that are constants
+  * Writing error wrappers
