@@ -10,3 +10,6 @@ _book/
 *.pdf
 
 game.db.json
+
+# macos files
+.DS_Store
