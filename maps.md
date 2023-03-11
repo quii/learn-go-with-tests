@@ -53,7 +53,7 @@ func Search(dictionary map[string]string, word string) string {
 }
 ```
 
-Your test should now fail with a _clear error message_
+Your test should now fail with a *clear error message*
 
 `dictionary_test.go:12: got '' want 'this is just a test' given, 'test'`.
 
@@ -646,11 +646,11 @@ The `delete` function returns nothing, and we based our `Delete` method on the s
 
 In this section, we covered a lot. We made a full CRUD (Create, Read, Update and Delete) API for our dictionary. Throughout the process we learned how to:
 
--   Create maps
--   Search for items in maps
--   Add new items to maps
--   Update items in maps
--   Delete items from a map
--   Learned more about errors
-    -   How to create errors that are constants
-    -   Writing error wrappers
+* Create maps
+* Search for items in maps
+* Add new items to maps
+* Update items in maps
+* Delete items from a map
+* Learned more about errors
+    * How to create errors that are constants
+    * Writing error wrappers
