@@ -342,7 +342,7 @@ With embed, the files are included in your Go program when you build it. This me
 
 What's handy is you can not only embed individual files, but also file systems; and that filesystem implements [io/fs](https://pkg.go.dev/io/fs) which means your code doesn't need to care what kind of file system it is working with.
 
-If you wish to use different templates depending on configuration though, you may wish to stick to loading templates from disk in the more coventional way.
+If you wish to use different templates depending on configuration though, you may wish to stick to loading templates from disk in the more conventional way.
 
 ## Next: Make the template "nice"
 
