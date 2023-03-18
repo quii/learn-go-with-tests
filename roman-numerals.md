@@ -1059,6 +1059,7 @@ assertion := func(arabic uint16) bool {
 	return fromRoman == arabic
 }
 ```
+Notice that now we are logging the input using the `log` method from the testing framework. Make sure you run the `go test` command with the flag `-v` to print the additional output (`go test -v`).
 
 If you run the test they now actually run and you can see what is being tested. You can run multiple times to see our code stands up well to the various values! This gives me a lot of confidence that our code is working how we want.
 
