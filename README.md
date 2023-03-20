@@ -104,7 +104,7 @@ If you have such a question raise it as an issue on github and I'll try and find
 
 ### Meta / Discussion
 
-* [Why](why.md) - Watch a video, or read about why unit testing and TDD is important
+* [Why unit tests and how to make them work for you](why.md) - Watch a video, or read about why unit testing and TDD is important
 * [Anti-patterns](anti-patterns.md) - A short chapter on TDD and unit testing anti-patterns
 
 ## Contributing
