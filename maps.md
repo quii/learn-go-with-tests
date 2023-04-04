@@ -328,7 +328,7 @@ func assertDefinition(t testing.TB, dictionary Dictionary, word, definition stri
 	if err != nil {
 		t.Fatal("should find added word:", err)
 	}
-	assertStrings(t, got, want)
+	assertStrings(t, got, definition)
 }
 ```
 
