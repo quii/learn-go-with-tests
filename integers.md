@@ -4,7 +4,23 @@
 
 Integers work as you would expect. Let's write an `Add` function to try things out. Create a test file called `adder_test.go` and write this code.
 
-**Note:** Go source files can only have one `package` per directory, make sure that your files are organised separately. [Here is a good explanation on this.](https://dave.cheney.net/2014/12/01/five-suggestions-for-setting-up-a-go-project)
+**Note:** Go source files can only have one `package` per directory. Make sure that your files are organised into their own packages. [Here is a good explanation on this.](https://dave.cheney.net/2014/12/01/five-suggestions-for-setting-up-a-go-project) 
+
+Your project directory might look something like this:
+
+```
+learnGoWithTests
+    |
+    |-> helloworld
+    |    |- hello.go
+    |    |- hello_test.go    
+    |
+    |-> integers
+    |    |- adder_test.go
+    |
+    |- go.mod
+    |- README.md
+```
 
 ## Write the test first
 
