@@ -409,9 +409,9 @@ The tests should now pass.
 Now it is time to _refactor_. You should see some problems in the code, "magic" strings, some of which are repeated. Try and refactor it yourself, with every change make sure you re-run the tests to make sure your refactoring isn't breaking anything.
 
 ```go
-const spanish = "Spanish"
-const englishHelloPrefix = "Hello, "
-const spanishHelloPrefix = "Hola, "
+    const spanish = "Spanish"
+    const englishHelloPrefix = "Hello, "
+    const spanishHelloPrefix = "Hola, "
 
 func Hello(name string, language string) string {
 	if name == "" {
@@ -479,6 +479,16 @@ Write a test to now include a greeting in the language of your choice and you sh
 You could argue that maybe our function is getting a little big. The simplest refactor for this would be to extract out some functionality into another function.
 
 ```go
+
+const (
+	french  = "French"
+	spanish = "Spanish"
+    
+    englishHelloPrefix = "Hello, "
+    spanishHelloPrefix = "Hola, "
+    frenchHelloPrefix = "Bonjour, "
+)
+
 func Hello(name string, language string) string {
 	if name == "" {
 		name = "World"
@@ -489,9 +499,9 @@ func Hello(name string, language string) string {
 
 func greetingPrefix(language string) (prefix string) {
 	switch language {
-	case "french":
+	case french:
 		prefix = frenchHelloPrefix
-	case "spanish":
+	case spanish:
 		prefix = spanishHelloPrefix
 	default:
 		prefix = englishHelloPrefix
@@ -509,6 +519,7 @@ A few new concepts:
   * This will display in the Go Doc for your function so it can make the intent of your code clearer.
 * `default` in the switch case will be branched to if none of the other `case` statements match.
 * The function name starts with a lowercase letter. In Go, public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposed to the world, so we made this function private.
+* Also, we can group constants in a block instead of declaring them each on their own line. It's a good idea to use a line between sets of related constants for readability.
 
 ## Wrapping up
 
