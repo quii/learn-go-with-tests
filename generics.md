@@ -105,7 +105,7 @@ So what's the problem?
 By using `interface{}` the compiler can't help us when writing our code, because we're not telling it anything useful about the types of things passed to the function. Try comparing two different types.
 
 ```go
-AssertNotEqual(1, "1")
+AssertEqual(1, "1")
 ```
 
 In this case, we get away with it; the test compiles, and it fails as we'd hope, although the error message `got 1, want 1` is unclear; but do we want to be able to compare strings with integers? What about comparing a `Person` with an `Airport`?
