@@ -276,7 +276,7 @@ We've made our test servers take longer than 10s to return to exercise this scen
 
 ## Try to run the test
 
-`./racer_test.go:37:10: assignment mismatch: 2 variables but 1 values`
+`./racer_test.go:37:10: assignment mismatch: 2 variables but Racer returns 1 value`
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
