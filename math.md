@@ -778,7 +778,7 @@ clockface_acceptance_test.go:28: Got {150 60}, wanted {150 240}
 We need to do three things to convert our unit vector into a point on the SVG:
 
 1. Scale it to the length of the hand
-2. Flip it over the X axis because to account for the SVG having an origin in
+2. Flip it over the X axis to account for the SVG having an origin in
    the top left hand corner
 3. Translate it to the right position (so that it's coming from an origin of
    (150,150))
