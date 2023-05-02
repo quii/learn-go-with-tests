@@ -775,6 +775,8 @@ func assertContains(t testing.TB, haystack []string, needle string) {
 }
 ```
 
+Since we have extracted maps into a new test, we haven't seen the failure message. Intentionally break the `with maps` test here so that you can check the error message, then fix it again so all tests are passing.
+
 The next type we want to handle is `chan`.
 
 ## Write the test first
