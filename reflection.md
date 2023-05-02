@@ -26,7 +26,7 @@ So `walk(x interface{}, fn func(string))` will accept any value for `x`.
 
 ### So why not use `interface{}` for everything and have really flexible functions?
 
-- As a user of a function that takes `interface{}` you lose type safety. What if you meant to pass `Foo.bar` of type `string` into a function but instead did `Foo.baz` which is an `int`? The compiler won't be able to inform you of your mistake. You also have no idea _what_ you're allowed to pass to a function. Knowing that a function takes a `UserService` for instance is very useful.
+- As a user of a function that takes `interface{}` you lose type safety. What if you meant to pass `Herd.species` of type `string` into a function but instead did `Herd.count` which is an `int`? The compiler won't be able to inform you of your mistake. You also have no idea _what_ you're allowed to pass to a function. Knowing that a function takes a `UserService` for instance is very useful.
 - As a writer of such a function, you have to be able to inspect _anything_ that has been passed to you and try and figure out what the type is and what you can do with it. This is done using _reflection_. This can be quite clumsy and difficult to read and is generally less performant (as you have to do checks at runtime).
 
 In short only use reflection if you really need to.
@@ -649,10 +649,10 @@ The next type we want to handle is `map`.
 {
     "maps",
     map[string]string{
-        "Foo": "Bar",
-        "Baz": "Boz",
+        "Cow": "Moo",
+        "Sheep": "Baa",
     },
-    []string{"Bar", "Boz"},
+    []string{"Moo", "Baa"},
 },
 ```
 
@@ -661,7 +661,7 @@ The next type we want to handle is `map`.
 ```
 === RUN   TestWalk/maps
     --- FAIL: TestWalk/maps (0.00s)
-        reflection_test.go:86: got [], want [Bar Boz]
+        reflection_test.go:86: got [], want [Moo Baa]
 ```
 
 ## Write enough code to make it pass
@@ -744,8 +744,8 @@ To fix this, we'll need to move our assertion with the maps to a new test where 
 ```go
 t.Run("with maps", func(t *testing.T) {
 	aMap := map[string]string{
-		"Foo": "Bar",
-		"Baz": "Boz",
+		"Cow": "Moo",
+		"Sheep": "Baa",
 	}
 
 	var got []string
@@ -753,8 +753,8 @@ t.Run("with maps", func(t *testing.T) {
 		got = append(got, input)
 	})
 
-	assertContains(t, got, "Bar")
-	assertContains(t, got, "Boz")
+	assertContains(t, got, "Moo")
+	assertContains(t, got, "Baa")
 })
 ```
 
