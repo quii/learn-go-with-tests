@@ -221,7 +221,7 @@ package main_test
 import (
 	"testing"
 
-	"github.com/quii/specifications"
+	"github.com/quii/go-specs-greet/specifications"
 )
 
 func TestGreeterServer(t *testing.T) {
