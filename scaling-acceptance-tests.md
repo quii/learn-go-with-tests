@@ -221,7 +221,7 @@ package main_test
 import (
 	"testing"
 
-	"github.com/quii/specifications"
+	"github.com/quii/go-specs-greet/specifications"
 )
 
 func TestGreeterServer(t *testing.T) {
@@ -287,7 +287,7 @@ Notes:
 
 - You could argue that I should be writing tests to drive out the various `if err != nil`, but in my experience, so long as you're not doing anything with the `err`, tests that say "you return the error you get" are relatively low value.
 - **You shouldn't use the default HTTP client**. Later we'll pass in an HTTP client to configure it with timeouts etc., but for now, we're just trying to get ourselves to a passing test.
-
+-  In our `greeter_server_test.go` we called the Driver function from `go_specs_greet` package which we have now created, don't forget to add `github.com/quii/go-specs-greet` to its imports.
 Try and rerun the tests; they should now compile but not pass.
 
 ```
