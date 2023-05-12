@@ -6,7 +6,7 @@ We want to make a counter which is safe to use concurrently.
 
 We'll start with an unsafe counter and verify its behaviour works in a single-threaded environment.
 
-Then we'll exercise it's unsafeness with multiple goroutines trying to use it via a test and fix it.
+Then we'll exercise it's unsafeness, with multiple goroutines trying to use the counter via a test, and fix it.
 
 ## Write the test first
 
