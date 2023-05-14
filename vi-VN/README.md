@@ -12,7 +12,6 @@
 
 - [Gitbook tiếng Anh](https://quii.gitbook.io/learn-go-with-tests)
 - [EPUB hoặc PDF tiếng Anh](https://github.com/quii/learn-go-with-tests/releases)
-- 
 
 ## Bản dịch
 
@@ -46,14 +45,14 @@ I am proud to offer this resource for free, but if you wish to give some appreci
 
 1. [Cài đặt Go](install-go.md) - Cài đặt môi trường cho sản phẩm.
 2. [Hello, world](hello-world.md) - Khai báo các biến, hằng số, các câu lệnh if/else, switch, viết chương trình Go đầu tiên và viết test đầu tiên. Cú pháp sub-test và closure.
-4. [Integers](integers.md) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
-5. [Iteration](iteration.md) - Learn about `for` and benchmarking.
-6. [Arrays and slices](arrays-and-slices.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
-7. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
-8. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.
-9. [Maps](maps.md) - Learn about storing values in the map data structure.
-10. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
-11. [Mocking](mocking.md) - Take some existing untested code and use DI with mocking to test it.
+3. [Integers](integers.md) - Khám phá sâu hơn về cú pháp khai báo hàm và học thêm các cách mới để cải thiện việc tạo tài liệu cho code của bạn.
+4. [Vòng lặp](iteration.md) - Học về vòng lặp `for` và thực hiện benchmark.
+5. [Arrays and slices](arrays-and-slices.md) - Học về array, slice, `len`, varargs, `range` và test coverage.
+6. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Học về `struct`, methods, `interface` và table driven tests.
+7. [Pointers & errors](pointers-and-errors.md) - Học về pointers and errors.
+8. [Maps](maps.md) - Học về cách lưu trữ dữ liệu trong cấu trúc dữ liệu map.
+9. [Dependency Injection](dependency-injection.md) - Học về dependency injection, cách nó liên quan trong việc sử dụng các interface và một thành phần cơ bản trong io.
+10. [Mocking](mocking.md) - Sử dụng các phần code đã có nhưng chưa được test  Take some existing untested code and use DI with mocking to test it.
 12. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
 13. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
 14. [Reflection](reflection.md) - Learn about reflection
