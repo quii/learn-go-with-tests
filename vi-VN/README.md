@@ -53,12 +53,12 @@ I am proud to offer this resource for free, but if you wish to give some appreci
 8. [Maps](maps.md) - Học về cách lưu trữ dữ liệu trong cấu trúc dữ liệu map.
 9. [Dependency Injection](dependency-injection.md) - Học về dependency injection, cách nó liên quan trong việc sử dụng các interface và một thành phần cơ bản trong io.
 10. [Mocking](mocking.md) - Sử dụng các phần code đã có nhưng chưa được test  Take some existing untested code and use DI with mocking to test it.
-12. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
-13. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
-14. [Reflection](reflection.md) - Learn about reflection
-15. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
-16. [Context](context.md) - Use the context package to manage and cancel long-running processes
-17. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
+11. [Concurrency](concurrency.md) - Học cách viết code concurrent để làm cho phần mềm của bạn chạy nhanh hơn.
+12. [Select](select.md) - Học cách đồng bộ hoá (synchronise) các process asynchronous một cách xịn nhất.
+13. [Reflection](reflection.md) - Cách dùng reflection
+14. [Sync](sync.md) - Học cách dùng một vài tính năng từ package sync bao gồm `WaitGroup` và `Mutex`
+15. [Context](context.md) - Sử dụng package context để kiểm soát và huỷ bỏ các process chạy trong thời gian dài.
+16. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
 18. [Maths](math.md) - Use the `math` package to draw an SVG clock
 19. [Reading files](reading-files.md) - Read files and process them
 20. [Templating](html-templates.md) - Use Go's html/template package to render html from data, and also learn about approval testing
