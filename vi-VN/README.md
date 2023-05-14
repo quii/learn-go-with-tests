@@ -58,8 +58,8 @@ I am proud to offer this resource for free, but if you wish to give some appreci
 13. [Reflection](reflection.md) - Cách dùng reflection
 14. [Sync](sync.md) - Học cách dùng một vài tính năng từ package sync bao gồm `WaitGroup` và `Mutex`
 15. [Context](context.md) - Sử dụng package context để kiểm soát và huỷ bỏ các process chạy trong thời gian dài.
-16. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
-18. [Maths](math.md) - Use the `math` package to draw an SVG clock
+16. [Giới thiệu property based tests](roman-numerals.md) - Thực hành một vài TDD với bài toán Số La Mã và hiểu sơ lược về property based tests
+17. [Maths](math.md) - Sử dụng package `math` để vẽ một đồng hồ SVG
 19. [Reading files](reading-files.md) - Read files and process them
 20. [Templating](html-templates.md) - Use Go's html/template package to render html from data, and also learn about approval testing
 21. [Generics](generics.md) - Learn how to write functions that take generic arguments and make your own generic data-structure
