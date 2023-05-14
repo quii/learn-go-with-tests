@@ -60,10 +60,10 @@ I am proud to offer this resource for free, but if you wish to give some appreci
 15. [Context](context.md) - Sử dụng package context để kiểm soát và huỷ bỏ các process chạy trong thời gian dài.
 16. [Giới thiệu property based tests](roman-numerals.md) - Thực hành một vài TDD với bài toán Số La Mã và hiểu sơ lược về property based tests
 17. [Maths](math.md) - Sử dụng package `math` để vẽ một đồng hồ SVG
-19. [Reading files](reading-files.md) - Read files and process them
-20. [Templating](html-templates.md) - Use Go's html/template package to render html from data, and also learn about approval testing
-21. [Generics](generics.md) - Learn how to write functions that take generic arguments and make your own generic data-structure
-22. [Revisiting arrays and slices with generics](revisiting-arrays-and-slices-with-generics.md) - Generics are very useful when working with collections. Learn how to write your own `Reduce` function and tidy up some common patterns.
+18. [Đọc file](reading-files.md) - Cách đọc các file và xử lý chúng
+19. [Templating](html-templates.md) - Sử dụng package html/template của Go để tạo html từ dữ liệu, đồng thời tìm hiểu về approval testing
+20. [Generics](generics.md) - Cách viết các hàm sử dụng các tham số generics và xây dựng cấu trúc dữ liệu generics cho riêng bạn
+21. [Quay lại với array và slice cùng generics](revisiting-arrays-and-slices-with-generics.md) - Generics rất hữu dụng khi làm việc với các loại collection. Học cách viết hàm `Reduce` và áp dụng một vài pattern phổ biến.
 
 ### Build an application
 
