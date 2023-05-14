@@ -4,64 +4,67 @@
   <img src="../red-green-blue-gophers-smaller.png" />
 </p>
 
-[Art by Denise](https://twitter.com/deniseyu21)
+[Đồ hoạ thiết kế bởi Denise](https://twitter.com/deniseyu21)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
-## Formats
+## Các định dạng sách
 
-- [Gitbook](https://quii.gitbook.io/learn-go-with-tests)
-- [EPUB or PDF](https://github.com/quii/learn-go-with-tests/releases)
+- [Gitbook tiếng Anh](https://quii.gitbook.io/learn-go-with-tests)
+- [EPUB hoặc PDF tiếng Anh](https://github.com/quii/learn-go-with-tests/releases)
+- 
 
-## Translations
+## Bản dịch
 
-- [中文](https://studygolang.gitbook.io/learn-go-with-tests)
-- [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
-- [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
-- [한국어](https://miryang.gitbook.io/learn-go-with-tests/)
-- [Türkçe](https://halilkocaoz.gitbook.io/go-programlama-dilini-ogren/)
+- [Tiếng Trung](https://studygolang.gitbook.io/learn-go-with-tests)
+- [Tiếng Bồ Đào Nha](https://larien.gitbook.io/aprenda-go-com-testes/)
+- [Tiếng Nhật](https://andmorefine.gitbook.io/learn-go-with-tests/)
+- [Tiếng Hàn](https://miryang.gitbook.io/learn-go-with-tests/)
+- [Tiếng Thổ Nhĩ Kỳ](https://halilkocaoz.gitbook.io/go-programlama-dilini-ogren/)
+- [Tiếng Việt](https://halilkocaoz.gitbook.io/go-programlama-dilini-ogren/)
 
-## Support me
+## Hỗ trợ tôi
 
+Tôi hân hạnh cung cấp miễn phí nguồn tài liệu này, nhưng nếu bạn có thể cảm ơn bằng các cách sau: 
 I am proud to offer this resource for free, but if you wish to give some appreciation:
 
-- [Tweet me @quii](https://twitter.com/quii)
+- [Theo dõi tôi trên Twitter @quii](https://twitter.com/quii)
 - <a rel="me" href="https://mastodon.cloud/@quii">Mastodon</a>
-- [Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii)
-- [Sponsor me on GitHub](https://github.com/sponsors/quii)
+- [Mua cho tôi một ly cà phê :coffee:](https://www.buymeacoffee.com/quii)
+- [Tài trợ cho tôi trên GitHub](https://github.com/sponsors/quii)
 
-## Why
+## Tại sao
 
-* Explore the Go language by writing tests
-* **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
-* Be confident that you'll be able to start writing robust, well-tested systems in Go
-* [Watch a video, or read about why unit testing and TDD is important](why.md)
+* Khám phá ngôn ngữ Go bằng cách viết test
+* **Xây dựng nền tảng TDD**. Go là một ngôn ngữ tốt cho việc học TDD, bởi vì nó là một ngôn ngữ đơn giản và dễ học và các thư viện dùng để test được tích hợp sẵn.
+* Tự tin rằng bạn sẽ có thể bắt đầu viết các hệ thống vững chắc, được test tốt bằng Go.
+* [Xem video, hoặc đọc về tại sao viết unit test và TDD là quan trọng](why.md)
 
-## Table of contents
+## Mục lục
 
-### Go fundamentals
+### Các yếu tố chính của Go
 
-1. [Install Go](install-go.md) - Set up environment for productivity.
-2. [Hello, world](hello-world.md) - Declaring variables, constants, if/else statements, switch, write your first go program and write your first test. Sub-test syntax and closures.
-3. [Integers](integers.md) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
-4. [Iteration](iteration.md) - Learn about `for` and benchmarking.
-5. [Arrays and slices](arrays-and-slices.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
-6. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
-7. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.
-8. [Maps](maps.md) - Learn about storing values in the map data structure.
-9. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
-10. [Mocking](mocking.md) - Take some existing untested code and use DI with mocking to test it.
-11. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
-12. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
-13. [Reflection](reflection.md) - Learn about reflection
-14. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
-15. [Context](context.md) - Use the context package to manage and cancel long-running processes
-16. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
-17. [Maths](math.md) - Use the `math` package to draw an SVG clock
-18. [Reading files](reading-files.md) - Read files and process them
-19. [Templating](html-templates.md) - Use Go's html/template package to render html from data, and also learn about approval testing
-20. [Generics](generics.md) - Learn how to write functions that take generic arguments and make your own generic data-structure
-21. [Revisiting arrays and slices with generics](revisiting-arrays-and-slices-with-generics.md) - Generics are very useful when working with collections. Learn how to write your own `Reduce` function and tidy up some common patterns.
+1. [Cài đặt Go](install-go.md) - Cài đặt môi trường cho sản phẩm.
+2. [Hello, world](hello-world.md) - Khai báo các biến, hằng số, các câu lệnh if/else, switch, viết chương trình Go đầu tiên và viết test đầu tiên. Cú pháp sub-test và closure.
+4. [Integers](integers.md) - Further Explore function declaration syntax and learn new ways to improve the documentation of your code.
+5. [Iteration](iteration.md) - Learn about `for` and benchmarking.
+6. [Arrays and slices](arrays-and-slices.md) - Learn about arrays, slices, `len`, varargs, `range` and test coverage.
+7. [Structs, methods & interfaces](structs-methods-and-interfaces.md) - Learn about `struct`, methods, `interface` and table driven tests.
+8. [Pointers & errors](pointers-and-errors.md) - Learn about pointers and errors.
+9. [Maps](maps.md) - Learn about storing values in the map data structure.
+10. [Dependency Injection](dependency-injection.md) - Learn about dependency injection, how it relates to using interfaces and a primer on io.
+11. [Mocking](mocking.md) - Take some existing untested code and use DI with mocking to test it.
+12. [Concurrency](concurrency.md) - Learn how to write concurrent code to make your software faster.
+13. [Select](select.md) - Learn how to synchronise asynchronous processes elegantly.
+14. [Reflection](reflection.md) - Learn about reflection
+15. [Sync](sync.md) - Learn some functionality from the sync package including `WaitGroup` and `Mutex`
+16. [Context](context.md) - Use the context package to manage and cancel long-running processes
+17. [Intro to property based tests](roman-numerals.md) - Practice some TDD with the Roman Numerals kata and get a brief intro to property based tests
+18. [Maths](math.md) - Use the `math` package to draw an SVG clock
+19. [Reading files](reading-files.md) - Read files and process them
+20. [Templating](html-templates.md) - Use Go's html/template package to render html from data, and also learn about approval testing
+21. [Generics](generics.md) - Learn how to write functions that take generic arguments and make your own generic data-structure
+22. [Revisiting arrays and slices with generics](revisiting-arrays-and-slices-with-generics.md) - Generics are very useful when working with collections. Learn how to write your own `Reduce` function and tidy up some common patterns.
 
 ### Build an application
 
