@@ -7,11 +7,3 @@ type InMemoryRecipeStore struct {
 func (s InMemoryRecipeStore) GetRecipes() []Recipe {
 	return s.Recipes
 }
-
-type InMemoryIngredientStore struct {
-	Ingredients []Ingredient
-}
-
-func (s InMemoryIngredientStore) GetIngredients() []Ingredient {
-	return s.Ingredients
-}

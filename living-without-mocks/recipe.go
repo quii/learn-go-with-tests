@@ -1,28 +1,22 @@
 package living_without_mocks
 
+import "github.com/quii/learn-go-with-tests/living-without-mocks/ingredients"
+
 type Recipe struct {
 	Name        string
-	Ingredients []Ingredient
-}
-
-type Ingredient struct {
-	Name     string
-	Quantity int
+	Ingredients []ingredients.Ingredient
 }
 
 type RecipeBook interface {
 	GetRecipes() []Recipe
 }
 
-type IngredientStore interface {
-	GetIngredients() []Ingredient
-}
 type RecipeMatcher struct {
 	recipeBook      RecipeBook
-	ingredientStore IngredientStore
+	ingredientStore ingredients.Store
 }
 
-func NewRecipeMatcher(recipes RecipeBook, ingredientStore IngredientStore) *RecipeMatcher {
+func NewRecipeMatcher(recipes RecipeBook, ingredientStore ingredients.Store) *RecipeMatcher {
 	return &RecipeMatcher{recipeBook: recipes, ingredientStore: ingredientStore}
 }
 
@@ -45,7 +39,7 @@ func (m RecipeMatcher) canMake(recipe Recipe) bool {
 	return true
 }
 
-func (m RecipeMatcher) hasIngredient(ingredient Ingredient) bool {
+func (m RecipeMatcher) hasIngredient(ingredient ingredients.Ingredient) bool {
 	for _, pantryIngredient := range m.ingredientStore.GetIngredients() {
 		if pantryIngredient.Name == ingredient.Name {
 			return true
