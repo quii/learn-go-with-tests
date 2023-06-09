@@ -510,6 +510,14 @@ And `bottom.gohtml`
 
 (Obviously, feel free to put whatever markup you like!)
 
+We now need to specify a specific template to run. In the blog renderer, change the `Execute` command to `ExecuteTemplate`
+
+```go
+if err := templ.ExecuteTemplate(w, "blog.gohtml", p); err != nil {
+	return err
+}
+```
+
 Re-run your test. A new "received" file should be made and the test will fail. Check it over and if you're happy, approve it by copying it over the old version. Re-run the test again and it should pass.
 
 ## An excuse to mess around with Benchmarking
@@ -523,7 +531,7 @@ func Render(w io.Writer, p Post) error {
 		return err
 	}
 
-	if err := templ.Execute(w, p); err != nil {
+    if err := templ.ExecuteTemplate(w, "blog.gohtml", p); err != nil {
 		return err
 	}
 
@@ -580,7 +588,7 @@ func NewPostRenderer() (*PostRenderer, error) {
 
 func (r *PostRenderer) Render(w io.Writer, p Post) error {
 
-	if err := r.templ.Execute(w, p); err != nil {
+    if err := r.templ.ExecuteTemplate(w, "blog.gohtml", p); err != nil {
 		return err
 	}
 
