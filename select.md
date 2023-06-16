@@ -257,22 +257,48 @@ Our final requirement was to return an error if `Racer` takes longer than 10 sec
 ## Write the test first
 
 ```go
-t.Run("returns an error if a server doesn't respond within 10s", func(t *testing.T) {
-	serverA := makeDelayedServer(11 * time.Second)
-	serverB := makeDelayedServer(12 * time.Second)
+func TestRacer(t *testing.T) {
 
-	defer serverA.Close()
-	defer serverB.Close()
+	t.Run("compares speeds of servers, returning the url of the fastest one", func(t *testing.T) {
+		slowServer := makeDelayedServer(20 * time.Millisecond)
+		fastServer := makeDelayedServer(0 * time.Millisecond)
 
-	_, err := Racer(serverA.URL, serverB.URL)
+		defer slowServer.Close()
+		defer fastServer.Close()
 
-	if err == nil {
-		t.Error("expected an error but didn't get one")
-	}
-})
+		slowURL := slowServer.URL
+		fastURL := fastServer.URL
+
+		want := fastURL
+		got, _ := Racer(slowURL, fastURL)
+
+		if err != nil {
+			t.Fatalf("did not expect an error but got one %v", err)
+		}
+
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("returns an error if a server doesn't respond within 10s", func(t *testing.T) {
+		serverA := makeDelayedServer(11 * time.Second)
+		serverB := makeDelayedServer(12 * time.Second)
+
+		defer serverA.Close()
+		defer serverB.Close()
+
+		_, err := Racer(serverA.URL, serverB.URL)
+
+		if err == nil {
+			t.Error("expected an error but didn't get one")
+		}
+	})
 ```
 
 We've made our test servers take longer than 10s to return to exercise this scenario and we are expecting `Racer` to return two values now, the winning URL (which we ignore in this test with `_`) and an `error`.
+
+Note that we've also handled the error return in our original test, we're using	`_` for now to ensure the tests will run.
 
 ## Try to run the test
 
