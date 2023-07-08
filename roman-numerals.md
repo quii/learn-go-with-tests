@@ -962,7 +962,7 @@ There have been a few rules in the domain of Roman Numerals that we have worked 
 - Only I (1), X (10) and C (100) can be "subtractors"
 - Taking the result of `ConvertToRoman(N)` and passing it to `ConvertToArabic` should return us `N`
 
-The tests we have written so far can be described as "example" based tests where we provide the tooling some examples around our code to verify.
+The tests we have written so far can be described as "example" based tests where we provide _examples_ for the tooling to verify.
 
 What if we could take these rules that we know about our domain and somehow exercise them against our code?
 
