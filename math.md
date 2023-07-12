@@ -173,7 +173,7 @@ package clockface
 
 import "time"
 
-// A Point represents a two dimensional Cartesian coordinate
+// A Point represents a two-dimensional Cartesian coordinate
 type Point struct {
 	X float64
 	Y float64
