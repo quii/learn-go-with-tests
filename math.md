@@ -73,7 +73,7 @@ working in the way you expect, but a test that tells you that the whole
 thing you're trying to achieve - the 'feature' - is complete.
 
 These tests are sometimes called 'acceptance tests', sometimes called
-'feature test'. The idea is that you write a really high level test to
+'feature tests'. The idea is that you write a really high level test to
 describe what you're trying to achieve - a user clicks a button on a website,
 and they see a complete list of the Pokémon they've caught, for instance.
 When we've written that test, we can then write more tests - unit tests -
