@@ -313,13 +313,20 @@ going on - so let's write a test! We don't need to solve the whole problem in
 one go - let's start off with working out the correct angle, in radians, for the
 second hand at a particular time.
 
-I'm going to write these tests _within_ the `clockface` package; they may never
-get exported, and they may get deleted (or moved) once I have a better grip on
-what's going on.
-
-I'm also going to _comment out_ the acceptance test that I was working on while
+I'm going to _comment out_ the acceptance test that I was working on while
 I'm working on these tests - I don't want to get distracted by that test while
 I'm getting this one to pass.
+
+### A recap on packages
+
+At the moment, our acceptance tests are in the `clockface_test` package. Our tests can 
+be outside of the `clockface` package - as long as their name ends with `_test.go` they 
+can be run.
+
+I'm going to write these radians tests _within_ the `clockface` package; they may never
+get exported, and they may get deleted (or moved) once I have a better grip on
+what's going on. I'll rename my acceptance test file to `clockface_acceptance_test.go`, 
+so that I can create a _new_ file called `clockface_test` to test seconds in radians.
 
 ```go
 package clockface
