@@ -691,7 +691,7 @@ say that they're roughly equal and get on with our lives.
 
 One option to increase the accuracy of these angles would be to use the rational
 type `Rat` from the `math/big` package. But given the objective is to draw an
-SVG and not land on the moon landings I think we can live with a bit of
+SVG and not land on the moon, I think we can live with a bit of
 fuzziness.
 
 ```go
@@ -1007,7 +1007,7 @@ type Svg struct {
 
 We could make adjustments to this if we needed to (like changing the name of the
 struct to `SVG`) but it's definitely good enough to start us off. Paste the
-struct into the `clockface_test` file and let's write a test with it:
+struct into the `clockface_assembly_test` file and let's write a test with it:
 
 ```go
 func TestSVGWriterAtMidnight(t *testing.T) {
@@ -1043,7 +1043,7 @@ informative message.
 ./clockface_acceptance_test.go:41:2: undefined: clockface.SVGWriter
 ```
 
-Looks like we'd better write that `SVGWriter`...
+Looks like we'd better create `SVGWriter.go`...
 
 ```go
 package clockface
