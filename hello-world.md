@@ -462,9 +462,9 @@ func Hello(name string, language string) string {
 	prefix := englishHelloPrefix
 
 	switch language {
-	case "french":
+	case "French":
 		prefix = frenchHelloPrefix
-	case "spanish":
+	case "Spanish":
 		prefix = spanishHelloPrefix
 	}
 
