@@ -85,7 +85,7 @@ the original acceptance test pass.
 
 Something like this _classic_ picture by Nat Pryce and Steve Freeman
 
-![img.png](TDD-outside-in.jpg)
+![Outside-in feedback loops in TDD](TDD-outside-in.jpg)
 
 Anyway, let's try and write that acceptance test - the one that will let us
 know when we're done.
