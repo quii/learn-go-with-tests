@@ -1142,7 +1142,7 @@ func main() {
 }
 ```
 
-This is what [things should look like now](https://github.com/quii/learn-go-with-tests/blob/main/math/v7b/clockface).
+This is what [things should look like now](https://github.com/quii/learn-go-with-tests/tree/main/math/v7b/clockface).
 
 And we can write a test for another time following the same pattern, but not
 before...
@@ -1269,7 +1269,7 @@ func containsLine(l Line, ls []Line) bool {
 }
 ```
 
-Here's what [it looks like](https://github.com/quii/learn-go-with-tests/blob/main/math/v7c/clockface)
+Here's what [it looks like](https://github.com/quii/learn-go-with-tests/tree/main/math/v7c/clockface)
 
 Now _that's_ what I call an acceptance test!
 
@@ -1431,7 +1431,7 @@ PASS
 ok  	clockface	0.007s
 ```
 
-Nice and easy. This is what things [look like now](https://github.com/quii/learn-go-with-tests/blob/main/math/v8/clockface/clockface_acceptance_test.go)
+Nice and easy. This is what things [look like now](https://github.com/quii/learn-go-with-tests/tree/main/math/v8/clockface/clockface_acceptance_test.go)
 
 ### Repeat for new requirements
 
