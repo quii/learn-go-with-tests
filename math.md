@@ -131,6 +131,7 @@ So my first test looks like this:
 package clockface_test
 
 import (
+    "projectpath/clockface"
 	"testing"
 	"time"
 )
