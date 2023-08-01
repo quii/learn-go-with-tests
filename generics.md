@@ -378,14 +378,14 @@ Even if we have the discipline not to do this, the code is still unpleasant to w
 Add the following test,
 
 ```go
-t.Run("interface stack dx is horrid", func(t *testing.T) {
+t.Run("interface stack DX is horrid", func(t *testing.T) {
 	myStackOfInts := new(StackOfInts)
 
 	myStackOfInts.Push(1)
 	myStackOfInts.Push(2)
 	firstNum, _ := myStackOfInts.Pop()
 	secondNum, _ := myStackOfInts.Pop()
-	AssertEqual(firstNum+secondNum, 3)
+	AssertEqual(t, firstNum+secondNum, 3)
 })
 ```
 
