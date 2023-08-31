@@ -272,10 +272,6 @@ func TestRacer(t *testing.T) {
 		want := fastURL
 		got, _ := Racer(slowURL, fastURL)
 
-		if err != nil {
-			t.Fatalf("did not expect an error but got one %v", err)
-		}
-
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
 		}
