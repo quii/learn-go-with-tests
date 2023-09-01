@@ -88,6 +88,7 @@ Remember we can access the internal `balance` field in the struct using the "rec
 ```go
 func (w Wallet) Deposit(amount int) {
 	w.balance += amount
+    return w.balance
 }
 
 func (w Wallet) Balance() int {
