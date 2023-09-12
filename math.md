@@ -1015,7 +1015,7 @@ type Svg struct {
 
 We could make adjustments to this if we needed to (like changing the name of the
 struct to `SVG`) but it's definitely good enough to start us off. Paste the
-struct into the `clockface_assembly_test` file and let's write a test with it:
+struct into the `clockface_acceptance_test` file and let's write a test with it:
 
 ```go
 func TestSVGWriterAtMidnight(t *testing.T) {
