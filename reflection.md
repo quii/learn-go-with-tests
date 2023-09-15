@@ -411,7 +411,7 @@ panic: reflect: call of reflect.Value.NumField on ptr Value [recovered]
 func walk(x interface{}, fn func(input string)) {
 	val := reflect.ValueOf(x)
 
-	if val.Kind() == reflect.Ptr {
+	if val.Kind() == reflect.Pointer {
 		val = val.Elem()
 	}
 
@@ -453,7 +453,7 @@ func walk(x interface{}, fn func(input string)) {
 func getValue(x interface{}) reflect.Value {
 	val := reflect.ValueOf(x)
 
-	if val.Kind() == reflect.Ptr {
+	if val.Kind() == reflect.Pointer {
 		val = val.Elem()
 	}
 
