@@ -270,7 +270,7 @@ func TestRacer(t *testing.T) {
 		fastURL := fastServer.URL
 
 		want := fastURL
-		got, _ := Racer(slowURL, fastURL)
+		got, err := Racer(slowURL, fastURL)
 
 		if err != nil {
 			t.Fatalf("did not expect an error but got one %v", err)
@@ -319,7 +319,7 @@ func Racer(a, b string) (winner string, error error) {
 
 Change the signature of `Racer` to return the winner and an `error`. Return `nil` for our happy cases.
 
-The compiler will complain about your _first test_ only looking for one value so change that line to `got, _ := Racer(slowURL, fastURL)`, knowing that we should check we _don't_ get an error in our happy scenario.
+The compiler will complain about your _first test_ only looking for one value so change that line to `got, err := Racer(slowURL, fastURL)`, knowing that we should check we _don't_ get an error in our happy scenario.
 
 If you run it now after 11 seconds it will fail.
 
