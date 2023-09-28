@@ -88,6 +88,7 @@ Covering other subjects around testing.
 
 * [Introduction to acceptance tests](intro-to-acceptance-tests.md) - Learn how to write acceptance tests for your code, with a real-world example for gracefully shutting down a HTTP server
 * [Scaling acceptance tests](scaling-acceptance-tests.md) - Learn techniques to manage the complexity of writing acceptance tests for non-trivial systems.
+* [Working without mocks, stubs and spies](working-without-mocks.md) - Learn about how to use fakes and contracts to create more realistic and maintainable tests.  
 
 ### Questions and answers
 
@@ -164,7 +165,7 @@ Taking my experience of learning with a group and my own personal way I am going
 * [Installed Go](https://golang.org/)
 * A text editor
 * Some experience with programming. Understanding of concepts like `if`, variables, functions etc.
-* Comfortable with using the terminal
+* Comfortable using the terminal
 
 ## Feedback
 

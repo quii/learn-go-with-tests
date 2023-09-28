@@ -80,7 +80,7 @@ Taking my experience of learning with a group and my own personal way I am going
 * [Installed Go](https://golang.org/)
 * A text editor
 * Some experience with programming. Understanding of concepts like `if`, variables, functions etc.
-* Comfortable with using the terminal
+* Comfortable using the terminal
 
 ## Feedback
 
