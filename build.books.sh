@@ -43,7 +43,7 @@ docker run --rm -v `pwd`:/data uppalabharath/pandoc-latex-cjk:latest --from=gfm+
     http-handlers-revisited.md \
     anti-patterns.md
 
-docker run --rm -v `pwd`:/data uppalabharath/pandoc-latex-cjk:latest --from=gfm+rebase_relative_paths --to=epub --file-scope title.txt -o learn-go-with-tests.epub --pdf-engine=xelatex --toc --toc-depth=1  \
+docker run --rm -v `pwd`:/data pandoc/latex:latest --from=gfm+rebase_relative_paths --to=epub --file-scope title.txt -o learn-go-with-tests.epub --pdf-engine=xelatex --toc --toc-depth=1  \
     gb-readme.md \
     why.md \
     hello-world.md \
