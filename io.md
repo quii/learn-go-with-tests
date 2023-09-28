@@ -1220,7 +1220,7 @@ t.Run("league sorted", func(t *testing.T) {
 
 	got := store.GetLeague()
 
-	want := []Player{
+	want := League{
 		{"Chris", 33},
 		{"Cleo", 10},
 	}
