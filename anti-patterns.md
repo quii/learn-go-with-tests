@@ -105,6 +105,16 @@ What are the signals here? _Listen_, complicated tests `==` complicated code. Wh
 
 If you have declared an `interface` that has many methods, that points to a leaky abstraction. Think about how you could define that collaboration with a more consolidated set of methods, ideally one.
 
+#### Interface pollution
+
+As a Go proverb says, *the bigger the interface, the weaker the abstraction*. If you expose a huge interface to the users of your package, you force them to create in their tests a stub/mock that matches the entire API, providing an implementation also for methods they do not use (sometimes, they just panic to make clear that they should not be used). This situation is an anti-pattern known as [interface pollution](https://rakyll.org/interface-pollution/) and this is the reason why the standard library offers you just tiny little interfaces. 
+
+Instead, you should expose from your package a bare struct with all relevant methods exported, leaving to the clients of your API the freedom to declare their own interfaces abstracting over the subset of the methods they need: e.g [go-redis](https://github.com/redis/go-redis) exposes a struct (`redis.Client`) to the API clients.
+
+Generally speaking, you should expose an interface to the clients only when:
+- the interface consists of a small and coherent set of functions.
+- the interface and its implementation need to be decoupled (e.g. because users can choose among multiple implementations or they need to mock an external dependency).
+
 #### Think about the types of test doubles you use
 
 - Mocks are sometimes helpful, but they're extremely powerful and therefore easy to misuse. Try giving yourself the constraint of using stubs instead.
