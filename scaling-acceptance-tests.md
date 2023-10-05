@@ -234,8 +234,12 @@ We wish to run our specification in a Go test. We already have access to a `*tes
 `specifications.Greeter` is an interface, which we will implement with a `Driver` by changing the new TestGreeterServer code to the following:
 
 ```go
+import (
+	go_specs_greet "github.com/quii/go-specs-greet"
+)
+
 func TestGreeterServer(t *testing.T) {
-  	driver := go_specs_greet.Driver{BaseURL: "http://localhost:8080"}
+	driver := go_specs_greet.Driver{BaseURL: "http://localhost:8080"}
 	specifications.GreetSpecification(t, driver)
 }
 ```
@@ -327,10 +331,10 @@ func TestGreeterServer(t *testing.T) {
 		FromDockerfile: testcontainers.FromDockerfile{
 			Context:    "../../.",
 			Dockerfile: "./cmd/httpserver/Dockerfile",
-	  // set to false if you want less spam, but this is helpful if you're having troubles
-	  PrintBuildLog: true,
+			// set to false if you want less spam, but this is helpful if you're having troubles
+			PrintBuildLog: true,
 		},
-	ExposedPorts: []string{"8080:8080"},
+		ExposedPorts: []string{"8080:8080"},
 		WaitingFor:   wait.ForHTTP("/").WithPort("8080"),
 	}
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -417,6 +421,12 @@ Try to run the test again, and it should fail with the following.
 Update the handler to behave how our specification wants it to
 
 ```go
+import (
+	"fmt"
+	"log"
+	"net/http"
+)
+
 func main() {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprint(w, "Hello, world")
@@ -432,9 +442,14 @@ func main() {
 Whilst this technically isn't a refactor, we shouldn't rely on the default HTTP client, so let's change our Driver, so we can supply one, which our test will give.
 
 ```go
+import (
+	"io"
+	"net/http"
+)
+
 type Driver struct {
 	BaseURL string
-	Client *http.Client
+	Client  *http.Client
 }
 
 func (d Driver) Greet() (string, error) {
@@ -455,7 +470,7 @@ In our test in `cmd/httpserver/greeter_server_test.go`, update the creation of t
 
 ```go
 client := http.Client{
-  Timeout: 1 * time.Second,
+	Timeout: 1 * time.Second,
 }
 
 driver := go_specs_greet.Driver{BaseURL: "http://localhost:8080", Client: &client}
@@ -546,6 +561,8 @@ The change in the specification has meant our driver needs to be updated.
 Update the driver so that it specifies a `name` query value in the request to ask for a particular `name` to be greeted.
 
 ```go
+import "io"
+
 func (d Driver) Greet(name string) (string, error) {
 	res, err := d.Client.Get(d.BaseURL + "/greet?name=" + name)
 	if err != nil {
@@ -576,6 +593,11 @@ The test should now run, and fail.
 Extract the `name` from the request and greet.
 
 ```go
+import (
+	"fmt"
+	"net/http"
+)
+
 func Handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, %s", r.URL.Query().Get("name"))
 }
@@ -599,7 +621,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 ```
 
 Create new file `./greet.go`:
-
 ```go
 package go_specs_greet
 
@@ -624,8 +645,8 @@ package go_specs_greet_test
 import (
 	"testing"
 
-	"github.com/quii/go-specs-greet/specifications"
 	go_specs_greet "github.com/quii/go-specs-greet"
+	"github.com/quii/go-specs-greet/specifications"
 )
 
 func TestGreet(t *testing.T) {
@@ -667,8 +688,8 @@ package go_specs_greet_test
 import (
 	"testing"
 
-	"github.com/quii/go-specs-greet/specifications"
 	gospecsgreet "github.com/quii/go-specs-greet"
+	"github.com/quii/go-specs-greet/specifications"
 )
 
 func TestGreet(t *testing.T) {
@@ -724,10 +745,10 @@ You'll now need to import the root package into `handler.go` to refer to the Gre
 package httpserver
 
 import (
-    "fmt"
-    "net/http"
+	"fmt"
+	"net/http"
 
-    go_specs_greet "github.com/quii/go-specs-greet/domain/interactions"
+	go_specs_greet "github.com/quii/go-specs-greet/domain/interactions"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -745,29 +766,19 @@ package main
 import (
 	"net/http"
 
-	 "github.com/quii/go-specs-greet/adapters/httpserver"
+	"github.com/quii/go-specs-greet/adapters/httpserver"
 )
 
 func main() {
 	handler := http.HandlerFunc(httpserver.Handler)
 	http.ListenAndServe(":8080", handler)
 }
-
 ```
 
 and update the import and reference to `Driver` in greeter_server_test.go:
 
 ```go
-import (
-	...
-	"github.com/quii/go-specs-greet/adapters/httpserver"
-	...
-)
-
-	  ...
-	  driver := httpserver.Driver{BaseURL: "http://localhost:8080", Client: &client}
-	  ...
-
+driver := httpserver.Driver{BaseURL: "http://localhost:8080", Client: &client}
 ```
 
 Finally, it's helpful to gather our domain level code in to its own folder too. Don't be lazy and have a `domain` folder in your projects with hundreds of unrelated types and functions. Make an effort to think about your domain and group ideas that belong together, together. This will make your project easier to understand and will improve the quality of your imports.
@@ -851,8 +862,8 @@ func StartDockerServer(
 	t.Helper()
 	req := testcontainers.ContainerRequest{
 		FromDockerfile: testcontainers.FromDockerfile{
-			Context:    "../../.",
-			Dockerfile: dockerFilePath,
+			Context:       "../../.",
+			Dockerfile:    dockerFilePath,
 			PrintBuildLog: true,
 		},
 		ExposedPorts: []string{fmt.Sprintf("%s:%s", port, port)},
@@ -1338,7 +1349,7 @@ We can add to our acceptance tests to see if the user wants to run our acceptanc
 
 ```go
 if testing.Short() {
-  t.Skip()
+	t.Skip()
 }
 ```
 
@@ -1557,6 +1568,4 @@ Specifications should then double up as documentation. They should specify clear
 - In this example, our "DSL" is not much of a DSL; we just used interfaces to decouple our specification from the real world and allow us to express domain logic cleanly. As your system grows, this level of abstraction might become clumsy and unclear. [Read into the "Screenplay Pattern"](https://cucumber.io/blog/bdd/understanding-screenplay-(part-1)/) if you want to find more ideas as to how to structure your specifications.
 - For emphasis, [Growing Object-Oriented Software, Guided by Tests,](http://www.growing-object-oriented-software.com) is a classic. It demonstrates applying this "London style", "top-down" approach to writing software. Anyone who has enjoyed Learn Go with Tests should get much value from reading GOOS.
 - [In the example code repository](https://github.com/quii/go-specs-greet), there's more code and ideas I haven't written about here, such as multi-stage docker build, you may wish to check this out.
-  - In particular, *for fun*, I made a **third program**, a website with some HTML forms to `Greet` and `Curse`. The `Driver` leverages the excellent-looking [https://github.com/go-rod/rod](https://github.com/go-rod/rod) module, which allows it to work with the website with a browser, just like a user would. Looking at the git history, you can see how I started not using any templating tools "just to make it work" Then, once I passed my acceptance test, I had the freedom to do so without fear of breaking things.
-
-
+  - In particular, *for fun*, I made a **third program**, a website with some HTML forms to `Greet` and `Curse`. The `Driver` leverages the excellent-looking [https://github.com/go-rod/rod](https://github.com/go-rod/rod) module, which allows it to work with the website with a browser, just like a user would. Looking at the git history, you can see how I started not using any templating tools "just to make it work" Then, once I passed my acceptance test, I had the freedom to do so without fear of breaking things. -->

@@ -531,7 +531,7 @@ func Render(w io.Writer, p Post) error {
 		return err
 	}
 
-    if err := templ.ExecuteTemplate(w, "blog.gohtml", p); err != nil {
+	if err := templ.ExecuteTemplate(w, "blog.gohtml", p); err != nil {
 		return err
 	}
 
@@ -588,7 +588,7 @@ func NewPostRenderer() (*PostRenderer, error) {
 
 func (r *PostRenderer) Render(w io.Writer, p Post) error {
 
-    if err := r.templ.ExecuteTemplate(w, "blog.gohtml", p); err != nil {
+	if err := r.templ.ExecuteTemplate(w, "blog.gohtml", p); err != nil {
 		return err
 	}
 

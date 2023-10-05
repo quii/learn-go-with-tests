@@ -36,8 +36,8 @@ Given this interface of a hypothetical recipe API:
 
 ```go
 type RecipeBook interface {
-GetRecipes() ([]Recipe, error)
-AddRecipes(...Recipe) error
+	GetRecipes() ([]Recipe, error)
+	AddRecipes(...Recipe) error
 }
 ```
 
@@ -47,35 +47,41 @@ We can construct test doubles in various ways, depending on how we're trying to 
 
 ```go
 type StubRecipeStore struct {
-recipes []Recipe
-err error
+	recipes []Recipe
+	err     error
 }
 
 func (s *StubRecipeStore) GetRecipes() ([]Recipe, error) {
-return s.recipes, s.err
+	return s.recipes, s.err
 }
 
 // AddRecipes omitted for brevity
+```
 
+```go
 // in test, we can set up the stub to always return specific recipes, or an error
-stubStore := &StubRecipeStore{recipes: someRecipes}
+stubStore := &StubRecipeStore{
+	recipes: someRecipes,
+}
 ```
 
 **Spies** are like stubs but also record how they were called so the test can assert that the SUT calls the dependencies in specific ways.
 
 ```go
 type SpyRecipeStore struct {
-AddCalls [][]Recipe
-err error
+	AddCalls [][]Recipe
+	err      error
 }
 
 func (s *SpyRecipeStore) AddRecipes(r ...Recipe) error {
-s.AddCalls = append(s.AddCalls, r)
-return s.err
+	s.AddCalls = append(s.AddCalls, r)
+	return s.err
 }
 
 // GetRecipes omitted for brevity
+```
 
+```go
 // in test
 spyStore := &SpyRecipeStore{}
 sut := NewThing(spyStore)
@@ -88,8 +94,8 @@ sut.DoStuff()
 
 ```go
 // set up the mock with expected calls
-mockStore := &MockRecipeStore
-mockStore.WhenCalledWith(someRecipes).return(someError)
+mockStore := &MockRecipeStore{}
+mockStore.WhenCalledWith(someRecipes).Return(someError)
 
 // when the sut uses the dependency, if it doesn't call it with someRecipes, usually mocks will panic
 ```
@@ -98,16 +104,16 @@ mockStore.WhenCalledWith(someRecipes).return(someError)
 
 ```go
 type FakeRecipeStore struct {
-recipes []Recipe
+	recipes []Recipe
 }
 
 func (f *FakeRecipeStore) GetRecipes() ([]Recipe, error) {
-return f.recipes, nil
+	return f.recipes, nil
 }
 
 func (f *FakeRecipeStore) AddRecipes(r ...Recipe) error {
-f.recipes = append(f.recipes, r...)
-return nil
+	f.recipes = append(f.recipes, r...)
+	return nil
 }
 ```
 
@@ -215,11 +221,13 @@ Using fakes, **we can make assertions based on the final states of the respectiv
 ```go
 // take our lego-bricks and assemble the system for the test
 fakeAPI1 := fakes.NewAPI1()
-fakeAPI2 := // etc..
+fakeAPI2 := fakes.NewAPI2() // etc..
 customerService := customer.NewService(fakeAPI1, fakeAPI2, etc...)
 
 // create new customer
-newCustomerRequest := NewCustomerReq{...}
+newCustomerRequest := NewCustomerReq{
+	// ...
+}
 createdCustomer, err := customerService.New(newCustomerRequest)
 assert.NoErr(t, err)
 
@@ -227,7 +235,7 @@ assert.NoErr(t, err)
 fakeAPI1Customer := fakeAPI1.Get(createdCustomer.FakeAPI1Details.ID)
 assert.Equal(t, fakeAPI1Customer.SocialSecurityNumber, newCustomerRequest.SocialSecurityNumber)
 
-// repeat for the other apis we care about 
+// repeat for the other apis we care about
 
 // update customer
 updatedCustomerRequest := NewUpdateReq{SocialSecurityNumber: "123", InternalID: createdCustomer.InternalID}
@@ -260,54 +268,54 @@ Here is an example of a contract for one of the APIs the system depends on
 
 ```go
 type API1Customer struct {
-Name string
-ID   string
+	Name string
+	ID   string
 }
 
 type API1 interface {
-CreateCustomer(ctx context.Context, name string) (API1Customer, error)
-GetCustomer(ctx context.Context, id string) (API1Customer, error)
-UpdateCustomer(ctx context.Context, id string, name string) error
+	CreateCustomer(ctx context.Context, name string) (API1Customer, error)
+	GetCustomer(ctx context.Context, id string) (API1Customer, error)
+	UpdateCustomer(ctx context.Context, id string, name string) error
 }
 
 type API1Contract struct {
-NewAPI1 func() API1
+	NewAPI1 func() API1
 }
 
 func (c API1Contract) Test(t *testing.T) {
-t.Run("can create, get and update a customer", func(t *testing.T) {
-var (
-ctx  = context.Background()
-sut  = c.NewAPI1()
-name = "Bob"
-)
+	t.Run("can create, get and update a customer", func(t *testing.T) {
+		var (
+			ctx  = context.Background()
+			sut  = c.NewAPI1()
+			name = "Bob"
+		)
 
-customer, err := sut.CreateCustomer(ctx, name)
-expect.NoErr(t, err)
+		customer, err := sut.CreateCustomer(ctx, name)
+		expect.NoErr(t, err)
 
-got, err := sut.GetCustomer(ctx, customer.ID)
-expect.NoErr(t, err)
-expect.Equal(t, customer, got)
+		got, err := sut.GetCustomer(ctx, customer.ID)
+		expect.NoErr(t, err)
+		expect.Equal(t, customer, got)
 
-newName := "Robert"
-expect.NoErr(t, sut.UpdateCustomer(ctx, customer.ID, newName))
+		newName := "Robert"
+		expect.NoErr(t, sut.UpdateCustomer(ctx, customer.ID, newName))
 
-got, err = sut.GetCustomer(ctx, customer.ID)
-expect.NoErr(t, err)
-expect.Equal(t, newName, got.Name)
-})
+		got, err = sut.GetCustomer(ctx, customer.ID)
+		expect.NoErr(t, err)
+		expect.Equal(t, newName, got.Name)
+	})
 
-// example of strange behaviours we didn't expect
-t.Run("the system will not allow you to add 'Dave' as a customer", func(t *testing.T) {
-var (
-ctx  = context.Background()
-sut  = c.NewAPI1()
-name = "Dave"
-)
+	// example of strange behaviours we didn't expect
+	t.Run("the system will not allow you to add 'Dave' as a customer", func(t *testing.T) {
+		var (
+			ctx  = context.Background()
+			sut  = c.NewAPI1()
+			name = "Dave"
+		)
 
-_, err := sut.CreateCustomer(ctx, name)
-expect.Err(t, ErrDaveIsForbidden)
-})
+		_, err := sut.CreateCustomer(ctx, name)
+		expect.Err(t, ErrDaveIsForbidden)
+	})
 }
 ```
 
@@ -322,9 +330,9 @@ To create our in-memory fake, we can use the contract in a test.
 
 ```go
 func TestInMemoryAPI1(t *testing.T) {
-API1Contract{NewAPI1: func() API1 {
-return inmemory.NewAPI1()
-}}.Test(t)
+	API1Contract{NewAPI1: func() API1 {
+		return inmemory.NewAPI1()
+	}}.Test(t)
 }
 ```
 
@@ -332,37 +340,37 @@ And here is the fake's code
 
 ```go
 func NewAPI1() *API1 {
-return &API1{customers: make(map[string]planner.API1Customer)}
+	return &API1{customers: make(map[string]planner.API1Customer)}
 }
 
 type API1 struct {
-i         int
-customers map[string]planner.API1Customer
+	i         int
+	customers map[string]planner.API1Customer
 }
 
 func (a *API1) CreateCustomer(ctx context.Context, name string) (planner.API1Customer, error) {
-if name == "Dave" {
-return planner.API1Customer{}, ErrDaveIsForbidden
-}
+	if name == "Dave" {
+		return planner.API1Customer{}, ErrDaveIsForbidden
+	}
 
-newCustomer := planner.API1Customer{
-Name: name,
-ID:   strconv.Itoa(a.i),
-}
-a.customers[newCustomer.ID] = newCustomer
-a.i++
-return newCustomer, nil
+	newCustomer := planner.API1Customer{
+		Name: name,
+		ID:   strconv.Itoa(a.i),
+	}
+	a.customers[newCustomer.ID] = newCustomer
+	a.i++
+	return newCustomer, nil
 }
 
 func (a *API1) GetCustomer(ctx context.Context, id string) (planner.API1Customer, error) {
-return a.customers[id], nil
+	return a.customers[id], nil
 }
 
 func (a *API1) UpdateCustomer(ctx context.Context, id string, name string) error {
-customer := a.customers[id]
-customer.Name = name
-a.customers[id] = customer
-return nil
+	customer := a.customers[id]
+	customer.Name = name
+	a.customers[id] = customer
+	return nil
 }
 ```
 
@@ -407,38 +415,38 @@ Returning to the `API1` example, we can create a type that implements the needed
 
 ```go
 type API1Decorator struct {
-delegate           API1
-CreateCustomerFunc func(ctx context.Context, name string) (API1Customer, error)
-GetCustomerFunc    func(ctx context.Context, id string) (API1Customer, error)
-UpdateCustomerFunc func(ctx context.Context, id string, name string) error
+	delegate           API1
+	CreateCustomerFunc func(ctx context.Context, name string) (API1Customer, error)
+	GetCustomerFunc    func(ctx context.Context, id string) (API1Customer, error)
+	UpdateCustomerFunc func(ctx context.Context, id string, name string) error
 }
 
 // assert API1Decorator implements API1
 var _ API1 = &API1Decorator{}
 
 func NewAPI1Decorator(delegate API1) *API1Decorator {
-return &API1Decorator{delegate: delegate}
+	return &API1Decorator{delegate: delegate}
 }
 
 func (a *API1Decorator) CreateCustomer(ctx context.Context, name string) (API1Customer, error) {
-if a.CreateCustomerFunc != nil {
-return a.CreateCustomerFunc(ctx, name)
-}
-return a.delegate.CreateCustomer(ctx, name)
+	if a.CreateCustomerFunc != nil {
+		return a.CreateCustomerFunc(ctx, name)
+	}
+	return a.delegate.CreateCustomer(ctx, name)
 }
 
 func (a *API1Decorator) GetCustomer(ctx context.Context, id string) (API1Customer, error) {
-if a.GetCustomerFunc != nil {
-return a.GetCustomerFunc(ctx, id)
-}
-return a.delegate.GetCustomer(ctx, id)
+	if a.GetCustomerFunc != nil {
+		return a.GetCustomerFunc(ctx, id)
+	}
+	return a.delegate.GetCustomer(ctx, id)
 }
 
 func (a *API1Decorator) UpdateCustomer(ctx context.Context, id string, name string) error {
-if a.UpdateCustomerFunc != nil {
-return a.UpdateCustomerFunc(ctx, id, name)
-}
-return a.delegate.UpdateCustomer(ctx, id, name)
+	if a.UpdateCustomerFunc != nil {
+		return a.UpdateCustomerFunc(ctx, id, name)
+	}
+	return a.delegate.UpdateCustomer(ctx, id, name)
 }
 ```
 
@@ -447,8 +455,8 @@ In our tests, we can then use the `XXXFunc` field to modify the behaviour of the
 ```go
 failingAPI1 = NewAPI1Decorator(inmemory.NewAPI1())
 failingAPI1.UpdateCustomerFunc = func(ctx context.Context, id string, name string) error {
-return errors.New("failed to update customer")
-})
+	return errors.New("failed to update customer")
+}
 ```
 
 However, this _is_ awkward and requires you to exercise some judgement. With this approach, you are losing the guarantees from your contract as you are introducing ad-hoc behaviour to your fake in tests.
@@ -498,45 +506,43 @@ Follow the TDD approach described above to drive out your persistence needs.
 package inmemory_test
 
 import (
-  "github.com/quii/go-fakes-and-contracts/adapters/driven/persistence/inmemory"
-  "github.com/quii/go-fakes-and-contracts/domain/planner"
-  "testing"
+	"github.com/quii/go-fakes-and-contracts/adapters/driven/persistence/inmemory"
+	"github.com/quii/go-fakes-and-contracts/domain/planner"
+	"testing"
 )
 
 func TestInMemoryPantry(t *testing.T) {
-  planner.PantryContract{
-    NewPantry: func() planner.Pantry {
-      return inmemory.NewPantry()
-    },
-  }.Test(t)
+	planner.PantryContract{
+		NewPantry: func() planner.Pantry {
+			return inmemory.NewPantry()
+		},
+	}.Test(t)
 }
-
 ```
 
 ```go
 package sqlite_test
 
 import (
-  "github.com/quii/go-fakes-and-contracts/adapters/driven/persistence/sqlite"
-  "github.com/quii/go-fakes-and-contracts/domain/planner"
-  "testing"
+	"github.com/quii/go-fakes-and-contracts/adapters/driven/persistence/sqlite"
+	"github.com/quii/go-fakes-and-contracts/domain/planner"
+	"testing"
 )
 
 func TestSQLitePantry(t *testing.T) {
-  client := sqlite.NewSQLiteClient()
-  t.Cleanup(func() {
-    if err := client.Close(); err != nil {
-      t.Error(err)
-    }
-  })
+	client := sqlite.NewSQLiteClient()
+	t.Cleanup(func() {
+		if err := client.Close(); err != nil {
+			t.Error(err)
+		}
+	})
 
-  planner.PantryContract{
-    NewPantry: func() planner.Pantry {
-      return sqlite.NewPantry(client)
-    },
-  }.Test(t)
+	planner.PantryContract{
+		NewPantry: func() planner.Pantry {
+			return sqlite.NewPantry(client)
+		},
+	}.Test(t)
 }
-
 ```
 
 Whilst Docker et al. _do_ make running databases locally easier, they can still carry a significant performance overhead. Fakes with contracts allow you to use restrict the need to use the "heavier" dependency to only when you're validating the contract, and not needed for other kinds of tests.
@@ -582,4 +588,4 @@ So many times in my career, I have seen carefully written software written by ta
 
 Some teams rely on everyone deploying to a shared environment and testing there. The problem is this doesn't give you **isolated** feedback, and the **feedback is slow**. You still won't be able to construct different experiments with how your system works with other dependencies, at least not efficiently.
 
-**We have to tame this complexity by adopting more sophisticated ways of modelling our dependencies** to quickly test/experiment on our dev machines before it gets to production. Create realistic and manageable fakes of your dependencies, verified by contracts. Then, you can start writing more meaningful tests and experimenting with your system, making you more likely to succeed. 
+**We have to tame this complexity by adopting more sophisticated ways of modelling our dependencies** to quickly test/experiment on our dev machines before it gets to production. Create realistic and manageable fakes of your dependencies, verified by contracts. Then, you can start writing more meaningful tests and experimenting with your system, making you more likely to succeed.
