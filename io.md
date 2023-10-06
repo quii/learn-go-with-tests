@@ -718,7 +718,7 @@ store := &FileSystemPlayerStore{database}
 If you run the test it should pass and now we can delete `InMemoryPlayerStore`. `main.go` will now have compilation problems which will motivate us to now use our new store in the "real" code.
 
 ```go
-//main.go
+// main.go
 package main
 
 import (
@@ -822,7 +822,7 @@ How will we test for this though? What we need to do is first refactor our code 
 We'll create a new type to encapsulate our "when we write we go from the beginning" functionality. I'm going to call it `Tape`. Create a new file with the following:
 
 ```go
-//tape.go
+// tape.go
 package main
 
 import "io"

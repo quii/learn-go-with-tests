@@ -744,7 +744,7 @@ To fix this, we'll need to move our assertion with the maps to a new test where 
 ```go
 t.Run("with maps", func(t *testing.T) {
 	aMap := map[string]string{
-		"Cow": "Moo",
+		"Cow":   "Moo",
 		"Sheep": "Baa",
 	}
 

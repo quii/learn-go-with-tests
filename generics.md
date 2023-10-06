@@ -437,7 +437,7 @@ func (s *Stack[T]) Push(value T) {
 }
 
 func (s *Stack[T]) IsEmpty() bool {
-	return len(s.values)==0
+	return len(s.values) == 0
 }
 
 func (s *Stack[T]) Pop() (T, bool) {
@@ -446,7 +446,7 @@ func (s *Stack[T]) Pop() (T, bool) {
 		return zero, false
 	}
 
-	index := len(s.values) -1
+	index := len(s.values) - 1
 	el := s.values[index]
 	s.values = s.values[:index]
 	return el, true

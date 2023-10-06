@@ -409,20 +409,20 @@ The tests should now pass.
 Now it is time to _refactor_. You should see some problems in the code, "magic" strings, some of which are repeated. Try and refactor it yourself, with every change make sure you re-run the tests to make sure your refactoring isn't breaking anything.
 
 ```go
-    const spanish = "Spanish"
-    const englishHelloPrefix = "Hello, "
-    const spanishHelloPrefix = "Hola, "
+	const spanish = "Spanish"
+	const englishHelloPrefix = "Hello, "
+	const spanishHelloPrefix = "Hola, "
 
-func Hello(name string, language string) string {
-	if name == "" {
-		name = "World"
-	}
+	func Hello(name string, language string) string {
+		if name == "" {
+			name = "World"
+		}
 
-	if language == spanish {
-		return spanishHelloPrefix + name
+		if language == spanish {
+			return spanishHelloPrefix + name
+		}
+		return englishHelloPrefix + name
 	}
-	return englishHelloPrefix + name
-}
 ```
 
 ### French
@@ -483,10 +483,10 @@ You could argue that maybe our function is getting a little big. The simplest re
 const (
 	french  = "French"
 	spanish = "Spanish"
-    
-    englishHelloPrefix = "Hello, "
-    spanishHelloPrefix = "Hola, "
-    frenchHelloPrefix = "Bonjour, "
+
+	englishHelloPrefix = "Hello, "
+	spanishHelloPrefix = "Hola, "
+	frenchHelloPrefix  = "Bonjour, "
 )
 
 func Hello(name string, language string) string {

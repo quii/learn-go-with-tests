@@ -68,7 +68,7 @@ Finally, we need to import this package into `main.go` so we can use it to creat
 The paths will be different on your computer, but it should be similar to this:
 
 ```go
-//cmd/webserver/main.go
+// cmd/webserver/main.go
 package main
 
 import (
@@ -116,7 +116,7 @@ In addition, users can view [the documentation at pkg.go.dev](https://pkg.go.dev
 Before we get stuck into writing tests, let's add a new application that our project will build. Create another directory inside `cmd` called `cli` (command line interface) and add a `main.go` with the following
 
 ```go
-//cmd/cli/main.go
+// cmd/cli/main.go
 package main
 
 import "fmt"
@@ -137,7 +137,7 @@ Before we jump too far ahead though, let's just write a test to check it integra
 Inside `CLI_test.go` (in the root of the project, not inside `cmd`)
 
 ```go
-//CLI_test.go
+// CLI_test.go
 package poker
 
 import "testing"
@@ -172,7 +172,7 @@ At this point, you should be comfortable enough to create our new `CLI` struct w
 You should end up with code like this
 
 ```go
-//CLI.go
+// CLI.go
 package poker
 
 type CLI struct {
@@ -464,7 +464,7 @@ Anecdotally I have used this technique in other shared packages and it has prove
 So let's create a file called `testing.go` and add our stub and our helpers.
 
 ```go
-//testing.go
+// testing.go
 package poker
 
 import "testing"
@@ -622,7 +622,7 @@ Now refactor both of our applications to use this function to create the store.
 #### CLI application code
 
 ```go
-//cmd/cli/main.go
+// cmd/cli/main.go
 package main
 
 import (
@@ -651,7 +651,7 @@ func main() {
 #### Web server application code
 
 ```go
-//cmd/webserver/main.go
+// cmd/webserver/main.go
 package main
 
 import (

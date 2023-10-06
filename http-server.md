@@ -959,7 +959,7 @@ For that reason, it is recommended that you research _The Test Pyramid_.
 In the interest of brevity, I am going to show you the final refactored integration test.
 
 ```go
-//server_integration_test.go
+// server_integration_test.go
 package main
 
 import (
@@ -1035,7 +1035,7 @@ func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 The integration test passes, now we just need to change `main` to use `NewInMemoryPlayerStore()`
 
 ```go
-//main.go
+// main.go
 package main
 
 import (

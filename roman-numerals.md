@@ -1176,13 +1176,13 @@ chapter so, in the interests of full disclosure, here's what he said.
 > sometimes `arabic` will be written as a decimal integer literal
 >
 > ```go
->   ConvertToRoman(255)
+> 	ConvertToRoman(255)
 > ```
 >
 > But it could just as well be written
 >
 > ```go
->   ConvertToRoman(0xFF)
+> 	ConvertToRoman(0xFF)
 > ```
 >
 > Really, we're not 'converting' from an Arabic numeral at all, we're 'printing'  -
