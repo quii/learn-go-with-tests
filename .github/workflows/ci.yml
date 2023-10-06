@@ -1,4 +1,4 @@
-name: Go
+name: ci
 
 on:
   push:
@@ -25,6 +25,9 @@ jobs:
 
     - name: Build books
       run: ./build.books.sh
+
+    - name: Spellcheck
+      uses: rojopolis/spellcheck-github-actions@0.34.0
 
     - name: Get release
       id: get_release
@@ -54,4 +57,3 @@ jobs:
       uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ github.token }}
-
