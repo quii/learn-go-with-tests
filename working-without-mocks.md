@@ -250,6 +250,14 @@ This is simpler to write and easier to read than checking various function call 
 
 This approach lets us have tests that cut across broad parts of our system, letting us write more **meaningful** tests about the use cases we'd be discussing at stand-up whilst still executing exceptionally quickly.
 
+#### Fakes bring more of the benefits of encapsulation
+
+In the example above, the tests were not concerned with how the dependencies behaved beyond verifying their end state. We created the fake versions of the dependencies and injected them into the part of the system we're testing.
+
+With mocks/stubs, we'd have to set up each dependency to handle certain scenarios, return certain data, etc. This brings behaviour and implementation detail into your tests, weakening the benefits of encapsulation. 
+
+We model dependencies behind interfaces so that, as clients, _we don't have to care how it works_, but with a "mockist" approach, _we do have to care **in every test**_. 
+
 #### The maintenance costs of fakes
 
 Fakes are costlier than other test doubles, at least in terms of code written; they must carry state and simulate the behaviour of whatever they're faking. Any discrepancies in behaviour between your fake and the real thing **carry a risk** that your tests aren't in line with reality. This leads to the scenario where you have passing tests but broken software.
