@@ -205,7 +205,7 @@ When you run the tests they should now pass. Normally as part of the TDD cycle w
 At this point, if you are using source control \(which you should!\) I would
 `commit` the code as it is. We have working software backed by a test.
 
-I _wouldn't_ push to master though, because I plan to refactor next. It is nice
+I _wouldn't_ push to main though, because I plan to refactor next. It is nice
 to commit at this point in case you somehow get into a mess with refactoring - you can always go back to the working version.
 
 There's not a lot to refactor here, but we can introduce another language feature, _constants_.
