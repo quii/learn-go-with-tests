@@ -415,7 +415,7 @@ func TestSumAllTails(t *testing.T) {
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
-Rename the function to `SumAllTails` and re-run the test
+Rename the function to `SumAll` and re-run the test
 
 `sum_test.go:30: got [3 9] want [2 9]`
 
