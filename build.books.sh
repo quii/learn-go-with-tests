@@ -30,6 +30,7 @@ docker run --rm -v `pwd`:/data uppalabharath/pandoc-latex-cjk:latest --from=gfm+
     intro-to-acceptance-tests.md \
     scaling-acceptance-tests.md \
     working-without-mocks.md \
+    refactoring-checklist.md \
     app-intro.md \
     http-server.md \
     json.md \
@@ -69,6 +70,7 @@ docker run --rm -v `pwd`:/data pandoc/latex:latest --from=gfm+rebase_relative_pa
     intro-to-acceptance-tests.md \
     scaling-acceptance-tests.md \
     working-without-mocks.md \
+    refactoring-checklist.md \
     app-intro.md \
     http-server.md \
     json.md \
