@@ -343,7 +343,7 @@ However, as it is an **automated and safe** change, the risk of going into a spi
 
 For that reason, any changes you can safely perform with your IDE/editor, I would still happily call refactoring.
 
-## Use your tools to help you practice refactoring.
+## Use your tools to help you practice refactoring.
 
 - You should run your unit tests every time you do one of these small changes. We invest time in making our code unit-testable, and the feedback loop of a few milliseconds is one of the significant benefits; use it!
 - Lean on source control. You shouldn't feel shy about trying out ideas. If you're happy, commit it; if not, revert. This should feel comfortable and easy and not a big deal.
