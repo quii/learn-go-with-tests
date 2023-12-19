@@ -30,7 +30,7 @@ What if you want to change the signature of a method?
 
 ```go
 func (b BirthdayGreeter) WishHappyBirthday(age int, firstname, lastname string, email Email) {
-  // some fascinating emailing code
+	// some fascinating emailing code
 }
 ```
 
@@ -75,14 +75,14 @@ I have included shortcuts for Intellij/Goland, which my colleagues and I use. Wh
 If you create a variable, only for it to be passed on to another method/function:
 
 ```go
-url := baseURL+"/user/"+id
+url := baseURL + "/user/" + id
 res, err := client.Get(url)
 ```
 
 Consider inlining it (`command+option+n`) *unless* the variable name adds significant meaning.
 
 ```go
-res, err := client.Get(baseURL+"/user/"+id)
+res, err := client.Get(baseURL + "/user/" + id)
 ```
 
 Don't be _too_ clever about inlining; the goal is not to have zero variables and instead have ridiculous one-liners that no one can read. If you can add significant naming to a value, it might be best to leave it be.
@@ -130,7 +130,8 @@ func main() {
 	api3Client := http.Client{
 		Timeout: 1 * time.Second,
 	}
-  // etc
+	//etc
+}
 ```
 
 We are setting up some HTTP clients for our application. There are some _magic values_ here, and we could DRY up the `Timeout` by extracting a variable and giving it a meaningful name.
@@ -152,6 +153,7 @@ func main() {
 		Timeout: timeout,
 	}
 	// etc..
+}
 ```
 
 We no longer have a magic value; we have given it a meaningful name, but we have also made it so all three clients **share the same timeout**. That _may_ be what you want; refactors are quite context-specific, but it's something to be wary of.
@@ -190,6 +192,8 @@ func (ws *WidgetService) CreateWidget(name string) error {
 		url,
 		bytes.NewBuffer([]byte(`{"name": "`+name+`"}`)),
 	)
+	// etc
+}
 ```
 
 Now, we can extract the creation of the JSON payload into a function using the extract method refactor (`command+option+m`) to remove the noise from the method.
@@ -202,6 +206,8 @@ func (ws *WidgetService) CreateWidget(name string) error {
 		url,
 		createWidgetPayload(name),
 	)
+	// etc
+}
 ```
 
 Public methods and functions should describe *what* they do rather than *how* they do it.
@@ -235,7 +241,7 @@ Methods often have to create value and use them, like the `url` in our `CreateWi
 ```go
 type WidgetService struct {
 	baseURL string
-	client *http.Client
+	client  *http.Client
 }
 
 func NewWidgetService(baseURL string) *WidgetService {
@@ -252,6 +258,8 @@ func (ws *WidgetService) CreateWidget(name string) error {
 		url,
 		createWidgetPayload(name),
 	)
+	// etc
+}
 ```
 
 A refactoring technique you could apply here is, if a value is being created **that is not dependant on the arguments to the method**, then you can instead create a _field_ in your type and calculate it in your constructor function.
@@ -267,8 +275,8 @@ func NewWidgetService(baseURL string) *WidgetService {
 		Timeout: 10 * time.Second,
 	}
 	return &WidgetService{
-		createWidgetURL : baseURL + "/widgets",
-		client: &client,
+		createWidgetURL: baseURL + "/widgets",
+		client:          &client,
 	}
 }
 
@@ -278,6 +286,8 @@ func (ws *WidgetService) CreateWidget(name string) error {
 		ws.createWidgetURL,
 		createWidgetPayload(name),
 	)
+	// etc
+}
 ```
 
 By moving them to construction time, you can simplify your methods.
@@ -295,6 +305,9 @@ func (ws *WidgetService) CreateWidget(name string) error {
 		url,
 		bytes.NewBuffer(payload),
 	)
+	// etc
+}
+
 ```
 
 With a few basic refactors, driven almost entirely using automated tooling, we resulted in
@@ -306,6 +319,8 @@ func (ws *WidgetService) CreateWidget(name string) error {
 		ws.createWidgetURL,
 		createWidgetPayload(name),
 	)
+	// etc
+}
 ```
 
 This is a small improvement, but it undoubtedly reads better. If you are well-practised, this kind of improvement will barely take you a minute, and so long as you have applied TDD well, you'll have the safety net of tests to ensure you're not breaking anything. These continuous minor improvements are vital to the long-term health of a codebase.
