@@ -8,7 +8,7 @@ The activity often gets conflated with more significant design changes, but they
 
 Refactoring is just improving existing code and <u>not changing behaviour</u>; therefore, tests shouldn't have to change.
 
-This is why it's the 3rd step of the TDD cycle. Once you have added a behaviour and a test to back it up, refactoring should be an activity which requires no change to your test code. **You're doing something else** if you are "refactoring" some code but must change your tests.
+This is why it's the 3rd step of the TDD cycle. Once you have added a behaviour and a test to back it up, refactoring should be an activity which requires no change to your test code. **You're doing something else** if you are "refactoring" some code and having to change tests at the same time.
 
 Many very helpful refactorings are simple to learn and easy to do (your IDE almost entirely automates many) but, over time, become hugely impactful to the quality of our system.
 
