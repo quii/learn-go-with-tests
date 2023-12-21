@@ -349,7 +349,7 @@ For that reason, any changes you can safely perform with your IDE/editor, I woul
 - Lean on source control. You shouldn't feel shy about trying out ideas. If you're happy, commit it; if not, revert. This should feel comfortable and easy and not a big deal.
 - The better you leverage your unit tests and source control, the easier to *practice* refactoring. Once you master this discipline, **your design skills increase quickly** because you have a reliable and effective feedback loop and safety net.
 - Too often in my career, I've heard developers complain about not having time to refactor; unfortunately, it is clear that it takes so much time for them because they don't do it with discipline - and they have not practised it enough.
-- Whilst typing is never the bottleneck, you should be able to use whatever editor/IDE you use to make refactoring safely and quickly. For instance, if your tool doesn't let you extract variables at a keystroke, you'll do it less because it's more labour-intensive and risky.
+- Whilst typing is never the bottleneck, you should be able to use whatever editor/IDE you use to refactor safely and quickly. For instance, if your tool doesn't let you extract variables at a keystroke, you'll do it less because it's more labour-intensive and risky.
 
 ## Don't ask permission to refactor
 
