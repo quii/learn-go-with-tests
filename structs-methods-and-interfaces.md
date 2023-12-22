@@ -392,7 +392,7 @@ This kind of approach of using interfaces to declare **only what you need** is v
 
 Now that you have some understanding of structs we can introduce "table driven tests".
 
-[Table driven tests](https://github.com/golang/go/wiki/TableDrivenTests) are useful when you want to build a list of test cases that can be tested in the same manner.
+[Table driven tests](https://go.dev/wiki/TableDrivenTests) are useful when you want to build a list of test cases that can be tested in the same manner.
 
 ```go
 func TestArea(t *testing.T) {

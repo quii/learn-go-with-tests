@@ -28,7 +28,7 @@ If you don't feel confident to submit your own guide, submitting an issue for so
   * Thinking of examples that showcase what you're trying to teach without confusing the reader with other features is important.
   * For example you can learn about `struct`s without understanding pointers.
   * Brevity is king.
-* Follow the [Code Review Comments style guide](https://github.com/golang/go/wiki/CodeReviewComments). It's important for a consistent style across all the sections.
+* Follow the [Code Review Comments style guide](https://go.dev/wiki/CodeReviewComments). It's important for a consistent style across all the sections.
 * Your section should have a runnable application at the end \(e.g `package main` with a `main` func\) so users can see it in action and play with it.
 * All tests should pass.
 * Run `./build.sh` before raising PR.
