@@ -1,74 +1,44 @@
-# :bookmark_tabs: Intro
+# Learn Go with Tests
 
-- 此專案目的為藉由測試驅動開發(TDD, Test-Driven Development )的方式，先寫測試再開始的方式進行
-- 此專案使用 go 官方的標準測試套件 ( [testing package](https://pkg.go.dev/testing) )，當然實務上可能友會搭配其他好用的第三方套件 ( [stretchr/testify](https://github.com/stretchr/testify) )
-- TDD 流程 :
+<p align="center">
+  <img src="red-green-blue-gophers-smaller.png" />
+</p>
 
-  - 寫測試程式，並執行測試程式，讓他不通過，檢查錯誤訊息是否有意義 ( Write a failing test )
-  - 再回去撰寫程式碼，讓測試通過 ( Make the test pass )
-  - 重構程式碼 ( Refactor )
+[Art by Denise](https://twitter.com/deniseyu21)
 
-    ![TDD](https://marsner.com/wp-content/uploads/test-driven-development-TDD.png)
+[![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
-# :triangular_ruler: 測試規則
+## Formats
 
-1. 必須是 `\_test.go` 結尾 ( 範例 : hello_world_test.go )
-2. 測試函數的名稱必須是 `TestHelloWorld` 開頭 ( 範例 : Test )
-3. 測試函數只能傳入 `t *testing.T`
+- [Gitbook](https://quii.gitbook.io/learn-go-with-tests)
+- [EPUB or PDF](https://github.com/quii/learn-go-with-tests/releases)
 
-# :bug: 錯誤處理方式
+## Translations
 
-### 1. `t.Fail()`
+- [中文](https://studygolang.gitbook.io/learn-go-with-tests)
+- [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
+- [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
+- [한국어](https://miryang.gitbook.io/learn-go-with-tests/)
+- [Türkçe](https://halilkocaoz.gitbook.io/go-programlama-dilini-ogren/)
+- [فارسی](https://go-yaad-begir.gitbook.io/go-ba-test/)
 
-- 是導致當前測試失敗並立即停止執行的函數，不會返回錯誤或提供有關失敗的任何其他信息
+## Support me
 
-### 2. `t.Errorf("\<format error message\>")`
+I am proud to offer this resource for free, but if you wish to give some appreciation:
 
-- 跟 `t.Fail()` 類似，但是允許描述失敗的錯誤訊息
-- 格式化訊息方式跟 `fmt.Printf("\<format message\>")` 一樣
+- [Tweet me @quii](https://twitter.com/quii)
+- <a rel="me" href="https://mastodon.cloud/@quii">Mastodon</a>
+- [Buy me a coffee :coffee:](https://www.buymeacoffee.com/quii)
+- [Sponsor me on GitHub](https://github.com/sponsors/quii)
 
-# :computer: 在測試程式檔案中，將重複程式碼寫到新的函數
+## Why
 
-- 可使用 `t.Helper()` 在新的函數中，告訴測試套件此函數是 helper，在測試失敗時，錯誤訊息的行數會落在呼叫此函數的地方，這樣方便除錯
-- 範例 :
+* Explore the Go language by writing tests
+* **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
+* Be confident that you'll be able to start writing robust, well-tested systems in Go
+* [Watch a video, or read about why unit testing and TDD is important](why.md)
 
-  ```go
-  // 傳入 testing.TB 原因是，此介面可讓我們使用 *testing.T 或 *testing.B
-  // *testing.B 是用於測試效能(performance)用的
-  func assertCorrectMessage(t testing.TB, got, want string) {
-    t.Helper()
-    if got != want {
-      t.Errorf("got %q want %q", got, want)
-    }
-  }
-  ```
-
-# :test_tube: 批次測試不同測試案例
-
-- 使用 `t.Run("\<測試內容說明\>", func(t *testing.T){...})` 方式，可在測試函數中，一次測試多種案例
-
-  ```go
-  testcase := []struct {
-      name string
-      test func(t *testing.T)
-    }{
-      {
-      name: "..."
-      test: func( t *testing.T){...}
-      },
-      {
-        ...
-      },
-      ...
-    }
-
-  for i := range testcase {
-    tc := testcase[i]
-    t.Run(tc.name, tc.test)
-  }
-  ```
-
-# 🗺 導覽
+## Table of contents
 
 ### Go fundamentals
 
@@ -135,7 +105,74 @@ If you have such a question raise it as an issue on github and I'll try and find
 * [Context-aware Reader](context-aware-reader.md) - Learn how to TDD augmenting `io.Reader` with cancellation. Based on [Context-aware io.Reader for Go](https://pace.dev/blog/2020/02/03/context-aware-ioreader-for-golang-by-mat-ryer)
 * [Revisiting HTTP Handlers](http-handlers-revisited.md) - Testing HTTP handlers seems to be the bane of many a developer's existence. This chapter explores the issues around designing handlers correctly.
 
+### Meta / Discussion
 
-# :link: Reference
+* [Why unit tests and how to make them work for you](why.md) - Watch a video, or read about why unit testing and TDD is important
+* [Anti-patterns](anti-patterns.md) - A short chapter on TDD and unit testing anti-patterns
 
-- [Learn Go with tests](https://quii.gitbook.io/learn-go-with-tests/)
+## Contributing
+
+* _This project is work in progress_ If you would like to contribute, please do get in touch.
+* Read [contributing.md](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/contributing.md) for guidelines
+* Any ideas? Create an issue
+
+## Background
+
+I have some experience introducing Go to development teams and have tried different approaches as to how to grow a team from some people curious about Go into highly effective writers of Go systems.
+
+### What didn't work
+
+#### Read _the_ book
+
+An approach we tried was to take [the blue book](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440) and every week discuss the next chapter along with the exercises.
+
+I love this book but it requires a high level of commitment. The book is very detailed in explaining concepts, which is obviously great but it means that the progress is slow and steady - this is not for everyone.
+
+I found that whilst a small number of people would read chapter X and do the exercises, many people didn't.
+
+#### Solve some problems
+
+Katas are fun but they are usually limited in their scope for learning a language; you're unlikely to use goroutines to solve a kata.
+
+Another problem is when you have varying levels of enthusiasm. Some people just learn way more of the language than others and when demonstrating what they have done end up confusing people with features the others are not familiar with.
+
+This ends up making the learning feel quite _unstructured_ and _ad hoc_.
+
+### What did work
+
+By far the most effective way was by slowly introducing the fundamentals of the language by reading through [go by example](https://gobyexample.com/), exploring them with examples and discussing them as a group. This was a more interactive approach than "read chapter x for homework".
+
+Over time the team gained a solid foundation of the _grammar_ of the language so we could then start to build systems.
+
+This to me seems analogous to practicing scales when trying to learn guitar.
+
+It doesn't matter how artistic you think you are, you are unlikely to write good music without understanding the fundamentals and practicing the mechanics.
+
+### What works for me
+
+When _I_ learn a new programming language I usually start by messing around in a REPL but eventually, I need more structure.
+
+What I like to do is explore concepts and then solidify the ideas with tests. Tests verify the code I write is correct and documents the feature I have learned.
+
+Taking my experience of learning with a group and my own personal way I am going to try and create something that hopefully proves useful to other teams. Learning the fundamentals by writing small tests so that you can then take your existing software design skills and ship some great systems.
+
+## Who this is for
+
+* People who are interested in picking up Go.
+* People who already know some Go, but want to explore testing with TDD.
+
+## What you'll need
+
+* A computer!
+* [Installed Go](https://golang.org/)
+* A text editor
+* Some experience with programming. Understanding of concepts like `if`, variables, functions etc.
+* Comfortable using the terminal
+
+## Feedback
+
+* Add issues/submit PRs [here](https://github.com/quii/learn-go-with-tests) or [tweet me @quii](https://twitter.com/quii)
+
+[MIT license](LICENSE.md)
+
+[Logo is by egonelbre](https://github.com/egonelbre) What a star!
