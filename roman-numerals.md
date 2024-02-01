@@ -645,16 +645,16 @@ var allRomanNumerals = RomanNumerals{
 
 // later..
 func ConvertToArabic(roman string) uint16 {
-    var arabic uint16 = 0
+	var arabic uint16 = 0
 
-    for _, numeral := range allRomanNumerals {
-        for strings.HasPrefix(roman, numeral.Symbol) {
-            arabic += numeral.Value
-            roman = strings.TrimPrefix(roman, numeral.Symbol)
-        }
-    }
+	for _, numeral := range allRomanNumerals {
+		for strings.HasPrefix(roman, numeral.Symbol) {
+			arabic += numeral.Value
+			roman = strings.TrimPrefix(roman, numeral.Symbol)
+		}
+	}
 
-    return arabic
+	return arabic
 }
 ```
 
