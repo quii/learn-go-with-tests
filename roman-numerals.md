@@ -627,18 +627,6 @@ Next we move to `cases[:4]` (`IV`) which now fails because it gets 2 back as tha
 
 ```go
 // earlier..
-type RomanNumerals []RomanNumeral
-
-func (r RomanNumerals) ValueOf(symbol string) int {
-	for _, s := range r {
-		if s.Symbol == symbol {
-			return s.Value
-		}
-	}
-
-	return 0
-}
-
 var allRomanNumerals = RomanNumerals{
 	{1000, "M"},
 	{900, "CM"},
@@ -656,303 +644,31 @@ var allRomanNumerals = RomanNumerals{
 }
 
 // later..
-func ConvertToArabic(roman string) int {
-	total := 0
+func ConvertToArabic(roman string) uint16 {
+    var arabic uint16 = 0
 
-	for i := 0; i < len(roman); i++ {
-		symbol := roman[i]
+    for _, numeral := range allRomanNumerals {
+        for strings.HasPrefix(roman, numeral.Symbol) {
+            arabic += numeral.Value
+            roman = strings.TrimPrefix(roman, numeral.Symbol)
+        }
+    }
 
-		// look ahead to next symbol if we can and, the current symbol is base 10 (only valid subtractors)
-		if i+1 < len(roman) && symbol == 'I' {
-			nextSymbol := roman[i+1]
-
-			// build the two character string
-			potentialNumber := string([]byte{symbol, nextSymbol})
-
-			// get the value of the two character string
-			value := allRomanNumerals.ValueOf(potentialNumber)
-
-			if value != 0 {
-				total += value
-				i++ // move past this character too for the next loop
-			} else {
-				total++
-			}
-		} else {
-			total++
-		}
-	}
-	return total
+    return arabic
 }
 ```
 
-This is horrible but it does work. It's so bad I felt the need to add comments.
+It is basically the algorithm of `ConvertToRoman(int)` implemented backwards. Here, we loop over the given roman numeral string:
+- We look for roman numeral symbols taken from `allRomanNumerals`, highest to lowest, at the beginning of the string.
+- If we find the prefix, we add its value to  `arabic` and trim the prefix.
 
-- I wanted to be able to look up an integer value for a given roman numeral so I made a type from our array of `RomanNumeral`s and then added a method to it, `ValueOf`
-- Next in our loop we need to look ahead _if_ the string is big enough _and the current symbol is a valid subtractor_. At the moment it's just `I` (1) but can also be `X` (10) or `C` (100).
-    - If it satisfies both of these conditions we need to lookup the value and add it to the total _if_ it is one of the special subtractors, otherwise ignore it
-    - Then we need to further increment `i` so we don't count this symbol twice
+At the end, we return the sum as the arabic number.
 
-## Refactor
+The `HasPrefix(s, prefix)` checks whether string `s` starts with `prefix` and `TrimPrefix(s, prefix)` removes the `prefix` from `s`, so we can proceed with the remaining roman numeral symbols. It works with `IV` and all other test cases.
 
-I'm not entirely convinced this will be the long-term approach and there's potentially some interesting refactors we could do, but I'll resist that in case our approach is totally wrong. I'd rather make a few more tests pass first and see. For the meantime I made the first `if` statement slightly less horrible.
+You can implement this as a recursive function, which is more elegant (in my opinion) but might be slower. I'll leave this up to you and some `Benchmark...` tests.
 
-```go
-func ConvertToArabic(roman string) int {
-	total := 0
-
-	for i := 0; i < len(roman); i++ {
-		symbol := roman[i]
-
-		if couldBeSubtractive(i, symbol, roman) {
-			nextSymbol := roman[i+1]
-
-			// build the two character string
-			potentialNumber := string([]byte{symbol, nextSymbol})
-
-			// get the value of the two character string
-			value := allRomanNumerals.ValueOf(potentialNumber)
-
-			if value != 0 {
-				total += value
-				i++ // move past this character too for the next loop
-			} else {
-				total++
-			}
-		} else {
-			total++
-		}
-	}
-	return total
-}
-
-func couldBeSubtractive(index int, currentSymbol uint8, roman string) bool {
-	return index+1 < len(roman) && currentSymbol == 'I'
-}
-```
-
-## Write the test first
-
-Let's move on to `cases[:5]`
-
-```console
-=== RUN   TestConvertingToArabic/'V'_gets_converted_to_5
-    --- FAIL: TestConvertingToArabic/'V'_gets_converted_to_5 (0.00s)
-        numeral_test.go:62: got 1, want 5
-```
-
-## Write enough code to make it pass
-
-Apart from when it is subtractive our code assumes that every character is a `I` which is why the value is 1. We should be able to re-use our `ValueOf` method to fix this.
-
-```go
-func ConvertToArabic(roman string) int {
-	total := 0
-
-	for i := 0; i < len(roman); i++ {
-		symbol := roman[i]
-
-		// look ahead to next symbol if we can and, the current symbol is base 10 (only valid subtractors)
-		if couldBeSubtractive(i, symbol, roman) {
-			nextSymbol := roman[i+1]
-
-			// build the two character string
-			potentialNumber := string([]byte{symbol, nextSymbol})
-
-			if value := allRomanNumerals.ValueOf(potentialNumber); value != 0 {
-				total += value
-				i++ // move past this character too for the next loop
-			} else {
-				total++ // this is fishy...
-			}
-		} else {
-			total += allRomanNumerals.ValueOf(string([]byte{symbol}))
-		}
-	}
-	return total
-}
-```
-
-## Refactor
-
-When you index strings in Go, you get a `byte`. This is why when we build up the string again we have to do stuff like `string([]byte{symbol})`. It's repeated a couple of times, let's just move that functionality so that `ValueOf` takes some bytes instead.
-
-```go
-func (r RomanNumerals) ValueOf(symbols ...byte) int {
-	symbol := string(symbols)
-	for _, s := range r {
-		if s.Symbol == symbol {
-			return s.Value
-		}
-	}
-
-	return 0
-}
-```
-
-Then we can just pass in the bytes as is, to our function
-
-```go
-func ConvertToArabic(roman string) int {
-	total := 0
-
-	for i := 0; i < len(roman); i++ {
-		symbol := roman[i]
-
-		if couldBeSubtractive(i, symbol, roman) {
-			if value := allRomanNumerals.ValueOf(symbol, roman[i+1]); value != 0 {
-				total += value
-				i++ // move past this character too for the next loop
-			} else {
-				total++ // this is fishy...
-			}
-		} else {
-			total += allRomanNumerals.ValueOf(symbol)
-		}
-	}
-	return total
-}
-```
-
-It's still pretty nasty, but it's getting there.
-
-If you start moving our `cases[:xx]` number through you'll see that quite a few are passing now. Remove the slice operator entirely and see which ones fail, here's some examples from my suite
-
-```console
-=== RUN   TestConvertingToArabic/'XL'_gets_converted_to_40
-    --- FAIL: TestConvertingToArabic/'XL'_gets_converted_to_40 (0.00s)
-        numeral_test.go:62: got 60, want 40
-=== RUN   TestConvertingToArabic/'XLVII'_gets_converted_to_47
-    --- FAIL: TestConvertingToArabic/'XLVII'_gets_converted_to_47 (0.00s)
-        numeral_test.go:62: got 67, want 47
-=== RUN   TestConvertingToArabic/'XLIX'_gets_converted_to_49
-    --- FAIL: TestConvertingToArabic/'XLIX'_gets_converted_to_49 (0.00s)
-        numeral_test.go:62: got 69, want 49
-```
-
-I think all we're missing is an update to `couldBeSubtractive` so that it accounts for the other kinds of subtractive symbols
-
-```go
-func couldBeSubtractive(index int, currentSymbol uint8, roman string) bool {
-	isSubtractiveSymbol := currentSymbol == 'I' || currentSymbol == 'X' || currentSymbol == 'C'
-	return index+1 < len(roman) && isSubtractiveSymbol
-}
-```
-
-Try again, they still fail. However we left a comment earlier...
-
-```go
-total++ // this is fishy...
-```
-
-We should never be just incrementing `total` as that implies every symbol is a `I`. Replace it with:
-
-```go
-total += allRomanNumerals.ValueOf(symbol)
-```
-
-And all the tests pass! Now that we have fully working software we can indulge ourselves in some refactoring, with confidence.
-
-## Refactor
-
-Here is all the code I finished up with. I had a few failed attempts but as I keep emphasising, that's fine and the tests help me play around with the code freely.
-
-```go
-import "strings"
-
-func ConvertToArabic(roman string) (total int) {
-	for _, symbols := range windowedRoman(roman).Symbols() {
-		total += allRomanNumerals.ValueOf(symbols...)
-	}
-	return
-}
-
-func ConvertToRoman(arabic int) string {
-	var result strings.Builder
-
-	for _, numeral := range allRomanNumerals {
-		for arabic >= numeral.Value {
-			result.WriteString(numeral.Symbol)
-			arabic -= numeral.Value
-		}
-	}
-
-	return result.String()
-}
-
-type romanNumeral struct {
-	Value  int
-	Symbol string
-}
-
-type romanNumerals []romanNumeral
-
-func (r romanNumerals) ValueOf(symbols ...byte) int {
-	symbol := string(symbols)
-	for _, s := range r {
-		if s.Symbol == symbol {
-			return s.Value
-		}
-	}
-
-	return 0
-}
-
-func (r romanNumerals) Exists(symbols ...byte) bool {
-	symbol := string(symbols)
-	for _, s := range r {
-		if s.Symbol == symbol {
-			return true
-		}
-	}
-	return false
-}
-
-var allRomanNumerals = romanNumerals{
-	{1000, "M"},
-	{900, "CM"},
-	{500, "D"},
-	{400, "CD"},
-	{100, "C"},
-	{90, "XC"},
-	{50, "L"},
-	{40, "XL"},
-	{10, "X"},
-	{9, "IX"},
-	{5, "V"},
-	{4, "IV"},
-	{1, "I"},
-}
-
-type windowedRoman string
-
-func (w windowedRoman) Symbols() (symbols [][]byte) {
-	for i := 0; i < len(w); i++ {
-		symbol := w[i]
-		notAtEnd := i+1 < len(w)
-
-		if notAtEnd && isSubtractive(symbol) && allRomanNumerals.Exists(symbol, w[i+1]) {
-			symbols = append(symbols, []byte{symbol, w[i+1]})
-			i++
-		} else {
-			symbols = append(symbols, []byte{symbol})
-		}
-	}
-	return
-}
-
-func isSubtractive(symbol uint8) bool {
-	return symbol == 'I' || symbol == 'X' || symbol == 'C'
-}
-```
-
-My main problem with the previous code is similar to our refactor from earlier. We had too many concerns coupled together. We wrote an algorithm which was trying to extract Roman Numerals from a string _and_ then find their values.
-
-So I created a new type `windowedRoman` which took care of extracting the numerals, offering a `Symbols` method to retrieve them as a slice. This meant our `ConvertToArabic` function could simply iterate over the symbols and total them.
-
-I broke the code down a bit by extracting some functions, especially around the wonky if statement to figure out if the symbol we are currently dealing with is a two character subtractive symbol.
-
-There's probably a more elegant way but I'm not going to sweat it. The code is there and it works and it is tested. If I (or anyone else) finds a better way they can safely change it - the hard work is done.
+Now that we have our functions to convert an arabic number into a roman numeral and back, we can take our tests a step further:
 
 ## An intro to property based tests
 
