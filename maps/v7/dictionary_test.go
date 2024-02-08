@@ -88,6 +88,10 @@ func assertStrings(t testing.TB, got, want string) {
 func assertError(t testing.TB, got, want error) {
 	t.Helper()
 
+	if got == nil {
+		t.Fatal("expected to get an error")
+	}
+
 	if got != want {
 		t.Errorf("got error %q want %q", got, want)
 	}
