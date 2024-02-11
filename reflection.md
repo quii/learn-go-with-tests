@@ -842,7 +842,7 @@ func walk(x interface{}, fn func(input string)) {
 	case reflect.Chan:
 		for {
 			if v, ok := val.Recv(); ok {
-				walk(v.Interface(), fn)
+				walkValue(v)
 			} else {
 				break
 			}
