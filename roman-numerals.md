@@ -644,8 +644,8 @@ var allRomanNumerals = RomanNumerals{
 }
 
 // later..
-func ConvertToArabic(roman string) uint16 {
-	var arabic uint16 = 0
+func ConvertToArabic(roman string) int {
+	var arabic = 0
 
 	for _, numeral := range allRomanNumerals {
 		for strings.HasPrefix(roman, numeral.Symbol) {
