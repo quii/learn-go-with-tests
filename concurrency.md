@@ -201,7 +201,7 @@ FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.010s
 
 ```
 
-### A quick aside into a parallel(ism) universe...
+### A quick aside into the concurrency universe...
 
 You might not get this result. You might get a panic message that
 we're going to talk about in a bit. Don't worry if you got that, just keep
@@ -463,12 +463,12 @@ We then use the `result` received to update the map.
 
 By sending the results into a channel, we can control the timing of each write
 into the results map, ensuring that it happens one at a time. Although each of
-the calls of `wc`, and each send to the result channel, is happening in parallel
+the calls of `wc`, and each send to the result channel, is happening concurrently
 inside its own process, each of the results is being dealt with one at a time as
 we take values out of the result channel with the receive expression.
 
-We have parallelized the part of the code that we wanted to make faster, while
-making sure that the part that cannot happen in parallel still happens linearly.
+We have used concurrency for the part of the code that we wanted to make faster, while
+making sure that the part that cannot happen simultaneously still happens linearly.
 And we have communicated across the multiple processes involved by using
 channels.
 
@@ -494,8 +494,8 @@ demonstrating that it had actually become faster.
 
 In making it faster we learned about
 
-- *goroutines*, the basic unit of concurrency in Go, which let us check more
-  than one website at the same time.
+- *goroutines*, the basic unit of concurrency in Go, which let us manage more
+  than one website check request.
 - *anonymous functions*, which we used to start each of the concurrent processes
   that check websites.
 - *channels*, to help organize and control the communication between the
