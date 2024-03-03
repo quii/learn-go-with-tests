@@ -840,8 +840,12 @@ func walk(x interface{}, fn func(input string)) {
 			walkValue(val.MapIndex(key))
 		}
 	case reflect.Chan:
-		for v, ok := val.Recv(); ok; v, ok = val.Recv() {
-			walkValue(v)
+		for {
+			if v, ok := val.Recv(); ok {
+				walkValue(v)
+			} else {
+				break
+			}
 		}
 	}
 }
