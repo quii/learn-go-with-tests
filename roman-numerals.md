@@ -374,7 +374,7 @@ I'm pretty sure this approach will be valid for 6 (VI), 7 (VII) and 8 (VIII) too
 
 We should be able to adopt the same approach as before
 
-```
+```go
 case arabic > 8:
     result.WriteString("IX")
     arabic -= 9
