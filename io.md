@@ -319,7 +319,7 @@ type FileSystemPlayerStore struct {
 }
 
 func (f *FileSystemPlayerStore) GetLeague() []Player {
-	f.database.Seek(0, 0)
+	f.database.Seek(0, io.SeekStart)
 	league, _ := NewLeague(f.database)
 	return league
 }
@@ -586,7 +586,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 		}
 	}
 
-	f.database.Seek(0, 0)
+	f.database.Seek(0, io.SeekStart)
 	json.NewEncoder(f.database).Encode(league)
 }
 ```
@@ -646,7 +646,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 		player.Wins++
 	}
 
-	f.database.Seek(0, 0)
+	f.database.Seek(0, io.SeekStart)
 	json.NewEncoder(f.database).Encode(league)
 }
 ```
@@ -699,7 +699,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 		league = append(league, Player{name, 1})
 	}
 
-	f.database.Seek(0, 0)
+	f.database.Seek(0, io.SeekStart)
 	json.NewEncoder(f.database).Encode(league)
 }
 ```
@@ -765,7 +765,7 @@ type FileSystemPlayerStore struct {
 }
 
 func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
-	database.Seek(0, 0)
+	database.Seek(0, io.SeekStart)
 	league, _ := NewLeague(database)
 	return &FileSystemPlayerStore{
 		database: database,
@@ -802,7 +802,7 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 		f.league = append(f.league, Player{name, 1})
 	}
 
-	f.database.Seek(0, 0)
+	f.database.Seek(0, io.SeekStart)
 	json.NewEncoder(f.database).Encode(f.league)
 }
 ```
@@ -832,7 +832,7 @@ type tape struct {
 }
 
 func (t *tape) Write(p []byte) (n int, err error) {
-	t.file.Seek(0, 0)
+	t.file.Seek(0, io.SeekStart)
 	return t.file.Write(p)
 }
 ```
@@ -852,7 +852,7 @@ Update the constructor to use `Tape`
 ```go
 //file_system_store.go
 func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
-	database.Seek(0, 0)
+	database.Seek(0, io.SeekStart)
 	league, _ := NewLeague(database)
 
 	return &FileSystemPlayerStore{
@@ -880,7 +880,7 @@ func TestTape_Write(t *testing.T) {
 
 	tape.Write([]byte("abc"))
 
-	file.Seek(0, 0)
+	file.Seek(0, io.SeekStart)
 	newFileContents, _ := io.ReadAll(file)
 
 	got := string(newFileContents)
@@ -916,7 +916,7 @@ type tape struct {
 
 func (t *tape) Write(p []byte) (n int, err error) {
 	t.file.Truncate(0)
-	t.file.Seek(0, 0)
+	t.file.Seek(0, io.SeekStart)
 	return t.file.Write(p)
 }
 ```
@@ -941,7 +941,7 @@ type FileSystemPlayerStore struct {
 }
 
 func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
-	file.Seek(0, 0)
+	file.Seek(0, io.SeekStart)
 	league, _ := NewLeague(file)
 
 	return &FileSystemPlayerStore{
@@ -1011,7 +1011,7 @@ Let's make it so our constructor is capable of returning an error.
 ```go
 //file_system_store.go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
-	file.Seek(0, 0)
+	file.Seek(0, io.SeekStart)
 	league, err := NewLeague(file)
 
 	if err != nil {
@@ -1121,7 +1121,7 @@ Change our constructor to the following
 //file_system_store.go
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
-	file.Seek(0, 0)
+	file.Seek(0, io.SeekStart)
 
 	info, err := file.Stat()
 
@@ -1131,7 +1131,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 
 	if info.Size() == 0 {
 		file.Write([]byte("[]"))
-		file.Seek(0, 0)
+		file.Seek(0, io.SeekStart)
 	}
 
 	league, err := NewLeague(file)
@@ -1156,7 +1156,7 @@ Our constructor is a bit messy now, so let's extract the initialise code into a 
 ```go
 //file_system_store.go
 func initialisePlayerDBFile(file *os.File) error {
-	file.Seek(0, 0)
+	file.Seek(0, io.SeekStart)
 
 	info, err := file.Stat()
 
@@ -1166,7 +1166,7 @@ func initialisePlayerDBFile(file *os.File) error {
 
 	if info.Size() == 0 {
 		file.Write([]byte("[]"))
-		file.Seek(0, 0)
+		file.Seek(0, io.SeekStart)
 	}
 
 	return nil

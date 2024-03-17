@@ -12,7 +12,7 @@ type FileSystemPlayerStore struct {
 
 // GetLeague returns the scores of all the players.
 func (f *FileSystemPlayerStore) GetLeague() League {
-	f.database.Seek(0, 0)
+	f.database.Seek(0, io.SeekStart)
 	league, _ := NewLeague(f.database)
 	return league
 }
@@ -40,6 +40,6 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 		league = append(league, Player{name, 1})
 	}
 
-	f.database.Seek(0, 0)
+	f.database.Seek(0, io.SeekStart)
 	json.NewEncoder(f.database).Encode(league)
 }
