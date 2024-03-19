@@ -366,7 +366,9 @@ Try and run the test.
 We need to create a Dockerfile for our program. Inside our `httpserver` folder, create a `Dockerfile` and add the following.
 
 ```dockerfile
-FROM golang:1.18-alpine
+# Make sure to specify the same Go version as the one in the go.mod file.
+# For example, golang:1.22.1-alpine.
+FROM golang:1.18-alpine 
 
 WORKDIR /app
 
@@ -968,6 +970,7 @@ If you run again, it should now _compile_ but not pass because we haven't create
 Create a new `Dockerfile` inside `cmd/grpcserver`.
 
 ```dockerfile
+# Make sure to specify the same Go version as the one in the go.mod file.
 FROM golang:1.18-alpine
 
 WORKDIR /app
@@ -1263,6 +1266,7 @@ You've probably noticed the two `Dockerfiles` are almost identical beyond the pa
 `Dockerfiles` can accept arguments to let us reuse them in different contexts, which sounds perfect. We can delete our 2 Dockerfiles and instead have one at the root of the project with the following
 
 ```dockerfile
+# Make sure to specify the same Go version as the one in the go.mod file.
 FROM golang:1.18-alpine
 
 WORKDIR /app
