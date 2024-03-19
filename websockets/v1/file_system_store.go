@@ -3,6 +3,7 @@ package poker
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"sort"
 )
@@ -56,7 +57,7 @@ func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(),
 }
 
 func initialisePlayerDBFile(file *os.File) error {
-	file.Seek(0, 0)
+	file.Seek(0, io.SeekStart)
 
 	info, err := file.Stat()
 
@@ -66,7 +67,7 @@ func initialisePlayerDBFile(file *os.File) error {
 
 	if info.Size() == 0 {
 		file.Write([]byte("[]"))
-		file.Seek(0, 0)
+		file.Seek(0, io.SeekStart)
 	}
 
 	return nil

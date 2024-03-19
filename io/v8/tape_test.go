@@ -13,7 +13,7 @@ func TestTape_Write(t *testing.T) {
 
 	tape.Write([]byte("abc"))
 
-	file.Seek(0, 0)
+	file.Seek(0, io.SeekStart)
 	newFileContents, _ := io.ReadAll(file)
 
 	got := string(newFileContents)
