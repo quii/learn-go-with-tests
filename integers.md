@@ -118,7 +118,7 @@ func Add(x, y int) int {
 
 If you really want to go the extra mile you can make [examples](https://blog.golang.org/examples). You will find a lot of examples in the documentation of the standard library.
 
-Often code examples that can be found outside the codebase, such as a readme file often become out of date and incorrect compared to the actual code because they don't get checked.
+Often code examples that can be found outside the codebase, such as a readme file become out of date and incorrect compared to the actual code because they don't get checked.
 
 Go examples are executed just like tests so you can be confident examples reflect what the code actually does.
 
@@ -162,7 +162,7 @@ If you publish your code with examples to a public URL, you can share the docume
 
 What we have covered:
 
-*   More practice of the TDD workflow
-*   Integers, addition
-*   Writing better documentation so users of our code can understand its usage quickly
-*   Examples of how to use our code, which are checked as part of our tests
+-   More practice of the TDD workflow
+-   Integers, addition
+-   Writing better documentation so users of our code can understand its usage quickly
+-   Examples of how to use our code, which are checked as part of our tests
