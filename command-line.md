@@ -257,7 +257,6 @@ FAIL
 
 ## Write enough code to make it pass
 
-
 Remember to do the strictly easiest thing first
 
 ```go
