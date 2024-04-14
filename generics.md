@@ -551,7 +551,7 @@ When you consider that if you've used arrays, slices or maps; you've _already be
 
 ```
 var myApples []Apples
-// You cant do this!
+// You can't do this!
 append(myApples, Orange{})
 ```
 
