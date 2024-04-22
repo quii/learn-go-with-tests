@@ -185,7 +185,7 @@ t.Run("stops reading when cancelled", func(t *testing.T) {
 	n, err := rdr.Read(got)
 
 	if err == nil {
-		t.Error("expected an error after cancellation but didnt get one")
+		t.Error("expected an error after cancellation but didn't get one")
 	}
 
 	if n > 0 {
@@ -226,7 +226,7 @@ You should now see a very clear failing test output
 === RUN   TestCancelReaders/stops_reading_when_cancelled
 --- FAIL: TestCancelReaders (0.00s)
     --- FAIL: TestCancelReaders/stops_reading_when_cancelled (0.00s)
-        cancel_readers_test.go:48: expected an error but didnt get one
+        cancel_readers_test.go:48: expected an error but didn't get one
         cancel_readers_test.go:52: expected 0 bytes to be read after cancellation but 3 were read
 ```
 
