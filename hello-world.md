@@ -462,10 +462,10 @@ func Hello(name string, language string) string {
 	prefix := englishHelloPrefix
 
 	switch language {
-	case "French":
-		prefix = frenchHelloPrefix
-	case "Spanish":
+	case spanish:
 		prefix = spanishHelloPrefix
+	case french:
+		prefix = frenchHelloPrefix
 	}
 
 	return prefix + name
@@ -481,8 +481,8 @@ You could argue that maybe our function is getting a little big. The simplest re
 ```go
 
 const (
-	french  = "French"
 	spanish = "Spanish"
+	french  = "French"
 
 	englishHelloPrefix = "Hello, "
 	spanishHelloPrefix = "Hola, "
