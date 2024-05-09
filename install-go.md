@@ -56,20 +56,20 @@ Your tools can help you do bigger refactoring with confidence.
 
 You should be familiar enough with your editor to perform the following with a simple key combination:
 
-- **Extract/Inline variable**. Being able to take magic values and give them a name lets you simplify your code quickly.
+- **Extract/Inline variable**. Taking magic values and giving them a name lets you simplify your code quickly.
 - **Extract method/function**. It is vital to be able to take a section of code and extract functions/methods
-- **Rename**. You should be able to confidently rename symbols across files.
-- **go fmt**. Go has an opinioned formatter called `go fmt`. Your editor should be running this on every file save.
+- **Rename**. You should be able to rename symbols across files confidently.
+- **go fmt**. Go has an opinioned formatter called `go fmt`. Your editor should run this on every file saved.
 - **Run tests**. You should be able to do any of the above and then quickly re-run your tests to ensure your refactoring hasn't broken anything.
 
-In addition, to help you work with your code you should be able to:
+In addition, to help you work with your code, you should be able to:
 
 - **View function signature**. You should never be unsure how to call a function in Go. Your IDE should describe a function in terms of its documentation, its parameters and what it returns.
-- **View function definition**. If it's still not clear what a function does, you should be able to jump to the source code and try and figure it out yourself.
-- **Find usages of a symbol**. Being able to see the context of a function being called can help your decision process when refactoring.
+- **View function definition**. If it's still unclear what a function does, you should be able to jump to the source code and try and figure it out yourself.
+- **Find usages of a symbol**. Understanding a function's context can help you make decisions when refactoring.
 
 Mastering your tools will help you concentrate on the code and reduce context switching.
 
 ## Wrapping up
 
-At this point you should have Go installed, an editor available and some basic tooling in place. Go has a very large ecosystem of third party products. We have identified a few useful components here. For a more complete list, see [https://awesome-go.com](https://awesome-go.com).
+At this point, you should have Go installed, an editor available, and some basic tooling in place. Go has a very large ecosystem of third-party products. We have identified a few useful components here. For a more complete list, see [https://awesome-go.com](https://awesome-go.com).
