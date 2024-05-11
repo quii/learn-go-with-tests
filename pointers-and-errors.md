@@ -455,6 +455,7 @@ Update our helper for a `string` to compare against.
 ```go
 assertError := func(t testing.TB, got error, want string) {
 	t.Helper()
+
 	if got == nil {
 		t.Fatal("didn't get an error but wanted one")
 	}
@@ -464,6 +465,8 @@ assertError := func(t testing.TB, got error, want string) {
 	}
 }
 ```
+
+As you can see `Error`s can be converted to a string with the `.Error()` method, which we do in order to compare it with the string we want. We are also making sure that the error is not `nil` to ensure we don't call `.Error()` on `nil`.
 
 And then update the caller
 

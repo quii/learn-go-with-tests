@@ -155,7 +155,8 @@ func TestSearch(t *testing.T) {
 
 The way to handle this scenario in Go is to return a second argument which is an `Error` type.
 
-`Error`s can be converted to a string with the `.Error()` method, which we do when passing it to the assertion. We are also protecting `assertStrings` with `if` to ensure we don't call `.Error()` on `nil`.
+Notice that as we've seen in the [pointers and error section](./pointers-and-errors.md) here in order to asset the error message
+we first check that the error is not `nil` and then use `.Error()` method to get the string which we can then pass to the assertion.
 
 ## Try and run the test
 
