@@ -10,3 +10,4 @@ _book/
 *.pdf
 
 game.db.json
+.DS_Store
