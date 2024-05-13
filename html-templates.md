@@ -667,7 +667,7 @@ We'll leave this as an exercise for you, the reader. You should be able to find 
 
 **Note**. Be careful not to worry too much about explicitly testing how a 3rd party library behaves in unit tests. 
 
-Writing tests against code you don't control is wasteful and adds maintenance overhead. Sometimes you may wish to use [dependency injection](/dependency-injection.md) to control a dependency and mock its behaviour for a test. 
+Writing tests against code you don't control is wasteful and adds maintenance overhead. Sometimes you may wish to use [dependency injection](./dependency-injection.md) to control a dependency and mock its behaviour for a test.
 
 In this case though, I view converting the markdown into HTML as implementation detail of rendering, and our approval tests should give us enough confidence.
 
