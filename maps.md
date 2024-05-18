@@ -414,8 +414,6 @@ func (d Dictionary) Add(word, definition string) error {
 	default:
 		return err
 	}
-
-	return nil
 }
 ```
 
@@ -566,8 +564,6 @@ func (d Dictionary) Update(word, definition string) error {
 	default:
 		return err
 	}
-
-	return nil
 }
 ```
 
