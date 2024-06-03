@@ -138,8 +138,8 @@ func (w Wallet) Deposit(amount int) {
 }
 ```
 
-The `\n` escape character prints a new line after outputting the memory address.
-We get the pointer (memory address) of something by placing an `&` character at the beginning of the symbol.
+The `%p` placeholder prints memory addresses in base 16 notation with leading `0x`s and the `\n` escape character prints a new line.
+Note that we get the pointer (memory address) of something by placing an `&` character at the beginning of the symbol.
 
 Now re-run the test
 
