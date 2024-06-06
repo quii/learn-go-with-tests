@@ -49,7 +49,7 @@ func TestWalk(t *testing.T) {
 		Name string
 	}{expected}
 
-	walk(x, func(input string) {
+	Walk(x, func(input string) {
 		got = append(got, input)
 	})
 
