@@ -355,11 +355,11 @@ func SumAll(numbersToSum ...[]int) []int {
 	sums := make([]int, lengthOfNumbers)
 
 	for i, numbers := range numbersToSum {
-		sums[i] = Sum(numbers)
+		sums[i] = sum.Sum(numbers) 
 	}
-
 	return sums
 }
+
 ```
 
 Lots of new things to learn!
