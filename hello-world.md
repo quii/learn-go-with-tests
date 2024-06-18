@@ -123,11 +123,11 @@ We will later explore the difference between methods and functions.
 
 ### Go doc
 
-Another quality-of-life feature of Go is the documentation. You can launch the docs locally by running `godoc -http:8000`. If you go to [localhost:8000/pkg](http://localhost:8000/pkg), you will see all the packages installed on your system.
+Another quality-of-life feature of Go is the documentation. You can launch the docs locally by running `godoc -http=localhost:8000`. If you go to [localhost:8000/pkg](http://localhost:8000/pkg), you will see all the packages installed on your system.
 
 The vast majority of the standard library has excellent documentation with examples. Navigating to [http://localhost:8000/pkg/testing/](http://localhost:8000/pkg/testing/) would be worthwhile to see what's available to you.
 
-If you don't have `godoc` command, then maybe you are using the newer version of Go (1.14 or later) which is [no longer including `godoc`](https://golang.org/doc/go1.14#godoc). You can manually install it using `go install golang.org/x/tools/cmd/godoc@latest`.
+If you don't have `godoc` command, then maybe you are using the newer version of Go (1.14 or later) which [no longer includes `godoc`](https://golang.org/doc/go1.14#godoc). You can manually install it using `go install golang.org/x/tools/cmd/godoc@latest`.
 
 ### Hello, YOU
 
