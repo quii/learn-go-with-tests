@@ -380,7 +380,7 @@ err := json.NewDecoder(response.Body).Decode(&got)
 
 To parse JSON into our data model we create a `Decoder` from `encoding/json` package and then call its `Decode` method. To create a `Decoder` it needs an `io.Reader` to read from which in our case is our response spy's `Body`.
 
-`Decode` takes the address of the thing we are trying to decode into which is why we declare an empty slice of `Player` the line before.
+`Decode` takes the address of the thing we are trying to decode into, which is why we declare an empty slice of `Player` the line before.
 
 Parsing JSON can fail so `Decode` can return an `error`. There's no point continuing the test if that fails so we check for the error and stop the test with `t.Fatalf` if it happens. Notice that we print the response body along with the error as it's important for someone running the test to see what string cannot be parsed.
 
