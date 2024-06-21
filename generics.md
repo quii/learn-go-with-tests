@@ -513,7 +513,7 @@ func (s *Stack[Apple]) Pop() (Apple, bool)
 
 Now that we have done this refactoring, we can safely remove the string stack test because we don't need to prove the same logic over and over.
 
-Note that so far in the examples of calling generic functions, we have not needed to specify the generic types. For example, to call `AssertEqual[T]`, we do not need to specify what the type `T` is since it can be inferred from the arguments. In cases where the generic types cannot be inferred, you need specify the types when calling the function. The syntax is the same as when defining the function, i.e. you specify the types inside square brackets before the arguments.
+Note that so far in the examples of calling generic functions, we have not needed to specify the generic types. For example, to call `AssertEqual[T]`, we do not need to specify what the type `T` is since it can be inferred from the arguments. In cases where the generic types cannot be inferred, you need to specify the types when calling the function. The syntax is the same as when defining the function, i.e. you specify the types inside square brackets before the arguments.
 
 For a concrete example, consider making a constructor for `Stack[T]`.
 ```go
