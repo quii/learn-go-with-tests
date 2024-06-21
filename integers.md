@@ -118,7 +118,7 @@ func Add(x, y int) int {
 
 If you really want to go the extra mile you can make [Testable Examples](https://blog.golang.org/examples). You will find many examples in the standard library documentation.
 
-A common fault in software projects is the documentation examples will become out of date and incorrect, because those examples don't get reviewed, since they exist outside the codebase. Go's Testable Examples solve this problem. 
+Often code examples that can be found outside the codebase, such as a readme file become out of date and incorrect compared to the actual code because they don't get checked.
 
 Testable Examples are compiled whenever tests are executed. Because such examples are validated by the Go compiler, you can be confident your documentation's examples always reflect current code behavior.
 
