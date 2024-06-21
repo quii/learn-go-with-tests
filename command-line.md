@@ -249,13 +249,13 @@ type CLI struct {
 }
 ```
 
-## Write enough code to make it pass
-
 ```
 --- FAIL: TestCLI (0.00s)
     CLI_test.go:23: didn't record the correct winner, got 'Cleo', want 'Chris'
 FAIL
 ```
+
+## Write enough code to make it pass
 
 Remember to do the strictly easiest thing first
 

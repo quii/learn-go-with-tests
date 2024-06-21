@@ -550,8 +550,8 @@ Not many people complain about our ability to define interfaces which, like gene
 When you consider that if you've used arrays, slices or maps; you've _already been a consumer of generic code_.
 
 ```
-var myApples []Apples
-// You cant do this!
+var myApples []Apple
+// You can't do this!
 append(myApples, Orange{})
 ```
 

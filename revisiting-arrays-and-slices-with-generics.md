@@ -66,7 +66,7 @@ You should be familiar with the generics syntax [from the previous chapter](gene
 
 If you think about the arguments to your function first, it'll give you a very small set of valid solutions
   - The array you want to reduce
-  - Some kind of combining function, or _accumulator_
+  - Some kind of combining function
 
 "Reduce" is an incredibly well documented pattern, there's no need to re-invent the wheel. [Read the wiki, in particular the lists section](https://en.wikipedia.org/wiki/Fold_(higher-order_function)), it should prompt you for another argument you'll need.
 
@@ -75,10 +75,10 @@ If you think about the arguments to your function first, it'll give you a very s
 ### My first-pass of `Reduce`
 
 ```go
-func Reduce[A any](collection []A, accumulator func(A, A) A, initialValue A) A {
+func Reduce[A any](collection []A, f func(A, A) A, initialValue A) A {
 	var result = initialValue
 	for _, x := range collection {
-		result = accumulator(result, x)
+		result = f(result, x)
 	}
 	return result
 }
@@ -265,10 +265,10 @@ But this won't compile.
 The reason is we're trying to reduce to a _different_ type than the type of the collection. This sounds scary, but actually just requires us to adjust the type signature of `Reduce` to make it work. We won't have to change the function body, and we won't have to change any of our existing callers.
 
 ```go
-func Reduce[A, B any](collection []A, accumulator func(B, A) B, initialValue B) B {
+func Reduce[A, B any](collection []A, f func(B, A) B, initialValue B) B {
 	var result = initialValue
 	for _, x := range collection {
-		result = accumulator(result, x)
+		result = f(result, x)
 	}
 	return result
 }

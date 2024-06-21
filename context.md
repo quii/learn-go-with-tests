@@ -32,20 +32,20 @@ type Store interface {
 
 The returned function calls the `store`'s `Fetch` method to get the data and writes it to the response.
 
-We have a corresponding stub for `Store` which we use in a test.
+We have a corresponding spy for `Store` which we use in a test.
 
 ```go
-type StubStore struct {
+type SpyStore struct {
 	response string
 }
 
-func (s *StubStore) Fetch() string {
+func (s *SpyStore) Fetch() string {
 	return s.response
 }
 
 func TestServer(t *testing.T) {
 	data := "hello, world"
-	svr := Server(&StubStore{data})
+	svr := Server(&SpyStore{data})
 
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()

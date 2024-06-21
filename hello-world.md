@@ -17,19 +17,19 @@ func main() {
 }
 ```
 
-To run it type `go run hello.go`.
+To run it, type `go run hello.go`.
 
 ## How it works
 
 When you write a program in Go, you will have a `main` package defined with a `main` func inside it. Packages are ways of grouping up related Go code together.
 
-The `func` keyword is how you define a function with a name and a body.
+The `func` keyword defines a function with a name and a body.
 
 With `import "fmt"` we are importing a package which contains the `Println` function that we use to print.
 
 ## How to test
 
-How do you test this? It is good to separate your "domain" code from the outside world \(side-effects\). The `fmt.Println` is a side effect \(printing to stdout\) and the string we send in is our domain.
+How do you test this? It is good to separate your "domain" code from the outside world \(side-effects\). The `fmt.Println` is a side effect \(printing to stdout\), and the string we send in is our domain.
 
 So let's separate these concerns so it's easier to test
 
@@ -47,7 +47,7 @@ func main() {
 }
 ```
 
-We have created a new function again with `func` but this time we've added another keyword `string` in the definition. This means this function returns a `string`.
+We have created a new function with `func`, but this time, we've added another keyword, `string,` to the definition. This means this function returns a `string`.
 
 Now create a new file called `hello_test.go` where we are going to write a test for our `Hello` function
 
@@ -68,7 +68,7 @@ func TestHello(t *testing.T) {
 
 ## Go modules?
 
-The next step is to run the tests. Enter `go test` in your terminal. If the tests pass, then you are probably using an earlier version of Go. However, if you are using Go 1.16 or later, then the tests will likely not run at all. Instead, you will see an error message like this in the terminal:
+The next step is to run the tests. Enter `go test` in your terminal. If the tests pass, then you are probably using an earlier version of Go. However, if you are using Go 1.16 or later, the tests will likely not run. Instead, you will see an error message like this in the terminal:
 
 ```shell
 $ go test
@@ -85,13 +85,13 @@ go 1.16
 
 This file tells the `go` tools essential information about your code. If you planned to distribute your application, you would include where the code was available for download as well as information about dependencies. For now, your module file is minimal, and you can leave it that way. To read more about modules, [you can check out the reference in the Golang documentation](https://golang.org/doc/modules/gomod-ref). We can get back to testing and learning Go now since the tests should run, even on Go 1.16.
 
-In future chapters you will need to run `go mod init SOMENAME` in each new folder before running commands like `go test` or `go build`.
+In future chapters, you will need to run `go mod init SOMENAME` in each new folder before running commands like `go test` or `go build`.
 
 ## Back to Testing
 
 Run `go test` in your terminal. It should've passed! Just to check, try deliberately breaking the test by changing the `want` string.
 
-Notice how you have not had to pick between multiple testing frameworks and then figure out how to install. Everything you need is built in to the language and the syntax is the same as the rest of the code you will write.
+Notice how you have not had to pick between multiple testing frameworks and then figure out how to install them. Everything you need is built into the language, and the syntax is the same as the rest of the code you will write.
 
 ### Writing tests
 
@@ -100,7 +100,7 @@ Writing a test is just like writing a function, with a few rules
 * It needs to be in a file with a name like `xxx_test.go`
 * The test function must start with the word `Test`
 * The test function takes one argument only `t *testing.T`
-* In order to use the `*testing.T` type, you need to `import "testing"`, like we did with `fmt` in the other file
+* To use the `*testing.T` type, you need to `import "testing"`, like we did with `fmt` in the other file
 
 For now, it's enough to know that your `t` of type `*testing.T` is your "hook" into the testing framework so you can do things like `t.Fail()` when you want to fail.
 
@@ -111,33 +111,33 @@ If statements in Go are very much like other programming languages.
 
 #### Declaring variables
 
-We're declaring some variables with the syntax `varName := value`, which lets us re-use some values in our test for readability.
+We're declaring some variables with the syntax `varName := value`, which lets us reuse some values in our test for readability.
 
 #### `t.Errorf`
 
-We are calling the `Errorf` _method_ on our `t` which will print out a message and fail the test. The `f` stands for format which allows us to build a string with values inserted into the placeholder values `%q`. When you made the test fail it should be clear how it works.
+We are calling the `Errorf` _method_ on our `t`, which will print out a message and fail the test. The `f` stands for format, which allows us to build a string with values inserted into the placeholder values `%q`. When you make the test fail, it should be clear how it works.
 
-You can read more about the placeholder strings in the [fmt go doc](https://golang.org/pkg/fmt/#hdr-Printing). For tests `%q` is very useful as it wraps your values in double quotes.
+You can read more about the placeholder strings in the [fmt go doc](https://golang.org/pkg/fmt/#hdr-Printing). For tests, `%q` is very useful as it wraps your values in double quotes.
 
 We will later explore the difference between methods and functions.
 
 ### Go doc
 
-Another quality of life feature of Go is the documentation. You can launch the docs locally by running `godoc -http :8000`. If you go to [localhost:8000/pkg](http://localhost:8000/pkg) you will see all the packages installed on your system.
+Another quality-of-life feature of Go is the documentation. You can launch the docs locally by running `godoc -http=localhost:8000`. If you go to [localhost:8000/pkg](http://localhost:8000/pkg), you will see all the packages installed on your system.
 
 The vast majority of the standard library has excellent documentation with examples. Navigating to [http://localhost:8000/pkg/testing/](http://localhost:8000/pkg/testing/) would be worthwhile to see what's available to you.
 
-If you don't have `godoc` command, then maybe you are using the newer version of Go (1.14 or later) which is [no longer including `godoc`](https://golang.org/doc/go1.14#godoc). You can manually install it with `go install golang.org/x/tools/cmd/godoc@latest`.
+If you don't have `godoc` command, then maybe you are using the newer version of Go (1.14 or later) which [no longer includes `godoc`](https://golang.org/doc/go1.14#godoc). You can manually install it using `go install golang.org/x/tools/cmd/godoc@latest`.
 
 ### Hello, YOU
 
-Now that we have a test we can iterate on our software safely.
+Now that we have a test, we can iterate on our software safely.
 
-In the last example we wrote the test _after_ the code had been written just so you could get an example of how to write a test and declare a function. From this point on we will be _writing tests first_.
+In the last example, we wrote the test _after_ the code had been written so that you could get an example of how to write a test and declare a function. From this point on, we will be _writing tests first_.
 
 Our next requirement is to let us specify the recipient of the greeting.
 
-Let's start by capturing these requirements in a test. This is basic test driven development and allows us to make sure our test is _actually_ testing what we want. When you retrospectively write tests there is the risk that your test may continue to pass even if the code doesn't work as intended.
+Let's start by capturing these requirements in a test. This is basic test-driven development and allows us to make sure our test is _actually_ testing what we want. When you retrospectively write tests, there is the risk that your test may continue to pass even if the code doesn't work as intended.
 
 ```go
 package main
@@ -182,7 +182,7 @@ func main() {
 }
 ```
 
-Now when you run your tests you should see something like
+Now when you run your tests, you should see something like
 
 ```text
 hello_test.go:10: got 'Hello, world' want 'Hello, Chris''
@@ -198,7 +198,7 @@ func Hello(name string) string {
 }
 ```
 
-When you run the tests they should now pass. Normally as part of the TDD cycle we should now _refactor_.
+When you run the tests, they should now pass. Normally, as part of the TDD cycle, we should now _refactor_.
 
 ### A note on source control
 
@@ -259,7 +259,7 @@ func TestHello(t *testing.T) {
 }
 ```
 
-Here we are introducing another tool in our testing arsenal, subtests. Sometimes it is useful to group tests around a "thing" and then have subtests describing different scenarios.
+Here, we are introducing another tool in our testing arsenal: subtests. Sometimes, it is useful to group tests around a "thing" and then have subtests describing different scenarios.
 
 A benefit of this approach is you can set up shared code that can be used in the other tests.
 
@@ -310,15 +310,15 @@ func assertCorrectMessage(t testing.TB, got, want string) {
 
 What have we done here?
 
-We've refactored our assertion into a new function. This reduces duplication and improves readability of our tests. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
+We've refactored our assertion into a new function. This reduces duplication and improves the readability of our tests. We need to pass in `t *testing.T` so that we can tell the test code to fail when we need to.
 
 For helper functions, it's a good idea to accept a `testing.TB` which is an interface that `*testing.T` and `*testing.B` both satisfy, so you can call helper functions from a test, or a benchmark (don't worry if words like "interface" mean nothing to you right now, it will be covered later).
 
-`t.Helper()` is needed to tell the test suite that this method is a helper. By doing this when it fails the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems easier. If you still don't understand, comment it out, make a test fail and observe the test output. Comments in Go are a great way to add additional information to your code, or in this case, a quick way to tell the compiler to ignore a line. You can comment out the `t.Helper()` code by adding two forward slashes `//` at the beginning of the line. You should see that line turn grey or change to another color than the rest of your code to indicate it's now commented out.
+`t.Helper()` is needed to tell the test suite that this method is a helper. By doing this, when it fails, the line number reported will be in our _function call_ rather than inside our test helper. This will help other developers track down problems more easily. If you still don't understand, comment it out, make a test fail and observe the test output. Comments in Go are a great way to add additional information to your code, or in this case, a quick way to tell the compiler to ignore a line. You can comment out the `t.Helper()` code by adding two forward slashes `//` at the beginning of the line. You should see that line turn grey or change to another color than the rest of your code to indicate it's now commented out.
 
 ### Back to source control
 
-Now we are happy with the code I would amend the previous commit so we only check in the lovely version of our code with its test.
+Now that we are happy with the code, I would amend the previous commit so that we only check in the lovely version of our code with its test.
 
 ### Discipline
 
@@ -338,13 +338,13 @@ Seeing the test fail is an important check because it also lets you see what the
 
 By ensuring your tests are _fast_ and setting up your tools so that running tests is simple you can get in to a state of flow when writing your code.
 
-By not writing tests you are committing to manually checking your code by running your software which breaks your state of flow and you won't be saving yourself any time, especially in the long run.
+By not writing tests, you are committing to manually checking your code by running your software, which breaks your state of flow. You won't be saving yourself any time, especially in the long run.
 
 ## Keep going! More requirements
 
 Goodness me, we have more requirements. We now need to support a second parameter, specifying the language of the greeting. If a language is passed in that we do not recognise, just default to English.
 
-We should be confident that we can use TDD to flesh out this functionality easily!
+We should be confident that we can easily use TDD to flesh out this functionality!
 
 Write a test for a user passing in Spanish. Add it to the existing suite.
 
@@ -356,7 +356,7 @@ Write a test for a user passing in Spanish. Add it to the existing suite.
 	})
 ```
 
-Remember not to cheat! _Test first_. When you try and run the test, the compiler _should_ complain because you are calling `Hello` with two arguments rather than one.
+Remember not to cheat! _Test first_. When you try to run the test, the compiler _should_ complain because you are calling `Hello` with two arguments rather than one.
 
 ```text
 ./hello_test.go:27:19: too many arguments in call to Hello
@@ -462,10 +462,10 @@ func Hello(name string, language string) string {
 	prefix := englishHelloPrefix
 
 	switch language {
-	case "French":
-		prefix = frenchHelloPrefix
-	case "Spanish":
+	case spanish:
 		prefix = spanishHelloPrefix
+	case french:
+		prefix = frenchHelloPrefix
 	}
 
 	return prefix + name
@@ -481,8 +481,8 @@ You could argue that maybe our function is getting a little big. The simplest re
 ```go
 
 const (
-	french  = "French"
 	spanish = "Spanish"
+	french  = "French"
 
 	englishHelloPrefix = "Hello, "
 	spanishHelloPrefix = "Hola, "
@@ -518,8 +518,8 @@ A few new concepts:
     * You can return whatever it's set to by just calling `return` rather than `return prefix`.
   * This will display in the Go Doc for your function so it can make the intent of your code clearer.
 * `default` in the switch case will be branched to if none of the other `case` statements match.
-* The function name starts with a lowercase letter. In Go, public functions start with a capital letter and private ones start with a lowercase. We don't want the internals of our algorithm to be exposed to the world, so we made this function private.
-* Also, we can group constants in a block instead of declaring them each on their own line. It's a good idea to use a line between sets of related constants for readability.
+* The function name starts with a lowercase letter. In Go, public functions start with a capital letter, and private ones start with a lowercase letter. We don't want the internals of our algorithm exposed to the world, so we made this function private.
+* Also, we can group constants in a block instead of declaring them on their own line. For readability, it's a good idea to use a line between sets of related constants.
 
 ## Wrapping up
 
@@ -540,6 +540,6 @@ By now you should have some understanding of:
 * Writing the smallest amount of code to make it pass so we know we have working software
 * _Then_ refactor, backed with the safety of our tests to ensure we have well-crafted code that is easy to work with
 
-In our case we've gone from `Hello()` to `Hello("name")`, to `Hello("name", "French")` in small, easy to understand steps.
+In our case, we've gone from `Hello()` to `Hello("name")` and then to `Hello("name", "French")` in small, easy-to-understand steps.
 
-This is of course trivial compared to "real world" software but the principles still stand. TDD is a skill that needs practice to develop, but by breaking problems down into smaller components that you can test, you will have a much easier time writing software.
+Of course, this is trivial compared to "real-world" software, but the principles still stand. TDD is a skill that needs practice to develop, but by breaking problems down into smaller components that you can test, you will have a much easier time writing software.

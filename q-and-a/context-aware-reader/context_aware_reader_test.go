@@ -44,7 +44,7 @@ func TestContextAwareReader(t *testing.T) {
 		n, err := rdr.Read(got)
 
 		if err == nil {
-			t.Error("expected an error after cancellation but didnt get one")
+			t.Error("expected an error after cancellation but didn't get one")
 		}
 
 		if n > 0 {
