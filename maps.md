@@ -215,7 +215,9 @@ We can get rid of the magic error in our `Search` function by extracting it into
 ```go
 t.Run("unknown word", func(t *testing.T) {
 	_, got := dictionary.Search("unknown")
-
+	if got == nil {
+		t.Fatal("expected to get an error.")
+	}
 	assertError(t, got, ErrNotFound)
 })
 ```
