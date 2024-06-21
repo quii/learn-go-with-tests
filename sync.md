@@ -6,7 +6,7 @@ We want to make a counter which is safe to use concurrently.
 
 We'll start with an unsafe counter and verify its behaviour works in a single-threaded environment.
 
-Then we'll exercise it's unsafeness, with multiple goroutines trying to use the counter via a test, and fix it.
+Then we'll exercise its unsafeness, with multiple goroutines trying to use the counter via a test, and fix it.
 
 ## Write the test first
 
@@ -204,7 +204,7 @@ func (c *Counter) Inc() {
 
 This _looks_ nice but while programming is a hugely subjective discipline, this is **bad and wrong**.
 
-Sometimes people forget that embedding types means the methods of that type becomes _part of the public interface_; and you often will not want that. Remember that we should be very careful with our public APIs, the moment we make something public is the moment other code can couple themselves to it. We always want to avoid unnecessary coupling.
+Sometimes people forget that embedding types means the methods of that type become _part of the public interface_; and you often will not want that. Remember that we should be very careful with our public APIs, the moment we make something public is the moment other code can couple themselves to it. We always want to avoid unnecessary coupling.
 
 Exposing `Lock` and `Unlock` is at best confusing but at worst potentially very harmful to your software if callers of your type start calling these methods.
 
