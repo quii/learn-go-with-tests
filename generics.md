@@ -513,6 +513,83 @@ func (s *Stack[Apple]) Pop() (Apple, bool)
 
 Now that we have done this refactoring, we can safely remove the string stack test because we don't need to prove the same logic over and over.
 
+Note that so far in the examples of calling generic functions, we have not needed to specify the generic types. For example, to call `AssertEqual[T]`, we do not need to specify what the type `T` is since it can be inferred from the arguments. In cases where the generic types cannot be inferred, you need specify the types when calling the function. The syntax is the same as when defining the function, i.e. you specify the types inside square brackets before the arguments.
+
+For a concrete example, consider making a constructor for `Stack[T]`.
+```go
+func NewStack[T any]() *Stack[T] {
+	return new(Stack[T])
+}
+```
+To use this constructor to create a stack of ints and a stack of strings for example, you call it like this:
+```go
+myStackOfInts := NewStack[int]()
+myStackOfStrings := NewStack[string]()
+```
+
+Here is the `Stack` implementation and the tests after adding the constructor.
+
+```go
+type Stack[T any] struct {
+	values []T
+}
+
+func NewStack[T any]() *Stack[T] {
+	return new(Stack[T])
+}
+
+func (s *Stack[T]) Push(value T) {
+	s.values = append(s.values, value)
+}
+
+func (s *Stack[T]) IsEmpty() bool {
+	return len(s.values) == 0
+}
+
+func (s *Stack[T]) Pop() (T, bool) {
+	if s.IsEmpty() {
+		var zero T
+		return zero, false
+	}
+
+	index := len(s.values) - 1
+	el := s.values[index]
+	s.values = s.values[:index]
+	return el, true
+}
+```
+
+```go
+func TestStack(t *testing.T) {
+	t.Run("integer stack", func(t *testing.T) {
+		myStackOfInts := NewStack[int]()
+
+		// check stack is empty
+		AssertTrue(t, myStackOfInts.IsEmpty())
+
+		// add a thing, then check it's not empty
+		myStackOfInts.Push(123)
+		AssertFalse(t, myStackOfInts.IsEmpty())
+
+		// add another thing, pop it back again
+		myStackOfInts.Push(456)
+		value, _ := myStackOfInts.Pop()
+		AssertEqual(t, value, 456)
+		value, _ = myStackOfInts.Pop()
+		AssertEqual(t, value, 123)
+		AssertTrue(t, myStackOfInts.IsEmpty())
+
+		// can get the numbers we put in as numbers, not untyped interface{}
+		myStackOfInts.Push(1)
+		myStackOfInts.Push(2)
+		firstNum, _ := myStackOfInts.Pop()
+		secondNum, _ := myStackOfInts.Pop()
+		AssertEqual(t, firstNum+secondNum, 3)
+	})
+}
+```
+
+
 Using a generic data type we have:
 
 - Reduced duplication of important logic.
