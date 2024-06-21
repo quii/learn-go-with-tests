@@ -63,9 +63,9 @@ func Add(x, y int) int {
 }
 ```
 
-When you have more than one argument of the same type \(in our case two integers\) rather than having `(x int, y int)` you can shorten it to `(x, y int)`.
+Remember, when you have more than one argument of the same type \(in our case two integers\) rather than having `(x int, y int)` you can shorten it to `(x, y int)`.
 
-Now run the tests and we should be happy that the test is correctly reporting what is wrong.
+Now run the tests, and we should be happy that the test is correctly reporting what is wrong.
 
 `adder_test.go:10: expected '4' but got '0'`
 
