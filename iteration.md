@@ -123,7 +123,7 @@ PASS
 
 What `136 ns/op` means is our function takes on average 136 nanoseconds to run \(on my computer\). Which is pretty ok! To test this it ran it 10000000 times.
 
-_NOTE_ by default Benchmarks are run sequentially.
+**Note:** By default Benchmarks are run sequentially.
 
 ## Practice exercises
 
