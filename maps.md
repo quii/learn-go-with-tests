@@ -595,7 +595,7 @@ func TestDelete(t *testing.T) {
 	dictionary.Delete(word)
 
 	_, err := dictionary.Search(word)
-	assertError(t, word, ErrNotFound)
+	assertError(t, err, ErrNotFound)
 }
 ```
 
@@ -620,7 +620,7 @@ func (d Dictionary) Delete(word string) {
 After we add this, the test tells us we are not deleting the word.
 
 ```
-dictionary_test.go:78: Expected 'test' to be deleted
+dictionary_test.go:82: got error %!q(<nil>) want "could not find the word you were looking for"
 ```
 
 ## Write enough code to make it pass
