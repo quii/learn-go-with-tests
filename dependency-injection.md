@@ -91,9 +91,7 @@ So we'll use it in our test to send in as our `Writer` and then we can check wha
 The test will not compile
 
 ```text
-./di_test.go:10:7: too many arguments in call to Greet
-    have (*bytes.Buffer, string)
-    want (string)
+./di_test.go:10:2: undefined: Greet
 ```
 
 ## Write the minimal amount of code for the test to run and check the failing test output
