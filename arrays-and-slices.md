@@ -375,7 +375,7 @@ The tests should now pass.
 ## Refactor
 
 As mentioned, slices have a capacity. If you have a slice with a capacity of
-2 and try to do `mySlice[10] = 1` you will get a _runtime_ error.
+2 and try to do `mySlice[10] = 1` you will get a _runtime_ error.The length of a slice is the number of elements it holds `len(mySlice)`, while the capacity is the number of elements it can hold in the underlying array `cap(mySlice)`, e.g., `make([]int, 0, 5)` creates a slice with length 0 and capacity 5.
 
 However, you can use the `append` function which takes a slice and a new value,
 then returns a new slice with all the items in it.
