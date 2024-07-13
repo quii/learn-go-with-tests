@@ -368,7 +368,7 @@ We need to create a Dockerfile for our program. Inside our `httpserver` folder, 
 ```dockerfile
 # Make sure to specify the same Go version as the one in the go.mod file.
 # For example, golang:1.22.1-alpine.
-FROM golang:1.18-alpine 
+FROM golang:1.18-alpine
 
 WORKDIR /app
 
@@ -804,21 +804,21 @@ Our project tree should now look like this:
 ```
 quii@Chriss-MacBook-Pro go-specs-greet % tree
 .
-├── Dockerfile
 ├── Makefile
 ├── README.md
 ├── adapters
-│   └── httpserver
-│       ├── driver.go
-│       └── handler.go
+│   └── httpserver
+│       ├── driver.go
+│       └── handler.go
 ├── cmd
-│   └── httpserver
-│       ├── greeter_server_test.go
-│       └── main.go
+│   └── httpserver
+|       ├── Dockerfile
+│       ├── greeter_server_test.go
+│       └── main.go
 ├── domain
-│   └── interactions
-│       ├── greet.go
-│       └── greet_test.go
+│   └── interactions
+│       ├── greet.go
+│       └── greet_test.go
 ├── go.mod
 ├── go.sum
 └── specifications
