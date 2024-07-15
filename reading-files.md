@@ -306,6 +306,11 @@ func TestNewBlogPosts(t *testing.T) {
 		"hello world.md":  {Data: []byte("Title: Post 1")},
 		"hello-world2.md": {Data: []byte("Title: Post 2")},
 	}
+    posts, err := NewPostsFromFS(fs)
+
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// rest of test code cut for brevity
 	got := posts[0]
@@ -505,6 +510,12 @@ Description: Description 2`
 		"hello-world2.md": {Data: []byte(secondBody)},
 	}
 
+	posts, err := NewPostsFromFS(fs)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// rest of test code cut for brevity
 	assertPost(t, posts[0], blogposts.Post{
 		Title:       "Post 1",
@@ -644,6 +655,17 @@ Tags: tdd, go`
 Description: Description 2
 Tags: rust, borrow-checker`
 	)
+
+    fs := fstest.MapFS{
+		"hello world.md":  {Data: []byte(firstBody)},
+		"hello-world2.md": {Data: []byte(secondBody)},
+	}
+
+	posts, err := NewPostsFromFS(fs)
+
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// rest of test code cut for brevity
 	assertPost(t, posts[0], blogposts.Post{
