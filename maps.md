@@ -537,7 +537,7 @@ We get 3 errors this time, but we know how to deal with these.
 const (
 	ErrNotFound         = DictionaryErr("could not find the word you were looking for")
 	ErrWordExists       = DictionaryErr("cannot add word because it already exists")
-	ErrWordDoesNotExist = DictionaryErr("cannot update word because it does not exist")
+	ErrWordDoesNotExist = DictionaryErr("cannot perform operation on word because it does not exist")
 )
 
 func (d Dictionary) Update(word, definition string) error {
@@ -631,9 +631,66 @@ func (d Dictionary) Delete(word string) {
 }
 ```
 
-Go has a built-in function `delete` that works on maps. It takes two arguments. The first is the map and the second is the key to be removed.
+Go has a built-in function `delete` that works on maps. It takes two arguments and returns nothing. The first argument is the map and the second is the key to be removed.
 
-The `delete` function returns nothing, and we based our `Delete` method on the same notion. Since deleting a value that's not there has no effect, unlike our `Update` and `Add` methods, we don't need to complicate the API with errors.
+## Refactor
+There isn't much to refactor, but we can implement the same logic from `Update` to handle cases where word doesn't exist.
+
+```go
+func TestDelete(t *testing.T) {
+	t.Run("existing word", func(t *testing.T) {
+		word := "test"
+		dictionary := Dictionary{word: "test definition"}
+
+		err := dictionary.Delete(word)
+
+		assertError(t, err, nil)
+
+		_, err = dictionary.Search(word)
+
+		assertError(t, err, ErrNotFound)
+	})
+
+	t.Run("non-existing word", func(t *testing.T) {
+		word := "test"
+		dictionary := Dictionary{}
+
+		err := dictionary.Delete(word)
+
+		assertError(t, err, ErrWordDoesNotExist)
+	})
+}
+```
+
+## Try to run test
+
+The compiler will fail because we are not returning a value for `Delete`.
+
+```
+./dictionary_test.go:77:10: dictionary.Delete(word) (no value) used as value
+./dictionary_test.go:90:10: dictionary.Delete(word) (no value) used as value
+```
+
+## Write enough code to make it pass
+
+```go
+func (d Dictionary) Delete(word string) error {
+	_, err := d.Search(word)
+
+	switch err {
+	case ErrNotFound:
+		return ErrWordDoesNotExist
+	case nil:
+		delete(d, word)
+	default:
+		return err
+	}
+
+	return nil
+}
+```
+
+We are again using a switch statement to match on the error when we attempt to delete a word that doesn't exist. 
 
 ## Wrapping up
 
