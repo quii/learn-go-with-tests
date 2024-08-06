@@ -75,15 +75,15 @@ $ go test
 go: cannot find main module; see 'go help modules'
 ```
 
-What's the problem? In a word, [modules](https://blog.golang.org/go116-module-changes). Luckily, the problem is easy to fix. Enter `go mod init hello` in your terminal. That will create a new file with the following contents:
+What's the problem? In a word, [modules](https://blog.golang.org/go116-module-changes). Luckily, the problem is easy to fix. Enter `go mod init example.com/hello` in your terminal. That will create a new file with the following contents:
 
 ```
-module hello
+module example.com/hello
 
 go 1.16
 ```
 
-This file tells the `go` tools essential information about your code. If you planned to distribute your application, you would include where the code was available for download as well as information about dependencies. For now, your module file is minimal, and you can leave it that way. To read more about modules, [you can check out the reference in the Golang documentation](https://golang.org/doc/modules/gomod-ref). We can get back to testing and learning Go now since the tests should run, even on Go 1.16.
+This file tells the `go` tools essential information about your code. If you planned to distribute your application, you would include where the code was available for download as well as information about dependencies.  The name of the module, example\.com\/hello, usually refers to a URL where the module can be found and downloaded. For compatibility with tools we'll start using soon, make sure your module's name has a dot somewhere in it, like the dot in .com of example\.com/hello. For now, your module file is minimal, and you can leave it that way. To read more about modules, [you can check out the reference in the Golang documentation](https://golang.org/doc/modules/gomod-ref). We can get back to testing and learning Go now since the tests should run, even on Go 1.16.
 
 In future chapters, you will need to run `go mod init SOMENAME` in each new folder before running commands like `go test` or `go build`.
 
@@ -117,17 +117,41 @@ We're declaring some variables with the syntax `varName := value`, which lets us
 
 We are calling the `Errorf` _method_ on our `t`, which will print out a message and fail the test. The `f` stands for format, which allows us to build a string with values inserted into the placeholder values `%q`. When you make the test fail, it should be clear how it works.
 
-You can read more about the placeholder strings in the [fmt go doc](https://golang.org/pkg/fmt/#hdr-Printing). For tests, `%q` is very useful as it wraps your values in double quotes.
+You can read more about the placeholder strings in the [fmt documentation](https://pkg.go.dev/fmt#hdr-Printing). For tests, `%q` is very useful as it wraps your values in double quotes.
 
 We will later explore the difference between methods and functions.
 
-### Go doc
+### Go's documentation
 
-Another quality-of-life feature of Go is the documentation. You can launch the docs locally by running `godoc -http=localhost:8000`. If you go to [localhost:8000/pkg](http://localhost:8000/pkg), you will see all the packages installed on your system.
+Another quality-of-life feature of Go is the documentation.  We just saw the documentation for the fmt package at the official package viewing website, and Go also provides ways for quickly getting at the documentation offline.
 
-The vast majority of the standard library has excellent documentation with examples. Navigating to [http://localhost:8000/pkg/testing/](http://localhost:8000/pkg/testing/) would be worthwhile to see what's available to you.
+Go has a built-in tool, doc, which lets you examine any package installed on your system, or the module you're currently working on. To view that same documentation for the Printing verbs:
 
-If you don't have `godoc` command, then maybe you are using the newer version of Go (1.14 or later) which [no longer includes `godoc`](https://golang.org/doc/go1.14#godoc). You can manually install it using `go install golang.org/x/tools/cmd/godoc@latest`.
+```
+$ go doc fmt
+package fmt // import "fmt"
+
+Package fmt implements formatted I/O with functions analogous to C's printf and
+scanf. The format 'verbs' are derived from C's but are simpler.
+
+# Printing
+
+The verbs:
+
+General:
+
+    %v	the value in a default format
+    	when printing structs, the plus flag (%+v) adds field names
+    %#v	a Go-syntax representation of the value
+    %T	a Go-syntax representation of the type of the value
+    %%	a literal percent sign; consumes no value
+...
+```
+
+Go's second tool for viewing documentation is the pkgsite command, which powers Go's official package viewing website.  You can install pkgsite with `go install golang.org/x/pkgsite/cmd/pkgsite@latest`, then,  `pkgsite -open .`.
+
+The vast majority of the standard library has excellent documentation with examples. Navigating to [http://localhost:8080/testing](http://localhost:8080/testing) would be worthwhile to see what's available to you.
+
 
 ### Hello, YOU
 
