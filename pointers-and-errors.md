@@ -652,6 +652,12 @@ func assertError(t testing.TB, got error, want error) {
 	}
 }
 ```
+## Practice exercise
+* Remember `go test --cover`? If we run it now, this is what we get:
+```go
+coverage: 85.7% of statements
+```
+Find out which part of the code is not covered by tests and try to get 100% coverage.
 
 ## Wrapping up
 
