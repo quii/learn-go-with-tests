@@ -41,10 +41,7 @@ import (
 )
 
 func mockWebsiteChecker(url string) bool {
-	if url == "waat://furhurterwe.geds" {
-		return false
-	}
-	return true
+	return url != "waat://furhurterwe.geds"
 }
 
 func TestCheckWebsites(t *testing.T) {
