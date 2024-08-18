@@ -334,7 +334,7 @@ func TestGreeterServer(t *testing.T) {
 			// set to false if you want less spam, but this is helpful if you're having troubles
 			PrintBuildLog: true,
 		},
-		ExposedPorts: []string{"8080:8080"},
+		ExposedPorts: []string{"8080"},
 		WaitingFor:   wait.ForHTTP("/").WithPort("8080"),
 	}
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
