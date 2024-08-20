@@ -334,8 +334,13 @@ func TestGreeterServer(t *testing.T) {
 			// set to false if you want less spam, but this is helpful if you're having troubles
 			PrintBuildLog: true,
 		},
-		ExposedPorts: []string{"8080"},
+		ExposedPorts: []string{"8080/tcp"},
 		WaitingFor:   wait.ForHTTP("/").WithPort("8080"),
+        HostConfigModifier: func(hc *container.HostConfig) {
+			hc.PortBindings = map[nat.Port][]nat.PortBinding{
+				"8080/tcp": {{HostPort: "8080/tcp"}},
+			}
+		},
 	}
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
