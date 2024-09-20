@@ -61,7 +61,7 @@ We'll design our code so it accepts an `io.Writer`. This means the caller of our
 
 As always, it's important to think about requirements before diving in too fast. How can we take this large-ish set of requirements and break it down in to a small, achievable step that we can focus on?
 
-In my view, actually viewing content is higher priority than an index page. We could launch this product and share direct links to our wonderful content. An index page which cant link to the actual content isn't useful.
+In my view, actually viewing content is higher priority than an index page. We could launch this product and share direct links to our wonderful content. An index page which can't link to the actual content isn't useful.
 
 Still, rendering a post as described earlier still feels big. All the HTML furniture, converting the body markdown into HTML, listing tags, e.t.c. 
 
