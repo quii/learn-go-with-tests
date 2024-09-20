@@ -7,8 +7,8 @@ const (
 	// ErrWordExists means you are trying to add a word that is already known
 	ErrWordExists = DictionaryErr("cannot add word because it already exists")
 
-	// ErrWordDoesNotExist occurs when trying to update a word not in the dictionary
-	ErrWordDoesNotExist = DictionaryErr("cannot update word because it does not exist")
+	// ErrWordDoesNotExist occurs when trying to perform an operation on a word not in the dictionary
+	ErrWordDoesNotExist = DictionaryErr("cannot perform operation on word because it does not exist")
 )
 
 // DictionaryErr are errors that can happen when interacting with the dictionary.
