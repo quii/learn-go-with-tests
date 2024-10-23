@@ -120,9 +120,9 @@ If you really want to go the extra mile you can make [Testable Examples](https:/
 
 Often code examples that can be found outside the codebase, such as a readme file become out of date and incorrect compared to the actual code because they don't get checked.
 
-Testable Examples are compiled whenever tests are executed. Because such examples are validated by the Go compiler, you can be confident your documentation's examples always reflect current code behavior.
+Example functions are compiled whenever tests are executed. Because such examples are validated by the Go compiler, you can be confident your documentation's examples always reflect current code behavior.
 
-Testable functions begin with `Example` (much like test functions begin with `Test`), and reside in a package's `_test.go` files, . Add the following `ExampleAdd` function to the `adder_test.go` file.
+Example functions begin with `Example` (much like test functions begin with `Test`), and reside in a package's `_test.go` files, . Add the following `ExampleAdd` function to the `adder_test.go` file.
 
 ```go
 func ExampleAdd() {
@@ -134,7 +134,7 @@ func ExampleAdd() {
 
 (If your editor doesn't automatically import packages for you, the compilation step will fail because you will be missing `import "fmt"` in `adder_test.go`. It is strongly recommended you research how to have these kind of errors fixed for you automatically in whatever editor you are using.)
 
-Adding this code will cause the example to appear in your `godoc` documentation, making your code even more accessible. If ever your code changes so that the example is no longer valid, your build will fail. 
+Adding this code will cause the example to appear in your `godoc` documentation, making your code even more accessible. If ever your code changes so that the example is no longer valid, your build will fail.
 
 Running the package's test suite, we can see the example `ExampleAdd` function is executed with no further arrangement from us:
 
