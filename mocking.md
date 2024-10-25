@@ -373,7 +373,6 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 		fmt.Fprintln(out, i)
 	}
 
-	sleeper.Sleep()
 	fmt.Fprint(out, finalWord)
 }
 ```
