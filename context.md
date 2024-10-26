@@ -279,7 +279,7 @@ One of the main points of `context` is that it is a consistent way of offering c
 
 From the [Go Blog: Context](https://blog.golang.org/context) again:
 
-> At Google, we require that Go programmers pass a Context parameter as the first argument to every function on the call path between incoming and outgoing requests. This allows Go code developed by many different teams to interoperate well. It provides simple control over timeouts and cancelation and ensures that critical values like security credentials transit Go programs properly.
+> At Google, we require that Go programmers pass a Context parameter as the first argument to every function on the call path between incoming and outgoing requests. This allows Go code developed by many different teams to interoperate well. It provides simple control over timeouts and cancellation and ensures that critical values like security credentials transit Go programs properly.
 
 (Pause for a moment and think of the ramifications of every function having to send in a context, and the ergonomics of that.)
 
