@@ -46,7 +46,7 @@ The `Reader`'s `Read` method will read the contents it has into a `[]byte` that 
 
 So rather than reading everything, we could:
 
- - Supply a fixed-size byte array that doesnt fit all the contents
+ - Supply a fixed-size byte array that doesn't fit all the contents
  - Send a cancel signal
  - Try and read again and this should return an error with 0 bytes read
 
