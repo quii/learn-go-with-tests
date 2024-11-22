@@ -41,10 +41,7 @@ import (
 )
 
 func mockWebsiteChecker(url string) bool {
-	if url == "waat://furhurterwe.geds" {
-		return false
-	}
-	return true
+	return url != "waat://furhurterwe.geds"
 }
 
 func TestCheckWebsites(t *testing.T) {
@@ -244,56 +241,6 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
-Now when we run the tests you get (or don't get - see above):
-
-```sh
---- FAIL: TestCheckWebsites (0.00s)
-        CheckWebsites_test.go:31: Wanted map[http://google.com:true http://blog.gypsydave5.com:true waat://furhurterwe.geds:false], got map[waat://furhurterwe.geds:false]
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/concurrency/v1        0.010s
-```
-
-This isn't great - why only one result? We might try and fix this by increasing
-the time we wait - try it if you like. It won't work. The problem here is that
-the variable `url` is reused for each iteration of the `for` loop - it takes
-a new value from `urls` each time. But each of our goroutines have a reference
-to the `url` variable - they don't have their own independent copy. So they're
-_all_ writing the value that `url` has at the end of the iteration - the last
-url. Which is why the one result we have is the last url.
-
-To fix this:
-
-```go
-package concurrency
-
-import (
-	"time"
-)
-
-type WebsiteChecker func(string) bool
-
-func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
-	results := make(map[string]bool)
-
-	for _, url := range urls {
-		go func(u string) {
-			results[u] = wc(u)
-		}(url)
-	}
-
-	time.Sleep(2 * time.Second)
-
-	return results
-}
-```
-
-By giving each anonymous function a parameter for the url - `u` - and then
-calling the anonymous function with the `url` as the argument, we make sure that
-the value of `u` is fixed as the value of `url` for the iteration of the loop
-that we're launching the goroutine in. `u` is a copy of the value of `url`, and
-so can't be changed.
-
 Now if you're lucky you'll get:
 
 ```sh
@@ -416,9 +363,9 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 	resultChannel := make(chan result)
 
 	for _, url := range urls {
-		go func(u string) {
-			resultChannel <- result{u, wc(u)}
-		}(url)
+		go func() {
+			resultChannel <- result{url, wc(url)}
+		}()
 	}
 
 	for i := 0; i < len(urls); i++ {
