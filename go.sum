@@ -1,12 +1,6 @@
-github.com/alecthomas/assert/v2 v2.2.2 h1:Z/iVC0xZfWTaFNE6bA3z07T86hd45Xe2eLt6WVy2bbk=
-github.com/alecthomas/assert/v2 v2.2.2/go.mod h1:pXcQ2Asjp247dahGEmsZ6ru0UVwnkhktn7S0bBDLxvQ=
-github.com/alecthomas/repr v0.2.0 h1:HAzS41CIzNW5syS8Mf9UwXhNH1J9aix/BvDRf1Ml2Yk=
-github.com/alecthomas/repr v0.2.0/go.mod h1:Fr0507jx4eOXV7AlPV6AVZLYrLIuIeSOWtW57eE/O/4=
 github.com/approvals/go-approval-tests v0.0.0-20211008131110-0c40b30e0000 h1:H152l3O+2XIXQu8IrqEXeqJOFCvSShUXs7+x0lw8V1k=
 github.com/approvals/go-approval-tests v0.0.0-20211008131110-0c40b30e0000/go.mod h1:PJOqSY8IofNv3heAD6k8E7EfFS6okiSS9bSAasaAUME=
-github.com/gomarkdown/markdown v0.0.0-20211212230626-5af6ad2f47df h1:M7mdNDTRraBcrHZg2aOYiFP9yTDajb6fquRZRpXnbVA=
-github.com/gomarkdown/markdown v0.0.0-20211212230626-5af6ad2f47df/go.mod h1:JDGcbDT52eL4fju3sZ4TeHGsQwhG9nbDV21aMyhwPoA=
-github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
-github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
-github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
-github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
+github.com/gomarkdown/markdown v0.0.0-20240626202925-2eda941fd024 h1:saBP362Qm7zDdDXqv61kI4rzhmLFq3Z1gx34xpl6cWE=
+github.com/gomarkdown/markdown v0.0.0-20240626202925-2eda941fd024/go.mod h1:JDGcbDT52eL4fju3sZ4TeHGsQwhG9nbDV21aMyhwPoA=
+github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=
+github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
