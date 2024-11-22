@@ -123,7 +123,9 @@ PASS
 
 What `136 ns/op` means is our function takes on average 136 nanoseconds to run \(on my computer\). Which is pretty ok! To test this it ran it 10000000 times.
 
-_NOTE_ by default Benchmarks are run sequentially.
+**Note:** By default benchmarks are run sequentially.
+
+**Note:** Sometimes, Go can optimize your benchmarks in a way that makes them inaccurate, such as eliminating the function being benchmarked. Check your benchmarks to see if the values make sense. If they seem overly optimized, you can follow the strategies in this **[blog post](https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go)**.
 
 ## Practice exercises
 
