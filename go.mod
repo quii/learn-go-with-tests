@@ -1,6 +1,6 @@
 module github.com/quii/learn-go-with-tests
 
-go 1.18
+go 1.22
 
 require (
 	github.com/alecthomas/assert/v2 v2.2.2
