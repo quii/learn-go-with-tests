@@ -298,7 +298,7 @@ import (
 
 const (
 	port = "8080"
-	url  = "<http://localhost:" +port
+	url  = "<http://localhost:" + port
 )
 
 func TestGracefulShutdown(t *testing.T) {
