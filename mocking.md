@@ -641,6 +641,8 @@ Under test doubles, there are various types like stubs, spies and indeed mocks! 
 
 In Go 1.23 [iterators were introduced](https://tip.golang.org/doc/go1.23). We can use iterators in various ways, in this instance we can make a `countdownFrom` iterator, which will return the numbers to countdown in reverse order.
 
+Before we get into how we write custom iterators, let's see how we use them. Rather than writing a fairly imperative looking loop to count down from a number, we can make this code look more expressive by `range`-ing over our custom `countdownFrom` iterator.
+
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
 	for i := range countDownFrom(3) {
@@ -652,9 +654,7 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 }
 ```
 
-Before we get into how we write custom iterators, let's see how we use it. Rather than writing a fairly imperative looking loop to count down from a number, we can make this code look more expressive by `range`-ing over our custom `countdownFrom` iterator.
-
-To write an iterator, a function that can be used in a `range` loop, you need to write a function in a particular way. From the docs:
+To write an iterator like `countDownFrom`, you need to write a function in a particular way. From the docs:
 
     The “range” clause in a “for-range” loop now accepts iterator functions of the following types
         func(func() bool)
@@ -677,4 +677,4 @@ func countDownFrom(from int) iter.Seq[int] {
 }
 ```
 
-This is a simple iterator, which will yield the numbers in reverse order - perfect for our usecase. 
+This is a simple iterator, which will yield numbers in reverse order, starting from, `from` - perfect for our usecase. 
