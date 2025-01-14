@@ -2,6 +2,12 @@
 
 set -e
 
+if [ -v GITHUB_REF_NAME ]; then
+    sed "s/%%FOOTER_VERSION%%/${GITHUB_REF_NAME}/" meta.tmpl.tex > meta.tex
+else
+    sed "s/%%FOOTER_VERSION%%/UNDEFINED VERSION/" meta.tmpl.tex > meta.tex
+fi
+
 docker run --rm -v `pwd`:/data uppalabharath/pandoc-latex-cjk:latest --from=gfm+rebase_relative_paths -o learn-go-with-tests.pdf \
     -H meta.tex --pdf-engine=xelatex --variable urlcolor=blue --toc --toc-depth=1 \
     -B pdf-cover.tex \
