@@ -127,6 +127,43 @@ What `136 ns/op` means is our function takes on average 136 nanoseconds to run \
 
 **Note:** Sometimes, Go can optimize your benchmarks in a way that makes them inaccurate, such as eliminating the function being benchmarked. Check your benchmarks to see if the values make sense. If they seem overly optimized, you can follow the strategies in this **[blog post](https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go)**.
 
+Strings in Go are immutable, meaning every concatenation, such as in our `Repeat` function, involves copying memory to accommodate the new string. This impacts performance, particularly during heavy string concatenation.
+
+The standard library provides `strings.Builder`[stringsBuilder] which minimizes memory copying.
+This type implements a `WriteString` method which you can use to concatenate strings:
+
+```go
+const repeatCount = 5
+
+func Repeat(character string) string {
+	var repeated strings.Builder
+	for i := 0; i < repeatCount; i++ {
+		repeated.WriteString(character)
+	}
+	return repeated.String()
+}
+```
+
+**Note**: We have to call the `String` method to retrieve the final result.
+
+We can use our benchmark to confirm that `strings.Builder` significantly improves performance.
+Furthermore, we can check that memory is allocated once per iteration.
+
+Run `go test -bench=. -benchmem`:
+
+```text
+goos: darwin
+goarch: amd64
+pkg: github.com/quii/learn-go-with-tests/for/v4
+10000000           25.70 ns/op           8 B/op           1 allocs/op
+PASS
+```
+
+The `-benchmem` flag reports information about memory allocation:
+
+* `B/op`: the number of bytes allocated per iteration
+* `allocs/op`: the number of memory allocations per iteration
+
 ## Practice exercises
 
 * Change the test so a caller can specify how many times the character is repeated and then fix the code
@@ -138,3 +175,5 @@ What `136 ns/op` means is our function takes on average 136 nanoseconds to run \
 * More TDD practice
 * Learned `for`
 * Learned how to write benchmarks
+
+[stringsBuilder]: https://pkg.go.dev/strings#Builder
