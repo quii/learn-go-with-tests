@@ -129,8 +129,8 @@ What `136 ns/op` means is our function takes on average 136 nanoseconds to run \
 
 Strings in Go are immutable, meaning every concatenation, such as in our `Repeat` function, involves copying memory to accommodate the new string. This impacts performance, particularly during heavy string concatenation.
 
-The standard library provides `strings.Builder`[stringsBuilder] which minimizes memory copying.
-This type implements a `WriteString` method which you can use to concatenate strings:
+The standard library provides the `strings.Builder`[stringsBuilder] type which minimizes memory copying.
+It implements a `WriteString` method which we can use to concatenate strings:
 
 ```go
 const repeatCount = 5
@@ -146,9 +146,7 @@ func Repeat(character string) string {
 
 **Note**: We have to call the `String` method to retrieve the final result.
 
-We can use our benchmark to confirm that `strings.Builder` significantly improves performance.
-Furthermore, we can check that memory is allocated once per iteration.
-
+We can use `BenchmarkRepeat` to confirm that `strings.Builder` significantly improves performance.
 Run `go test -bench=. -benchmem`:
 
 ```text
@@ -159,7 +157,7 @@ pkg: github.com/quii/learn-go-with-tests/for/v4
 PASS
 ```
 
-The `-benchmem` flag reports information about memory allocation:
+The `-benchmem` flag reports information about memory allocations:
 
 * `B/op`: the number of bytes allocated per iteration
 * `allocs/op`: the number of memory allocations per iteration
