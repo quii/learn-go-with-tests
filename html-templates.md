@@ -365,7 +365,7 @@ But really, we don't actually care about whitespace. Maintaining this test will 
 
 The idea is similar to "golden" files, or snapshot testing. Rather than awkwardly maintaining strings within a test file, the approval tool can compare the output for you with an "approved" file you created. You then simply copy over the new version if you approve it. Re-run the test and you're back to green.
 
-Add a dependency to `"github.com/approvals/go-approval-tests"` to your project and edit the test to the following
+Add a dependency to `"github.com/approvals/go-approval-tests"` (with the command `go get github.com/approvals/go-approval-tests`) to your project and edit the test to the following
 
 ```go
 func TestRender(t *testing.T) {
