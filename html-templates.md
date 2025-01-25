@@ -72,7 +72,6 @@ package blogrenderer_test
 
 import (
 	"bytes"
-	"github.com/quii/learn-go-with-tests/blogrenderer"
 	"testing"
 )
 
@@ -162,9 +161,7 @@ Now we have a very basic version working, we can now iterate on the test to expa
 		}
 
 		got := buf.String()
-		want := `<h1>hello world</h1>
-<p>This is a description</p>
-Tags: <ul><li>go</li><li>tdd</li></ul>`
+		want := `<h1>hello world</h1><p>This is a description</p>Tags: <ul><li>go</li><li>tdd</li></ul>`
 
 		if got != want {
 			t.Errorf("got '%s' want '%s'", got, want)
@@ -368,7 +365,7 @@ But really, we don't actually care about whitespace. Maintaining this test will 
 
 The idea is similar to "golden" files, or snapshot testing. Rather than awkwardly maintaining strings within a test file, the approval tool can compare the output for you with an "approved" file you created. You then simply copy over the new version if you approve it. Re-run the test and you're back to green.
 
-Add a dependency to `"github.com/approvals/go-approval-tests"` to your project and edit the test to the following
+Add a dependency to `"github.com/approvals/go-approval-tests"` (with the command `go get github.com/approvals/go-approval-tests`) to your project and edit the test to the following
 
 ```go
 func TestRender(t *testing.T) {
