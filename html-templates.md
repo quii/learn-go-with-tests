@@ -72,7 +72,6 @@ package blogrenderer_test
 
 import (
 	"bytes"
-	"github.com/quii/learn-go-with-tests/blogrenderer"
 	"testing"
 )
 
