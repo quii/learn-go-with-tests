@@ -161,9 +161,7 @@ Now we have a very basic version working, we can now iterate on the test to expa
 		}
 
 		got := buf.String()
-		want := `<h1>hello world</h1>
-<p>This is a description</p>
-Tags: <ul><li>go</li><li>tdd</li></ul>`
+		want := `<h1>hello world</h1><p>This is a description</p>Tags: <ul><li>go</li><li>tdd</li></ul>`
 
 		if got != want {
 			t.Errorf("got '%s' want '%s'", got, want)
