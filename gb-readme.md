@@ -15,15 +15,15 @@ Tác giả rất tự hào khi cung cấp những tài nguyên này miễn phí,
 - [Buy me a coffee](https://www.buymeacoffee.com/quii)
 - [Sponsor me on GitHub](https://github.com/sponsors/quii)
 
-## Học Phát triển theo hướng thử nghiệm (Test-driven development) với Go
+## Phát triển theo hướng thử nghiệm (Test-driven development) với Go
 
-* Khám phá ngôn ngữ Go bằng cách viết test
-* **Nắm vững nền tảng với TDD**. Go là một ngôn ngữ lý tưởng để học TDD vì nó dễ học và có hệ thống kiểm thử tích hợp sẵn
-* Hãy tự tin rằng bạn có thể viết các hệ thống Go vững chắc và được kiểm thử kỹ cẩn thận ngay từ đầu
+* Khám phá ngôn ngữ Go thông qua viết test.
+* **Nắm vững nền tảng TDD**. Go là một ngôn ngữ lý tưởng để học TDD vì nó dễ học và có hệ thống kiểm thử tích hợp sẵn.
+* Hãy tự tin rằng bạn có thể viết các hệ thống Go vững chắc và được kiểm thử kỹ cẩn thận ngay từ đầu.
 
 Các bản dịch:
 
-- [Tiếng Việt](https://bjergsen243.gitbook.io/learn-go-with-tests)
+- [Tiếng Việt](https://sons-organization-15.gitbook.io/learn-go-with-tests)
 - [Tiếng Anh (bản gốc)](https://quii.gitbook.io/learn-go-with-tests)
 
 ## Kinh nghiệm
@@ -77,7 +77,7 @@ Từ kinh nghiệm học tập trong nhóm và phương pháp cá nhân của ri
 
 ## Phản hồi
 
-* Thêm issues hoặc tạo PRs [tại đây (bản gốc)](https://github.com/quii/learn-go-with-tests) hoặc [tweet me @quii](https://twitter.com/quii)
+* Thêm issues hoặc tạo PRs [tại đây (bản gốc)](https://github.com/quii/learn-go-with-tests) hoặc [tweet tác giả @quii](https://twitter.com/quii)
 * Dịch giả [Soren](https://github.com/bjergsen243)
-* Đóng góp về bản dịch của mình [tại đây](https://github.com/bjergsen243/learn-go-with-tests)
+* Đóng góp về bản dịch của tôi [tại đây](https://github.com/bjergsen243/learn-go-with-tests)
 [MIT license](https://github.com/quii/learn-go-with-tests/blob/main/LICENSE.md)
