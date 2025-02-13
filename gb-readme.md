@@ -4,86 +4,80 @@
   <img src="red-green-blue-gophers-smaller.png" />
 </div>
 
-[Art by Denise](https://twitter.com/deniseyu21)
+[Minh hoạ bởi Denise](https://twitter.com/deniseyu21)
 
 ## Support me
 
-I am proud to offer this resource for free, but if you wish to give some appreciation
+Tác giả rất tự hào khi cung cấp những tài nguyên này miễn phí, nhưng nếu bạn mong muốn bày tỏ lòng biết ơn
 
 - [Tweet me @quii](https://twitter.com/quii)
 - <a rel="me" href="https://mastodon.cloud/@quii">Mastodon</a>
 - [Buy me a coffee](https://www.buymeacoffee.com/quii)
 - [Sponsor me on GitHub](https://github.com/sponsors/quii)
 
-## Learn test-driven development with Go
+## Học Phát triển theo hướng thử nghiệm (Test-driven development) với Go
 
-* Explore the Go language by writing tests
-* **Get a grounding with TDD**. Go is a good language for learning TDD because it is a simple language to learn and testing is built-in
-* Be confident that you'll be able to start writing robust, well-tested systems in Go
+* Khám phá ngôn ngữ Go bằng cách viết test
+* **Nắm vững nền tảng với TDD**. Go là một ngôn ngữ lý tưởng để học TDD vì nó dễ học và có hệ thống kiểm thử tích hợp sẵn
+* Hãy tự tin rằng bạn có thể viết các hệ thống Go vững chắc và được kiểm thử kỹ cẩn thận ngay từ đầu
 
-Translations:
+Các bản dịch:
 
-- [中文](https://studygolang.gitbook.io/learn-go-with-tests)
-- [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
-- [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
-- [한국어](https://miryang.gitbook.io/learn-go-with-tests/)
-- [Türkçe](https://halilkocaoz.gitbook.io/go-programlama-dilini-ogren/)
+- [Tiếng Việt](https://bjergsen243.gitbook.io/learn-go-with-tests)
+- [Tiếng Anh (bản gốc)](https://quii.gitbook.io/learn-go-with-tests)
 
-## Background
+## Kinh nghiệm
 
-I have some experience introducing Go to development teams and have tried different approaches as to how to grow a team from some people curious about Go into highly effective writers of Go systems.
+Tác giả đã từng giới thiệu Go cho các nhóm phát triển phần mềm và thử nhiều phương pháp khác nhau để giúp họ thành thạo trong việc xây dựng hệ thống hiệu quả cao bằng Go.
 
-### What didn't work
+### Những phương pháp không hiệu quả
 
-#### Read _the_ book
+#### Đọc _sách_
 
-An approach we tried was to take [the blue book](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440) and every week discuss the next chapter along with the exercises.
+Một cách tiếp cận mà tác giả đã thử là sử dụng [cuốn sách màu xanh](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440), thảo luận mỗi chương mới cùng với các bài tập mỗi tuần.
 
-I love this book but it requires a high level of commitment. The book is very detailed in explaining concepts, which is obviously great but it means that the progress is slow and steady - this is not for everyone.
+Tuy nhiên nó đòi hỏi sự cam kết cao. Cuốn sách này giải thích rất chi tiết về các khái niệm, điều này rất hữu ích, nhưng cũng khiến tốc độ học tập diễn ra chậm - điều này không phù hợp với tất cả mọi người.
 
-I found that whilst a small number of people would read chapter X and do the exercises, many people didn't.
+Lúc này tác giả nhận ra rằng, trong khi một số ít người thực sự đọc chương X và làm bài tập, thì nhiều người khác lại không theo kịp.
 
 #### Solve some problems
 
-Katas are fun but they are usually limited in their scope for learning a language; you're unlikely to use goroutines to solve a kata.
+Các bài luyện tập lập trình [kata](https://en.wikipedia.org/wiki/Kata#Outside_martial_arts) rất thú vị, nhưng chúng thường có hạn chế khi học một ngôn ngữ lập trình. Bạn khó có thể sử dụng goroutines để giải một bài tập kiểu này.
 
-Another problem is when you have varying levels of enthusiasm. Some people just learn way more of the language than others and when demonstrating what they have done end up confusing people with features the others are not familiar with.
+Một vấn đề khác là sự chênh lệch về mức độ hứng thú trong học tập. Một số người học và khám phá nhiều hơn những người khác, và khi trình bày bài làm của mình, họ vô tình sử dụng những tính năng mà những người khác chưa từng tiếp xúc, khiến mọi người bị bối rối.
 
-This ends up making the learning feel quite _unstructured_ and _ad hoc_.
+Điều này khiến quá trình học tập trở nên khá _thiếu cấu trúc_ và mang _tính tự phát_ (ad hoc).
 
-### What did work
+### Phương pháp hiệu quả
 
-By far the most effective way was by slowly introducing the fundamentals of the language by reading through [go by example](https://gobyexample.com/), exploring them with examples and discussing them as a group. This was a more interactive approach than "read chapter x for homework".
+Tác giả khuyến khích thực hành qua [go by example](https://gobyexample.com/) so với việc "đọc chương X như bài tập về nhà".
 
-Over time the team gained a solid foundation of the _grammar_ of the language so we could then start to build systems.
+Khi đã xây dựng được nền tảng chắc, từ đó có thể bắt đầu phát triển các hệ thống thực tế.
 
-This to me seems analogous to practicing scales when trying to learn guitar.
+### Phương pháp phù hợp với tác giả
 
-It doesn't matter how artistic you think you are, you are unlikely to write good music without understanding the fundamentals and practicing the mechanics.
+Khi học một ngôn ngữ lập trình mới, tác giả thường bắt đầu bằng cách thử nghiệm trong một môi trường REPL. Nhưng cuối cùng, tác giả thấy rằng vẫn cần một cách tiếp cận có cấu trúc hơn.
 
-### What works for me
+Các bài kiểm thử giúp tác giả xác minh tính đúng đắn của mã nguồn và còn đóng vai trò như tài liệu về những tính năng đã học.
 
-When _I_ learn a new programming language I usually start by messing around in a REPL but eventually, I need more structure.
+Từ kinh nghiệm học tập trong nhóm và phương pháp cá nhân của riêng mình, tác gỉa sẽ cố gắng tạo ra một cách tiếp cận có thể hữu ích cho các nhóm khác. Học các khái niệm nền tảng thông qua việc viết các bài kiểm thử nhỏ, từ đó áp dụng kỹ năng thiết kế phần mềm hiện có để xây dựng những hệ thống chất lượng.
 
-What I like to do is explore concepts and then solidify the ideas with tests. Tests verify the code I write is correct and documents the feature I have learned.
+## Đối tượng phù hợp
 
-Taking my experience of learning with a group and my own personal way I am going to try and create something that hopefully proves useful to other teams. Learning the fundamentals by writing small tests so that you can then take your existing software design skills and ship some great systems.
+* Những ai muốn bắt đầu học Go
+* Những người đã biết một chút về Go nhưng muốn tìm hiểu sâu hơn về kiểm thử
 
-## Who this is for
+## Bạn cần gì?
 
-* People who are interested in picking up Go
-* People who already know some Go, but want to explore testing more
+* Một chiếc máy tính!
+* [Cài đặt Go](https://golang.org/)
+* Trình soạn thảo mã nguồn
+* Một chút kinh nghiệm lập trình. Hiểu ý tưởng của `if`, biến, hàm,....
+* Biết cách sử dụng terminal
 
-## What you'll need
+## Phản hồi
 
-* A computer!
-* [Installed Go](https://golang.org/)
-* A text editor
-* Some experience with programming. Understanding of concepts like `if`, variables, functions etc.
-* Comfortable using the terminal
-
-## Feedback
-
-* Add issues/submit PRs [here](https://github.com/quii/learn-go-with-tests) or [tweet me @quii](https://twitter.com/quii)
-
+* Thêm issues hoặc tạo PRs [tại đây (bản gốc)](https://github.com/quii/learn-go-with-tests) hoặc [tweet me @quii](https://twitter.com/quii)
+* Dịch giả [Soren](https://github.com/bjergsen243)
+* Đóng góp về bản dịch của mình [tại đây](https://github.com/bjergsen243/learn-go-with-tests)
 [MIT license](https://github.com/quii/learn-go-with-tests/blob/main/LICENSE.md)
