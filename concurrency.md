@@ -363,10 +363,9 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 	resultChannel := make(chan result)
 
 	for _, url := range urls {
-		u := url
-		go func() {
-			resultChannel <- result{u, wc(u)}
-		}()
+		go func(url string) {
+			resultChannel <- result{url, wc(url)}
+		}(url)
 	}
 
 	for i := 0; i < len(urls); i++ {
@@ -386,18 +385,14 @@ The new type, `result` has been made to associate the return value of the
 within the struct; this can be useful in when it's hard to know what to name
 a value.
 
-Now when we iterate over the urls, at first, we create a copy of the `url`
-variable as `u` and pass it to the goroutine. Without this step, all gorouties
-will reuse the same `url` variable, leading to unreliable results.
-
-Next, instead of writing to the `map` directly
+Now when we iterate over the urls, instead of writing to the `map` directly
 we're sending a `result` struct for each call to `wc` to the `resultChannel`
 with a _send statement_. This uses the `<-` operator, taking a channel on the
 left and a value on the right:
 
 ```go
 // Send statement
-resultChannel <- result{u, wc(u)}
+resultChannel <- result{url, wc(url)}
 ```
 
 The next `for` loop iterates once for each of the urls. Inside we're using
