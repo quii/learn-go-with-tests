@@ -89,7 +89,7 @@ We could just give the functions more specific names like `RectangleArea`. A nea
 
 We can create a simple type using a **struct**. [A struct](https://golang.org/ref/spec#Struct_types) is just a named collection of fields where you can store data.
 
-Declare a struct like this
+Declare a struct in your `shapes.go` file like this
 
 ```go
 type Rectangle struct {
