@@ -494,7 +494,7 @@ So instead of
 
 we can write
 
-	π / (30 / numberOfSeconds)
+	π * (numberOfSeconds / 30)
 
 which is equivalent.
 
@@ -502,7 +502,7 @@ In Go:
 
 ```go
 func secondsInRadians(t time.Time) float64 {
-	return (math.Pi / (30 / (float64(t.Second()))))
+	return math.Pi * (float64(t.Second()) / 30)
 }
 ```
 
