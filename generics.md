@@ -94,7 +94,7 @@ The tests should now compile and pass. If you try making them fail you'll see th
 
 ### The problem with `interface{}`
 
-Our `AssertX` functions are quite naive but conceptually aren't too different to how other [popular libraries offer this functionality](https://github.com/matryer/is/blob/master/is.go#L150)
+Our `AssertX` functions are quite naive but conceptually aren't too different to how other [popular libraries offer this functionality](https://github.com/matryer/is/blob/master/is.go#L160)
 
 ```go
 func (is *I) Equal(a, b interface{})
@@ -659,4 +659,4 @@ A common path I've taken in other programming languages has been:
 > OK, I'd like to try to see if I can generalise this thing. Thank goodness I am so smart and good-looking because I use TDD, so I can refactor whenever I wish, and the process has helped me understand what behaviour I actually need before designing too much.
 
 - This abstraction feels nice! The tests are still passing, and the code is simpler
-- I can now delete a number of tests, I've captured the _essence_ of the behaviour and removed unnecessary detail
+- I can now delete a number of tests, I've captured the _essence_ of the behaviour and removed unnecessary details.

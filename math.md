@@ -59,7 +59,7 @@ so they point in the appropriate directions for a given time.
 
 ## An Acceptance Test
 
-Before we get too stuck in, lets think about an acceptance test.
+Before we get too stuck in, let's think about an acceptance test.
 
 Wait, you don't know what an acceptance test is yet. Look, let me try to
 explain.
@@ -320,13 +320,13 @@ I'm getting this one to pass.
 
 ### A recap on packages
 
-At the moment, our acceptance tests are in the `clockface_test` package. Our tests can 
-be outside of the `clockface` package - as long as their name ends with `_test.go` they 
+At the moment, our acceptance tests are in the `clockface_test` package. Our tests can
+be outside of the `clockface` package - as long as their name ends with `_test.go` they
 can be run.
 
 I'm going to write these radians tests _within_ the `clockface` package; they may never
 get exported, and they may get deleted (or moved) once I have a better grip on
-what's going on. I'll rename my acceptance test file to `clockface_acceptance_test.go`, 
+what's going on. I'll rename my acceptance test file to `clockface_acceptance_test.go`,
 so that I can create a _new_ file called `clockface_test` to test seconds in radians.
 
 ```go
@@ -388,7 +388,7 @@ ok  	clockface	0.011s
 
 ### Refactor
 
-Nothing needs refactoring yet
+Nothing needs refactoring yet.
 
 ### Repeat for new requirements
 
@@ -576,7 +576,7 @@ So we've got the first part covered here - we know what angle the second hand
 will be pointing at in radians. Now we need to work out the coordinates.
 
 Again, let's keep this as simple as possible and only work with the _unit
-circle_; the circle with a radius of 1. This means that our hands will all have
+circle_: the circle with a radius of 1. This means that our hands will all have
 a length of one but, on the bright side, it means that the maths will be easy
 for us to swallow.
 
