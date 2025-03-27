@@ -580,7 +580,7 @@ If your mocking code is becoming complicated or you are having to mock out lots 
 
 Normally a lot of mocking points to _bad abstraction_ in your code.
 
-**What people see here is a weakness in TDD but it is actually a strength**, more often than not poor test code is a result of bad design or put more nicely, well-designed code is easy to test.
+**What people see here is a weakness in TDD but it is actually a strength**. More often than not poor test code is a result of bad design or put more nicely, well-designed code is easy to test.
 
 ### But mocks and tests are still making my life hard!
 
