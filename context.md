@@ -144,9 +144,9 @@ func Server(store Store) http.HandlerFunc {
 }
 ```
 
-This makes this test pass but it doesn't feel good does it! We surely shouldn't be cancelling `Cancel()` before we fetch on _every request_.
+This makes this test pass but it doesn't feel good, does it? We surely shouldn't be cancelling `Store` before we fetch on _every request_.
 
-By being disciplined it highlighted a flaw in our tests, this is a good thing!
+By being disciplined it highlighted a flaw in our tests and this is a good thing!
 
 We'll need to update our happy path test to assert that it does not get cancelled.
 
