@@ -222,7 +222,7 @@ This helps you understand the overall design better, and it then allows you to a
 
 > Why does this method do so many tasks? Can we consolidate this elsewhere?
 
-Private functions and methods are great; they let you wrap up irrelevant how's into whats.
+Private functions and methods are great; they let you wrap up irrelevant hows into whats.
 
 #### But now I don't know how it works!
 
