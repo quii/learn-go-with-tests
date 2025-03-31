@@ -162,7 +162,7 @@ This leads to flaky and difficult to read/write tests and it reflects the diffic
 
 Always make sure your tests reflect how _you'd_ like to use your code, so in this respect consider creating error types to encapsulate your kinds of errors. This makes handling different kinds of errors easier for users of your code and also makes writing your error handling code simpler and easier to read.
 
-## Addendum
+## Addendum
 
 As of Go 1.13 there are new ways to work with errors in the standard library which is covered in the [Go Blog](https://blog.golang.org/go1.13-errors)
 
