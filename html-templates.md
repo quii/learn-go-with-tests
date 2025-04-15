@@ -196,7 +196,7 @@ New lines! Who cares? Well, our test does, because it's matching on an exact str
 
 ```go
 func Render(w io.Writer, p Post) error {
-	_, err := fmt.Fprintf(w, "<h1>%s</h1><p>%s</p>", p.Title, p.Description)
+	_, err := fmt.Fprintf(w, "<h1>%s</h1>\n<p>%s</p>\n", p.Title, p.Description)
 	if err != nil {
 		return err
 	}
