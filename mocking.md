@@ -379,7 +379,20 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 
 If you run your tests they should still be passing even though the implementation is wrong.
 
-Let's use spying again with a new test to check the order of operations is correct.
+> Note: Don't forget to revert the `Countdown` function to its correct implementation afterwards to avoid failing tests in subsequent sections. Restore it back to:
+
+```go
+func Countdown(out io.Writer, sleeper Sleeper) {
+	for i := countdownStart; i > 0; i-- {
+		fmt.Fprintln(out, i)
+		sleeper.Sleep()
+	}
+
+	fmt.Fprint(out, finalWord)
+}
+```
+
+Now, let's use spying again with a new test to check the order of operations is correct.
 
 We have two different dependencies and we want to record all of their operations into one list. So we'll create _one spy for them both_.
 
