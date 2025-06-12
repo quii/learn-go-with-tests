@@ -97,7 +97,7 @@ Writing [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks) in Go is an
 
 ```go
 func BenchmarkRepeat(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		Repeat("a")
 	}
 }
@@ -105,11 +105,11 @@ func BenchmarkRepeat(b *testing.B) {
 
 You'll see the code is very similar to a test.
 
-The `testing.B` gives you access to the cryptically named `b.N`.
+The `testing.B` gives you access to the loop function. `Loop()` returns true as long as the benchmark should continue running. 
 
-When the benchmark code is executed, it runs `b.N` times and measures how long it takes.
+When the benchmark code is executed, it measures how long it takes. After `Loop()` returns false, `b.N` contains the total number of iterations that ran.
 
-The amount of times the code is run shouldn't matter to you, the framework will determine what is a "good" value for that to let you have some decent results.
+The number of times the code is run shouldn't matter to you, the framework will determine what is a "good" value for that to let you have some decent results.
 
 To run the benchmarks do `go test -bench=.` (or if you're in Windows Powershell `go test -bench="."`)
 
@@ -125,7 +125,17 @@ What `136 ns/op` means is our function takes on average 136 nanoseconds to run \
 
 **Note:** By default benchmarks are run sequentially.
 
-**Note:** Sometimes, Go can optimize your benchmarks in a way that makes them inaccurate, such as eliminating the function being benchmarked. Check your benchmarks to see if the values make sense. If they seem overly optimized, you can follow the strategies in this **[blog post](https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go)**.
+Only the body of the loop is timed; it automatically excludes setup and cleanup code from benchmark timing. A typical benchmark is structured like:
+
+```go
+func Benchmark(b *testing.B) {
+	//... setup ...
+	for b.Loop() {
+		//... code to measure ...
+	}
+	//... cleanup ...
+}
+```
 
 Strings in Go are immutable, meaning every concatenation, such as in our `Repeat` function, involves copying memory to accommodate the new string. This impacts performance, particularly during heavy string concatenation.
 
