@@ -557,8 +557,7 @@ func BenchmarkRender(b *testing.B) {
 		}
 	)
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		blogrenderer.Render(io.Discard, aPost)
 	}
 }
@@ -646,8 +645,7 @@ func BenchmarkRender(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		postRenderer.Render(io.Discard, aPost)
 	}
 }
