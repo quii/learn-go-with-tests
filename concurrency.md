@@ -362,9 +362,9 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 	resultChannel := make(chan result)
 
 	for _, url := range urls {
-		go func() {
+		go func(url string) {
 			resultChannel <- result{url, wc(url)}
-		}()
+		}(url)
 	}
 
 	for i := 0; i < len(urls); i++ {
@@ -391,7 +391,7 @@ left and a value on the right:
 
 ```go
 // Send statement
-resultChannel <- result{u, wc(u)}
+resultChannel <- result{url, wc(url)}
 ```
 
 The next `for` loop iterates once for each of the urls. Inside we're using
