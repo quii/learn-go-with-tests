@@ -194,7 +194,7 @@ Add the following scenario to the `cases`.
         City string
     }{"Chris", "London"},
     []string{"Chris", "London"},
-}
+},
 ```
 
 ## Try to run the test
