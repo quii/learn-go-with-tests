@@ -127,7 +127,7 @@ Here we created a `Dictionary` type which acts as a thin wrapper around `map`. W
 
 The basic search was very easy to implement, but what will happen if we supply a word that's not in our dictionary?
 
-We actually get nothing back. This is good because the program can continue to run, but there is a better approach. The function can report that the word is not in the dictionary. This way, the user isn't left wondering if the word doesn't exist or if there is just no definition (this might not seem very useful for a dictionary. However, it's a scenario that could be key in other usecases).
+We actually get nothing back. This is good because the program can continue to run, but there is a better approach. The function can report that the word is not in the dictionary. This way, the user isn't left wondering if the word doesn't exist or if there is just no definition (this might not seem very useful for a dictionary. However, it's a scenario that could be key in other use cases).
 
 ```go
 func TestSearch(t *testing.T) {

@@ -2,7 +2,7 @@
 
 **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/reflection)**
 
-[From Twitter](https://twitter.com/peterbourgon/status/1011403901419937792?s=09)
+[From X](https://x.com/peterbourgon/status/1011403901419937792?s=09)
 
 > golang challenge: write a function `walk(x interface{}, fn func(string))` which takes a struct `x` and calls `fn` for all strings fields found inside. difficulty level: recursively.
 
