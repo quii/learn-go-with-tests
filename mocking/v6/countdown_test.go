@@ -48,7 +48,7 @@ func TestConfigurableSleeper(t *testing.T) {
 	sleepTime := 5 * time.Second
 
 	spyTime := &SpyTime{}
-	sleeper := ConfigurableSleeper{sleepTime, spyTime.Sleep}
+	sleeper := ConfigurableSleeper{sleepTime, spyTime.SetDurationSlept}
 	sleeper.Sleep()
 
 	if spyTime.durationSlept != sleepTime {
@@ -76,6 +76,6 @@ type SpyTime struct {
 	durationSlept time.Duration
 }
 
-func (s *SpyTime) Sleep(duration time.Duration) {
+func (s *SpyTime) SetDurationSlept(duration time.Duration) {
 	s.durationSlept = duration
 }
