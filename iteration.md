@@ -97,7 +97,7 @@ Writing [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks) in Go is an
 
 ```go
 func BenchmarkRepeat(b *testing.B) {
-	for b.Loop() {
+	for i := 0; i < b.N; i++ {
 		Repeat("a")
 	}
 }
@@ -105,7 +105,7 @@ func BenchmarkRepeat(b *testing.B) {
 
 You'll see the code is very similar to a test.
 
-The `testing.B` gives you access to the loop function. `Loop()` returns true as long as the benchmark should continue running. 
+The `testing.B` gives you access to the loop function. `Loop()` returns true as long as the benchmark should continue running.
 
 When the benchmark code is executed, it measures how long it takes. After `Loop()` returns false, `b.N` contains the total number of iterations that ran.
 
@@ -130,7 +130,7 @@ Only the body of the loop is timed; it automatically excludes setup and cleanup 
 ```go
 func Benchmark(b *testing.B) {
 	//... setup ...
-	for b.Loop() {
+	for i := 0; i < b.N; i++ {
 		//... code to measure ...
 	}
 	//... cleanup ...
