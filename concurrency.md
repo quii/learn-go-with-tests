@@ -212,7 +212,7 @@ We are caught by the original test `CheckWebsites`, it's now returning an
 empty map. What went wrong?
 
 None of the goroutines that our `for` loop started had enough time to add
-their result to the `results` map; the `WebsiteChecker` function is too fast for
+their result to the `results` map; the `CheckWebsite` function is too fast for
 them, and it returns the still empty map.
 
 To fix this we can just wait while all the goroutines do their work, and then
