@@ -97,7 +97,7 @@ Writing [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks) in Go is an
 
 ```go
 func BenchmarkRepeat(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		Repeat("a")
 	}
 }
@@ -130,7 +130,7 @@ Only the body of the loop is timed; it automatically excludes setup and cleanup 
 ```go
 func Benchmark(b *testing.B) {
 	//... setup ...
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		//... code to measure ...
 	}
 	//... cleanup ...

@@ -93,7 +93,7 @@ func BenchmarkCheckWebsites(b *testing.B) {
 		urls[i] = "a url"
 	}
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		CheckWebsites(slowStubWebsiteChecker, urls)
 	}
 }
