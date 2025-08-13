@@ -57,13 +57,13 @@ func BenchmarkRender(b *testing.B) {
 		}
 	)
 
-	postRenderer, err := blogrenderer.NewPostRenderer()
-
-	if err != nil {
-		b.Fatal(err)
-	}
-
 	for b.Loop() {
+		postRenderer, err := blogrenderer.NewPostRenderer()
+
+		if err != nil {
+			b.Fatal(err)
+		}
+
 		postRenderer.Render(io.Discard, aPost)
 	}
 }
