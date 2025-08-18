@@ -112,7 +112,7 @@ func TestRomanNumerals(t *testing.T) {
         numeral_test.go:20: got 'I', want 'II'
 ```
 
-Not much surprise there
+Not much surprise there.
 
 ## Write enough code to make it pass
 
@@ -673,7 +673,7 @@ Now that we have our functions to convert an arabic number into a roman numeral 
 
 ## An intro to property based tests
 
-There have been a few rules in the domain of Roman Numerals that we have worked with in this chapter
+There have been a few rules in the domain of Roman Numerals that we have worked with in this chapter:
 
 - Can't have more than 3 consecutive symbols
 - Only I (1), X (10) and C (100) can be "subtractors"
