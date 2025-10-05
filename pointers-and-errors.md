@@ -108,7 +108,7 @@ In Go, **when you call a function or a method the arguments are** _**copied**_.
 
 When calling `func (w Wallet) Deposit(amount int)` the `w` is a copy of whatever we called the method from.
 
-Without getting too computer-sciency, when you create a value - like a wallet, it is stored somewhere in memory. You can find out what the _address_ of that bit of memory with `&myVal`.
+Without getting too computer-sciency, when you create a value - like a wallet, it is stored somewhere in memory. You can find out what the _address_ of that bit of memory is with `&myVal`.
 
 Experiment by adding some prints to your code
 
