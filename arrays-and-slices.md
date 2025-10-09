@@ -299,9 +299,14 @@ This is valid, but our tests still won't compile!
 `./sum_test.go:26:9: invalid operation: got != want (slice can only be compared to nil)`
 
 Go does not let you use equality operators with slices. You _could_ write
-a function to iterate over each `got` and `want` slice and check their values
-but for convenience sake, we can use [`reflect.DeepEqual`][deepEqual] which is
-useful for seeing if _any_ two variables are the same.
+a function to iterate over each `got` and `want` slice and check their values,
+but what if we had a more convenient way to do this?
+
+From Go 1.21, [slices](https://pkg.go.dev/slices#pkg-overview) standard package is available, which has [slices.Equal](https://pkg.go.dev/slices#Equal) function to do a simple shallow compare on slices, where you don't need to worry about the types like the above case.
+Note that this function expects the elements to be [comparable](https://pkg.go.dev/builtin#comparable).
+So, it can't be applied to slices with non-comparable elements like 2D slices.
+
+Let's go ahead and put this into practice!
 
 ```go
 func TestSumAll(t *testing.T) {
@@ -309,39 +314,13 @@ func TestSumAll(t *testing.T) {
 	got := SumAll([]int{1, 2}, []int{0, 9})
 	want := []int{3, 9}
 
-	if !reflect.DeepEqual(got, want) {
+	if !slices.Equal(got, want) {
 		t.Errorf("got %v want %v", got, want)
 	}
 }
 ```
 
-\(make sure you `import reflect` in the top of your file to have access to `DeepEqual`\)
-
-It's important to note that `reflect.DeepEqual` is not "type safe" - the code
-will compile even if you did something a bit silly. To see this in action,
-temporarily change the test to:
-
-```go
-func TestSumAll(t *testing.T) {
-
-	got := SumAll([]int{1, 2}, []int{0, 9})
-	want := "bob"
-
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("got %v want %v", got, want)
-	}
-}
-```
-
-What we have done here is try to compare a `slice` with a `string`. This makes
-no sense, but the test compiles! So while using `reflect.DeepEqual` is
-a convenient way of comparing slices \(and other things\) you must be careful
-when using it.
-
-(From Go 1.21, [slices](https://pkg.go.dev/slices#pkg-overview) standard package is available, which has [slices.Equal](https://pkg.go.dev/slices#Equal) function to do a simple shallow compare on slices, where you don't need to worry about the types like the above case. Note that this function expects the elements to be [comparable](https://pkg.go.dev/builtin#comparable). So, it can't be applied to slices with non-comparable elements like 2D slices.)  
-
-Change the test back again and run it. You should have test output like the following
-
+You should have test output like the following:
 `sum_test.go:30: got [] want [3 9]`
 
 ## Write enough code to make it pass
@@ -482,9 +461,9 @@ panic: runtime error: slice bounds out of range [recovered]
     panic: runtime error: slice bounds out of range
 ```
 
-Oh no! It's important to note that while the test _has compiled_, it _has a runtime error_.  
+Oh no! It's important to note that while the test _has compiled_, it _has a runtime error_.
 
-Compile time errors are our friend because they help us write software that works,  
+Compile time errors are our friend because they help us write software that works,
 runtime errors are our enemies because they affect our users.
 
 ## Write enough code to make it pass
@@ -534,9 +513,9 @@ func TestSumAllTails(t *testing.T) {
 }
 ```
 
-We could've created a new function `checkSums` like we normally do, but in this case, we're showing a new technique, assigning a function to a variable. It might look strange but, it's no different to assigning a variable to a `string`, or an `int`, functions in effect are values too. 
+We could've created a new function `checkSums` like we normally do, but in this case, we're showing a new technique, assigning a function to a variable. It might look strange but, it's no different to assigning a variable to a `string`, or an `int`, functions in effect are values too.
 
-It's not shown here, but this technique can be useful when you want to bind a function to other local variables in "scope" (e.g between some `{}`). It also allows you to reduce the surface area of your API. 
+It's not shown here, but this technique can be useful when you want to bind a function to other local variables in "scope" (e.g between some `{}`). It also allows you to reduce the surface area of your API.
 
 By defining this function inside the test, it cannot be used by other functions in this package. Hiding variables and functions that don't need to be exported is an important design consideration.
 
