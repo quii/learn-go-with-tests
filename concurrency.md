@@ -330,7 +330,7 @@ On top of that, we can see the line of code where the write is happening:
 
 `/Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:12`
 
-and the line of code where goroutines 7 an 8 are started:
+and the line of code where goroutines 7 and 8 are started:
 
 `/Users/gypsydave5/go/src/github.com/gypsydave5/learn-go-with-tests/concurrency/v3/websiteChecker.go:11`
 
