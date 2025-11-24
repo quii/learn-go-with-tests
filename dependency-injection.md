@@ -124,7 +124,7 @@ The test now passes.
 
 Earlier the compiler told us to pass in a pointer to a `bytes.Buffer`. This is technically correct but not very useful.
 
-To demonstrate this, try wiring up the `Greet` function into a Go application where we want it to print to stdout.
+To demonstrate this, try writing up the `Greet` function into a Go application where we want it to print to stdout.
 
 ```go
 func main() {
