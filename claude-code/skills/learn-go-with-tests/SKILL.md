@@ -609,8 +609,7 @@ Delete one test. Coverage will remain 100% because both tests exercise the same 
 ### Package Organization
 
 - One package per directory
-- Test files in same package: `package mypackage`
-- OR test files in test package: `package mypackage_test` (enforces public API testing)
+- Test files should use `package mypackage_test` (enforces public API testing)
 
 ### Naming Conventions
 
