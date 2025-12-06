@@ -180,7 +180,7 @@ func Countdown(out io.Writer) {
 }
 ```
 
-Use a `for` loop counting backwards with `i--` and use `fmt.Fprintln` to print to `out` with our number followed by a newline character. Finally use `fmt.Fprint` to send "Go!" aftward.
+Use a `for` loop counting backwards with `i--` and use `fmt.Fprintln` to print to `out` with our number followed by a newline character. Finally, use `fmt.Fprint` to send "Go!" afterward.
 
 ## Refactor
 
