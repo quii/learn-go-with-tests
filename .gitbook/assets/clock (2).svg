@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="100%"
+     height="100%"
+     viewBox="0 0 300 300"
+     ><circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/><line x1="150" y1="150" x2="177.812" y2="235.595" style="fill:none;stroke:#f00;stroke-width:3px;"/><line x1="150" y1="150" x2="228.948" y2="137.072" style="fill:none;stroke:#000;stroke-width:3px;"/><line x1="150" y1="150" x2="130.243" y2="104.069" style="fill:none;stroke:#000;stroke-width:3px;"/></svg>

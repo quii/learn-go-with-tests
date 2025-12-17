@@ -1,6 +1,6 @@
 # Time
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/time)**
+[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/main/time)
 
 The product owner wants us to expand the functionality of our command line application by helping a group of people play Texas-Holdem Poker.
 
@@ -10,12 +10,12 @@ You won't need to know much about poker, only that at certain time intervals all
 
 Our application will help keep track of when the blind should go up, and how much it should be.
 
-- When it starts it asks how many players are playing. This determines the amount of time there is before the "blind" bet goes up.
-  - There is a base amount of time of 5 minutes.
-  - For every player, 1 minute is added.
-  - e.g 6 players equals 11 minutes for the blind.
-- After the blind time expires the game should alert the players the new amount the blind bet is.
-- The blind starts at 100 chips, then 200, 400, 600, 1000, 2000 and continue to double until the game ends (our previous functionality of "Ruth wins" should still finish the game)
+* When it starts it asks how many players are playing. This determines the amount of time there is before the "blind" bet goes up.
+  * There is a base amount of time of 5 minutes.
+  * For every player, 1 minute is added.
+  * e.g 6 players equals 11 minutes for the blind.
+* After the blind time expires the game should alert the players the new amount the blind bet is.
+* The blind starts at 100 chips, then 200, 400, 600, 1000, 2000 and continue to double until the game ends (our previous functionality of "Ruth wins" should still finish the game)
 
 ## Reminder of the code
 
@@ -48,7 +48,6 @@ func (cli *CLI) readLine() string {
 	return cli.in.Text()
 }
 ```
-
 
 ### `time.AfterFunc`
 
@@ -113,9 +112,7 @@ func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
 		amount      int
 	}{duration, amount})
 }
-
 ```
-
 
 ## Try to run the test
 
@@ -572,9 +569,9 @@ t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
 
 Ouch! A lot of changes.
 
-- We remove our dummy for StdIn and instead send in a mocked version representing our user entering 7
-- We also remove our dummy on the blind alerter so we can see that the number of players has had an effect on the scheduling
-- We test what alerts are scheduled
+* We remove our dummy for StdIn and instead send in a mocked version representing our user entering 7
+* We also remove our dummy on the blind alerter so we can see that the number of players has had an effect on the scheduling
+* We test what alerts are scheduled
 
 ## Try to run the test
 
@@ -618,9 +615,9 @@ func (cli *CLI) scheduleBlindAlerts(numberOfPlayers int) {
 }
 ```
 
-- We read in the `numberOfPlayersInput` into a string
-- We use `cli.readLine()` to get the input from the user and then call `Atoi` to convert it into an integer - ignoring any error scenarios. We'll need to write a test for that scenario later.
-- From here we change `scheduleBlindAlerts` to accept a number of players. We then calculate a `blindIncrement` time to use to add to `blindTime` as we iterate over the blind amounts
+* We read in the `numberOfPlayersInput` into a string
+* We use `cli.readLine()` to get the input from the user and then call `Atoi` to convert it into an integer - ignoring any error scenarios. We'll need to write a test for that scenario later.
+* From here we change `scheduleBlindAlerts` to accept a number of players. We then calculate a `blindIncrement` time to use to add to `blindTime` as we iterate over the blind amounts
 
 While our new test has been fixed, a lot of others have failed because now our system only works if the game starts with a user entering a number. You'll need to fix the tests by changing the user inputs so that a number followed by a newline is added (this is highlighting yet more flaws in our approach right now).
 
@@ -628,10 +625,10 @@ While our new test has been fixed, a lot of others have failed because now our s
 
 This all feels a bit horrible right? Let's **listen to our tests**.
 
-- In order to test that we are scheduling some alerts we set up 4 different dependencies. Whenever you have a lot of dependencies for a _thing_ in your system, it implies it's doing too much. Visually we can see it in how cluttered our test is.
-- To me it feels like **we need to make a cleaner abstraction between reading user input and the business logic we want to do**
-- A better test would be _given this user input, do we call a new type `Game` with the correct number of players_.
-- We would then extract the testing of the scheduling into the tests for our new `Game`.
+* In order to test that we are scheduling some alerts we set up 4 different dependencies. Whenever you have a lot of dependencies for a _thing_ in your system, it implies it's doing too much. Visually we can see it in how cluttered our test is.
+* To me it feels like **we need to make a cleaner abstraction between reading user input and the business logic we want to do**
+* A better test would be _given this user input, do we call a new type `Game` with the correct number of players_.
+* We would then extract the testing of the scheduling into the tests for our new `Game`.
 
 We can refactor toward our `Game` first and our test should continue to pass. Once we've made the structural changes we want we can think about how we can refactor the tests to reflect our new separation of concerns
 
@@ -710,8 +707,9 @@ func (cli *CLI) readLine() string {
 ```
 
 From a "domain" perspective:
-- We want to `Start` a `Game`, indicating how many people are playing
-- We want to `Finish` a `Game`, declaring the winner
+
+* We want to `Start` a `Game`, indicating how many people are playing
+* We want to `Finish` a `Game`, declaring the winner
 
 The new `Game` type encapsulates this for us.
 
@@ -719,8 +717,8 @@ With this change we've passed `BlindAlerter` and `PlayerStore` to `Game` as it i
 
 Our `CLI` is now just concerned with:
 
-- Constructing `Game` with its existing dependencies (which we'll refactor next)
-- Interpreting user input as method invocations for `Game`
+* Constructing `Game` with its existing dependencies (which we'll refactor next)
+* Interpreting user input as method invocations for `Game`
 
 We want to try to avoid doing "big" refactors which leave us in a state of failing tests for extended periods as that increases the chances of mistakes. (If you are working in a large/distributed team this is extra important)
 
@@ -837,9 +835,9 @@ Make sure to also move over the test for when the game ends.
 
 Once we are happy we have moved the tests over for game logic we can simplify our CLI tests so they reflect our intended responsibilities clearer
 
-- Process user input and call `Game`'s methods when appropriate
-- Send output
-- Crucially it doesn't know about the actual workings of how games work
+* Process user input and call `Game`'s methods when appropriate
+* Send output
+* Crucially it doesn't know about the actual workings of how games work
 
 To do this we'll have to make it so `CLI` no longer relies on a concrete `Game` type but instead accepts an interface with `Start(numberOfPlayers)` and `Finish(winner)`. We can then create a spy of that type and verify the correct calls are made.
 
@@ -927,6 +925,7 @@ t.Run("it prints an error when a non numeric value is entered and does not start
 You'll need to add to our `GameSpy` a field `StartCalled` which only gets set if `Start` is called
 
 ## Try to run the test
+
 ```
 === RUN   TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game
     --- FAIL: TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game (0.00s)
@@ -1062,6 +1061,7 @@ func TestCLI(t *testing.T) {
 	})
 }
 ```
+
 The tests now reflect the main capabilities of CLI, it is able to read user input in terms of how many people are playing and who won and handles when a bad value is entered for number of players. By doing this it is clear to the reader what `CLI` does, but also what it doesn't do.
 
 What happens if instead of putting `Ruth wins` the user puts in `Lloyd is a killer` ?
@@ -1074,10 +1074,10 @@ Finish this chapter by writing a test for this scenario and making it pass.
 
 For the past 5 chapters we have slowly TDD'd a fair amount of code
 
-- We have two applications, a command line application and a web server.
-- Both these applications rely on a `PlayerStore` to record winners
-- The web server can also display a league table of who is winning the most games
-- The command line app helps players play a game of poker by tracking what the current blind value is.
+* We have two applications, a command line application and a web server.
+* Both these applications rely on a `PlayerStore` to record winners
+* The web server can also display a league table of who is winning the most games
+* The command line app helps players play a game of poker by tracking what the current blind value is.
 
 ### time.Afterfunc
 
@@ -1085,8 +1085,8 @@ A very handy way of scheduling a function call after a specific duration. It is 
 
 Some of my favourites are
 
-- `time.After(duration)` returns a `chan Time` when the duration has expired. So if you wish to do something _after_ a specific time, this can help.
-- `time.NewTicker(duration)` returns a `Ticker` which is similar to the above in that it returns a channel but this one "ticks" every duration, rather than just once. This is very handy if you want to execute some code every `N duration`.
+* `time.After(duration)` returns a `chan Time` when the duration has expired. So if you wish to do something _after_ a specific time, this can help.
+* `time.NewTicker(duration)` returns a `Ticker` which is similar to the above in that it returns a channel but this one "ticks" every duration, rather than just once. This is very handy if you want to execute some code every `N duration`.
 
 ### More examples of good separation of concerns
 
@@ -1094,9 +1094,9 @@ _Generally_ it is good practice to separate the responsibilities of dealing with
 
 Our tests got messy. We had too many assertions (check this input, schedules these alerts, etc) and too many dependencies. We could visually see it was cluttered; it is **so important to listen to your tests**.
 
-- If your tests look messy try and refactor them.
-- If you've done this and they're still a mess it is very likely pointing to a flaw in your design
-- This is one of the real strengths of tests.
+* If your tests look messy try and refactor them.
+* If you've done this and they're still a mess it is very likely pointing to a flaw in your design
+* This is one of the real strengths of tests.
 
 Even though the tests and the production code was a bit cluttered we could freely refactor backed by our tests.
 

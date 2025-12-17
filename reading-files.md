@@ -1,7 +1,7 @@
 # Reading files
 
-- **[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/reading-files)**
-- [Here is a video of me working through the problem and taking questions from the Twitch stream](https://www.youtube.com/watch?v=nXts4dEJnkU)
+* [**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/main/reading-files)
+* [Here is a video of me working through the problem and taking questions from the Twitch stream](https://www.youtube.com/watch?v=nXts4dEJnkU)
 
 In this chapter we're going to learn how to read some files, get some data out of them, and do something useful.
 
@@ -12,6 +12,7 @@ We've been asked to create the package that converts a given folder of blog post
 ### Example data
 
 hello world.md
+
 ```markdown
 Title: Hello, TDD world!
 Description: First post on our wonderful blog
@@ -51,8 +52,8 @@ Instead, our approach should strive to be as close to delivering _real_ consumer
 
 Let's remind ourselves of our mindset and goals when starting:
 
-- **Write the test we want to see**. Think about how we'd like to use the code we're going to write from a consumer's point of view.
-- Focus on _what_ and _why_, but don't get distracted by _how_.
+* **Write the test we want to see**. Think about how we'd like to use the code we're going to write from a consumer's point of view.
+* Focus on _what_ and _why_, but don't get distracted by _how_.
 
 Our package needs to offer a function that can be pointed at a folder, and return us some posts.
 
@@ -63,9 +64,9 @@ posts = blogposts.NewPostsFromFS("some-folder")
 
 To write a test around this, we'd need some kind of test folder with some example posts in it. _There's nothing terribly wrong with this_, but you are making some trade-offs:
 
-- for each test you may need to create new files to test a particular behaviour
-- some behaviour will be challenging to test, such as failing to load files
-- the tests will run a little slower because they will need to access the file system
+* for each test you may need to create new files to test a particular behaviour
+* some behaviour will be challenging to test, such as failing to load files
+* the tests will run a little slower because they will need to access the file system
 
 We're also unnecessarily coupling ourselves to a specific implementation of the file system.
 
@@ -92,17 +93,16 @@ var posts []blogposts.Post
 posts = blogposts.NewPostsFromFS(someFS)
 ```
 
-
 ## Write the test first
 
-We should keep scope as small and useful as possible. If we prove that we can read all the files in a directory, that will be a good start.  This will give us confidence in the software we're writing.  We can check that the count of `[]Post` returned is the same as the number of files in our fake file system.
+We should keep scope as small and useful as possible. If we prove that we can read all the files in a directory, that will be a good start. This will give us confidence in the software we're writing. We can check that the count of `[]Post` returned is the same as the number of files in our fake file system.
 
 Create a new project to work through this chapter.
 
-- `mkdir blogposts`
-- `cd blogposts`
-- `go mod init github.com/{your-name}/blogposts`
-- `touch blogposts_test.go`
+* `mkdir blogposts`
+* `cd blogposts`
+* `go mod init github.com/{your-name}/blogposts`
+* `touch blogposts_test.go`
 
 ```go
 package blogposts_test
@@ -124,7 +124,6 @@ func TestNewBlogPosts(t *testing.T) {
 		t.Errorf("got %d posts, wanted %d posts", len(posts), len(fs))
 	}
 }
-
 ```
 
 Notice that the package of our test is `blogposts_test`. Remember, when TDD is practiced well we take a _consumer-driven_ approach: we don't want to test internal details because _consumers_ don't care about them. By appending `_test` to our intended package name, we only access exported members from our package - just like a real user of our package.
@@ -195,7 +194,7 @@ func NewPostsFromFS(fileSystem fstest.MapFS) []Post {
 
 But, as Denise Yu wrote:
 
->Sliming is useful for giving a “skeleton” to your object. Designing an interface and executing logic are two concerns, and sliming tests strategically lets you focus on one at a time.
+> Sliming is useful for giving a “skeleton” to your object. Designing an interface and executing logic are two concerns, and sliming tests strategically lets you focus on one at a time.
 
 We already have our structure. So, what do we do instead?
 
@@ -284,6 +283,7 @@ func (s StubFailingFS) Open(name string) (fs.File, error) {
 	return nil, errors.New("oh no, i always fail")
 }
 ```
+
 ```go
 // later
 _, err := blogposts.NewPostsFromFS(StubFailingFS{})
@@ -300,6 +300,7 @@ Logically, our next iterations will be around expanding our `Post` type so that 
 We'll start with the first line in the proposed blog post schema, the title field.
 
 We need to change the contents of the test files so they match what was specified, and then we can make an assertion that it is parsed correctly.
+
 ```go
 func TestNewBlogPosts(t *testing.T) {
 	fs := fstest.MapFS{
@@ -318,6 +319,7 @@ func TestNewBlogPosts(t *testing.T) {
 ```
 
 ## Try to run the test
+
 ```
 ./blogpost_test.go:58:26: unknown field 'Title' in struct literal of type blogposts.Post
 ```
@@ -384,7 +386,7 @@ Even though this feels like a small increment forward it still required us to wr
 
 The iterative approach has given us fast feedback that our understanding of the requirements is incomplete.
 
-`fs.FS` gives us a way of opening a file within it by name with its `Open` method. From there we read the data from the file and, for now, we do not need any sophisticated parsing, just cutting out the `Title: ` text by slicing the string.
+`fs.FS` gives us a way of opening a file within it by name with its `Open` method. From there we read the data from the file and, for now, we do not need any sophisticated parsing, just cutting out the `Title:` text by slicing the string.
 
 ## Refactor
 
@@ -784,9 +786,9 @@ func newPost(postBody io.Reader) (Post, error) {
 }
 ```
 
-- `scanner.Scan()` returns a `bool` which indicates whether there's more data to scan, so we can use that with a `for` loop to keep reading through the data until the end.
-- After every `Scan()` we write the data into the buffer using `fmt.Fprintln`. We use the version that adds a newline because the scanner removes the newlines from each line, but we need to maintain them.
-- Because of the above, we need to trim the final newline, so we don't have a trailing one.
+* `scanner.Scan()` returns a `bool` which indicates whether there's more data to scan, so we can use that with a `for` loop to keep reading through the data until the end.
+* After every `Scan()` we write the data into the buffer using `fmt.Fprintln`. We use the version that adds a newline because the scanner removes the newlines from each line, but we need to maintain them.
+* Because of the above, we need to trim the final newline, so we don't have a trailing one.
 
 ## Refactor
 
@@ -825,9 +827,9 @@ We've made our "steel thread" of functionality, taking the shortest route to get
 
 We haven't handled:
 
-- when the file's format is not correct
-- the file is not a `.md`
-- what if the order of the metadata fields is different? Should that be allowed? Should we be able to handle it?
+* when the file's format is not correct
+* the file is not a `.md`
+* what if the order of the metadata fields is different? Should that be allowed? Should we be able to handle it?
 
 Crucially though, we have working software, and we have defined our interface. The above are just further iterations, more tests to write and drive our behaviour. To support any of the above we shouldn't have to change our _design_, just implementation details.
 
@@ -839,8 +841,8 @@ Keeping focused on the goal means we made the important decisions, and validated
 
 If you wish to try out the code "for real":
 
-- Create a `cmd` folder within the project, add a `main.go` file
-- Add the following code
+* Create a `cmd` folder within the project, add a `main.go` file
+* Add the following code
 
 ```go
 import (
@@ -858,7 +860,7 @@ func main() {
 }
 ```
 
-- Add some markdown files into a `posts` folder and run the program!
+* Add some markdown files into a `posts` folder and run the program!
 
 Notice the symmetry between the production code
 
@@ -876,7 +878,7 @@ This is when consumer-driven, top-down TDD _feels correct_.
 
 A user of our package can look at our tests and quickly get up to speed with what it's supposed to do and how to use it. As maintainers, we can be _confident our tests are useful because they're from a consumer's point of view_. We're not testing implementation details or other incidental details, so we can be reasonably confident that our tests will help us, rather than hinder us when refactoring.
 
-By relying on good software engineering practices like  [**dependency injection**](dependency-injection.md) our code is simple to test and re-use.
+By relying on good software engineering practices like [**dependency injection**](dependency-injection.md) our code is simple to test and re-use.
 
 When you're creating packages, even if they're only internal to your project, prefer a top-down consumer driven approach. This will stop you over-imagining designs and making abstractions you may not even need and will help ensure the tests you write are useful.
 
@@ -888,5 +890,5 @@ It's important to note that these new features only have operations for _reading
 
 ### Further reading
 
-- This was a light intro to `io/fs`. [Ben Congdon has done an excellent write-up](https://benjamincongdon.me/blog/2021/01/21/A-Tour-of-Go-116s-iofs-package/) which was a lot of help for writing this chapter.
-- [Discussion on the file system interfaces](https://github.com/golang/go/issues/41190)
+* This was a light intro to `io/fs`. [Ben Congdon has done an excellent write-up](https://benjamincongdon.me/blog/2021/01/21/A-Tour-of-Go-116s-iofs-package/) which was a lot of help for writing this chapter.
+* [Discussion on the file system interfaces](https://github.com/golang/go/issues/41190)

@@ -1,6 +1,6 @@
 # Pointers & errors
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/pointers)**
+[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/main/pointers)
 
 We learned about structs in the last section which let us capture a number of values related around a concept.
 
@@ -28,7 +28,7 @@ func TestWallet(t *testing.T) {
 }
 ```
 
-In the [previous example](./structs-methods-and-interfaces.md) we accessed fields directly with the field name, however in our _very secure wallet_ we don't want to expose our inner state to the rest of the world. We want to control access via methods.
+In the [previous example](structs-methods-and-interfaces.md) we accessed fields directly with the field name, however in our _very secure wallet_ we don't want to expose our inner state to the rest of the world. We want to control access via methods.
 
 ## Try to run the test
 
@@ -101,8 +101,7 @@ With our career in fintech secured, run the test suite and bask in the passing t
 
 ### That's not quite right
 
-Well this is confusing, our code looks like it should work.
-We add the new amount onto our balance and then the balance method should return the current state of it.
+Well this is confusing, our code looks like it should work. We add the new amount onto our balance and then the balance method should return the current state of it.
 
 In Go, **when you call a function or a method the arguments are** _**copied**_.
 
@@ -138,20 +137,18 @@ func (w Wallet) Deposit(amount int) {
 }
 ```
 
-The `%p` placeholder prints memory addresses in base 16 notation with leading `0x`s and the `\n` escape character prints a new line.
-Note that we get the pointer (memory address) of something by placing an `&` character at the beginning of the symbol.
+The `%p` placeholder prints memory addresses in base 16 notation with leading `0x`s and the  escape character prints a new line. Note that we get the pointer (memory address) of something by placing an `&` character at the beginning of the symbol.
 
 Now re-run the test
 
-```text
+```
 address of balance in Deposit is 0xc420012268
 address of balance in test is 0xc420012260
 ```
 
 You can see that the addresses of the two balances are different. So when we change the value of the balance inside the code, we are working on a copy of what came from the test. Therefore the balance in the test is unchanged.
 
-We can fix this with _pointers_. [Pointers](https://gobyexample.com/pointers) let us _point_ to some values and then let us change them.
-So rather than taking a copy of the whole Wallet, we instead take a pointer to that wallet so that we can change the original values within it.
+We can fix this with _pointers_. [Pointers](https://gobyexample.com/pointers) let us _point_ to some values and then let us change them. So rather than taking a copy of the whole Wallet, we instead take a pointer to that wallet so that we can change the original values within it.
 
 ```go
 func (w *Wallet) Deposit(amount int) {
@@ -175,8 +172,7 @@ func (w *Wallet) Balance() int {
 }
 ```
 
-and seemingly addressed the object directly. In fact, the code above using `(*w)` is absolutely valid. However, the makers of Go deemed this notation cumbersome, so the language permits us to write `w.balance`, without an explicit dereference.
-These pointers to structs even have their own name: _struct pointers_ and they are [automatically dereferenced](https://golang.org/ref/spec#Method_values).
+and seemingly addressed the object directly. In fact, the code above using `(*w)` is absolutely valid. However, the makers of Go deemed this notation cumbersome, so the language permits us to write `w.balance`, without an explicit dereference. These pointers to structs even have their own name: _struct pointers_ and they are [automatically dereferenced](https://golang.org/ref/spec#Method_values).
 
 Technically you do not need to change `Balance` to use a pointer receiver as taking a copy of the balance is fine. However, by convention you should keep your method receiver types the same for consistency.
 
@@ -658,7 +654,7 @@ func assertError(t testing.TB, got error, want error) {
 ### Pointers
 
 * Go copies values when you pass them to functions/methods, so if you're writing a function that needs to mutate state you'll need it to take a pointer to the thing you want to change.
-* The fact that Go takes a copy of values is useful a lot of the time but sometimes you won't want your system to make a copy of something, in which case you need to pass a reference. Examples include referencing very large data structures or things where only one instance is necessary \(like database connection pools\).
+* The fact that Go takes a copy of values is useful a lot of the time but sometimes you won't want your system to make a copy of something, in which case you need to pass a reference. Examples include referencing very large data structures or things where only one instance is necessary (like database connection pools).
 
 ### nil
 

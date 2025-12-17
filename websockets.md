@@ -1,6 +1,6 @@
 # WebSockets
 
-**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/websockets)**
+[**You can find all the code for this chapter here**](https://github.com/quii/learn-go-with-tests/tree/main/websockets)
 
 In this chapter we'll learn how to use WebSockets to improve our application.
 
@@ -8,8 +8,8 @@ In this chapter we'll learn how to use WebSockets to improve our application.
 
 We have two applications in our poker codebase
 
-- *Command line app*. Prompts the user to enter the number of players in a game. From then on informs the players of what the "blind bet" value is, which increases over time. At any point a user can enter `"{Playername} wins"` to finish the game and record the victor in a store.
-- *Web app*. Allows users to record winners of games and displays a league table. Shares the same store as the command line app.
+* _Command line app_. Prompts the user to enter the number of players in a game. From then on informs the players of what the "blind bet" value is, which increases over time. At any point a user can enter `"{Playername} wins"` to finish the game and record the victor in a store.
+* _Web app_. Allows users to record winners of games and displays a league table. Shares the same store as the command line app.
 
 ## Next steps
 
@@ -84,6 +84,7 @@ func TestGame(t *testing.T) {
 ```
 
 ## Try to run the test
+
 ```
 --- FAIL: TestGame (0.00s)
 === RUN   TestGame/GET_/game_returns_200
@@ -135,7 +136,6 @@ You'll also notice I changed `assertStatus` to accept `response` rather than `re
 Now we need to make the endpoint return some HTML, here it is
 
 ```html
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -169,9 +169,9 @@ Now we need to make the endpoint return some HTML, here it is
 
 We have a very simple web page
 
- - A text input for the user to enter the winner into
- - A button they can click to declare the winner.
- - Some JavaScript to open a WebSocket connection to our server and handle the submit button being pressed
+* A text input for the user to enter the winner into
+* A button they can click to declare the winner.
+* Some JavaScript to open a WebSocket connection to our server and handle the submit button being pressed
 
 `WebSocket` is built into most modern browsers so we don't need to worry about bringing in any libraries. The web page won't work for older browsers, but we're ok with that for this scenario.
 
@@ -254,6 +254,7 @@ Using `websocket.DefaultDialer.Dial` we try to dial in to our server and then we
 Finally, we assert on the player store to check the winner was recorded.
 
 ## Try to run the test
+
 ```
 === RUN   TestGame/when_we_get_a_message_over_a_websocket_it_is_a_winner_of_a_game
     --- FAIL: TestGame/when_we_get_a_message_over_a_websocket_it_is_a_winner_of_a_game (0.00s)
@@ -590,9 +591,9 @@ type Game interface {
 
 Let the compiler tell you what you need to fix. The change isn't so bad:
 
-- Update `TexasHoldem` so it properly implements `Game`
-- In `CLI` when we start the game, pass in our `out` property (`cli.game.Start(numberOfPlayers, cli.out)`)
-- In `TexasHoldem`'s test i use `game.Start(5, io.Discard)` to fix the compilation problem and configure the alert output to be discarded
+* Update `TexasHoldem` so it properly implements `Game`
+* In `CLI` when we start the game, pass in our `out` property (`cli.game.Start(numberOfPlayers, cli.out)`)
+* In `TexasHoldem`'s test i use `game.Start(5, io.Discard)` to fix the compilation problem and configure the alert output to be discarded
 
 If you've got everything right, everything should be green! Now we can try and use `Game` within `Server`.
 
@@ -640,9 +641,9 @@ t.Run("start a game with 3 players and declare Ruth the winner", func(t *testing
 })
 ```
 
-- As discussed we create a spy `Game` and pass it into `mustMakePlayerServer` (be sure to update the helper to support this).
-- We then send the web socket messages for a game.
-- Finally we assert that the game is started and finished with what we expect.
+* As discussed we create a spy `Game` and pass it into `mustMakePlayerServer` (be sure to update the helper to support this).
+* We then send the web socket messages for a game.
+* Finally we assert that the game is started and finished with what we expect.
 
 ## Try to run the test
 
@@ -934,13 +935,12 @@ t.Run("start a game with 3 players, send some blind alerts down WS and declare R
 })
 ```
 
-- We've added a `wantedBlindAlert` and configured our `GameSpy` to send it to `out` if `Start` is called.
-- We hope it gets sent in the websocket connection so we've added a call to `ws.ReadMessage()` to wait for a message to be sent and then check it's the one we expected.
+* We've added a `wantedBlindAlert` and configured our `GameSpy` to send it to `out` if `Start` is called.
+* We hope it gets sent in the websocket connection so we've added a call to `ws.ReadMessage()` to wait for a message to be sent and then check it's the one we expected.
 
 ## Try to run the test
 
 You should find the test hangs forever. This is because `ws.ReadMessage()` will block until it gets a message, which it never will.
-
 
 ## Write the minimal amount of code for the test to run and check the failing test output
 
@@ -1081,11 +1081,11 @@ We covered a few things in this chapter
 
 ### WebSockets
 
-- Convenient way of sending messages between clients and servers that does not require the client to keep polling the server. Both the client and server code we have is very simple.
-- Trivial to test, but you have to be wary of the asynchronous nature of the tests
+* Convenient way of sending messages between clients and servers that does not require the client to keep polling the server. Both the client and server code we have is very simple.
+* Trivial to test, but you have to be wary of the asynchronous nature of the tests
 
 ### Handling code in tests that can be delayed or never finish
 
-- Create helper functions to retry assertions and add timeouts.
-- We can use go routines to ensure the assertions don't block anything and then use channels to let them signal that they have finished, or not.
-- The `time` package has some helpful functions which also send signals via channels about events in time so we can set timeouts
+* Create helper functions to retry assertions and add timeouts.
+* We can use go routines to ensure the assertions don't block anything and then use channels to let them signal that they have finished, or not.
+* The `time` package has some helpful functions which also send signals via channels about events in time so we can set timeouts
