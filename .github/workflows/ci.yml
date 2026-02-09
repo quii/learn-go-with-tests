@@ -1,0 +1,32 @@
+name: Go CI
+
+on:
+  # Run tests for every Pull Request into main
+  pull_request:
+    branches:
+      - main
+
+  # Optional: Run CI on pushes to main (recommended)
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Go Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.1'
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test -v ./...
