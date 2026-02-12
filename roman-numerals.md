@@ -687,6 +687,16 @@ Property based tests help you do this by throwing random data at your code and v
 
 Enough words, let's see some code
 
+> **⚠️ Linux Users:** Please **DO NOT** run the test below immediately. It will likely freeze your system (requiring a hard reboot).
+>
+> <details>
+> <summary>Click here to see why (Technical Explanation)</summary>
+>
+> The `testing/quick` package generates random integers up to `int64` max. Our current naive implementation attempts to build a string of that length in memory (quadrillions of characters).
+>
+> While macOS and Windows often handle this gracefully (UI remains responsive), Linux kernels usually encounter "swap thrashing," causing the entire system to freeze before the process can be killed.
+> </details>
+
 ```go
 func TestPropertiesOfConversion(t *testing.T) {
 	assertion := func(arabic int) bool {
