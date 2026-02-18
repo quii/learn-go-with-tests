@@ -384,7 +384,7 @@ func TestSumAllTails(t *testing.T) {
 	got := SumAllTails([]int{1, 2}, []int{0, 9})
 	want := []int{2, 9}
 
-	if !reflect.DeepEqual(got, want) {
+	if !slices.Equal(got, want) {
 		t.Errorf("got %v want %v", got, want)
 	}
 }
@@ -437,7 +437,7 @@ func TestSumAllTails(t *testing.T) {
 		got := SumAllTails([]int{1, 2}, []int{0, 9})
 		want := []int{2, 9}
 
-		if !reflect.DeepEqual(got, want) {
+		if !slices.Equal(got, want) {
 			t.Errorf("got %v want %v", got, want)
 		}
 	})
@@ -446,7 +446,7 @@ func TestSumAllTails(t *testing.T) {
 		got := SumAllTails([]int{}, []int{3, 4, 5})
 		want := []int{0, 9}
 
-		if !reflect.DeepEqual(got, want) {
+		if !slices.Equal(got, want) {
 			t.Errorf("got %v want %v", got, want)
 		}
 	})
@@ -493,7 +493,7 @@ func TestSumAllTails(t *testing.T) {
 
 	checkSums := func(t testing.TB, got, want []int) {
 		t.Helper()
-		if !reflect.DeepEqual(got, want) {
+		if !slices.Equal(got, want) {
 			t.Errorf("got %v want %v", got, want)
 		}
 	}
@@ -540,7 +540,6 @@ We have covered
   * How to slice, slices!
 * `len` to get the length of an array or slice
 * Test coverage tool
-* `reflect.DeepEqual` and why it's useful but can reduce the type-safety of your code
 
 We've used slices and arrays with integers but they work with any other type
 too, including arrays/slices themselves. So you can declare a variable of
