@@ -391,7 +391,7 @@ left and a value on the right:
 
 ```go
 // Send statement
-resultChannel <- result{u, wc(u)}
+resultChannel <- result{url, wc(url)}
 ```
 
 The next `for` loop iterates once for each of the urls. Inside we're using
