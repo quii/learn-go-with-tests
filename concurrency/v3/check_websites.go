@@ -7,7 +7,7 @@ type result struct {
 	bool
 }
 
-// CheckWebsites takes a WebsiteChecker and a slice of urls and returns  a map.
+// CheckWebsites takes a WebsiteChecker and a slice of urls and returns a map.
 // of urls to the result of checking each url with the WebsiteChecker function.
 func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 	results := make(map[string]bool)
