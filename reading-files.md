@@ -771,11 +771,11 @@ func newPost(postBody io.Reader) (Post, error) {
 
 	scanner.Scan() // ignore a line
 
-	buf := bytes.Buffer{}
+	var b strings.Builder
 	for scanner.Scan() {
-		fmt.Fprintln(&buf, scanner.Text())
+		fmt.Fprintln(&b, scanner.Text())
 	}
-	body := strings.TrimSuffix(buf.String(), "\n")
+	body := strings.TrimSuffix(b.String(), "\n")
 
 	return Post{
 		Title:       title,
@@ -813,11 +813,11 @@ func newPost(postBody io.Reader) (Post, error) {
 
 func readBody(scanner *bufio.Scanner) string {
 	scanner.Scan() // ignore a line
-	buf := bytes.Buffer{}
+	var b strings.Builder
 	for scanner.Scan() {
-		fmt.Fprintln(&buf, scanner.Text())
+		fmt.Fprintln(&b, scanner.Text())
 	}
-	return strings.TrimSuffix(buf.String(), "\n")
+	return strings.TrimSuffix(b.String(), "\n")
 }
 ```
 
