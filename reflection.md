@@ -186,7 +186,7 @@ Now we can easily add a scenario to see what happens if we have more than one st
 
 Add the following scenario to the `cases`.
 
-```
+``` go
 {
     "struct with two string fields",
     struct {
@@ -230,7 +230,7 @@ The next shortcoming in `walk` is that it assumes every field is a `string`. Let
 
 Add the following case
 
-```
+``` go
 {
     "struct with non string field",
     struct {
@@ -279,7 +279,7 @@ The next scenario is what if it isn't a "flat" `struct`? In other words, what ha
 
 We have been using the anonymous struct syntax to declare types ad-hocly for our tests so we could continue to do that like so
 
-```
+``` go
 {
     "nested fields",
     struct {
@@ -294,6 +294,7 @@ We have been using the anonymous struct syntax to declare types ad-hocly for our
     }{33, "London"}},
     []string{"Chris", "London"},
 },
+
 ```
 
 But we can see that when you get inner anonymous structs the syntax gets a little messy. [There is a proposal to make it so the syntax would be nicer](https://github.com/golang/go/issues/12854).
@@ -316,7 +317,7 @@ type Profile struct {
 
 Now we can add this to our cases which reads a lot clearer than before
 
-```
+``` go
 {
     "nested fields",
     Person{
@@ -386,7 +387,7 @@ What if the value of the struct passed in is a pointer?
 
 Add this case
 
-```
+``` go
 {
     "pointers to things",
     &Person{
@@ -470,7 +471,7 @@ Next, we need to cover slices.
 
 ## Write the test first
 
-```
+``` go
 {
     "slices",
     []Profile {
@@ -594,7 +595,7 @@ Now we've done this, handling arrays should be trivial.
 
 Add to the cases
 
-```
+``` go
 {
     "arrays",
     [2]Profile {
@@ -645,7 +646,7 @@ The next type we want to handle is `map`.
 
 ## Write the test first
 
-```
+``` go
 {
     "maps",
     map[string]string{
