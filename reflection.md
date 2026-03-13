@@ -294,7 +294,6 @@ We have been using the anonymous struct syntax to declare types ad-hocly for our
     }{33, "London"}},
     []string{"Chris", "London"},
 },
-
 ```
 
 But we can see that when you get inner anonymous structs the syntax gets a little messy. [There is a proposal to make it so the syntax would be nicer](https://github.com/golang/go/issues/12854).
