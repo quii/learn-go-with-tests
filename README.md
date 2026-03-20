@@ -23,6 +23,7 @@
 - [Türkçe](https://halilkocaoz.gitbook.io/go-programlama-dilini-ogren/)
 - [فارسی](https://go-yaad-begir.gitbook.io/go-ba-test/)
 - [Nederlands](https://bobkosse.gitbook.io/leer-go-met-tests/)
+- [Tiếng Việt](https://sons-organization-15.gitbook.io/learn-go-with-tests)
 
 ## Support me
 
