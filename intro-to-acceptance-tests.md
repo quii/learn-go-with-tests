@@ -242,7 +242,7 @@ func runServer(binName string, port string) (sendInterrupt func() error, kill fu
 
 	err = waitForServerListening(port)
 
-	return
+	return sendInterrupt, kill, nil
 }
 
 func waitForServerListening(port string) error {
