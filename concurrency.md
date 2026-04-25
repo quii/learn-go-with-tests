@@ -273,10 +273,7 @@ tests, two of the goroutines write to the results map at exactly the same time.
 Maps in Go don't like it when more than one thing tries to write to them at
 once, and so `fatal error`.
 
-This is a _race condition_, a bug that occurs when the output of our software is
-dependent on the timing and sequence of events that we have no control over.
-Because we cannot control exactly when each goroutine writes to the results map,
-we are vulnerable to two goroutines writing to it at the same time.
+This is a _data race_, a bug that occurs when two or more goroutines access the same memory location concurrently, and at least one of those accesses is a write. Because we cannot control exactly when each goroutine executes, we are vulnerable to multiple goroutines trying to write to the `results` map at the exact same time. Go maps are not safe for concurrent writes, so the runtime throws a fatal error to prevent memory corruption.
 
 Go can help us to spot race conditions with its built in [_race detector_][godoc_race_detector].
 To enable this feature, run the tests with the `race` flag: `go test -race`.
