@@ -2,13 +2,13 @@
 
 **[You can find all the code here](https://github.com/quii/learn-go-with-tests/tree/main/blogrenderer)**
 
-We live in a world where everyone wants to build web applications with the latest flavour of the month frontend framework built upon gigabytes of transpiled JavaScript, working with a Byzantine build system; [but maybe that's not always necessary](https://quii.dev/The_Web_I_Want).  
+We live in a world where everyone wants to build web applications with the latest flavour of the month frontend framework built upon gigabytes of transpiled JavaScript, working with a Byzantine build system; [but maybe that's not always necessary](https://quii.dev/The_Web_I_Want).
 
 I'd say most Go developers value a simple, stable & fast toolchain but the frontend world frequently fails to deliver on this front.
 
-Many websites do not need to be an [SPA](https://en.wikipedia.org/wiki/Single-page_application). **HTML and CSS are fantastic ways of delivering content** and you can use Go to make a website to deliver HTML. 
+Many websites do not need to be an [SPA](https://en.wikipedia.org/wiki/Single-page_application). **HTML and CSS are fantastic ways of delivering content** and you can use Go to make a website to deliver HTML.
 
-If you wish to still have some dynamic elements, you can still sprinkle in some client side JavaScript, or you may even want to try experimenting with [Hotwire](https://hotwired.dev) which allows you to deliver a dynamic experience with a server-side approach. 
+If you wish to still have some dynamic elements, you can still sprinkle in some client side JavaScript, or you may even want to try experimenting with [Hotwire](https://hotwired.dev) which allows you to deliver a dynamic experience with a server-side approach.
 
 You can generate your HTML in Go with elaborate usage of [`fmt.Fprintf`](https://pkg.go.dev/fmt#Fprintf), but in this chapter you'll learn that Go's standard library has some tools to generate HTML in a simpler and more maintainable way. You'll also learn more effective ways of testing this kind of code that you may not have run in to before.
 
@@ -44,12 +44,12 @@ If we continue our journey of writing blog software, we'd take this data and gen
 
 For our blog, we want to generate two kinds of page:
 
-1. **View post**. Renders a specific post. The `Body` field in `Post` is a string containing markdown so that should be converted to HTML. 
+1. **View post**. Renders a specific post. The `Body` field in `Post` is a string containing markdown so that should be converted to HTML.
 2. **Index**. Lists all of the posts, with hyperlinks to view the specific post.
 
 We'll also want a consistent look and feel across our site, so for each page we'll have the usual HTML furniture like `<html>` and a `<head>` containing links to CSS stylesheets and whatever else we may want.
 
-When you're building blog software you have a few options in terms of approach of how you build and send HTML to the user's browser. 
+When you're building blog software you have a few options in terms of approach of how you build and send HTML to the user's browser.
 
 We'll design our code so it accepts an `io.Writer`. This means the caller of our code has the flexibility to:
 
@@ -63,7 +63,7 @@ As always, it's important to think about requirements before diving in too fast.
 
 In my view, actually viewing content is higher priority than an index page. We could launch this product and share direct links to our wonderful content. An index page which can't link to the actual content isn't useful.
 
-Still, rendering a post as described earlier still feels big. All the HTML furniture, converting the body markdown into HTML, listing tags, e.t.c. 
+Still, rendering a post as described earlier still feels big. All the HTML furniture, converting the body markdown into HTML, listing tags, e.t.c.
 
 At this stage I'm not overly concerned with the specific markup, and an easy first step would be just to check we can render the post's title as an `<h1>`. This *feels* like the smallest first step that can move us forward a bit.
 
@@ -107,7 +107,7 @@ Our decision to accept an `io.Writer` also makes testing simple, in this case we
 
 ## Try to run the test
 
-If you've read the previous chapters of this book you should be well-practiced at this now. You won't be able to run the test because we don't have the package defined or the `Render` function. Try and follow the compiler messages yourself and get to a state where you can run the test and see that it fails with a clear message. 
+If you've read the previous chapters of this book you should be well-practiced at this now. You won't be able to run the test because we don't have the package defined or the `Render` function. Try and follow the compiler messages yourself and get to a state where you can run the test and see that it fails with a clear message.
 
 It's really important that you exercise your tests failing, you'll thank yourself when you accidentally make a test fail 6 months later that you put in the effort *now* to check it fails with a clear message.
 
@@ -140,7 +140,7 @@ func Render(w io.Writer, p Post) error {
 }
 ```
 
-Remember, software development is primarily a learning activity. In order to discover and learn as we work, we need to work in a way that gives us frequent, high-quality feedback loops, and the easiest way to do that is work in small steps. 
+Remember, software development is primarily a learning activity. In order to discover and learn as we work, we need to work in a way that gives us frequent, high-quality feedback loops, and the easiest way to do that is work in small steps.
 
 So we're not worrying about using any templating libraries right now. You can make HTML just with "normal" string templating just fine, and by skipping the template part we can validate a small bit of useful behaviour and we've done a small bit of design work for our package's API.
 
@@ -178,7 +178,7 @@ Nonetheless, let's put up with the pain *for now*.
 
 ## Try to run the test
 
-It should fail, complaining it doesn't have the string we expect, as we're not rendering the description and tags. 
+It should fail, complaining it doesn't have the string we expect, as we're not rendering the description and tags.
 
 ## Write enough code to make it pass
 
@@ -222,17 +222,17 @@ func Render(w io.Writer, p Post) error {
 }
 ```
 
-**Yikes**. Not the nicest code i've written, and we're still only at a very early implementation of our markup. We'll need so much more content and things on our page, we're quickly seeing that this approach is not appropriate. 
+**Yikes**. Not the nicest code i've written, and we're still only at a very early implementation of our markup. We'll need so much more content and things on our page, we're quickly seeing that this approach is not appropriate.
 
 Crucially though, we have a passing test; we have working software.
 
 ## Refactor
 
-With the safety-net of a passing test for working code, we can now think about changing our implementation approach at the refactoring stage. 
+With the safety-net of a passing test for working code, we can now think about changing our implementation approach at the refactoring stage.
 
 ### Introducing templates
 
-Go has two templating packages [text/template](https://pkg.go.dev/text/template) and [html/template](https://pkg.go.dev/html/template) and they share the same interface.  What they both do is allow you to combine a template and some data to produce a string. 
+Go has two templating packages [text/template](https://pkg.go.dev/text/template) and [html/template](https://pkg.go.dev/html/template) and they share the same interface.  What they both do is allow you to combine a template and some data to produce a string.
 
 What's the difference with the HTML version?
 
@@ -244,7 +244,7 @@ Whilst we're focusing on generating HTML here, if your project is doing complex 
 
 ### Back to the code
 
-Here is a template for our blog: 
+Here is a template for our blog:
 
 `<h1>{{.Title}}</h1><p>{{.Description}}</p>Tags: <ul>{{range .Tags}}<li>{{.}}</li>{{end}}</ul>`
 
@@ -276,11 +276,11 @@ func Render(w io.Writer, p Post) error {
 }
 ```
 
-We create a new template with a name, and then parse our template string. We can then use the `Execute` method on it, passing in our data, in this case the `Post`. 
+We create a new template with a name, and then parse our template string. We can then use the `Execute` method on it, passing in our data, in this case the `Post`.
 
 The template will substitute things like `{{.Description}}` with the content of `p.Description`. Templates also give you some programming primitives like `range` to loop over values, and `if`. You can find more details in the [text/template documentation](https://pkg.go.dev/text/template).
 
-*This should be a pure refactor.* We shouldn't need to change our tests and they should continue to pass. Importantly, our code is easier to read and has far less annoying error handling to contend with. 
+*This should be a pure refactor.* We shouldn't need to change our tests and they should continue to pass. Importantly, our code is easier to read and has far less annoying error handling to contend with.
 
 Frequently people complain about the verbosity of error handling in Go, but you might find you can find better ways to write your code so it's less error-prone in the first place, like here.
 
@@ -336,9 +336,9 @@ Embed was lightly touched on in [reading files](reading-files.md). The [document
 >
 > Go source files that import "embed" can use the //go:embed directive to initialize a variable of type string, []byte, or FS with the contents of files read from the package directory or subdirectories at compile time.
 
-Why would we want to use this? Well the alternative is that we _can_ load our templates from a "normal" file system. However this means we'd have to make sure that the templates are in the correct file path wherever we want to use this software. In your job you may have various environments like development, staging and live. For this to work, you'd need to make sure your templates are copied to the correct place. 
+Why would we want to use this? Well the alternative is that we _can_ load our templates from a "normal" file system. However this means we'd have to make sure that the templates are in the correct file path wherever we want to use this software. In your job you may have various environments like development, staging and live. For this to work, you'd need to make sure your templates are copied to the correct place.
 
-With embed, the files are included in your Go program when you build it. This means once you've built your program (which you should only do once), the files are always available to you. 
+With embed, the files are included in your Go program when you build it. This means once you've built your program (which you should only do once), the files are always available to you.
 
 What's handy is you can not only embed individual files, but also file systems; and that filesystem implements [io/fs](https://pkg.go.dev/io/fs) which means your code doesn't need to care what kind of file system it is working with.
 
@@ -356,7 +356,7 @@ We don't really want our template to be defined as a one line string. We want to
 Tags: <ul>{{range .Tags}}<li>{{.}}</li>{{end}}</ul>
 ```
 
-But if we do this, our test fails. This is because our test is expecting a very specific string to be returned. 
+But if we do this, our test fails. This is because our test is expecting a very specific string to be returned.
 
 But really, we don't actually care about whitespace. Maintaining this test will become a nightmare if we have to keep painstakingly updating the assertion string every time we make minor changes to the markup. As the template grows, these kind of edits become harder to manage and the costs of work will spiral out of control.
 
@@ -432,9 +432,9 @@ Now that we have made this change, we still benefit from having our code well-te
 
 ### Are we still doing TDD?
 
-An interesting side-effect of this approach is it takes us away from TDD. Of course you _could_ manually edit the approved files to the state you want, run your tests and then fix the templates so they output what you defined. 
+An interesting side-effect of this approach is it takes us away from TDD. Of course you _could_ manually edit the approved files to the state you want, run your tests and then fix the templates so they output what you defined.
 
-But that's just silly! TDD is a method for doing work, specifically designing; but that doesn't mean we have to dogmatically use it for **everything**. 
+But that's just silly! TDD is a method for doing work, specifically designing; but that doesn't mean we have to dogmatically use it for **everything**.
 
 The important thing is, we've done the right thing and used TDD as a **design tool** to design our package's API. For templates changes our process can be:
 
@@ -446,7 +446,7 @@ The important thing is, we've done the right thing and used TDD as a **design to
 
 We still shouldn't give up the value of working in small achievable steps. Try to find ways to make the changes small and keep re-running the tests to get real feedback on what you're doing.
 
-If we start doing things like changing the code _around_ the templates, then of course that may warrant going back to our TDD method of work. 
+If we start doing things like changing the code _around_ the templates, then of course that may warrant going back to our TDD method of work.
 
 ## Expand the markup
 
@@ -557,7 +557,7 @@ func BenchmarkRender(b *testing.B) {
 		}
 	)
 
-	for b.Loop() {
+	for i := 0; i < b.N; i++ {
 		blogrenderer.Render(io.Discard, aPost)
 	}
 }
@@ -645,7 +645,7 @@ func BenchmarkRender(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	for b.Loop() {
+	for i := 0; i < b.N; i++ {
 		postRenderer.Render(io.Discard, aPost)
 	}
 }
@@ -657,13 +657,13 @@ The test should continue to pass. How about our benchmark?
 
 ## Back to the real work
 
-In terms of rendering posts, the important part left is actually rendering the `Body`. If you recall, that should be markdown that the author has written, so it'll need converting to HTML. 
+In terms of rendering posts, the important part left is actually rendering the `Body`. If you recall, that should be markdown that the author has written, so it'll need converting to HTML.
 
-We'll leave this as an exercise for you, the reader. You should be able to find a Go library to do this for you. Use the approval test to validate what you're doing. 
+We'll leave this as an exercise for you, the reader. You should be able to find a Go library to do this for you. Use the approval test to validate what you're doing.
 
 ### On testing 3rd-party libraries
 
-**Note**. Be careful not to worry too much about explicitly testing how a 3rd party library behaves in unit tests. 
+**Note**. Be careful not to worry too much about explicitly testing how a 3rd party library behaves in unit tests.
 
 Writing tests against code you don't control is wasteful and adds maintenance overhead. Sometimes you may wish to use [dependency injection](./dependency-injection.md) to control a dependency and mock its behaviour for a test.
 
@@ -671,9 +671,9 @@ In this case though, I view converting the markdown into HTML as implementation 
 
 ### Render index
 
-The next bit of functionality we're going to do is rendering an Index, listing the posts as a HTML ordered list. 
+The next bit of functionality we're going to do is rendering an Index, listing the posts as a HTML ordered list.
 
-We're expanding upon our API, so we'll put our TDD hat back on. 
+We're expanding upon our API, so we'll put our TDD hat back on.
 
 ## Write the test first
 
@@ -700,7 +700,7 @@ t.Run("it renders an index of posts", func(t *testing.T) {
 1. We're using the `Post`'s title field as a part of the path of the URL, but we don't really want spaces in the URL so we're replacing them with hyphens.
 2. We've added a `RenderIndex` method to our `PostRenderer` that again takes an `io.Writer` and a slice of `Post`.
 
-If we had stuck with a test-after, approval tests approach here we would not be answering these questions in a controlled environment. **Tests give us space to think**. 
+If we had stuck with a test-after, approval tests approach here we would not be answering these questions in a controlled environment. **Tests give us space to think**.
 
 ## Try to run the test
 
@@ -746,7 +746,7 @@ func (r *PostRenderer) RenderIndex(w io.Writer, posts []Post) error {
 }
 ```
 
-I didn't want to bother with separate template files at first, I just wanted to get it working. I view the upfront template parsing and separation as refactoring I can do later. 
+I didn't want to bother with separate template files at first, I just wanted to get it working. I view the upfront template parsing and separation as refactoring I can do later.
 
 This doesn't pass, but it's close.
 
@@ -758,11 +758,11 @@ This doesn't pass, but it's close.
     --- FAIL: TestRender/it_renders_an_index_of_posts (0.00s)
 ```
 
-You can see that the templating code is escaping the spaces in the `href` attributes. We need a way to do a string replace of spaces with hyphens. We can't just loop through the `[]Post` and replace them in-memory because we still want the spaces displayed to the user in the anchors. 
+You can see that the templating code is escaping the spaces in the `href` attributes. We need a way to do a string replace of spaces with hyphens. We can't just loop through the `[]Post` and replace them in-memory because we still want the spaces displayed to the user in the anchors.
 
-We have a few options. The first one we'll explore is passing a function in to our template. 
+We have a few options. The first one we'll explore is passing a function in to our template.
 
-### Passing functions into templates 
+### Passing functions into templates
 
 ```go
 func (r *PostRenderer) RenderIndex(w io.Writer, posts []Post) error {
@@ -787,17 +787,17 @@ func (r *PostRenderer) RenderIndex(w io.Writer, posts []Post) error {
 
 _Before you parse a template_ you can add a `template.FuncMap` into your template, which allows you to define functions that can be called within your template. In this case we've made a `sanitiseTitle` function which we then call inside our template with `{{sanitiseTitle .Title}}`.
 
-This is a powerful feature, being able to send functions in to your template will allow you to do some very cool things, but, should you? Going back to the principles of Mustache and logic-less templates, why did they advocate for logic-less? **What is wrong with logic in templates?** 
+This is a powerful feature, being able to send functions in to your template will allow you to do some very cool things, but, should you? Going back to the principles of Mustache and logic-less templates, why did they advocate for logic-less? **What is wrong with logic in templates?**
 
-As we've shown, in order to test our templates, *we've had to introduce a whole different kind of testing*. 
+As we've shown, in order to test our templates, *we've had to introduce a whole different kind of testing*.
 
-Imagine you introduce a function into a template which has a few different permutations of behaviour and edge cases, **how will you test it**? With this current design, your only means of testing this logic is by _rendering HTML and comparing strings_. This is not an easy or sane way of testing logic, and definitely not what you'd want for _important_ business logic. 
+Imagine you introduce a function into a template which has a few different permutations of behaviour and edge cases, **how will you test it**? With this current design, your only means of testing this logic is by _rendering HTML and comparing strings_. This is not an easy or sane way of testing logic, and definitely not what you'd want for _important_ business logic.
 
 Even though the approval tests technique has reduced the cost of maintaining these tests, they're still more expensive to maintain than most unit tests you'll write. They're still sensitive to any minor markup changes you might make, it's just we've made it easier to manage. We should still strive to architect our code so we don't have to write many tests around our templates, and try and separate concerns so any logic that doesn't need to live inside our rendering code is properly separated.
 
-What Mustache-influenced templating engines give you is a useful constraint, don't try to circumvent it too often; **don't go against the grain**. Instead, embrace the idea of [view models](https://stackoverflow.com/a/11074506/3193), where you construct specific types that contain the data you need to render, in a way that's convenient for the templating language. 
+What Mustache-influenced templating engines give you is a useful constraint, don't try to circumvent it too often; **don't go against the grain**. Instead, embrace the idea of [view models](https://stackoverflow.com/a/11074506/3193), where you construct specific types that contain the data you need to render, in a way that's convenient for the templating language.
 
-This way, whatever important business logic you use to generate that bag of data can be unit tested separately, away from the messy world of HTML and templating. 
+This way, whatever important business logic you use to generate that bag of data can be unit tested separately, away from the messy world of HTML and templating.
 
 ### Separating concerns
 
@@ -805,7 +805,7 @@ So what could we do instead?
 
 #### Add a method to `Post` and then call that in the template
 
-We can call methods in our templating code on the types we send, so we could add a `SanitisedTitle` method to `Post`. This would simplify the template and we could easily unit test this logic separately if we wish. This is probably the easiest solution, although not necessarily the simplest.  
+We can call methods in our templating code on the types we send, so we could add a `SanitisedTitle` method to `Post`. This would simplify the template and we could easily unit test this logic separately if we wish. This is probably the easiest solution, although not necessarily the simplest.
 
 A downside to this approach is that this is still _view_ logic. It's not interesting to the rest of the system but it now becomes a part of the API for a core domain object. This kind of approach over time can lead to you creating [God Objects](https://en.wikipedia.org/wiki/God_object).
 
@@ -895,7 +895,7 @@ func (r *PostRenderer) RenderIndex(w io.Writer, posts []Post) error {
 
 By parsing more than one template into `templ` we now have to call `ExecuteTemplate` and specify _which_ template we wish to render as appropriate, but hopefully you'll agree the code we've arrived at looks great.
 
-There is a _slight_ risk if someone renames one of the template files, it would introduce a bug, but our fast to run unit tests would catch this quickly. 
+There is a _slight_ risk if someone renames one of the template files, it would introduce a bug, but our fast to run unit tests would catch this quickly.
 
 Now we're happy with our package's API design and got some basic behaviour driven out with TDD, let's change our test to use approvals.
 
@@ -912,7 +912,7 @@ Now we're happy with our package's API design and got some basic behaviour drive
 	})
 ```
 
-Remember to run the test to see it fail, and then approve the change. 
+Remember to run the test to see it fail, and then approve the change.
 
 Finally we can add our page furniture to our index page:
 
@@ -981,9 +981,9 @@ func newPostVM(p Post, r *PostRenderer) postViewModel {
 }
 ```
 
-I used the excellent [gomarkdown](https://github.com/gomarkdown/markdown) library which worked exactly how I'd hope. 
+I used the excellent [gomarkdown](https://github.com/gomarkdown/markdown) library which worked exactly how I'd hope.
 
-If you tried to do this yourself you may have found that your body render had the HTML escaped. This is a security feature of Go's html/template package to stop malicious 3rd-party HTML being outputted. 
+If you tried to do this yourself you may have found that your body render had the HTML escaped. This is a security feature of Go's html/template package to stop malicious 3rd-party HTML being outputted.
 
 To circumvent this, in the type you send to the render, you'll need to wrap your trusted HTML in [template.HTML](https://pkg.go.dev/html/template#HTML)
 
@@ -991,13 +991,13 @@ To circumvent this, in the type you send to the render, you'll need to wrap your
 >
 > Use of this type presents a security risk: the encapsulated content should come from a trusted source, as it will be included verbatim in the template output.
 
-So I created an **unexported** view model (`postViewModel`), because I still viewed this as internal implementation detail to rendering. I have no need to test this separately and I don't want it polluting my API. 
+So I created an **unexported** view model (`postViewModel`), because I still viewed this as internal implementation detail to rendering. I have no need to test this separately and I don't want it polluting my API.
 
 I construct one when rendering so I can parse the `Body` into `HTMLBody` and then I use that field in the template to render the HTML.
 
 ## Wrapping up
 
-If you combine your learnings of the [reading files](reading-files.md) chapter and this one, you can comfortably make a well-tested, simple, static site generator and spin up a blog of your own. Find some CSS tutorials and you can make it look nice too. 
+If you combine your learnings of the [reading files](reading-files.md) chapter and this one, you can comfortably make a well-tested, simple, static site generator and spin up a blog of your own. Find some CSS tutorials and you can make it look nice too.
 
 This approach extends beyond blogs. Taking data from any source, be it a database, an API or a file-system and converting it into HTML and returning it from a server is a simple technique spanning many decades. People like to bemoan the complexity of modern web development but are you sure you're not just inflicting the complexity on yourself?
 
@@ -1008,7 +1008,7 @@ Go is wonderful for web development, especially when you think clearly about wha
 - How to create and render HTML templates.
 - How to compose templates together and [DRY](https://en.wikipedia.org/wiki/Don't_repeat_yourself) up related markup and help us keep a consistent look and feel.
 - How to pass functions into templates, and why you should think twice about it.
-- How to write "Approval Tests", which help us test the big ugly output of things like template renderers. 
+- How to write "Approval Tests", which help us test the big ugly output of things like template renderers.
 
 ### On logic-less templates
 
@@ -1016,9 +1016,9 @@ As always, this is all about **separation of concerns**. It's important we consi
 
 ### Not just for HTML
 
-Remember that go has `text/template` to generate other kinds of data from a template. If you find yourself needing to transform data into some kind of structured output, the techniques laid out in this chapter can be useful. 
+Remember that go has `text/template` to generate other kinds of data from a template. If you find yourself needing to transform data into some kind of structured output, the techniques laid out in this chapter can be useful.
 
-### References and further material 
+### References and further material
 
 - [John Calhoun's 'Learn Web Development with Go'](https://www.calhoun.io/intro-to-templates-p1-contextual-encoding/) has a number of excellent articles on templating.
-- [Hotwire](https://hotwired.dev) - You can use these techniques to create Hotwire web applications. It has been built by Basecamp who are primarily a Ruby on Rails shop, but because it is server-side, we can use it with Go. 
+- [Hotwire](https://hotwired.dev) - You can use these techniques to create Hotwire web applications. It has been built by Basecamp who are primarily a Ruby on Rails shop, but because it is server-side, we can use it with Go.

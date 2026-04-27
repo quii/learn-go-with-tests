@@ -63,7 +63,7 @@ func BenchmarkRender(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	for b.Loop() {
+	for i := 0; i < b.N; i++ {
 		postRenderer.Render(io.Discard, aPost)
 	}
 }
