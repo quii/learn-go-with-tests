@@ -10,6 +10,12 @@ Go 1.11 introduced [Modules](https://go.dev/wiki/Modules). This approach is the 
 
 Modules aim to solve problems related to dependency management, version selection and reproducible builds; they also enable users to run Go code outside of `GOPATH`.
 
+**A bit of context: what came before modules.** Prior to Go 1.11, the Go toolchain relied on a convention called `GOPATH`, an environment variable pointing to a single directory on your machine (typically `~/go`) where all Go code had to live. Every project, every dependency, and every compiled package was stored under that directory. This meant you could not simply create a folder anywhere on your computer and start writing Go code; the compiler would not know how to resolve imports outside of `GOPATH`.
+
+**How modules address each of these problems.** For dependency management, a `go.mod` file inside your project explicitly declares which external packages your code needs and at which versions, similar to `package.json` in Node.js. For version selection, Go uses a deterministic algorithm called Minimum Version Selection (MVS): when multiple dependencies require different versions of the same package, Go always picks the minimum version that satisfies everyone, making the outcome predictable. For reproducible builds, Go generates a `go.sum` file alongside `go.mod` that contains a cryptographic hash of every dependency. Anyone building the project will download the exact same files, verified against those hashes. If anything changes on the remote server, the build fails immediately.
+
+**Why modules allow code outside `GOPATH`.** When Go finds a `go.mod` file in a directory, that file acts as the anchor of the project. The toolchain uses it to resolve all imports relative to that module, with no need for a global `GOPATH` reference. This means you can create a project folder anywhere on your machine and the compiler will understand it.
+
 Using Modules is pretty straightforward. Select any directory outside `GOPATH` as the root of your project, and create a new module with the `go mod init` command.
 
 A `go.mod` file will be generated, containing the module path, a Go version, and its dependency requirements, which are the other modules needed for a successful build.
