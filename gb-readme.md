@@ -2,7 +2,7 @@
 
 ![](.gitbook/assets/red-green-blue-gophers-smaller.png)
 
-[Art by Denise](https://twitter.com/deniseyu21)
+[Art by Denise](https://deniseyu.io/)
 
 ## Support me
 

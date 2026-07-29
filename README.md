@@ -23,6 +23,7 @@
 - [Türkçe](https://halilkocaoz.gitbook.io/go-programlama-dilini-ogren/)
 - [فارسی](https://go-yaad-begir.gitbook.io/go-ba-test/)
 - [Nederlands](https://bobkosse.gitbook.io/leer-go-met-tests/)
+- [Tiếng Việt](https://sons-organization-15.gitbook.io/learn-go-with-tests)
 
 ## Support me
 
@@ -115,7 +116,7 @@ If you have such a question raise it as an issue on github and I'll try and find
 ## Contributing
 
 * _This project is work in progress_ If you would like to contribute, please do get in touch.
-* Read [contributing.md](https://github.com/quii/learn-go-with-tests/tree/842f4f24d1f1c20ba3bb23cbc376c7ca6f7ca79a/contributing.md) for guidelines
+* Read [contributing.md](contributing.md) for guidelines
 * Any ideas? Create an issue
 
 ## Background

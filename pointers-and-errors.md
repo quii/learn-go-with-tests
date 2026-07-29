@@ -244,9 +244,9 @@ As you can see, the syntax for creating a method on a type declaration is the sa
 Next we need to update our test format strings so they will use `String()` instead.
 
 ```go
-	if got != want {
-		t.Errorf("got %s want %s", got, want)
-	}
+if got != want {
+	t.Errorf("got %s want %s", got, want)
+}
 ```
 
 To see this in action, deliberately break the test so we can see it

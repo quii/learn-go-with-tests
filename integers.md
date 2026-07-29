@@ -69,7 +69,7 @@ Now run the tests, and we should be happy that the test is correctly reporting w
 
 `adder_test.go:10: expected '4' but got '0'`
 
-If you have noticed we learnt about _named return value_ in the [last](hello-world.md#one...last...refactor?) section but aren't using the same here. It should generally be used when the meaning of the result isn't clear from context, in our case it's pretty much clear that `Add` function will add the parameters. You can refer [this](https://go.dev/wiki/CodeReviewComments#named-result-parameters) wiki for more details.
+If you have noticed we learnt about _named return value_ in the [last](hello-world.md#onelastrefactor) section but aren't using the same here. It should generally be used when the meaning of the result isn't clear from context, in our case it's pretty much clear that `Add` function will add the parameters. You can refer [this](https://go.dev/wiki/CodeReviewComments#named-result-parameters) wiki for more details.
 
 ## Write enough code to make it pass
 

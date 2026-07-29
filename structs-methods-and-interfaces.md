@@ -589,7 +589,7 @@ func TestArea(t *testing.T) {
 This was more TDD practice, iterating over our solutions to basic mathematic problems and learning new language features motivated by our tests.
 
 * Declaring structs to create your own data types which lets you bundle related data together and make the intent of your code clearer
-* Declaring interfaces so you can define functions that can be used by different types \([parametric polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism)\)
+* Declaring interfaces so you can define functions that can be used by different types \([ad hoc polymorphism](https://en.wikipedia.org/wiki/Ad_hoc_polymorphism)\)
 * Adding methods so you can add functionality to your data types and so you can implement interfaces
 * Table driven tests to make your assertions clearer and your test suites easier to extend & maintain
 

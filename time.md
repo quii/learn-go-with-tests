@@ -470,7 +470,7 @@ func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter
 
 Now the _other_ tests will fail to compile because they don't have an `io.Writer` being passed into `NewCLI`.
 
-Add `dummyStdout` for the other tests.
+Add `dummyStdOut` for the other tests.
 
 The new test should fail like so
 
