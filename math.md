@@ -18,8 +18,8 @@ is described like this:
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg"
-     width="100%"
-     height="100%"
+     width="300"
+     height="300"
      viewBox="0 0 300 300"
      version="2.0">
 
