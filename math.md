@@ -107,6 +107,8 @@ func TestSecondHandAtMidnight(t *testing.T) {
 }
 ```
 
+`projectpath` here is a placeholder - replace it with your own module's path plus `/clockface` (e.g. if your `go.mod` says `module example.com/learning-go`, this import would be `"example.com/learning-go/clockface"`). This works because we're putting `clockface_test.go` in its own directory named `clockface`, alongside `clockface.go` (which we'll create next). Naming the directory to match the package name it contains means Go can resolve the import without needing an alias. `package clockface_test` inside that same directory is a special case Go allows: an external test package that can live alongside `package clockface` files in the same folder.
+
 Remember how SVGs plot their coordinates from the top left hand corner? To place the second hand at midnight we expect that it hasn't moved from the centre of the clockface on the X axis - still 150 - and the Y axis is the length of the hand 'up' from the centre; 150 minus 90.
 
 ### Try to run the test
