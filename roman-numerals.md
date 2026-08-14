@@ -775,6 +775,8 @@ Go has types for _unsigned integers_, which means they cannot be negative; so th
 
 Try updating the code to use `uint16` rather than `int`. I updated `assertion` in the test to give a bit more visibility.
 
+> Note that you also need to change the variable `arabic` to `uint16` in your code (the test will tell you this). What might require more effort is the error you get for the line `arabic += numeral.Value`. You get this error because we declared `arabic` in `ConvertToArabic` with `arabic := 0`. This declaration is correct, but assume we should treat `0` as an `int` value. It will fail if you try to add an `int` value and a `uint16` value. Because Go is a typed language, this won't work. Therefore, dont't forget to change `arabic := 0` to `var arabic uint16 = 0` to make the arabic variable `uint16`.
+
 ```go
 assertion := func(arabic uint16) bool {
 	if arabic > 3999 {
