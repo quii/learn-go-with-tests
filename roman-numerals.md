@@ -225,6 +225,8 @@ Instead you take the next highest symbol and then "subtract" by putting a symbol
 
 For example `5` in Roman Numerals is `V`. To create 4 you do not do `IIII`, instead you do `IV`.
 
+A subtractor can only be placed before one of the next two higher symbols in its "family": `I` can only precede `V` or `X` (4 is `IV`, 9 is `IX`), `X` can only precede `L` or `C` (40 is `XL`, 90 is `XC`), and `C` can only precede `D` or `M` (400 is `CD`, 900 is `CM`). So while `I`, `X` and `C` are all valid subtractors, you can't mix and match freely - 99 is not `IC` (it's `XCIX`, 90 + 9) and 499 is not `ID` (it's `CDXCIX`, 400 + 90 + 9).
+
 ## Write the test first
 
 ```
