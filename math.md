@@ -1059,7 +1059,7 @@ func TestSVGWriterAtMidnight(t *testing.T) {
 }
 ```
 
-Finally we can take a leaf out of the unit tests' tables, and we can write a helper function `containsLine(line Line, lines []Line) bool` to really make these tests shine:
+Finally we can take a leaf out of the unit tests' tables, and we can write a helper function `containsLine(line Line, lines []Line) bool` to really make these tests shine. We'll reach for `simpleTime` and `testName` again too - but this file (`clockface_acceptance_test.go`) is in `package clockface_test`, a separate package from the `clockface_test.go` file we originally wrote them in (`package clockface`). Since they're unexported, they're not visible outside the package they were declared in, so we need our own copies here.
 
 ```go
 func TestSVGWriterSecondHand(t *testing.T) {
@@ -1099,6 +1099,14 @@ func containsLine(l Line, ls []Line) bool {
 		}
 	}
 	return false
+}
+
+func simpleTime(hours, minutes, seconds int) time.Time {
+	return time.Date(312, time.October, 28, hours, minutes, seconds, 0, time.UTC)
+}
+
+func testName(t time.Time) string {
+	return t.Format("15:04:05")
 }
 ```
 
