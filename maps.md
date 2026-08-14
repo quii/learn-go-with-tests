@@ -225,7 +225,7 @@ t.Run("unknown word", func(t *testing.T) {
 func assertError(t testing.TB, got, want error) {
 	t.Helper()
 
-	if got != want {
+	if !errors.Is(got, want) {
 		t.Errorf("got error %q want %q", got, want)
 	}
 }
