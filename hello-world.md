@@ -87,6 +87,8 @@ This file tells the `go` tools essential information about your code. If you pla
 
 In future chapters, you will need to run `go mod init SOMENAME` in each new folder before running commands like `go test` or `go build`.
 
+It's worth being clear that `SOMENAME`, the module's name, is unrelated to `package main` (which every `.go` file in this book so far declares at the top). The module name is just an identifier for your project as a whole - it doesn't need to be called `main`, and `go run`, `go test` and `go build` will all work correctly with whatever name you choose, run from inside that same folder.
+
 ## Back to Testing
 
 Run `go test` in your terminal. It should've passed! Just to check, try deliberately breaking the test by changing the `want` string.
