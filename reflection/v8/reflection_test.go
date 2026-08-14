@@ -91,6 +91,7 @@ func TestWalk(t *testing.T) {
 			got = append(got, input)
 		})
 
+		assertLength(t, got, len(aMap))
 		assertContains(t, got, "Bar")
 		assertContains(t, got, "Boz")
 	})
@@ -104,6 +105,13 @@ type Person struct {
 type Profile struct {
 	Age  int
 	City string
+}
+
+func assertLength(t testing.TB, got []string, want int) {
+	t.Helper()
+	if len(got) != want {
+		t.Errorf("got %d values but expected %d", len(got), want)
+	}
 }
 
 func assertContains(t testing.TB, haystack []string, needle string) {

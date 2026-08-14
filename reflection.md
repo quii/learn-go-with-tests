@@ -777,6 +777,37 @@ func assertContains(t testing.TB, haystack []string, needle string) {
 
 Since we have extracted maps into a new test, we haven't seen the failure message. Intentionally break the `with maps` test here so that you can check the error message, then fix it again so all tests are passing.
 
+We gave up checking the _order_ of `got` because maps don't guarantee one, but that doesn't mean we have to give up checking everything about its shape. `assertContains` alone would still pass if `walk` visited a map entry twice, or missed one out and only checked the remaining entries - as long as the specific values we search for are present somewhere, however many times. Unlike order, the _length_ of `got` is entirely predictable regardless of which order the map is iterated in, so let's assert on that too.
+
+```go
+func assertLength(t testing.TB, got []string, want int) {
+	t.Helper()
+	if len(got) != want {
+		t.Errorf("got %d values but expected %d", len(got), want)
+	}
+}
+```
+
+Add a call to it at the top of the `with maps` test.
+
+```go
+t.Run("with maps", func(t *testing.T) {
+	aMap := map[string]string{
+		"Cow":   "Moo",
+		"Sheep": "Baa",
+	}
+
+	var got []string
+	walk(aMap, func(input string) {
+		got = append(got, input)
+	})
+
+	assertLength(t, got, len(aMap))
+	assertContains(t, got, "Moo")
+	assertContains(t, got, "Baa")
+})
+```
+
 The next type we want to handle is `chan`.
 
 ## Write the test first
