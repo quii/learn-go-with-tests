@@ -158,6 +158,29 @@ FAIL
 
 The test will _probably_ fail with a different number, but nonetheless it demonstrates it does not work when multiple goroutines are trying to mutate the value of the counter at the same time.
 
+### Why does this happen?
+
+`c.value++` looks like a single, indivisible operation, but it isn't. It's shorthand for something closer to:
+
+```go
+tmp := c.value // 1. read
+tmp = tmp + 1  // 2. increment
+c.value = tmp  // 3. write
+```
+
+Each of those three steps is a separate operation, and the Go runtime is free to switch between goroutines at any point in between them. If two goroutines both call `Inc` around the same time, their steps can interleave, for example:
+
+```
+goroutine A: reads c.value (0)
+goroutine B: reads c.value (0)
+goroutine A: increments its copy to 1
+goroutine B: increments its copy to 1
+goroutine A: writes c.value = 1
+goroutine B: writes c.value = 1
+```
+
+Both goroutines called `Inc` once each, so we'd want `c.value` to end up as `2`, but it ends up as `1`. One of the increments got silently lost because both goroutines read the same starting value before either had written their result back. This is called a _race condition_, and with a thousand goroutines all racing to read, increment and write at once, it's no surprise some of those increments get lost.
+
 ## Write enough code to make it pass
 
 A simple solution is to add a lock to our `Counter`, ensuring only one goroutine can increment the counter at a time. Go's [`Mutex`](https://golang.org/pkg/sync/#Mutex) provides such a lock:
