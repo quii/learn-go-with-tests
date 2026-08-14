@@ -15,8 +15,7 @@ var (
 
 // PostRenderer renders data into HTML
 type PostRenderer struct {
-	templ    *template.Template
-	mdParser *parser.Parser
+	templ *template.Template
 }
 
 // NewPostRenderer creates a new PostRenderer
@@ -26,15 +25,12 @@ func NewPostRenderer() (*PostRenderer, error) {
 		return nil, err
 	}
 
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
-	parser := parser.NewWithExtensions(extensions)
-
-	return &PostRenderer{templ: templ, mdParser: parser}, nil
+	return &PostRenderer{templ: templ}, nil
 }
 
 // Render renders post into HTML
 func (r *PostRenderer) Render(w io.Writer, p Post) error {
-	return r.templ.ExecuteTemplate(w, "blog.gohtml", newPostVM(p, r))
+	return r.templ.ExecuteTemplate(w, "blog.gohtml", newPostVM(p))
 }
 
 // RenderIndex creates an HTML index page given a collection of posts
@@ -47,8 +43,10 @@ type postViewModel struct {
 	HTMLBody template.HTML
 }
 
-func newPostVM(p Post, r *PostRenderer) postViewModel {
+func newPostVM(p Post) postViewModel {
 	vm := postViewModel{Post: p}
-	vm.HTMLBody = template.HTML(markdown.ToHTML([]byte(p.Body), r.mdParser, nil))
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
+	mdParser := parser.NewWithExtensions(extensions)
+	vm.HTMLBody = template.HTML(markdown.ToHTML([]byte(p.Body), mdParser, nil))
 	return vm
 }

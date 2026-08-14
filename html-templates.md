@@ -945,8 +945,7 @@ var (
 )
 
 type PostRenderer struct {
-	templ    *template.Template
-	mdParser *parser.Parser
+	templ *template.Template
 }
 
 func NewPostRenderer() (*PostRenderer, error) {
@@ -955,14 +954,11 @@ func NewPostRenderer() (*PostRenderer, error) {
 		return nil, err
 	}
 
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
-	parser := parser.NewWithExtensions(extensions)
-
-	return &PostRenderer{templ: templ, mdParser: parser}, nil
+	return &PostRenderer{templ: templ}, nil
 }
 
 func (r *PostRenderer) Render(w io.Writer, p Post) error {
-	return r.templ.ExecuteTemplate(w, "blog.gohtml", newPostVM(p, r))
+	return r.templ.ExecuteTemplate(w, "blog.gohtml", newPostVM(p))
 }
 
 func (r *PostRenderer) RenderIndex(w io.Writer, posts []Post) error {
@@ -974,14 +970,18 @@ type postViewModel struct {
 	HTMLBody template.HTML
 }
 
-func newPostVM(p Post, r *PostRenderer) postViewModel {
+func newPostVM(p Post) postViewModel {
 	vm := postViewModel{Post: p}
-	vm.HTMLBody = template.HTML(markdown.ToHTML([]byte(p.Body), r.mdParser, nil))
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
+	mdParser := parser.NewWithExtensions(extensions)
+	vm.HTMLBody = template.HTML(markdown.ToHTML([]byte(p.Body), mdParser, nil))
 	return vm
 }
 ```
 
 I used the excellent [gomarkdown](https://github.com/gomarkdown/markdown) library which worked exactly how I'd hope. 
+
+Notice that we create a new `parser.Parser` on every call to `newPostVM`, rather than constructing one once and storing it on `PostRenderer`. Normally, if you can construct something once and reuse it, that's worth doing - it saves the repeated construction cost. But that general instinct breaks down here: gomarkdown's parser keeps internal state while it builds the document tree, and isn't safe to reuse across multiple `Parse` calls - you'll get a panic (or, in older versions, a much less helpful nil pointer dereference) the second time you use the same one. Since a `PostRenderer` is meant to `Render` many posts over its lifetime, a fresh parser per call is the correct way to use it - and it's cheap regardless, since constructing it is trivial compared to the parsing work itself.
 
 If you tried to do this yourself you may have found that your body render had the HTML escaped. This is a security feature of Go's html/template package to stop malicious 3rd-party HTML being outputted. 
 
