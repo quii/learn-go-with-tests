@@ -951,6 +951,8 @@ func NewFileSystemPlayerStore(file *os.File) *FileSystemPlayerStore {
 }
 ```
 
+`tape.Write` seeks to the start of the file on _every_ call, so it's worth pausing to check this combination is actually safe: if `Encode` ever called `Write` more than once for a single call, each subsequent write would seek back to the start and overwrite the previous one, corrupting the output. It doesn't, though - `Encoder.Encode` always marshals the whole value into memory first and hands it to the underlying `Writer` in a single `Write` call, so `tape` only ever seeks once per `Encode`, which is exactly the "always overwrite from the start" behaviour we want.
+
 Use it in `RecordWin`.
 
 ```go
