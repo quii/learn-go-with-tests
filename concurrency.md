@@ -373,6 +373,10 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 }
 ```
 
+> **A note on `url` inside the goroutine.** Each iteration of the loop starts a new goroutine referencing `url`, without passing it in explicitly. Since Go 1.22, this is safe: the language spec was changed so that `url` is a fresh variable on every iteration, so each goroutine captures its own copy.
+>
+> If you run this on a project whose `go.mod` declares a `go` version *older* than `1.22`, you'll get the old behaviour instead: `url` is a single variable shared and reused by every iteration, so by the time the goroutines run, they'll likely all see the same (probably final) value of `url`. This trips people up because your Go *toolchain* can be new while your `go.mod`'s `go` directive is old — the toolchain honours whichever loop variable semantics the declared version implies. The fix on an older `go.mod` is to pass `url` into the goroutine explicitly: `go func(url string) { ... }(url)`.
+
 Alongside the `results` map we now have a `resultChannel`, which we `make` in
 the same way. `chan result` is the type of the channel - a channel of `result`.
 The new type, `result` has been made to associate the return value of the

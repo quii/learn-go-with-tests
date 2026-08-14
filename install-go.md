@@ -33,9 +33,11 @@ A `go.mod` file could look like this:
 ```
 module cmd
 
-go 1.16
+go 1.24
 
 ```
+
+The Go version declared here isn't just informational: the toolchain uses it to decide which language semantics apply, even if you have a newer version of Go installed. For example, Go 1.22 changed how `for` loop variables work, so code relying on that behaviour (as we do later in the [concurrency](concurrency.md) chapter) needs a `go.mod` declaring `1.22` or later to behave as expected. Keeping this reasonably current will save you some confusing debugging later on.
 
 The built-in documentation provides an overview of all available `go mod` commands.
 
