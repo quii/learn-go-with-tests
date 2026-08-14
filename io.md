@@ -1000,9 +1000,9 @@ Don't be afraid to chop and change types and experiment like we have here. The g
 
 Before we start working on sorting we should make sure we're happy with our current code and remove any technical debt we may have. It's an important principle to get to working software as quickly as possible (stay out of the red state) but that doesn't mean we should ignore error cases!
 
-If we go back to `FileSystemStore.go` we have `league, _ := NewLeague(f.database)` in our constructor.
+If we go back to `file_system_store.go` we have `league, _ := NewLeague(file)` in our constructor.
 
-`NewLeague` can return an error if it is unable to parse the league from the `io.Reader` that we provide.
+`NewLeague` can return an error if it is unable to parse the league from the `*os.File` that we provide.
 
 It was pragmatic to ignore that at the time as we already had failing tests. If we had tried to tackle it at the same time, we would have been juggling two things at once.
 
