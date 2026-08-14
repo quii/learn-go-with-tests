@@ -40,6 +40,8 @@ Thankfully it's pretty straightforward to add structure _when you need it_.
 
 Inside the existing project create a `cmd` directory with a `webserver` directory inside that (e.g `mkdir -p cmd/webserver`).
 
+`cmd` is a widely used Go convention for holding the `main` packages of the applications a project builds, keeping them separate from the importable library code that lives at the project root.
+
 Move the `main.go` inside there.
 
 If you have `tree` installed you should run it and your structure should look like this
@@ -99,6 +101,8 @@ func main() {
 }
 ```
 
+`dbFileName` is a relative path, so `game.db.json` will be created (or read) relative to whatever directory you run the resulting binary _from_, not the directory the binary lives in. Since our product owner wants the CLI and web server to share the same database, this matters: running both from different directories will silently give each one its own, separate `game.db.json`. We'll come back to this in "Final checks" below.
+
 The full path may seem a bit jarring, but this is how you can import _any_ publicly available library into your code.
 
 By separating our domain code into a separate package and committing it to a public repo like GitHub any Go developer can write their own code which imports that package the features we've written available. The first time you try and run it will complain it is not existing but all you need to do is run `go get`.
@@ -110,6 +114,8 @@ In addition, users can view [the documentation at pkg.go.dev](https://pkg.go.dev
 - Inside the root run `go test` and check they're still passing
 - Go inside our `cmd/webserver` and do `go run main.go`
   - Visit `http://localhost:5000/league` and you should see it's still working
+
+Later in this chapter we'll build a second application, `cmd/cli`, which is meant to share the same `game.db.json` as the web server. Because `dbFileName` is resolved relative to the current working directory, you'll need to run both binaries _from the same directory_ for them to see each other's updates, for example by building them first and running the binaries from the project root (`go build -o webserver ./cmd/webserver && go build -o cli ./cmd/cli`, then `./webserver` and `./cli`), rather than using `go run main.go` from inside each `cmd` subfolder.
 
 ### Walking skeleton
 
