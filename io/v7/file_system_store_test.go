@@ -27,10 +27,10 @@ func createTempFile(t testing.TB, initialData string) (*os.File, func()) {
 func TestFileSystemStore(t *testing.T) {
 
 	t.Run("league from a reader", func(t *testing.T) {
-		database, cleanDatabase := createTempFile(t, `[
+		database, removeFile := createTempFile(t, `[
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
-		defer cleanDatabase()
+		defer removeFile()
 
 		store := NewFileSystemPlayerStore(database)
 
@@ -49,10 +49,10 @@ func TestFileSystemStore(t *testing.T) {
 	})
 
 	t.Run("get player score", func(t *testing.T) {
-		database, cleanDatabase := createTempFile(t, `[
+		database, removeFile := createTempFile(t, `[
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
-		defer cleanDatabase()
+		defer removeFile()
 
 		store := NewFileSystemPlayerStore(database)
 
@@ -62,10 +62,10 @@ func TestFileSystemStore(t *testing.T) {
 	})
 
 	t.Run("store wins for existing players", func(t *testing.T) {
-		database, cleanDatabase := createTempFile(t, `[
+		database, removeFile := createTempFile(t, `[
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
-		defer cleanDatabase()
+		defer removeFile()
 
 		store := NewFileSystemPlayerStore(database)
 
@@ -77,10 +77,10 @@ func TestFileSystemStore(t *testing.T) {
 	})
 
 	t.Run("store wins for new players", func(t *testing.T) {
-		database, cleanDatabase := createTempFile(t, `[
+		database, removeFile := createTempFile(t, `[
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
-		defer cleanDatabase()
+		defer removeFile()
 
 		store := NewFileSystemPlayerStore(database)
 

@@ -485,17 +485,17 @@ func assertScoreEquals(t testing.TB, got, want int) {
 
 [CreateTemp](https://pkg.go.dev/os#CreateTemp) creates a temporary file for us to use. The `"db"` value we've passed in is a prefix put on a random file name it will create. This is to ensure it won't clash with other files by accident.
 
-You'll notice we're not only returning our `ReadWriteSeeker` (the file) but also a function. We need to make sure that the file is removed once the test is finished. We don't want to leak details of the files into the test as it's prone to error and uninteresting for the reader. By returning a `removeFile` function, we can take care of the details in our helper and all the caller has to do is run `defer cleanDatabase()`.
+You'll notice we're not only returning our `ReadWriteSeeker` (the file) but also a function. We need to make sure that the file is removed once the test is finished. We don't want to leak details of the files into the test as it's prone to error and uninteresting for the reader. By returning a `removeFile` function, we can take care of the details in our helper and all the caller has to do is run `defer removeFile()`.
 
 ```go
 //file_system_store_test.go
 func TestFileSystemStore(t *testing.T) {
 
 	t.Run("league from a reader", func(t *testing.T) {
-		database, cleanDatabase := createTempFile(t, `[
+		database, removeFile := createTempFile(t, `[
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
-		defer cleanDatabase()
+		defer removeFile()
 
 		store := FileSystemPlayerStore{database}
 
@@ -514,10 +514,10 @@ func TestFileSystemStore(t *testing.T) {
 	})
 
 	t.Run("get player score", func(t *testing.T) {
-		database, cleanDatabase := createTempFile(t, `[
+		database, removeFile := createTempFile(t, `[
 			{"Name": "Cleo", "Wins": 10},
 			{"Name": "Chris", "Wins": 33}]`)
-		defer cleanDatabase()
+		defer removeFile()
 
 		store := FileSystemPlayerStore{database}
 
@@ -535,10 +535,10 @@ Let's get the first iteration of recording a win for an existing player
 ```go
 //file_system_store_test.go
 t.Run("store wins for existing players", func(t *testing.T) {
-	database, cleanDatabase := createTempFile(t, `[
+	database, removeFile := createTempFile(t, `[
 		{"Name": "Cleo", "Wins": 10},
 		{"Name": "Chris", "Wins": 33}]`)
-	defer cleanDatabase()
+	defer removeFile()
 
 	store := FileSystemPlayerStore{database}
 
@@ -660,10 +660,10 @@ We now need to handle the scenario of recording wins of new players.
 ```go
 //file_system_store_test.go
 t.Run("store wins for new players", func(t *testing.T) {
-	database, cleanDatabase := createTempFile(t, `[
+	database, removeFile := createTempFile(t, `[
 		{"Name": "Cleo", "Wins": 10},
 		{"Name": "Chris", "Wins": 33}]`)
-	defer cleanDatabase()
+	defer removeFile()
 
 	store := FileSystemPlayerStore{database}
 
@@ -710,8 +710,8 @@ In `TestRecordingWinsAndRetrievingThem` replace the old store.
 
 ```go
 //server_integration_test.go
-database, cleanDatabase := createTempFile(t, "")
-defer cleanDatabase()
+database, removeFile := createTempFile(t, "")
+defer removeFile()
 store := &FileSystemPlayerStore{database}
 ```
 
@@ -1084,7 +1084,7 @@ Let's fix our big integration test by putting some valid JSON in it:
 ```go
 //server_integration_test.go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
-	database, cleanDatabase := createTempFile(t, `[]`)
+	database, removeFile := createTempFile(t, `[]`)
 	//etc...
 }
 ```
@@ -1096,8 +1096,8 @@ Now that all the tests are passing, we need to handle the scenario where the fil
 ```go
 //file_system_store_test.go
 t.Run("works with an empty file", func(t *testing.T) {
-	database, cleanDatabase := createTempFile(t, "")
-	defer cleanDatabase()
+	database, removeFile := createTempFile(t, "")
+	defer removeFile()
 
 	_, err := NewFileSystemPlayerStore(database)
 
@@ -1209,10 +1209,10 @@ We can update the assertion on our first test in `TestFileSystemStore`:
 ```go
 //file_system_store_test.go
 t.Run("league sorted", func(t *testing.T) {
-	database, cleanDatabase := createTempFile(t, `[
+	database, removeFile := createTempFile(t, `[
 		{"Name": "Cleo", "Wins": 10},
 		{"Name": "Chris", "Wins": 33}]`)
-	defer cleanDatabase()
+	defer removeFile()
 
 	store, err := NewFileSystemPlayerStore(database)
 
