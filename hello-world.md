@@ -498,6 +498,8 @@ func Hello(name string, language string) string {
 }
 ```
 
+Notice we use `:=` once for `prefix` (declaring a new variable and giving it an initial value) but plain `=` everywhere else it's changed, both for `name` above and `prefix` inside the `switch`. `:=` is Go's [short variable declaration](https://go.dev/ref/spec#Short_variable_declarations) - it creates a new variable. `=` is a plain [assignment](https://go.dev/ref/spec#Assignment_statements) - it changes the value of a variable that already exists (`name` already exists as a parameter, and `prefix` was already declared a couple of lines above with `:=`). Using `:=` on a variable that already exists in the same scope, or `=` on one that doesn't exist yet, is a compile error.
+
 Write a test to now include a greeting in the language of your choice and you should see how simple it is to extend our _amazing_ function.
 
 ### one...last...refactor?
