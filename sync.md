@@ -268,12 +268,39 @@ func NewCounter() *Counter {
 
 Use this function in your tests when initialising `Counter`.
 
+## An alternative: sync/atomic
+
+`Mutex` is a general-purpose tool - it can protect any number of fields and any invariant between them, as long as you remember to `Lock`/`Unlock` around every access. But our `Counter` is about as simple as shared state gets: a single integer, incremented from multiple goroutines. For exactly this kind of case, the [`sync/atomic`](https://pkg.go.dev/sync/atomic) package provides types like [`atomic.Int64`](https://pkg.go.dev/sync/atomic#Int64) that give you safe concurrent access to a single value without a separate lock at all:
+
+```go
+type Counter struct {
+	value atomic.Int64
+}
+
+func NewCounter() *Counter {
+	return &Counter{}
+}
+
+func (c *Counter) Inc() {
+	c.value.Add(1)
+}
+
+func (c *Counter) Value() int64 {
+	return c.value.Load()
+}
+```
+
+No `Mutex`, no `Lock`/`Unlock`, and it's still safe to call `Inc` from as many goroutines as you like at once - the same test we wrote earlier passes unchanged. Under the hood this uses low-level CPU instructions to make the increment itself atomic, which is typically faster than a `Mutex` for simple cases like this. `atomic.Int64` (and its siblings, like `atomic.Int32` and `atomic.Bool`) also can't be used incorrectly the way raw `atomic.AddInt64(&x, 1)`-style function calls could in older Go - you can't forget to pass a pointer, and you can't accidentally read the field without going through `Load`.
+
+Reach for `sync/atomic`'s types when you're protecting a single value; reach for `Mutex` once you need to keep multiple fields, or some invariant between them, consistent together.
+
 ## Wrapping up
 
 We've covered a few things from the [sync package](https://golang.org/pkg/sync/)
 
 - `Mutex` allows us to add locks to our data
 - `WaitGroup` is a means of waiting for goroutines to finish jobs
+- `sync/atomic` offers safe, lock-free access to single values, and is worth reaching for when a full `Mutex` would be overkill
 
 ### When to use locks over channels and goroutines?
 
