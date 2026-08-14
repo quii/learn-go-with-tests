@@ -241,6 +241,20 @@ func (b Bitcoin) String() string {
 
 As you can see, the syntax for creating a method on a type declaration is the same as it is on a struct.
 
+We lacked discipline here: we've added a method without writing a test for it first. That's OK, we're not always saints, but we shouldn't let it slide either. Running `go test -cover` would show us that `String` isn't covered, which is a good prompt to go back and ask whether it's worth testing retrospectively. We shouldn't chase 100% coverage for its own sake, but in this case `String` has its own logic (`fmt.Sprintf`) worth pinning down, so let's add a test.
+
+```go
+t.Run("Bitcoin String", func(t *testing.T) {
+	btc := Bitcoin(10)
+	got := btc.String()
+	want := "10 BTC"
+
+	if got != want {
+		t.Errorf("got %s want %s", got, want)
+	}
+})
+```
+
 Next we need to update our test format strings so they will use `String()` instead.
 
 ```go
