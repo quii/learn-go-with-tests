@@ -69,6 +69,25 @@ func TestArea(t *testing.T) {
 }
 ```
 
+You may have heard that comparing floating point numbers with `!=`/`==` is a bad idea, because of how they're represented in memory:
+
+```go
+func Example_floatComparison() {
+	fmt.Println(0.1 + 0.2 == 0.3)
+
+	var a, b, c float64 = 0.1, 0.2, 0.3
+	fmt.Println(a+b == c)
+
+	// Output:
+	// true
+	// false
+}
+```
+
+The second comparison is `false` because `0.1` and `0.2` can't be represented exactly as a `float64`, so adding them together doesn't land exactly on `0.3` either. The first one is `true` only because it's written as a literal expression - Go evaluates those with arbitrary precision, not `float64`, until they're assigned to something.
+
+That inexactness doesn't apply to our `Area` test above though: every value we're using (`12.0`, `6.0`, `72.0`, and so on) is a whole number, which `float64` _can_ represent exactly, and multiplying two exactly-represented numbers together, so long as the result is still in range, produces another exactly representable result. Exact comparison only becomes unsafe once you introduce values or calculations that aren't exactly representable, like `0.1`, or results of division. If you find yourself writing tests like that, reach for a comparison with an acceptable tolerance instead, for example [`cmp.Diff` with `cmpopts.EquateApprox`](https://pkg.go.dev/github.com/google/go-cmp/cmp/cmpopts#EquateApprox) from `go-cmp`.
+
 And code like this
 
 ```go
