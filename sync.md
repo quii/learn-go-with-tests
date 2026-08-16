@@ -151,7 +151,7 @@ By waiting for `wg.Wait()` to finish before making our assertions we can be sure
 ```
 === RUN   TestCounter/it_runs_safely_concurrently
 --- FAIL: TestCounter (0.00s)
-    --- FAIL: TestCounter/it_runs_safely_concurrently
+    --- FAIL: TestCounter/it_runs_safely_concurrently (0.00s)
     	sync_test.go:26: got 939, want 1000
 FAIL
 ```
