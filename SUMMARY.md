@@ -41,6 +41,7 @@
 * [IO and sorting](io.md)
 * [Command line & package structure](command-line.md)
 * [Time](time.md)
+* [Revisiting time, with testing/synctest](revisiting-time-with-synctest.md)
 * [WebSockets](websockets.md)
 
 ## Questions and answers

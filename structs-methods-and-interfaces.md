@@ -73,7 +73,7 @@ You may have heard that comparing floating point numbers with `!=`/`==` is a bad
 
 ```go
 func Example_floatComparison() {
-	fmt.Println(0.1 + 0.2 == 0.3)
+	fmt.Println(0.1+0.2 == 0.3)
 
 	var a, b, c float64 = 0.1, 0.2, 0.3
 	fmt.Println(a+b == c)

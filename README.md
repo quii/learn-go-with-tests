@@ -84,6 +84,7 @@ By the end of this, you should have a strong grasp as to how to iteratively writ
 * [IO and sorting](io.md) - We will persist and read our data from disk and we'll cover sorting data.
 * [Command line & project structure](command-line.md) - Support multiple applications from one code base and read input from command line.
 * [Time](time.md) - using the `time` package to schedule activities.
+* [Revisiting time, with testing/synctest](revisiting-time-with-synctest.md) - Use Go 1.25's `testing/synctest` package to properly test the real timer-based code from the Time chapter, without slow or flaky tests.
 * [WebSockets](websockets.md) - learn how to write and test a server that uses WebSockets.
 
 ### Testing fundamentals
