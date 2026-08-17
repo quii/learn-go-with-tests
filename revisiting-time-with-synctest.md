@@ -263,7 +263,7 @@ Clean, every time. Very nice.
 
 ## Write the test first
 
-There's a second thing worth testing here, and it's the feature that makes `synctest` genuinely better than "just use real time with generous sleeps": proving something *hasn't* happened yet, without guessing at how long "not yet" should mean:
+There's another thing worth testing: that nothing has happened yet. With real time, that means guessing at a sleep that's long enough to be confident, but not so long the test drags. synctest doesn't need the guess:
 
 ```go
 func TestStdOutAlerter(t *testing.T) {
