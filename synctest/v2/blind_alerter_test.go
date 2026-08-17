@@ -16,7 +16,7 @@ func TestStdOutAlerter(t *testing.T) {
 
 		time.Sleep(6 * time.Second)
 
-		want := "Blind is now 100\n"
+		want := "Blind is now 100"
 		if out.String() != want {
 			t.Errorf("got %q, want %q", out.String(), want)
 		}

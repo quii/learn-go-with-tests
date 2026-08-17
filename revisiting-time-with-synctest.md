@@ -66,7 +66,7 @@ func TestStdOutAlerter(t *testing.T) {
 
 	time.Sleep(6 * time.Second)
 
-	want := "Blind is now 100\n"
+	want := "Blind is now 100"
 	if out.String() != want {
 		t.Errorf("got %q, want %q", out.String(), want)
 	}
@@ -111,7 +111,7 @@ func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
 func StdOutAlerter(out io.Writer) BlindAlerterFunc {
 	return func(duration time.Duration, amount int) {
 		time.AfterFunc(duration, func() {
-			fmt.Fprintf(out, "Blind is now %d\n", amount)
+			fmt.Fprintf(out, "Blind is now %d", amount)
 		})
 	}
 }
@@ -140,7 +140,7 @@ func TestStdOutAlerter(t *testing.T) {
 
 		alerter.ScheduleAlertAt(5*time.Second, 100)
 
-		want := "Blind is now 100\n"
+		want := "Blind is now 100"
 		if out.String() != want {
 			t.Errorf("got %q, want %q", out.String(), want)
 		}
@@ -152,7 +152,7 @@ We dropped the sleep entirely: surely the fake clock handles that for us now? It
 
 ```
 === RUN   TestStdOutAlerter
-    blind_alerter_test.go:19: got "", want "Blind is now 100\n"
+    blind_alerter_test.go:19: got "", want "Blind is now 100"
 --- FAIL: TestStdOutAlerter (0.00s)
 FAIL
 ```
@@ -169,7 +169,7 @@ func TestStdOutAlerter(t *testing.T) {
 
 		time.Sleep(6 * time.Second)
 
-		want := "Blind is now 100\n"
+		want := "Blind is now 100"
 		if out.String() != want {
 			t.Errorf("got %q, want %q", out.String(), want)
 		}
@@ -239,7 +239,7 @@ func TestStdOutAlerter(t *testing.T) {
 		time.Sleep(6 * time.Second)
 		synctest.Wait()
 
-		want := "Blind is now 100\n"
+		want := "Blind is now 100"
 		if out.String() != want {
 			t.Errorf("got %q, want %q", out.String(), want)
 		}
@@ -281,7 +281,7 @@ func TestStdOutAlerter(t *testing.T) {
 		time.Sleep(5 * time.Second)
 		synctest.Wait()
 
-		want := "Blind is now 100\n"
+		want := "Blind is now 100"
 		if out.String() != want {
 			t.Errorf("got %q, want %q", out.String(), want)
 		}
@@ -345,7 +345,7 @@ func NewAlerter() (BlindAlerterFunc, <-chan string) {
 
 	scheduleAlertAt := func(duration time.Duration, amount int) {
 		time.AfterFunc(duration, func() {
-			alerts <- fmt.Sprintf("Blind is now %d\n", amount)
+			alerts <- fmt.Sprintf("Blind is now %d", amount)
 		})
 	}
 
@@ -371,7 +371,7 @@ func TestNewAlerter(t *testing.T) {
 		}
 
 		got := <-alerts
-		want := "Blind is now 100\n"
+		want := "Blind is now 100"
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
 		}

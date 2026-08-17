@@ -25,7 +25,7 @@ func NewAlerter() (BlindAlerterFunc, <-chan string) {
 
 	scheduleAlertAt := func(duration time.Duration, amount int) {
 		time.AfterFunc(duration, func() {
-			alerts <- fmt.Sprintf("Blind is now %d\n", amount)
+			alerts <- fmt.Sprintf("Blind is now %d", amount)
 		})
 	}
 

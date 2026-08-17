@@ -19,7 +19,7 @@ func TestNewAlerter(t *testing.T) {
 		}
 
 		got := <-alerts
-		want := "Blind is now 100\n"
+		want := "Blind is now 100"
 		if got != want {
 			t.Errorf("got %q, want %q", got, want)
 		}

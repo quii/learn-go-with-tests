@@ -23,7 +23,7 @@ func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
 func StdOutAlerter(out io.Writer) BlindAlerterFunc {
 	return func(duration time.Duration, amount int) {
 		time.AfterFunc(duration, func() {
-			fmt.Fprintf(out, "Blind is now %d\n", amount)
+			fmt.Fprintf(out, "Blind is now %d", amount)
 		})
 	}
 }

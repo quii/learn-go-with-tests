@@ -22,7 +22,7 @@ func TestStdOutAlerter(t *testing.T) {
 		time.Sleep(5 * time.Second)
 		synctest.Wait()
 
-		want := "Blind is now 100\n"
+		want := "Blind is now 100"
 		if out.String() != want {
 			t.Errorf("got %q, want %q", out.String(), want)
 		}
