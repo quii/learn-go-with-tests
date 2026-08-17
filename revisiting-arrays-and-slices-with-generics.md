@@ -429,7 +429,7 @@ Practice combining TDD with good source control habits. Commit your work when yo
 
 Make an effort to do some research outside of Go, so you don't re-invent patterns that already exist with an already established name.
 
-Writing a function takes a collection of `A` and converts them to `B`? Don't call it `Convert`, that's [`Map`](https://en.wikipedia.org/wiki/Map_(higher-order_function)). Using the "proper" name for these items will reduce the cognitive burden for others and make it more search engine friendly to learn more.
+Writing a function that takes a collection of `A` and converts them to `B`? Don't call it `Convert`, that's [`Map`](https://en.wikipedia.org/wiki/Map_(higher-order_function)). Using the "proper" name for these items will reduce the cognitive burden for others and make it more search engine friendly to learn more.
 
 ### This doesn't feel idiomatic?
 
@@ -441,12 +441,12 @@ Saying
 
 > This is not idiomatic
 
-Without any more detail, is not an actionable, or useful thing to say. Especially when discussing new language features.
+Without any more detail, is not an actionable, or useful thing to say, especially when discussing new language features.
 
 Discuss with your colleagues patterns and style of code based on their merits rather than dogma. So long as you have well-designed tests, you'll always be able to refactor and shift things as you understand what works well for you, and your team.
 
 ### Resources
 
-Fold is a real fundamental in computer science. Here's some interesting resources if you wish to dig more into it
+Fold is a real fundamental in computer science. Here's some interesting resources if you wish to dig more into it:
 - [Wikipedia: Fold](https://en.wikipedia.org/wiki/Fold)
 - [A tutorial on the universality and expressiveness of fold](http://www.cs.nott.ac.uk/~pszgmh/fold.pdf)
