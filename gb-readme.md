@@ -27,7 +27,10 @@ Translations:
 * [Français](https://goosegeesejeez.gitbook.io/apprendre-go-par-les-tests)
 * [한국어](https://miryang.gitbook.io/learn-go-with-tests/)
 * [Türkçe](https://halilkocaoz.gitbook.io/go-programlama-dilini-ogren/)
-* [Nederlands](https://bobkosse.gitbook.io/leer-go-met-tests)
+* [فارسی](https://go-yaad-begir.gitbook.io/go-ba-test/)
+* [Nederlands](https://bobkosse.gitbook.io/leer-go-met-tests/)
+* [Tiếng Việt](https://sons-organization-15.gitbook.io/learn-go-with-tests)
+* [Русский](https://eda-1.gitbook.io/lgwt/)
 
 ## Background
 

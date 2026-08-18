@@ -28,7 +28,7 @@
 
 ## Testing fundamentals
 
-* [Introduction to acceptance tests](intro-to-acceptance-tests.md)
+* [Введение в приёмочные тесты](intro-to-acceptance-tests.md)
 * [Scaling acceptance tests](scaling-acceptance-tests.md)
 * [Working without mocks](working-without-mocks.md)
 * [Refactoring Checklist](refactoring-checklist.md)

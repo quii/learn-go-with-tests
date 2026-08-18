@@ -24,6 +24,7 @@
 - [فارسی](https://go-yaad-begir.gitbook.io/go-ba-test/)
 - [Nederlands](https://bobkosse.gitbook.io/leer-go-met-tests/)
 - [Tiếng Việt](https://sons-organization-15.gitbook.io/learn-go-with-tests)
+- [Русский](https://eda-1.gitbook.io/lgwt/)
 
 ## Support me
 
