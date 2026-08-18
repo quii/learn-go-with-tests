@@ -4,7 +4,7 @@
   <img src="red-green-blue-gophers-smaller.png" />
 </p>
 
-[Art by Denise](https://twitter.com/deniseyu21)
+[Art by Denise](https://github.com/deniseyu)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/quii/learn-go-with-tests)](https://goreportcard.com/report/github.com/quii/learn-go-with-tests)
 
