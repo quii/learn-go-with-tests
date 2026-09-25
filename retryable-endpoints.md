@@ -789,3 +789,209 @@ go test ./retryable-endpoints/... -race -count=10
 ```
 
 Sharing one Go value isn't horizontal scaling yet. Separate processes will need to coordinate through shared storage. But we now have a contract for a Postgres adapter to fulfil: keep the credit and its result in one transaction, and replay that result on a retry. The reusable scenarios stay the same; the database-specific tests will establish that its transaction and recovery behaviour really work.
+
+## A Postgres implementation
+
+Let's give our operation somewhere durable to store its results. We'll keep the database setup deliberately small: two tables, created directly in the test setup. A migration framework and deployment configuration wouldn't help us understand idempotency, so we'll leave those out of this example.
+
+We'll use `database/sql` with the pgx driver, and [Testcontainers](https://golang.testcontainers.org/modules/postgres/) to start a real Postgres instance for the tests. You'll need Docker running. Install the dependencies from the repository root:
+
+```sh
+go get github.com/jackc/pgx/v5/stdlib@v5.11.0 github.com/testcontainers/testcontainers-go/modules/postgres@v0.44.0
+```
+
+### Run the same contract
+
+The test setup in [postgres_test.go](retryable-endpoints/postgres_test.go) starts one container, opens a connection pool and creates the tables. The important part is ordinary SQL:
+
+```sql
+CREATE TABLE accounts (
+    account_id TEXT PRIMARY KEY,
+    balance_pence BIGINT NOT NULL
+);
+CREATE TABLE top_up_results (
+    idempotency_key TEXT PRIMARY KEY,
+    account_id TEXT,
+    balance_pence BIGINT
+);
+```
+
+The primary key on `top_up_results` prevents two committed rows with the same idempotency key. Its result columns start out empty when we claim a key, but we fill them in before committing. This adapter never commits an unfinished claim.
+
+Our container setup uses Testcontainers' Postgres readiness checks:
+
+```go
+container, err := postgres.Run(ctx, "postgres:17-alpine",
+	postgres.WithDatabase("topups"),
+	postgres.WithUsername("test"),
+	postgres.WithPassword("test"),
+	postgres.BasicWaitStrategies(),
+)
+testcontainers.CleanupContainer(t, container)
+if err != nil {
+	t.Fatalf("start Postgres: %v", err)
+}
+```
+
+These are credentials for the disposable test database. We obtain its connection string, open it with `sql.Open("pgx", connectionString)` and execute the table definitions above. The blank import `_ "github.com/jackc/pgx/v5/stdlib"` registers the driver. Cleanup closes the pool and removes the container.
+
+Then we run the existing contract:
+
+```go
+TopUpsContract{New: func(t testing.TB) TopUps {
+	resetPostgres(t, db)
+	return NewPostgresTopUps(db)
+}}.Test(t)
+```
+
+`resetPostgres` executes `TRUNCATE accounts, top_up_results` before each scenario. The scenarios run sequentially, so this gives each one clean state while sharing a container. The concurrent requests *within* a scenario still exercise separate database transactions.
+
+We haven't rewritten any of the contract's assertions. Now we need an implementation that satisfies them.
+
+### One transaction owns the operation
+
+Our adapter only needs a connection pool:
+
+```go
+type PostgresTopUps struct {
+	db *sql.DB
+}
+
+func NewPostgresTopUps(db *sql.DB) *PostgresTopUps {
+	return &PostgresTopUps{db: db}
+}
+```
+
+The full implementation is in [postgres.go](retryable-endpoints/postgres.go). Let's walk through `Apply` in pieces, keeping the error handling in view.
+
+First, reject an empty key and start a transaction:
+
+```go
+if key == "" {
+	return TopUpResult{}, ErrMissingKey
+}
+
+tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
+if err != nil {
+	return TopUpResult{}, fmt.Errorf("begin top-up: %w", err)
+}
+defer tx.Rollback()
+```
+
+The deferred rollback releases the transaction on any early return. After a successful commit it has nothing left to roll back. We'll come back to why we explicitly chose `READ COMMITTED` in a moment.
+
+Next, try to claim the key:
+
+```go
+claim, err := tx.ExecContext(ctx, `
+	INSERT INTO top_up_results (idempotency_key) VALUES ($1)
+	ON CONFLICT (idempotency_key) DO NOTHING`, key)
+if err != nil {
+	return TopUpResult{}, fmt.Errorf("claim top-up: %w", err)
+}
+inserted, err := claim.RowsAffected()
+if err != nil {
+	return TopUpResult{}, fmt.Errorf("read claim outcome: %w", err)
+}
+```
+
+This replaces our in-memory check-and-claim. The unique constraint coordinates requests even when they come from different processes:
+
+1. If the key is new, we insert its row and get to do the work.
+2. If another transaction is currently inserting the same key, Postgres waits for its outcome.
+3. If that transaction commits, our insert does nothing. If it rolls back, our insert can proceed.
+
+When we didn't insert a row, read the recorded result:
+
+```go
+var result TopUpResult
+if inserted == 0 {
+	err = tx.QueryRowContext(ctx, `
+		SELECT account_id, balance_pence FROM top_up_results
+		WHERE idempotency_key = $1`, key).Scan(&result.AccountID, &result.BalancePence)
+	if err != nil {
+		return TopUpResult{}, fmt.Errorf("read top-up result: %w", err)
+	}
+	return result, nil
+}
+```
+
+At `READ COMMITTED`, each statement gets a fresh snapshot. That separate `SELECT` can see the result committed by the transaction our insert waited for. We haven't changed anything on this path, so the deferred rollback simply ends our transaction.
+
+For a new key, add the credit and get the updated balance:
+
+```go
+result.AccountID = request.AccountID
+err = tx.QueryRowContext(ctx, `
+	INSERT INTO accounts (account_id, balance_pence) VALUES ($1, $2)
+	ON CONFLICT (account_id) DO UPDATE
+	SET balance_pence = accounts.balance_pence + EXCLUDED.balance_pence
+	RETURNING balance_pence`, request.AccountID, request.AmountPence).Scan(&result.BalancePence)
+if err != nil {
+	return TopUpResult{}, fmt.Errorf("add credit: %w", err)
+}
+```
+
+The arithmetic happens in Postgres. Reading a balance into Go, adding the amount and writing it back would introduce another check-then-act problem: two different top-ups could overwrite each other's changes. This update locks the account row and increments its current balance.
+
+Finally, save the result and commit:
+
+```go
+_, err = tx.ExecContext(ctx, `
+	UPDATE top_up_results SET account_id = $2, balance_pence = $3
+	WHERE idempotency_key = $1`, key, result.AccountID, result.BalancePence)
+if err != nil {
+	return TopUpResult{}, fmt.Errorf("record top-up result: %w", err)
+}
+if err := tx.Commit(); err != nil {
+	return TopUpResult{}, fmt.Errorf("commit top-up: %w", err)
+}
+return result, nil
+```
+
+**The balance change and the result become committed together.** If the transaction fails before committing, neither survives. If it commits but our response gets lost, a retry reads the saved result. Even an error returned by `Commit` can leave the caller uncertain about the outcome, so it should retry with the same key rather than inventing a new one.
+
+`Balance` is just a query, returning zero for an account that doesn't exist yet:
+
+```go
+func (s *PostgresTopUps) Balance(ctx context.Context, accountID string) (int, error) {
+	var balance int
+	err := s.db.QueryRowContext(ctx, `
+		SELECT balance_pence FROM accounts WHERE account_id = $1`, accountID).Scan(&balance)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, fmt.Errorf("read balance: %w", err)
+	}
+	return balance, nil
+}
+```
+
+### Check what only the database can tell us
+
+The shared contract checks our observable behaviour, including concurrent retries. Two additional tests exercise the database implementation:
+
+1. **Replay through a new adapter and connection pool.** Apply a top-up, create another adapter connected to the same database, then retry. The result comes from Postgres, not an object-local cache.
+2. **Rollback after crediting but before recording the result.** Add a test-only check constraint that rejects a particular saved balance. The balance update succeeds inside the transaction, but recording its result fails. Check that the account still has zero credit, remove the constraint and retry the same key. It should succeed once, rather than finding a stranded claim or doubling the credit.
+
+The second test uses this constraint to trigger the failure:
+
+```sql
+ALTER TABLE top_up_results
+ADD CONSTRAINT reject_test_result CHECK (balance_pence <> 1234);
+```
+
+The initial claim has a null balance, so it passes this check. Saving a result of 1,234 pence fails after the account update. That's a real database error at the boundary we care about, without adding failure switches to the adapter.
+
+Run the database tests with Docker running:
+
+```sh
+go test ./retryable-endpoints -run TestPostgresTopUps -v -timeout 3m
+```
+
+For everyday work on the handler or in-memory implementation, `go test -short ./retryable-endpoints/...` skips the container test. Normal test runs include it. We pay the database startup cost when checking the database contract, rather than for every HTTP scenario.
+
+We've kept this example focused on the transaction boundary. Key expiry, rejecting a reused key with a different payload, authentication and account validation still need deliberate policies in a real service. In particular, this example assumes a key identifies one top-up globally; an authenticated API would usually scope keys to the caller as well.
+
+The handler hasn't changed. The operation's promise hasn't changed. We've replaced the in-memory mechanism with a transaction that can uphold that promise across separate service instances.
