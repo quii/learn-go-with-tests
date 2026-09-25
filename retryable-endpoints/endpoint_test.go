@@ -36,6 +36,8 @@ type TopUpRequest struct {
 }
 
 func RetryableEndpoint(accounts Accounts) http.Handler {
+	handledKeys := make(map[string]bool)
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var topUp TopUpRequest
 		if err := json.NewDecoder(r.Body).Decode(&topUp); err != nil {
@@ -43,7 +45,15 @@ func RetryableEndpoint(accounts Accounts) http.Handler {
 			return
 		}
 
+		idempotencyKey := r.Header.Get("Idempotency-Key")
+
+		if handledKeys[idempotencyKey] {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		accounts.AddCredit(topUp.AccountID, topUp.AmountPence)
+		handledKeys[idempotencyKey] = true
 		w.WriteHeader(http.StatusOK)
 	})
 }

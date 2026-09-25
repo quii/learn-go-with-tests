@@ -190,23 +190,23 @@ Our clients are asking if we can support idempotency keys. They will generate on
 
 ```go
 t.Run("credits the account only once when a request is retried", func(t *testing.T) {
-    accounts := NewInMemoryAccounts()
-    handler := RetryableEndpoint(accounts)
+	accounts := NewInMemoryAccounts()
+	handler := RetryableEndpoint(accounts)
 
-    topUp := TopUpRequest{
-        AccountID:   "user-123",
-        AmountPence: 1000,
-    }
+	topUp := TopUpRequest{
+		AccountID:   "user-123",
+		AmountPence: 1000,
+	}
 
-    idempotencyKey := uuid.New().String()
+	idempotencyKey := uuid.New().String()
 
-    res1 := postTopUp(t, handler, topUp, idempotencyKey)
-    assertStatus(t, res1, http.StatusOK)
-    assertBalance(t, accounts, "user-123", 1000)
+	res1 := postTopUp(t, handler, topUp, idempotencyKey)
+	assertStatus(t, res1, http.StatusOK)
+	assertBalance(t, accounts, "user-123", 1000)
 
-    res2 := postTopUp(t, handler, topUp, idempotencyKey)
-    assertStatus(t, res2, http.StatusOK)
-    assertBalance(t, accounts, "user-123", 1000)
+	res2 := postTopUp(t, handler, topUp, idempotencyKey)
+	assertStatus(t, res2, http.StatusOK)
+	assertBalance(t, accounts, "user-123", 1000)
 })
 ```
 
@@ -242,3 +242,40 @@ func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, idempoten
 ```
 
 As expected, our endpoint does not use the idempotency key, so it tops up twice.
+
+## Write enough code to make it pass
+
+We need to remember which keys we've already handled. A map will do for now.
+
+```go
+func RetryableEndpoint(accounts Accounts) http.Handler {
+	handledKeys := make(map[string]bool)
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var topUp TopUpRequest
+		if err := json.NewDecoder(r.Body).Decode(&topUp); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		idempotencyKey := r.Header.Get("Idempotency-Key")
+
+		if handledKeys[idempotencyKey] {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		accounts.AddCredit(topUp.AccountID, topUp.AmountPence)
+		handledKeys[idempotencyKey] = true
+		w.WriteHeader(http.StatusOK)
+	})
+}
+```
+
+Our tests pass, but this simple implementation has some gaps:
+
+- Empty keys are not handled well at all. After the first empty-key request, all others will be ignored! For this endpoint, we'll require a non-empty key.
+- Checking the key and claiming it should be _atomic_: no other request should be able to slip between those steps. Two requests with the same key could both find it missing and both add credit before either records it. Accessing the map concurrently without synchronisation is also a data race.
+- The map belongs to one handler instance. If we run several instances of our service, a retry could reach a different instance that hasn't seen the key and add credit again. Restarting the service also loses the keys. We'll need to share and persist this information to support horizontal scaling, which we'll explore later in the chapter.
+
+Let's tackle these one at a time.
