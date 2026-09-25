@@ -43,6 +43,7 @@
 * [Time](time.md)
 * [Revisiting time, with testing/synctest](revisiting-time-with-synctest.md)
 * [WebSockets](websockets.md)
+* [Retryable endpoints](retryable-endpoints.md)
 
 ## Questions and answers
 

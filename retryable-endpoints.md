@@ -1,5 +1,7 @@
 # Retryable endpoints
 
+**[You can find all the code for this chapter here](https://github.com/quii/learn-go-with-tests/tree/main/retryable-endpoints)**
+
 We are building an API that allows a system to add credit to an account. Bread and butter Go, at least on the happy path. But we're building a resilient [distributed system](https://en.wikipedia.org/wiki/Distributed_computing), so we need to think carefully about what happens when things go wrong.
 
 Imagine a client is using a _[transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html)_. If you're not familiar, it's enough to know that it's a list of pending work stored in a database. A worker picks up an item from the outbox, calls our API and then marks the item as done if the call succeeds.
@@ -10,7 +12,7 @@ What we need to do is make our API friendly for retries. A fancier term for this
 
 Sometimes we can design our APIs to be idempotent, almost out of the box. An [HTTP PUT](https://en.wikipedia.org/wiki/HTTP#Idempotent_method)'s semantics mean you update a resource in place, and if you do the same call again, the state of the resource is the same. GET should also follow these retryable semantics.
 
-For operations that musn't be repeated on retry we need some help: **idempotency keys**. Let’s use TDD to see how they work.
+For operations that mustn't be repeated on retry we need some help: **idempotency keys**. Let’s use TDD to see how they work.
 
 ## Write the test first
 
@@ -186,7 +188,7 @@ Run the test again to check it still passes. We can now write the next scenario 
 
 ## Write the test first
 
-Our clients are asking if we can support idempotency keys. They will generate one per logical top-up, and they expect us to use that key to make the endpoint idempotent. In practice this means if they retry with the same idempotency key, we will not top up again. 
+Our clients are asking if we can support idempotency keys. They will generate one per logical top-up, and they expect us to use that key to make the endpoint idempotent. In practice this means if they retry with the same idempotency key, we will not top up again.
 
 ```go
 t.Run("credits the account only once when a request is retried", func(t *testing.T) {
@@ -212,9 +214,9 @@ t.Run("credits the account only once when a request is retried", func(t *testing
 
 ## Try to run the test
 
-For this to compile, you'll need to update `postTopUp` to accept the key, and update the first test to pass it. You can just send an empty one for now. 
+For this to compile, you'll need to update `postTopUp` to accept the key, and update the first test to pass it. You can just send an empty one for now.
 
-You'll also need Go 1.27 or above to have access to the `uuid` package. 
+You'll also need Go 1.27 or above to have access to the `uuid` package.
 
 ```go
 func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, idempotencyKey string) *httptest.ResponseRecorder {
@@ -234,7 +236,6 @@ func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, idempoten
 }
 ```
 
-## Try and run the test
 ```
 --- FAIL: TestCreditAccount (0.00s)
     --- FAIL: TestCreditAccount/uses_idempotency_keys_given_from_client (0.00s)
@@ -322,7 +323,7 @@ if idempotencyKey == "" {
 }
 ```
 
-The test will now pass. 
+The test will now pass.
 
 ## Write the test first
 
@@ -995,3 +996,41 @@ For everyday work on the handler or in-memory implementation, `go test -short ./
 We've kept this example focused on the transaction boundary. Key expiry, rejecting a reused key with a different payload, authentication and account validation still need deliberate policies in a real service. In particular, this example assumes a key identifies one top-up globally; an authenticated API would usually scope keys to the caller as well.
 
 The handler hasn't changed. The operation's promise hasn't changed. We've replaced the in-memory mechanism with a transaction that can uphold that promise across separate service instances.
+
+## Wrapping up
+
+Retries aren't an exotic edge case in a distributed system, they're how work gets done. A client that can't tell "it worked" from "I didn't hear back" has no choice but to send the request again. So the question was never whether our endpoint gets called twice; it's what happens when it does.
+
+### What we've covered
+
+- **Idempotency**: repeating the same logical operation has the same effect as doing it once. Some HTTP methods give us this almost for free (`PUT`, `GET`); the ones that don't need help.
+- **Idempotency keys**: the client generates one per logical operation and sends it with every attempt, retries included. We made ours required, so a caller can't quietly opt out of retry-safety.
+- **Check-then-act** is the bug hiding inside "have we seen this key before?". Looking a key up and claiming it have to be one atomic step, or two requests can both decide they're the first one.
+- **Atomicity has to cover the whole operation, not just the claim.** Adding the credit and recording the key as two independent steps leaves a gap; stop the service in that gap and we've credited an account with nothing to say we did.
+- That's what drove the redesign in the second half of the chapter. We stopped asking an HTTP handler to coordinate a claim, a credit and a completion, and made one method, `Apply`, responsible for all three.
+- **Contracts and fakes**, as in [Working Without Mocks](working-without-mocks.md). We described the behaviour once and ran it against an in-memory implementation and Postgres. Writing the database adapter didn't mean rewriting the tests.
+- **A transaction and a unique constraint** are how that promise survives more than one process. `INSERT ... ON CONFLICT DO NOTHING` lets Postgres pick the winner, and a competing transaction waits for that winner's outcome rather than guessing at it.
+- Let the database do the arithmetic. Reading a balance into Go, adding to it and writing it back is check-then-act again, just with a network hop in the middle.
+
+### On testing concurrent behaviour
+
+- We used [`testing/synctest`](revisiting-time-with-synctest.md) to arrange the overlap on purpose instead of starting goroutines and hoping. A test that only fails when your laptop is busy isn't much of a test.
+- **The race detector would not have caught this bug.** There was no data race in our failing test; the two requests touched the map at different moments. They were both still wrong. `-race` finds unsynchronised access, not broken logic, so we need tests that describe the behaviour too.
+- The contract's concurrent scenarios use a plain start channel rather than `synctest`, so those same scenarios can run against an implementation doing real database I/O. Neither approach replaces the other.
+- Some things only the database can tell us, so we kept a couple of tests for it: replaying a result through a fresh connection pool, and a transaction that fails *after* crediting but *before* recording its result. We provoked that failure with a test-only `CHECK` constraint rather than building failure switches into the adapter.
+
+### Decisions we've left open
+
+The mechanism is the easy half. A real service still has to pick a policy for each of these, and I'd rather make those choices explicitly than inherit them by accident:
+
+- **What to say while a top-up is still running.** Our first version returned `409 Conflict` and invited the caller to try again later; the second waits for the outcome and replays the result. Both are reasonable, and they lead to different tests.
+- **How long a key lives.** You can't keep them forever. Expiry turns a very late retry into a brand new top-up, so the window needs to comfortably outlast any retrying a client will plausibly do.
+- **What a reused key with a different payload means.** We assumed callers replay the same request. Rejecting a mismatch is genuinely useful, and it's a separate behaviour with its own tests.
+- **Who a key belongs to.** We treated keys as globally unique, which is fine for an example. An authenticated API would normally scope them to the caller, so one client can't collide with — or go fishing in — another's keys.
+
+### Additional material
+
+- [The Idempotency-Key HTTP Header Field](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-idempotency-key-header) is the IETF draft that standardises the header we've been setting, including what servers should do about mismatched payloads and concurrent requests.
+- [Stripe's documentation on idempotent requests](https://docs.stripe.com/api/idempotent_requests) is a good look at how this is presented to clients of a real API, expiry window and all.
+- [Implementing Stripe-like idempotency keys in Postgres](https://brandur.org/idempotency-keys) by Brandur Leach goes considerably further than we have, into multi-step operations where some steps are calls to other systems you can't roll back.
+- [PostgreSQL: Transaction Isolation](https://www.postgresql.org/docs/current/transaction-iso.html) is worth reading properly if you're relying on transactions for correctness. Our adapter chose `READ COMMITTED` deliberately, and that choice only makes sense once you know what the alternatives promise.
