@@ -46,6 +46,10 @@ func RetryableEndpoint(accounts Accounts) http.Handler {
 		}
 
 		idempotencyKey := r.Header.Get("Idempotency-Key")
+		if idempotencyKey == "" {
+			http.Error(w, "missing idempotency key", http.StatusBadRequest)
+			return
+		}
 
 		if handledKeys[idempotencyKey] {
 			w.WriteHeader(http.StatusOK)
@@ -68,7 +72,7 @@ func TestCreditAccount(t *testing.T) {
 			AmountPence: 1000,
 		}
 
-		response := postTopUp(t, handler, topUp, "")
+		response := postTopUp(t, handler, topUp, uuid.New().String())
 
 		assertStatus(t, response, http.StatusOK)
 		assertBalance(t, accounts, "user-123", 1000)
@@ -93,6 +97,21 @@ func TestCreditAccount(t *testing.T) {
 		assertStatus(t, res2, http.StatusOK)
 		assertBalance(t, accounts, "user-123", 1000)
 	})
+
+	t.Run("bad request when idempotency key is missing", func(t *testing.T) {
+		accounts := NewInMemoryAccounts()
+		handler := RetryableEndpoint(accounts)
+
+		topUp := TopUpRequest{
+			AccountID:   "user-123",
+			AmountPence: 1000,
+		}
+
+		res := postTopUp(t, handler, topUp, "")
+		assertStatus(t, res, http.StatusBadRequest)
+		assertBalance(t, accounts, "user-123", 0)
+	})
+
 }
 
 func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, idempotencyKey string) *httptest.ResponseRecorder {

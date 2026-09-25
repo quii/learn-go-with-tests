@@ -279,3 +279,47 @@ Our tests pass, but this simple implementation has some gaps:
 - The map belongs to one handler instance. If we run several instances of our service, a retry could reach a different instance that hasn't seen the key and add credit again. Restarting the service also loses the keys. We'll need to share and persist this information to support horizontal scaling, which we'll explore later in the chapter.
 
 Let's tackle these one at a time.
+
+## Write the test first
+
+This is the simplest one to make pass. To prepare, update the first test to pass in a UUID as the key rather than an empty string, so we don't end up with two failing tests. Then, let's write a test to check for the key is sent properly
+
+```go
+t.Run("bad request when idempotency key is missing", func(t *testing.T) {
+    accounts := NewInMemoryAccounts()
+    handler := RetryableEndpoint(accounts)
+
+    topUp := TopUpRequest{
+        AccountID:   "user-123",
+        AmountPence: 1000,
+    }
+
+    res := postTopUp(t, handler, topUp, "")
+    assertStatus(t, res, http.StatusBadRequest)
+    assertBalance(t, accounts, "user-123", 0)
+})
+```
+
+## Try to run the test
+
+```
+--- FAIL: TestCreditAccount (0.00s)
+    --- FAIL: TestCreditAccount/bad_request_when_idempotency_key_is_missing (0.00s)
+        endpoint_test.go:107: got status 200, want 400;
+
+```
+
+Fails as expected
+
+## Write enough code to make it pass
+
+We just need to add a bit of validation to the header after we've extracted it from the request.
+
+```go
+if idempotencyKey == "" {
+    http.Error(w, "missing idempotency key", http.StatusBadRequest)
+    return
+}
+```
+
+The test will now pass. 
