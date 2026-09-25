@@ -323,3 +323,7 @@ if idempotencyKey == "" {
 ```
 
 The test will now pass. 
+
+## Write the test first
+
+We now need to write a test to exercise the concurrent access issues. 
