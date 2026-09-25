@@ -2,240 +2,148 @@ package retryableendpoints
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
-	"sync"
 	"testing"
 	"testing/synctest"
 	"uuid"
 )
 
-type Accounts interface {
-	AddCredit(accountID string, amountPence int)
-	Balance(accountID string) int
-}
-
-type InMemoryAccounts struct {
-	balances map[string]int
-}
-
-func NewInMemoryAccounts() *InMemoryAccounts {
-	return &InMemoryAccounts{balances: make(map[string]int)}
-}
-
-func (a *InMemoryAccounts) AddCredit(accountID string, amountPence int) {
-	a.balances[accountID] += amountPence
-}
-
-func (a *InMemoryAccounts) Balance(accountID string) int {
-	return a.balances[accountID]
-}
-
-type PausingAccounts struct {
-	Accounts
-	pauseNext bool
-	resume    <-chan struct{}
-}
-
-func (a *PausingAccounts) AddCredit(accountID string, amountPence int) {
-	a.Accounts.AddCredit(accountID, amountPence)
-
-	if a.pauseNext {
-		a.pauseNext = false
-		<-a.resume
-	}
-}
-
-type TopUpRequest struct {
-	AccountID   string `json:"account_id"`
-	AmountPence int    `json:"amount_pence"`
-}
-
-type claimResult int
-
-const (
-	claimed claimResult = iota
-	alreadyInProgress
-	alreadyCompleted
-)
-
-type IdempotencyStore struct {
-	mu       sync.Mutex
-	requests map[string]claimResult
-}
-
-func NewIdempotencyStore() *IdempotencyStore {
-	return &IdempotencyStore{requests: make(map[string]claimResult)}
-}
-
-func (s *IdempotencyStore) Claim(key string) claimResult {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if result, exists := s.requests[key]; exists {
-		return result
-	}
-
-	s.requests[key] = alreadyInProgress
-	return claimed
-}
-
-func (s *IdempotencyStore) Complete(key string) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.requests[key] = alreadyCompleted
-}
-
-func RetryableEndpoint(accounts Accounts) http.Handler {
-	store := NewIdempotencyStore()
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var topUp TopUpRequest
-		if err := json.NewDecoder(r.Body).Decode(&topUp); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		idempotencyKey := r.Header.Get("Idempotency-Key")
-		if idempotencyKey == "" {
-			http.Error(w, "missing idempotency key", http.StatusBadRequest)
-			return
-		}
-
-		switch store.Claim(idempotencyKey) {
-		case alreadyInProgress:
-			http.Error(w, "top-up is still in progress", http.StatusConflict)
-		case alreadyCompleted:
-			w.WriteHeader(http.StatusOK)
-		case claimed:
-			accounts.AddCredit(topUp.AccountID, topUp.AmountPence)
-			store.Complete(idempotencyKey)
-			w.WriteHeader(http.StatusOK)
-		}
-	})
-}
-
 func TestCreditAccount(t *testing.T) {
-	t.Run("adds credit to an account", func(t *testing.T) {
-		accounts := NewInMemoryAccounts()
-		handler := RetryableEndpoint(accounts)
+	t.Run("adds credit and returns the result", func(t *testing.T) {
+		topUps := NewInMemoryTopUps()
+		handler := RetryableEndpoint(topUps)
+		request := TopUpRequest{AccountID: "user-123", AmountPence: 1000}
 
-		topUp := TopUpRequest{
-			AccountID:   "user-123",
-			AmountPence: 1000,
-		}
-
-		response := postTopUp(t, handler, topUp, uuid.New().String())
+		response := postTopUp(t, handler, request, uuid.New().String())
 
 		assertStatus(t, response, http.StatusOK)
-		assertBalance(t, accounts, "user-123", 1000)
+		assertResult(t, readResult(t, response), TopUpResult{AccountID: "user-123", BalancePence: 1000})
+		assertBalance(t, topUps, "user-123", 1000)
+		if got := response.Header().Get("Content-Type"); got != "application/json" {
+			t.Errorf("got Content-Type %q, want application/json", got)
+		}
 	})
 
-	t.Run("credits the account only once when a request is retried", func(t *testing.T) {
-		accounts := NewInMemoryAccounts()
-		handler := RetryableEndpoint(accounts)
+	t.Run("retries can reach a different handler", func(t *testing.T) {
+		topUps := NewInMemoryTopUps()
+		firstHandler := RetryableEndpoint(topUps)
+		secondHandler := RetryableEndpoint(topUps)
+		request := TopUpRequest{AccountID: "user-123", AmountPence: 1000}
+		key := uuid.New().String()
 
-		topUp := TopUpRequest{
-			AccountID:   "user-123",
-			AmountPence: 1000,
+		first := postTopUp(t, firstHandler, request, key)
+		retry := postTopUp(t, secondHandler, request, key)
+
+		assertStatus(t, first, http.StatusOK)
+		assertStatus(t, retry, http.StatusOK)
+		if first.Body.String() != retry.Body.String() {
+			t.Errorf("retry body %q differs from original %q", retry.Body.String(), first.Body.String())
 		}
-
-		idempotencyKey := uuid.New().String()
-
-		res1 := postTopUp(t, handler, topUp, idempotencyKey)
-		assertStatus(t, res1, http.StatusOK)
-		assertBalance(t, accounts, "user-123", 1000)
-
-		res2 := postTopUp(t, handler, topUp, idempotencyKey)
-		assertStatus(t, res2, http.StatusOK)
-		assertBalance(t, accounts, "user-123", 1000)
+		assertBalance(t, topUps, "user-123", 1000)
 	})
 
 	t.Run("bad request when idempotency key is missing", func(t *testing.T) {
-		accounts := NewInMemoryAccounts()
-		handler := RetryableEndpoint(accounts)
+		topUps := NewInMemoryTopUps()
+		response := postTopUp(t, RetryableEndpoint(topUps), TopUpRequest{AccountID: "user-123", AmountPence: 1000}, "")
 
-		topUp := TopUpRequest{
-			AccountID:   "user-123",
-			AmountPence: 1000,
-		}
-
-		res := postTopUp(t, handler, topUp, "")
-		assertStatus(t, res, http.StatusBadRequest)
-		assertBalance(t, accounts, "user-123", 0)
+		assertStatus(t, response, http.StatusBadRequest)
+		assertBalance(t, topUps, "user-123", 0)
 	})
 
-	t.Run("does not credit twice when a retry arrives before the first request completes", func(t *testing.T) {
+	t.Run("retry succeeds before the first response reaches the caller", func(t *testing.T) {
 		synctest.Test(t, func(t *testing.T) {
-			accounts := NewInMemoryAccounts()
+			topUps := NewInMemoryTopUps()
 			resume := make(chan struct{})
-			handler := RetryableEndpoint(&PausingAccounts{
-				Accounts:  accounts,
-				pauseNext: true,
-				resume:    resume,
-			})
-			topUp := TopUpRequest{
-				AccountID:   "user-123",
-				AmountPence: 1000,
-			}
-			idempotencyKey := uuid.New().String()
-			request := newTopUpRequest(t, topUp, idempotencyKey)
+			firstHandler := RetryableEndpoint(&PausingTopUps{TopUps: topUps, resume: resume})
+			secondHandler := RetryableEndpoint(topUps)
+			request := TopUpRequest{AccountID: "user-123", AmountPence: 1000}
+			key := uuid.New().String()
+			firstRequest := newTopUpRequest(t, request, key)
 			firstResponse := httptest.NewRecorder()
 
-			go handler.ServeHTTP(firstResponse, request)
+			go firstHandler.ServeHTTP(firstResponse, firstRequest)
 			synctest.Wait()
 
-			// The credit has been added, but the first request hasn't finished.
-			assertBalance(t, accounts, "user-123", 1000)
-
-			// The client hasn't received confirmation, so it retries the same top-up.
-			retryResponse := postTopUp(t, handler, topUp, idempotencyKey)
-
+			// Apply has completed, but the first handler hasn't received its result.
+			assertBalance(t, topUps, "user-123", 1000)
+			retry := postTopUp(t, secondHandler, request, key)
 			close(resume)
 			synctest.Wait()
 
 			assertStatus(t, firstResponse, http.StatusOK)
-			assertStatus(t, retryResponse, http.StatusConflict)
-			assertBalance(t, accounts, "user-123", 1000)
+			assertStatus(t, retry, http.StatusOK)
+			assertResult(t, readResult(t, retry), readResult(t, firstResponse))
+			assertBalance(t, topUps, "user-123", 1000)
 		})
+	})
+
+	t.Run("reports an operation failure", func(t *testing.T) {
+		topUps := NewInMemoryTopUps()
+		handler := RetryableEndpoint(FailingTopUps{TopUps: topUps})
+		response := postTopUp(t, handler, TopUpRequest{AccountID: "user-123", AmountPence: 1000}, uuid.New().String())
+		assertStatus(t, response, http.StatusInternalServerError)
+		assertBalance(t, topUps, "user-123", 0)
 	})
 }
 
-func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, idempotencyKey string) *httptest.ResponseRecorder {
-	t.Helper()
+// Pause after the operation has finished, modelling a delayed acknowledgement.
+type PausingTopUps struct {
+	TopUps
+	resume <-chan struct{}
+}
 
-	req := newTopUpRequest(t, topUp, idempotencyKey)
+func (p *PausingTopUps) Apply(ctx context.Context, key string, request TopUpRequest) (TopUpResult, error) {
+	result, err := p.TopUps.Apply(ctx, key, request)
+	<-p.resume
+	return result, err
+}
+
+type FailingTopUps struct {
+	TopUps
+}
+
+func (f FailingTopUps) Apply(context.Context, string, TopUpRequest) (TopUpResult, error) {
+	return TopUpResult{}, errors.New("operation unavailable")
+}
+
+func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, key string) *httptest.ResponseRecorder {
+	t.Helper()
+	request := newTopUpRequest(t, topUp, key)
 	response := httptest.NewRecorder()
-	handler.ServeHTTP(response, req)
+	handler.ServeHTTP(response, request)
 	return response
 }
 
-func newTopUpRequest(t testing.TB, topUp TopUpRequest, idempotencyKey string) *http.Request {
+func newTopUpRequest(t testing.TB, topUp TopUpRequest, key string) *http.Request {
 	t.Helper()
-
 	payload, err := json.Marshal(topUp)
 	if err != nil {
 		t.Fatalf("could not marshal top-up request: %v", err)
 	}
+	request := httptest.NewRequest(http.MethodPost, "/top-up", bytes.NewReader(payload))
+	request.Header.Set("Content-Type", "application/json")
+	if key != "" {
+		request.Header.Set("Idempotency-Key", key)
+	}
+	return request
+}
 
-	req := httptest.NewRequest(http.MethodPost, "/top-up", bytes.NewReader(payload))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Idempotency-Key", idempotencyKey)
-	return req
+func readResult(t testing.TB, response *httptest.ResponseRecorder) TopUpResult {
+	t.Helper()
+	var result TopUpResult
+	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+		t.Fatalf("could not decode top-up result: %v", err)
+	}
+	return result
 }
 
 func assertStatus(t testing.TB, response *httptest.ResponseRecorder, want int) {
 	t.Helper()
 	if response.Code != want {
 		t.Errorf("got status %d, want %d; response body: %s", response.Code, want, response.Body.String())
-	}
-}
-
-func assertBalance(t testing.TB, accounts Accounts, accountID string, want int) {
-	t.Helper()
-	if got := accounts.Balance(accountID); got != want {
-		t.Errorf("got balance %d pence for account %q, want %d", got, accountID, want)
 	}
 }

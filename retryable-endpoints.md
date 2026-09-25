@@ -574,3 +574,218 @@ They should pass. When our first request pauses, its key is already recorded as 
 The handler assumes its `Accounts` dependency supports concurrent calls; how it achieves that is the dependency's responsibility. Our concern here is preventing two requests with the same key from performing the same top-up twice.
 
 The idempotency store is still local to one handler instance; we haven't solved persistence or horizontal scaling yet.
+
+## Refactor
+
+Our handler now knows rather a lot about making a top-up retryable. It claims a key, adds credit and records completion. But what happens if the service stops between those last two steps?
+
+If we put the balances and keys in a database but keep updating them independently, we still have a problem. The credit could be saved without its completion record. Moving the maps to Postgres wouldn't fix that on its own.
+
+We need the credit and its completion record to succeed together. Let's give that responsibility to one operation, instead of asking our HTTP handler to coordinate it.
+
+The code so far is preserved in [v1](retryable-endpoints/v1/endpoint_test.go). The next version lives in [retryable-endpoints](retryable-endpoints), with the implementation in ordinary `.go` files rather than alongside the tests.
+
+### An operation, not three separate steps
+
+```go
+type TopUpResult struct {
+	AccountID    string `json:"account_id"`
+	BalancePence int    `json:"balance_pence"`
+}
+
+var ErrMissingKey = errors.New("missing idempotency key")
+
+type TopUps interface {
+	Apply(ctx context.Context, key string, request TopUpRequest) (TopUpResult, error)
+	Balance(ctx context.Context, accountID string) (int, error)
+}
+```
+
+`Apply` promises to add credit once per key and return the original result when we retry. `Balance` lets us query the current state, just as we did with `Accounts`. The HTTP handler only needs `Apply`.
+
+We're also giving the caller a result rather than an empty `200 OK`. It contains the balance immediately after *this* top-up. If another top-up happens before a retry, the retry should still return the first operation's recorded result, not today's balance.
+
+The context and error let an implementation report a cancelled request or an unavailable database. For now, the only input validation we'll add is the existing requirement for a non-empty key. Callers must reuse the same payload when retrying a key; detecting mismatched payloads is a separate behaviour we could add later.
+
+### Decide what happens during an overlapping call
+
+This is also a change to our earlier policy. Instead of returning `409` while a top-up is running, this version waits for the operation to finish and replays its result. Both are reasonable choices, but they lead to different tests.
+
+Waiting fits a database transaction protected by a unique constraint: a competing insert can wait for the first transaction's outcome. It also means our abstraction doesn't need to expose the intermediate claim state.
+
+This isn't just moving code around. We're changing the overlapping-request behaviour and adding a response body, so let's make those promises explicit in our tests.
+
+### A contract we can reuse
+
+As in [Working Without Mocks](working-without-mocks.md), we'll describe the behaviour once and run it against each implementation. The factory gives each scenario fresh, isolated state; a database version can also register cleanup with `t.Cleanup`.
+
+```go
+type TopUpsContract struct {
+	New func(t testing.TB) TopUps
+}
+```
+
+Here's the replay scenario from the contract in [topups_contract_test.go](retryable-endpoints/topups_contract_test.go):
+
+```go
+func (c TopUpsContract) Test(t *testing.T) {
+	t.Run("replays the original result even after another top-up", func(t *testing.T) {
+		topUps := c.New(t)
+		request := TopUpRequest{AccountID: "user-123", AmountPence: 1000}
+		first := applyTopUp(t, topUps, "first", request)
+
+		// Identical payload, different key: a genuinely new top-up.
+		second := applyTopUp(t, topUps, "second", request)
+		assertResult(t, second, TopUpResult{AccountID: "user-123", BalancePence: 2000})
+
+		replayed := applyTopUp(t, topUps, "first", request)
+		assertResult(t, replayed, first)
+		assertBalance(t, topUps, "user-123", 2000)
+	})
+}
+```
+
+The helpers do the same jobs as before: apply a top-up and check the error, compare results, and query the balance. The full contract also checks:
+
+1. A top-up credits the right account and returns its balance.
+2. A missing key is rejected without changing the balance.
+3. Concurrent attempts with the same key all return the same result and add credit once.
+4. Concurrent top-ups with different keys all contribute to the balance.
+
+For the concurrent scenarios, the contract releases several goroutines from a shared start channel and collects their results. It doesn't use `synctest`, so the same scenarios can run against an implementation doing real database I/O. That start signal doesn't force a particular interleaving; we'll still need database-specific tests for transaction contention and rollback.
+
+### Keep the balance and result together
+
+Our in-memory implementation owns both maps. It holds one mutex from checking the key through to recording the balance and result:
+
+```go
+type InMemoryTopUps struct {
+	mu       sync.Mutex
+	balances map[string]int
+	results  map[string]TopUpResult
+}
+
+func NewInMemoryTopUps() *InMemoryTopUps {
+	return &InMemoryTopUps{
+		balances: make(map[string]int),
+		results:  make(map[string]TopUpResult),
+	}
+}
+
+func (s *InMemoryTopUps) Apply(ctx context.Context, key string, request TopUpRequest) (TopUpResult, error) {
+	if key == "" {
+		return TopUpResult{}, ErrMissingKey
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if err := ctx.Err(); err != nil {
+		return TopUpResult{}, err
+	}
+	if result, exists := s.results[key]; exists {
+		return result, nil
+	}
+
+	s.balances[request.AccountID] += request.AmountPence
+	result := TopUpResult{
+		AccountID:    request.AccountID,
+		BalancePence: s.balances[request.AccountID],
+	}
+	s.results[key] = result
+	return result, nil
+}
+
+func (s *InMemoryTopUps) Balance(ctx context.Context, accountID string) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+	return s.balances[accountID], nil
+}
+```
+
+There are no network calls inside the lock, just a few map operations. For this implementation, serialising all top-ups is a simple way to uphold the contract. Another implementation could allow unrelated accounts to be updated concurrently.
+
+Notice that the mutex protects the *whole operation*, including balance queries. Other callers cannot observe the balance change before we've stored its result. This is why we no longer have a separately injected `Accounts` and `IdempotencyStore` to coordinate.
+
+This is still an in-memory implementation, not a durable transaction. A process restart loses both maps. What we've gained is a boundary where a database implementation can commit the balance and result together, without changing the handler.
+
+Run the contract against it:
+
+```go
+func TestInMemoryTopUps(t *testing.T) {
+	TopUpsContract{New: func(t testing.TB) TopUps {
+		return NewInMemoryTopUps()
+	}}.Test(t)
+}
+```
+
+### The handler becomes an HTTP adapter
+
+The handler now decodes the request, applies the top-up and translates the result into HTTP:
+
+```go
+func RetryableEndpoint(topUps TopUps) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var request TopUpRequest
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		result, err := topUps.Apply(r.Context(), r.Header.Get("Idempotency-Key"), request)
+		if errors.Is(err, ErrMissingKey) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if err != nil {
+			http.Error(w, "could not top up account", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		// Once writing starts, an encoding/write error cannot change the status.
+		// The completed result remains available for a retry.
+		_ = json.NewEncoder(w).Encode(result)
+	})
+}
+```
+
+Writing the JSON starts the response with the default `200 OK`. If the client disappears while we're writing, the completed top-up remains recorded. That's exactly why we needed retries to be safe.
+
+### Two handlers, one operation service
+
+We can now pass the same `TopUps` implementation to two handlers. A retry can reach either handler without adding credit twice:
+
+```go
+topUps := NewInMemoryTopUps()
+firstHandler := RetryableEndpoint(topUps)
+secondHandler := RetryableEndpoint(topUps)
+request := TopUpRequest{AccountID: "user-123", AmountPence: 1000}
+key := uuid.New().String()
+
+first := postTopUp(t, firstHandler, request, key)
+retry := postTopUp(t, secondHandler, request, key)
+
+assertStatus(t, first, http.StatusOK)
+assertStatus(t, retry, http.StatusOK)
+if first.Body.String() != retry.Body.String() {
+	t.Errorf("retry body %q differs from original %q", retry.Body.String(), first.Body.String())
+}
+assertBalance(t, topUps, "user-123", 1000)
+```
+
+The updated `synctest` scenario in [endpoint_test.go](retryable-endpoints/endpoint_test.go) pauses *after* `Apply` has finished, before the first handler receives its result. It decorates only the first handler's dependency, so a second handler can retry through the underlying service. Both calls now receive `200 OK` and the same result.
+
+That is deliberately different from pausing halfway through `AddCredit`. We've moved the atomic operation behind our interface; the HTTP test no longer reaches inside it. The contract checks concurrent calls, while the HTTP test tells the story of a caller that hasn't received confirmation.
+
+Run both versions with:
+
+```sh
+go test ./retryable-endpoints/... -race -count=10
+```
+
+Sharing one Go value isn't horizontal scaling yet. Separate processes will need to coordinate through shared storage. But we now have a contract for a Postgres adapter to fulfil: keep the credit and its result in one transaction, and replay that result on a retry. The reusable scenarios stay the same; the database-specific tests will establish that its transaction and recovery behaviour really work.
