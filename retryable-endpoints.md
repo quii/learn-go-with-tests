@@ -10,7 +10,7 @@ What we need to do is make our API friendly for retries. A fancier term for this
 
 Sometimes we can design our APIs to be idempotent, almost out of the box. An [HTTP PUT](https://en.wikipedia.org/wiki/HTTP#Idempotent_method)'s semantics mean you update a resource in place, and if you do the same call again, the state of the resource is the same. GET should also follow these retryable semantics.
 
-For operations like sending an email, we need some help: **idempotency keys**. Let’s use TDD to see how they work.
+For operations that musn't be repeated on retry we need some help: **idempotency keys**. Let’s use TDD to see how they work.
 
 ## Write the test first
 
@@ -183,3 +183,62 @@ func TestCreditAccount(t *testing.T) {
 ```
 
 Run the test again to check it still passes. We can now write the next scenario without repeating the request setup and assertion details.
+
+## Write the test first
+
+Our clients are asking if we can support idempotency keys. They will generate one per logical top-up, and they expect us to use that key to make the endpoint idempotent. In practice this means if they retry with the same idempotency key, we will not top up again. 
+
+```go
+t.Run("credits the account only once when a request is retried", func(t *testing.T) {
+    accounts := NewInMemoryAccounts()
+    handler := RetryableEndpoint(accounts)
+
+    topUp := TopUpRequest{
+        AccountID:   "user-123",
+        AmountPence: 1000,
+    }
+
+    idempotencyKey := uuid.New().String()
+
+    res1 := postTopUp(t, handler, topUp, idempotencyKey)
+    assertStatus(t, res1, http.StatusOK)
+    assertBalance(t, accounts, "user-123", 1000)
+
+    res2 := postTopUp(t, handler, topUp, idempotencyKey)
+    assertStatus(t, res2, http.StatusOK)
+    assertBalance(t, accounts, "user-123", 1000)
+})
+```
+
+## Try to run the test
+
+For this to compile, you'll need to update `postTopUp` to accept the key, and update the first test to pass it. You can just send an empty one for now. 
+
+You'll also need Go 1.27 or above to have access to the `uuid` package. 
+
+```go
+func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, idempotencyKey string) *httptest.ResponseRecorder {
+	t.Helper()
+
+	payload, err := json.Marshal(topUp)
+	if err != nil {
+		t.Fatalf("could not marshal top-up request: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/top-up", bytes.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Idempotency-Key", idempotencyKey)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	return response
+}
+```
+
+## Try and run the test
+```
+--- FAIL: TestCreditAccount (0.00s)
+    --- FAIL: TestCreditAccount/uses_idempotency_keys_given_from_client (0.00s)
+        endpoint_test.go:84: got balance 2000 pence for account "user-123", want 1000
+```
+
+As expected, our endpoint does not use the idempotency key, so it tops up twice.

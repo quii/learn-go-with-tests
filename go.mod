@@ -1,6 +1,6 @@
 module github.com/quii/learn-go-with-tests
 
-go 1.25
+go 1.27
 
 require (
 	github.com/approvals/go-approval-tests v0.0.0-20211008131110-0c40b30e0000
