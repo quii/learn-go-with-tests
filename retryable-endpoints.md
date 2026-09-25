@@ -286,17 +286,17 @@ This is the simplest one to make pass. To prepare, update the first test to pass
 
 ```go
 t.Run("bad request when idempotency key is missing", func(t *testing.T) {
-    accounts := NewInMemoryAccounts()
-    handler := RetryableEndpoint(accounts)
+	accounts := NewInMemoryAccounts()
+	handler := RetryableEndpoint(accounts)
 
-    topUp := TopUpRequest{
-        AccountID:   "user-123",
-        AmountPence: 1000,
-    }
+	topUp := TopUpRequest{
+		AccountID:   "user-123",
+		AmountPence: 1000,
+	}
 
-    res := postTopUp(t, handler, topUp, "")
-    assertStatus(t, res, http.StatusBadRequest)
-    assertBalance(t, accounts, "user-123", 0)
+	res := postTopUp(t, handler, topUp, "")
+	assertStatus(t, res, http.StatusBadRequest)
+	assertBalance(t, accounts, "user-123", 0)
 })
 ```
 
@@ -317,8 +317,8 @@ We just need to add a bit of validation to the header after we've extracted it f
 
 ```go
 if idempotencyKey == "" {
-    http.Error(w, "missing idempotency key", http.StatusBadRequest)
-    return
+	http.Error(w, "missing idempotency key", http.StatusBadRequest)
+	return
 }
 ```
 
@@ -326,4 +326,251 @@ The test will now pass.
 
 ## Write the test first
 
-We now need to write a test to exercise the concurrent access issues. 
+So far, our client retries after the first request has finished. But what if it hasn't received a response and retries while the first request is still running? The account might already have been credited.
+
+We could start two goroutines and hope they hit the handler at just the wrong moment. I'd rather have a test that fails every time we have this bug, not just when my laptop is having a busy day.
+
+Let's arrange this sequence deliberately:
+
+1. The first request checks its key and adds credit to the account.
+2. We pause it before `AddCredit` returns, so the handler hasn't recorded the key or sent a response yet.
+3. A second request arrives with the same key.
+4. We let the first request finish and check that the account was only credited once.
+
+There's also a response to consider. Previously, we returned `200 OK` for a retry because the original request had finished. For an operation still in progress, we'll choose to return `409 Conflict`, allowing the caller to retry later. Waiting for the first request to finish is another option, but we'll use the fail-fast approach here.
+
+We'll use [`testing/synctest`](revisiting-time-with-synctest.md) to control the overlap. Remember that `synctest.Test` creates a bubble containing our test and its goroutines. `synctest.Wait()` waits until all the other goroutines in that bubble have finished or are *durably blocked*, such as waiting to receive from a channel created inside the bubble.
+
+Add `"testing/synctest"` to your imports, then add this subtest. We'll implement `PausingAccounts` and `newTopUpRequest` next.
+
+```go
+t.Run("does not credit twice when a retry arrives before the first request completes", func(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		accounts := NewInMemoryAccounts()
+		resume := make(chan struct{})
+		handler := RetryableEndpoint(&PausingAccounts{
+			Accounts:  accounts,
+			pauseNext: true,
+			resume:    resume,
+		})
+		topUp := TopUpRequest{
+			AccountID:   "user-123",
+			AmountPence: 1000,
+		}
+		idempotencyKey := uuid.New().String()
+		request := newTopUpRequest(t, topUp, idempotencyKey)
+		firstResponse := httptest.NewRecorder()
+
+		go handler.ServeHTTP(firstResponse, request)
+		synctest.Wait()
+
+		// The credit has been added, but the first request hasn't finished.
+		assertBalance(t, accounts, "user-123", 1000)
+
+		// The client hasn't received confirmation, so it retries the same top-up.
+		retryResponse := postTopUp(t, handler, topUp, idempotencyKey)
+
+		close(resume)
+		synctest.Wait()
+
+		assertStatus(t, firstResponse, http.StatusOK)
+		assertStatus(t, retryResponse, http.StatusConflict)
+		assertBalance(t, accounts, "user-123", 1000)
+	})
+})
+```
+
+The two calls to `synctest.Wait()` do different jobs:
+
+1. The first lets the handler reach the pause. We can then check the balance and send the retry while the first request is still in progress.
+2. After we close `resume`, the second lets the first handler finish. We can then safely inspect its response and the final balance.
+
+No sleeps required. We're controlling the order of events, rather than guessing how long they take.
+
+## Write the minimal amount of code for the test to run and check the failing test output
+
+We need a way to pause the account operation without adding test-specific behaviour to our handler. As in [Working Without Mocks](working-without-mocks.md#off-the-happy-path-with-decorators), we can decorate our fake.
+
+```go
+type PausingAccounts struct {
+	Accounts
+	pauseNext bool
+	resume    <-chan struct{}
+}
+
+func (a *PausingAccounts) AddCredit(accountID string, amountPence int) {
+	a.Accounts.AddCredit(accountID, amountPence)
+
+	if a.pauseNext {
+		a.pauseNext = false
+		<-a.resume
+	}
+}
+```
+
+Embedding `Accounts` lets us keep using the fake's `Balance` method. We only change how `AddCredit` behaves:
+
+1. Delegate to the fake to add the credit.
+2. If this call should pause, set `pauseNext` to `false` so the retry won't pause too.
+3. Wait for the test to close `resume` before returning to the handler.
+
+Notice that we're pausing *after* changing the balance. The work has happened, but the handler hasn't yet recorded that fact. That's the gap we want to expose.
+
+This decorator relies on our controlled ordering: the first `synctest.Wait()` lets the first request reach the channel receive before we start the second request. It isn't a general-purpose, concurrency-safe accounts implementation.
+
+We also need to separate constructing a request from sending it. Our existing helper can call `t.Fatalf` if JSON encoding fails, and fatal test methods must be called from the test goroutine. Let's do that preparation before starting the handler's goroutine.
+
+Extract the request construction into `newTopUpRequest`:
+
+```go
+func newTopUpRequest(t testing.TB, topUp TopUpRequest, idempotencyKey string) *http.Request {
+	t.Helper()
+
+	payload, err := json.Marshal(topUp)
+	if err != nil {
+		t.Fatalf("could not marshal top-up request: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/top-up", bytes.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Idempotency-Key", idempotencyKey)
+	return req
+}
+```
+
+Our existing tests can keep using `postTopUp`, which now delegates to the new helper:
+
+```go
+func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, idempotencyKey string) *httptest.ResponseRecorder {
+	t.Helper()
+
+	req := newTopUpRequest(t, topUp, idempotencyKey)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	return response
+}
+```
+
+Run the new test:
+
+```sh
+go test ./retryable-endpoints -run 'TestCreditAccount/does_not_credit_twice'
+```
+
+```text
+--- FAIL: TestCreditAccount (0.00s)
+    --- FAIL: TestCreditAccount/does_not_credit_twice_when_a_retry_arrives_before_the_first_request_completes (0.00s)
+        endpoint_test.go:161: got status 200, want 409; response body:
+        endpoint_test.go:162: got balance 2000 pence for account "user-123", want 1000
+```
+
+Both requests added credit. When the retry checked the map, the first request hadn't recorded its key yet, so the retry went ahead and returned `200 OK` too.
+
+You can also run this with `-race`. This test fails its assertions without a race-detector report: we've deliberately ordered the accesses using `synctest.Wait()` and the channel. The requests overlap, but they don't access the maps at the same instant. We've exposed a check-then-act bug, which the race detector alone can't catch.
+
+Our handler needs to distinguish a key that's *in progress* from one that's *completed*, and checking and claiming a key must happen atomically. That's our next step.
+
+## Write enough code to make it pass
+
+We now need to check and claim a key as one operation. Let's put the map and its mutex together in a type that handles this for us. The handler can then ask to claim a key without managing locks itself.
+
+There are three possible outcomes when we try to claim a key:
+
+```go
+type claimResult int
+
+const (
+	claimed claimResult = iota
+	alreadyInProgress
+	alreadyCompleted
+)
+```
+
+`claimed` means this caller gets to do the work. The other two results tell it why it shouldn't. We'll store the result that *subsequent* callers should receive, so `claimed` itself never goes into the map.
+
+Add `"sync"` to your imports and create the store:
+
+```go
+type IdempotencyStore struct {
+	mu       sync.Mutex
+	requests map[string]claimResult
+}
+
+func NewIdempotencyStore() *IdempotencyStore {
+	return &IdempotencyStore{requests: make(map[string]claimResult)}
+}
+
+func (s *IdempotencyStore) Claim(key string) claimResult {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if result, exists := s.requests[key]; exists {
+		return result
+	}
+
+	s.requests[key] = alreadyInProgress
+	return claimed
+}
+
+func (s *IdempotencyStore) Complete(key string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.requests[key] = alreadyCompleted
+}
+```
+
+The important part of `Claim` is the scope of the lock:
+
+1. Acquire the mutex before looking up the key.
+2. If the key exists, return its recorded result.
+3. Otherwise, record it as in progress and return `claimed`.
+
+The deferred unlock happens as the method returns. No other caller can check the map between our lookup and insertion, so two requests can't both claim the same key.
+
+The mutex is only held while we inspect or update the map. **The claim remains recorded after the mutex is released.** That lets a retry discover that the work is in progress without waiting for the work to finish.
+
+Now replace the handler's map and inline checks with our store:
+
+```go
+func RetryableEndpoint(accounts Accounts) http.Handler {
+	store := NewIdempotencyStore()
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var topUp TopUpRequest
+		if err := json.NewDecoder(r.Body).Decode(&topUp); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		idempotencyKey := r.Header.Get("Idempotency-Key")
+		if idempotencyKey == "" {
+			http.Error(w, "missing idempotency key", http.StatusBadRequest)
+			return
+		}
+
+		switch store.Claim(idempotencyKey) {
+		case alreadyInProgress:
+			http.Error(w, "top-up is still in progress", http.StatusConflict)
+		case alreadyCompleted:
+			w.WriteHeader(http.StatusOK)
+		case claimed:
+			accounts.AddCredit(topUp.AccountID, topUp.AmountPence)
+			store.Complete(idempotencyKey)
+			w.WriteHeader(http.StatusOK)
+		}
+	})
+}
+```
+
+Run the tests again, including with the race detector:
+
+```sh
+go test ./retryable-endpoints -race -count=10
+```
+
+They should pass. When our first request pauses, its key is already recorded as in progress, so the retry gets `409 Conflict` without adding any credit. Once the first request finishes, subsequent retries get `200 OK`.
+
+The handler assumes its `Accounts` dependency supports concurrent calls; how it achieves that is the dependency's responsibility. Our concern here is preventing two requests with the same key from performing the same top-up twice.
+
+The idempotency store is still local to one handler instance; we haven't solved persistence or horizontal scaling yet.

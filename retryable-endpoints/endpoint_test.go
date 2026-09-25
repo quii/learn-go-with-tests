@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
+	"testing/synctest"
 	"uuid"
 )
 
@@ -30,13 +32,64 @@ func (a *InMemoryAccounts) Balance(accountID string) int {
 	return a.balances[accountID]
 }
 
+type PausingAccounts struct {
+	Accounts
+	pauseNext bool
+	resume    <-chan struct{}
+}
+
+func (a *PausingAccounts) AddCredit(accountID string, amountPence int) {
+	a.Accounts.AddCredit(accountID, amountPence)
+
+	if a.pauseNext {
+		a.pauseNext = false
+		<-a.resume
+	}
+}
+
 type TopUpRequest struct {
 	AccountID   string `json:"account_id"`
 	AmountPence int    `json:"amount_pence"`
 }
 
+type claimResult int
+
+const (
+	claimed claimResult = iota
+	alreadyInProgress
+	alreadyCompleted
+)
+
+type IdempotencyStore struct {
+	mu       sync.Mutex
+	requests map[string]claimResult
+}
+
+func NewIdempotencyStore() *IdempotencyStore {
+	return &IdempotencyStore{requests: make(map[string]claimResult)}
+}
+
+func (s *IdempotencyStore) Claim(key string) claimResult {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if result, exists := s.requests[key]; exists {
+		return result
+	}
+
+	s.requests[key] = alreadyInProgress
+	return claimed
+}
+
+func (s *IdempotencyStore) Complete(key string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.requests[key] = alreadyCompleted
+}
+
 func RetryableEndpoint(accounts Accounts) http.Handler {
-	handledKeys := make(map[string]bool)
+	store := NewIdempotencyStore()
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var topUp TopUpRequest
@@ -51,14 +104,16 @@ func RetryableEndpoint(accounts Accounts) http.Handler {
 			return
 		}
 
-		if handledKeys[idempotencyKey] {
+		switch store.Claim(idempotencyKey) {
+		case alreadyInProgress:
+			http.Error(w, "top-up is still in progress", http.StatusConflict)
+		case alreadyCompleted:
 			w.WriteHeader(http.StatusOK)
-			return
+		case claimed:
+			accounts.AddCredit(topUp.AccountID, topUp.AmountPence)
+			store.Complete(idempotencyKey)
+			w.WriteHeader(http.StatusOK)
 		}
-
-		accounts.AddCredit(topUp.AccountID, topUp.AmountPence)
-		handledKeys[idempotencyKey] = true
-		w.WriteHeader(http.StatusOK)
 	})
 }
 
@@ -112,9 +167,52 @@ func TestCreditAccount(t *testing.T) {
 		assertBalance(t, accounts, "user-123", 0)
 	})
 
+	t.Run("does not credit twice when a retry arrives before the first request completes", func(t *testing.T) {
+		synctest.Test(t, func(t *testing.T) {
+			accounts := NewInMemoryAccounts()
+			resume := make(chan struct{})
+			handler := RetryableEndpoint(&PausingAccounts{
+				Accounts:  accounts,
+				pauseNext: true,
+				resume:    resume,
+			})
+			topUp := TopUpRequest{
+				AccountID:   "user-123",
+				AmountPence: 1000,
+			}
+			idempotencyKey := uuid.New().String()
+			request := newTopUpRequest(t, topUp, idempotencyKey)
+			firstResponse := httptest.NewRecorder()
+
+			go handler.ServeHTTP(firstResponse, request)
+			synctest.Wait()
+
+			// The credit has been added, but the first request hasn't finished.
+			assertBalance(t, accounts, "user-123", 1000)
+
+			// The client hasn't received confirmation, so it retries the same top-up.
+			retryResponse := postTopUp(t, handler, topUp, idempotencyKey)
+
+			close(resume)
+			synctest.Wait()
+
+			assertStatus(t, firstResponse, http.StatusOK)
+			assertStatus(t, retryResponse, http.StatusConflict)
+			assertBalance(t, accounts, "user-123", 1000)
+		})
+	})
 }
 
 func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, idempotencyKey string) *httptest.ResponseRecorder {
+	t.Helper()
+
+	req := newTopUpRequest(t, topUp, idempotencyKey)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	return response
+}
+
+func newTopUpRequest(t testing.TB, topUp TopUpRequest, idempotencyKey string) *http.Request {
 	t.Helper()
 
 	payload, err := json.Marshal(topUp)
@@ -125,9 +223,7 @@ func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, idempoten
 	req := httptest.NewRequest(http.MethodPost, "/top-up", bytes.NewReader(payload))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Idempotency-Key", idempotencyKey)
-	response := httptest.NewRecorder()
-	handler.ServeHTTP(response, req)
-	return response
+	return req
 }
 
 func assertStatus(t testing.TB, response *httptest.ResponseRecorder, want int) {
