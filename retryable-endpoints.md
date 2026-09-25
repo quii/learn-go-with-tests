@@ -107,3 +107,79 @@ func RetryableEndpoint(accounts Accounts) http.Handler {
 For brevity, we'll leave testing invalid JSON out of this example.
 
 It should now pass.
+
+## Refactor
+
+Our tests deserve some attention too. We're about to exercise several variations of topping up an account, and I don't fancy copying all that JSON and HTTP setup into each test.
+
+Let's extract a helper that takes our handler and payload, makes the request and returns the response.
+
+```go
+func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest) *httptest.ResponseRecorder {
+	t.Helper()
+
+	payload, err := json.Marshal(topUp)
+	if err != nil {
+		t.Fatalf("could not marshal top-up request: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/top-up", bytes.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	return response
+}
+```
+
+The helper handles the boring detail, including checking the error from `json.Marshal` that we ignored earlier. It creates a fresh request each time, which will be useful when we call the handler more than once: reading a request body consumes it.
+
+We can extract our assertions too.
+
+```go
+func assertStatus(t testing.TB, response *httptest.ResponseRecorder, want int) {
+	t.Helper()
+	if response.Code != want {
+		t.Errorf("got status %d, want %d; response body: %s", response.Code, want, response.Body.String())
+	}
+}
+
+func assertBalance(t testing.TB, accounts Accounts, accountID string, want int) {
+	t.Helper()
+	if got := accounts.Balance(accountID); got != want {
+		t.Errorf("got balance %d pence for account %q, want %d", got, accountID, want)
+	}
+}
+```
+
+Remember `t.Helper()` tells Go to report failures at the line calling the helper, so we can find the failing assertion in our scenario. Including the account ID and response body in our error messages should also help us understand what went wrong.
+
+Let's also give our fake a constructor. Tests shouldn't need to know that it stores balances in a map, or remember to initialise it.
+
+```go
+func NewInMemoryAccounts() *InMemoryAccounts {
+	return &InMemoryAccounts{balances: make(map[string]int)}
+}
+```
+
+Now our test can focus on the top-up and its effect on the account.
+
+```go
+func TestCreditAccount(t *testing.T) {
+	t.Run("adds credit to an account", func(t *testing.T) {
+		accounts := NewInMemoryAccounts()
+		handler := RetryableEndpoint(accounts)
+
+		topUp := TopUpRequest{
+			AccountID:   "user-123",
+			AmountPence: 1000,
+		}
+
+		response := postTopUp(t, handler, topUp)
+
+		assertStatus(t, response, http.StatusOK)
+		assertBalance(t, accounts, "user-123", 1000)
+	})
+}
+```
+
+Run the test again to check it still passes. We can now write the next scenario without repeating the request setup and assertion details.

@@ -17,6 +17,10 @@ type InMemoryAccounts struct {
 	balances map[string]int
 }
 
+func NewInMemoryAccounts() *InMemoryAccounts {
+	return &InMemoryAccounts{balances: make(map[string]int)}
+}
+
 func (a *InMemoryAccounts) AddCredit(accountID string, amountPence int) {
 	a.balances[accountID] += amountPence
 }
@@ -45,7 +49,7 @@ func RetryableEndpoint(accounts Accounts) http.Handler {
 
 func TestCreditAccount(t *testing.T) {
 	t.Run("adds credit to an account", func(t *testing.T) {
-		accounts := &InMemoryAccounts{balances: make(map[string]int)}
+		accounts := NewInMemoryAccounts()
 		handler := RetryableEndpoint(accounts)
 
 		topUp := TopUpRequest{
@@ -53,21 +57,38 @@ func TestCreditAccount(t *testing.T) {
 			AmountPence: 1000,
 		}
 
-		topUpPayload, _ := json.Marshal(topUp)
+		response := postTopUp(t, handler, topUp)
 
-		req := httptest.NewRequest("POST", "/top-up", bytes.NewReader(topUpPayload))
-		req.Header.Set("Content-Type", "application/json")
-
-		rr := httptest.NewRecorder()
-		handler.ServeHTTP(rr, req)
-
-		if status := rr.Code; status != http.StatusOK {
-			t.Errorf("handler returned wrong status code: got %v want %v",
-				status, http.StatusOK)
-		}
-
-		if balance := accounts.Balance("user-123"); balance != 1000 {
-			t.Errorf("got balance %d pence, want 1000", balance)
-		}
+		assertStatus(t, response, http.StatusOK)
+		assertBalance(t, accounts, "user-123", 1000)
 	})
+}
+
+func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest) *httptest.ResponseRecorder {
+	t.Helper()
+
+	payload, err := json.Marshal(topUp)
+	if err != nil {
+		t.Fatalf("could not marshal top-up request: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/top-up", bytes.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	return response
+}
+
+func assertStatus(t testing.TB, response *httptest.ResponseRecorder, want int) {
+	t.Helper()
+	if response.Code != want {
+		t.Errorf("got status %d, want %d; response body: %s", response.Code, want, response.Body.String())
+	}
+}
+
+func assertBalance(t testing.TB, accounts Accounts, accountID string, want int) {
+	t.Helper()
+	if got := accounts.Balance(accountID); got != want {
+		t.Errorf("got balance %d pence for account %q, want %d", got, accountID, want)
+	}
 }
