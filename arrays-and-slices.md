@@ -373,6 +373,9 @@ func SumAll(numbersToSum ...[]int) []int {
 In this implementation, we are worrying less about capacity. We start with an
 empty slice `sums` and append to it the result of `Sum` as we work through the varargs.
 
+However, If we were to pre-allocate the capacity of the slice using `make([]int, 0, lengthOfNumbers)`.
+This would avoid unnecessary allocations due to the slice size already being known.
+
 Our next requirement is to change `SumAll` to `SumAllTails`, where it will
 calculate the totals of the "tails" of each slice. The tail of a collection is
 all items in the collection except the first one \(the "head"\).
