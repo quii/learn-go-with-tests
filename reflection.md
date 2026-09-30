@@ -966,12 +966,12 @@ Our `walk` will stack-overflow if you pass it a struct that contains a pointer b
 
 ```go
 type Person struct {
-    Name   string
-    Friend *Person
+	Name   string
+	Friend *Person
 }
 p := Person{Name: "Alice"}
-p.Friend = &p  // cycle!
-walk(p, fn)  // fatal error: stack overflow
+p.Friend = &p // cycle!
+walk(p, fn)   // fatal error: stack overflow
 ```
 
 Fixing this is left as an exercise. The standard approach is to track which pointer addresses have already been visited and skip them on re-entry. You'll need a `map[uintptr]bool` — `uintptr` is the raw numeric address of a pointer, obtainable via `reflect.Value.Pointer()` for pointer kinds. Because the map needs to live across the whole traversal you'll want an internal helper that carries it as a parameter, with the public `walk` creating the map and calling in.
