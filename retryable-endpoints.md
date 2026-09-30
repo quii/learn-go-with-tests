@@ -224,7 +224,7 @@ Let's tackle these one at a time.
 
 ## Write the test first
 
-This is the simplest one to make pass. To prepare, update the first test to pass in a UUID as the key rather than an empty string, so we don't end up with two failing tests. Then, let's write a test to check what happens when the key is missing.
+Empty keys is the easiest one to fix. Update the first test to pass in a UUID as the key rather than an empty string, so we don't end up with two failing tests. Then, let's write a test to check what happens when the key is missing.
 
 ```go
 t.Run("bad request when idempotency key is missing", func(t *testing.T) {
@@ -270,6 +270,30 @@ The test will now pass.
 
 So far, our client retries after the first request has finished. But what if it hasn't received a response and retries while the first request is still running? The account might already have been credited.
 
+Here's how that goes wrong:
+
+```mermaid
+sequenceDiagram
+	participant A as Request A
+	participant B as Request B
+	participant Handler
+
+	A->>Handler: check handledKeys[key]
+	Handler-->>A: false, not seen yet
+	B->>Handler: check handledKeys[key]
+	Handler-->>B: false, not seen yet
+	Note over A,B: Both requests believe they're first
+	A->>Handler: AddCredit(1000)
+	Handler->>Handler: balance = 1000
+	B->>Handler: AddCredit(1000)
+	Handler->>Handler: balance = 2000
+	A->>Handler: handledKeys[key] = true
+	B->>Handler: handledKeys[key] = true
+	Note over Handler: Credited twice for one logical request
+```
+
+Both requests check the map before either has recorded anything in it, so both believe they're the first to see this key.
+
 We could start two goroutines and hope they hit the handler at just the wrong moment. I'd rather have a test that fails every time we have this bug, not just when my laptop is having a busy day.
 
 Let's arrange this sequence deliberately:
@@ -295,10 +319,12 @@ t.Run("does not credit twice when a retry arrives before the first request compl
 			pauseNext: true,
 			resume:    resume,
 		})
+
 		topUp := TopUpRequest{
 			AccountID:   "user-123",
 			AmountPence: 1000,
 		}
+
 		idempotencyKey := uuid.New().String()
 		request := newTopUpRequest(t, topUp, idempotencyKey)
 		firstResponse := httptest.NewRecorder()
@@ -552,9 +578,7 @@ If we put the balances and keys in a database but keep updating them independent
 
 We need the credit and its completion record to succeed together. Let's give that responsibility to one operation, instead of asking our HTTP handler to coordinate it.
 
-Keep editing in the same package you've been using all chapter — don't create a new directory for what follows. (If you'd like to see the code exactly as it stood at this point without following along yourself, we've snapshotted it as [v1](retryable-endpoints/v1/endpoint_test.go) in this book's own repository; that's a reference for you to read, not something you need to reproduce.)
-
-We're replacing the `Accounts`, `InMemoryAccounts`, `IdempotencyStore` and `PausingAccounts` types wholesale, not extending them. Delete them along with anything that only existed to support them, rather than keeping both versions side by side — a couple of the new helpers below reuse names from earlier with different signatures, and Go won't let two functions share a name in one package.
+`Accounts` and `IdempotencyStore` did exactly what we needed them to: they let us build a working version, hit its exact failure mode, and name it precisely. That's been the value of this first half of the chapter — not that this code survives, but that we now understand, from a real failing test, exactly what an idempotent operation has to guarantee. That understanding is what points us at the more conventional shape: one operation owning the whole thing, rather than a handler stitching two collaborators together. From here, `Accounts` and `IdempotencyStore` step aside in favour of it. (The code as it stood is preserved at [v1](retryable-endpoints/v1/endpoint_test.go), if you'd like to compare.)
 
 ### An operation, not three separate steps
 
@@ -588,7 +612,13 @@ This isn't just moving code around. We're changing the overlapping-request behav
 
 ### A contract we can reuse
 
-As in [Working Without Mocks](working-without-mocks.md), we'll describe the behaviour once and run it against each implementation. The factory gives each scenario fresh, isolated state; a database version can also register cleanup with `t.Cleanup`.
+We're going to end up with more than one implementation of `TopUps`. The in-memory version we're about to write is fine for understanding the design, but a real service needs something durable that can be shared across more than one running instance, which is why we'll build a Postgres-backed version later in the chapter.
+
+The fake earns its keep well before then, too. It's what lets us test the handler, and later write acceptance tests, without a real database running for every one of them. That's only trustworthy if the fake genuinely behaves the way Postgres will, which is exactly what a contract is for, as [Working Without Mocks](working-without-mocks.md#the-maintenance-costs-of-fakes) put it:
+
+> By having a contract, we can assume that we can use a fake and an actual dependency interchangeably.
+
+So let's describe the behaviour once and run it against each implementation, rather than writing this test twice. The factory gives each scenario fresh, isolated state; a database version can also register cleanup with `t.Cleanup`.
 
 ```go
 type TopUpsContract struct {
@@ -725,6 +755,153 @@ func TestInMemoryTopUps(t *testing.T) {
 		return NewInMemoryTopUps()
 	}}.Test(t)
 }
+```
+
+## Refactor
+
+In a real system we'd likely have more than one idempotent operation — refunds, cancellations, whatever else needs retry-safety — and each would need this same claim-then-replay mechanism. Right now it's tangled up with the balance bookkeeping inside `InMemoryTopUps`. Let's pull the two apart: a generic piece that only knows about idempotency keys, and a domain-specific piece that only knows about balances.
+
+```go
+// Idempotent wraps a plain operation so repeated calls with the same key
+// run it once and replay the stored result thereafter.
+type Idempotent[Req, Res any] struct {
+	mu      sync.Mutex
+	results map[string]Res
+	work    func(Req) (Res, error)
+}
+
+func NewIdempotent[Req, Res any](work func(Req) (Res, error)) *Idempotent[Req, Res] {
+	return &Idempotent[Req, Res]{results: make(map[string]Res), work: work}
+}
+
+func (s *Idempotent[Req, Res]) Apply(ctx context.Context, key string, request Req) (Res, error) {
+	var zero Res
+	if key == "" {
+		return zero, ErrMissingKey
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if err := ctx.Err(); err != nil {
+		return zero, err
+	}
+	if result, exists := s.results[key]; exists {
+		return result, nil
+	}
+
+	result, err := s.work(request)
+	if err != nil {
+		return zero, err
+	}
+	s.results[key] = result
+	return result, nil
+}
+```
+
+`Req` and `Res` let this same type serve a top-up, a refund, or anything else with its own request and result shapes. `InMemoryTopUps` just needs to supply the domain-specific work:
+
+```go
+type InMemoryTopUps struct {
+	*Idempotent[TopUpRequest, TopUpResult]
+	balances map[string]int
+}
+
+func NewInMemoryTopUps() *InMemoryTopUps {
+	s := &InMemoryTopUps{balances: make(map[string]int)}
+	s.Idempotent = NewIdempotent(func(request TopUpRequest) (TopUpResult, error) {
+		s.balances[request.AccountID] += request.AmountPence
+		return TopUpResult{
+			AccountID:    request.AccountID,
+			BalancePence: s.balances[request.AccountID],
+		}, nil
+	})
+	return s
+}
+```
+
+Embedding `*Idempotent[TopUpRequest, TopUpResult]` gives `InMemoryTopUps` its `Apply` method for free. From the outside nothing has changed: `TopUps` is the same interface, and the handler still just calls `Apply` without knowing any of this is composed from two pieces now.
+
+`Balance` is where the sharp edge is. We were careful earlier that the mutex protects the *whole operation*, "including balance queries" — a caller must never see a credit applied before its result is recorded. Move that guarantee into a generic type and it's easy to lose without noticing, because it's tempting to just read the map directly:
+
+```go
+// Don't do this: reads outside Apply's lock.
+func (s *InMemoryTopUps) Balance(ctx context.Context, accountID string) (int, error) {
+	return s.balances[accountID], nil
+}
+```
+
+I tried exactly that, then stress-tested it: fifty goroutines calling `Apply` and `Balance` concurrently on the same account, under `-race`.
+
+```go
+func TestInMemoryTopUpsBalanceDuringConcurrentApply(t *testing.T) {
+	topUps := NewInMemoryTopUps()
+	var wg sync.WaitGroup
+	for i := range 50 {
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			topUps.Apply(t.Context(), fmt.Sprintf("key-%d", i), TopUpRequest{AccountID: "user-123", AmountPence: 10})
+		}()
+		go func() {
+			defer wg.Done()
+			topUps.Balance(t.Context(), "user-123")
+		}()
+	}
+	wg.Wait()
+}
+```
+
+```text
+WARNING: DATA RACE
+Read at 0x00c0001b80e8 by goroutine 33:
+  github.com/quii/learn-go-with-tests/retryable-endpoints.(*InMemoryTopUps).Balance()
+      topups.go:91 +0xc8
+
+Previous write at 0x00c0001b80e8 by goroutine 24:
+  github.com/quii/learn-go-with-tests/retryable-endpoints.NewInMemoryTopUps.func1()
+      topups.go:81 +0xa0
+  github.com/quii/learn-go-with-tests/retryable-endpoints.(*Idempotent[...]).Apply()
+      topups.go:57 +0x148
+==================
+```
+(trimmed — the full trace also lists where each goroutine was created)
+
+That's the same class of bug as check-then-act, just relocated: `results` is protected, `balances` quietly isn't. Generalising the idempotency piece is only safe if reads go through the same lock as writes, so `Idempotent` needs a way to offer that:
+
+```go
+// Query runs read under the same lock Apply uses, so a caller can never
+// observe work's side effects before Apply has finished recording its result.
+func (s *Idempotent[Req, Res]) Query(read func()) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	read()
+}
+```
+
+```go
+func (s *InMemoryTopUps) Balance(ctx context.Context, accountID string) (int, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+	var balance int
+	s.Query(func() { balance = s.balances[accountID] })
+	return balance, nil
+}
+```
+
+With `Balance` going through `Query`, the same stress test passes clean under `-race`, and the existing contract still passes unchanged — `TopUpsContract` doesn't know or care that `InMemoryTopUps` is built on a generic type now.
+
+The real payoff of splitting this out: the tricky concurrency proof — the `synctest` scenario, the "many concurrent calls with the same key only run once" check — only has to be written once, against `Idempotent` itself. Every future fake built on it inherits that guarantee, rather than each one needing its own from-scratch concurrency test.
+
+That's the same idea [Working Without Mocks](working-without-mocks.md#enter-fakes) already showed us: fakes as composable pieces you snap together like Lego bricks, rather than a bespoke test double for every dependency. `Idempotent` is just another brick now — `InMemoryTopUps` reads more clearly for not spelling out the claim-then-replay mechanism inline, and the next fake that needs retry-safety gets it for free.
+
+This is specifically a fakes-side refactor. `PostgresTopUps`'s atomicity comes from a unique constraint and a transaction, not from a wrapped Go closure, so it doesn't need — or benefit from — the same treatment.
+
+Run everything again to confirm nothing broke:
+
+```sh
+go test ./retryable-endpoints/... -race -count=10
 ```
 
 ### The handler becomes an HTTP adapter

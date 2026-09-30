@@ -176,10 +176,12 @@ func TestCreditAccount(t *testing.T) {
 				pauseNext: true,
 				resume:    resume,
 			})
+
 			topUp := TopUpRequest{
 				AccountID:   "user-123",
 				AmountPence: 1000,
 			}
+
 			idempotencyKey := uuid.New().String()
 			request := newTopUpRequest(t, topUp, idempotencyKey)
 			firstResponse := httptest.NewRecorder()

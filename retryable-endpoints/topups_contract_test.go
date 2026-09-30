@@ -2,6 +2,8 @@ package retryableendpoints
 
 import (
 	"errors"
+	"fmt"
+	"sync"
 	"testing"
 )
 
@@ -116,6 +118,26 @@ func TestInMemoryTopUps(t *testing.T) {
 	TopUpsContract{New: func(t testing.TB) TopUps {
 		return NewInMemoryTopUps()
 	}}.Test(t)
+}
+
+// Balance must never observe a credit before Apply has finished recording
+// its result. Run with -race: if Balance ever reads outside Apply's lock,
+// this fails.
+func TestInMemoryTopUpsBalanceDuringConcurrentApply(t *testing.T) {
+	topUps := NewInMemoryTopUps()
+	var wg sync.WaitGroup
+	for i := range 50 {
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			topUps.Apply(t.Context(), fmt.Sprintf("key-%d", i), TopUpRequest{AccountID: "user-123", AmountPence: 10})
+		}()
+		go func() {
+			defer wg.Done()
+			topUps.Balance(t.Context(), "user-123")
+		}()
+	}
+	wg.Wait()
 }
 
 func assertResult(t testing.TB, got, want TopUpResult) {
