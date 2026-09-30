@@ -28,12 +28,21 @@ func TestPostgresTopUps(t *testing.T) {
 	t.Run("replays through a new adapter and connection pool", func(t *testing.T) {
 		resetPostgres(t, db)
 		request := TopUpRequest{AccountID: "user-123", AmountPence: 1000}
-		first := applyTopUp(t, NewPostgresTopUps(db), "first", request)
+		first, err := NewPostgresTopUps(db).Apply(t.Context(), "first", request)
+		if err != nil {
+			t.Fatalf("could not apply top-up: %v", err)
+		}
 
 		otherDB := openPostgres(t, connectionString)
 		other := NewPostgresTopUps(otherDB)
-		applyTopUp(t, other, "second", request)
-		assertResult(t, applyTopUp(t, other, "first", request), first)
+		if _, err := other.Apply(t.Context(), "second", request); err != nil {
+			t.Fatalf("could not apply top-up: %v", err)
+		}
+		replayed, err := other.Apply(t.Context(), "first", request)
+		if err != nil {
+			t.Fatalf("could not apply top-up: %v", err)
+		}
+		assertResult(t, replayed, first)
 		assertBalance(t, other, "user-123", 2000)
 	})
 
@@ -64,7 +73,10 @@ func TestPostgresTopUps(t *testing.T) {
 		}
 		// Retrying the same operation now succeeds: the failed transaction didn't
 		// leave a claimed key or any credit behind.
-		result := applyTopUp(t, topUps, "first", request)
+		result, err := topUps.Apply(t.Context(), "first", request)
+		if err != nil {
+			t.Fatalf("could not apply top-up: %v", err)
+		}
 		assertResult(t, result, TopUpResult{AccountID: "user-123", BalancePence: 1234})
 		assertBalance(t, topUps, "user-123", 1234)
 	})

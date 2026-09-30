@@ -14,82 +14,9 @@ Sometimes we can design our APIs to be idempotent, almost out of the box. An [HT
 
 For operations that mustn't be repeated on retry we need some help: **idempotency keys**. Let’s use TDD to see how they work.
 
-## Write the test first
+## Our starting point
 
-We'll start with the happy path to get the scaffolding in. We'll be testing an `http.Handler`.
-
-As discussed in [Working Without Mocks](working-without-mocks.md), we prefer to model test-doubles as fakes rather than spies. We'll model the account with an interface so we can pass in a fake to our HTTP handler. We can then call the endpoint, and verify the user's account balance.
-
-```go
-func TestCreditAccount(t *testing.T) {
-	t.Run("adds credit to an account", func(t *testing.T) {
-		accounts := &InMemoryAccounts{balances: make(map[string]int)}
-		handler := RetryableEndpoint(accounts)
-
-		topUp := TopUpRequest{
-			AccountID:   "user-123",
-			AmountPence: 1000,
-		}
-
-		topUpPayload, _ := json.Marshal(topUp)
-
-		req := httptest.NewRequest("POST", "/top-up", bytes.NewReader(topUpPayload))
-		req.Header.Set("Content-Type", "application/json")
-
-		rr := httptest.NewRecorder()
-		handler.ServeHTTP(rr, req)
-
-		if status := rr.Code; status != http.StatusOK {
-			t.Errorf("handler returned wrong status code: got %v want %v",
-				status, http.StatusOK)
-		}
-
-		if balance := accounts.Balance("user-123"); balance != 1000 {
-			t.Errorf("got balance %d pence, want 1000", balance)
-		}
-	})
-}
-```
-
-## Write the minimal amount of code for the test to run and check the failing test output
-
-Let's add the account interface, its in-memory implementation, the request type and an empty handler so we can run our test.
-
-```go
-type Accounts interface {
-	AddCredit(accountID string, amountPence int)
-	Balance(accountID string) int
-}
-
-type InMemoryAccounts struct {
-	balances map[string]int
-}
-
-func (a *InMemoryAccounts) AddCredit(accountID string, amountPence int) {
-	a.balances[accountID] += amountPence
-}
-
-func (a *InMemoryAccounts) Balance(accountID string) int {
-	return a.balances[accountID]
-}
-
-type TopUpRequest struct {
-	AccountID   string `json:"account_id"`
-	AmountPence int    `json:"amount_pence"`
-}
-
-func RetryableEndpoint(accounts Accounts) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// TODO: add credit to the account
-	})
-}
-```
-
-If you run this test, you'll see it fails because the balance of the account has not been updated.
-
-## Write enough code to make it pass
-
-We just need to parse the JSON into the `TopUpRequest` and call the service.
+None of this is really about idempotency yet, so let's skip the usual TDD dance for it and work backwards from the handler.
 
 ```go
 func RetryableEndpoint(accounts Accounts) http.Handler {
@@ -106,64 +33,43 @@ func RetryableEndpoint(accounts Accounts) http.Handler {
 }
 ```
 
-For brevity, we'll leave testing invalid JSON out of this example.
+It decodes the request body into a `TopUpRequest`, then hands the numbers to an `Accounts` collaborator to actually apply the credit. The handler doesn't know or care how that's done; it just needs something that can add credit to an account.
 
-It should now pass.
-
-## Refactor
-
-Our tests deserve some attention too. We're about to exercise several variations of topping up an account, and I don't fancy copying all that JSON and HTTP setup into each test.
-
-Let's extract a helper that takes our handler and payload, makes the request and returns the response.
+Here is how the handler's dependency and payload type are defined.
 
 ```go
-func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest) *httptest.ResponseRecorder {
-	t.Helper()
+type Accounts interface {
+	AddCredit(accountID string, amountPence int)
+	Balance(accountID string) int
+}
 
-	payload, err := json.Marshal(topUp)
-	if err != nil {
-		t.Fatalf("could not marshal top-up request: %v", err)
-	}
-
-	req := httptest.NewRequest(http.MethodPost, "/top-up", bytes.NewReader(payload))
-	req.Header.Set("Content-Type", "application/json")
-	response := httptest.NewRecorder()
-	handler.ServeHTTP(response, req)
-	return response
+type TopUpRequest struct {
+	AccountID   string `json:"account_id"`
+	AmountPence int    `json:"amount_pence"`
 }
 ```
 
-The helper handles the boring detail, including checking the error from `json.Marshal` that we ignored earlier. It creates a fresh request each time, which will be useful when we call the handler more than once: reading a request body consumes it.
-
-We can extract our assertions too.
+As discussed in [Working Without Mocks](working-without-mocks.md), we prefer to model test-doubles as fakes rather than spies. So, for our tests, here's an in-memory `Accounts`:
 
 ```go
-func assertStatus(t testing.TB, response *httptest.ResponseRecorder, want int) {
-	t.Helper()
-	if response.Code != want {
-		t.Errorf("got status %d, want %d; response body: %s", response.Code, want, response.Body.String())
-	}
+type InMemoryAccounts struct {
+	balances map[string]int
 }
 
-func assertBalance(t testing.TB, accounts Accounts, accountID string, want int) {
-	t.Helper()
-	if got := accounts.Balance(accountID); got != want {
-		t.Errorf("got balance %d pence for account %q, want %d", got, accountID, want)
-	}
-}
-```
-
-Remember `t.Helper()` tells Go to report failures at the line calling the helper, so we can find the failing assertion in our scenario. Including the account ID and response body in our error messages should also help us understand what went wrong.
-
-Let's also give our fake a constructor. Tests shouldn't need to know that it stores balances in a map, or remember to initialise it.
-
-```go
 func NewInMemoryAccounts() *InMemoryAccounts {
 	return &InMemoryAccounts{balances: make(map[string]int)}
 }
+
+func (a *InMemoryAccounts) AddCredit(accountID string, amountPence int) {
+	a.balances[accountID] += amountPence
+}
+
+func (a *InMemoryAccounts) Balance(accountID string) int {
+	return a.balances[accountID]
+}
 ```
 
-Now our test can focus on the top-up and its effect on the account.
+Here's the happy path test. For brevity, we're leave testing invalid JSON out of this example.
 
 ```go
 func TestCreditAccount(t *testing.T) {
@@ -184,11 +90,48 @@ func TestCreditAccount(t *testing.T) {
 }
 ```
 
-Run the test again to check it still passes. We can now write the next scenario without repeating the request setup and assertion details.
+We have some test helpers - `postTopUp`, `assertStatus` and `assertBalance`.
+
+```go
+func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest) *httptest.ResponseRecorder {
+	t.Helper()
+
+	payload, err := json.Marshal(topUp)
+	if err != nil {
+		t.Fatalf("could not marshal top-up request: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/top-up", bytes.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	return response
+}
+
+func assertStatus(t testing.TB, response *httptest.ResponseRecorder, want int) {
+	t.Helper()
+	if response.Code != want {
+		t.Errorf("got status %d, want %d; response body: %s", response.Code, want, response.Body.String())
+	}
+}
+
+func assertBalance(t testing.TB, accounts Accounts, accountID string, want int) {
+	t.Helper()
+	if got := accounts.Balance(accountID); got != want {
+		t.Errorf("got balance %d pence for account %q, want %d", got, accountID, want)
+	}
+}
+```
+
+To follow along, copy all this code into Go test file like `retryable_endpoint_test.go`.
+
+Run it, and it should pass. Now we have the happy path tested, we can now get onto the spicier requirements, in a TDD fashion of course.
 
 ## Write the test first
 
 Our clients are asking if we can support idempotency keys. They will generate one per logical top-up, and they expect us to use that key to make the endpoint idempotent. In practice this means if they retry with the same idempotency key, we will not top up again.
+
+We'll generate the key with `uuid.New().String()`. Go 1.27 added a `uuid` package to the standard library so you can just `import "uuid"`.
 
 ```go
 t.Run("credits the account only once when a request is retried", func(t *testing.T) {
@@ -216,8 +159,6 @@ t.Run("credits the account only once when a request is retried", func(t *testing
 
 For this to compile, you'll need to update `postTopUp` to accept the key, and update the first test to pass it. You can just send an empty one for now.
 
-You'll also need Go 1.27 or above to have access to the `uuid` package.
-
 ```go
 func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, idempotencyKey string) *httptest.ResponseRecorder {
 	t.Helper()
@@ -238,7 +179,7 @@ func postTopUp(t testing.TB, handler http.Handler, topUp TopUpRequest, idempoten
 
 ```
 --- FAIL: TestCreditAccount (0.00s)
-    --- FAIL: TestCreditAccount/uses_idempotency_keys_given_from_client (0.00s)
+    --- FAIL: TestCreditAccount/credits_the_account_only_once_when_a_request_is_retried (0.00s)
         endpoint_test.go:84: got balance 2000 pence for account "user-123", want 1000
 ```
 
@@ -283,7 +224,7 @@ Let's tackle these one at a time.
 
 ## Write the test first
 
-This is the simplest one to make pass. To prepare, update the first test to pass in a UUID as the key rather than an empty string, so we don't end up with two failing tests. Then, let's write a test to check for the key is sent properly
+This is the simplest one to make pass. To prepare, update the first test to pass in a UUID as the key rather than an empty string, so we don't end up with two failing tests. Then, let's write a test to check what happens when the key is missing.
 
 ```go
 t.Run("bad request when idempotency key is missing", func(t *testing.T) {
@@ -306,11 +247,11 @@ t.Run("bad request when idempotency key is missing", func(t *testing.T) {
 ```
 --- FAIL: TestCreditAccount (0.00s)
     --- FAIL: TestCreditAccount/bad_request_when_idempotency_key_is_missing (0.00s)
-        endpoint_test.go:107: got status 200, want 400;
-
+        endpoint_test.go:107: got status 200, want 400; response body:
+        endpoint_test.go:108: got balance 1000 pence for account "user-123", want 0
 ```
 
-Fails as expected
+Fails as expected.
 
 ## Write enough code to make it pass
 
@@ -381,7 +322,30 @@ t.Run("does not credit twice when a retry arrives before the first request compl
 })
 ```
 
-The two calls to `synctest.Wait()` do different jobs:
+The interleaving is the whole point here, and it's a lot to hold in your head from the code alone. Here's the same sequence as a diagram:
+
+```mermaid
+sequenceDiagram
+	participant Test
+	participant Handler
+	participant PausingAccounts
+
+	Test->>+Handler: go ServeHTTP(firstResponse, request)
+	Handler->>+PausingAccounts: AddCredit("user-123", 1000)
+	PausingAccounts->>PausingAccounts: balance = 1000
+	Note right of PausingAccounts: pauses here to stand in for a real,<br/>non-instant transaction — the gap where<br/>a retry can genuinely land
+	Note over Test: synctest.Wait()
+	Test->>Test: assertBalance(1000)
+	Test->>+Handler: postTopUp (retry, same key)
+	Handler-->>-Test: 409 Conflict
+	Test->>PausingAccounts: close channel to let the first transaction finish
+	PausingAccounts-->>-Handler: AddCredit returns
+	Handler-->>-Test: 200 OK
+	Note over Test: synctest.Wait()
+	Test->>Test: assert both responses and the final balance
+```
+
+`PausingAccounts` stands in for that slow transaction, and blocking on a channel receive is what makes the window deterministic rather than hoped-for: the retry only proceeds once we know the first request has genuinely reached that point. That's what earns it its own activation bar, nested inside the first request's still-open one — a real overlap, not a guessed one. The two calls to `synctest.Wait()` do different jobs:
 
 1. The first lets the handler reach the pause. We can then check the balance and send the retry while the first request is still in progress.
 2. After we close `resume`, the second lets the first handler finish. We can then safely inspect its response and the final balance.
@@ -578,13 +542,19 @@ The idempotency store is still local to one handler instance; we haven't solved 
 
 ## Refactor
 
-Our handler now knows rather a lot about making a top-up retryable. It claims a key, adds credit and records completion. But what happens if the service stops between those last two steps?
+Our handler now knows rather a lot. It parses the request, claims a key, decides what to say if that key's already in progress, adds the credit, and records completion. That's more than translating HTTP into a domain call — [a handler's job is to decode the request, hand it to something else to do the actual work, and translate whatever comes back into a response](http-handlers-revisited.md), not to be the thing doing the work.
+
+It's also a sign we drew the boundary between `Accounts` and `IdempotencyStore` in the wrong place. Claiming a key and adding the credit aren't two concerns that happen to run next to each other — they're one operation: idempotently applying a top-up. Right now the handler is the only place that knows both halves have to happen together, which is exactly the kind of coordination a handler shouldn't be doing.
+
+That coordination has a concrete cost, not just a stylistic one: because the handler treats "claim, credit, complete" as three separate steps, what happens if the service stops between the last two?
 
 If we put the balances and keys in a database but keep updating them independently, we still have a problem. The credit could be saved without its completion record. Moving the maps to Postgres wouldn't fix that on its own.
 
 We need the credit and its completion record to succeed together. Let's give that responsibility to one operation, instead of asking our HTTP handler to coordinate it.
 
-The code so far is preserved in [v1](retryable-endpoints/v1/endpoint_test.go). The next version lives in [retryable-endpoints](retryable-endpoints), with the implementation in ordinary `.go` files rather than alongside the tests.
+Keep editing in the same package you've been using all chapter — don't create a new directory for what follows. (If you'd like to see the code exactly as it stood at this point without following along yourself, we've snapshotted it as [v1](retryable-endpoints/v1/endpoint_test.go) in this book's own repository; that's a reference for you to read, not something you need to reproduce.)
+
+We're replacing the `Accounts`, `InMemoryAccounts`, `IdempotencyStore` and `PausingAccounts` types wholesale, not extending them. Delete them along with anything that only existed to support them, rather than keeping both versions side by side — a couple of the new helpers below reuse names from earlier with different signatures, and Go won't let two functions share a name in one package.
 
 ### An operation, not three separate steps
 
@@ -633,20 +603,53 @@ func (c TopUpsContract) Test(t *testing.T) {
 	t.Run("replays the original result even after another top-up", func(t *testing.T) {
 		topUps := c.New(t)
 		request := TopUpRequest{AccountID: "user-123", AmountPence: 1000}
-		first := applyTopUp(t, topUps, "first", request)
+		first, err := topUps.Apply(t.Context(), "first", request)
+		if err != nil {
+			t.Fatalf("could not apply top-up: %v", err)
+		}
 
 		// Identical payload, different key: a genuinely new top-up.
-		second := applyTopUp(t, topUps, "second", request)
+		second, err := topUps.Apply(t.Context(), "second", request)
+		if err != nil {
+			t.Fatalf("could not apply top-up: %v", err)
+		}
 		assertResult(t, second, TopUpResult{AccountID: "user-123", BalancePence: 2000})
 
-		replayed := applyTopUp(t, topUps, "first", request)
+		replayed, err := topUps.Apply(t.Context(), "first", request)
+		if err != nil {
+			t.Fatalf("could not apply top-up: %v", err)
+		}
 		assertResult(t, replayed, first)
 		assertBalance(t, topUps, "user-123", 2000)
 	})
 }
 ```
 
-The helpers do the same jobs as before: apply a top-up and check the error, compare results, and query the balance. The full contract also checks:
+We're calling `topUps.Apply` directly rather than wrapping it in a helper. It's the thing this contract is testing, so we want it visible at every call site, not hidden behind a name that could just as easily be doing something else. `assertResult` and `assertBalance` do the same jobs as before: compare results and query the balance.
+
+```go
+func assertResult(t testing.TB, got, want TopUpResult) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got result %+v, want %+v", got, want)
+	}
+}
+
+func assertBalance(t testing.TB, topUps TopUps, accountID string, want int) {
+	t.Helper()
+	got, err := topUps.Balance(t.Context(), accountID)
+	if err != nil {
+		t.Fatalf("could not read balance: %v", err)
+	}
+	if got != want {
+		t.Errorf("got balance %d pence for account %q, want %d", got, accountID, want)
+	}
+}
+```
+
+This `assertBalance` takes a `TopUps` rather than an `Accounts` — it replaces the version we wrote earlier, it doesn't overload it.
+
+The full contract also checks:
 
 1. A top-up credits the right account and returns its balance.
 2. A missing key is rejected without changing the balance.
@@ -757,53 +760,90 @@ func RetryableEndpoint(topUps TopUps) http.Handler {
 
 Writing the JSON starts the response with the default `200 OK`. If the client disappears while we're writing, the completed top-up remains recorded. That's exactly why we needed retries to be safe.
 
-### Two handlers, one operation service
+That's still one Go value living in one process, though. Run two instances of our service, each with their own `InMemoryTopUps`, and a retry that lands on a different instance won't find the key at all — it'll look brand new, and get credited again. Horizontal scaling needs the claim and the result to live somewhere every instance can see, not in one process's memory. We'll get there with Postgres shortly — first, let's make sure our concurrency coverage still holds up after the redesign.
 
-We can now pass the same `TopUps` implementation to two handlers. A retry can reach either handler without adding credit twice:
+### Retrying before the first response arrives
+
+The shape is the same as the earlier `synctest` scenario — pause, check the balance, retry, resume, check the result — but it pauses in a different place and decorates a different dependency, so it's worth seeing in full rather than just describing.
+
+A top-up now returns a JSON body instead of an empty `200 OK`, so comparing two responses means decoding them first:
 
 ```go
-topUps := NewInMemoryTopUps()
-firstHandler := RetryableEndpoint(topUps)
-secondHandler := RetryableEndpoint(topUps)
-request := TopUpRequest{AccountID: "user-123", AmountPence: 1000}
-key := uuid.New().String()
-
-first := postTopUp(t, firstHandler, request, key)
-retry := postTopUp(t, secondHandler, request, key)
-
-assertStatus(t, first, http.StatusOK)
-assertStatus(t, retry, http.StatusOK)
-if first.Body.String() != retry.Body.String() {
-	t.Errorf("retry body %q differs from original %q", retry.Body.String(), first.Body.String())
+func readResult(t testing.TB, response *httptest.ResponseRecorder) TopUpResult {
+	t.Helper()
+	var result TopUpResult
+	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+		t.Fatalf("could not decode top-up result: %v", err)
+	}
+	return result
 }
-assertBalance(t, topUps, "user-123", 1000)
 ```
 
-The updated `synctest` scenario in [endpoint_test.go](retryable-endpoints/endpoint_test.go) pauses *after* `Apply` has finished, before the first handler receives its result. It decorates only the first handler's dependency, so a second handler can retry through the underlying service. Both calls now receive `200 OK` and the same result.
+As before, we decorate our dependency to pause partway through — this time `TopUps` rather than `Accounts`:
+
+```go
+type PausingTopUps struct {
+	TopUps
+	resume <-chan struct{}
+}
+
+func (p *PausingTopUps) Apply(ctx context.Context, key string, request TopUpRequest) (TopUpResult, error) {
+	result, err := p.TopUps.Apply(ctx, key, request)
+	<-p.resume
+	return result, err
+}
+```
+
+Unlike `PausingAccounts`, this one doesn't need a `pauseNext` flag. `Apply` has already recorded the result by the time we pause, so a retry hitting the same underlying `TopUps` is served straight from the store — it never reaches this decorated method at all. Only the first handler needs decorating:
+
+```go
+t.Run("retry succeeds before the first response reaches the caller", func(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		topUps := NewInMemoryTopUps()
+		resume := make(chan struct{})
+		firstHandler := RetryableEndpoint(&PausingTopUps{TopUps: topUps, resume: resume})
+		secondHandler := RetryableEndpoint(topUps)
+		request := TopUpRequest{AccountID: "user-123", AmountPence: 1000}
+		key := uuid.New().String()
+		firstRequest := newTopUpRequest(t, request, key)
+		firstResponse := httptest.NewRecorder()
+
+		go firstHandler.ServeHTTP(firstResponse, firstRequest)
+		synctest.Wait()
+
+		// Apply has completed, but the first handler hasn't received its result.
+		assertBalance(t, topUps, "user-123", 1000)
+		retry := postTopUp(t, secondHandler, request, key)
+		close(resume)
+		synctest.Wait()
+
+		assertStatus(t, firstResponse, http.StatusOK)
+		assertStatus(t, retry, http.StatusOK)
+		assertResult(t, readResult(t, retry), readResult(t, firstResponse))
+		assertBalance(t, topUps, "user-123", 1000)
+	})
+})
+```
+
+It decorates only the first handler's dependency, so the second handler retries through the same, undecorated `TopUps`. Both calls now receive `200 OK` and the same result.
 
 That is deliberately different from pausing halfway through `AddCredit`. We've moved the atomic operation behind our interface; the HTTP test no longer reaches inside it. The contract checks concurrent calls, while the HTTP test tells the story of a caller that hasn't received confirmation.
 
-Run both versions with:
+Run it with:
 
 ```sh
 go test ./retryable-endpoints/... -race -count=10
 ```
 
-Sharing one Go value isn't horizontal scaling yet. Separate processes will need to coordinate through shared storage. But we now have a contract for a Postgres adapter to fulfil: keep the credit and its result in one transaction, and replay that result on a retry. The reusable scenarios stay the same; the database-specific tests will establish that its transaction and recovery behaviour really work.
+We now have a contract for a Postgres adapter to fulfil: keep the credit and its result in one transaction, and replay that result on a retry. The reusable scenarios stay the same; the database-specific tests will establish that its transaction and recovery behaviour really work.
 
 ## A Postgres implementation
 
-Let's give our operation somewhere durable to store its results. We'll keep the database setup deliberately small: two tables, created directly in the test setup. A migration framework and deployment configuration wouldn't help us understand idempotency, so we'll leave those out of this example.
+A database is that shared resource. Postgres specifically is a good fit here because it already has transactions, which are exactly the locking mechanism idempotency needs — we don't have to invent our own distributed lock. We just need to use the one it already gives us correctly.
 
-We'll use `database/sql` with the pgx driver, and [Testcontainers](https://golang.testcontainers.org/modules/postgres/) to start a real Postgres instance for the tests. You'll need Docker running. Install the dependencies from the repository root:
+This part isn't really about idempotency any more, it's about Postgres, so we won't build it up through TDD the way we did the rest of the chapter. Here's a finished implementation, and the proof that it holds up: the exact same `TopUpsContract` we already wrote, run against it instead of `InMemoryTopUps`.
 
-```sh
-go get github.com/jackc/pgx/v5/stdlib@v5.11.0 github.com/testcontainers/testcontainers-go/modules/postgres@v0.44.0
-```
-
-### Run the same contract
-
-The test setup in [postgres_test.go](retryable-endpoints/postgres_test.go) starts one container, opens a connection pool and creates the tables. The important part is ordinary SQL:
+The schema is deliberately small, two tables, created directly in the test setup:
 
 ```sql
 CREATE TABLE accounts (
@@ -817,41 +857,7 @@ CREATE TABLE top_up_results (
 );
 ```
 
-The primary key on `top_up_results` prevents two committed rows with the same idempotency key. Its result columns start out empty when we claim a key, but we fill them in before committing. This adapter never commits an unfinished claim.
-
-Our container setup uses Testcontainers' Postgres readiness checks:
-
-```go
-container, err := postgres.Run(ctx, "postgres:17-alpine",
-	postgres.WithDatabase("topups"),
-	postgres.WithUsername("test"),
-	postgres.WithPassword("test"),
-	postgres.BasicWaitStrategies(),
-)
-testcontainers.CleanupContainer(t, container)
-if err != nil {
-	t.Fatalf("start Postgres: %v", err)
-}
-```
-
-These are credentials for the disposable test database. We obtain its connection string, open it with `sql.Open("pgx", connectionString)` and execute the table definitions above. The blank import `_ "github.com/jackc/pgx/v5/stdlib"` registers the driver. Cleanup closes the pool and removes the container.
-
-Then we run the existing contract:
-
-```go
-TopUpsContract{New: func(t testing.TB) TopUps {
-	resetPostgres(t, db)
-	return NewPostgresTopUps(db)
-}}.Test(t)
-```
-
-`resetPostgres` executes `TRUNCATE accounts, top_up_results` before each scenario. The scenarios run sequentially, so this gives each one clean state while sharing a container. The concurrent requests *within* a scenario still exercise separate database transactions.
-
-We haven't rewritten any of the contract's assertions. Now we need an implementation that satisfies them.
-
-### One transaction owns the operation
-
-Our adapter only needs a connection pool:
+And here's the whole implementation ([postgres.go](retryable-endpoints/postgres.go)):
 
 ```go
 type PostgresTopUps struct {
@@ -861,100 +867,64 @@ type PostgresTopUps struct {
 func NewPostgresTopUps(db *sql.DB) *PostgresTopUps {
 	return &PostgresTopUps{db: db}
 }
-```
 
-The full implementation is in [postgres.go](retryable-endpoints/postgres.go). Let's walk through `Apply` in pieces, keeping the error handling in view.
+func (s *PostgresTopUps) Apply(ctx context.Context, key string, request TopUpRequest) (TopUpResult, error) {
+	if key == "" {
+		return TopUpResult{}, ErrMissingKey
+	}
 
-First, reject an empty key and start a transaction:
-
-```go
-if key == "" {
-	return TopUpResult{}, ErrMissingKey
-}
-
-tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
-if err != nil {
-	return TopUpResult{}, fmt.Errorf("begin top-up: %w", err)
-}
-defer tx.Rollback()
-```
-
-The deferred rollback releases the transaction on any early return. After a successful commit it has nothing left to roll back. We'll come back to why we explicitly chose `READ COMMITTED` in a moment.
-
-Next, try to claim the key:
-
-```go
-claim, err := tx.ExecContext(ctx, `
-	INSERT INTO top_up_results (idempotency_key) VALUES ($1)
-	ON CONFLICT (idempotency_key) DO NOTHING`, key)
-if err != nil {
-	return TopUpResult{}, fmt.Errorf("claim top-up: %w", err)
-}
-inserted, err := claim.RowsAffected()
-if err != nil {
-	return TopUpResult{}, fmt.Errorf("read claim outcome: %w", err)
-}
-```
-
-This replaces our in-memory check-and-claim. The unique constraint coordinates requests even when they come from different processes:
-
-1. If the key is new, we insert its row and get to do the work.
-2. If another transaction is currently inserting the same key, Postgres waits for its outcome.
-3. If that transaction commits, our insert does nothing. If it rolls back, our insert can proceed.
-
-When we didn't insert a row, read the recorded result:
-
-```go
-var result TopUpResult
-if inserted == 0 {
-	err = tx.QueryRowContext(ctx, `
-		SELECT account_id, balance_pence FROM top_up_results
-		WHERE idempotency_key = $1`, key).Scan(&result.AccountID, &result.BalancePence)
+	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
-		return TopUpResult{}, fmt.Errorf("read top-up result: %w", err)
+		return TopUpResult{}, fmt.Errorf("begin top-up: %w", err)
+	}
+	defer tx.Rollback()
+
+	claim, err := tx.ExecContext(ctx, `
+		INSERT INTO top_up_results (idempotency_key) VALUES ($1)
+		ON CONFLICT (idempotency_key) DO NOTHING`, key)
+	if err != nil {
+		return TopUpResult{}, fmt.Errorf("claim top-up: %w", err)
+	}
+	inserted, err := claim.RowsAffected()
+	if err != nil {
+		return TopUpResult{}, fmt.Errorf("read claim outcome: %w", err)
+	}
+
+	var result TopUpResult
+	if inserted == 0 {
+		// At READ COMMITTED, this new statement sees the competing transaction's
+		// committed result, even if our INSERT had to wait for it.
+		err = tx.QueryRowContext(ctx, `
+			SELECT account_id, balance_pence FROM top_up_results
+			WHERE idempotency_key = $1`, key).Scan(&result.AccountID, &result.BalancePence)
+		if err != nil {
+			return TopUpResult{}, fmt.Errorf("read top-up result: %w", err)
+		}
+		return result, nil
+	}
+
+	result.AccountID = request.AccountID
+	err = tx.QueryRowContext(ctx, `
+		INSERT INTO accounts (account_id, balance_pence) VALUES ($1, $2)
+		ON CONFLICT (account_id) DO UPDATE
+		SET balance_pence = accounts.balance_pence + EXCLUDED.balance_pence
+		RETURNING balance_pence`, request.AccountID, request.AmountPence).Scan(&result.BalancePence)
+	if err != nil {
+		return TopUpResult{}, fmt.Errorf("add credit: %w", err)
+	}
+
+	_, err = tx.ExecContext(ctx, `
+		UPDATE top_up_results SET account_id = $2, balance_pence = $3
+		WHERE idempotency_key = $1`, key, result.AccountID, result.BalancePence)
+	if err != nil {
+		return TopUpResult{}, fmt.Errorf("record top-up result: %w", err)
+	}
+	if err := tx.Commit(); err != nil {
+		return TopUpResult{}, fmt.Errorf("commit top-up: %w", err)
 	}
 	return result, nil
 }
-```
 
-At `READ COMMITTED`, each statement gets a fresh snapshot. That separate `SELECT` can see the result committed by the transaction our insert waited for. We haven't changed anything on this path, so the deferred rollback simply ends our transaction.
-
-For a new key, add the credit and get the updated balance:
-
-```go
-result.AccountID = request.AccountID
-err = tx.QueryRowContext(ctx, `
-	INSERT INTO accounts (account_id, balance_pence) VALUES ($1, $2)
-	ON CONFLICT (account_id) DO UPDATE
-	SET balance_pence = accounts.balance_pence + EXCLUDED.balance_pence
-	RETURNING balance_pence`, request.AccountID, request.AmountPence).Scan(&result.BalancePence)
-if err != nil {
-	return TopUpResult{}, fmt.Errorf("add credit: %w", err)
-}
-```
-
-The arithmetic happens in Postgres. Reading a balance into Go, adding the amount and writing it back would introduce another check-then-act problem: two different top-ups could overwrite each other's changes. This update locks the account row and increments its current balance.
-
-Finally, save the result and commit:
-
-```go
-_, err = tx.ExecContext(ctx, `
-	UPDATE top_up_results SET account_id = $2, balance_pence = $3
-	WHERE idempotency_key = $1`, key, result.AccountID, result.BalancePence)
-if err != nil {
-	return TopUpResult{}, fmt.Errorf("record top-up result: %w", err)
-}
-if err := tx.Commit(); err != nil {
-	return TopUpResult{}, fmt.Errorf("commit top-up: %w", err)
-}
-return result, nil
-```
-
-**The balance change and the result become committed together.** If the transaction fails before committing, neither survives. If it commits but our response gets lost, a retry reads the saved result. Even an error returned by `Commit` can leave the caller uncertain about the outcome, so it should retry with the same key rather than inventing a new one.
-
-`Balance` is just a query, returning zero for an account that doesn't exist yet:
-
-```go
 func (s *PostgresTopUps) Balance(ctx context.Context, accountID string) (int, error) {
 	var balance int
 	err := s.db.QueryRowContext(ctx, `
@@ -969,29 +939,52 @@ func (s *PostgresTopUps) Balance(ctx context.Context, accountID string) (int, er
 }
 ```
 
-### Check what only the database can tell us
+A few things worth noticing:
 
-The shared contract checks our observable behaviour, including concurrent retries. Two additional tests exercise the database implementation:
+- **The unique constraint on `idempotency_key` is the lock.** `INSERT ... ON CONFLICT DO NOTHING` is our claim: if another transaction, in another process, is already inserting the same key, Postgres makes ours wait for its outcome rather than letting both proceed. That's the coordination we couldn't get from an in-memory mutex.
+- **The arithmetic happens inside Postgres too**, via `ON CONFLICT DO UPDATE ... EXCLUDED`, for the same reason as the claim: reading a balance into Go, adding to it, and writing it back would be check-then-act all over again, just with a network hop in the middle.
+- **The balance change and the result are written and committed together, in one transaction.** If either fails, neither survives, so a retry always finds either nothing or a complete result to replay.
+- **The transaction is pinned to `READ COMMITTED` explicitly.** The "read the winner's result" path depends on a fresh statement seeing whatever the competing transaction committed, which is exactly what that isolation level guarantees.
 
-1. **Replay through a new adapter and connection pool.** Apply a top-up, create another adapter connected to the same database, then retry. The result comes from Postgres, not an object-local cache.
-2. **Rollback after crediting but before recording the result.** Add a test-only check constraint that rejects a particular saved balance. The balance update succeeds inside the transaction, but recording its result fails. Check that the account still has zero credit, remove the constraint and retry the same key. It should succeed once, rather than finding a stranded claim or doubling the credit.
+Now let's prove it against the contract we already have:
 
-The second test uses this constraint to trigger the failure:
+```go
+func TestPostgresTopUps(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Postgres integration test requires Docker")
+	}
+	db, _ := newPostgresDB(t)
 
-```sql
-ALTER TABLE top_up_results
-ADD CONSTRAINT reject_test_result CHECK (balance_pence <> 1234);
+	TopUpsContract{New: func(t testing.TB) TopUps {
+		resetPostgres(t, db)
+		return NewPostgresTopUps(db)
+	}}.Test(t)
+}
 ```
 
-The initial claim has a null balance, so it passes this check. Saving a result of 1,234 pence fails after the account update. That's a real database error at the boundary we care about, without adding failure switches to the adapter.
+Same assertions, same scenarios, nothing rewritten, `TopUpsContract` doesn't know or care whether it's talking to a map or a database. `newPostgresDB` starts a real instance with [Testcontainers](https://golang.testcontainers.org/modules/postgres/), opens a connection and creates the schema above; the full setup, along with two extra tests for things only a real database can prove, is in [postgres_test.go](retryable-endpoints/postgres_test.go). You'll need Docker running, and the dependencies installed:
 
-Run the database tests with Docker running:
+```sh
+go get github.com/jackc/pgx/v5/stdlib@v5.11.0 github.com/testcontainers/testcontainers-go/modules/postgres@v0.44.0
+```
 
 ```sh
 go test ./retryable-endpoints -run TestPostgresTopUps -v -timeout 3m
 ```
 
-For everyday work on the handler or in-memory implementation, `go test -short ./retryable-endpoints/...` skips the container test. Normal test runs include it. We pay the database startup cost when checking the database contract, rather than for every HTTP scenario.
+```text
+--- PASS: TestPostgresTopUps (1.91s)
+    --- PASS: TestPostgresTopUps/credits_an_account_and_returns_its_balance (0.00s)
+    --- PASS: TestPostgresTopUps/replays_the_original_result_even_after_another_top-up (0.00s)
+    --- PASS: TestPostgresTopUps/rejects_a_missing_key_without_adding_credit (0.00s)
+    --- PASS: TestPostgresTopUps/concurrent_retries_all_return_the_same_result (0.01s)
+    --- PASS: TestPostgresTopUps/concurrent_distinct_top-ups_do_not_lose_credit (0.01s)
+    --- PASS: TestPostgresTopUps/replays_through_a_new_adapter_and_connection_pool (0.01s)
+    --- PASS: TestPostgresTopUps/failure_to_record_the_result_rolls_back_the_credit_and_key (0.01s)
+PASS
+```
+
+For everyday work on the handler or the in-memory implementation, `go test -short ./retryable-endpoints/...` skips the container test, so you're not paying the startup cost on every run.
 
 We've kept this example focused on the transaction boundary. Key expiry, rejecting a reused key with a different payload, authentication and account validation still need deliberate policies in a real service. In particular, this example assumes a key identifies one top-up globally; an authenticated API would usually scope keys to the caller as well.
 
@@ -999,25 +992,18 @@ The handler hasn't changed. The operation's promise hasn't changed. We've replac
 
 ## Wrapping up
 
-Retries aren't an exotic edge case in a distributed system, they're how work gets done. A client that can't tell "it worked" from "I didn't hear back" has no choice but to send the request again. So the question was never whether our endpoint gets called twice; it's what happens when it does.
+A client that can't tell "it worked" from "I didn't hear back" has no choice but to send the request again. So the question was never whether our endpoint gets called twice; it's what happens when it does.
+
+Retries aren't an exotic edge case in a distributed system, they're an important tool for a high performing team building a distributed system that can be ran at scale. If your client systems cant reliably retry, you'll waste countless hours on support issues resolving trivial failures. 
 
 ### What we've covered
 
-- **Idempotency**: repeating the same logical operation has the same effect as doing it once. Some HTTP methods give us this almost for free (`PUT`, `GET`); the ones that don't need help.
-- **Idempotency keys**: the client generates one per logical operation and sends it with every attempt, retries included. We made ours required, so a caller can't quietly opt out of retry-safety.
-- **Check-then-act** is the bug hiding inside "have we seen this key before?". Looking a key up and claiming it have to be one atomic step, or two requests can both decide they're the first one.
-- **Atomicity has to cover the whole operation, not just the claim.** Adding the credit and recording the key as two independent steps leaves a gap; stop the service in that gap and we've credited an account with nothing to say we did.
-- That's what drove the redesign in the second half of the chapter. We stopped asking an HTTP handler to coordinate a claim, a credit and a completion, and made one method, `Apply`, responsible for all three.
-- **Contracts and fakes**, as in [Working Without Mocks](working-without-mocks.md). We described the behaviour once and ran it against an in-memory implementation and Postgres. Writing the database adapter didn't mean rewriting the tests.
-- **A transaction and a unique constraint** are how that promise survives more than one process. `INSERT ... ON CONFLICT DO NOTHING` lets Postgres pick the winner, and a competing transaction waits for that winner's outcome rather than guessing at it.
-- Let the database do the arithmetic. Reading a balance into Go, adding to it and writing it back is check-then-act again, just with a network hop in the middle.
-
-### On testing concurrent behaviour
-
-- We used [`testing/synctest`](revisiting-time-with-synctest.md) to arrange the overlap on purpose instead of starting goroutines and hoping. A test that only fails when your laptop is busy isn't much of a test.
-- **The race detector would not have caught this bug.** There was no data race in our failing test; the two requests touched the map at different moments. They were both still wrong. `-race` finds unsynchronised access, not broken logic, so we need tests that describe the behaviour too.
-- The contract's concurrent scenarios use a plain start channel rather than `synctest`, so those same scenarios can run against an implementation doing real database I/O. Neither approach replaces the other.
-- Some things only the database can tell us, so we kept a couple of tests for it: replaying a result through a fresh connection pool, and a transaction that fails *after* crediting but *before* recording its result. We provoked that failure with a test-only `CHECK` constraint rather than building failure switches into the adapter.
+- **Idempotency and idempotency keys.** Repeating the same logical operation should have the same effect as doing it once; the client supplies a key per operation so the server can tell a retry from a genuinely new request.
+- **Check-then-act** is the bug hiding inside "have we seen this key before?" — checking and claiming a key have to be one atomic step, or two requests can both decide they're the first.
+- **Atomicity has to cover the whole operation, not just the claim.** That's what drove the redesign: one method, `Apply`, is responsible for claiming, crediting and completing, rather than an HTTP handler coordinating three separate steps.
+- **Contracts and fakes**, as in [Working Without Mocks](working-without-mocks.md), let us describe the behaviour once and run it unchanged against an in-memory implementation and Postgres.
+- **A unique constraint is a cross-process lock.** `INSERT ... ON CONFLICT DO NOTHING` lets Postgres pick a winner between two transactions claiming the same key, which is how that promise survives more than one instance of our service.
+- We used [`testing/synctest`](revisiting-time-with-synctest.md) to arrange a retry-while-in-progress overlap deterministically, rather than hoping two goroutines collide at the right moment.
 
 ### Decisions we've left open
 
@@ -1026,7 +1012,7 @@ The mechanism is the easy half. A real service still has to pick a policy for ea
 - **What to say while a top-up is still running.** Our first version returned `409 Conflict` and invited the caller to try again later; the second waits for the outcome and replays the result. Both are reasonable, and they lead to different tests.
 - **How long a key lives.** You can't keep them forever. Expiry turns a very late retry into a brand new top-up, so the window needs to comfortably outlast any retrying a client will plausibly do.
 - **What a reused key with a different payload means.** We assumed callers replay the same request. Rejecting a mismatch is genuinely useful, and it's a separate behaviour with its own tests.
-- **Who a key belongs to.** We treated keys as globally unique, which is fine for an example. An authenticated API would normally scope them to the caller, so one client can't collide with — or go fishing in — another's keys.
+- **Who a key belongs to.** We treated keys as globally unique, which is fine for an example. An authenticated API would normally scope them to the caller, so one client can't collide with another's keys.
 
 ### Additional material
 

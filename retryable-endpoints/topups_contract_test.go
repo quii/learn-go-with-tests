@@ -16,7 +16,10 @@ func (c TopUpsContract) Test(t *testing.T) {
 		topUps := c.New(t)
 		request := TopUpRequest{AccountID: "user-123", AmountPence: 1000}
 
-		got := applyTopUp(t, topUps, "first", request)
+		got, err := topUps.Apply(t.Context(), "first", request)
+		if err != nil {
+			t.Fatalf("could not apply top-up: %v", err)
+		}
 
 		assertResult(t, got, TopUpResult{AccountID: "user-123", BalancePence: 1000})
 		assertBalance(t, topUps, "user-123", 1000)
@@ -26,13 +29,22 @@ func (c TopUpsContract) Test(t *testing.T) {
 	t.Run("replays the original result even after another top-up", func(t *testing.T) {
 		topUps := c.New(t)
 		request := TopUpRequest{AccountID: "user-123", AmountPence: 1000}
-		first := applyTopUp(t, topUps, "first", request)
+		first, err := topUps.Apply(t.Context(), "first", request)
+		if err != nil {
+			t.Fatalf("could not apply top-up: %v", err)
+		}
 
 		// Identical payload, different key: a genuinely new top-up.
-		second := applyTopUp(t, topUps, "second", request)
+		second, err := topUps.Apply(t.Context(), "second", request)
+		if err != nil {
+			t.Fatalf("could not apply top-up: %v", err)
+		}
 		assertResult(t, second, TopUpResult{AccountID: "user-123", BalancePence: 2000})
 
-		replayed := applyTopUp(t, topUps, "first", request)
+		replayed, err := topUps.Apply(t.Context(), "first", request)
+		if err != nil {
+			t.Fatalf("could not apply top-up: %v", err)
+		}
 		assertResult(t, replayed, first)
 		assertBalance(t, topUps, "user-123", 2000)
 	})
@@ -104,15 +116,6 @@ func TestInMemoryTopUps(t *testing.T) {
 	TopUpsContract{New: func(t testing.TB) TopUps {
 		return NewInMemoryTopUps()
 	}}.Test(t)
-}
-
-func applyTopUp(t testing.TB, topUps TopUps, key string, request TopUpRequest) TopUpResult {
-	t.Helper()
-	result, err := topUps.Apply(t.Context(), key, request)
-	if err != nil {
-		t.Fatalf("could not apply top-up: %v", err)
-	}
-	return result
 }
 
 func assertResult(t testing.TB, got, want TopUpResult) {
