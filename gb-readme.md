@@ -2,7 +2,7 @@
 description: Learn Go with Tests
 ---
 
-# テスト駆動開発でGO言語を学びましょう
+# テスト駆動開発でGo言語を学びましょう
 
 ![](.gitbook/assets/red-green-blue-gophers-smaller.png)
 

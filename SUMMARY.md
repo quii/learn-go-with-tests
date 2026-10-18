@@ -1,6 +1,6 @@
 # Table of contents
 
-* [テスト駆動開発でGO言語を学びましょう](gb-readme.md)
+* [テスト駆動開発でGo言語を学びましょう](gb-readme.md)
 
 ## Go言語：基礎 <a id="go-fundamentals"></a>
 
