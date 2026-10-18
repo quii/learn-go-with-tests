@@ -1,8 +1,8 @@
 ---
-description: Revisiting arrays and slices with generics
+description: ジェネリクスで配列とスライスを再考する
 ---
 
-# ジェネリクスで配列とスライスを再訪する
+# ジェネリクスで配列とスライスを再考する
 
 **[この章のコードは「配列とスライス」の続きで、ここにあります](https://github.com/quii/learn-go-with-tests/tree/main/arrays)**
 

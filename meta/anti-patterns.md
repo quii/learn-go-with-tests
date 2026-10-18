@@ -1,5 +1,5 @@
 ---
-description: TDD Anti-patterns
+description: アンチパターン
 ---
 
 # TDD のアンチパターン
