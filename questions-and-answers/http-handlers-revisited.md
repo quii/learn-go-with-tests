@@ -8,7 +8,7 @@ description: Revisiting HTTP Handlers
 
 このサイトにはすでに[HTTPハンドラーのテスト](../build-an-application/http-server.md) に関する章がありますが、これはそれらの設計に関する幅広い議論を特徴とするため、テストは簡単です。
 
-実際の例を見て、単一責任の原則や懸念の分離などの原則を適用することによって、それがどのように設計されるかを改善する方法を見ていきます。これらの原則は、[インターフェース（interfaces）](../go-fundamentals/structs-methods-and-interfaces.md) and [依存性注入（dependency injection）](../go-fundamentals/dependency-injection.md)を使用して実現できます。これを行うことで、ハンドラーのテストが実際に非常に簡単であることを示します。
+実際の例を見て、単一責任の原則や懸念の分離などの原則を適用することによって、それがどのように設計されるかを改善する方法を見ていきます。これらの原則は、[インターフェース（interfaces）](../go-fundamentals/structs-methods-and-interfaces.md) と [依存性注入（dependency injection）](../go-fundamentals/dependency-injection.md)を使用して実現できます。これを行うことで、ハンドラーのテストが実際に非常に簡単であることを示します。
 
 ![Goコミュニティのよくある質問の図解](../.gitbook/assets/amazing-art.png)
 
@@ -109,7 +109,7 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 
 ## HTTPハンドラーとは何ですか？
 
-特定のGoの詳細を一瞬忘れてしまいますが、私が常にうまく機能してきた言語で働いていても、[懸念の分離](https://en.wikipedia.org/wiki/Separation_of_concerns)と[単一責任原則](https://en.wikipedia.org/wiki/Single-responsibility_principle).
+Goの詳細を一瞬忘れてしまうことはありますが、どんな言語でも私はいつもうまく機能するもの、[関心の分離](https://en.wikipedia.org/wiki/Separation_of_concerns)と[単一責任の原則](https://en.wikipedia.org/wiki/Single-responsibility_principle)を考えています。
 
 これは、あなたが解決しようとしている問題によっては、適用するにはかなり厄介なことになります。責任とは何か？
 
@@ -130,7 +130,7 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 * `ImportantBusinessLogic`を変更することなく、他のコンテキストで使用できます。
 * `ImportantBusinessLogic`が動作を変更しても、インターフェイスが同じである限り、ハンドラーを変更する必要はありません。
 
-## Go'sのハンドラ
+## Go のハンドラ
 
 [`http.HandlerFunc`](https://golang.org/pkg/net/http/#HandlerFunc)
 

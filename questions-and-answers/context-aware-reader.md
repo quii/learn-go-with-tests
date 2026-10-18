@@ -12,7 +12,7 @@ description: Context-aware Reader
 
 まず、`io.Reader`の簡単な入門書です。
 
-この本の他の章を読んだことがあれば、ファイルを開いたり、JSONをエンコードしたり、その他の一般的なタスクを実行したりしたときに、`io.Reader`に出くわすことになります。 _something_ からのデータの読み取りに関する単純な抽象化です。
+この本の他の章を読んだことがあれば、ファイルを開いたり、JSONをエンコードしたり、その他の一般的なタスクを実行したりしたときに、`io.Reader`に出くわしたでしょう。それは _何かしら_ からデータを読み取るための単純な抽象化です。
 
 ```go
 type Reader interface {
@@ -21,7 +21,7 @@ type Reader interface {
 ```
 
 `io.Reader`を使用すると、標準ライブラリから多くの再利用を得ることができます。
-これは、非常に一般的に使用される抽象化です（対応する` io.Writer`とともに）
+これは、非常に一般的に使用される抽象化です（対応する`io.Writer`とともに）
 
 ### コンテキスト認識？
 
@@ -92,7 +92,7 @@ func assertBufferHas(t testing.TB, buf []byte, want string) {
 
 * いくつかのデータを含む文字列から`io.Reader`を作成します
 * 読み込む内容がリーダーの内容よりも小さいバイト配列
-* 呼び出しを読んで、内容を確認し、繰り返します
+* Read を呼び出し、内容を確認し、繰り返します
 
 これから、2回目の読み取りの前に動作を変更するために何らかのキャンセル信号を送信することを想像できます。
 
@@ -301,7 +301,7 @@ func (r readerCtx) Read(p []byte) (n int, err error) {
 ## まとめ
 
 * 小さなインターフェイスが良く、構成が簡単
-* あるもの ( `io.Reader`) を別のもので拡張しようとするとき、通常は[委任パターン（delegation pattern）](https://en.wikipedia.org/wiki/Delegation_pattern)に到達したいと思います。
+* あるもの (`io.Reader`) を別のもので拡張しようとするとき、通常は[委任パターン（delegation pattern）](https://en.wikipedia.org/wiki/Delegation_pattern)に到達したいと思います。
 
 > ソフトウェア工学では、デリゲーションパターンはオブジェクト指向の設計パターンであり、オブジェクトを構成して継承と同じコードの再利用を実現することができます。
 
