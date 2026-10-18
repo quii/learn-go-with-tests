@@ -1,5 +1,5 @@
 ---
-description: HTML Templates
+description: テンプレート
 ---
 
 # HTML テンプレート

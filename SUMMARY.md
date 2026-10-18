@@ -15,7 +15,7 @@
 * [依存性注入](go-fundamentals/dependency-injection.md)
 * [スタブ・モック](go-fundamentals/mocking.md)
 * [並行性](go-fundamentals/concurrency.md)
-* [選択](go-fundamentals/select.md)
+* [Select](go-fundamentals/select.md)
 * [リフレクション](go-fundamentals/reflection.md)
 * [同期](go-fundamentals/sync.md)
 * [コンテキスト](go-fundamentals/context.md)
@@ -53,6 +53,6 @@
 
 ## メタ
 
-* [ユニットテスト機能を作成する方法](meta/why.md)
+* [なぜユニットテストなのか、そしてユニットテストを役立てる方法](meta/why.md)
 * [アンチパターン](meta/anti-patterns.md)
 * [貢献](meta/contributing.md)

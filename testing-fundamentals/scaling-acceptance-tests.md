@@ -1,5 +1,5 @@
 ---
-description: Learn Go with Tests - 受け入れテストのスケーリング（とgRPC入門）
+description: 受け入れテストのスケーリング
 ---
 
 # Learn Go with Tests - 受け入れテストのスケーリング（とgRPC入門）
