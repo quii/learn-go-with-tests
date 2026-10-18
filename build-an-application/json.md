@@ -266,7 +266,7 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 
 そして、`server_test.go`, `server_integration_test.go`, `main.go` 内の `server := &PlayerServer{&store}` を `server := NewPlayerServer(&store)` に置き換えてみてください。
 
-最後に、`func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request)`が不要になったので、**delete** が不要になったので、**削除**してください。
+最後に、`func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request)`が不要になったので、**削除**してください。
 
 ## 埋め込み
 
@@ -297,7 +297,7 @@ type Animal interface {
 
 埋め込む型のすべてのパブリックメソッドとフィールドを公開するため、埋め込み型には注意する必要があります。私たちの場合、\(`http.Handler`\)を公開したい _interface_ だけを埋め込んだので問題ありません。
 
-怠惰で埋め込まれた`http.ServeMux`ではなく具象型でも機能しますが、`Handle(path、handler)`が原因で、`PlayerServer`のユーザーはサーバーに新しいルートを追加できます公開する。
+怠惰で埋め込まれた`http.ServeMux`ではなく具象型でも機能しますが、`Handle(path, handler)`が公開されるので、`PlayerServer`のユーザーはサーバーに新しいルートを追加できます。
 
 **型を埋め込むときは、公開APIにどのような影響があるかをよく考えてください**
 

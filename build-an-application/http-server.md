@@ -6,7 +6,7 @@ description: HTTP server
 
 [**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/http-server)
 
-あなたは、ユーザーがプレーヤーが勝ったゲームの数を追跡できるWebサーバーを作成するように求められました。
+あなたは、プレーヤーが勝ったゲームの数をユーザーが追跡できるWebサーバーを作成するように求められました。
 
 * `GET /players/{name}`は、勝利の合計数を示す数値を返す必要があります
 * `POST /players/{name}`は、その名前の勝利を記録し、後続の`POST`ごとに増分する必要があります
