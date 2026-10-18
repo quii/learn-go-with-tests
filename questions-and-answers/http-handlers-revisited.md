@@ -4,7 +4,7 @@ description: Revisiting HTTP Handlers
 
 # HTTPハンドラーの再検討
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/q-and-a/http-handlers-revisited)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/q-and-a/http-handlers-revisited)
 
 このサイトにはすでに[HTTPハンドラーのテスト](../build-an-application/http-server.md) に関する章がありますが、これはそれらの設計に関する幅広い議論を特徴とするため、テストは簡単です。
 
@@ -29,70 +29,70 @@ HTTPハンドラーのテストはGoコミュニティで繰り返し発生す�
 
 ```go
 func Registration(w http.ResponseWriter, r *http.Request) {
-    var res model.ResponseResult
-    var user model.User
+	var res model.ResponseResult
+	var user model.User
 
-    w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
-    jsonDecoder := json.NewDecoder(r.Body)
-    jsonDecoder.DisallowUnknownFields()
-    defer r.Body.Close()
+	jsonDecoder := json.NewDecoder(r.Body)
+	jsonDecoder.DisallowUnknownFields()
+	defer r.Body.Close()
 
-    // check if there is proper json body or error
-    if err := jsonDecoder.Decode(&user); err != nil {
-        res.Error = err.Error()
-        // return 400 status codes
-        w.WriteHeader(http.StatusBadRequest)
-        json.NewEncoder(w).Encode(res)
-        return
-    }
+	// check if there is proper json body or error
+	if err := jsonDecoder.Decode(&user); err != nil {
+		res.Error = err.Error()
+		// return 400 status codes
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(res)
+		return
+	}
 
-    // Connect to mongodb
-    client, _ := mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))
-    ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-    err := client.Connect(ctx)
-    if err != nil {
-        panic(err)
-    }
-    defer client.Disconnect(ctx)
-    // Check if username already exists in users datastore, if so, 400
-    // else insert user right away
-    collection := client.Database("test").Collection("users")
-    filter := bson.D{{"username", user.Username}}
-    var foundUser model.User
-    err = collection.FindOne(context.TODO(), filter).Decode(&foundUser)
-    if foundUser.Username == user.Username {
-        res.Error = UserExists
-        // return 400 status codes
-        w.WriteHeader(http.StatusBadRequest)
-        json.NewEncoder(w).Encode(res)
-        return
-    }
+	// Connect to mongodb
+	client, _ := mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err := client.Connect(ctx)
+	if err != nil {
+		panic(err)
+	}
+	defer client.Disconnect(ctx)
+	// Check if username already exists in users datastore, if so, 400
+	// else insert user right away
+	collection := client.Database("test").Collection("users")
+	filter := bson.D{{"username", user.Username}}
+	var foundUser model.User
+	err = collection.FindOne(context.TODO(), filter).Decode(&foundUser)
+	if foundUser.Username == user.Username {
+		res.Error = UserExists
+		// return 400 status codes
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(res)
+		return
+	}
 
-    pass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-    if err != nil {
-        res.Error = err.Error()
-        // return 400 status codes
-        w.WriteHeader(http.StatusBadRequest)
-        json.NewEncoder(w).Encode(res)
-        return
-    }
-    user.Password = string(pass)
+	pass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		res.Error = err.Error()
+		// return 400 status codes
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+	user.Password = string(pass)
 
-    insertResult, err := collection.InsertOne(context.TODO(), user)
-    if err != nil {
-        res.Error = err.Error()
-        // return 400 status codes
-        w.WriteHeader(http.StatusBadRequest)
-        json.NewEncoder(w).Encode(res)
-        return
-    }
+	insertResult, err := collection.InsertOne(context.TODO(), user)
+	if err != nil {
+		res.Error = err.Error()
+		// return 400 status codes
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(res)
+		return
+	}
 
-    // return 200
-    w.WriteHeader(http.StatusOK)
-    res.Result = fmt.Sprintf("%s: %s", UserCreated, insertResult.InsertedID)
-    json.NewEncoder(w).Encode(res)
-    return
+	// return 200
+	w.WriteHeader(http.StatusOK)
+	res.Result = fmt.Sprintf("%s: %s", UserCreated, insertResult.InsertedID)
+	json.NewEncoder(w).Encode(res)
+	return
 }
 ```
 
@@ -127,7 +127,7 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 
 * ハンドラのテストは簡単になり、少数の懸念事項に集中することができます。
 * 重要なことは、`ImportantBusinessLogic`をテストする際に、`HTTP`を気にする必要がなくなり、ビジネスロジックをきれいにテストできるようになることです。
-* ビジネスロジックをきれいにテストすることができます。
+* `ImportantBusinessLogic`を変更することなく、他のコンテキストで使用できます。
 * `ImportantBusinessLogic`が動作を変更しても、インターフェイスが同じである限り、ハンドラーを変更する必要はありません。
 
 ## Go'sのハンドラ
@@ -155,18 +155,18 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 
 ```go
 func Teapot(res http.ResponseWriter, req *http.Request) {
-    res.WriteHeader(http.StatusTeapot)
+	res.WriteHeader(http.StatusTeapot)
 }
 
 func TestTeapotHandler(t *testing.T) {
-    req := httptest.NewRequest(http.MethodGet, "/", nil)
-    res := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	res := httptest.NewRecorder()
 
-    Teapot(res, req)
+	Teapot(res, req)
 
-    if res.Code != http.StatusTeapot {
-        t.Errorf("got status %d but wanted %d", res.Code, http.StatusTeapot)
-    }
+	if res.Code != http.StatusTeapot {
+		t.Errorf("got status %d but wanted %d", res.Code, http.StatusTeapot)
+	}
 }
 ```
 
@@ -195,8 +195,8 @@ TDDチュートリアルについてよくある苦情は、いつも「シン�
 
 1. リクエストのボディを`User`にデコードする。
 2. `UserService.Register(user)`を呼び出します（これは`ServiceThing`）
-3. エラーが発生した場合はそれに対処する（例では常に`400 BadRequest`を送信しているが、これは正しいとは思えないので、`500 Internal Server Error`のキャッチオールハンドラを用意しておくことにする。すべてのエラーに対して`500`を返すと、ひどいAPIになってしまうことを強調しておかなければなりません。後でエラー処理をもっと洗練させて、おそらく[error types](error-types.md)を使うことができるでしょう。
-4. エラーがなければ、`201 Created`のIDをレスポンスボディにします（これもまた緊張感と面白さのためです）
+3. エラーが発生した場合はそれに対処する（例では常に`400 BadRequest`を送信しているが、これは正しいとは思えない）、_今のところ_ は`500 Internal Server Error`のキャッチオールハンドラを用意しておくことにします。すべてのエラーに対して`500`を返すと、ひどいAPIになってしまうことを強調しておかなければなりません。後でエラー処理をもっと洗練させて、おそらく[error types](error-types.md)を使うことができるでしょう。
+4. エラーがなければ、`201 Created`のIDをレスポンスボディにします（これもまた簡潔さ／手抜きのためです）
 
 簡潔にするために、通常のTDDプロセスについては説明しません。
 
@@ -204,41 +204,41 @@ TDDチュートリアルについてよくある苦情は、いつも「シン�
 
 ```go
 type UserService interface {
-    Register(user User) (insertedID string, err error)
+	Register(user User) (insertedID string, err error)
 }
 
 type UserServer struct {
-    service UserService
+	service UserService
 }
 
 func NewUserServer(service UserService) *UserServer {
-    return &UserServer{service: service}
+	return &UserServer{service: service}
 }
 
 func (u *UserServer) RegisterUser(w http.ResponseWriter, r *http.Request) {
-    defer r.Body.Close()
+	defer r.Body.Close()
 
-    // request parsing and validation
-    var newUser User
-    err := json.NewDecoder(r.Body).Decode(&newUser)
+	// request parsing and validation
+	var newUser User
+	err := json.NewDecoder(r.Body).Decode(&newUser)
 
-    if err != nil {
-        http.Error(w, fmt.Sprintf("could not decode user payload: %v", err), http.StatusBadRequest)
-        return
-    }
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not decode user payload: %v", err), http.StatusBadRequest)
+		return
+	}
 
-    // call a service thing to take care of the hard work
-    insertedID, err := u.service.Register(newUser)
+	// call a service thing to take care of the hard work
+	insertedID, err := u.service.Register(newUser)
 
-    // depending on what we get back, respond accordingly
-    if err != nil {
-        //todo: handle different kinds of errors differently
-        http.Error(w, fmt.Sprintf("problem registering new user: %v", err), http.StatusInternalServerError)
-        return
-    }
+	// depending on what we get back, respond accordingly
+	if err != nil {
+		//todo: handle different kinds of errors differently
+		http.Error(w, fmt.Sprintf("problem registering new user: %v", err), http.StatusInternalServerError)
+		return
+	}
 
-    w.WriteHeader(http.StatusCreated)
-    fmt.Fprint(w, insertedID)
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprint(w, insertedID)
 }
 ```
 
@@ -257,75 +257,75 @@ TDDに続いてこのアプローチをより詳しく知りたい場合は、[�
 
 ```go
 type MockUserService struct {
-    RegisterFunc    func(user User) (string, error)
-    UsersRegistered []User
+	RegisterFunc    func(user User) (string, error)
+	UsersRegistered []User
 }
 
 func (m *MockUserService) Register(user User) (insertedID string, err error) {
-    m.UsersRegistered = append(m.UsersRegistered, user)
-    return m.RegisterFunc(user)
+	m.UsersRegistered = append(m.UsersRegistered, user)
+	return m.RegisterFunc(user)
 }
 
 func TestRegisterUser(t *testing.T) {
-    t.Run("can register valid users", func(t *testing.T) {
-        user := User{Name: "CJ"}
-        expectedInsertedID := "whatever"
+	t.Run("can register valid users", func(t *testing.T) {
+		user := User{Name: "CJ"}
+		expectedInsertedID := "whatever"
 
-        service := &MockUserService{
-            RegisterFunc: func(user User) (string, error) {
-                return expectedInsertedID, nil
-            },
-        }
-        server := NewUserServer(service)
+		service := &MockUserService{
+			RegisterFunc: func(user User) (string, error) {
+				return expectedInsertedID, nil
+			},
+		}
+		server := NewUserServer(service)
 
-        req := httptest.NewRequest(http.MethodGet, "/", userToJSON(user))
-        res := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/", userToJSON(user))
+		res := httptest.NewRecorder()
 
-        server.RegisterUser(res, req)
+		server.RegisterUser(res, req)
 
-        assertStatus(t, res.Code, http.StatusCreated)
+		assertStatus(t, res.Code, http.StatusCreated)
 
-        if res.Body.String() != expectedInsertedID {
-            t.Errorf("expected body of %q but got %q", res.Body.String(), expectedInsertedID)
-        }
+		if res.Body.String() != expectedInsertedID {
+			t.Errorf("expected body of %q but got %q", res.Body.String(), expectedInsertedID)
+		}
 
-        if len(service.UsersRegistered) != 1 {
-            t.Fatalf("expected 1 user added but got %d", len(service.UsersRegistered))
-        }
+		if len(service.UsersRegistered) != 1 {
+			t.Fatalf("expected 1 user added but got %d", len(service.UsersRegistered))
+		}
 
-        if !reflect.DeepEqual(service.UsersRegistered[0], user) {
-            t.Errorf("the user registered %+v was not what was expected %+v", service.UsersRegistered[0], user)
-        }
-    })
+		if !reflect.DeepEqual(service.UsersRegistered[0], user) {
+			t.Errorf("the user registered %+v was not what was expected %+v", service.UsersRegistered[0], user)
+		}
+	})
 
-    t.Run("returns 400 bad request if body is not valid user JSON", func(t *testing.T) {
-        server := NewUserServer(nil)
+	t.Run("returns 400 bad request if body is not valid user JSON", func(t *testing.T) {
+		server := NewUserServer(nil)
 
-        req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader("trouble will find me"))
-        res := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader("trouble will find me"))
+		res := httptest.NewRecorder()
 
-        server.RegisterUser(res, req)
+		server.RegisterUser(res, req)
 
-        assertStatus(t, res.Code, http.StatusBadRequest)
-    })
+		assertStatus(t, res.Code, http.StatusBadRequest)
+	})
 
-    t.Run("returns a 500 internal server error if the service fails", func(t *testing.T) {
-        user := User{Name: "CJ"}
+	t.Run("returns a 500 internal server error if the service fails", func(t *testing.T) {
+		user := User{Name: "CJ"}
 
-        service := &MockUserService{
-            RegisterFunc: func(user User) (string, error) {
-                return "", errors.New("couldn't add new user")
-            },
-        }
-        server := NewUserServer(service)
+		service := &MockUserService{
+			RegisterFunc: func(user User) (string, error) {
+				return "", errors.New("couldn't add new user")
+			},
+		}
+		server := NewUserServer(service)
 
-        req := httptest.NewRequest(http.MethodGet, "/", userToJSON(user))
-        res := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/", userToJSON(user))
+		res := httptest.NewRecorder()
 
-        server.RegisterUser(res, req)
+		server.RegisterUser(res, req)
 
-        assertStatus(t, res.Code, http.StatusInternalServerError)
-    })
+		assertStatus(t, res.Code, http.StatusInternalServerError)
+	})
 }
 ```
 
@@ -345,14 +345,14 @@ type MongoUserService struct {
 }
 
 func NewMongoUserService() *MongoUserService {
-    //todo: pass in DB URL as argument to this function
-    //todo: connect to db, create a connection pool
-    return &MongoUserService{}
+	//todo: pass in DB URL as argument to this function
+	//todo: connect to db, create a connection pool
+	return &MongoUserService{}
 }
 
 func (m MongoUserService) Register(user User) (insertedID string, err error) {
-    // use m.mongoConnection to perform queries
-    panic("implement me")
+	// use m.mongoConnection to perform queries
+	panic("implement me")
 }
 ```
 
@@ -360,9 +360,9 @@ func (m MongoUserService) Register(user User) (insertedID string, err error) {
 
 ```go
 func main() {
-    mongoService := NewMongoUserService()
-    server := NewUserServer(mongoService)
-    http.ListenAndServe(":8000", http.HandlerFunc(server.RegisterUser))
+	mongoService := NewMongoUserService()
+	server := NewUserServer(mongoService)
+	http.ListenAndServe(":8000", http.HandlerFunc(server.RegisterUser))
 }
 ```
 

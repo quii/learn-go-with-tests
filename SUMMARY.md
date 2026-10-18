@@ -21,6 +21,17 @@
 * [コンテキスト](go-fundamentals/context.md)
 * [プロパティベースのテスト概要](go-fundamentals/roman-numerals.md)
 * [数学](go-fundamentals/math.md)
+* [ファイルの読み込み](go-fundamentals/reading-files.md)
+* [テンプレート](go-fundamentals/html-templates.md)
+* [ジェネリクス](go-fundamentals/generics.md)
+* [ジェネリクスで配列とスライスを再考する](go-fundamentals/revisiting-arrays-and-slices-with-generics.md)
+
+## テストの基礎 <a id="testing-fundamentals"></a>
+
+* [受け入れテスト入門](testing-fundamentals/intro-to-acceptance-tests.md)
+* [受け入れテストのスケーリング](testing-fundamentals/scaling-acceptance-tests.md)
+* [モックを使わずに作業する](testing-fundamentals/working-without-mocks.md)
+* [リファクタリングチェックリスト](testing-fundamentals/refactoring-checklist.md)
 
 ## アプリケーションを構築する <a id="build-an-application"></a>
 
@@ -30,6 +41,7 @@
 * [IO、並び替え](build-an-application/io.md)
 * [コマンドライン、パッケージ構造](build-an-application/command-line.md)
 * [時間](build-an-application/time.md)
+* [testing/synctest で時間を再考する](build-an-application/revisiting-time-with-synctest.md)
 * [ウェブソケット](build-an-application/websockets.md)
 
 ## 質問と答え <a id="questions-and-answers"></a>
@@ -42,5 +54,5 @@
 ## メタ
 
 * [ユニットテスト機能を作成する方法](meta/why.md)
+* [アンチパターン](meta/anti-patterns.md)
 * [貢献](meta/contributing.md)
-

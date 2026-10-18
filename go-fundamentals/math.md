@@ -4,7 +4,7 @@ description: Maths
 
 # 数学
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/math)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/math)
 
 現代のコンピューターのすべての能力が驚異的な速さで膨大な合計を実行するために、普通の開発者は自分の仕事を行うために数学を使用することはほとんどありません。
 
@@ -29,12 +29,12 @@ SVGは、XMLで記述された一連の形状として記述されているた�
 
 このように記述されています。
 
-```markup
+```xml
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg"
-     width="100%"
-     height="100%"
+     width="300"
+     height="300"
      viewBox="0 0 300 300"
      version="2.0">
 
@@ -61,7 +61,21 @@ SVGは、XMLで記述された一連の形状として記述されているた�
 
 ## 受け入れテスト
 
-行き詰まる前に、受け入れテストについて考えてみましょう。時計の例があるので、重要なパラメータがどうなるかを考えてみましょう。
+行き詰まる前に、受け入れテストについて考えてみましょう。
+
+待って、受け入れテストが何なのかまだ知らないですよね。では、説明してみましょう。
+
+質問させてください。勝利とはどのようなものでしょうか？作業が終わったことはどうすればわかるでしょうか？TDDは、作業が終わったことを知るための良い方法を提供してくれます。テストが成功したときです。ときには（実際にはほとんどの場合）、使用可能な機能全体を書き終えたことを教えてくれるテストを書くと便利です。特定の関数が期待どおりに動作していることを教えてくれるだけのテストではなく、達成しようとしているもの全体、つまり「機能（feature）」が完成したことを教えてくれるテストです。
+
+このようなテストは「受け入れテスト（acceptance tests）」と呼ばれることもあれば、「機能テスト（feature tests）」と呼ばれることもあります。考え方としては、達成しようとしていることを説明する本当に高いレベルのテストを書くということです。たとえば、ユーザーがWebサイトのボタンをクリックすると、捕まえたポケモンの完全なリストが表示される、といったものです。そのテストを書いたら、受け入れテストに合格する動作するシステムに向けて、さらにテスト（ユニットテスト）を書いていくことができます。この例でいえば、それらのテストは、ボタンのあるWebページのレンダリング、Webサーバーのルートハンドラーのテスト、データベースの検索の実行などに関するものになるでしょう。これらはすべてTDDで進められ、そのすべてが元の受け入れテストを成功させることにつながっていきます。
+
+Nat PryceとSteve Freemanによる、この _古典的な_ 図のようなものです。
+
+![TDDにおけるアウトサイドインのフィードバックループ](../.gitbook/assets/TDD-outside-in.jpg)
+
+とにかく、受け入れテスト、つまり完了したときにそれを教えてくれるテストを書いてみましょう。
+
+時計の例があるので、重要なパラメータがどうなるかを考えてみましょう。
 
 ```text
 <line x1="150" y1="150" x2="114.150000" y2="132.260000"
@@ -79,7 +93,7 @@ SVGは、XMLで記述された一連の形状として記述されているた�
 * すべての時計の中心は（150、150）です
 * 時針は50です。
 * 分針は80です
-* 秒針は90秒です。
+* 秒針は90です。
 
 SVGに関する注意点：原点（0, 0）-は、予想される _左下_ ではなく、 _左上_ です。どの番号をラインに接続するかを検討しているときは、これを覚えておくことが重要です。
 
@@ -94,23 +108,24 @@ SVGに関する注意点：原点（0, 0）-は、予想される _左下_ で�
 package clockface_test
 
 import (
-    "testing"
-    "time"
-
-    "github.com/gypsydave5/learn-go-with-tests/math/v1/clockface"
+	"projectpath/clockface"
+	"testing"
+	"time"
 )
 
 func TestSecondHandAtMidnight(t *testing.T) {
-    tm := time.Date(1337, time.January, 1, 0, 0, 0, 0, time.UTC)
+	tm := time.Date(1337, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-    want := clockface.Point{X: 150, Y: 150 - 90}
-    got := clockface.SecondHand(tm)
+	want := clockface.Point{X: 150, Y: 150 - 90}
+	got := clockface.SecondHand(tm)
 
-    if got != want {
-        t.Errorf("Got %v, wanted %v", got, want)
-    }
+	if got != want {
+		t.Errorf("Got %v, wanted %v", got, want)
+	}
 }
 ```
+
+ここでの`projectpath`はプレースホルダーです。自分のモジュールのパスに`/clockface`を加えたものに置き換えてください（たとえば、`go.mod`に`module example.com/learning-go`と書かれていれば、このインポートは`"example.com/learning-go/clockface"`になります）。これが機能するのは、`clockface_test.go`を`clockface`という名前の専用ディレクトリに、（次に作成する）`clockface.go`と並べて置いているからです。ディレクトリ名をその中のパッケージ名と一致させることで、Goはエイリアスなしでインポートを解決できます。同じディレクトリ内の`package clockface_test`は、Goが認めている特別なケースです。同じフォルダ内に`package clockface`のファイルと並んで存在できる外部テストパッケージです。
 
 SVGが左上から座標をプロットする方法を覚えていますか？
 秒針を真夜中に配置するには、X軸（まだ150）の文字盤の中心から移動しておらず、Y軸は中心からの「上」方向の長さです。 150 マイナス 90。
@@ -121,10 +136,8 @@ SVGが左上から座標をプロットする方法を覚えていますか？
 
 ```text
 --- FAIL: TestSecondHandAtMidnight (0.00s)
-# github.com/gypsydave5/learn-go-with-tests/math/v1/clockface_test [github.com/gypsydave5/learn-go-with-tests/math/v1/clockface.test]
 ./clockface_test.go:13:10: undefined: clockface.Point
 ./clockface_test.go:14:9: undefined: clockface.SecondHand
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v1/clockface [build failed]
 ```
 
 だから秒針の先が行くはずの`Point`とそれを取得する関数。
@@ -138,16 +151,16 @@ package clockface
 
 import "time"
 
-// A Point represents a two dimensional Cartesian coordinate
+// A Point represents a two-dimensional Cartesian coordinate
 type Point struct {
-    X float64
-    Y float64
+	X float64
+	Y float64
 }
 
 // SecondHand is the unit vector of the second hand of an analogue clock at time `t`
 // represented as a Point.
 func SecondHand(t time.Time) Point {
-    return Point{}
+	return Point{}
 }
 ```
 
@@ -158,12 +171,12 @@ func SecondHand(t time.Time) Point {
     clockface_test.go:17: Got {0 0}, wanted {150 60}
 FAIL
 exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v1/clockface    0.006s
+FAIL	learn-go-with-tests/math/clockface	0.006s
 ```
 
 ### 成功させるのに十分なコードを書く
 
-予想される失敗が発生したら、`HandsAt`の戻り値を入力できます。
+予想される失敗が発生したら、`SecondHand`の戻り値を入力できます。
 
 ```go
 // SecondHand is the unit vector of the second hand of an analogue clock at time `t`
@@ -175,11 +188,9 @@ func SecondHand(t time.Time) Point {
 
 見てください。テストが成功しました。
 
-Behold, a passing test.
-
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v1/clockface    0.006s
+ok  	    clockface	0.006s
 ```
 
 ### リファクタリング♪
@@ -229,14 +240,13 @@ func TestSecondHandAt30Seconds(t *testing.T) {
 これは「単位円（`unit circle`）」と呼ばれます。半径が1単位だからです。
 
 円の円周は、グリッド上のポイントから作られます。
-より多くの座標。これらの各座標のxおよびyコンポーネントは三角形を形成し、その斜辺は常に1。
-円の半径です
+より多くの座標。これらの各座標のxおよびyコンポーネントは三角形を形成し、その斜辺は常に1（つまり円の半径）です。
 
 ![円周上にポイントが定義されている単位円の画像](../.gitbook/assets/unit_circle_coords.png)
 
 三角測量では、原点との角度がわかっている場合、各三角形のXとYの長さを計算できます。 X座標はcos（a）になり、Y座標はsin（a）になります。ここで、aは線と（positive）x軸とのなす角度です。
 
-![それぞれcos（a）とsin（a）として定義された光線のx要素とy要素を含む単位円の画像。ここで、aはx軸と光線がなす角度](../.gitbook/assets/unit_circle_params.png)
+![それぞれcos（a）とsin（a）として定義された光線のx要素とy要素を含む単位円の画像。ここで、aはx軸と光線がなす角度](<../.gitbook/assets/unit_circle_params (1).png>)
 
 （これを信じない場合は、[ウィキペディアを見て...](https://en.wikipedia.org/wiki/Sine#Unit_circle_definition)）
 
@@ -253,7 +263,7 @@ func TestSecondHandAt30Seconds(t *testing.T) {
 
 > Cosは、ラジアン引数xの余弦を返します。
 
-角度をラジアンにする必要があります。では、ラジアンとは何ですか？円の完全な回転を360度で構成するのではなく、完全な回転を2πラジアンとして定義します。これを実行する理由はありません。
+角度をラジアンにする必要があります。では、ラジアンとは何ですか？円の完全な回転を360度で構成するのではなく、完全な回転を2πラジアンとして定義します。こうするのには十分な理由がありますが、ここでは立ち入りません。
 
 読んだり、学習したり、考えたりしたので、次のテストを書くことができます。
 
@@ -262,10 +272,13 @@ func TestSecondHandAt30Seconds(t *testing.T) {
 このすべての数学は困難で混乱を招きます。私は何が起こっているのか理解していると確信していません。
 それではテストを書きましょう！問題全体を一度に解決する必要はありません。特定の時間の秒針について、ラジアン単位で正しい角度を計算することから始めましょう。
 
-私はこれらのテストを`clockface`パッケージ内で記述します。それらがエクスポートされることはなく、何が起こっているのかをしっかり把握すると、または移動されて削除される可能性があります。
+これらのテストに取り組んでいる間は、取り組んでいた受け入れテストを _コメントアウト_ します。これを成功させている間、そのテストに気を取られたくありません。
 
-また、これらのテストに取り組んでいる間に取り組んでいた受け入れテストをコメントアウトします
-。これに合格している間、そのテストに気を取られたくありません。
+### パッケージのおさらい
+
+現時点では、受け入れテストは`clockface_test`パッケージにあります。テストは`clockface`パッケージの外にあっても構いません。名前が`_test.go`で終わっていれば実行できます。
+
+これらのラジアンのテストは`clockface`パッケージ _内_ で記述します。それらがエクスポートされることはないかもしれませんし、何が起こっているのかをしっかり把握したら削除される（または移動される）かもしれません。受け入れテストのファイル名を`clockface_acceptance_test.go`に変更し、秒をラジアンでテストするための _新しい_ ファイル`clockface_test`を作成できるようにします。
 
 ```go
 package clockface
@@ -292,9 +305,7 @@ func TestSecondsInRadians(t *testing.T) {
 ### テストを実行してみてください
 
 ```text
-# github.com/gypsydave5/learn-go-with-tests/math/v2/clockface [github.com/gypsydave5/learn-go-with-tests/math/v2/clockface.test]
 ./clockface_test.go:12:9: undefined: secondsInRadians
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v2/clockface [build failed]
 ```
 
 ### テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
@@ -306,11 +317,7 @@ func secondsInRadians(t time.Time) float64 {
 ```
 
 ```text
---- FAIL: TestSecondsInRadians (0.00s)
-    clockface_test.go:15: Wanted 3.141592653589793 radians, but got 0
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v2/clockface    0.007s
+clockface_test.go:15: Wanted 3.141592653589793 radians, but got 0
 ```
 
 ### 成功させるのに十分なコードを書く
@@ -323,7 +330,7 @@ func secondsInRadians(t time.Time) float64 {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v2/clockface    0.011s
+ok  	clockface	0.011s
 ```
 
 ### リファクタリング♪
@@ -358,7 +365,7 @@ func TestSecondsInRadians(t *testing.T) {
 }
 ```
 
-いくつかのヘルパー関数を追加して、このテーブルベースのテストの作成を少し面倒にしました。 `testName`は時刻をデジタル時計形式（HH：MM：SS）に変換し、`simpleTime`は実際に気にする部分のみを使用して`time.Time`を構築します（再び、時間、分、秒）。
+いくつかのヘルパー関数を追加して、このテーブルベースのテストの作成を少し面倒にしました。 `testName`は時刻をデジタル時計形式（HH：MM：SS）に変換し、`simpleTime`は実際に気にする部分のみを使用して`time.Time`を構築します（再び、時間、分、秒）。これがそのコードです。
 
 ```go
 func simpleTime(hours, minutes, seconds int) time.Time {
@@ -375,16 +382,9 @@ func testName(t time.Time) string {
 これにより、優れたテスト出力が得られます。
 
 ```text
---- FAIL: TestSecondsInRadians (0.00s)
-    --- FAIL: TestSecondsInRadians/00:00:00 (0.00s)
-        clockface_test.go:24: Wanted 0 radians, but got 3.141592653589793
-    --- FAIL: TestSecondsInRadians/00:00:45 (0.00s)
-        clockface_test.go:24: Wanted 4.71238898038469 radians, but got 3.141592653589793
-    --- FAIL: TestSecondsInRadians/00:00:07 (0.00s)
-        clockface_test.go:24: Wanted 0.7330382858376184 radians, but got 3.141592653589793
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v3/clockface    0.007s
+clockface_test.go:24: Wanted 0 radians, but got 3.141592653589793
+
+clockface_test.go:24: Wanted 4.71238898038469 radians, but got 3.141592653589793
 ```
 
 上で話していた数学のすべてを実装するお時間です。
@@ -398,12 +398,7 @@ func secondsInRadians(t time.Time) float64 {
 1秒は（2π/60）ラジアンです... 2をキャンセルすると、π/30ラジアンになります。これに秒数（ `float64`として）を掛けると、すべてのテストに合格するはずです...
 
 ```text
---- FAIL: TestSecondsInRadians (0.00s)
-    --- FAIL: TestSecondsInRadians/00:00:30 (0.00s)
-        clockface_test.go:24: Wanted 3.141592653589793 radians, but got 3.1415926535897936
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v3/clockface    0.006s
+clockface_test.go:24: Wanted 3.141592653589793 radians, but got 3.1415926535897936
 ```
 
 待って、なになに？
@@ -416,7 +411,7 @@ FAIL    github.com/gypsydave5/learn-go-with-tests/math/v3/clockface    0.006s
 
 これを回避するには2つの方法があります。
 
-1. それに活かす
+1. それを受け入れる
 2. 方程式をリファクタリングして関数をリファクタリングする
 
 （1）はそれほど魅力的ではないように思われるかもしれませんが、浮動小数点の等価性を機能させる唯一の方法であることがよくあります。時計の文字盤を描画するために、ごくわずかな分数で不正確であることは率直に言って問題にならないので、角度に対して「十分に近い」等式を定義する関数を書くことができます。
@@ -437,7 +432,7 @@ numberOfSeconds * π / 30
 
 これは同等です。
 
-In Go:
+Goでは次のようになります。
 
 ```go
 func secondsInRadians(t time.Time) float64 {
@@ -449,7 +444,64 @@ func secondsInRadians(t time.Time) float64 {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v2/clockface     0.005s
+ok      clockface     0.005s
+```
+
+すべて[このようになっている](https://github.com/quii/learn-go-with-tests/tree/main/math/v3/clockface)はずです。
+
+### ゼロ除算についての注意
+
+コンピューターは、無限大が少し奇妙なものであるため、ゼロで割ることを好まないことがよくあります。
+
+Goでは、明示的にゼロで割ろうとするとコンパイルエラーになります。
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	fmt.Println(10.0 / 0.0) // fails to compile
+}
+```
+
+もちろん、私たちの`t.Second()`のように、ゼロで割ることになるかどうかをコンパイラーが常に予測できるわけではありません。
+
+これを試してみてください。
+
+```go
+func main() {
+	fmt.Println(10.0 / zero())
+}
+
+func zero() float64 {
+	return 0.0
+}
+```
+
+これは`+Inf`（無限大）を出力します。+Infで割るとゼロになるようです。次のコードで確認できます。
+
+```go
+package main
+
+import (
+	"fmt"
+	"math"
+)
+
+func main() {
+	fmt.Println(secondsinradians())
+}
+
+func zero() float64 {
+	return 0.0
+}
+
+func secondsinradians() float64 {
+	return (math.Pi / (30 / (float64(zero()))))
+}
 ```
 
 ### 新しい要件について繰り返します
@@ -462,31 +514,29 @@ ok      github.com/gypsydave5/learn-go-with-tests/math/v2/clockface     0.005s
 ### 最初にテストを書く
 
 ```go
-func TestSecondHandVector(t *testing.T) {
-    cases := []struct {
-        time  time.Time
-        point Point
-    }{
-        {simpleTime(0, 0, 30), Point{0, -1}},
-    }
+func TestSecondHandPoint(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		point Point
+	}{
+		{simpleTime(0, 0, 30), Point{0, -1}},
+	}
 
-    for _, c := range cases {
-        t.Run(testName(c.time), func(t *testing.T) {
-            got := secondHandPoint(c.time)
-            if got != c.point {
-                t.Fatalf("Wanted %v Point, but got %v", c.point, got)
-            }
-        })
-    }
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := secondHandPoint(c.time)
+			if got != c.point {
+				t.Fatalf("Wanted %v Point, but got %v", c.point, got)
+			}
+		})
+	}
 }
 ```
 
 ### テストを実行してみてください
 
 ```text
-# github.com/gypsydave5/learn-go-with-tests/math/v4/clockface [github.com/gypsydave5/learn-go-with-tests/math/v4/clockface.test]
 ./clockface_test.go:40:11: undefined: secondHandPoint
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v4/clockface [build failed]
 ```
 
 ### テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
@@ -498,12 +548,7 @@ func secondHandPoint(t time.Time) Point {
 ```
 
 ```text
---- FAIL: TestSecondHandPoint (0.00s)
-    --- FAIL: TestSecondHandPoint/00:00:30 (0.00s)
-        clockface_test.go:42: Wanted {0 -1} Point, but got {0 0}
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v4/clockface    0.010s
+clockface_test.go:42: Wanted {0 -1} Point, but got {0 0}
 ```
 
 ### 成功させるのに十分なコードを書く
@@ -516,7 +561,7 @@ func secondHandPoint(t time.Time) Point {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v4/clockface    0.007s
+ok  	clockface	0.007s
 ```
 
 ### 新しい要件について繰り返します
@@ -545,18 +590,18 @@ func TestSecondHandPoint(t *testing.T) {
 ### テストを実行してみてください
 
 ```text
---- FAIL: TestSecondHandPoint (0.00s)
-    --- FAIL: TestSecondHandPoint/00:00:45 (0.00s)
-        clockface_test.go:43: Wanted {-1 0} Point, but got {0 -1}
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v4/clockface    0.006s
+clockface_test.go:43: Wanted {-1 0} Point, but got {0 -1}
 ```
 
 ### 成功させるのに十分なコードを書く
 
-ユニットサークルの画像を覚えていますか？
-![それぞれcos\(a\)とsin\(a\)として定義された光線のx要素とy要素を持つ単位円の画像。ここで、aはx軸と光線がなす角度](../.gitbook/assets/unit_circle_params%20%281%29.png)
+単位円の画像を覚えていますか？
+
+![それぞれcos\(a\)とsin\(a\)として定義された光線のx要素とy要素を持つ単位円の画像。ここで、aはx軸と光線がなす角度](<../.gitbook/assets/unit_circle_params (1).png>)
+
+また、秒針と3時の間の角度を測るX軸からではなく、Y軸である12時から角度を測りたいことも思い出してください。
+
+![y軸からの角度で定義された単位円光線](../.gitbook/assets/unit_circle_12_oclock.png)
 
 ここで、XとYを生成する方程式が必要です。秒に書きましょう。
 
@@ -573,14 +618,9 @@ func secondHandPoint(t time.Time) Point {
 これなら、いけるでしょうか。
 
 ```text
---- FAIL: TestSecondHandPoint (0.00s)
-    --- FAIL: TestSecondHandPoint/00:00:30 (0.00s)
-        clockface_test.go:43: Wanted {0 -1} Point, but got {1.2246467991473515e-16 -1}
-    --- FAIL: TestSecondHandPoint/00:00:45 (0.00s)
-        clockface_test.go:43: Wanted {-1 0} Point, but got {-1 -1.8369701987210272e-16}
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v4/clockface    0.007s
+clockface_test.go:43: Wanted {0 -1} Point, but got {1.2246467991473515e-16 -1}
+
+clockface_test.go:43: Wanted {-1 0} Point, but got {-1 -1.8369701987210272e-16}
 ```
 
 待って。。もう一度、フロートにもう一度呪われているようです。
@@ -588,7 +628,7 @@ FAIL    github.com/gypsydave5/learn-go-with-tests/math/v4/clockface    0.007s
 したがって、ここでも、精度を上げるか、ほぼ同じであると言って私たちの生活を続けるかを選択できます。
 
 これらの角度の精度を向上させる1つのオプションは、`math/big`パッケージの合理的なタイプ`Rat`を使用することです。
-しかし、目的が月着陸ではなくSVGを描画することであることを考えると、少しぼやけて暮らせると思います。
+しかし、目的が月に着陸することではなくSVGを描画することであることを考えると、少しぼやけていても許容できると思います。
 
 ```go
 func TestSecondHandPoint(t *testing.T) {
@@ -631,12 +671,14 @@ func roughlyEqualPoint(a, b Point) bool {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v4/clockface    0.007s
+ok  	clockface	0.007s
 ```
 
 ### リファクタリング♪
 
 これでもかなり満足しています。
+
+[現在はこのようになっています](https://github.com/quii/learn-go-with-tests/tree/main/math/v4/clockface)。
 
 ### 新しい要件について繰り返します
 
@@ -659,25 +701,16 @@ func TestSecondHandAt30Seconds(t *testing.T) {
 ### テストを実行してみてください
 
 ```text
---- FAIL: TestSecondHandAt30Seconds (0.00s)
-    clockface_acceptance_test.go:28: Got {150 60}, wanted {150 240}
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v5/clockface    0.007s
+clockface_acceptance_test.go:28: Got {150 60}, wanted {150 240}
 ```
 
 ### 成功させるのに十分なコードを書く
 
 単位ベクトルをSVG上の点に変換するには、3つのことを行う必要があります。
 
-1. 長さに合わせます
-2. SVGに原点があるSVGを考慮するため、X軸上で反転します
-
-   左上隅
-
-3. それを正しい位置に移動します（それが
-
-   （150, 150））
+1. 針の長さに合わせて拡大縮小します
+2. SVGの原点が左上隅にあることを考慮して、X軸で反転します
+3. 正しい位置に平行移動します（原点（150, 150）から伸びるようにします）
 
 楽しい時間ですね！
 
@@ -693,11 +726,11 @@ func SecondHand(t time.Time) Point {
 }
 ```
 
-正確にその順序でスケーリング、反転、変換されます。やったー！
+正確にその順序でスケーリング、反転、平行移動します。数学ばんざい！
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v5/clockface    0.007s
+ok  	clockface	0.007s
 ```
 
 ### リファクタリング♪
@@ -730,38 +763,38 @@ func SecondHand(t time.Time) Point {
 メインの`clockface`パッケージディレクトリの下に、（confusingly）、`clockface`という新しいディレクトリを追加します。そこにSVGをビルドするバイナリを作成する`main`パッケージを置きます。
 
 ```text
-├── clockface
-│   └── main.go
-├── clockface.go
-├── clockface_acceptance_test.go
-└── clockface_test.go
+|-- clockface
+|       |-- main.go
+|-- clockface.go
+|-- clockface_acceptance_test.go
+|-- clockface_test.go
 ```
 
-`main.go`の中
+`main.go`の中では、次のコードから始めますが、clockfaceパッケージのインポートは自分のバージョンを指すように変更してください。
 
 ```go
 package main
 
 import (
-    "fmt"
-    "io"
-    "os"
-    "time"
+	"fmt"
+	"io"
+	"os"
+	"time"
 
-    "github.com/gypsydave5/learn-go-with-tests/math/v6/clockface"
+	"learn-go-with-tests/math/clockface" // REPLACE THIS!
 )
 
 func main() {
-    t := time.Now()
-    sh := clockface.SecondHand(t)
-    io.WriteString(os.Stdout, svgStart)
-    io.WriteString(os.Stdout, bezel)
-    io.WriteString(os.Stdout, secondHandTag(sh))
-    io.WriteString(os.Stdout, svgEnd)
+	t := time.Now()
+	sh := clockface.SecondHand(t)
+	io.WriteString(os.Stdout, svgStart)
+	io.WriteString(os.Stdout, bezel)
+	io.WriteString(os.Stdout, secondHandTag(sh))
+	io.WriteString(os.Stdout, svgEnd)
 }
 
 func secondHandTag(p clockface.Point) string {
-    return fmt.Sprintf(`<line x1="150" y1="150" x2="%f" y2="%f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
+	return fmt.Sprintf(`<line x1="150" y1="150" x2="%f" y2="%f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
 }
 
 const svgStart = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -794,7 +827,9 @@ go build
 
 私たちは次のようなものを見るはずです
 
-![秒針のみの時計](../.gitbook/assets/clock%20%281%29.svg)
+![秒針のみの時計](../.gitbook/assets/clock.svg)
+
+そして、これが[コードの様子](https://github.com/quii/learn-go-with-tests/tree/main/math/v6/clockface)です。
 
 ### リファクタリング♪
 
@@ -832,19 +867,19 @@ func TestSVGWriterAtMidnight(t *testing.T) {
 
 有効なSVGを生成しなかった場合でも（パスが出力に文字列が表示されることをテストするだけなので）成功するだけでなく、その文字列に最小の重要でない変更を加えた場合も失敗します。たとえば、属性の間にスペースを追加します。
 
-最大のにおいは、実際には、データ構造（XML）を一連の文字としての（文字列としての）表示でテストすることです。これは _never_ 、 _ever_ です。これは、上で概説したのと同じような問題を引き起こすためです。脆弱すぎて感度が不十分なテストです。間違ったことをテストするテスト！
+_最大の_ においは、データ構造（XML）を一連の文字としての（文字列としての）表示でテストしていることです。これは _never_ 、 _ever_ です。これは、上で概説したのと同じような問題を引き起こすためです。脆弱すぎて感度が不十分なテストです。間違ったことをテストするテスト！
 
 したがって、唯一の解決策は、出力をXMLとしてテストすることです。そのためには、それを解析する必要があります。
 
 ## XMLの解析
 
-[`encoding/xml`](https://godoc.org/encoding/xml)は、シンプルなXML解析で行うすべてのことを処理できるGoパッケージです。
+[`encoding/xml`](https://pkg.go.dev/encoding/xml)は、シンプルなXML解析で行うすべてのことを処理できるGoパッケージです。
 
-関数[`xml.Unmarshall`](https://godoc.org/encoding/xml#Unmarshal)は、XMLデータの`[]byte`と、非整列化する構造体へのポインターを受け取ります。
+関数[`xml.Unmarshal`](https://pkg.go.dev/encoding/xml#Unmarshal)は、XMLデータの`[]byte`と、非整列化する構造体へのポインターを受け取ります。
 
 したがって、XMLを非整列化するための構造体が必要になります。
-すべてのノードと属性の正しい名前と正しい構造の書き方を検討するのに少し時間を費やすことができましたが、幸い、誰かが[`zek`](https://github.com/miku/zek)そのハードワークのすべてを自動化するプログラム。
-さらに良いことに、[https://www.onlinetool.io/xmltogo/](https://www.onlinetool.io/xmltogo/)にオンラインバージョンがあります。ファイルの上部から1つのボックスにSVGを貼り付けるだけです。
+すべてのノードと属性の正しい名前と正しい構造の書き方を検討するのに少し時間を費やすこともできますが、幸い、誰かがそのハードワークのすべてを自動化してくれるプログラム[`zek`](https://github.com/miku/zek)を書いてくれています。
+さらに良いことに、[https://xml-to-go.github.io/](https://xml-to-go.github.io/)にオンラインバージョンがあります。ファイルの上部にあるSVGを1つのボックスに貼り付けるだけです。
 
 * 飛び出します
 
@@ -875,7 +910,7 @@ type Svg struct {
 }
 ```
 
-（構造体の名前を`SVG`に変更するなど）必要がある場合は、これを調整できますが、最初から十分です。
+（構造体の名前を`SVG`に変更するなど）必要がある場合は、これを調整できますが、最初から十分です。この構造体を`clockface_acceptance_test`ファイルに貼り付けて、これを使ったテストを書いてみましょう。
 
 ```go
 func TestSVGWriterAtMidnight(t *testing.T) {
@@ -900,16 +935,14 @@ func TestSVGWriterAtMidnight(t *testing.T) {
 }
 ```
 
-`clockface.SVGWriter`の出力を`bytes.Buffer`に書き込み、次に`Unmarshall`を`Svg`に書き込みます。次に、`Svg`内の各`Line`を見て、それらのいずれかが期待される`X2`および`Y2`値を持っているかどうかを確認します。
+`clockface.SVGWriter`の出力を`bytes.Buffer`に書き込み、次にそれを`Svg`に`Unmarshal`します。次に、`Svg`内の各`Line`を見て、それらのいずれかが期待される`X2`および`Y2`値を持っているかどうかを確認します。
 一致した場合、早期に（テストに合格）します。そうでない場合、（うまくいけば）情報メッセージで失敗します。
 
-```bash
-# github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface_test [github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface.test]
+```sh
 ./clockface_acceptance_test.go:41:2: undefined: clockface.SVGWriter
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface [build failed]
 ```
 
-その`SVGWriter`を書くほうがいいようです...
+`SVGWriter.go`を作成したほうがよさそうです...
 
 ```go
 package clockface
@@ -958,17 +991,13 @@ const svgEnd = `</svg>`
 最も美しいSVGの書き方ですか？いいえ。でもうまくいけば、うまくいきます...
 
 ```text
---- FAIL: TestSVGWriterAtMidnight (0.00s)
-    clockface_acceptance_test.go:56: Expected to find the second hand with x2 of 150 and y2 of 60, in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-        <svg xmlns="http://www.w3.org/2000/svg"
-             width="100%"
-             height="100%"
-             viewBox="0 0 300 300"
-             version="2.0"><circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/><line x1="150" y1="150" x2="150.000000" y2="60.000000" style="fill:none;stroke:#f00;stroke-width:3px;"/></svg>
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface    0.008s
+clockface_acceptance_test.go:56: Expected to find the second hand with x2 of 150 and y2 of 60, in the SVG output <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="100%"
+         height="100%"
+         viewBox="0 0 300 300"
+         version="2.0"><circle cx="150" cy="150" r="100" style="fill:#fff;stroke:#000;stroke-width:5px;"/><line x1="150" y1="150" x2="150.000000" y2="60.000000" style="fill:none;stroke:#f00;stroke-width:3px;"/></svg>
 ```
 
 おっと！
@@ -976,7 +1005,7 @@ FAIL    github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface    0.008s
 `％f`フォーマットディレクティブは、座標をデフォルトの精度レベル（小数点以下6桁）に出力します。座標に期待する精度のレベルを明示する必要があります。小数点第3位としましょう。
 
 ```go
-s := fmt.Sprintf(`<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
+	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
 ```
 
 テストでの期待を更新した後
@@ -990,7 +1019,7 @@ s := fmt.Sprintf(`<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;s
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface    0.006s
+ok  	clockface	0.006s
 ```
 
 `main`関数を短くすることができます。
@@ -999,35 +1028,29 @@ ok      github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface    0.006s
 package main
 
 import (
-    "os"
-    "time"
+	"os"
+	"time"
 
-    "github.com/gypsydave5/learn-go-with-tests/math/v7b/clockface"
+	"learn-go-with-tests/math/clockface"
 )
 
 func main() {
-    t := time.Now()
-    clockface.SVGWriter(os.Stdout, t)
+	t := time.Now()
+	clockface.SVGWriter(os.Stdout, t)
 }
 ```
 
-そして、同じパターンに従って別の時間のテストを書くことができますが、前にはできません...
+[現在はこのようになっている](https://github.com/quii/learn-go-with-tests/tree/main/math/v7b/clockface)はずです。
+
+そして、同じパターンに従って別の時間のテストを書くことができますが、その前に...
 
 ### リファクタリング♪
 
 3つのことが突き出ています。
 
-1. 確認する必要があるすべての情報を実際にテストしているわけではありません。
-
-   現在-たとえば、`x1`値はどうですか？
-
-2. また、`x1`などの属性は実際には「文字列」ではないのですか？彼らは
-
-   数字！
-
-3. 私は本当に手の「スタイル」を気にしますか？または、そのことについては、
-
-   `zak`によって生成された空の`Text`ノード？
+1. 存在を確認する必要がある情報のすべてを実際にテストしているわけではありません。たとえば、`x1`の値はどうでしょうか？
+2. また、`x1`などの属性は実際には`strings`ではありませんよね？数値です！
+3. 針の`style`を本当に気にしていますか？あるいは、`zak`によって生成された空の`Text`ノードはどうでしょうか？
 
 私たちはもっとうまくやることができます。
 すべてをシャープにするために、`Svg`構造体とテストにいくつかの調整を加えましょう。
@@ -1060,13 +1083,11 @@ type Line struct {
 
 ここで私は
 
-* 名前付き型構造体の重要な部分 -- `Line` と
-
-  `Circle`
+* 構造体の重要な部分を名前付きの型にしました -- `Line` と `Circle`
 
 * 数値属性を`string`ではなく`float64`に変更しました。
 * `Style`や` Text`などの未使用の属性を削除
-* `Svg`は`SVG`に名前が変更されました。
+* `Svg`を`SVG`に名前を変更しました。 _それが正しいことだからです_ 。
 
 これにより、探している行でより正確に評価できます。
 
@@ -1093,83 +1114,97 @@ func TestSVGWriterAtMidnight(t *testing.T) {
 }
 ```
 
-最後に、単体テストのテーブルから葉を取り除き、ヘルパー関数`containsLine(line Line, lines []Line) bool`を記述して、これらのテストを本当に輝かせることができます。
+最後に、単体テストのテーブルを参考にして、ヘルパー関数`containsLine(line Line, lines []Line) bool`を記述して、これらのテストを本当に輝かせることができます。`simpleTime`と`testName`も再び使いますが、このファイル（`clockface_acceptance_test.go`）は`package clockface_test`にあり、それらを最初に書いた`clockface_test.go`ファイル（`package clockface`）とは別のパッケージです。これらはエクスポートされていないため、宣言されたパッケージの外からは見えません。そのため、ここに独自のコピーが必要です。
 
 ```go
 func TestSVGWriterSecondHand(t *testing.T) {
-    cases := []struct {
-        time time.Time
-        line Line
-    }{
-        {
-            simpleTime(0, 0, 0),
-            Line{150, 150, 150, 60},
-        },
-        {
-            simpleTime(0, 0, 30),
-            Line{150, 150, 150, 240},
-        },
-    }
+	cases := []struct {
+		time time.Time
+		line Line
+	}{
+		{
+			simpleTime(0, 0, 0),
+			Line{150, 150, 150, 60},
+		},
+		{
+			simpleTime(0, 0, 30),
+			Line{150, 150, 150, 240},
+		},
+	}
 
-    for _, c := range cases {
-        t.Run(testName(c.time), func(t *testing.T) {
-            b := bytes.Buffer{}
-            clockface.SVGWriter(&b, c.time)
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			b := bytes.Buffer{}
+			clockface.SVGWriter(&b, c.time)
 
-            svg := SVG{}
-            xml.Unmarshal(b.Bytes(), &svg)
+			svg := SVG{}
+			xml.Unmarshal(b.Bytes(), &svg)
 
-            if !containsLine(c.line, svg.Line) {
-                t.Errorf("Expected to find the second hand line %+v, in the SVG lines %+v", c.line, svg.Line)
-            }
-        })
-    }
+			if !containsLine(c.line, svg.Line) {
+				t.Errorf("Expected to find the second hand line %+v, in the SVG lines %+v", c.line, svg.Line)
+			}
+		})
+	}
+}
+
+func containsLine(l Line, ls []Line) bool {
+	for _, line := range ls {
+		if line == l {
+			return true
+		}
+	}
+	return false
+}
+
+func simpleTime(hours, minutes, seconds int) time.Time {
+	return time.Date(312, time.October, 28, hours, minutes, seconds, 0, time.UTC)
+}
+
+func testName(t time.Time) string {
+	return t.Format("15:04:05")
 }
 ```
 
-さて、これが私が受け入れるテストです。
+[このようになります](https://github.com/quii/learn-go-with-tests/tree/main/math/v7c/clockface)。
+
+さて、 _これこそ_ 私が受け入れテストと呼ぶものです！
 
 ### 最初にテストを書く
 
 これが秒針です。それでは分針から始めましょう。
 
 ```go
-func TestSVGWriterMinutedHand(t *testing.T) {
-    cases := []struct {
-        time time.Time
-        line Line
-    }{
-        {
-            simpleTime(0, 0, 0),
-            Line{150, 150, 150, 70},
-        },
-    }
+func TestSVGWriterMinuteHand(t *testing.T) {
+	cases := []struct {
+		time time.Time
+		line Line
+	}{
+		{
+			simpleTime(0, 0, 0),
+			Line{150, 150, 150, 70},
+		},
+	}
 
-    for _, c := range cases {
-        t.Run(testName(c.time), func(t *testing.T) {
-            b := bytes.Buffer{}
-            clockface.SVGWriter(&b, c.time)
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			b := bytes.Buffer{}
+			clockface.SVGWriter(&b, c.time)
 
-            svg := SVG{}
-            xml.Unmarshal(b.Bytes(), &svg)
+			svg := SVG{}
+			xml.Unmarshal(b.Bytes(), &svg)
 
-            if !containsLine(c.line, svg.Line) {
-                t.Errorf("Expected to find the minute hand line %+v, in the SVG lines %+v", c.line, svg.Line)
-            }
-        })
-    }
+			if !containsLine(c.line, svg.Line) {
+				t.Errorf("Expected to find the minute hand line %+v, in the SVG lines %+v", c.line, svg.Line)
+			}
+		})
+	}
 }
 ```
 
 ### テストを実行してみてください
 
 ```text
---- FAIL: TestSVGWriterMinutedHand (0.00s)
-    --- FAIL: TestSVGWriterMinutedHand/00:00:00 (0.00s)
-        clockface_acceptance_test.go:87: Expected to find the minute hand line {X1:150 Y1:150 X2:150 Y2:70}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60}]
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v8/clockface    0.007s
+clockface_acceptance_test.go:87: Expected to find the minute hand line {X1:150 Y1:150 X2:150 Y2:70}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60}]
 ```
 
 他の時計針の作成を開始した方がよいでしょう。
@@ -1198,9 +1233,7 @@ func TestMinutesInRadians(t *testing.T) {
 ### テストを実行してみてください
 
 ```text
-# github.com/gypsydave5/learn-go-with-tests/math/v8/clockface [github.com/gypsydave5/learn-go-with-tests/math/v8/clockface.test]
 ./clockface_test.go:59:11: undefined: minutesInRadians
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v8/clockface [build failed]
 ```
 
 ### テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
@@ -1251,13 +1284,8 @@ func TestMinutesInRadians(t *testing.T) {
 
 ### テストを実行してみてください
 
-```go
---- FAIL: TestMinutesInRadians (0.00s)
-    --- FAIL: TestMinutesInRadians/00:00:07 (0.00s)
-        clockface_test.go:62: Wanted 0.012217304763960306 radians, but got 3.141592653589793
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v8/clockface    0.009s
+```
+clockface_test.go:62: Wanted 0.012217304763960306 radians, but got 3.141592653589793
 ```
 
 ### 成功させるのに十分なコードを書く
@@ -1286,18 +1314,18 @@ math.Pi / (30 / float64(t.Minute()))
 
 そして...
 
-```go
+```
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v8/clockface    0.007s
+ok  	clockface	0.007s
 ```
 
-簡単です。
+簡単です。[現在はこのようになっています](https://github.com/quii/learn-go-with-tests/tree/main/math/v8/clockface/clockface_acceptance_test.go)。
 
 ### 新しい要件について繰り返します
 
 `minutesInRadians`テストにさらにケースを追加する必要がありますか？現時点では2つしかありません。`minuteHandPoint`関数のテストに進む前に、いくつのケースが必要ですか？
 
-私のお気に入りのTDD引用の1つは、しばしばケントベックに起因するとされています。
+私のお気に入りのTDDの引用の1つは、しばしばケント・ベックの言葉とされている次のものです。
 
 > 恐怖が退屈に変わるまでテストを書いてください。
 
@@ -1328,9 +1356,7 @@ func TestMinuteHandPoint(t *testing.T) {
 ### テストを実行してみてください
 
 ```text
-# github.com/gypsydave5/learn-go-with-tests/math/v9/clockface [github.com/gypsydave5/learn-go-with-tests/math/v9/clockface.test]
 ./clockface_test.go:79:11: undefined: minuteHandPoint
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v9/clockface [build failed]
 ```
 
 ### テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
@@ -1342,12 +1368,7 @@ func minuteHandPoint(t time.Time) Point {
 ```
 
 ```text
---- FAIL: TestMinuteHandPoint (0.00s)
-    --- FAIL: TestMinuteHandPoint/00:30:00 (0.00s)
-        clockface_test.go:80: Wanted {0 -1} Point, but got {0 0}
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v9/clockface    0.007s
+clockface_test.go:80: Wanted {0 -1} Point, but got {0 0}
 ```
 
 ### 成功させるのに十分なコードを書く
@@ -1360,7 +1381,7 @@ func minuteHandPoint(t time.Time) Point {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v9/clockface    0.007s
+ok  	clockface	0.007s
 ```
 
 ### 新しい要件について繰り返します
@@ -1389,12 +1410,7 @@ func TestMinuteHandPoint(t *testing.T) {
 ```
 
 ```text
---- FAIL: TestMinuteHandPoint (0.00s)
-    --- FAIL: TestMinuteHandPoint/00:45:00 (0.00s)
-        clockface_test.go:81: Wanted {-1 0} Point, but got {0 -1}
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v9/clockface    0.007s
+clockface_test.go:81: Wanted {-1 0} Point, but got {0 -1}
 ```
 
 ### 成功させるのに十分なコードを書く
@@ -1413,7 +1429,7 @@ func minuteHandPoint(t time.Time) Point {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v9/clockface    0.009s
+ok  	clockface	0.009s
 ```
 
 ### リファクタリング♪
@@ -1445,35 +1461,51 @@ func secondHandPoint(t time.Time) Point {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v9/clockface    0.007s
+ok  	clockface	0.007s
 ```
 
 これで、受け入れテストのコメントを外して、分針を描き始めることができます。
 
 ### 成功させるのに十分なコードを書く
 
-いくつかの小さな調整を含む別のクイックコピーアンドペースト
+`minuteHand`関数は、`minuteHandLength`を宣言するなどの小さな調整を加えた`secondHand`のコピー＆ペーストです。
 
 ```go
+const minuteHandLength = 80
+
+//...
+
 func minuteHand(w io.Writer, t time.Time) {
-    p := minuteHandPoint(t)
-    p = Point{p.X * minuteHandLength, p.Y * minuteHandLength}
-    p = Point{p.X, -p.Y}
-    p = Point{p.X + clockCentreX, p.Y + clockCentreY}
-    fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#000;stroke-width:3px;"/>`, p.X, p.Y)
+	p := minuteHandPoint(t)
+	p = Point{p.X * minuteHandLength, p.Y * minuteHandLength}
+	p = Point{p.X, -p.Y}
+	p = Point{p.X + clockCentreX, p.Y + clockCentreY}
+	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#000;stroke-width:3px;"/>`, p.X, p.Y)
 }
 ```
 
-```text
-PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v9/clockface    0.006s
+そして、`SVGWriter`関数の中でそれを呼び出します。
+
+```go
+func SVGWriter(w io.Writer, t time.Time) {
+	io.WriteString(w, svgStart)
+	io.WriteString(w, bezel)
+	secondHand(w, t)
+	minuteHand(w, t)
+	io.WriteString(w, svgEnd)
+}
 ```
 
-But the proof of the pudding is in the eating.
+これで`TestSVGWriterMinuteHand`が成功するはずです。
 
-ここで`clockface`プログラムをコンパイルして実行すると、以下のようなものが表示されるはずです。
+```text
+PASS
+ok  	clockface	0.006s
+```
 
-![秒針と分針のある時計](../.gitbook/assets/clock%20%282%29.svg)
+しかし、論より証拠です。ここで`clockface`プログラムをコンパイルして実行すると、以下のようなものが表示されるはずです。
+
+![秒針と分針のある時計](<../.gitbook/assets/clock (1).svg>)
 
 ### リファクタリング♪
 
@@ -1499,10 +1531,12 @@ func makeHand(p Point, length float64) Point {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v9/clockface    0.007s
+ok  	clockface	0.007s
 ```
 
-そこに...今では時間針だけです！
+[現在はここまで来ています](https://github.com/quii/learn-go-with-tests/tree/main/math/v9/clockface)。
+
+さあ...あとは時針だけです！
 
 ### 最初にテストを書く
 
@@ -1537,12 +1571,7 @@ func TestSVGWriterHourHand(t *testing.T) {
 ### テストを実行してみてください
 
 ```text
---- FAIL: TestSVGWriterHourHand (0.00s)
-    --- FAIL: TestSVGWriterHourHand/06:00:00 (0.00s)
-        clockface_acceptance_test.go:113: Expected to find the hour hand line {X1:150 Y1:150 X2:150 Y2:200}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v10/clockface    0.013s
+clockface_acceptance_test.go:113: Expected to find the hour hand line {X1:150 Y1:150 X2:150 Y2:200}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
 ```
 
 繰り返しますが、下位レベルのテストでいくつかのカバレッジが得られるまで、これをコメントアウトしてみましょう。
@@ -1572,9 +1601,7 @@ func TestHoursInRadians(t *testing.T) {
 ### テストを実行してみてください
 
 ```text
-# github.com/gypsydave5/learn-go-with-tests/math/v10/clockface [github.com/gypsydave5/learn-go-with-tests/math/v10/clockface.test]
 ./clockface_test.go:97:11: undefined: hoursInRadians
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v10/clockface [build failed]
 ```
 
 ### テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
@@ -1587,7 +1614,7 @@ func hoursInRadians(t time.Time) float64 {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v10/clockface    0.007s
+ok  	clockface	0.007s
 ```
 
 ### 新しい要件について繰り返します
@@ -1616,12 +1643,7 @@ func TestHoursInRadians(t *testing.T) {
 ### テストを実行してみてください
 
 ```text
---- FAIL: TestHoursInRadians (0.00s)
-    --- FAIL: TestHoursInRadians/00:00:00 (0.00s)
-        clockface_test.go:100: Wanted 0 radians, but got 3.141592653589793
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v10/clockface    0.007s
+clockface_test.go:100: Wanted 0 radians, but got 3.141592653589793
 ```
 
 ### 成功させるのに十分なコードを書く
@@ -1659,12 +1681,7 @@ func TestHoursInRadians(t *testing.T) {
 ### テストを実行してみてください
 
 ```text
---- FAIL: TestHoursInRadians (0.00s)
-    --- FAIL: TestHoursInRadians/21:00:00 (0.00s)
-        clockface_test.go:101: Wanted 4.71238898038469 radians, but got 10.995574287564276
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v10/clockface    0.014s
+clockface_test.go:101: Wanted 4.71238898038469 radians, but got 10.995574287564276
 ```
 
 ### 成功させるのに十分なコードを書く
@@ -1679,7 +1696,7 @@ func hoursInRadians(t time.Time) float64 {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v10/clockface    0.008s
+ok  	learn-go-with-tests/math/clockface	0.008s
 ```
 
 ### 最初にテストを書く
@@ -1712,12 +1729,7 @@ func TestHoursInRadians(t *testing.T) {
 ### テストを実行してみてください
 
 ```text
---- FAIL: TestHoursInRadians (0.00s)
-    --- FAIL: TestHoursInRadians/00:01:30 (0.00s)
-        clockface_test.go:102: Wanted 0.013089969389957472 radians, but got 0
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v10/clockface    0.007s
+clockface_test.go:102: Wanted 0.013089969389957472 radians, but got 0
 ```
 
 ### 成功させるのに十分なコードを書く
@@ -1736,15 +1748,10 @@ func hoursInRadians(t time.Time) float64 {
 見よ
 
 ```text
---- FAIL: TestHoursInRadians (0.00s)
-    --- FAIL: TestHoursInRadians/00:01:30 (0.00s)
-        clockface_test.go:104: Wanted 0.013089969389957472 radians, but got 0.01308996938995747
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v10/clockface    0.007s
+clockface_test.go:104: Wanted 0.013089969389957472 radians, but got 0.01308996938995747
 ```
 
-AAAAARGH BLOODY FLOATING POINT ARITHMETIC!
+浮動小数点演算がまたやってくれました。
 
 角度の比較に`roughlyEqualFloat64`を使用するようにテストを更新してみましょう。
 
@@ -1773,12 +1780,12 @@ func TestHoursInRadians(t *testing.T) {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v10/clockface    0.007s
+ok  	clockface	0.007s
 ```
 
 ### リファクタリング♪
 
-ラジアンテストの _one_ で`roughlyEqualFloat64`を使用する場合、それらの _all_ に使用する必要があります。それは素晴らしくて単純なリファクタリングです。
+ラジアンテストの _one_ で`roughlyEqualFloat64`を使用する場合、それらの _all_ に使用する必要があります。それは素晴らしくて単純なリファクタリングで、[このような状態](https://github.com/quii/learn-go-with-tests/tree/main/math/v10/clockface)になります。
 
 ## 時針
 
@@ -1807,29 +1814,26 @@ func TestHourHandPoint(t *testing.T) {
 }
 ```
 
-待って、私は _two_ テストケースを _at once_ に投げますか？これは _悪いTDD_ ではありませんか？
+待って、私は _2つ_ のテストケースを _一度に_ 書くのですか？これは _悪いTDD_ ではありませんか？
 
 ### TDD熱狂について
 
-テスト駆動開発は宗教ではありません。一部の人々はそのように振る舞う可能性があります。
-通常、TDDを行わないが、TwitterまたはDev.toでうめき声を上げて喜んでいる人々は、熱心さによってのみ行われ、テストを書かないときは「実用的」であると言います。しかしそれは宗教ではありません。それはツールです。
+テスト駆動開発は宗教ではありません。一部の人々はそのように振る舞うかもしれません。
+たいていは、TDDを実践していないのに、TDDは熱狂者だけがやるものだ、自分たちがテストを書かないのは「実用的」だからだ、とTwitterやDev.toで喜んで不満を言う人々です。しかしそれは宗教ではありません。それはツールです。
 
-私は2つのテストが何であるかを知っています。他の2つの時計の針をまったく同じ方法でテストしました。私の実装が何であるかはすでに知っています。
-角度を変更する一般的なケースの関数を書きました分針反復のポイント。
+私は2つのテストがどうなるかを _知っています_ 。他の2つの時計の針をまったく同じ方法でテストしました。そして、実装がどうなるかもすでに知っています。分針のイテレーションで、角度を点に変換する一般的なケースの関数を書いたからです。
 
-そのためにTDDセレモニーを行うつもりはありません。テストは、より優れたコードを作成するためのツールです。 TDDは、より優れたコードを作成するためのテクニックです。テストもTDDもそれ自体が目的ではありません。
+形式のためだけにTDDの儀式をこなすつもりはありません。TDDは、自分が書いているコード、そしてこれから書こうとしているコードをよりよく理解するのに役立つテクニックです。TDDはフィードバック、知識、洞察を与えてくれます。しかし、すでにその知識を持っているのであれば、理由もなく儀式をこなすつもりはありません。テストもTDDもそれ自体が目的ではありません。
 
 自信がついたので、大きく前進できると思います。私はいくつかのステップを「スキップ」します。なぜなら、自分がどこにいるのか、どこに行くのか、そして以前にこの道を歩いたことがあるからです。
 
 しかし、また注意してください。
-私はテストを完全に書くことをスキップしていません。
+私はテストを書くことを完全にスキップしているわけではありません。今でもテストを最初に書いています。ただ、より粒度の粗い単位で登場しているだけです。
 
 ### テストを実行してみてください
 
 ```text
-# github.com/gypsydave5/learn-go-with-tests/math/v11/clockface [github.com/gypsydave5/learn-go-with-tests/math/v11/clockface.test]
 ./clockface_test.go:119:11: undefined: hourHandPoint
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v11/clockface [build failed]
 ```
 
 ### 成功させるのに十分なコードを書く
@@ -1845,7 +1849,7 @@ func hourHandPoint(t time.Time) Point {
 
 ```text
 PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v11/clockface    0.009s
+ok  	learn-go-with-tests/math/clockface	0.009s
 ```
 
 ## 時針を引きます
@@ -1883,17 +1887,13 @@ func TestSVGWriterHourHand(t *testing.T) {
 ### テストを実行してみてください
 
 ```text
---- FAIL: TestSVGWriterHourHand (0.00s)
-    --- FAIL: TestSVGWriterHourHand/06:00:00 (0.00s)
-        clockface_acceptance_test.go:113: Expected to find the hour hand line {X1:150 Y1:150 X2:150 Y2:200}, in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
-FAIL
-exit status 1
-FAIL    github.com/gypsydave5/learn-go-with-tests/math/v10/clockface    0.013s
+clockface_acceptance_test.go:113: Expected to find the hour hand line {X1:150 Y1:150 X2:150 Y2:200},
+    in the SVG lines [{X1:150 Y1:150 X2:150 Y2:60} {X1:150 Y1:150 X2:150 Y2:70}]
 ```
 
 ### 成功させるのに十分なコードを書く
 
-そして、`svgWriter.go`に最終調整を加えることができます。
+そして、SVGを書き出す定数と関数に最終調整を加えることができます。
 
 ```go
 const (
@@ -1925,13 +1925,12 @@ func hourHand(w io.Writer, t time.Time) {
 など...
 
 ```text
-PASS
-ok      github.com/gypsydave5/learn-go-with-tests/math/v12/clockface    0.007s
+ok  	clockface	0.007s
 ```
 
 `clockface`プログラムをコンパイルして実行して確認してみましょう。
 
-![時計](../.gitbook/assets/clock.svg)
+![時計](<../.gitbook/assets/clock (2).svg>)
 
 ### リファクタリング♪
 
@@ -1972,7 +1971,7 @@ const (
 
 > API はプログラムと一緒に提供されるべきであり、その逆もまた然りです。使用するために C コードを書かなければならず、コマンドラインから簡単に呼び出すことができない API は、学習して使用するのが難しくなります。そして逆に、唯一のオープンでドキュメント化された形がプログラムであり、Cプログラムから簡単に呼び出すことができないインターフェースを持つことは、非常に苦痛です。-- ヘンリー・スペンサー、_The Art of Unix Programming_の中で
 
-[このプログラムの最終的な取り組み](https://github.com/andmorefine/learn-go-with-tests/tree/2705e1505f1d4426969523d3c9be643bc40ca699/math/vFinal/clockface/README.md)では、`clockface`の中にあるエクスポートされていない関数をライブラリのパブリックAPIにして、時計の針の角度と単位ベクトルを計算する関数を用意した。また、SVG生成部分を独自のパッケージである`svg`に分割し、`clockface`プログラムが直接使用するようにしました。当然のことながら、それぞれの関数とパッケージのドキュメントを作成しました。
+[このプログラムの最終的な取り組み](https://github.com/quii/learn-go-with-tests/tree/main/math/vFinal/clockface)では、`clockface`の中にあるエクスポートされていない関数をライブラリのパブリックAPIにして、時計の針の角度と単位ベクトルを計算する関数を用意しました。また、SVG生成部分を独自のパッケージである`svg`に分割し、`clockface`プログラムが直接使用するようにしました。当然のことながら、それぞれの関数とパッケージのドキュメントを作成しました。
 
 SVGといえば
 
@@ -1984,8 +1983,10 @@ SVG を扱うための最も洗練されたコードは、アプリケーショ�
 * （テストで行っている限り）XMLライブラリを使用しますか？
 * SVGライブラリを使用しますか？
 
-これらのことを行うためにコードをリファクタリングすることができます。なぜなら、SVG を生成する方法は重要ではないからです。そのため、システムの中で SVG について最もよく知っている必要があり、何が SVG を構成するかについて最も厳密である必要がある部分は、SVG 出力のためのテストです。
+これらのことを行うためにコードをリファクタリングすることができます。それができるのは、SVG を _どのように_ 生成するかは重要ではなく、重要なのは _何を_ 生成するか、つまり _SVG_ だからです。そのため、システムの中で SVG について最もよく知っている必要があり、何が SVG を構成するかについて最も厳密である必要がある部分は、SVG 出力のためのテストです。SVG を出力していると確信できるように、SVG とは何かについての十分なコンテキストと知識を持っている必要があります。SVG の _何_ はテストの中にあり、 _どのように_ はコードの中にあります。
 
-XML ライブラリのインポート、XML の解析、構造体のリファクタリングなど、SVG テストに多くの時間と労力を費やしていることに違和感を感じたかもしれませんが、このテスト コードはコードベースの貴重な部分であり、現在の本番コードよりも価値があるかもしれません。しかし、テスト コードは私たちのコードベースの貴重な部分であり、現在の本番用コードよりも価値があるかもしれません。
+XML ライブラリのインポート、XML の解析、構造体のリファクタリングなど、SVG テストに多くの時間と労力を費やしていることに違和感を感じたかもしれませんが、このテストコードはコードベースの貴重な部分であり、現在の本番コードよりも価値があるかもしれません。生成に何を使うことにしても、出力が常に有効な SVG であることを保証するのに役立ちます。
 
-テストは二流の市民ではありません。良いテストは、テストしているコードの特定のバージョンよりもずっと長持ちします。テストを書くのに「時間がかかりすぎる」と感じるべきではありません。通常、それは賢明な投資です。
+テストは二流の市民ではありません。良いテストは、テストしているコードのバージョンよりもずっと長持ちします。テストを書くのに「時間がかかりすぎる」と感じるべきではありません。それは投資です。
+
+1. 簡単に言えば、普通の度数を使うと角度としてπが何度も登場するため、円を使った微積分が簡単になります。角度をπ単位で数えれば、すべての方程式がより簡単になります。

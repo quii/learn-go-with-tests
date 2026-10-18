@@ -19,6 +19,9 @@ func Racer(a, b string) (winner string) {
 
 func measureResponseTime(url string) time.Duration {
 	start := time.Now()
-	http.Get(url)
+	resp, err := http.Get(url)
+	if err == nil {
+		resp.Body.Close()
+	}
 	return time.Since(start)
 }

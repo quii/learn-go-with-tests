@@ -4,7 +4,7 @@ description: OS Exec
 
 # OS実行
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/q-and-a/os-exec)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/q-and-a/os-exec)
 
 [keith6014](https://www.reddit.com/user/keith6014)が[reddit](https://www.reddit.com/r/golang/comments/aaz8ji/testdata_and_function_setup_help/)で質問する
 
@@ -25,22 +25,22 @@ description: OS Exec
 
 ```go
 type Payload struct {
-    Message string `xml:"message"`
+	Message string `xml:"message"`
 }
 
 func GetData() string {
-    cmd := exec.Command("cat", "msg.xml")
+	cmd := exec.Command("cat", "msg.xml")
 
-    out, _ := cmd.StdoutPipe()
-    var payload Payload
-    decoder := xml.NewDecoder(out)
+	out, _ := cmd.StdoutPipe()
+	var payload Payload
+	decoder := xml.NewDecoder(out)
 
-    // these 3 can return errors but I'm ignoring for brevity
-    cmd.Start()
-    decoder.Decode(&payload)
-    cmd.Wait()
+	// these 3 can return errors but I'm ignoring for brevity
+	cmd.Start()
+	decoder.Decode(&payload)
+	cmd.Wait()
 
-    return strings.ToUpper(payload.Message)
+	return strings.ToUpper(payload.Message)
 }
 ```
 
@@ -51,7 +51,7 @@ func GetData() string {
 
 これが `msg.xml`内に含まれているものです。
 
-```markup
+```xml
 <payload>
     <message>Happy New Year!</message>
 </payload>
@@ -61,12 +61,12 @@ func GetData() string {
 
 ```go
 func TestGetData(t *testing.T) {
-    got := GetData()
-    want := "HAPPY NEW YEAR!"
+	got := GetData()
+	want := "HAPPY NEW YEAR!"
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 ```
 
@@ -90,33 +90,33 @@ func TestGetData(t *testing.T) {
 
 ```go
 type Payload struct {
-    Message string `xml:"message"`
+	Message string `xml:"message"`
 }
 
 func GetData(data io.Reader) string {
-    var payload Payload
-    xml.NewDecoder(data).Decode(&payload)
-    return strings.ToUpper(payload.Message)
+	var payload Payload
+	xml.NewDecoder(data).Decode(&payload)
+	return strings.ToUpper(payload.Message)
 }
 
 func getXMLFromCommand() io.Reader {
-    cmd := exec.Command("cat", "msg.xml")
-    out, _ := cmd.StdoutPipe()
+	cmd := exec.Command("cat", "msg.xml")
+	out, _ := cmd.StdoutPipe()
 
-    cmd.Start()
-    data, _ := ioutil.ReadAll(out)
-    cmd.Wait()
+	cmd.Start()
+	data, _ := io.ReadAll(out)
+	cmd.Wait()
 
-    return bytes.NewReader(data)
+	return bytes.NewReader(data)
 }
 
 func TestGetDataIntegration(t *testing.T) {
-    got := GetData(getXMLFromCommand())
-    want := "HAPPY NEW YEAR!"
+	got := GetData(getXMLFromCommand())
+	want := "HAPPY NEW YEAR!"
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 ```
 
@@ -126,18 +126,19 @@ func TestGetDataIntegration(t *testing.T) {
 
 ```go
 func TestGetData(t *testing.T) {
-    input := strings.NewReader(`
+	input := strings.NewReader(`
 <payload>
     <message>Cats are the best animal</message>
 </payload>`)
 
-    got := GetData(input)
-    want := "CATS ARE THE BEST ANIMAL"
+	got := GetData(input)
+	want := "CATS ARE THE BEST ANIMAL"
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
+
 ```
 
 これは`GetData`の単体テストの例です。

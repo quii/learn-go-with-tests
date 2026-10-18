@@ -134,8 +134,8 @@ func Hello(name, language string) string {
 }
 
 var greetings = map[string]string {
-  es: "Hola",
-  fr: "Bonjour",
+  "es": "Hola",
+  "fr": "Bonjour",
   //etc..
 }
 

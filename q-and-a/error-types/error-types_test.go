@@ -2,7 +2,7 @@ package errortypes
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -30,7 +30,7 @@ func DumbGetter(url string) (string, error) {
 	}
 
 	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body) // ignoring err for brevity
+	body, _ := io.ReadAll(res.Body) // ignoring err for brevity
 
 	return string(body), nil
 }

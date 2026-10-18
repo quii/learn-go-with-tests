@@ -4,7 +4,7 @@ description: Context (長期実行プロセスの管理に役立つパッケー�
 
 # コンテキスト
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/context)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/context)
 
 ソフトウェアは、多くの場合、長時間実行され、リソースを大量に消費するプロセスを開始します（多くの場合、ゴルーチンで）。これを引き起こしたアクションがキャンセルされるか、何らかの理由で失敗した場合は、アプリケーションを通じてこれらのプロセスを一貫した方法で停止する必要があります。
 
@@ -39,29 +39,29 @@ type Store interface {
 
 返された関数は、`store`の` Fetch`メソッドを呼び出してデータを取得し、それを応答に書き込みます。
 
-テストで使用する`Store`に対応するスタブがあります。
+テストで使用する`Store`に対応するスパイがあります。
 
 ```go
-type StubStore struct {
-    response string
+type SpyStore struct {
+	response string
 }
 
-func (s *StubStore) Fetch() string {
-    return s.response
+func (s *SpyStore) Fetch() string {
+	return s.response
 }
 
-func TestHandler(t *testing.T) {
-    data := "hello, world"
-    svr := Server(&StubStore{data})
+func TestServer(t *testing.T) {
+	data := "hello, world"
+	svr := Server(&SpyStore{data})
 
-    request := httptest.NewRequest(http.MethodGet, "/", nil)
-    response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
 
-    svr.ServeHTTP(response, request)
+	svr.ServeHTTP(response, request)
 
-    if response.Body.String() != data {
-        t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
-    }
+	if response.Body.String() != data {
+		t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
+	}
 }
 ```
 
@@ -78,7 +78,7 @@ type Store interface {
 }
 ```
 
-スパイを調整する必要があるので、`data`を返すには時間がかかり、キャンセルするように指示されたことを知る方法があります。呼び出し方法を確認しているので、名前を`SpyStore`に変更します。
+スパイを調整する必要があるので、`data`を返すには時間がかかり、キャンセルするように指示されたことを知る方法があります。
 
 `Store`インターフェースを実装するメソッドとして`Cancel`を追加する必要があります。
 
@@ -102,23 +102,24 @@ func (s *SpyStore) Cancel() {
 
 ```go
 t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
-      store := &SpyStore{response: data}
-      svr := Server(store)
+	data := "hello, world"
+	store := &SpyStore{response: data}
+	svr := Server(store)
 
-      request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
 
-      cancellingCtx, cancel := context.WithCancel(request.Context())
-      time.AfterFunc(5 * time.Millisecond, cancel)
-      request = request.WithContext(cancellingCtx)
+	cancellingCtx, cancel := context.WithCancel(request.Context())
+	time.AfterFunc(5*time.Millisecond, cancel)
+	request = request.WithContext(cancellingCtx)
 
-      response := httptest.NewRecorder()
+	response := httptest.NewRecorder()
 
-      svr.ServeHTTP(response, request)
+	svr.ServeHTTP(response, request)
 
-      if !store.cancelled {
-          t.Errorf("store was not told to cancel")
-      }
-  })
+	if !store.cancelled {
+		t.Error("store was not told to cancel")
+	}
+})
 ```
 
 [Goブログ: コンテキスト`Context`](https://blog.golang.org/context)
@@ -133,7 +134,7 @@ t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
 
 テストは予想通り失敗します。
 
-```go
+```text
 --- FAIL: TestServer (0.00s)
     --- FAIL: TestServer/tells_store_to_cancel_work_if_request_is_cancelled (0.00s)
         context_test.go:62: store was not told to cancel
@@ -152,30 +153,31 @@ func Server(store Store) http.HandlerFunc {
 }
 ```
 
-これはこのテストに合格しますが、気分が良くありません！
-あらゆるリクエストをフェッチする前に、`Store`をキャンセルしてはいけません。
+これはこのテストに合格しますが、気分が良くありませんよね？
+ _あらゆるリクエスト_ でフェッチする前に`Cancel()`を呼び出すべきではありません。
 
-懲戒処分を受けることで、テストの欠陥が明らかになり、これは良いことです！
+規律を守ったことで、テストの欠陥が明らかになりました。これは良いことです！
 
 キャンセルされないことを確認するために、幸せなパステストを更新する必要があります。
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
-    store := &SpyStore{response: data}
-    svr := Server(store)
+	data := "hello, world"
+	store := &SpyStore{response: data}
+	svr := Server(store)
 
-    request := httptest.NewRequest(http.MethodGet, "/", nil)
-    response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
 
-    svr.ServeHTTP(response, request)
+	svr.ServeHTTP(response, request)
 
-    if response.Body.String() != data {
-        t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
-    }
+	if response.Body.String() != data {
+		t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
+	}
 
-    if store.cancelled {
-        t.Error("it should not have cancelled the store")
-    }
+	if store.cancelled {
+		t.Error("it should not have cancelled the store")
+	}
 })
 ```
 
@@ -213,18 +215,24 @@ func Server(store Store) http.HandlerFunc {
 スパイでアサーションメソッドを作成することで、テストコードを少しリファクタリングできます。
 
 ```go
+type SpyStore struct {
+	response  string
+	cancelled bool
+	t         *testing.T
+}
+
 func (s *SpyStore) assertWasCancelled() {
-    s.t.Helper()
-    if !s.cancelled {
-        s.t.Errorf("store was not told to cancel")
-    }
+	s.t.Helper()
+	if !s.cancelled {
+		s.t.Error("store was not told to cancel")
+	}
 }
 
 func (s *SpyStore) assertWasNotCancelled() {
-    s.t.Helper()
-    if s.cancelled {
-        s.t.Errorf("store was told to cancel")
-    }
+	s.t.Helper()
+	if s.cancelled {
+		s.t.Error("store was told to cancel")
+	}
 }
 ```
 
@@ -314,34 +322,34 @@ func Server(store Store) http.HandlerFunc {
 
 ```go
 type SpyStore struct {
-    response string
-    t        *testing.T
+	response string
+	t        *testing.T
 }
 
 func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
-    data := make(chan string, 1)
+	data := make(chan string, 1)
 
-    go func() {
-        var result string
-        for _, c := range s.response {
-            select {
-            case <-ctx.Done():
-                s.t.Log("spy store got cancelled")
-                return
-            default:
-                time.Sleep(10 * time.Millisecond)
-                result += string(c)
-            }
-        }
-        data <- result
-    }()
+	go func() {
+		var result string
+		for _, c := range s.response {
+			select {
+			case <-ctx.Done():
+				log.Println("spy store got cancelled")
+				return
+			default:
+				time.Sleep(10 * time.Millisecond)
+				result += string(c)
+			}
+		}
+		data <- result
+	}()
 
-    select {
-    case <-ctx.Done():
-        return "", ctx.Err()
-    case res := <-data:
-        return res, nil
-    }
+	select {
+	case <-ctx.Done():
+		return "", ctx.Err()
+	case res := <-data:
+		return res, nil
+	}
 }
 ```
 
@@ -359,17 +367,18 @@ func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
 
 ```go
 t.Run("returns data from store", func(t *testing.T) {
-    store := &SpyStore{response: data, t: t}
-    svr := Server(store)
+	data := "hello, world"
+	store := &SpyStore{response: data, t: t}
+	svr := Server(store)
 
-    request := httptest.NewRequest(http.MethodGet, "/", nil)
-    response := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
 
-    svr.ServeHTTP(response, request)
+	svr.ServeHTTP(response, request)
 
-    if response.Body.String() != data {
-        t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
-    }
+	if response.Body.String() != data {
+		t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
+	}
 })
 ```
 
@@ -397,7 +406,7 @@ func Server(store Store) http.HandlerFunc {
 
 ## 最初にテストを書く
 
-エラーの場合には、いかなる種類の応答も書かないことをテストする必要があります。悲しいことに、`httptest.ResponseRecorder`にはこれを理解する方法がないため、これをテストするために私たち自身のスパイをロールする必要があります。
+エラーの場合には、いかなる種類の応答も書かないことをテストする必要があります。悲しいことに、`httptest.ResponseRecorder`にはこれを理解する方法がないため、これをテストするために独自のスパイを自作する必要があります。
 
 ```go
 type SpyResponseWriter struct {
@@ -423,22 +432,23 @@ func (s *SpyResponseWriter) WriteHeader(statusCode int) {
 
 ```go
 t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
-    store := &SpyStore{response: data, t: t}
-    svr := Server(store)
+	data := "hello, world"
+	store := &SpyStore{response: data, t: t}
+	svr := Server(store)
 
-    request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
 
-    cancellingCtx, cancel := context.WithCancel(request.Context())
-    time.AfterFunc(5*time.Millisecond, cancel)
-    request = request.WithContext(cancellingCtx)
+	cancellingCtx, cancel := context.WithCancel(request.Context())
+	time.AfterFunc(5*time.Millisecond, cancel)
+	request = request.WithContext(cancellingCtx)
 
-    response := &SpyResponseWriter{}
+	response := &SpyResponseWriter{}
 
-    svr.ServeHTTP(response, request)
+	svr.ServeHTTP(response, request)
 
-    if response.written {
-        t.Error("a response should not have been written")
-    }
+	if response.written {
+		t.Error("a response should not have been written")
+	}
 })
 ```
 

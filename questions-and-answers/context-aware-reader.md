@@ -4,7 +4,7 @@ description: Context-aware Reader
 
 # コンテキスト認識リーダー
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/q-and-a/context-aware-reader)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/q-and-a/context-aware-reader)
 
 この章では、_Mat・Ryer_ と _David・Hernandez_ が [The Pace Dev Blog](https://pace.dev/blog/2020/02/03/context-aware-ioreader-for-golang-by-mat-ryer)で書いた、コンテキストを意識した`io.Reader`をテストドライブする方法を示します。
 
@@ -16,7 +16,7 @@ description: Context-aware Reader
 
 ```go
 type Reader interface {
-  Read(p []byte) (n int, err error)
+	Read(p []byte) (n int, err error)
 }
 ```
 
@@ -34,7 +34,7 @@ type Reader interface {
 `io.Reader`をラップしてキャンセルできるように、いくつかの機能をTDDで試してみましょう。
 
 これをテストすることは興味深い挑戦を引き起こします。通常、`io.Reader`を使用するときは、通常、他の関数にそれを提供しているので、詳細に気を使う必要はありません。
-`json.NewDecoder`や`ioutil.ReadAll`など。
+`json.NewDecoder`や`io.ReadAll`など。
 
 デモしたいのは、次のようなものです。
 
@@ -44,7 +44,7 @@ type Reader interface {
 
 ```go
 type Reader interface {
-  Read(p []byte) (n int, err error)
+	Read(p []byte) (n int, err error)
 }
 ```
 
@@ -60,33 +60,33 @@ type Reader interface {
 
 ```go
 func TestContextAwareReader(t *testing.T) {
-    t.Run("lets just see how a normal reader works", func(t *testing.T) {
-        rdr := strings.NewReader("123456")
-        got := make([]byte, 3)
-        _, err := rdr.Read(got)
+	t.Run("lets just see how a normal reader works", func(t *testing.T) {
+		rdr := strings.NewReader("123456")
+		got := make([]byte, 3)
+		_, err := rdr.Read(got)
 
-        if err != nil {
-            t.Fatal(err)
-        }
+		if err != nil {
+			t.Fatal(err)
+		}
 
-        assertBufferHas(t, got, "123")
+		assertBufferHas(t, got, "123")
 
-        _, err = rdr.Read(got)
+		_, err = rdr.Read(got)
 
-        if err != nil {
-            t.Fatal(err)
-        }
+		if err != nil {
+			t.Fatal(err)
+		}
 
-        assertBufferHas(t, got, "456")
-    })
+		assertBufferHas(t, got, "456")
+	})
 }
 
-func assertBufferHas(t *testing.T, buf []byte, want string) {
-    t.Helper()
-    got := string(buf)
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+func assertBufferHas(t testing.TB, buf []byte, want string) {
+	t.Helper()
+	got := string(buf)
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 ```
 
@@ -108,29 +108,29 @@ TDDでは、希望するAPIを想像することから始めて、そのため�
 
 ```go
 t.Run("behaves like a normal reader", func(t *testing.T) {
-    rdr := NewCancellableReader(strings.NewReader("123456"))
-    got := make([]byte, 3)
-    _, err := rdr.Read(got)
+	rdr := NewCancellableReader(strings.NewReader("123456"))
+	got := make([]byte, 3)
+	_, err := rdr.Read(got)
 
-    if err != nil {
-        t.Fatal(err)
-    }
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    assertBufferHas(t, got, "123")
+	assertBufferHas(t, got, "123")
 
-    _, err = rdr.Read(got)
+	_, err = rdr.Read(got)
 
-    if err != nil {
-        t.Fatal(err)
-    }
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    assertBufferHas(t, got, "456")
+	assertBufferHas(t, got, "456")
 })
 ```
 
 ## テストを実行してみます
 
-```text
+```
 ./cancel_readers_test.go:12:10: undefined: NewCancellableReader
 ```
 
@@ -140,17 +140,17 @@ t.Run("behaves like a normal reader", func(t *testing.T) {
 
 ```go
 func NewCancellableReader(rdr io.Reader) io.Reader {
-    return nil
+	return nil
 }
 ```
 
 試しに実行してみると
 
-```text
+```
 === RUN   TestCancelReaders
 === RUN   TestCancelReaders/behaves_like_a_normal_reader
 panic: runtime error: invalid memory address or nil pointer dereference [recovered]
-    panic: runtime error: invalid memory address or nil pointer dereference
+	panic: runtime error: invalid memory address or nil pointer dereference
 [signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0x10f8fb5]
 ```
 
@@ -162,7 +162,7 @@ panic: runtime error: invalid memory address or nil pointer dereference [recover
 
 ```go
 func NewCancellableReader(rdr io.Reader) io.Reader {
-    return rdr
+	return rdr
 }
 ```
 
@@ -176,28 +176,28 @@ func NewCancellableReader(rdr io.Reader) io.Reader {
 
 ```go
 t.Run("stops reading when cancelled", func(t *testing.T) {
-    ctx, cancel := context.WithCancel(context.Background())
-    rdr := NewCancellableReader(ctx, strings.NewReader("123456"))
-    got := make([]byte, 3)
-    _, err := rdr.Read(got)
+	ctx, cancel := context.WithCancel(context.Background())
+	rdr := NewCancellableReader(ctx, strings.NewReader("123456"))
+	got := make([]byte, 3)
+	_, err := rdr.Read(got)
 
-    if err != nil {
-        t.Fatal(err)
-    }
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    assertBufferHas(t, got, "123")
+	assertBufferHas(t, got, "123")
 
-    cancel()
+	cancel()
 
-    n, err := rdr.Read(got)
+	n, err := rdr.Read(got)
 
-    if err == nil {
-        t.Error("expected an error after cancellation but didnt get one")
-    }
+	if err == nil {
+		t.Error("expected an error after cancellation but didn't get one")
+	}
 
-    if n > 0 {
-        t.Errorf("expected 0 bytes to be read after cancellation but %d were read", n)
-    }
+	if n > 0 {
+		t.Errorf("expected 0 bytes to be read after cancellation but %d were read", n)
+	}
 })
 ```
 
@@ -209,10 +209,10 @@ t.Run("stops reading when cancelled", func(t *testing.T) {
 
 ## テストを実行してみます
 
-```text
+```
 ./cancel_readers_test.go:33:30: too many arguments in call to NewCancellableReader
-    have (context.Context, *strings.Reader)
-    want (io.Reader)
+	have (context.Context, *strings.Reader)
+	want (io.Reader)
 ```
 
 ## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
@@ -221,7 +221,7 @@ t.Run("stops reading when cancelled", func(t *testing.T) {
 
 ```go
 func NewCancellableReader(ctx context.Context, rdr io.Reader) io.Reader {
-    return rdr
+	return rdr
 }
 ```
 
@@ -229,12 +229,12 @@ func NewCancellableReader(ctx context.Context, rdr io.Reader) io.Reader {
 
 これで、非常に明確な失敗したテスト出力を見ることができるはずです。
 
-```text
+```
 === RUN   TestCancelReaders
 === RUN   TestCancelReaders/stops_reading_when_cancelled
 --- FAIL: TestCancelReaders (0.00s)
     --- FAIL: TestCancelReaders/stops_reading_when_cancelled (0.00s)
-        cancel_readers_test.go:48: expected an error but didnt get one
+        cancel_readers_test.go:48: expected an error but didn't get one
         cancel_readers_test.go:52: expected 0 bytes to be read after cancellation but 3 were read
 ```
 
@@ -246,30 +246,30 @@ func NewCancellableReader(ctx context.Context, rdr io.Reader) io.Reader {
 
 ```go
 func NewCancellableReader(ctx context.Context, rdr io.Reader) io.Reader {
-    return &readerCtx{
-        ctx:      ctx,
-        delegate: rdr,
-    }
+	return &readerCtx{
+		ctx:      ctx,
+		delegate: rdr,
+	}
 }
 
 type readerCtx struct {
-    ctx      context.Context
-    delegate io.Reader
+	ctx      context.Context
+	delegate io.Reader
 }
 ```
 
 このサイトで何度も強調してきたように、ゆっくりと進み、コンパイラに助けてもらいましょう。
 
-```go
+```
 ./cancel_readers_test.go:60:3: cannot use &readerCtx literal (type *readerCtx) as type io.Reader in return argument:
-    *readerCtx does not implement io.Reader (missing Read method)
+	*readerCtx does not implement io.Reader (missing Read method)
 ```
 
 抽象化はいい感じだけど、必要なインターフェースが実装されてないから、メソッドを追加しよう。
 
 ```go
 func (r *readerCtx) Read(p []byte) (n int, err error) {
-    panic("implement me")
+	panic("implement me")
 }
 ```
 
@@ -279,7 +279,7 @@ func (r *readerCtx) Read(p []byte) (n int, err error) {
 
 ```go
 func (r readerCtx) Read(p []byte) (n int, err error) {
-    return r.delegate.Read(p)
+	return r.delegate.Read(p)
 }
 ```
 
@@ -289,10 +289,10 @@ func (r readerCtx) Read(p []byte) (n int, err error) {
 
 ```go
 func (r readerCtx) Read(p []byte) (n int, err error) {
-    if err := r.ctx.Err(); err != nil {
-        return 0, err
-    }
-    return r.delegate.Read(p)
+	if err := r.ctx.Err(); err != nil {
+		return 0, err
+	}
+	return r.delegate.Read(p)
 }
 ```
 

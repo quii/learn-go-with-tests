@@ -4,7 +4,7 @@ description: WebSockets
 
 # ウェブソケット
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/websockets)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/websockets)
 
 この章では、アプリケーションを改善するためにWebSocketを使用する方法を学びます。
 
@@ -51,24 +51,24 @@ O'Reillyに「テストでJavaScriptを学ぶ」を作ってくれるように�
 
 ```go
 type PlayerServer struct {
-    store PlayerStore
-    http.Handler
+	store PlayerStore
+	http.Handler
 }
 
 const jsonContentType = "application/json"
 
 func NewPlayerServer(store PlayerStore) *PlayerServer {
-    p := new(PlayerServer)
+	p := new(PlayerServer)
 
-    p.store = store
+	p.store = store
 
-    router := http.NewServeMux()
-    router.Handle("/league", http.HandlerFunc(p.leagueHandler))
-    router.Handle("/players/", http.HandlerFunc(p.playersHandler))
+	router := http.NewServeMux()
+	router.Handle("/league", http.HandlerFunc(p.leagueHandler))
+	router.Handle("/players/", http.HandlerFunc(p.playersHandler))
 
-    p.Handler = router
+	p.Handler = router
 
-    return p
+	return p
 }
 ```
 
@@ -76,26 +76,26 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 
 ```go
 func TestGame(t *testing.T) {
-    t.Run("GET /game returns 200", func(t *testing.T) {
-        server := NewPlayerServer(&StubPlayerStore{})
+	t.Run("GET /game returns 200", func(t *testing.T) {
+		server := NewPlayerServer(&StubPlayerStore{})
 
-        request, _ := http.NewRequest(http.MethodGet, "/game", nil)
-        response := httptest.NewRecorder()
+		request, _ := http.NewRequest(http.MethodGet, "/game", nil)
+		response := httptest.NewRecorder()
 
-        server.ServeHTTP(response, request)
+		server.ServeHTTP(response, request)
 
-        assertStatus(t, response.Code, http.StatusOK)
-    })
+		assertStatus(t, response.Code, http.StatusOK)
+	})
 }
 ```
 
 ## テストを実行してみます
 
-```text
+```
 --- FAIL: TestGame (0.00s)
 === RUN   TestGame/GET_/game_returns_200
     --- FAIL: TestGame/GET_/game_returns_200 (0.00s)
-        server_test.go:109: did not get correct status, got 404, want 200
+    	server_test.go:109: did not get correct status, got 404, want 200
 ```
 
 ## 成功させるのに十分なコードを書く
@@ -112,7 +112,7 @@ router.Handle("/game", http.HandlerFunc(p.game))
 
 ```go
 func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
-    w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusOK)
 }
 ```
 
@@ -124,16 +124,16 @@ func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
 
 ```go
 func TestGame(t *testing.T) {
-    t.Run("GET /game returns 200", func(t *testing.T) {
-        server := NewPlayerServer(&StubPlayerStore{})
+	t.Run("GET /game returns 200", func(t *testing.T) {
+		server := NewPlayerServer(&StubPlayerStore{})
 
-        request :=  newGameRequest()
-        response := httptest.NewRecorder()
+		request := newGameRequest()
+		response := httptest.NewRecorder()
 
-        server.ServeHTTP(response, request)
+		server.ServeHTTP(response, request)
 
-        assertStatus(t, response, http.StatusOK)
-    })
+		assertStatus(t, response, http.StatusOK)
+	})
 }
 ```
 
@@ -141,7 +141,7 @@ func TestGame(t *testing.T) {
 
 次に、エンドポイントにHTMLを返すようにする必要があります。
 
-```markup
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -197,14 +197,14 @@ func TestGame(t *testing.T) {
 
 ```go
 func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
-    tmpl, err := template.ParseFiles("game.html")
+	tmpl, err := template.ParseFiles("game.html")
 
-    if err != nil {
-        http.Error(w, fmt.Sprintf("problem loading template %s", err.Error()), http.StatusInternalServerError)
-        return
-    }
+	if err != nil {
+		http.Error(w, fmt.Sprintf("problem loading template %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
 
-    tmpl.Execute(w, nil)
+	tmpl.Execute(w, nil)
 }
 ```
 
@@ -230,24 +230,24 @@ func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
 
 ```go
 t.Run("when we get a message over a websocket it is a winner of a game", func(t *testing.T) {
-    store := &StubPlayerStore{}
-    winner := "Ruth"
-    server := httptest.NewServer(NewPlayerServer(store))
-    defer server.Close()
+	store := &StubPlayerStore{}
+	winner := "Ruth"
+	server := httptest.NewServer(NewPlayerServer(store))
+	defer server.Close()
 
-    wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
+	wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
 
-    ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-    if err != nil {
-        t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
-    }
-    defer ws.Close()
+	ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		t.Fatalf("could not open a ws connection on %s %v", wsURL, err)
+	}
+	defer ws.Close()
 
-    if err := ws.WriteMessage(websocket.TextMessage, []byte(winner)); err != nil {
-        t.Fatalf("could not send message over ws connection %v", err)
-    }
+	if err := ws.WriteMessage(websocket.TextMessage, []byte(winner)); err != nil {
+		t.Fatalf("could not send message over ws connection %v", err)
+	}
 
-    AssertPlayerWin(t, store, winner)
+	AssertPlayerWin(t, store, winner)
 })
 ```
 
@@ -264,7 +264,7 @@ t.Run("when we get a message over a websocket it is a winner of a game", func(t 
 
 ## テストを実行してみます
 
-```text
+```
 === RUN   TestGame/when_we_get_a_message_over_a_websocket_it_is_a_winner_of_a_game
     --- FAIL: TestGame/when_we_get_a_message_over_a_websocket_it_is_a_winner_of_a_game (0.00s)
         server_test.go:124: could not open a ws connection on ws://127.0.0.1:55838/ws websocket: bad handshake
@@ -284,17 +284,17 @@ router.Handle("/ws", http.HandlerFunc(p.webSocket))
 
 ```go
 func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
-    upgrader := websocket.Upgrader{
-        ReadBufferSize:  1024,
-        WriteBufferSize: 1024,
-    }
-    upgrader.Upgrade(w, r, nil)
+	upgrader := websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+	upgrader.Upgrade(w, r, nil)
 }
 ```
 
 WebSocket接続を受け入れるには、リクエストを「`Upgrade`」します。ここでテストを再実行する場合は、次のエラーに進む必要があります。
 
-```text
+```
 === RUN   TestGame/when_we_get_a_message_over_a_websocket_it_is_a_winner_of_a_game
     --- FAIL: TestGame/when_we_get_a_message_over_a_websocket_it_is_a_winner_of_a_game (0.00s)
         server_test.go:132: got 0 calls to RecordWin want 1
@@ -304,13 +304,13 @@ WebSocket接続を受け入れるには、リクエストを「`Upgrade`」し�
 
 ```go
 func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
-    upgrader := websocket.Upgrader{
-        ReadBufferSize:  1024,
-        WriteBufferSize: 1024,
-    }
-    conn, _ := upgrader.Upgrade(w, r, nil)
-    _, winnerMsg, _ := conn.ReadMessage()
-    p.store.RecordWin(string(winnerMsg))
+	upgrader := websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+	conn, _ := upgrader.Upgrade(w, r, nil)
+	_, winnerMsg, _ := conn.ReadMessage()
+	p.store.RecordWin(string(winnerMsg))
 }
 ```
 
@@ -341,14 +341,14 @@ AssertPlayerWin(t, store, winner)
 
 ```go
 var wsUpgrader = websocket.Upgrader{
-    ReadBufferSize:  1024,
-    WriteBufferSize: 1024,
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
 func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
-    conn, _ := wsUpgrader.Upgrade(w, r, nil)
-    _, winnerMsg, _ := conn.ReadMessage()
-    p.store.RecordWin(string(winnerMsg))
+	conn, _ := wsUpgrader.Upgrade(w, r, nil)
+	_, winnerMsg, _ := conn.ReadMessage()
+	p.store.RecordWin(string(winnerMsg))
 }
 ```
 
@@ -360,38 +360,38 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 
 ```go
 type PlayerServer struct {
-    store PlayerStore
-    http.Handler
-    template *template.Template
+	store PlayerStore
+	http.Handler
+	template *template.Template
 }
 
 const htmlTemplatePath = "game.html"
 
 func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
-    p := new(PlayerServer)
+	p := new(PlayerServer)
 
-    tmpl, err := template.ParseFiles(htmlTemplatePath)
+	tmpl, err := template.ParseFiles(htmlTemplatePath)
 
-    if err != nil {
-        return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
-    }
+	if err != nil {
+		return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
+	}
 
-    p.template = tmpl
-    p.store = store
+	p.template = tmpl
+	p.store = store
 
-    router := http.NewServeMux()
-    router.Handle("/league", http.HandlerFunc(p.leagueHandler))
-    router.Handle("/players/", http.HandlerFunc(p.playersHandler))
-    router.Handle("/game", http.HandlerFunc(p.game))
-    router.Handle("/ws", http.HandlerFunc(p.webSocket))
+	router := http.NewServeMux()
+	router.Handle("/league", http.HandlerFunc(p.leagueHandler))
+	router.Handle("/players/", http.HandlerFunc(p.playersHandler))
+	router.Handle("/game", http.HandlerFunc(p.game))
+	router.Handle("/ws", http.HandlerFunc(p.webSocket))
 
-    p.Handler = router
+	p.Handler = router
 
-    return p, nil
+	return p, nil
 }
 
 func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
-    p.template.Execute(w, nil)
+	p.template.Execute(w, nil)
 }
 ```
 
@@ -401,11 +401,11 @@ func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
 
 ```go
 func mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer {
-    server, err := NewPlayerServer(store)
-    if err != nil {
-        t.Fatal("problem creating player server", err)
-    }
-    return server
+	server, err := NewPlayerServer(store)
+	if err != nil {
+		t.Fatal("problem creating player server", err)
+	}
+	return server
 }
 ```
 
@@ -413,13 +413,13 @@ func mustMakePlayerServer(t *testing.T, store PlayerStore) *PlayerServer {
 
 ```go
 func mustDialWS(t *testing.T, url string) *websocket.Conn {
-    ws, _, err := websocket.DefaultDialer.Dial(url, nil)
+	ws, _, err := websocket.DefaultDialer.Dial(url, nil)
 
-    if err != nil {
-        t.Fatalf("could not open a ws connection on %s %v", url, err)
-    }
+	if err != nil {
+		t.Fatalf("could not open a ws connection on %s %v", url, err)
+	}
 
-    return ws
+	return ws
 }
 ```
 
@@ -427,10 +427,10 @@ func mustDialWS(t *testing.T, url string) *websocket.Conn {
 
 ```go
 func writeWSMessage(t testing.TB, conn *websocket.Conn, message string) {
-    t.Helper()
-    if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
-        t.Fatalf("could not send message over ws connection %v", err)
-    }
+	t.Helper()
+	if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
+		t.Fatalf("could not send message over ws connection %v", err)
+	}
 }
 ```
 
@@ -440,7 +440,7 @@ func writeWSMessage(t testing.TB, conn *websocket.Conn, message string) {
 
 まず、`game.html`を更新して、新しい要件に合わせてクライアント側のコードを更新します
 
-```markup
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -525,8 +525,8 @@ func writeWSMessage(t testing.TB, conn *websocket.Conn, message string) {
 
 ```go
 type Game interface {
-    Start(numberOfPlayers int)
-    Finish(winner string)
+	Start(numberOfPlayers int)
+	Finish(winner string)
 }
 ```
 
@@ -536,8 +536,8 @@ type Game interface {
 
 ```go
 type TexasHoldem struct {
-    alerter BlindAlerter
-    store   PlayerStore
+	alerter BlindAlerter
+	store   PlayerStore
 }
 ```
 
@@ -545,7 +545,7 @@ type TexasHoldem struct {
 
 ```go
 type BlindAlerter interface {
-    ScheduleAlertAt(duration time.Duration, amount int)
+	ScheduleAlertAt(duration time.Duration, amount int)
 }
 ```
 
@@ -553,9 +553,9 @@ type BlindAlerter interface {
 
 ```go
 func StdOutAlerter(duration time.Duration, amount int) {
-    time.AfterFunc(duration, func() {
-        fmt.Fprintf(os.Stdout, "Blind is now %d\n", amount)
-    })
+	time.AfterFunc(duration, func() {
+		fmt.Fprintf(os.Stdout, "Blind is now %d\n", amount)
+	})
 }
 ```
 
@@ -568,13 +568,13 @@ func StdOutAlerter(duration time.Duration, amount int) {
 
 ```go
 type BlindAlerter interface {
-    ScheduleAlertAt(duration time.Duration, amount int, to io.Writer)
+	ScheduleAlertAt(duration time.Duration, amount int, to io.Writer)
 }
 
 type BlindAlerterFunc func(duration time.Duration, amount int, to io.Writer)
 
 func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int, to io.Writer) {
-    a(duration, amount, to)
+	a(duration, amount, to)
 }
 ```
 
@@ -582,9 +582,9 @@ func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int, to
 
 ```go
 func Alerter(duration time.Duration, amount int, to io.Writer) {
-    time.AfterFunc(duration, func() {
-        fmt.Fprintf(to, "Blind is now %d\n", amount)
-    })
+	time.AfterFunc(duration, func() {
+		fmt.Fprintf(to, "Blind is now %d\n", amount)
+	})
 }
 ```
 
@@ -600,8 +600,8 @@ func Alerter(duration time.Duration, amount int, to io.Writer) {
 
 ```go
 type Game interface {
-    Start(numberOfPlayers int, alertsDestination io.Writer)
-    Finish(winner string)
+	Start(numberOfPlayers int, alertsDestination io.Writer)
+	Finish(winner string)
 }
 ```
 
@@ -609,7 +609,7 @@ type Game interface {
 
 * `TexasHoldem`を更新して、`Game`を適切に実装します。
 * ゲームを開始するときに、`CLI`で`out`プロパティを渡します（`cli.game.Start(numberOfPlayers、cli.out)`）
-* `TexasHoldem`のテストでは、` game.Start(5、ioutil.Discard)`を使用してコンパイルの問題を修正し、アラート出力が破棄されるように設定します
+* `TexasHoldem`のテストでは、`game.Start(5, io.Discard)`を使用してコンパイルの問題を修正し、アラート出力が破棄されるように設定します
 
 すべてが正しければ、すべてがグリーンになるはずです。
 これで、`Server`内で`Game`を試して使用できます。
@@ -622,16 +622,16 @@ type Game interface {
 
 ```go
 t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t *testing.T) {
-    game := &GameSpy{}
+	game := &GameSpy{}
 
-    out := &bytes.Buffer{}
-    in := userSends("3", "Chris wins")
+	out := &bytes.Buffer{}
+	in := userSends("3", "Chris wins")
 
-    poker.NewCLI(in, out, game).PlayPoker()
+	poker.NewCLI(in, out, game).PlayPoker()
 
-    assertMessagesSentToUser(t, out, poker.PlayerPrompt)
-    assertGameStartedWith(t, game, 3)
-    assertFinishCalledWith(t, game, "Chris")
+	assertMessagesSentToUser(t, out, poker.PlayerPrompt)
+	assertGameStartedWith(t, game, 3)
+	assertFinishCalledWith(t, game, "Chris")
 })
 ```
 
@@ -641,20 +641,20 @@ t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t
 
 ```go
 t.Run("start a game with 3 players and declare Ruth the winner", func(t *testing.T) {
-    game := &poker.GameSpy{}
-    winner := "Ruth"
-    server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
-    ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+	game := &poker.GameSpy{}
+	winner := "Ruth"
+	server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+	ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
 
-    defer server.Close()
-    defer ws.Close()
+	defer server.Close()
+	defer ws.Close()
 
-    writeWSMessage(t, ws, "3")
-    writeWSMessage(t, ws, winner)
+	writeWSMessage(t, ws, "3")
+	writeWSMessage(t, ws, winner)
 
-    time.Sleep(10 * time.Millisecond)
-    assertGameStartedWith(t, game, 3)
-    assertFinishCalledWith(t, game, winner)
+	time.Sleep(10 * time.Millisecond)
+	assertGameStartedWith(t, game, 3)
+	assertFinishCalledWith(t, game, winner)
 })
 ```
 
@@ -668,16 +668,16 @@ t.Run("start a game with 3 players and declare Ruth the winner", func(t *testing
 
 ```go
 var (
-    dummyGame = &GameSpy{}
+	dummyGame = &GameSpy{}
 )
 ```
 
 最後のエラーは、`Game`を`NewPlayerServer`に渡そうとしているところですが、まだサポートしていません。
 
-```text
+```
 ./server_test.go:21:38: too many arguments in call to "github.com/quii/learn-go-with-tests/WebSockets/v2".NewPlayerServer
-    have ("github.com/quii/learn-go-with-tests/WebSockets/v2".PlayerStore, "github.com/quii/learn-go-with-tests/WebSockets/v2".Game)
-    want ("github.com/quii/learn-go-with-tests/WebSockets/v2".PlayerStore)
+	have ("github.com/quii/learn-go-with-tests/WebSockets/v2".PlayerStore, "github.com/quii/learn-go-with-tests/WebSockets/v2".Game)
+	want ("github.com/quii/learn-go-with-tests/WebSockets/v2".PlayerStore)
 ```
 
 ## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
@@ -690,12 +690,12 @@ func NewPlayerServer(store PlayerStore, game Game) (*PlayerServer, error)
 
 最終的に！
 
-```text
+```
 === RUN   TestGame/start_a_game_with_3_players_and_declare_Ruth_the_winner
 --- FAIL: TestGame (0.01s)
     --- FAIL: TestGame/start_a_game_with_3_players_and_declare_Ruth_the_winner (0.01s)
-        server_test.go:146: wanted Start called with 3 but got 0
-        server_test.go:147: expected finish called with 'Ruth' but got ''
+    	server_test.go:146: wanted Start called with 3 but got 0
+    	server_test.go:147: expected finish called with 'Ruth' but got ''
 FAIL
 ```
 
@@ -705,10 +705,10 @@ FAIL
 
 ```go
 type PlayerServer struct {
-    store PlayerStore
-    http.Handler
-    template *template.Template
-    game Game
+	store PlayerStore
+	http.Handler
+	template *template.Template
+	game     Game
 }
 ```
 
@@ -718,17 +718,17 @@ type PlayerServer struct {
 
 ```go
 func NewPlayerServer(store PlayerStore, game Game) (*PlayerServer, error) {
-    p := new(PlayerServer)
+	p := new(PlayerServer)
 
-    tmpl, err := template.ParseFiles(htmlTemplatePath)
+	tmpl, err := template.ParseFiles(htmlTemplatePath)
 
-    if err != nil {
-        return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
-    }
+	if err != nil {
+		return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
+	}
 
-    p.game = game
+	p.game = game
 
-    // etc
+	// etc
 }
 ```
 
@@ -736,44 +736,44 @@ func NewPlayerServer(store PlayerStore, game Game) (*PlayerServer, error) {
 
 ```go
 func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
-    conn, _ := wsUpgrader.Upgrade(w, r, nil)
+	conn, _ := wsUpgrader.Upgrade(w, r, nil)
 
-    _, numberOfPlayersMsg, _ := conn.ReadMessage()
-    numberOfPlayers, _ := strconv.Atoi(string(numberOfPlayersMsg))
-    p.game.Start(numberOfPlayers, ioutil.Discard) //todo: Don't discard the blinds messages!
+	_, numberOfPlayersMsg, _ := conn.ReadMessage()
+	numberOfPlayers, _ := strconv.Atoi(string(numberOfPlayersMsg))
+	p.game.Start(numberOfPlayers, io.Discard) //todo: Don't discard the blinds messages!
 
-    _, winner, _ := conn.ReadMessage()
-    p.game.Finish(string(winner))
+	_, winner, _ := conn.ReadMessage()
+	p.game.Finish(string(winner))
 }
 ```
 
 やったー！テストに成功しました。
 
-それについて考える必要があるので、「まだ」どこにもブラインドメッセージを送信するつもりはありません。`game.Start`を呼び出すと、それに書き込まれたメッセージを破棄する`ioutil.Discard`を送信します。
+それについて考える必要があるので、「まだ」どこにもブラインドメッセージを送信するつもりはありません。`game.Start`を呼び出すと、それに書き込まれたメッセージを破棄する`io.Discard`を送信します。
 
 ここでは、Webサーバーを起動します。`Game`を`PlayerServer`に渡すには、`main.go`を更新する必要があります
 
 ```go
 func main() {
-    db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
 
-    if err != nil {
-        log.Fatalf("problem opening %s %v", dbFileName, err)
-    }
+	if err != nil {
+		log.Fatalf("problem opening %s %v", dbFileName, err)
+	}
 
-    store, err := poker.NewFileSystemPlayerStore(db)
+	store, err := poker.NewFileSystemPlayerStore(db)
 
-    if err != nil {
-        log.Fatalf("problem creating file system player store, %v ", err)
-    }
+	if err != nil {
+		log.Fatalf("problem creating file system player store, %v ", err)
+	}
 
-    game := poker.NewTexasHoldem(poker.BlindAlerterFunc(poker.Alerter), store)
+	game := poker.NewTexasHoldem(poker.BlindAlerterFunc(poker.Alerter), store)
 
-    server, err := poker.NewPlayerServer(store, game)
+	server, err := poker.NewPlayerServer(store, game)
 
-    if err != nil {
-        log.Fatalf("problem creating player server %v", err)
-    }
+	if err != nil {
+		log.Fatalf("problem creating player server %v", err)
+	}
 
 	log.Fatal(http.ListenAndServe(":5000", server))
 }
@@ -789,25 +789,25 @@ WebSocketを使用する方法はかなり基本的で、エラー処理はか�
 
 ```go
 type playerServerWS struct {
-    *websocket.Conn
+	*websocket.Conn
 }
 
 func newPlayerServerWS(w http.ResponseWriter, r *http.Request) *playerServerWS {
-    conn, err := wsUpgrader.Upgrade(w, r, nil)
+	conn, err := wsUpgrader.Upgrade(w, r, nil)
 
-    if err != nil {
-        log.Printf("problem upgrading connection to WebSockets %v\n", err)
-    }
+	if err != nil {
+		log.Printf("problem upgrading connection to WebSockets %v\n", err)
+	}
 
-    return &playerServerWS{conn}
+	return &playerServerWS{conn}
 }
 
 func (w *playerServerWS) WaitForMsg() string {
-    _, msg, err := w.ReadMessage()
-    if err != nil {
-        log.Printf("error reading from websocket %v\n", err)
-    }
-    return string(msg)
+	_, msg, err := w.ReadMessage()
+	if err != nil {
+		log.Printf("error reading from websocket %v\n", err)
+	}
+	return string(msg)
 }
 ```
 
@@ -815,14 +815,14 @@ func (w *playerServerWS) WaitForMsg() string {
 
 ```go
 func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
-    ws := newPlayerServerWS(w, r)
+	ws := newPlayerServerWS(w, r)
 
-    numberOfPlayersMsg := ws.WaitForMsg()
-    numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
-    p.game.Start(numberOfPlayers, ioutil.Discard) //todo: Don't discard the blinds messages!
+	numberOfPlayersMsg := ws.WaitForMsg()
+	numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
+	p.game.Start(numberOfPlayers, io.Discard) //todo: Don't discard the blinds messages!
 
-    winner := ws.WaitForMsg()
-    p.game.Finish(winner)
+	winner := ws.WaitForMsg()
+	p.game.Finish(winner)
 }
 ```
 
@@ -835,7 +835,7 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 私たちが持っている問題のあるコード行は
 
 ```go
-p.game.Start(numberOfPlayers, ioutil.Discard) //todo: Don't discard the blinds messages!
+p.game.Start(numberOfPlayers, io.Discard) //todo: Don't discard the blinds messages!
 ```
 
 ゲームがブラインドアラートを書き込むには、`io.Writer`を渡す必要があります。
@@ -846,33 +846,33 @@ p.game.Start(numberOfPlayers, ioutil.Discard) //todo: Don't discard the blinds m
 
 ```go
 func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
-    ws := newPlayerServerWS(w, r)
+	ws := newPlayerServerWS(w, r)
 
-    numberOfPlayersMsg := ws.WaitForMsg()
-    numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
-    p.game.Start(numberOfPlayers, ws) 
-    //etc...
+	numberOfPlayersMsg := ws.WaitForMsg()
+	numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
+	p.game.Start(numberOfPlayers, ws)
+	//etc...
 }
 ```
 
 コンパイラは以下のような問題を指摘しています。
 
-```text
+```
 ./server.go:71:14: cannot use ws (type *playerServerWS) as type io.Writer in argument to p.game.Start:
-    *playerServerWS does not implement io.Writer (missing Write method)
+	*playerServerWS does not implement io.Writer (missing Write method)
 ```
 
 当然のことのようですが、`playerServerWS`が _does_ に`io.Writer`を実装するようにすることです。そのためには、基になる`*websocket.Conn`を使用して、`WriteMessage`を使用し、メッセージをWebSocketに送信します。
 
 ```go
 func (w *playerServerWS) Write(p []byte) (n int, err error) {
-    err = w.WriteMessage(websocket.TextMessage, p)
+	err = w.WriteMessage(websocket.TextMessage, p)
 
-    if err != nil {
-        return 0, err
-    }
+	if err != nil {
+		return 0, err
+	}
 
-    return len(p), nil
+	return len(p), nil
 }
 ```
 
@@ -886,7 +886,7 @@ blindIncrement := time.Duration(5+numberOfPlayers) * time.Second // (rather than
 
 あなたはそれが機能するのを見るはずです！ブラインド量は、まるで魔法のようにブラウザで増加します。
 
-コードを元に戻して、テストする方法を考えましょう。これを _具現化_ するために、`StartGame`へのパススルーは`ioutil.Discard`ではなく`playerServerWS`でしたので、呼び出しをスパイして動作を確認する必要があるかもしれません。
+コードを元に戻して、テストする方法を考えましょう。これを _具現化_ するために、`StartGame`へのパススルーは`io.Discard`ではなく`playerServerWS`でしたので、呼び出しをスパイして動作を確認する必要があるかもしれません。
 
 スパイは素晴らしく、実装の詳細をチェックするのに役立ちますが、可能であれば _実際_ の動作をテストすることを常に推奨する必要があります。なぜなら、リファクタリングする場合、通常、変更しようとしている実装の詳細をチェックしているため、失敗するスパイテストがよくあるためです。 。
 
@@ -901,12 +901,12 @@ blindIncrement := time.Duration(5+numberOfPlayers) * time.Second // (rather than
 
 ```go
 type GameSpy struct {
-    StartCalled     bool
-    StartCalledWith int
-    BlindAlert      []byte
+	StartCalled     bool
+	StartCalledWith int
+	BlindAlert      []byte
 
-    FinishedCalled   bool
-    FinishCalledWith string
+	FinishedCalled   bool
+	FinishCalledWith string
 }
 ```
 
@@ -916,9 +916,9 @@ type GameSpy struct {
 
 ```go
 func (g *GameSpy) Start(numberOfPlayers int, out io.Writer) {
-    g.StartCalled = true
-    g.StartCalledWith = numberOfPlayers
-    out.Write(g.BlindAlert)
+	g.StartCalled = true
+	g.StartCalledWith = numberOfPlayers
+	out.Write(g.BlindAlert)
 }
 ```
 
@@ -928,28 +928,28 @@ func (g *GameSpy) Start(numberOfPlayers int, out io.Writer) {
 
 ```go
 t.Run("start a game with 3 players, send some blind alerts down WS and declare Ruth the winner", func(t *testing.T) {
-    wantedBlindAlert := "Blind is 100"
-    winner := "Ruth"
+	wantedBlindAlert := "Blind is 100"
+	winner := "Ruth"
 
-    game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
-    server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
-    ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+	game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
+	server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+	ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
 
-    defer server.Close()
-    defer ws.Close()
+	defer server.Close()
+	defer ws.Close()
 
-    writeWSMessage(t, ws, "3")
-    writeWSMessage(t, ws, winner)
+	writeWSMessage(t, ws, "3")
+	writeWSMessage(t, ws, winner)
 
-    time.Sleep(10 * time.Millisecond)
-    assertGameStartedWith(t, game, 3)
-    assertFinishCalledWith(t, game, winner)
+	time.Sleep(10 * time.Millisecond)
+	assertGameStartedWith(t, game, 3)
+	assertFinishCalledWith(t, game, winner)
 
-    _, gotBlindAlert, _ := ws.ReadMessage()
+	_, gotBlindAlert, _ := ws.ReadMessage()
 
-    if string(gotBlindAlert) != wantedBlindAlert {
-        t.Errorf("got blind alert %q, want %q", string(gotBlindAlert), wantedBlindAlert)
-    }
+	if string(gotBlindAlert) != wantedBlindAlert {
+		t.Errorf("got blind alert %q, want %q", string(gotBlindAlert), wantedBlindAlert)
+	}
 })
 ```
 
@@ -966,20 +966,20 @@ t.Run("start a game with 3 players, send some blind alerts down WS and declare R
 
 ```go
 func within(t testing.TB, d time.Duration, assert func()) {
-    t.Helper()
+	t.Helper()
 
-    done := make(chan struct{}, 1)
+	done := make(chan struct{}, 1)
 
-    go func() {
-        assert()
-        done <- struct{}{}
-    }()
+	go func() {
+		assert()
+		done <- struct{}{}
+	}()
 
-    select {
-    case <-time.After(d):
-        t.Error("timed out")
-    case <-done:
-    }
+	select {
+	case <-time.After(d):
+		t.Error("timed out")
+	case <-done:
+	}
 }
 ```
 
@@ -991,10 +991,10 @@ func within(t testing.TB, d time.Duration, assert func()) {
 
 ```go
 func assertWebsocketGotMsg(t *testing.T, ws *websocket.Conn, want string) {
-    _, msg, _ := ws.ReadMessage()
-    if string(msg) != want {
-        t.Errorf(`got "%s", want "%s"`, string(msg), want)
-    }
+	_, msg, _ := ws.ReadMessage()
+	if string(msg) != want {
+		t.Errorf(`got "%s", want "%s"`, string(msg), want)
+	}
 }
 ```
 
@@ -1002,36 +1002,36 @@ func assertWebsocketGotMsg(t *testing.T, ws *websocket.Conn, want string) {
 
 ```go
 t.Run("start a game with 3 players, send some blind alerts down WS and declare Ruth the winner", func(t *testing.T) {
-    wantedBlindAlert := "Blind is 100"
-    winner := "Ruth"
+	wantedBlindAlert := "Blind is 100"
+	winner := "Ruth"
 
-    game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
-    server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
-    ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
+	game := &GameSpy{BlindAlert: []byte(wantedBlindAlert)}
+	server := httptest.NewServer(mustMakePlayerServer(t, dummyPlayerStore, game))
+	ws := mustDialWS(t, "ws"+strings.TrimPrefix(server.URL, "http")+"/ws")
 
-    defer server.Close()
-    defer ws.Close()
+	defer server.Close()
+	defer ws.Close()
 
-    writeWSMessage(t, ws, "3")
-    writeWSMessage(t, ws, winner)
+	writeWSMessage(t, ws, "3")
+	writeWSMessage(t, ws, winner)
 
-    time.Sleep(tenMS)
+	time.Sleep(tenMS)
 
-    assertGameStartedWith(t, game, 3)
-    assertFinishCalledWith(t, game, winner)
-    within(t, tenMS, func() { assertWebsocketGotMsg(t, ws, wantedBlindAlert) })
+	assertGameStartedWith(t, game, 3)
+	assertFinishCalledWith(t, game, winner)
+	within(t, tenMS, func() { assertWebsocketGotMsg(t, ws, wantedBlindAlert) })
 })
 ```
 
 テストを実行すると...
 
-```text
+```
 === RUN   TestGame
 === RUN   TestGame/start_a_game_with_3_players,_send_some_blind_alerts_down_WS_and_declare_Ruth_the_winner
 --- FAIL: TestGame (0.02s)
     --- FAIL: TestGame/start_a_game_with_3_players,_send_some_blind_alerts_down_WS_and_declare_Ruth_the_winner (0.02s)
-        server_test.go:143: timed out
-        server_test.go:150: got "", want "Blind is 100"
+    	server_test.go:143: timed out
+    	server_test.go:150: got "", want "Blind is 100"
 ```
 
 ## 成功させるのに十分なコードを書く
@@ -1040,14 +1040,14 @@ t.Run("start a game with 3 players, send some blind alerts down WS and declare R
 
 ```go
 func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
-    ws := newPlayerServerWS(w, r)
+	ws := newPlayerServerWS(w, r)
 
-    numberOfPlayersMsg := ws.WaitForMsg()
-    numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
-    p.game.Start(numberOfPlayers, ws)
+	numberOfPlayersMsg := ws.WaitForMsg()
+	numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
+	p.game.Start(numberOfPlayers, ws)
 
-    winner := ws.WaitForMsg()
-    p.game.Finish(winner)
+	winner := ws.WaitForMsg()
+	p.game.Finish(winner)
 }
 ```
 
@@ -1062,15 +1062,15 @@ func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
 
 ```go
 func assertFinishCalledWith(t testing.TB, game *GameSpy, winner string) {
-    t.Helper()
+	t.Helper()
 
-    passed := retryUntil(500*time.Millisecond, func() bool {
-        return game.FinishCalledWith == winner
-    })
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.FinishCalledWith == winner
+	})
 
-    if !passed {
-        t.Errorf("expected finish called with %q but got %q", winner, game.FinishCalledWith)
-    }
+	if !passed {
+		t.Errorf("expected finish called with %q but got %q", winner, game.FinishCalledWith)
+	}
 }
 ```
 
@@ -1078,13 +1078,13 @@ func assertFinishCalledWith(t testing.TB, game *GameSpy, winner string) {
 
 ```go
 func retryUntil(d time.Duration, f func() bool) bool {
-    deadline := time.Now().Add(d)
-    for time.Now().Before(deadline) {
-        if f() {
-            return true
-        }
-    }
-    return false
+	deadline := time.Now().Add(d)
+	for time.Now().Before(deadline) {
+		if f() {
+			return true
+		}
+	}
+	return false
 }
 ```
 

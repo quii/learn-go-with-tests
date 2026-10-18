@@ -12,7 +12,7 @@ const (
 	clockCentreY     = 150
 )
 
-//SVGWriter writes an SVG representation of an analogue clock, showing the time t, to the writer w.
+// SVGWriter writes an SVG representation of an analogue clock, showing the time t, to the writer w.
 func SVGWriter(w io.Writer, t time.Time) {
 	io.WriteString(w, svgStart)
 	io.WriteString(w, bezel)

@@ -4,7 +4,7 @@ description: Error types
 
 # エラーの種類
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/q-and-a/error-types)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/q-and-a/error-types)
 
 **エラー用に独自のタイプを作成することは、コードを整頓し、コードを使いやすくテストするための洗練された方法になる場合があります。**
 
@@ -17,20 +17,20 @@ description: Error types
 ```go
 // DumbGetter will get the string body of url if it gets a 200
 func DumbGetter(url string) (string, error) {
-    res, err := http.Get(url)
+	res, err := http.Get(url)
 
-    if err != nil {
-        return "", fmt.Errorf("problem fetching from %s, %v", url, err)
-    }
+	if err != nil {
+		return "", fmt.Errorf("problem fetching from %s, %v", url, err)
+	}
 
-    if res.StatusCode != http.StatusOK {
-        return "", fmt.Errorf("did not get 200 from %s, got %d", url, res.StatusCode)
-    }
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("did not get 200 from %s, got %d", url, res.StatusCode)
+	}
 
-    defer res.Body.Close()
-    body, _ := ioutil.ReadAll(res.Body) // ignoring err for brevity
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body) // ignoring err for brevity
 
-    return string(body), nil
+	return string(body), nil
 }
 ```
 
@@ -41,23 +41,23 @@ func DumbGetter(url string) (string, error) {
 ```go
 t.Run("when you don't get a 200 you get a status error", func(t *testing.T) {
 
-    svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-        res.WriteHeader(http.StatusTeapot)
-    }))
-    defer svr.Close()
+	svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		res.WriteHeader(http.StatusTeapot)
+	}))
+	defer svr.Close()
 
-    _, err := DumbGetter(svr.URL)
+	_, err := DumbGetter(svr.URL)
 
-    if err == nil {
-        t.Fatal("expected an error")
-    }
+	if err == nil {
+		t.Fatal("expected an error")
+	}
 
-    want := fmt.Sprintf("did not get 200 from %s, got %d", svr.URL, http.StatusTeapot)
-    got := err.Error()
+	want := fmt.Sprintf("did not get 200 from %s, got %d", svr.URL, http.StatusTeapot)
+	got := err.Error()
 
-    if got != want {
-        t.Errorf(`got "%v", want "%v"`, got, want)
-    }
+	if got != want {
+		t.Errorf(`got "%v", want "%v"`, got, want)
+	}
 })
 ```
 
@@ -89,8 +89,8 @@ TDDを使用すると、以下の考え方に入ることができます。
 
 ```go
 type BadStatusError struct {
-    URL    string
-    Status int
+	URL    string
+	Status int
 }
 ```
 
@@ -101,28 +101,28 @@ type BadStatusError struct {
 ```go
 t.Run("when you don't get a 200 you get a status error", func(t *testing.T) {
 
-    svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-        res.WriteHeader(http.StatusTeapot)
-    }))
-    defer svr.Close()
+	svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		res.WriteHeader(http.StatusTeapot)
+	}))
+	defer svr.Close()
 
-    _, err := DumbGetter(svr.URL)
+	_, err := DumbGetter(svr.URL)
 
-    if err == nil {
-        t.Fatal("expected an error")
-    }
+	if err == nil {
+		t.Fatal("expected an error")
+	}
 
-    got, isStatusErr := err.(BadStatusError)
+	got, isStatusErr := err.(BadStatusError)
 
-    if !isStatusErr {
-        t.Fatalf("was not a BadStatusError, got %T", err)
-    }
+	if !isStatusErr {
+		t.Fatalf("was not a BadStatusError, got %T", err)
+	}
 
-    want := BadStatusError{URL: svr.URL, Status: http.StatusTeapot}
+	want := BadStatusError{URL: svr.URL, Status: http.StatusTeapot}
 
-    if got != want {
-        t.Errorf("got %v, want %v", got, want)
-    }
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
 })
 ```
 
@@ -130,7 +130,7 @@ t.Run("when you don't get a 200 you get a status error", func(t *testing.T) {
 
 ```go
 func (b BadStatusError) Error() string {
-    return fmt.Sprintf("did not get 200 from %s, got %d", b.URL, b.Status)
+	return fmt.Sprintf("did not get 200 from %s, got %d", b.URL, b.Status)
 }
 ```
 
@@ -142,17 +142,17 @@ func (b BadStatusError) Error() string {
 
 テストを実行すると、正しい種類のエラーが返されなかったことがわかります
 
-```text
+```
 --- FAIL: TestDumbGetter (0.00s)
     --- FAIL: TestDumbGetter/when_you_dont_get_a_200_you_get_a_status_error (0.00s)
-        error-types_test.go:56: was not a BadStatusError, got *errors.errorString
+    	error-types_test.go:56: was not a BadStatusError, got *errors.errorString
 ```
 
 タイプを使用するようにエラー処理コードを更新して、`DumbGetter`を修正しましょう
 
 ```go
 if res.StatusCode != http.StatusOK {
-    return "", BadStatusError{URL: url, Status: res.StatusCode}
+	return "", BadStatusError{URL: url, Status: res.StatusCode}
 }
 ```
 
@@ -177,29 +177,29 @@ Go1.13では、標準ライブラリのエラーを扱う新しい方法があ�
 ```go
 t.Run("when you don't get a 200 you get a status error", func(t *testing.T) {
 
-    svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-        res.WriteHeader(http.StatusTeapot)
-    }))
-    defer svr.Close()
+	svr := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		res.WriteHeader(http.StatusTeapot)
+	}))
+	defer svr.Close()
 
-    _, err := DumbGetter(svr.URL)
+	_, err := DumbGetter(svr.URL)
 
-    if err == nil {
-        t.Fatal("expected an error")
-    }
+	if err == nil {
+		t.Fatal("expected an error")
+	}
 
-    var got BadStatusError
-    isBadStatusError := errors.As(err, &got)
-    want := BadStatusError{URL: svr.URL, Status: http.StatusTeapot}
+	var got BadStatusError
+	isBadStatusError := errors.As(err, &got)
+	want := BadStatusError{URL: svr.URL, Status: http.StatusTeapot}
 
-    if !isBadStatusError {
-        t.Fatalf("was not a BadStatusError, got %T", err)
-    }
+	if !isBadStatusError {
+		t.Fatalf("was not a BadStatusError, got %T", err)
+	}
 
-    if got != want {
-        t.Errorf("got %v, want %v", got, want)
-    }
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
 })
 ```
 
-この場合、[`errors.As`](https://golang.org/pkg/errors/#example_As)を使ってエラーをカスタム型に抽出しています。これは成功を示すために`bool`を返し、それを`got`に抽出してくれます。
+この場合、[`errors.As`](https://pkg.go.dev/errors#example-As)を使ってエラーをカスタム型に抽出しています。これは成功を示すために`bool`を返し、それを`got`に抽出してくれます。

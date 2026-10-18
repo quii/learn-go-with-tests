@@ -4,7 +4,7 @@ description: 'Structs, methods & interfaces'
 
 # 構造体、メソッド、インターフェース
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/structs)
+**[この章のすべてのコードはここにあります](https://github.com/quii/learn-go-with-tests/tree/main/structs)**
 
 高さと幅を指定して長方形の周囲を計算するために、いくつかのジオメトリコードが必要だとします。 `Perimeter(width float64, height float64)`関数を記述できます。
 ここで、 `float64`は` 123.45`のような浮動小数点数用です。
@@ -15,12 +15,12 @@ description: 'Structs, methods & interfaces'
 
 ```go
 func TestPerimeter(t *testing.T) {
-    got := Perimeter(10.0, 10.0)
-    want := 40.0
+	got := Perimeter(10.0, 10.0)
+	want := 40.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
-    }
+	if got != want {
+		t.Errorf("got %.2f want %.2f", got, want)
+	}
 }
 ```
 
@@ -34,17 +34,17 @@ func TestPerimeter(t *testing.T) {
 
 ```go
 func Perimeter(width float64, height float64) float64 {
-    return 0
+	return 0
 }
 ```
 
-Results in `shapes_test.go:10: got 0.00 want 40.00`.
+結果は `shapes_test.go:10: got 0.00 want 40.00` となります。
 
 ## 成功させるのに十分なコードを書く
 
 ```go
 func Perimeter(width float64, height float64) float64 {
-    return 2 * (width + height)
+	return 2 * (width + height)
 }
 ```
 
@@ -56,21 +56,21 @@ TDDサイクルに従って、自分で試してください。
 
 ```go
 func TestPerimeter(t *testing.T) {
-    got := Perimeter(10.0, 10.0)
-    want := 40.0
+	got := Perimeter(10.0, 10.0)
+	want := 40.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
-    }
+	if got != want {
+		t.Errorf("got %.2f want %.2f", got, want)
+	}
 }
 
 func TestArea(t *testing.T) {
-    got := Area(12.0, 6.0)
-    want := 72.0
+	got := Area(12.0, 6.0)
+	want := 72.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
-    }
+	if got != want {
+		t.Errorf("got %.2f want %.2f", got, want)
+	}
 }
 ```
 
@@ -78,13 +78,33 @@ func TestArea(t *testing.T) {
 
 ```go
 func Perimeter(width float64, height float64) float64 {
-    return 2 * (width + height)
+	return 2 * (width + height)
 }
 
 func Area(width float64, height float64) float64 {
-    return width * height
+	return width * height
 }
 ```
+
+浮動小数点数を `!=`/`==` で比較するのは、メモリ上での表現方法のせいで良くない考えだと聞いたことがあるかもしれません。
+
+```go
+func Example_floatComparison() {
+	fmt.Println(0.1+0.2 == 0.3)
+
+	var a, b, c float64 = 0.1, 0.2, 0.3
+	fmt.Println(a+b == c)
+
+	// Output:
+	// true
+	// false
+}
+```
+
+2つ目の比較が `false` になるのは、`0.1` と `0.2` が `float64` では正確に表現できないため、それらを足し合わせても正確に `0.3` にはならないからです。1つ目が `true` になるのは、リテラル式として書かれているからにすぎません。Goはリテラル式を、何かに代入されるまでは `float64` ではなく任意精度で評価します。
+
+ただし、この不正確さは上の `Area` のテストには当てはまりません。使っている値（`12.0`、`6.0`、`72.0` など）はすべて整数であり、`float64` で正確に表現 _できます_ 。そして、正確に表現された2つの数を掛け合わせた結果は、範囲内に収まっている限り、やはり正確に表現できる値になります。厳密な比較が危険になるのは、`0.1` のような正確に表現できない値や、除算の結果のような計算を持ち込んだときだけです。そのようなテストを書くことになったら、代わりに許容誤差を設けた比較を使いましょう。例えば `go-cmp` の [`cmp.Diff` と `cmpopts.EquateApprox`](https://pkg.go.dev/github.com/google/go-cmp/cmp/cmpopts#EquateApprox) などです。
+
 
 ## リファクタリング♪
 
@@ -95,12 +115,12 @@ func Area(width float64, height float64) float64 {
 
 **struct**を使用して単純なタイプを作成できます。[構造体](https://golang.org/ref/spec#Struct_types)は、データを保存できるフィールドの名前付きコレクションです。
 
-このような構造体を宣言します
+`shapes.go`ファイルで次のように構造体を宣言します
 
 ```go
 type Rectangle struct {
-    Width float64
-    Height float64
+	Width  float64
+	Height float64
 }
 ```
 
@@ -108,28 +128,28 @@ type Rectangle struct {
 
 ```go
 func TestPerimeter(t *testing.T) {
-    rectangle := Rectangle{10.0, 10.0}
-    got := Perimeter(rectangle)
-    want := 40.0
+	rectangle := Rectangle{10.0, 10.0}
+	got := Perimeter(rectangle)
+	want := 40.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
-    }
+	if got != want {
+		t.Errorf("got %.2f want %.2f", got, want)
+	}
 }
 
 func TestArea(t *testing.T) {
-    rectangle := Rectangle{12.0, 6.0}
-    got := Area(rectangle)
-    want := 72.0
+	rectangle := Rectangle{12.0, 6.0}
+	got := Area(rectangle)
+	want := 72.0
 
-    if got != want {
-        t.Errorf("got %.2f want %.2f", got, want)
-    }
+	if got != want {
+		t.Errorf("got %.2f want %.2f", got, want)
+	}
 }
 ```
 
 修正を試みる前に必ずテストを実行してください。
-次のような有用なエラーが表示されるはずです。
+テストは次のような有用なエラーを表示するはずです。
 
 ```text
 ./shapes_test.go:7:18: not enough arguments in call to Perimeter
@@ -143,15 +163,15 @@ func TestArea(t *testing.T) {
 
 ```go
 func Perimeter(rectangle Rectangle) float64 {
-    return 2 * (rectangle.Width + rectangle.Height)
+	return 2 * (rectangle.Width + rectangle.Height)
 }
 
 func Area(rectangle Rectangle) float64 {
-    return rectangle.Width * rectangle.Height
+	return rectangle.Width * rectangle.Height
 }
 ```
 
-`Rectangle`を関数に渡すと、意図がより明確に伝わるが、構造体を使用することで得られるメリットが増えることに同意していただければ幸いです。
+`Rectangle`を関数に渡すと意図がより明確に伝わることに同意していただければ幸いです。構造体を使用することには他にもメリットがあり、それについては後で説明します。
 
 次の要件は、サークルの`Area`関数を記述することです。
 
@@ -160,30 +180,32 @@ func Area(rectangle Rectangle) float64 {
 ```go
 func TestArea(t *testing.T) {
 
-    t.Run("rectangles", func(t *testing.T) {
-        rectangle := Rectangle{12, 6}
-        got := Area(rectangle)
-        want := 72.0
+	t.Run("rectangles", func(t *testing.T) {
+		rectangle := Rectangle{12, 6}
+		got := Area(rectangle)
+		want := 72.0
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %g want %g", got, want)
+		}
+	})
 
-    t.Run("circles", func(t *testing.T) {
-        circle := Circle{10}
-        got := Area(circle)
-        want := 314.1592653589793
+	t.Run("circles", func(t *testing.T) {
+		circle := Circle{10}
+		got := Area(circle)
+		want := 314.1592653589793
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %g want %g", got, want)
+		}
+	})
 
 }
 ```
 
-ご覧のとおり、 `f` は `g`に置き換えられています。`f`を使用すると、正確な10進数を知るのが難しい場合があります。`g`を使用すると、エラーメッセージで完全な10進数が表示されます。\([fmt options](https://golang.org/pkg/fmt/)\).
+ご覧のとおり、 `f` は `g`に置き換えられています。これにはちゃんとした理由があります。
+`g`を使用すると、エラーメッセージでより精度の高い10進数が表示されます\([fmt options](https://golang.org/pkg/fmt/)\)。
+例えば、円の面積の計算で半径1.5を使った場合、`f`では`7.068583`と表示されますが、`g`では`7.0685834705770345`と表示されます。
 
 ## テストを実行してみます
 
@@ -195,7 +217,7 @@ func TestArea(t *testing.T) {
 
 ```go
 type Circle struct {
-    Radius float64
+	Radius float64
 }
 ```
 
@@ -206,8 +228,8 @@ type Circle struct {
 一部のプログラミング言語では、次のようなことができます。
 
 ```go
-func Area(circle Circle) float64 { ... }
-func Area(rectangle Rectangle) float64 { ... }
+func Area(circle Circle) float64       {}
+func Area(rectangle Rectangle) float64 {}
 ```
 
 しかし、**Go**ではできません
@@ -234,25 +256,25 @@ func Area(rectangle Rectangle) float64 { ... }
 ```go
 func TestArea(t *testing.T) {
 
-    t.Run("rectangles", func(t *testing.T) {
-        rectangle := Rectangle{12, 6}
-        got := rectangle.Area()
-        want := 72.0
+	t.Run("rectangles", func(t *testing.T) {
+		rectangle := Rectangle{12, 6}
+		got := rectangle.Area()
+		want := 72.0
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %g want %g", got, want)
+		}
+	})
 
-    t.Run("circles", func(t *testing.T) {
-        circle := Circle{10}
-        got := circle.Area()
-        want := 314.1592653589793
+	t.Run("circles", func(t *testing.T) {
+		circle := Circle{10}
+		got := circle.Area()
+		want := 314.1592653589793
 
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %g want %g", got, want)
+		}
+	})
 
 }
 ```
@@ -274,20 +296,20 @@ func TestArea(t *testing.T) {
 
 ```go
 type Rectangle struct {
-    Width  float64
-    Height float64
+	Width  float64
+	Height float64
 }
 
-func (r Rectangle) Area() float64  {
-    return 0
+func (r Rectangle) Area() float64 {
+	return 0
 }
 
 type Circle struct {
-    Radius float64
+	Radius float64
 }
 
-func (c Circle) Area() float64  {
-    return 0
+func (c Circle) Area() float64 {
+	return 0
 }
 ```
 
@@ -299,7 +321,7 @@ func (c Circle) Area() float64  {
 
 Goの慣例では、レシーバー変数をタイプの最初の文字にします。
 
-```go
+```
 r Rectangle
 ```
 
@@ -310,8 +332,8 @@ r Rectangle
 新しいメソッドを修正して、長方形のテストに成功させましょう
 
 ```go
-func (r Rectangle) Area() float64  {
-    return r.Width * r.Height
+func (r Rectangle) Area() float64 {
+	return r.Width * r.Height
 }
 ```
 
@@ -320,8 +342,8 @@ func (r Rectangle) Area() float64  {
 サークルの `Area`関数を渡すために、`math`パッケージから `Pi`定数を借ります（インポートすることを忘れないでください\）。
 
 ```go
-func (c Circle) Area() float64  {
-    return math.Pi * c.Radius * c.Radius
+func (c Circle) Area() float64 {
+	return math.Pi * c.Radius * c.Radius
 }
 ```
 
@@ -343,23 +365,23 @@ Goでは、この意図を**インターフェース**で体系化できます�
 ```go
 func TestArea(t *testing.T) {
 
-    checkArea := func(t *testing.T, shape Shape, want float64) {
-        t.Helper()
-        got := shape.Area()
-        if got != want {
-            t.Errorf("got %g want %g", got, want)
-        }
-    }
+	checkArea := func(t testing.TB, shape Shape, want float64) {
+		t.Helper()
+		got := shape.Area()
+		if got != want {
+			t.Errorf("got %g want %g", got, want)
+		}
+	}
 
-    t.Run("rectangles", func(t *testing.T) {
-        rectangle := Rectangle{12, 6}
-        checkArea(t, rectangle, 72.0)
-    })
+	t.Run("rectangles", func(t *testing.T) {
+		rectangle := Rectangle{12, 6}
+		checkArea(t, rectangle, 72.0)
+	})
 
-    t.Run("circles", func(t *testing.T) {
-        circle := Circle{10}
-        checkArea(t, circle, 314.1592653589793)
-    })
+	t.Run("circles", func(t *testing.T) {
+		circle := Circle{10}
+		checkArea(t, circle, 314.1592653589793)
+	})
 
 }
 ```
@@ -371,7 +393,7 @@ func TestArea(t *testing.T) {
 
 ```go
 type Shape interface {
-    Area() float64
+	Area() float64
 }
 ```
 
@@ -404,25 +426,25 @@ Goでは、**インターフェースの解決は暗黙的です**。
 
 構造体についてある程度理解できたので、「**テーブル駆動テスト**」を紹介します。
 
-[テーブル駆動テスト](https://github.com/golang/go/wiki/TableDrivenTests)は、同じ方法でテストできるテストケースのリストを作成する場合に役立ちます。
+[テーブル駆動テスト](https://go.dev/wiki/TableDrivenTests)は、同じ方法でテストできるテストケースのリストを作成する場合に役立ちます。
 
 ```go
 func TestArea(t *testing.T) {
 
-    areaTests := []struct {
-        shape Shape
-        want  float64
-    }{
-        {Rectangle{12, 6}, 72.0},
-        {Circle{10}, 314.1592653589793},
-    }
+	areaTests := []struct {
+		shape Shape
+		want  float64
+	}{
+		{Rectangle{12, 6}, 72.0},
+		{Circle{10}, 314.1592653589793},
+	}
 
-    for _, tt := range areaTests {
-        got := tt.shape.Area()
-        if got != tt.want {
-            t.Errorf("got %g want %g", got, tt.want)
-        }
-    }
+	for _, tt := range areaTests {
+		got := tt.shape.Area()
+		if got != tt.want {
+			t.Errorf("got %g want %g", got, tt.want)
+		}
+	}
 
 }
 ```
@@ -434,7 +456,7 @@ func TestArea(t *testing.T) {
 開発者が新しい形状を導入し、 `Area`を実装してテストケースに追加するのが非常に簡単であることを確認できます。
 さらに、`Area`でバグが見つかった場合、修正する前に新しいテストケースを追加して実行するのは非常に簡単です。
 
-テーブルベースのテストは、ツールボックスの優れた項目になる可能性がありますが、テストで余分なノイズが必要であることを確認してください。
+テーブル駆動テストは、ツールボックスの優れた道具になり得ますが、テストに余分なノイズを加える必要が本当にあるのかを確認してください。
 インターフェースのさまざまな実装をテストしたい場合、または関数に渡されるデータに、テストを必要とするさまざまな要件がたくさんある場合、それらは非常に適しています。
 
 別の形状を追加してテストすることで、これらすべてを実証してみましょう。三角形含めて。
@@ -446,21 +468,21 @@ func TestArea(t *testing.T) {
 ```go
 func TestArea(t *testing.T) {
 
-    areaTests := []struct {
-        shape Shape
-        want  float64
-    }{
-        {Rectangle{12, 6}, 72.0},
-        {Circle{10}, 314.1592653589793},
-        {Triangle{12, 6}, 36.0},
-    }
+	areaTests := []struct {
+		shape Shape
+		want  float64
+	}{
+		{Rectangle{12, 6}, 72.0},
+		{Circle{10}, 314.1592653589793},
+		{Triangle{12, 6}, 36.0},
+	}
 
-    for _, tt := range areaTests {
-        got := tt.shape.Area()
-        if got != tt.want {
-            t.Errorf("got %g want %g", got, tt.want)
-        }
-    }
+	for _, tt := range areaTests {
+		got := tt.shape.Area()
+		if got != tt.want {
+			t.Errorf("got %g want %g", got, tt.want)
+		}
+	}
 
 }
 ```
@@ -473,12 +495,12 @@ func TestArea(t *testing.T) {
 
 `./shapes_test.go:25:4: undefined: Triangle`
 
-三角形はまだ定義していません
+`Triangle`はまだ定義していません
 
 ```go
 type Triangle struct {
-    Base   float64
-    Height float64
+	Base   float64
+	Height float64
 }
 ```
 
@@ -489,11 +511,11 @@ type Triangle struct {
     Triangle does not implement Shape (missing Area method)
 ```
 
-Triangleは `Area()`メソッドがないため、形状として使用できないので、テストを機能させるために空の実装を追加します
+`Triangle`は `Area()`メソッドがないため、形状として使用できないので、テストを機能させるために空の実装を追加します
 
 ```go
 func (t Triangle) Area() float64 {
-    return 0
+	return 0
 }
 ```
 
@@ -505,7 +527,7 @@ func (t Triangle) Area() float64 {
 
 ```go
 func (t Triangle) Area() float64 {
-    return (t.Base * t.Height) * 0.5
+	return (t.Base * t.Height) * 0.5
 }
 ```
 
@@ -517,7 +539,7 @@ func (t Triangle) Area() float64 {
 
 これを見直すと
 
-```go
+```
 {Rectangle{12, 6}, 72.0},
 {Circle{10}, 314.1592653589793},
 {Triangle{12, 6}, 36.0},
@@ -529,7 +551,7 @@ func (t Triangle) Area() float64 {
 
 それがどのように見えるか見てみましょう
 
-```go
+```
         {shape: Rectangle{Width: 12, Height: 6}, want: 72.0},
         {shape: Circle{Radius: 10}, want: 314.1592653589793},
         {shape: Triangle{Base: 12, Height: 6}, want: 36.0},
@@ -539,7 +561,9 @@ func (t Triangle) Area() float64 {
 
 > テストは、それが真実の主張であるかのように、より明確に私たちに話しかけます。**一連の操作ではありません**
 
-今度は、少なくともケースのリストのテストで、形状とその領域について真実を主張します。
+\(引用中の強調は私によるものです\)
+
+これで、テスト、というよりテストケースのリストが、形状とその面積についての真実を主張するようになりました。
 
 ## テスト出力が役立つことを確認する
 
@@ -547,13 +571,12 @@ func (t Triangle) Area() float64 {
 
 `shapes_test.go:31: got 0.00 want 36.00`と表示されました。
 
-これが`Triangle`に関連していることはわかっていましたが、それを扱っているだけでしたが、表の20のケースのいずれかでバグがシステムに侵入した場合はどうなりますか？
+ちょうど`Triangle`を扱っていたので、これが`Triangle`に関連していることはわかっていました。
+しかし、表の20のケースのいずれかでバグがシステムに紛れ込んだ場合はどうなるでしょうか？
 開発者はどのケースが失敗したかをどのようにして知るのでしょうか？
-これは開発者にとって素晴らしい経験ではありません。
+これは開発者にとって良い体験ではありません。実際に失敗したケースを見つけるために、ケースを手動で調べる必要があります。
 
-実際に失敗したケースを見つけるために、ケースを手動で調べる必要があります。
-
-エラーメッセージを `%#v got %.2f want %.2f`に変更できます。 `%#v`形式の文字列は、フィールドの値を含む構造体を出力するため、開発者はテストされているプロパティを一目で確認できます。
+エラーメッセージを `%#v got %g want %g`に変更できます。 `%#v`形式の文字列は、フィールドの値を含む構造体を出力するため、開発者はテストされているプロパティを一目で確認できます。
 
 テストケースを読みやすくするために、 `want`フィールドの名前を`hasArea`のようなわかりやすい名前に変更できます。
 
@@ -574,26 +597,26 @@ func (t Triangle) Area() float64 {
 ```go
 func TestArea(t *testing.T) {
 
-    areaTests := []struct {
-        name    string
-        shape   Shape
-        hasArea float64
-    }{
-        {name: "Rectangle", shape: Rectangle{Width: 12, Height: 6}, hasArea: 72.0},
-        {name: "Circle", shape: Circle{Radius: 10}, hasArea: 314.1592653589793},
-        {name: "Triangle", shape: Triangle{Base: 12, Height: 6}, hasArea: 36.0},
-    }
+	areaTests := []struct {
+		name    string
+		shape   Shape
+		hasArea float64
+	}{
+		{name: "Rectangle", shape: Rectangle{Width: 12, Height: 6}, hasArea: 72.0},
+		{name: "Circle", shape: Circle{Radius: 10}, hasArea: 314.1592653589793},
+		{name: "Triangle", shape: Triangle{Base: 12, Height: 6}, hasArea: 36.0},
+	}
 
-    for _, tt := range areaTests {
-        // using tt.name from the case to use it as the `t.Run` test name
-        t.Run(tt.name, func(t *testing.T) {
-            got := tt.shape.Area()
-            if got != tt.hasArea {
-                t.Errorf("%#v got %g want %g", tt.shape, got, tt.hasArea)
-            }
-        })
+	for _, tt := range areaTests {
+		// using tt.name from the case to use it as the `t.Run` test name
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.shape.Area()
+			if got != tt.hasArea {
+				t.Errorf("%#v got %g want %g", tt.shape, got, tt.hasArea)
+			}
+		})
 
-    }
+	}
 
 }
 ```
@@ -603,13 +626,13 @@ func TestArea(t *testing.T) {
 これはより基本的な数学の問題の解決策を繰り返し、テストによって動機付けされた新しい言語機能を学習する、よりTDDの実践でした。
 
 * 構造体を宣言して独自のデータ型を作成し、関連するデータをまとめてコードの意図を明確にする
-* さまざまなタイプで使用できる関数を定義できるようにインターフェイスを宣言する \([parametric polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism)\)
+* さまざまなタイプで使用できる関数を定義できるようにインターフェイスを宣言する \([アドホック多相](https://en.wikipedia.org/wiki/Ad_hoc_polymorphism)\)
 * データ型に機能を追加したり、インターフェースを実装したりできるようにメソッドを追加する
-* アサーションをより明確にし、スイートを拡張および保守しやすくするためのテーブルベースのテスト
+* アサーションをより明確にし、テストスイートを拡張および保守しやすくするためのテーブル駆動テスト
 
 これは重要な章でした。私たちは今、独自の型を定義し始めているからです。 Goのような静的に型付けされた言語では、理解しやすく、つなぎ合わせてテストできるソフトウェアを構築するために、独自の型を設計できることが不可欠です。
 
-インターフェイスは、システムの他の部分から複雑さを隠すための優れたツールです。私たちの場合、テストヘルパーは、それがアサートしている正確な形状を知る必要はなく、その領域を`尋ねる`方法を知るだけでした。
+インターフェイスは、システムの他の部分から複雑さを隠すための優れたツールです。私たちの場合、テストヘルパーは、それがアサートしている正確な形状を知る必要はなく、その面積を「尋ねる」方法を知るだけでした。
 
-Goに慣れるにつれて、インターフェースと標準ライブラリの本当の強みを理解し始めることができます。
-`everywhere`で使用される標準ライブラリで定義されたインターフェイスについて学び、独自のタイプに対してそれらを実装することにより、多くの優れた機能を非常に迅速に再利用できます。
+Goに慣れるにつれて、インターフェースと標準ライブラリの本当の強みがわかり始めるでしょう。
+ _あらゆる場所_ で使用される標準ライブラリで定義されたインターフェイスについて学び、独自のタイプに対してそれらを実装することにより、多くの優れた機能を非常に迅速に再利用できます。

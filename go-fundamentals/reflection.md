@@ -4,9 +4,9 @@ description: Reflection
 
 # リフレクション
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/reflection)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/reflection)
 
-[Twitter](https://twitter.com/peterbourgon/status/1011403901419937792?s=09)
+[X より](https://x.com/peterbourgon/status/1011403901419937792?s=09)
 
 > golangチャレンジ：構造体`x`を受け取り、内部にあるすべての文字列フィールドに対して`fn`を呼び出す関数`walk(x interface{}, fn func(string))`を記述します。難易度：再帰的に。
 
@@ -16,7 +16,7 @@ description: Reflection
 
 [The Go Blog: Reflection](https://blog.golang.org/laws-of-reflection)抜粋
 
-## 「インターフェース（`interface`）」とは何ですか？
+## 「インターフェース（`interface{}`）」とは何ですか？
 
 Goでは、`string`、`int`などの既知の型や、`BankAccount`などの独自の型で機能する関数の点で、タイプの安全性を提供してきました。
 
@@ -24,17 +24,17 @@ Goでは、`string`、`int`などの既知の型や、`BankAccount`などの独�
 
 コンパイル時に型がわからない関数を書きたいというシナリオに出くわすかもしれません。
 
-Goでは、これを _any_ 型と考えることができる型`interface{}`で回避できます。
+Goでは、これを _any_ 型と考えることができる型`interface{}`で回避できます（実際、Goでは`any`は`interface{}`の[エイリアス](https://cs.opensource.google/go/go/+/master:src/builtin/builtin.go;drc=master;l=95)です）。
 
 したがって、`walk(x interface{}, fn func(string))`は、`x`の任意の値を受け入れます。
 
-### では、すべてに「インターフェース」を使用し、本当に柔軟な機能を持たないのはなぜでしょうか？
-* 「インターフェース`interface`」をとる関数のユーザーとして、タイプの安全性を失います。タイプ`string`の`Foo.bar`を関数に渡すつもりでしたが、代わりに`int`である`Foo.baz`を渡した場合はどうなりますか？コンパイラーは間違いを通知できません。また、関数に渡すことが許可されている _what_ もわかりません。たとえば関数が `UserService`をとることを知ることは非常に便利です。
+### では、すべてに`interface{}`を使用し、本当に柔軟な機能を持たないのはなぜでしょうか？
+* `interface{}`をとる関数のユーザーとして、タイプの安全性を失います。タイプ`string`の`Herd.species`を関数に渡すつもりでしたが、代わりに`int`である`Herd.count`を渡した場合はどうなりますか？コンパイラーは間違いを通知できません。また、関数に渡すことが許可されている _what_ もわかりません。たとえば関数が `UserService`をとることを知ることは非常に便利です。
 * そのような関数の書き方として、渡された _anything_ を検査して、型が何であり、それで何ができるのかを理解する必要があります。これは、リフレクション（_reflection_）を使用して行われます。これは非常に不格好で読みにくい場合があり、実行時にチェックを行う必要があるため一般的にパフォーマンスが低下します。
 
 つまり、本当に必要な場合にのみ、リフレクションを使用してください。
 
-ポリモーフィック関数が必要な場合は、ユーザーが関数を機能させるために必要なメソッドを実装している場合に、ユーザーが複数の型で関数を使用できるように、（`interface`ではなく混乱を防ぐために）の周囲で設計できるかどうか検討してください。
+ポリモーフィック関数が必要な場合は、ユーザーが関数を機能させるために必要なメソッドを実装している場合に、ユーザーが複数の型で関数を使用できるように、（紛らわしいですが、`interface{}`ではなく）インターフェースの周囲で設計できるかどうか検討してください。
 
 私たちの機能は、さまざまなことを処理できる必要があります。いつものように、サポートしたい新しいものごとにテストを作成し、完了するまでリファクタリングを繰り返すというアプローチをとります。
 
@@ -134,16 +134,16 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-このコードは _非常に安全でナイーブ_ ですが、「赤」（テスト失敗）にあるときの目標は、可能な限り最小限のコードを記述することです。次に、懸念に対処するためのテストをさらに記述します。
+このコードは _非常に安全でなくナイーブ_ ですが、覚えておいてください。「赤」（テスト失敗）にあるときの目標は、可能な限り最小限のコードを記述することです。次に、懸念に対処するためのテストをさらに記述します。
 
 リフレクションを使用して`x`を確認し、そのプロパティを確認する必要があります。
 
-[reflect package](https://godoc.org/reflect)には、指定された変数の`Value`を返す関数`ValueOf`があります。これには、次の行で使用するフィールドなど、値を検査する方法があります。
+[reflect package](https://pkg.go.dev/reflect)には、指定された変数の`Value`を返す関数`ValueOf`があります。これには、次の行で使用するフィールドなど、値を検査する方法があります。
 
 次に、渡された値について非常に楽観的な仮定を行います。
 
-* 最初で唯一のフィールドを見て、パニックを引き起こすフィールドがまったくない場合があります。
-* 次に、基になる値を文字列として返す`String()`を呼び出しますが、フィールドが文字列以外の場合は間違っていることがわかります。
+* 最初で唯一のフィールドを見ます。しかし、フィールドがまったくない場合もあり、その場合はパニックを引き起こします。
+* 次に、基になる値を文字列として返す`String()`を呼び出します。しかし、フィールドが文字列以外の場合、これは間違ったものになります。
 
 ## リファクタリング♪
 
@@ -156,32 +156,32 @@ func walk(x interface{}, fn func(input string)) {
 ```go
 func TestWalk(t *testing.T) {
 
-    cases := []struct{
-        Name string
-        Input interface{}
-        ExpectedCalls []string
-    } {
-        {
-            "Struct with one string field",
-            struct {
-                Name string
-            }{ "Chris"},
-            []string{"Chris"},
-        },
-    }
+	cases := []struct {
+		Name          string
+		Input         interface{}
+		ExpectedCalls []string
+	}{
+		{
+			"struct with one string field",
+			struct {
+				Name string
+			}{"Chris"},
+			[]string{"Chris"},
+		},
+	}
 
-    for _, test := range cases {
-        t.Run(test.Name, func(t *testing.T) {
-            var got []string
-            walk(test.Input, func(input string) {
-                got = append(got, input)
-            })
+	for _, test := range cases {
+		t.Run(test.Name, func(t *testing.T) {
+			var got []string
+			walk(test.Input, func(input string) {
+				got = append(got, input)
+			})
 
-            if !reflect.DeepEqual(got, test.ExpectedCalls) {
-                t.Errorf("got %v, want %v", got, test.ExpectedCalls)
-            }
-        })
-    }
+			if !reflect.DeepEqual(got, test.ExpectedCalls) {
+				t.Errorf("got %v, want %v", got, test.ExpectedCalls)
+			}
+		})
+	}
 }
 ```
 
@@ -191,22 +191,22 @@ func TestWalk(t *testing.T) {
 
 次のシナリオを`cases`に追加します。
 
-```go
+```
 {
-    "Struct with two string fields",
+    "struct with two string fields",
     struct {
         Name string
         City string
     }{"Chris", "London"},
     []string{"Chris", "London"},
-}
+},
 ```
 
 ## テストを実行してみます
 
 ```text
-=== RUN   TestWalk/Struct_with_two_string_fields
-    --- FAIL: TestWalk/Struct_with_two_string_fields (0.00s)
+=== RUN   TestWalk/struct_with_two_string_fields
+    --- FAIL: TestWalk/struct_with_two_string_fields (0.00s)
         reflection_test.go:40: got [Chris], want [Chris London]
 ```
 
@@ -237,9 +237,9 @@ func walk(x interface{}, fn func(input string)) {
 
 次のケースを追加
 
-```go
+```
 {
-    "Struct with non string field",
+    "struct with non string field",
     struct {
         Name string
         Age  int
@@ -251,8 +251,8 @@ func walk(x interface{}, fn func(input string)) {
 ## テストを実行してみます
 
 ```text
-=== RUN   TestWalk/Struct_with_non_string_field
-    --- FAIL: TestWalk/Struct_with_non_string_field (0.00s)
+=== RUN   TestWalk/struct_with_non_string_field
+    --- FAIL: TestWalk/struct_with_non_string_field (0.00s)
         reflection_test.go:46: got [Chris <int Value>], want [Chris]
 ```
 
@@ -274,7 +274,7 @@ func walk(x interface{}, fn func(input string)) {
 }
 ```
 
-その[`Kind`](https://godoc.org/reflect#Kind)をチェックすることでそれを行うことができます。
+その[`Kind`](https://pkg.go.dev/reflect#Kind)をチェックすることでそれを行うことができます。
 
 ## リファクタリング♪
 
@@ -287,9 +287,9 @@ func walk(x interface{}, fn func(input string)) {
 
 私たちは匿名構造体構文を使用して、テストのためにアドホックに型を宣言しているので、そのように続けることができます
 
-```go
+```
 {
-    "Nested fields",
+    "nested fields",
     struct {
         Name string
         Profile struct {
@@ -325,9 +325,9 @@ type Profile struct {
 
 これをケースに追加して、以前よりもはるかに明確に読み取ることができます。
 
-```go
+```
 {
-    "Nested fields",
+    "nested fields",
     Person{
         "Chris",
         Profile{33, "London"},
@@ -340,7 +340,7 @@ type Profile struct {
 
 ```text
 === RUN   TestWalk/Nested_fields
-    --- FAIL: TestWalk/Nested_fields (0.00s)
+    --- FAIL: TestWalk/nested_fields (0.00s)
         reflection_test.go:54: got [Chris], want [Chris London]
 ```
 
@@ -395,9 +395,9 @@ func walk(x interface{}, fn func(input string)) {
 
 このケースを追加
 
-```go
+```
 {
-    "Pointers to things",
+    "pointers to things",
     &Person{
         "Chris",
         Profile{33, "London"},
@@ -409,7 +409,7 @@ func walk(x interface{}, fn func(input string)) {
 ## テストを実行してみます
 
 ```text
-=== RUN   TestWalk/Pointers_to_things
+=== RUN   TestWalk/pointers_to_things
 panic: reflect: call of reflect.Value.NumField on ptr Value [recovered]
     panic: reflect: call of reflect.Value.NumField on ptr Value
 ```
@@ -418,22 +418,22 @@ panic: reflect: call of reflect.Value.NumField on ptr Value [recovered]
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-    val := reflect.ValueOf(x)
+	val := reflect.ValueOf(x)
 
-    if val.Kind() == reflect.Ptr {
-        val = val.Elem()
-    }
+	if val.Kind() == reflect.Pointer {
+		val = val.Elem()
+	}
 
-    for i := 0; i < val.NumField(); i++ {
-        field := val.Field(i)
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
 
-        switch field.Kind() {
-        case reflect.String:
-            fn(field.String())
-        case reflect.Struct:
-            walk(field.Interface(), fn)
-        }
-    }
+		switch field.Kind() {
+		case reflect.String:
+			fn(field.String())
+		case reflect.Struct:
+			walk(field.Interface(), fn)
+		}
+	}
 }
 ```
 
@@ -445,28 +445,28 @@ func walk(x interface{}, fn func(input string)) {
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-    val := getValue(x)
+	val := getValue(x)
 
-    for i := 0; i < val.NumField(); i++ {
-        field := val.Field(i)
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
 
-        switch field.Kind() {
-        case reflect.String:
-            fn(field.String())
-        case reflect.Struct:
-            walk(field.Interface(), fn)
-        }
-    }
+		switch field.Kind() {
+		case reflect.String:
+			fn(field.String())
+		case reflect.Struct:
+			walk(field.Interface(), fn)
+		}
+	}
 }
 
 func getValue(x interface{}) reflect.Value {
-    val := reflect.ValueOf(x)
+	val := reflect.ValueOf(x)
 
-    if val.Kind() == reflect.Ptr {
-        val = val.Elem()
-    }
+	if val.Kind() == reflect.Pointer {
+		val = val.Elem()
+	}
 
-    return val
+	return val
 }
 ```
 
@@ -479,9 +479,9 @@ func getValue(x interface{}) reflect.Value {
 
 ## 最初にテストを書く
 
-```go
+```
 {
-    "Slices",
+    "slices",
     []Profile {
         {33, "London"},
         {34, "Reykjavík"},
@@ -493,7 +493,7 @@ func getValue(x interface{}) reflect.Value {
 ## テストを実行してみます
 
 ```text
-=== RUN   TestWalk/Slices
+=== RUN   TestWalk/slices
 panic: reflect: call of reflect.Value.NumField on slice Value [recovered]
     panic: reflect: call of reflect.Value.NumField on slice Value
 ```
@@ -608,9 +608,9 @@ func walk(x interface{}, fn func(input string)) {
 
 ケースに追加
 
-```go
+```
 {
-    "Arrays",
+    "arrays",
     [2]Profile {
         {33, "London"},
         {34, "Reykjavík"},
@@ -622,8 +622,8 @@ func walk(x interface{}, fn func(input string)) {
 ## テストを実行してみます
 
 ```text
-=== RUN   TestWalk/Arrays
-    --- FAIL: TestWalk/Arrays (0.00s)
+=== RUN   TestWalk/arrays
+    --- FAIL: TestWalk/arrays (0.00s)
         reflection_test.go:78: got [], want [London Reykjavík]
 ```
 
@@ -659,23 +659,23 @@ func walk(x interface{}, fn func(input string)) {
 
 ## 最初にテストを書く
 
-```go
+```
 {
-    "Maps",
+    "maps",
     map[string]string{
-        "Foo": "Bar",
-        "Baz": "Boz",
+        "Cow": "Moo",
+        "Sheep": "Baa",
     },
-    []string{"Bar", "Boz"},
+    []string{"Moo", "Baa"},
 },
 ```
 
 ## テストを実行してみます
 
 ```text
-=== RUN   TestWalk/Maps
-    --- FAIL: TestWalk/Maps (0.00s)
-        reflection_test.go:86: got [], want [Bar Boz]
+=== RUN   TestWalk/maps
+    --- FAIL: TestWalk/maps (0.00s)
+        reflection_test.go:86: got [], want [Moo Baa]
 ```
 
 ## 成功させるのに十分なコードを書く
@@ -762,36 +762,69 @@ Goのマップは順序を保証するものではないことに注意してく
 
 ```go
 t.Run("with maps", func(t *testing.T) {
-    aMap := map[string]string{
-        "Foo": "Bar",
-        "Baz": "Boz",
-    }
+	aMap := map[string]string{
+		"Cow":   "Moo",
+		"Sheep": "Baa",
+	}
 
-    var got []string
-    walk(aMap, func(input string) {
-        got = append(got, input)
-    })
+	var got []string
+	walk(aMap, func(input string) {
+		got = append(got, input)
+	})
 
-    assertContains(t, got, "Bar")
-    assertContains(t, got, "Boz")
+	assertContains(t, got, "Moo")
+	assertContains(t, got, "Baa")
 })
 ```
 
 `assertContains`の定義方法は次のとおりです
 
 ```go
-func assertContains(t *testing.T, haystack []string, needle string)  {
-    t.Helper()
-    contains := false
-    for _, x := range haystack {
-        if x == needle {
-            contains = true
-        }
-    }
-    if !contains {
-        t.Errorf("expected %+v to contain %q but it didn't", haystack, needle)
-    }
+func assertContains(t testing.TB, haystack []string, needle string) {
+	t.Helper()
+	contains := false
+	for _, x := range haystack {
+		if x == needle {
+			contains = true
+		}
+	}
+	if !contains {
+		t.Errorf("expected %v to contain %q but it didn't", haystack, needle)
+	}
 }
+```
+
+マップを新しいテストに切り出したので、まだ失敗メッセージを見ていません。ここで意図的に`with maps`テストを壊してエラーメッセージを確認し、その後すべてのテストが成功するように元に戻してください。
+
+マップは順序を保証しないため`got`の _順序_ のチェックはあきらめましたが、だからといってその形についてのすべてのチェックをあきらめる必要はありません。`assertContains`だけでは、`walk`がマップのエントリを2回訪れたり、1つを見落として残りのエントリだけをチェックしたりしても、検索する特定の値がどこかに（何回であれ）存在する限り、テストは成功してしまいます。順序とは異なり、`got`の _長さ_ はマップがどの順序で反復されても完全に予測可能なので、それもアサートしましょう。
+
+```go
+func assertLength(t testing.TB, got []string, want int) {
+	t.Helper()
+	if len(got) != want {
+		t.Errorf("got %d values but expected %d", len(got), want)
+	}
+}
+```
+
+`with maps`テストの先頭でこれを呼び出すように追加します。
+
+```go
+t.Run("with maps", func(t *testing.T) {
+	aMap := map[string]string{
+		"Cow":   "Moo",
+		"Sheep": "Baa",
+	}
+
+	var got []string
+	walk(aMap, func(input string) {
+		got = append(got, input)
+	})
+
+	assertLength(t, got, len(aMap))
+	assertContains(t, got, "Moo")
+	assertContains(t, got, "Baa")
+})
 ```
 
 次に処理したい型は`chan`です。
@@ -835,28 +868,36 @@ t.Run("with channels", func(t *testing.T) {
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-    val := getValue(x)
+	val := getValue(x)
 
-    var getField func(int) reflect.Value
+	walkValue := func(value reflect.Value) {
+		walk(value.Interface(), fn)
+	}
 
-    switch val.Kind() {
-    case reflect.String:
-        fn(val.String())
-    case reflect.Struct:
-        numberOfValues = val.NumField()
-        getField = val.Field
-    case reflect.Slice, reflect.Array:
-        numberOfValues = val.Len()
-        getField = val.Index
-    case reflect.Map:
-        for _, key := range val.MapKeys() {
-            walk(val.MapIndex(key).Interface(), fn)
-        }
-    case reflect.Chan:
-        for v, ok := val.Recv(); ok; v, ok = val.Recv() {
-            walk(v.Interface(), fn)
-        }
-    }
+	switch val.Kind() {
+	case reflect.String:
+		fn(val.String())
+	case reflect.Struct:
+		for i := 0; i < val.NumField(); i++ {
+			walkValue(val.Field(i))
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < val.Len(); i++ {
+			walkValue(val.Index(i))
+		}
+	case reflect.Map:
+		for _, key := range val.MapKeys() {
+			walkValue(val.MapIndex(key))
+		}
+	case reflect.Chan:
+		for {
+			if v, ok := val.Recv(); ok {
+				walkValue(v)
+			} else {
+				break
+			}
+		}
+	}
 }
 ```
 
@@ -897,40 +938,60 @@ t.Run("with function", func(t *testing.T) {
 
 ```go
 func walk(x interface{}, fn func(input string)) {
-    val := getValue(x)
+	val := getValue(x)
 
-    var getField func(int) reflect.Value
+	walkValue := func(value reflect.Value) {
+		walk(value.Interface(), fn)
+	}
 
-    switch val.Kind() {
-    case reflect.String:
-        fn(val.String())
-    case reflect.Struct:
-        numberOfValues = val.NumField()
-        getField = val.Field
-    case reflect.Slice, reflect.Array:
-        numberOfValues = val.Len()
-        getField = val.Index
-    case reflect.Map:
-        for _, key := range val.MapKeys() {
-            walk(val.MapIndex(key).Interface(), fn)
-        }
-    case reflect.Chan:
-        for v, ok := val.Recv(); ok; v, ok = val.Recv() {
-            walk(v.Interface(), fn)
-        }
-    case reflect.Func:
-        valFnResult := val.Call(nil)
-        for _, res := range valFnResult {
-            walk(res.Interface(), fn)
-        }
-    }
+	switch val.Kind() {
+	case reflect.String:
+		fn(val.String())
+	case reflect.Struct:
+		for i := 0; i < val.NumField(); i++ {
+			walkValue(val.Field(i))
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < val.Len(); i++ {
+			walkValue(val.Index(i))
+		}
+	case reflect.Map:
+		for _, key := range val.MapKeys() {
+			walkValue(val.MapIndex(key))
+		}
+	case reflect.Chan:
+		for v, ok := val.Recv(); ok; v, ok = val.Recv() {
+			walkValue(v)
+		}
+	case reflect.Func:
+		valFnResult := val.Call(nil)
+		for _, res := range valFnResult {
+			walkValue(res)
+		}
+	}
 }
 ```
 
 ## まとめ
 
-* `reflect`パッケージのいくつかの概念を導入しました。
+* `reflect`パッケージのいくつかの概念を紹介しました。
 * 任意のデータ構造をたどるために再帰を使用しました。
 * 振り返ってみると、悪いリファクタリングをしましたが、それについてはあまり動揺はありません。テストを反復的に行うことで、それほど大したことではありません。
 * これは、リフレクションの小さな側面だけをカバーしています。[GOブログでは、詳細を網羅した優れた記事を掲載しています](https://blog.golang.org/laws-of-reflection)。
 * リフレクションについて理解したので、使用しないように最善を尽くしてください。
+
+### 既知の制限: 循環参照
+
+自分自身へのポインターを含む構造体（あるいは任意のポインターの循環）を渡すと、`walk`はスタックオーバーフローを起こします。例えば次のとおりです。
+
+```go
+type Person struct {
+    Name   string
+    Friend *Person
+}
+p := Person{Name: "Alice"}
+p.Friend = &p  // cycle!
+walk(p, fn)  // fatal error: stack overflow
+```
+
+これを修正することは演習として残しておきます。標準的なアプローチは、すでに訪れたポインターのアドレスを記録しておき、再び入ったときにはスキップすることです。`map[uintptr]bool`が必要になるでしょう。`uintptr`はポインターの生の数値アドレスで、ポインター型の場合は`reflect.Value.Pointer()`で取得できます。このマップは走査全体を通して存在する必要があるため、それをパラメータとして持ち回る内部ヘルパー関数を用意し、公開の`walk`がマップを作成してそれを呼び出すようにするとよいでしょう。

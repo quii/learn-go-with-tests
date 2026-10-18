@@ -84,7 +84,7 @@ func TestRegisterUser(t *testing.T) {
 	})
 }
 
-func assertStatus(t *testing.T, got, want int) {
+func assertStatus(t testing.TB, got, want int) {
 	t.Helper()
 	if got != want {
 		t.Errorf("wanted http status %d but got %d", got, want)

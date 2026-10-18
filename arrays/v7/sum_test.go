@@ -1,7 +1,7 @@
 package main
 
 import (
-	"reflect"
+	"slices"
 	"testing"
 )
 
@@ -24,7 +24,7 @@ func TestSum(t *testing.T) {
 func TestSumAllTails(t *testing.T) {
 
 	checkSums := func(t *testing.T, got, want []int) {
-		if !reflect.DeepEqual(got, want) {
+		if !slices.Equal(got, want) {
 			t.Errorf("got %v want %v", got, want)
 		}
 	}

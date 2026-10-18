@@ -2,6 +2,8 @@ package v1
 
 import (
 	"fmt"
+	"math/rand"
+	"reflect"
 	"testing"
 	"testing/quick"
 )
@@ -67,9 +69,6 @@ func TestConvertingToArabic(t *testing.T) {
 
 func TestPropertiesOfConversion(t *testing.T) {
 	assertion := func(arabic uint16) bool {
-		if arabic > 3999 {
-			return true
-		}
 		t.Log("testing", arabic)
 		roman := ConvertToRoman(arabic)
 		fromRoman := ConvertToArabic(roman)
@@ -78,6 +77,9 @@ func TestPropertiesOfConversion(t *testing.T) {
 
 	if err := quick.Check(assertion, &quick.Config{
 		MaxCount: 1000,
+		Values: func(args []reflect.Value, r *rand.Rand) {
+			args[0] = reflect.ValueOf(uint16(r.Intn(4000)))
+		},
 	}); err != nil {
 		t.Error("failed checks", err)
 	}
