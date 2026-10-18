@@ -4,11 +4,11 @@ description: Select
 
 # 選択
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/select)
+**[この章のすべてのコードはここにあります](https://github.com/quii/learn-go-with-tests/tree/main/select)**
 
 2つのURLを取得し、それらをHTTP GETでヒットして最初に返されたURLを返すことで「競合」する`WebsiteRacer`と呼ばれる関数を作成するように求められました。 10秒以内に戻らない場合は、「エラー（`error`）」を返します。
 
-これには
+これには、次のものを使用します。
 
 * HTTP呼び出しを行うための `net/http`。
 * `net/http/httptest`はテストを支援するためのものです。
@@ -21,19 +21,19 @@ description: Select
 
 ```go
 func TestRacer(t *testing.T) {
-    slowURL := "http://www.facebook.com"
-    fastURL := "http://www.quii.co.uk"
+	slowURL := "http://www.facebook.com"
+	fastURL := "http://www.quii.dev"
 
-    want := fastURL
-    got := Racer(slowURL, fastURL)
+	want := fastURL
+	got := Racer(slowURL, fastURL)
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 ```
 
-これは完璧ではなく、問題があることはわかっていますが、うまくいくでしょう。
+これは完璧ではなく、問題があることはわかっていますが、始めとしては十分です。
 物事を最初から完璧にするのにあまり夢中にならないようにすることが重要です。
 
 ## テストを実行してみます
@@ -44,36 +44,42 @@ func TestRacer(t *testing.T) {
 
 ```go
 func Racer(a, b string) (winner string) {
-    return
+	return
 }
 ```
 
-`racer_test.go:25: got '', want 'http://www.quii.co.uk'`
+`racer_test.go:25: got '', want 'http://www.quii.dev'`
 
 ## 成功させるのに十分なコードを書く
 
 ```go
 func Racer(a, b string) (winner string) {
-    startA := time.Now()
-    http.Get(a)
-    aDuration := time.Since(startA)
+	startA := time.Now()
+	resp, err := http.Get(a)
+	if err == nil {
+		resp.Body.Close()
+	}
+	aDuration := time.Since(startA)
 
-    startB := time.Now()
-    http.Get(b)
-    bDuration := time.Since(startB)
+	startB := time.Now()
+	resp, err = http.Get(b)
+	if err == nil {
+		resp.Body.Close()
+	}
+	bDuration := time.Since(startB)
 
-    if aDuration < bDuration {
-        return a
-    }
+	if aDuration < bDuration {
+		return a
+	}
 
-    return b
+	return b
 }
 ```
 
 各URLについて
 
 1. `time.Now()`を使用して、 `URL`を取得しようとする直前に記録します。
-2. 次に、[`http.Get`](https://golang.org/pkg/net/http/#Client.Get)を使用して、`URL`のコンテンツを取得します。この関数は[`http.Response`](https://golang.org/pkg/net/http/#Response)と`error`を返しますが、今のところこれらの値には興味がありません。
+2. 次に、[`http.Get`](https://golang.org/pkg/net/http/#Client.Get)を使用して、`URL`に対してHTTP `GET`リクエストを実行します。この関数は[`http.Response`](https://golang.org/pkg/net/http/#Response)と`error`を返します。ファイルディスクリプタのリークを避けるため、レスポンスボディを閉じます。閉じないと、リクエストごとに接続が開いたまま残ってしまいます。
 3. `time.Since`は開始時間を取り、差の`time.Duration`を返します。
 
 これを実行したら、期間を比較してどちらが最も速いかを確認します。
@@ -91,47 +97,47 @@ HTTPを使用するコードのテストは非常に一般的であるため、G
 * フレーク状（Flaky）
 * エッジケースをテストできません（Can't test edge cases）
 
-標準ライブラリには、[`net/http/httptest`](https://golang.org/pkg/net/http/httptest/)というパッケージがあり、模擬HTTPサーバーを簡単に作成できます。
+標準ライブラリには、[`net/http/httptest`](https://golang.org/pkg/net/http/httptest/)というパッケージがあり、これを使うと模擬HTTPサーバーを簡単に作成できます。
 
 テストをモックを使用するように変更して、制御できる信頼性の高いサーバーをテストできるようにします。
 
 ```go
 func TestRacer(t *testing.T) {
 
-    slowServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        time.Sleep(20 * time.Millisecond)
-        w.WriteHeader(http.StatusOK)
-    }))
+	slowServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(20 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	}))
 
-    fastServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusOK)
-    }))
+	fastServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
 
-    slowURL := slowServer.URL
-    fastURL := fastServer.URL
+	slowURL := slowServer.URL
+	fastURL := fastServer.URL
 
-    want := fastURL
-    got := Racer(slowURL, fastURL)
+	want := fastURL
+	got := Racer(slowURL, fastURL)
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 
-    slowServer.Close()
-    fastServer.Close()
+	slowServer.Close()
+	fastServer.Close()
 }
 ```
 
 構文は少しせわしなく見えるかもしれませんが、時間をかけてください。
 
-`httptest.NewServer`は、_anonymous function_ を介して送信する`http.HandlerFunc`を受け取ります。
+`httptest.NewServer`は、_無名関数_ を介して送信する`http.HandlerFunc`を受け取ります。
 
 `http.HandlerFunc`は、`type HandlerFunc func(ResponseWriter, *Request)`のようなタイプです。
 
 実際に言っているのは、`ResponseWriter`と`Request`を受け取る関数が必要なことだけです。
 これは、HTTPサーバーにとってそれほど驚くべきことではありません。
 
-ここには特別な魔法はありません。**これは、Goで** _ **実際に** _ **HTTPサーバーを作成する方法でもあります**。唯一の違いは、それを`httptest.NewServer`でラップすることです。これにより、リッスンする開いているポートが見つかり、テストが完了したら閉じることができるため、テストでの使用が簡単になります。
+ここには特別な魔法はありません。**これは、Goで _実際の_ HTTPサーバーを作成する方法でもあります**。唯一の違いは、それを`httptest.NewServer`でラップすることです。これにより、リッスンする開いているポートが見つかり、テストが完了したら閉じることができるため、テストでの使用が簡単になります。
 
 2つのサーバー内では、遅いサーバーに他のサーバーよりも遅いリクエストを受け取ったときに、遅い方の`time.Sleep`を作成します。
 
@@ -147,20 +153,23 @@ func TestRacer(t *testing.T) {
 
 ```go
 func Racer(a, b string) (winner string) {
-    aDuration := measureResponseTime(a)
-    bDuration := measureResponseTime(b)
+	aDuration := measureResponseTime(a)
+	bDuration := measureResponseTime(b)
 
-    if aDuration < bDuration {
-        return a
-    }
+	if aDuration < bDuration {
+		return a
+	}
 
-    return b
+	return b
 }
 
 func measureResponseTime(url string) time.Duration {
-    start := time.Now()
-    http.Get(url)
-    return time.Since(start)
+	start := time.Now()
+	resp, err := http.Get(url)
+	if err == nil {
+		resp.Body.Close()
+	}
+	return time.Since(start)
 }
 ```
 
@@ -169,28 +178,28 @@ func measureResponseTime(url string) time.Duration {
 ```go
 func TestRacer(t *testing.T) {
 
-    slowServer := makeDelayedServer(20 * time.Millisecond)
-    fastServer := makeDelayedServer(0 * time.Millisecond)
+	slowServer := makeDelayedServer(20 * time.Millisecond)
+	fastServer := makeDelayedServer(0 * time.Millisecond)
 
-    defer slowServer.Close()
-    defer fastServer.Close()
+	defer slowServer.Close()
+	defer fastServer.Close()
 
-    slowURL := slowServer.URL
-    fastURL := fastServer.URL
+	slowURL := slowServer.URL
+	fastURL := fastServer.URL
 
-    want := fastURL
-    got := Racer(slowURL, fastURL)
+	want := fastURL
+	got := Racer(slowURL, fastURL)
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 
 func makeDelayedServer(delay time.Duration) *httptest.Server {
-    return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        time.Sleep(delay)
-        w.WriteHeader(http.StatusOK)
-    }))
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(delay)
+		w.WriteHeader(http.StatusOK)
+	}))
 }
 ```
 
@@ -198,7 +207,7 @@ func makeDelayedServer(delay time.Duration) *httptest.Server {
 
 ### `defer`
 
-関数呼び出しの前に`defer`を付けることで、その関数を含まれている関数の最後に呼び出します。
+関数呼び出しの前に`defer`を付けることで、その関数を _それを含む関数の最後に_ 呼び出します。
 
 場合によっては、ファイルを閉じるなどのリソースをクリーンアップする必要があります。この場合、サーバーがポートをリッスンし続けないようにサーバーを閉じる必要があります。
 
@@ -215,21 +224,24 @@ func makeDelayedServer(delay time.Duration) *httptest.Server {
 
 ```go
 func Racer(a, b string) (winner string) {
-    select {
-    case <-ping(a):
-        return a
-    case <-ping(b):
-        return b
-    }
+	select {
+	case <-ping(a):
+		return a
+	case <-ping(b):
+		return b
+	}
 }
 
 func ping(url string) chan struct{} {
-    ch := make(chan struct{})
-    go func() {
-        http.Get(url)
-        close(ch)
-    }()
-    return ch
+	ch := make(chan struct{})
+	go func() {
+		resp, err := http.Get(url)
+		if err == nil {
+			resp.Body.Close()
+		}
+		close(ch)
+	}()
+	return ch
 }
 ```
 
@@ -243,9 +255,9 @@ func ping(url string) chan struct{} {
 なぜ`struct{}`で、`bool`のような別の型ではないのですか？まあ、`chan struct{}`はメモリの観点から利用できる最小のデータ型なので、`bool`に対して割り当てはありません。
 ちゃんと閉じて何も送信しないので、なぜ何かを割り当てるのですか？
 
-同じ関数内で、`http.Get(url)`を完了すると、そのチャネルに信号を送信するゴルーチン（`goroutine`）を開始します。
+同じ関数内で、`http.Get(url)`を完了すると、そのチャネルに信号を送信するゴルーチン（`goroutine`）を開始します。レスポンスボディはすぐに閉じます。私たちが気にしているのはリクエストが完了したことだけで、レスポンスの内容ではありません。また、開いたままにするとファイルディスクリプタがリークしてしまいます。
 
-**常にチャネルを作成する**
+##### 常にチャネルを`make`する
 
 チャネルを作成するときに、`make`を使用する方法に注意してください。
 「`var ch chan struct{}`」と言うのではなく。
@@ -257,12 +269,12 @@ func ping(url string) chan struct{} {
 
 #### `select`
 
-同時実行の章を思い出すと、`myVar := <-ch`を使用して値がチャネルに送信されるのを待つことができます。値を待っているので、これは _blocking_ 呼び出しです。
+並行性の章で学んだように、`myVar := <-ch`を使用して値がチャネルに送信されるのを待つことができます。値を待っているので、これは _ブロッキング_ 呼び出しです。
 
-`select`でできることは、_multiple_ チャネルで待機することです。
+`select`を使うと、 _複数の_ チャネルで待機できます。
 値を送信する最初のものは「勝ち」、`case`の下のコードが実行されます。
 
-`select`で`ping`を使用して、`URL`ごとに2つのチャネルを設定します。
+`select`で`ping`を使用して、2つのチャネルを`URL`ごとに1つずつ設定します。
 最初にチャネルに書き込む方は、コードが`select`で実行され、その結果、`URL`が返されます（勝者となります）。
 
 これらの変更後、コードの背後にある意図は非常に明確になり、実装は実際にはより単純になります。
@@ -274,49 +286,68 @@ func ping(url string) chan struct{} {
 ## 最初にテストを書く
 
 ```go
-t.Run("returns an error if a server doesn't respond within 10s", func(t *testing.T) {
-    serverA := makeDelayedServer(11 * time.Second)
-    serverB := makeDelayedServer(12 * time.Second)
+func TestRacer(t *testing.T) {
+	t.Run("compares speeds of servers, returning the url of the fastest one", func(t *testing.T) {
+		slowServer := makeDelayedServer(20 * time.Millisecond)
+		fastServer := makeDelayedServer(0 * time.Millisecond)
 
-    defer serverA.Close()
-    defer serverB.Close()
+		defer slowServer.Close()
+		defer fastServer.Close()
 
-    _, err := Racer(serverA.URL, serverB.URL)
+		slowURL := slowServer.URL
+		fastURL := fastServer.URL
 
-    if err == nil {
-        t.Error("expected an error but didn't get one")
-    }
-})
+		want := fastURL
+		got, _ := Racer(slowURL, fastURL)
+
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("returns an error if a server doesn't respond within 10s", func(t *testing.T) {
+		serverA := makeDelayedServer(11 * time.Second)
+		serverB := makeDelayedServer(12 * time.Second)
+
+		defer serverA.Close()
+		defer serverB.Close()
+
+		_, err := Racer(serverA.URL, serverB.URL)
+
+		if err == nil {
+			t.Error("expected an error but didn't get one")
+		}
+	})
+}
 ```
 
 テストサーバーがこのシナリオを実行するために戻るまでに10秒以上かかるようにしました。
-ここでは、`Racer`が2つの値を返すことを期待しています。勝つURL（このテストでは`_`で無視）と `error`。
+ここでは、`Racer`が2つの値を返すことを期待しています。勝つURL（このテストでは`_`で無視）と `error`です。
+
+元のテストでもエラーの戻り値を扱うようにしていることに注意してください。今のところは、テストが実行できるように`_`を使っています。
 
 ## テストを実行してみます
 
-`./racer_test.go:37:10: assignment mismatch: 2 variables but 1 values`
+`./racer_test.go:37:10: assignment mismatch: 2 variables but Racer returns 1 value`
 
 ## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
 
 ```go
 func Racer(a, b string) (winner string, error error) {
-    select {
-    case <-ping(a):
-        return a, nil
-    case <-ping(b):
-        return b, nil
-    }
+	select {
+	case <-ping(a):
+		return a, nil
+	case <-ping(b):
+		return b, nil
+	}
 }
 ```
 
 勝者と`error`を返すように`Racer`の署名を変更します。ハッピーケースの場合は`nil`を返します。
 
-コンパイラーは _first test_ が1つの値しか検索しないと文句を言うので、この行を`got, _ := Racer(slowURL, fastURL)`に変更します。
-確認すると、私たちの幸せなシナリオでエラーが発生しないことを確認する必要があります。
-
 11秒後に実行すると、失敗します。
 
-```text
+```
 --- FAIL: TestRacer (12.00s)
     --- FAIL: TestRacer/returns_an_error_if_a_server_doesn't_respond_within_10s (12.00s)
         racer_test.go:40: expected an error but didn't get one
@@ -326,14 +357,14 @@ func Racer(a, b string) (winner string, error error) {
 
 ```go
 func Racer(a, b string) (winner string, error error) {
-    select {
-    case <-ping(a):
-        return a, nil
-    case <-ping(b):
-        return b, nil
-    case <-time.After(10 * time.Second):
-        return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
-    }
+	select {
+	case <-ping(a):
+		return a, nil
+	case <-ping(b):
+		return b, nil
+	case <-time.After(10 * time.Second):
+		return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
+	}
 }
 ```
 
@@ -351,20 +382,20 @@ func Racer(a, b string) (winner string, error error) {
 
 ```go
 func Racer(a, b string, timeout time.Duration) (winner string, error error) {
-    select {
-    case <-ping(a):
-        return a, nil
-    case <-ping(b):
-        return b, nil
-    case <-time.After(timeout):
-        return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
-    }
+	select {
+	case <-ping(a):
+		return a, nil
+	case <-ping(b):
+		return b, nil
+	case <-time.After(timeout):
+		return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
+	}
 }
 ```
 
 タイムアウトを指定していないため、テストはコンパイルされません。
 
-急いでこのデフォルト値を両方のテストに追加する前に、リッスンしてみましょう_。
+急いでこのデフォルト値を両方のテストに追加する前に、 _テストの声に耳を傾けて_ みましょう。
 
 * 「ハッピー」テストのタイムアウトを気にしますか？
 * タイムアウトに関する要件は明示的でした
@@ -375,18 +406,18 @@ func Racer(a, b string, timeout time.Duration) (winner string, error error) {
 var tenSecondTimeout = 10 * time.Second
 
 func Racer(a, b string) (winner string, error error) {
-    return ConfigurableRacer(a, b, tenSecondTimeout)
+	return ConfigurableRacer(a, b, tenSecondTimeout)
 }
 
 func ConfigurableRacer(a, b string, timeout time.Duration) (winner string, error error) {
-    select {
-    case <-ping(a):
-        return a, nil
-    case <-ping(b):
-        return b, nil
-    case <-time.After(timeout):
-        return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
-    }
+	select {
+	case <-ping(a):
+		return a, nil
+	case <-ping(b):
+		return b, nil
+	case <-time.After(timeout):
+		return "", fmt.Errorf("timed out waiting for %s and %s", a, b)
+	}
 }
 ```
 
@@ -395,39 +426,39 @@ func ConfigurableRacer(a, b string, timeout time.Duration) (winner string, error
 ```go
 func TestRacer(t *testing.T) {
 
-    t.Run("compares speeds of servers, returning the url of the fastest one", func(t *testing.T) {
-        slowServer := makeDelayedServer(20 * time.Millisecond)
-        fastServer := makeDelayedServer(0 * time.Millisecond)
+	t.Run("compares speeds of servers, returning the url of the fastest one", func(t *testing.T) {
+		slowServer := makeDelayedServer(20 * time.Millisecond)
+		fastServer := makeDelayedServer(0 * time.Millisecond)
 
-        defer slowServer.Close()
-        defer fastServer.Close()
+		defer slowServer.Close()
+		defer fastServer.Close()
 
-        slowURL := slowServer.URL
-        fastURL := fastServer.URL
+		slowURL := slowServer.URL
+		fastURL := fastServer.URL
 
-        want := fastURL
-        got, err := Racer(slowURL, fastURL)
+		want := fastURL
+		got, err := Racer(slowURL, fastURL)
 
-        if err != nil {
-            t.Fatalf("did not expect an error but got one %v", err)
-        }
+		if err != nil {
+			t.Fatalf("did not expect an error but got one %v", err)
+		}
 
-        if got != want {
-            t.Errorf("got %q, want %q", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
 
-    t.Run("returns an error if a server doesn't respond within 10s", func(t *testing.T) {
-        server := makeDelayedServer(25 * time.Millisecond)
+	t.Run("returns an error if a server doesn't respond within the specified time", func(t *testing.T) {
+		server := makeDelayedServer(25 * time.Millisecond)
 
-        defer server.Close()
+		defer server.Close()
 
-        _, err := ConfigurableRacer(server.URL, server.URL, 20*time.Millisecond)
+		_, err := ConfigurableRacer(server.URL, server.URL, 20*time.Millisecond)
 
-        if err == nil {
-            t.Error("expected an error but didn't get one")
-        }
-    })
+		if err == nil {
+			t.Error("expected an error but didn't get one")
+		}
+	})
 }
 ```
 
@@ -443,4 +474,4 @@ func TestRacer(t *testing.T) {
 ### `httptest`
 
 * テストサーバーを作成して、信頼性の高い制御可能なテストを作成できる便利な方法。
-* 「実際の」`net/http`サーバーと同じインターフェースを使用します。これは一貫性があり、習得するのに時間がかかります。
+* 「実際の」`net/http`サーバーと同じインターフェースを使用します。これは一貫性があり、学ぶことが少なくて済みます。

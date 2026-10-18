@@ -4,7 +4,7 @@ description: Command line & package structure
 
 # コマンドライン、パッケージ構造
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/command-line)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/command-line)
 
 私たちの製品の所有者は、2つ目のアプリケーション（コマンドラインアプリケーション）を導入することで _pivot_ を実行したいと考えています。
 
@@ -18,9 +18,9 @@ HTTPサーバーを起動する`main.go`ファイルを含むアプリケーシ�
 
 ```go
 type PlayerStore interface {
-    GetPlayerScore(name string) int
-    RecordWin(name string)
-    GetLeague() League
+	GetPlayerScore(name string) int
+	RecordWin(name string)
+	GetLeague() League
 }
 ```
 
@@ -44,12 +44,13 @@ Goでアプリケーションを作成するには、`package main`内に`main`�
 
 既存のプロジェクト内に`cmd`ディレクトリを作成し、その中に`webserver`ディレクトリを作成します（例：`mkdir -p cmd/webserver`）。
 
+`cmd`は、プロジェクトがビルドするアプリケーションの`main`パッケージを置くための、Goで広く使われている慣習です。これにより、それらをプロジェクトのルートにあるインポート可能なライブラリコードから分離しておけます。
 
 そこに`main.go`を移動します。
 
 `tree`がインストールされている場合は、それを実行し、構造は次のようになります。
 
-```text
+```
 .
 |-- file_system_store.go
 |-- file_system_store_test.go
@@ -73,43 +74,44 @@ Goでアプリケーションを作成するには、`package main`内に`main`�
 パスはコンピューターによって異なりますが、次のようになります。
 
 ```go
-//cmd/webserver/main.go
+// cmd/webserver/main.go
 package main
 
 import (
-    "github.com/quii/learn-go-with-tests/command-line/v1"
-    "log"
-    "net/http"
-    "os"
+	"github.com/quii/learn-go-with-tests/command-line/v1"
+	"log"
+	"net/http"
+	"os"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-    db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
 
-    if err != nil {
-        log.Fatalf("problem opening %s %v", dbFileName, err)
-    }
+	if err != nil {
+		log.Fatalf("problem opening %s %v", dbFileName, err)
+	}
 
-    store, err := poker.NewFileSystemPlayerStore(db)
+	store, err := poker.NewFileSystemPlayerStore(db)
 
-    if err != nil {
-        log.Fatalf("problem creating file system player store, %v ", err)
-    }
+	if err != nil {
+		log.Fatalf("problem creating file system player store, %v ", err)
+	}
 
-    server := poker.NewPlayerServer(store)
+	server := poker.NewPlayerServer(store)
 
 	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
 
+`dbFileName`は相対パスなので、`game.db.json`はバイナリが置かれているディレクトリではなく、ビルドしたバイナリを _実行した_ ディレクトリを基準に作成（または読み込み）されます。プロダクトオーナーはCLIとWebサーバーで同じデータベースを共有したいと考えているので、これは重要です。両者を異なるディレクトリから実行すると、それぞれが別々の`game.db.json`を持つことになり、しかもそのことに気付けません。これについては後述の「最終チェック」で改めて触れます。
+
 完全なパスは少し不快に思えるかもしれませんが、これにより、一般に入手可能なライブラリをコードにインポートできます。
 
 ドメインコードを個別のパッケージに分離し、それをGitHubのようなパブリックリポジトリにコミットすることで、Go開発者は私たちが書いた機能をパッケージ化してインポートする独自のコードを書くことができます。初めて実行すると、それが存在しないというメッセージが表示されますが、`go get`を実行するだけで済みます。
 
-
-さらに、ユーザーは[`godoc.org`でドキュメントを表示](https://godoc.org/github.com/quii/learn-go-with-tests/command-line/v1)できます
+さらに、ユーザーは[`pkg.go.dev`でドキュメント](https://pkg.go.dev/github.com/quii/learn-go-with-tests/command-line/v1)を表示できます。
 
 ### 最終チェック
 
@@ -117,18 +119,20 @@ func main() {
 * `cmd/webserver`内に移動し、`go run main.go`を実行します
   * `http://localhost:5000/league` にアクセスすると、まだ機能していることがわかります
 
+この章の後半では、Webサーバーと同じ`game.db.json`を共有することを想定した2つ目のアプリケーション`cmd/cli`を作成します。`dbFileName`は現在の作業ディレクトリを基準に解決されるため、両方のバイナリがお互いの更新を参照できるようにするには、 _同じディレクトリから_ 実行する必要があります。たとえば、各`cmd`サブフォルダ内で`go run main.go`を使うのではなく、先にビルドしてからプロジェクトのルートでバイナリを実行します（`go build -o webserver ./cmd/webserver && go build -o cli ./cmd/cli`の後に、`./webserver`と`./cli`を実行）。
+
 ### スケルトンを歩く
 
 テストの作成に取り掛かる前に、プロジェクトで構築する新しいアプリケーションを追加しましょう。`cmd`内に`cli`（コマンドラインインターフェイス）という別のディレクトリを作成し、次のように`main.go`を追加します
 
 ```go
-//cmd/cli/main.go
+// cmd/cli/main.go
 package main
 
 import "fmt"
 
 func main() {
-    fmt.Println("Let's play poker")
+	fmt.Println("Let's play poker")
 }
 ```
 
@@ -143,18 +147,19 @@ func main() {
 `CLI_test.go`内（`cmd`内ではなくプロジェクトのルート内）
 
 ```go
-//CLI_test.go
+// CLI_test.go
 package poker
+
 import "testing"
 
 func TestCLI(t *testing.T) {
-    playerStore := &StubPlayerStore{}
-    cli := &CLI{playerStore}
-    cli.PlayPoker()
+	playerStore := &StubPlayerStore{}
+	cli := &CLI{playerStore}
+	cli.PlayPoker()
 
-    if len(playerStore.winCalls) != 1 {
-        t.Fatal("expected a win call but didn't get any")
-    }
+	if len(playerStore.winCalls) != 1 {
+		t.Fatal("expected a win call but didn't get any")
+	}
 }
 ```
 
@@ -165,7 +170,7 @@ func TestCLI(t *testing.T) {
 
 ## テストを実行してみます
 
-```text
+```
 # github.com/quii/learn-go-with-tests/command-line/v2
 ./cli_test.go:25:10: undefined: CLI
 ```
@@ -177,11 +182,11 @@ func TestCLI(t *testing.T) {
 あなたはこのようなコードで終わるはずです。
 
 ```go
-//CLI.go
+// CLI.go
 package poker
 
 type CLI struct {
-    playerStore PlayerStore
+	playerStore PlayerStore
 }
 
 func (cli *CLI) PlayPoker() {}
@@ -189,7 +194,7 @@ func (cli *CLI) PlayPoker() {}
 
 テストを実行しようとしているだけなので、テストが失敗したことを希望どおりに確認できます。
 
-```text
+```
 --- FAIL: TestCLI (0.00s)
     cli_test.go:30: expected a win call but didn't get any
 FAIL
@@ -200,7 +205,7 @@ FAIL
 ```go
 //CLI.go
 func (cli *CLI) PlayPoker() {
-    cli.playerStore.RecordWin("Cleo")
+	cli.playerStore.RecordWin("Cleo")
 }
 ```
 
@@ -215,22 +220,22 @@ func (cli *CLI) PlayPoker() {
 ```go
 //CLI_test.go
 func TestCLI(t *testing.T) {
-    in := strings.NewReader("Chris wins\n")
-    playerStore := &StubPlayerStore{}
+	in := strings.NewReader("Chris wins\n")
+	playerStore := &StubPlayerStore{}
 
-    cli := &CLI{playerStore, in}
-    cli.PlayPoker()
+	cli := &CLI{playerStore, in}
+	cli.PlayPoker()
 
-    if len(playerStore.winCalls) != 1 {
-        t.Fatal("expected a win call but didn't get any")
-    }
+	if len(playerStore.winCalls) != 1 {
+		t.Fatal("expected a win call but didn't get any")
+	}
 
-    got := playerStore.winCalls[0]
-    want := "Chris"
+	got := playerStore.winCalls[0]
+	want := "Chris"
 
-    if got != want {
-        t.Errorf("didn't record correct winner, got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("didn't record correct winner, got %q, want %q", got, want)
+	}
 }
 ```
 
@@ -249,24 +254,24 @@ func TestCLI(t *testing.T) {
 ```go
 //CLI.go
 type CLI struct {
-    playerStore PlayerStore
-    in          io.Reader
+	playerStore PlayerStore
+	in          io.Reader
 }
 ```
 
-## 成功させるのに十分なコードを書く
-
-```text
+```
 --- FAIL: TestCLI (0.00s)
     CLI_test.go:23: didn't record the correct winner, got 'Cleo', want 'Chris'
 FAIL
 ```
 
+## 成功させるのに十分なコードを書く
+
 最初に最も簡単なことを忘れないでください。
 
 ```go
 func (cli *CLI) PlayPoker() {
-    cli.playerStore.RecordWin("Chris")
+	cli.playerStore.RecordWin("Chris")
 }
 ```
 
@@ -279,15 +284,15 @@ func (cli *CLI) PlayPoker() {
 ```go
 //server_test.go
 func assertPlayerWin(t testing.TB, store *StubPlayerStore, winner string) {
-    t.Helper()
+	t.Helper()
 
-    if len(store.winCalls) != 1 {
-        t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
-    }
+	if len(store.winCalls) != 1 {
+		t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
+	}
 
-    if store.winCalls[0] != winner {
-        t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
-    }
+	if store.winCalls[0] != winner {
+		t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
+	}
 }
 ```
 
@@ -298,13 +303,13 @@ func assertPlayerWin(t testing.TB, store *StubPlayerStore, winner string) {
 ```go
 //CLI_test.go
 func TestCLI(t *testing.T) {
-    in := strings.NewReader("Chris wins\n")
-    playerStore := &StubPlayerStore{}
+	in := strings.NewReader("Chris wins\n")
+	playerStore := &StubPlayerStore{}
 
-    cli := &CLI{playerStore, in}
-    cli.PlayPoker()
+	cli := &CLI{playerStore, in}
+	cli.PlayPoker()
 
-    assertPlayerWin(t, playerStore, "Chris")
+	assertPlayerWin(t, playerStore, "Chris")
 }
 ```
 
@@ -316,32 +321,32 @@ func TestCLI(t *testing.T) {
 //CLI_test.go
 func TestCLI(t *testing.T) {
 
-    t.Run("record chris win from user input", func(t *testing.T) {
-        in := strings.NewReader("Chris wins\n")
-        playerStore := &StubPlayerStore{}
+	t.Run("record chris win from user input", func(t *testing.T) {
+		in := strings.NewReader("Chris wins\n")
+		playerStore := &StubPlayerStore{}
 
-        cli := &CLI{playerStore, in}
-        cli.PlayPoker()
+		cli := &CLI{playerStore, in}
+		cli.PlayPoker()
 
-        assertPlayerWin(t, playerStore, "Chris")
-    })
+		assertPlayerWin(t, playerStore, "Chris")
+	})
 
-    t.Run("record cleo win from user input", func(t *testing.T) {
-        in := strings.NewReader("Cleo wins\n")
-        playerStore := &StubPlayerStore{}
+	t.Run("record cleo win from user input", func(t *testing.T) {
+		in := strings.NewReader("Cleo wins\n")
+		playerStore := &StubPlayerStore{}
 
-        cli := &CLI{playerStore, in}
-        cli.PlayPoker()
+		cli := &CLI{playerStore, in}
+		cli.PlayPoker()
 
-        assertPlayerWin(t, playerStore, "Cleo")
-    })
+		assertPlayerWin(t, playerStore, "Cleo")
+	})
 
 }
 ```
 
 ## テストを実行してみます
 
-```text
+```
 === RUN   TestCLI
 --- FAIL: TestCLI (0.00s)
 === RUN   TestCLI/record_chris_win_from_user_input
@@ -363,18 +368,18 @@ FAIL
 ```go
 //CLI.go
 type CLI struct {
-    playerStore PlayerStore
-    in          io.Reader
+	playerStore PlayerStore
+	in          io.Reader
 }
 
 func (cli *CLI) PlayPoker() {
-    reader := bufio.NewScanner(cli.in)
-    reader.Scan()
-    cli.playerStore.RecordWin(extractWinner(reader.Text()))
+	reader := bufio.NewScanner(cli.in)
+	reader.Scan()
+	cli.playerStore.RecordWin(extractWinner(reader.Text()))
 }
 
 func extractWinner(userInput string) string {
-    return strings.Replace(userInput, " wins", "", 1)
+	return strings.Replace(userInput, " wins", "", 1)
 }
 ```
 
@@ -391,38 +396,38 @@ func extractWinner(userInput string) string {
 package main
 
 import (
-    "fmt"
-    "github.com/quii/learn-go-with-tests/command-line/v3"
-    "log"
-    "os"
+	"fmt"
+	"github.com/quii/learn-go-with-tests/command-line/v3"
+	"log"
+	"os"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-    fmt.Println("Let's play poker")
-    fmt.Println("Type {Name} wins to record a win")
+	fmt.Println("Let's play poker")
+	fmt.Println("Type {Name} wins to record a win")
 
-    db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
 
-    if err != nil {
-        log.Fatalf("problem opening %s %v", dbFileName, err)
-    }
+	if err != nil {
+		log.Fatalf("problem opening %s %v", dbFileName, err)
+	}
 
-    store, err := poker.NewFileSystemPlayerStore(db)
+	store, err := poker.NewFileSystemPlayerStore(db)
 
-    if err != nil {
-        log.Fatalf("problem creating file system player store, %v ", err)
-    }
+	if err != nil {
+		log.Fatalf("problem creating file system player store, %v ", err)
+	}
 
-    game := poker.CLI{store, os.Stdin}
-    game.PlayPoker()
+	game := poker.CLI{store, os.Stdin}
+	game.PlayPoker()
 }
 ```
 
 エラーが発生するはずです。
 
-```text
+```
 command-line/v3/cmd/cli/main.go:32:25: implicit assignment of unexported field 'playerStore' in poker.CLI literal
 command-line/v3/cmd/cli/main.go:32:34: implicit assignment of unexported field 'in' in poker.CLI literal
 ```
@@ -448,7 +453,7 @@ TDDの格言は、コードをテストできない場合、コードのユー�
 適切に構成されたIDEがある場合、突然多くの赤（Red）が表示されます。
 コンパイラを実行すると、次のエラーが発生します
 
-```text
+```
 ./CLI_test.go:12:19: undefined: StubPlayerStore
 ./CLI_test.go:17:3: undefined: assertPlayerWin
 ./CLI_test.go:22:19: undefined: StubPlayerStore
@@ -469,40 +474,40 @@ Mitchell・Hashimotoによるプレゼンテーション[Goを使った高度な
 それでは、`testing.go`というファイルを作成して、スタブとヘルパーを追加しましょう。
 
 ```go
-//testing.go
+// testing.go
 package poker
 
 import "testing"
 
 type StubPlayerStore struct {
-    scores   map[string]int
-    winCalls []string
-    league   []Player
+	scores   map[string]int
+	winCalls []string
+	league   []Player
 }
 
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
-    score := s.scores[name]
-    return score
+	score := s.scores[name]
+	return score
 }
 
 func (s *StubPlayerStore) RecordWin(name string) {
-    s.winCalls = append(s.winCalls, name)
+	s.winCalls = append(s.winCalls, name)
 }
 
 func (s *StubPlayerStore) GetLeague() League {
-    return s.league
+	return s.league
 }
 
 func AssertPlayerWin(t testing.TB, store *StubPlayerStore, winner string) {
-    t.Helper()
+	t.Helper()
 
-    if len(store.winCalls) != 1 {
-        t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
-    }
+	if len(store.winCalls) != 1 {
+		t.Fatalf("got %d calls to RecordWin want %d", len(store.winCalls), 1)
+	}
 
-    if store.winCalls[0] != winner {
-        t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
-    }
+	if store.winCalls[0] != winner {
+		t.Errorf("did not store correct winner got %q want %q", store.winCalls[0], winner)
+	}
 }
 
 // todo for you - the rest of the helpers
@@ -516,32 +521,32 @@ func AssertPlayerWin(t testing.TB, store *StubPlayerStore, winner string) {
 //CLI_test.go
 func TestCLI(t *testing.T) {
 
-    t.Run("record chris win from user input", func(t *testing.T) {
-        in := strings.NewReader("Chris wins\n")
-        playerStore := &poker.StubPlayerStore{}
+	t.Run("record chris win from user input", func(t *testing.T) {
+		in := strings.NewReader("Chris wins\n")
+		playerStore := &poker.StubPlayerStore{}
 
-        cli := &poker.CLI{playerStore, in}
-        cli.PlayPoker()
+		cli := &poker.CLI{playerStore, in}
+		cli.PlayPoker()
 
-        poker.AssertPlayerWin(t, playerStore, "Chris")
-    })
+		poker.AssertPlayerWin(t, playerStore, "Chris")
+	})
 
-    t.Run("record cleo win from user input", func(t *testing.T) {
-        in := strings.NewReader("Cleo wins\n")
-        playerStore := &poker.StubPlayerStore{}
+	t.Run("record cleo win from user input", func(t *testing.T) {
+		in := strings.NewReader("Cleo wins\n")
+		playerStore := &poker.StubPlayerStore{}
 
-        cli := &poker.CLI{playerStore, in}
-        cli.PlayPoker()
+		cli := &poker.CLI{playerStore, in}
+		cli.PlayPoker()
 
-        poker.AssertPlayerWin(t, playerStore, "Cleo")
-    })
+		poker.AssertPlayerWin(t, playerStore, "Cleo")
+	})
 
 }
 ```
 
 これで、`main`と同じ問題が発生することがわかります。
 
-```text
+```
 ./CLI_test.go:15:26: implicit assignment of unexported field 'playerStore' in poker.CLI literal
 ./CLI_test.go:15:39: implicit assignment of unexported field 'in' in poker.CLI literal
 ./CLI_test.go:25:26: implicit assignment of unexported field 'playerStore' in poker.CLI literal
@@ -553,15 +558,15 @@ func TestCLI(t *testing.T) {
 ```go
 //CLI.go
 type CLI struct {
-    playerStore PlayerStore
-    in          *bufio.Scanner
+	playerStore PlayerStore
+	in          *bufio.Scanner
 }
 
 func NewCLI(store PlayerStore, in io.Reader) *CLI {
-    return &CLI{
-        playerStore: store,
-        in:          bufio.NewScanner(in),
-    }
+	return &CLI{
+		playerStore: store,
+		in:          bufio.NewScanner(in),
+	}
 }
 ```
 
@@ -570,17 +575,17 @@ func NewCLI(store PlayerStore, in io.Reader) *CLI {
 ```go
 //CLI.go
 func (cli *CLI) PlayPoker() {
-    userInput := cli.readLine()
-    cli.playerStore.RecordWin(extractWinner(userInput))
+	userInput := cli.readLine()
+	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
 func extractWinner(userInput string) string {
-    return strings.Replace(userInput, " wins", "", 1)
+	return strings.Replace(userInput, " wins", "", 1)
 }
 
 func (cli *CLI) readLine() string {
-    cli.in.Scan()
-    return cli.in.Text()
+	cli.in.Scan()
+	return cli.in.Text()
 }
 ```
 
@@ -597,29 +602,29 @@ game := poker.NewCLI(store, os.Stdin)
 
 ### リファクタリング♪
 
-それぞれのアプリケーションで、ファイルを開いてその内容から「file_system_store」を作成するという繰り返しがあります。
+それぞれのアプリケーションで、ファイルを開いてその内容から`file_system_store`を作成するという繰り返しがあります。
 これは、パッケージの設計のわずかな弱点のように感じられるので、パスからファイルを開いて、`PlayerStore`を返すようにカプセル化する関数を作成する必要があります。
 
 ```go
 //file_system_store.go
 func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(), error) {
-    db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
+	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
 
-    if err != nil {
-        return nil, nil, fmt.Errorf("problem opening %s %v", path, err)
-    }
+	if err != nil {
+		return nil, nil, fmt.Errorf("problem opening %s %v", path, err)
+	}
 
-    closeFunc := func() {
-        db.Close()
-    }
+	closeFunc := func() {
+		db.Close()
+	}
 
-    store, err := NewFileSystemPlayerStore(db)
+	store, err := NewFileSystemPlayerStore(db)
 
-    if err != nil {
-        return nil, nil, fmt.Errorf("problem creating file system player store, %v ", err)
-    }
+	if err != nil {
+		return nil, nil, fmt.Errorf("problem creating file system player store, %v ", err)
+	}
 
-    return store, closeFunc, nil
+	return store, closeFunc, nil
 }
 ```
 
@@ -628,59 +633,59 @@ func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(),
 #### CLIアプリケーションコード
 
 ```go
-//cmd/cli/main.go
+// cmd/cli/main.go
 package main
 
 import (
-    "fmt"
-    "github.com/quii/learn-go-with-tests/command-line/v3"
-    "log"
-    "os"
+	"fmt"
+	"github.com/quii/learn-go-with-tests/command-line/v3"
+	"log"
+	"os"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-    store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+	store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
 
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer close()
 
-    fmt.Println("Let's play poker")
-    fmt.Println("Type {Name} wins to record a win")
-    poker.NewCLI(store, os.Stdin).PlayPoker()
+	fmt.Println("Let's play poker")
+	fmt.Println("Type {Name} wins to record a win")
+	poker.NewCLI(store, os.Stdin).PlayPoker()
 }
 ```
 
 #### Webサーバーアプリケーションコード
 
 ```go
-//cmd/webserver/main.go
+// cmd/webserver/main.go
 package main
 
 import (
-    "github.com/quii/learn-go-with-tests/command-line/v3"
-    "log"
-    "net/http"
+	"github.com/quii/learn-go-with-tests/command-line/v3"
+	"log"
+	"net/http"
 )
 
 const dbFileName = "game.db.json"
 
 func main() {
-    store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
+	store, close, err := poker.FileSystemPlayerStoreFromFile(dbFileName)
 
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer close()
 
-    server := poker.NewPlayerServer(store)
+	server := poker.NewPlayerServer(store)
 
-    if err := http.ListenAndServe(":5000", server); err != nil {
-        log.Fatalf("could not listen on port 5000 %v", err)
-    }
+	if err := http.ListenAndServe(":5000", server); err != nil {
+		log.Fatalf("could not listen on port 5000 %v", err)
+	}
 }
 ```
 

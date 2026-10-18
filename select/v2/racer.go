@@ -17,7 +17,10 @@ func Racer(a, b string) (winner string) {
 func ping(url string) chan struct{} {
 	ch := make(chan struct{})
 	go func() {
-		http.Get(url)
+		resp, err := http.Get(url)
+		if err == nil {
+			resp.Body.Close()
+		}
 		close(ch)
 	}()
 	return ch

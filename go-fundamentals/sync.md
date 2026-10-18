@@ -4,13 +4,13 @@ description: Sync
 
 # 同期
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/sync)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/sync)
 
 安全に併用できる並行処理を作りたい。
 
 安全でない並行処理から始めて、その動作がシングルスレッド環境で機能することを確認します。
 
-次に、複数のゴルーチンがテストを介してそれを使用して修正することで、安全でないことを実行します。
+次に、複数のゴルーチンがテストを介してカウンターを使用することで安全でないことを確かめ、それを修正します。
 
 ## 最初にテストを書く
 
@@ -100,19 +100,20 @@ func (c *Counter) Value() int {
 
 ```go
 t.Run("incrementing the counter 3 times leaves it at 3", func(t *testing.T) {
-    counter := Counter{}
-    counter.Inc()
-    counter.Inc()
-    counter.Inc()
+	counter := Counter{}
+	counter.Inc()
+	counter.Inc()
+	counter.Inc()
 
-    assertCounter(t, counter, 3)
+	assertCounter(t, counter, 3)
 })
-
-func assertCounter(t *testing.T, got Counter, want int)  {
-    t.Helper()
-    if got.Value() != want {
-        t.Errorf("got %d, want %d", got.Value(), want)
-    }
+```
+```go
+func assertCounter(t testing.TB, got Counter, want int) {
+	t.Helper()
+	if got.Value() != want {
+		t.Errorf("got %d, want %d", got.Value(), want)
+	}
 }
 ```
 
@@ -124,21 +125,21 @@ func assertCounter(t *testing.T, got Counter, want int)  {
 
 ```go
 t.Run("it runs safely concurrently", func(t *testing.T) {
-    wantedCount := 1000
-    counter := Counter{}
+	wantedCount := 1000
+	counter := Counter{}
 
-    var wg sync.WaitGroup
-    wg.Add(wantedCount)
+	var wg sync.WaitGroup
+	wg.Add(wantedCount)
 
-    for i := 0; i < wantedCount; i++ {
-        go func(w *sync.WaitGroup) {
-            counter.Inc()
-            w.Done()
-        }(&wg)
-    }
-    wg.Wait()
+	for i := 0; i < wantedCount; i++ {
+		go func() {
+			counter.Inc()
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 
-    assertCounter(t, counter, wantedCount)
+	assertCounter(t, counter, wantedCount)
 })
 ```
 
@@ -154,18 +155,41 @@ t.Run("it runs safely concurrently", func(t *testing.T) {
 ## テストを実行してみます
 
 ```text
-=== RUN   TestCounter/it_runs_safely_in_a_concurrent_envionment
+=== RUN   TestCounter/it_runs_safely_concurrently
 --- FAIL: TestCounter (0.00s)
-    --- FAIL: TestCounter/it_runs_safely_in_a_concurrent_envionment (0.00s)
-        sync_test.go:26: got 939, want 1000
+    --- FAIL: TestCounter/it_runs_safely_concurrently (0.00s)
+    	sync_test.go:26: got 939, want 1000
 FAIL
 ```
 
 テストは別の数値で _おそらく_ 失敗しますが、それでも複数のゴルーチンが同時にカウンターの値を変更しようとしている場合は機能しないことを示しています。
 
+### なぜこうなるのでしょうか？
+
+`c.value++`は単一の分割できない操作のように見えますが、そうではありません。これは次のようなものの省略形です。
+
+```go
+tmp := c.value // 1. read
+tmp = tmp + 1  // 2. increment
+c.value = tmp  // 3. write
+```
+
+これら3つのステップはそれぞれ別々の操作であり、Goランタイムはその間のどの時点でもゴルーチンを切り替えることができます。2つのゴルーチンがほぼ同時に`Inc`を呼び出すと、それぞれのステップが交互に実行される可能性があります。例えば次のようになります。
+
+```
+goroutine A: reads c.value (0)
+goroutine B: reads c.value (0)
+goroutine A: increments its copy to 1
+goroutine B: increments its copy to 1
+goroutine A: writes c.value = 1
+goroutine B: writes c.value = 1
+```
+
+どちらのゴルーチンも`Inc`を1回ずつ呼び出したので、`c.value`は最終的に`2`になってほしいところですが、実際には`1`になります。どちらかが結果を書き戻す前に、両方のゴルーチンが同じ開始値を読み取ってしまったため、インクリメントの1つが黙って失われたのです。これは _競合状態（race condition）_ と呼ばれます。1000個のゴルーチンが一斉に読み取り、インクリメント、書き込みを競い合えば、いくつかのインクリメントが失われるのも不思議ではありません。
+
 ## 成功させるのに十分なコードを書く
 
-簡単な解決策は、`Counter`、[`Mutex`](https://golang.org/pkg/sync/#Mutex)にロックを追加することです。
+簡単な解決策は、`Counter`にロックを追加して、一度に1つのゴルーチンだけがカウンターをインクリメントできるようにすることです。Goの[`Mutex`](https://golang.org/pkg/sync/#Mutex)がそのようなロックを提供します。
 
 > `Mutex`は相互排他ロックです。ミューテックスのゼロ値は、ロックされていないミューテックスです。
 
@@ -209,7 +233,7 @@ func (c *Counter) Inc() {
 
 これは見栄えが良いですが、プログラミングは非常に主観的な分野ですが、これは**悪いことであり間違っています**。
 
-場合によっては、型の埋め込みがその型のメソッドが _public_ インターフェースの一部になることを忘れることがあります。そしてあなたはしばしばそれを望まないでしょう。
+型を埋め込むと、その型のメソッドが _公開インターフェースの一部_ になることを忘れてしまう人がいます。そしてあなたはしばしばそれを望まないでしょう。
 公開APIには細心の注意を払う必要があることを忘れないでください。何かを公開する瞬間は、他のコードがそれに結合できる瞬間です。私たちは常に不必要な結合を避けたいと思っています。
 
 `Lock`と`Unlock`を公開することはせいぜい混乱を招きますが、最悪の場合、同じタイプの呼び出し元がこれらのメソッドの呼び出しを開始すると、ソフトウェアに非常に有害な可能性があります。
@@ -238,7 +262,7 @@ sync/v2/sync_test.go:39: assertCounter passes lock by value: v1.Counter contains
 これを解決するには、代わりに`Counter`へのポインターを渡す必要があるため、`assertCounter`のシグネチャを変更します
 
 ```go
-func assertCounter(t *testing.T, got *Counter, want int)
+func assertCounter(t testing.TB, got *Counter, want int)
 ```
 
 `*Counter`ではなく`Counter`を渡そうとしているため、テストはコンパイルされなくなりました。これを解決するには、自分で型を初期化しない方がよいことをAPIのリーダーに示すコンストラクタを作成することをお勧めします。
@@ -251,17 +275,44 @@ func NewCounter() *Counter {
 
 `Counter`を初期化するときに、この関数をテストで使用します。
 
+## 別の選択肢: sync/atomic
+
+`Mutex`は汎用的なツールです。すべてのアクセスの前後で`Lock`/`Unlock`することさえ忘れなければ、任意の数のフィールドと、それらの間の任意の不変条件を保護できます。しかし、私たちの`Counter`は共有状態としてはこれ以上ないほど単純です。複数のゴルーチンからインクリメントされる、単一の整数です。まさにこのようなケースのために、[`sync/atomic`](https://pkg.go.dev/sync/atomic)パッケージは[`atomic.Int64`](https://pkg.go.dev/sync/atomic#Int64)のような型を提供しており、別途ロックを用意することなく単一の値への安全な並行アクセスを実現できます。
+
+```go
+type Counter struct {
+	value atomic.Int64
+}
+
+func NewCounter() *Counter {
+	return &Counter{}
+}
+
+func (c *Counter) Inc() {
+	c.value.Add(1)
+}
+
+func (c *Counter) Value() int64 {
+	return c.value.Load()
+}
+```
+
+`Mutex`も`Lock`/`Unlock`もありませんが、それでも好きなだけ多くのゴルーチンから同時に`Inc`を呼び出しても安全です。先ほど書いたテストは変更なしでそのまま成功します。内部的には、低レベルのCPU命令を使ってインクリメント自体をアトミックにしており、このような単純なケースでは一般的に`Mutex`よりも高速です。また`atomic.Int64`（および`atomic.Int32`や`atomic.Bool`のような仲間の型）は、古いGoでの`atomic.AddInt64(&x, 1)`のような生の関数呼び出しのように誤った使い方をすることができません。ポインターを渡し忘れることも、`Load`を経由せずに誤ってフィールドを読み取ってしまうこともありません。
+
+単一の値を保護するときは`sync/atomic`の型を使い、複数のフィールドやそれらの間の不変条件を一緒に一貫させる必要が出てきたら`Mutex`を使いましょう。
+
 ## まとめ
 
 [同期パッケージ(sync package)](https://golang.org/pkg/sync/)のいくつかをカバーしました
 
 * `Mutex`を使用すると、データにロックを追加できます
-* `Waitgroup`は、ゴルーチンがジョブを完了するのを待つ手段です
+* `WaitGroup`は、ゴルーチンがジョブを完了するのを待つ手段です
+* `sync/atomic`は単一の値への安全でロックフリーなアクセスを提供し、完全な`Mutex`では大げさな場合に使う価値があります
 
 ### チャネルとゴルーチンにロックを使用するのはいつですか？
 
 [私たちは以前に最初の並行性の章でゴルーチンをカバーしました](concurrency.md)これで安全な並行コードを書くことができるので、なぜロックを使うのでしょうか？
-[go wikiには、このトピック専用のページがあります。ミューテックスまたはチャネル](https://github.com/golang/go/wiki/MutexOrChannel)
+[go wikiには、このトピック専用のページがあります。ミューテックスまたはチャネル](https://go.dev/wiki/MutexOrChannel)
 
 > Goの初心者によくある間違いは、それが可能であったり、楽しいからといって、チャネルやゴルーチンを使いすぎてしまうことです。`sync.Mutex`が問題に最も適している場合は、恐れずに同期を使用してください。 Goは、問題を最もよく解決するツールを使用できるようにし、1つのスタイルのコードに強制するのではなく、実用的です。
 

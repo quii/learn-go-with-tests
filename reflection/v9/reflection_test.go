@@ -13,12 +13,12 @@ func TestWalk(t *testing.T) {
 		ExpectedCalls []string
 	}{
 		{
-			"Struct with one string field",
+			"struct with one string field",
 			struct{ Name string }{"Chris"},
 			[]string{"Chris"},
 		},
 		{
-			"Struct with two string fields",
+			"struct with two string fields",
 			struct {
 				Name string
 				City string
@@ -26,7 +26,7 @@ func TestWalk(t *testing.T) {
 			[]string{"Chris", "London"},
 		},
 		{
-			"Struct with non string field",
+			"struct with non string field",
 			struct {
 				Name string
 				Age  int
@@ -34,7 +34,7 @@ func TestWalk(t *testing.T) {
 			[]string{"Chris"},
 		},
 		{
-			"Nested fields",
+			"nested fields",
 			Person{
 				"Chris",
 				Profile{33, "London"},
@@ -42,7 +42,7 @@ func TestWalk(t *testing.T) {
 			[]string{"Chris", "London"},
 		},
 		{
-			"Pointers to things",
+			"pointers to things",
 			&Person{
 				"Chris",
 				Profile{33, "London"},
@@ -50,7 +50,7 @@ func TestWalk(t *testing.T) {
 			[]string{"Chris", "London"},
 		},
 		{
-			"Slices",
+			"slices",
 			[]Profile{
 				{33, "London"},
 				{34, "Reykjavík"},
@@ -58,7 +58,7 @@ func TestWalk(t *testing.T) {
 			[]string{"London", "Reykjavík"},
 		},
 		{
-			"Arrays",
+			"arrays",
 			[2]Profile{
 				{33, "London"},
 				{34, "Reykjavík"},
@@ -91,6 +91,7 @@ func TestWalk(t *testing.T) {
 			got = append(got, input)
 		})
 
+		assertLength(t, got, len(aMap))
 		assertContains(t, got, "Bar")
 		assertContains(t, got, "Boz")
 	})
@@ -127,7 +128,15 @@ type Profile struct {
 	City string
 }
 
-func assertContains(t *testing.T, haystack []string, needle string) {
+func assertLength(t testing.TB, got []string, want int) {
+	t.Helper()
+	if len(got) != want {
+		t.Errorf("got %d values but expected %d", len(got), want)
+	}
+}
+
+func assertContains(t testing.TB, haystack []string, needle string) {
+	t.Helper()
 	contains := false
 	for _, x := range haystack {
 		if x == needle {
@@ -135,6 +144,6 @@ func assertContains(t *testing.T, haystack []string, needle string) {
 		}
 	}
 	if !contains {
-		t.Errorf("expected %+v to contain %q but it didn't", haystack, needle)
+		t.Errorf("expected %v to contain %q but it didn't", haystack, needle)
 	}
 }

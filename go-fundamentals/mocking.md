@@ -4,11 +4,11 @@ description: Mocking
 
 # スタブ・モック
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/mocking)
+**[この章のすべてのコードはここにあります](https://github.com/quii/learn-go-with-tests/tree/main/mocking)**
 
 3からカウントダウンするプログラムを作成するように求められました。各数値を新しい行に表示します（1秒の間隔を置いて）、ゼロに達すると「Go！」と表示します。そして終了します。
 
-```text
+```
 3
 2
 1
@@ -21,7 +21,7 @@ Go!
 package main
 
 func main() {
-    Countdown()
+	Countdown()
 }
 ```
 
@@ -29,7 +29,7 @@ func main() {
 
 反復とはどういう意味ですか？私たちは、有用なソフトウェアを入手するために、できる限り小さなステップを踏んでいることを確認します。
 
-開発者がうさぎの穴に陥るのはそのためであることが多いため、ハッキングの後に理論的に機能するコードに長い時間を費やしたくありません。 **要件をできる限り小さくスライスして、** _ **動作するソフトウェア** _ **を使用できるようにすることは重要なスキルです。**
+開発者がうさぎの穴に陥るのはそのためであることが多いため、ハッキングの後に理論的に機能するコードに長い時間を費やしたくありません。 **要件をできる限り小さくスライスして、 _動作するソフトウェア_ を手にできるようにすることは重要なスキルです。**
 
 作業を分割して反復する方法は次のとおりです。
 
@@ -39,20 +39,20 @@ func main() {
 
 ## 最初にテストを書く
 
-私たちのソフトウェアはstdoutに出力する必要があり、DIを使用してこれをテストする方法をDIセクションで確認しました。
+私たちのソフトウェアはstdoutに出力する必要があり、依存性注入（DI）を使用してこれをテストする方法をDIセクションで確認しました。
 
 ```go
 func TestCountdown(t *testing.T) {
-    buffer := &bytes.Buffer{}
+	buffer := &bytes.Buffer{}
 
-    Countdown(buffer)
+	Countdown(buffer)
 
-    got := buffer.String()
-    want := "3"
+	got := buffer.String()
+	want := "3"
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 }
 ```
 
@@ -63,7 +63,7 @@ func TestCountdown(t *testing.T) {
 * `main`で`os.Stdout`に送信して、ターミナルに出力されたカウントダウンをユーザーに表示します。
 * テストでは、`bytes.Buffer`に送信して、生成されるデータをテストでキャプチャできるようにします。
 
-## テストを試して実行する
+## テストを実行してみます
 
 `./countdown_test.go:11:2: undefined: Countdown`
 
@@ -77,7 +77,7 @@ func Countdown() {}
 
 再試行
 
-```go
+```
 ./countdown_test.go:11:11: too many arguments in call to Countdown
     have (*bytes.Buffer)
     want ()
@@ -97,11 +97,11 @@ func Countdown(out *bytes.Buffer) {}
 
 ```go
 func Countdown(out *bytes.Buffer) {
-    fmt.Fprint(out, "3")
+	fmt.Fprint(out, "3")
 }
 ```
 
-`fm.Fprint`を使用しています。これは、`io.Writer`（`* bytes.Buffer`など）を受け取り、それに`string`を送信します。テストは成功するはずです。
+`fmt.Fprint`を使用しています。これは、`io.Writer`（`*bytes.Buffer`など）を受け取り、それに`string`を送信します。テストは成功するはずです。
 
 ## リファクタリング♪
 
@@ -109,7 +109,7 @@ func Countdown(out *bytes.Buffer) {
 
 ```go
 func Countdown(out io.Writer) {
-    fmt.Fprint(out, "3")
+	fmt.Fprint(out, "3")
 }
 ```
 
@@ -121,17 +121,17 @@ func Countdown(out io.Writer) {
 package main
 
 import (
-    "fmt"
-    "io"
-    "os"
+	"fmt"
+	"io"
+	"os"
 )
 
 func Countdown(out io.Writer) {
-    fmt.Fprint(out, "3")
+	fmt.Fprint(out, "3")
 }
 
 func main() {
-    Countdown(os.Stdout)
+	Countdown(os.Stdout)
 }
 ```
 
@@ -149,27 +149,27 @@ func main() {
 
 ```go
 func TestCountdown(t *testing.T) {
-    buffer := &bytes.Buffer{}
+	buffer := &bytes.Buffer{}
 
-    Countdown(buffer)
+	Countdown(buffer)
 
-    got := buffer.String()
-    want := `3
+	got := buffer.String()
+	want := `3
 2
 1
 Go!`
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 }
 ```
 
-バックティック構文は`string`を作成するもう1つの方法ですが、テストに最適な改行などを配置できます。
+バックティック構文は`string`を作成するもう1つの方法ですが、改行などを含めることができるので、テストに最適です。
 
-## テストを試して実行する
+## テストを実行してみます
 
-```text
+```
 countdown_test.go:21: got '3' want '3
         2
         1
@@ -180,10 +180,10 @@ countdown_test.go:21: got '3' want '3
 
 ```go
 func Countdown(out io.Writer) {
-    for i := 3; i > 0; i-- {
-        fmt.Fprintln(out, i)
-    }
-    fmt.Fprint(out, "Go!")
+	for i := 3; i > 0; i-- {
+		fmt.Fprintln(out, i)
+	}
+	fmt.Fprint(out, "Go!")
 }
 ```
 `i--`で逆にカウントする`for`ループを使用し、`fmt.Fprintln`を使用して、番号と改行文字を続けて`out`に出力します。最後に`fmt.Fprint`を使用して終わった後「Go！」を送信します。
@@ -197,10 +197,10 @@ const finalWord = "Go!"
 const countdownStart = 3
 
 func Countdown(out io.Writer) {
-    for i := countdownStart; i > 0; i-- {
-        fmt.Fprintln(out, i)
-    }
-    fmt.Fprint(out, finalWord)
+	for i := countdownStart; i > 0; i-- {
+		fmt.Fprintln(out, i)
+	}
+	fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -210,13 +210,12 @@ Goでは、`time.Sleep`でこれを実現できます。コードに追加して
 
 ```go
 func Countdown(out io.Writer) {
-    for i := countdownStart; i > 0; i-- {
-        time.Sleep(1 * time.Second)
-        fmt.Fprintln(out, i)
-    }
+	for i := countdownStart; i > 0; i-- {
+		fmt.Fprintln(out, i)
+		time.Sleep(1 * time.Second)
+	}
 
-    time.Sleep(1 * time.Second)
-    fmt.Fprint(out, finalWord)
+	fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -226,10 +225,10 @@ func Countdown(out io.Writer) {
 
 テストは引き続き成功し、ソフトウェアは意図したとおりに機能しますが、いくつかの問題があります。
 
-* テストの実行には4秒かかります。
+* テストの実行には3秒かかります。
   * ソフトウェア開発に関する前向きな投稿はすべて、迅速なフィードバックループの重要性を強調しています。
   * **遅いテストは開発者の生産性を台無しにします**。
-  * 要件がさらに洗練され、より多くのテストが必要になると想像してください。 `Countdown`のすべての新しいテストのテスト実行に4が追加されたことに満足していますか？
+  * 要件がさらに洗練され、より多くのテストが必要になると想像してください。 `Countdown`のすべての新しいテストのテスト実行に3秒が追加されることに満足できるでしょうか？
 * 関数の重要なプロパティはテストしていません。
 
 テストでそれを制御できるように抽出する必要がある`Sleep`に依存しています。
@@ -242,7 +241,7 @@ func Countdown(out io.Writer) {
 
 ```go
 type Sleeper interface {
-    Sleep()
+	Sleep()
 }
 ```
 
@@ -253,44 +252,44 @@ type Sleeper interface {
 
 ```go
 type SpySleeper struct {
-    Calls int
+	Calls int
 }
 
 func (s *SpySleeper) Sleep() {
-    s.Calls++
+	s.Calls++
 }
 ```
 
 _Spies_ は、依存関係の使用方法を記録できるモックの一種です。送信された引数、それが呼び出された回数などを記録できます。この例では、`Sleep()`が呼び出された回数を追跡しているので、テストで確認できます。
 
-テストを更新してSpyへの依存関係を挿入し、スリープが4回呼び出されたことをアサートします。
+テストを更新してSpyへの依存関係を挿入し、スリープが3回呼び出されたことをアサートします。
 
 ```go
 func TestCountdown(t *testing.T) {
-    buffer := &bytes.Buffer{}
-    spySleeper := &SpySleeper{}
+	buffer := &bytes.Buffer{}
+	spySleeper := &SpySleeper{}
 
-    Countdown(buffer, spySleeper)
+	Countdown(buffer, spySleeper)
 
-    got := buffer.String()
-    want := `3
+	got := buffer.String()
+	want := `3
 2
 1
 Go!`
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 
-    if spySleeper.Calls != 4 {
-        t.Errorf("not enough calls to sleeper, want 4 got %d", spySleeper.Calls)
-    }
+	if spySleeper.Calls != 3 {
+		t.Errorf("not enough calls to sleeper, want 3 got %d", spySleeper.Calls)
+	}
 }
 ```
 
-## テストを試して実行する
+## テストを実行してみます
 
-```text
+```
 too many arguments in call to Countdown
     have (*bytes.Buffer, *SpySleeper)
     want (io.Writer)
@@ -302,19 +301,18 @@ too many arguments in call to Countdown
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
-    for i := countdownStart; i > 0; i-- {
-        time.Sleep(1 * time.Second)
-        fmt.Fprintln(out, i)
-    }
+	for i := countdownStart; i > 0; i-- {
+		fmt.Fprintln(out, i)
+		time.Sleep(1 * time.Second)
+	}
 
-    time.Sleep(1 * time.Second)
-    fmt.Fprint(out, finalWord)
+	fmt.Fprint(out, finalWord)
 }
 ```
 
 もう一度試すと、同じ理由で`main`はコンパイルできなくなります
 
-```text
+```
 ./main.go:26:11: not enough arguments in call to Countdown
     have (*os.File)
     want (io.Writer, Sleeper)
@@ -323,10 +321,10 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 必要なインターフェースを実装する「実際の」スリーパーを作成しましょう
 
 ```go
-type DefaultSleeper struct {}
+type DefaultSleeper struct{}
 
 func (d *DefaultSleeper) Sleep() {
-    time.Sleep(1 * time.Second)
+	time.Sleep(1 * time.Second)
 }
 ```
 
@@ -334,8 +332,8 @@ func (d *DefaultSleeper) Sleep() {
 
 ```go
 func main() {
-    sleeper := &DefaultSleeper{}
-    Countdown(os.Stdout, sleeper)
+	sleeper := &DefaultSleeper{}
+	Countdown(os.Stdout, sleeper)
 }
 ```
 
@@ -345,27 +343,25 @@ func main() {
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
-    for i := countdownStart; i > 0; i-- {
-        sleeper.Sleep()
-        fmt.Fprintln(out, i)
-    }
+	for i := countdownStart; i > 0; i-- {
+		fmt.Fprintln(out, i)
+		sleeper.Sleep()
+	}
 
-    sleeper.Sleep()
-    fmt.Fprint(out, finalWord)
+	fmt.Fprint(out, finalWord)
 }
 ```
 
-テストに合格し、4秒はかかりません。
+テストに合格し、もう3秒はかからなくなるはずです。
 
 ### まだいくつかの問題
 
 テストしていない重要なプロパティがまだあります。
 
-`Countdown` は各表示の前にスリープする必要があります。
+`Countdown` は次の表示の前にそれぞれスリープする必要があります。
 
 例：
 
-* `Sleep`
 * `Print N`
 * `Sleep`
 * `Print N-1`
@@ -373,7 +369,7 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 * `Print Go!`
 * etc
 
-私たちの最新の変更は、それが4回寝たと断言しているだけですが、それらの睡眠は順序が狂って起こる可能性があります。
+私たちの最新の変更は、それが3回スリープしたとアサートしているだけですが、それらの睡眠は順序が狂って起こる可能性があります。
 
 テストが十分な自信を与えていると確信していない場合にテストを作成するときは、テストを中断してください。
 （ただし、変更を最初にソース管理にコミットしたことを確認してください）。
@@ -383,16 +379,15 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 
 ```go
 func Countdown(out io.Writer, sleeper Sleeper) {
-    for i := countdownStart; i > 0; i-- {
-        sleeper.Sleep()
-    }
+	for i := countdownStart; i > 0; i-- {
+		sleeper.Sleep()
+	}
 
-    for i := countdownStart; i > 0; i-- {
-        fmt.Fprintln(out, i)
-    }
+	for i := countdownStart; i > 0; i-- {
+		fmt.Fprintln(out, i)
+	}
 
-    sleeper.Sleep()
-    fmt.Fprint(out, finalWord)
+	fmt.Fprint(out, finalWord)
 }
 ```
 
@@ -404,46 +399,45 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 ですから、両方のスパイを1つ作成します。
 
 ```go
-type CountdownOperationsSpy struct {
-    Calls []string
+type SpyCountdownOperations struct {
+	Calls []string
 }
 
-func (s *CountdownOperationsSpy) Sleep() {
-    s.Calls = append(s.Calls, sleep)
+func (s *SpyCountdownOperations) Sleep() {
+	s.Calls = append(s.Calls, sleep)
 }
 
-func (s *CountdownOperationsSpy) Write(p []byte) (n int, err error) {
-    s.Calls = append(s.Calls, write)
-    return
+func (s *SpyCountdownOperations) Write(p []byte) (n int, err error) {
+	s.Calls = append(s.Calls, write)
+	return
 }
 
 const write = "write"
 const sleep = "sleep"
 ```
 
-`CountdownOperationsSpy`は`io.Writer`と`Sleeper`の両方を実装し、すべての呼び出しを1つのスライスに記録します。このテストでは操作の順序のみを考慮しているため、名前付き操作のリストとして記録するだけで十分です。
+`SpyCountdownOperations`は`io.Writer`と`Sleeper`の両方を実装し、すべての呼び出しを1つのスライスに記録します。このテストでは操作の順序のみを考慮しているため、名前付き操作のリストとして記録するだけで十分です。
 
 テストスイートにサブテストを追加して、スリープと表示が希望する順序で動作することを確認します。
 
 ```go
 t.Run("sleep before every print", func(t *testing.T) {
-    spySleepPrinter := &CountdownOperationsSpy{}
-    Countdown(spySleepPrinter, spySleepPrinter)
+	spySleepPrinter := &SpyCountdownOperations{}
+	Countdown(spySleepPrinter, spySleepPrinter)
 
-    want := []string{
-        sleep,
-        write,
-        sleep,
-        write,
-        sleep,
-        write,
-        sleep,
-        write,
-    }
+	want := []string{
+		write,
+		sleep,
+		write,
+		sleep,
+		write,
+		sleep,
+		write,
+	}
 
-    if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
-        t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
-    }
+	if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
+		t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
+	}
 })
 ```
 
@@ -455,40 +449,39 @@ t.Run("sleep before every print", func(t *testing.T) {
 ```go
 func TestCountdown(t *testing.T) {
 
-    t.Run("prints 3 to Go!", func(t *testing.T) {
-        buffer := &bytes.Buffer{}
-        Countdown(buffer, &CountdownOperationsSpy{})
+	t.Run("prints 3 to Go!", func(t *testing.T) {
+		buffer := &bytes.Buffer{}
+		Countdown(buffer, &SpyCountdownOperations{})
 
-        got := buffer.String()
-        want := `3
+		got := buffer.String()
+		want := `3
 2
 1
 Go!`
 
-        if got != want {
-            t.Errorf("got %q want %q", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %q want %q", got, want)
+		}
+	})
 
-    t.Run("sleep before every print", func(t *testing.T) {
-        spySleepPrinter := &CountdownOperationsSpy{}
-        Countdown(spySleepPrinter, spySleepPrinter)
+	t.Run("sleep before every print", func(t *testing.T) {
+		spySleepPrinter := &SpyCountdownOperations{}
+		Countdown(spySleepPrinter, spySleepPrinter)
 
-        want := []string{
-            sleep,
-            write,
-            sleep,
-            write,
-            sleep,
-            write,
-            sleep,
-            write,
-        }
+		want := []string{
+			write,
+			sleep,
+			write,
+			sleep,
+			write,
+			sleep,
+			write,
+		}
 
-        if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
-            t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
-        }
-    })
+		if !reflect.DeepEqual(want, spySleepPrinter.Calls) {
+			t.Errorf("wanted calls %v got %v", want, spySleepPrinter.Calls)
+		}
+	})
 }
 ```
 
@@ -504,8 +497,8 @@ Go!`
 
 ```go
 type ConfigurableSleeper struct {
-    duration time.Duration
-    sleep    func(time.Duration)
+	duration time.Duration
+	sleep    func(time.Duration)
 }
 ```
 
@@ -513,11 +506,11 @@ type ConfigurableSleeper struct {
 
 ```go
 type SpyTime struct {
-    durationSlept time.Duration
+	durationSlept time.Duration
 }
 
-func (s *SpyTime) Sleep(duration time.Duration) {
-    s.durationSlept = duration
+func (s *SpyTime) SetDurationSlept(duration time.Duration) {
+	s.durationSlept = duration
 }
 ```
 
@@ -525,24 +518,25 @@ func (s *SpyTime) Sleep(duration time.Duration) {
 
 ```go
 func TestConfigurableSleeper(t *testing.T) {
-    sleepTime := 5 * time.Second
+	sleepTime := 5 * time.Second
 
-    spyTime := &SpyTime{}
-    sleeper := ConfigurableSleeper{sleepTime, spyTime.Sleep}
-    sleeper.Sleep()
+	spyTime := &SpyTime{}
+	sleeper := ConfigurableSleeper{sleepTime, spyTime.SetDurationSlept}
+	sleeper.Sleep()
 
-    if spyTime.durationSlept != sleepTime {
-        t.Errorf("should have slept for %v but slept for %v", sleepTime, spyTime.durationSlept)
-    }
+	if spyTime.durationSlept != sleepTime {
+		t.Errorf("should have slept for %v but slept for %v", sleepTime, spyTime.durationSlept)
+	}
 }
 ```
 
 このテストには何も新しいものはなく、以前の模擬テストと非常によく似た設定になっています。
 
-### テストを試して実行する
+### テストを実行してみます
 
-```text
+```
 sleeper.Sleep undefined (type ConfigurableSleeper has no field or method Sleep, but does have sleep)
+
 ```
 
 `ConfigurableSleeper`で作成された`Sleep`メソッドがないことを示す非常に明確なエラーメッセージが表示されます。
@@ -556,7 +550,7 @@ func (c *ConfigurableSleeper) Sleep() {
 
 新しい`Sleep`関数が実装されたため、テストに失敗しました。
 
-```text
+```
 countdown_test.go:56: should have slept for 5s but slept for 0s
 ```
 
@@ -566,7 +560,7 @@ countdown_test.go:56: should have slept for 5s but slept for 0s
 
 ```go
 func (c *ConfigurableSleeper) Sleep() {
-    c.sleep(c.duration)
+	c.sleep(c.duration)
 }
 ```
 
@@ -579,8 +573,8 @@ func (c *ConfigurableSleeper) Sleep() {
 
 ```go
 func main() {
-    sleeper := &ConfigurableSleeper{1 * time.Second, time.Sleep}
-    Countdown(os.Stdout, sleeper)
+	sleeper := &ConfigurableSleeper{1 * time.Second, time.Sleep}
+	Countdown(os.Stdout, sleeper)
 }
 ```
 
@@ -606,9 +600,9 @@ func main() {
 
 通常、コードのモックポイントの多くは、 _悪い抽象化_ を指します。
 
-**ここで見られるのはTDDの弱点ですが、それは実際には長所です**。多くの場合、貧弱なテストコードは、設計が悪い結果であるか、より適切に設計されたコードをテストすることは簡単です。
+**人々はここにTDDの弱点を見ますが、それは実際には長所です**。多くの場合、貧弱なテストコードは悪い設計の結果です。より良い言い方をすれば、適切に設計されたコードはテストが簡単です。
 
-### でも、模試やテストのせいで生活が苦しくなってきました!
+### でも、モックやテストのせいで生活が苦しくなってきました!
 
 この状況に遭遇したことがありますか？
 
@@ -622,20 +616,28 @@ func main() {
 正確にテストするために、どのレベルかを知るのは難しい場合がありますが、ここに私が従おうとするいくつかの思考プロセスとルールがあります。
 
 * **リファクタリングの定義では、コードは変更されますが、動作は同じです**。理論的にリファクタリングを行うことに決めた場合は、テストを変更せずにコミットを実行できるはずです。だからテストを書くときは自問してください
-  * 必要な動作や実装の詳細をテストしていますか？
+  * 自分が求める振る舞いをテストしているのか、それとも実装の詳細をテストしているのか？
   * このコードをリファクタリングする場合、テストに多くの変更を加える必要がありますか？
-* Goではプライベート関数をテストできますが、プライベート関数は実装に関係しているため、避けたいと思います。
+* Goではプライベート関数をテストできますが、プライベート関数はパブリックな振る舞いを支える実装の詳細なので、私は避けたいと思います。パブリックな振る舞いをテストしましょう。Sandi Metzはプライベート関数を「安定性が低い」ものと表現しており、テストをそれらに結合させたくはありません。
 * テストが**3つ以上のモックで動作している場合、それは危険信号**であるように感じます（デザインを再検討する時間）
 * スパイは注意して使用してください。スパイを使用すると、作成中のアルゴリズムの内部を確認できます。これは非常に便利ですが、テストコードと実装の間の結合がより緊密になることを意味します。 **これらをスパイする場合は、これらの詳細に注意してください**
 
-いつものように、ソフトウェア開発のルールは実際にはルールではなく、例外がある場合があります。
-[ボックルおじさんの「モックするとき」の記事](https://8thlight.com/blog/uncle-bob/2014/05/10/WhenToMock.html)には、優れた指針がいくつかあります。
+#### モックフレームワークを使えばいいのでは？
+
+モックには魔法は不要で、比較的シンプルです。フレームワークを使うと、モックが実際よりも複雑に見えてしまうことがあります。この章では、次のことを得るために自動モックを使用していません。
+
+* モックの方法をよりよく理解する
+* インターフェースを実装する練習をする
+
+共同プロジェクトでは、モックを自動生成することに価値があります。チームでは、モック生成ツールがテストダブルの一貫性を明文化します。これにより、一貫性のない書き方のテストダブルを避けることができ、それが一貫性のない書き方のテストにつながることも避けられます。
+
+モックジェネレーターは、インターフェースに対してテストダブルを生成するものだけを使うべきです。テストの書き方を過度に指示するツールや、多くの「魔法」を使うツールは、さっさと捨ててしまいましょう。
 
 ## まとめ
 
 ### TDDアプローチの詳細
 
-* ささいな例に直面した場合は、問題を「薄いスライス」に分解してください。ウサギの穴に入り込み、「ビッグバン」アプローチをとらないように、できるだけ早く_testsで動作するソフトウェアを使用できるようにしてください。
+* ささいな例に直面した場合は、問題を「薄いスライス」に分解してください。ウサギの穴に入り込み、「ビッグバン」アプローチをとらないように、できるだけ早く _テストに裏打ちされた動作するソフトウェア_ を手にできるようにしてください。
 * 動作するソフトウェアを入手したら、必要なソフトウェアにたどり着くまで**小さなステップで繰り返す**のが簡単です。
 
 > 「反復開発を使用する場合？反復開発は、成功させたいプロジェクトでのみ使用する必要があります。」
@@ -648,8 +650,52 @@ func main() {
 * モックがないと、単純なビジネスルールをテストするためだけに、データベースや他のサードパーティの設定が必要になる場合があります。テストが遅くなり、**フィードバックループが遅くなる**可能性があります。
 * 何かをテストするためにデータベースまたはWebサービスをスピンアップする必要があるため、そのようなサービスの信頼性が低いために、**壊れやすいテスト**を受ける可能性があります。
 
-開発者がモックについて学ぶと、システムの _機能_ ではなく _機能_ の観点から、システムのあらゆる側面を過剰にテストすることが非常に簡単になります。 **テストの価値**と、それらが将来のリファクタリングに与える影響について常に注意してください。
+開発者がモックについて学ぶと、システムが _何をするか_ ではなく _どのように動くか_ の観点から、システムのあらゆる側面を過剰にテストすることが非常に簡単になります。 **テストの価値**と、それらが将来のリファクタリングに与える影響について常に注意してください。
 
-モックに関するこの投稿では、モックの一種である**スパイ**のみを取り上げました。 モックにはさまざまな種類があります。 [ボブおじさんは非常に読みやすい記事でタイプについて説明しています](https://8thlight.com/blog/uncle-bob/2014/05/14/TheLittleMocker.html)。
+モックに関するこの投稿では、モックの一種である**スパイ**のみを取り上げました。モックは「テストダブル」の一種です。
 
-後の章では、データを他の人に依存するコードを書く必要があります。この場所で**スタブ**の動作を示します。
+> [テストダブル（Test Double）とは、テスト目的で本番オブジェクトを置き換えるあらゆる場合を指す総称です。](https://martinfowler.com/bliki/TestDouble.html)
+
+テストダブルには、スタブ、スパイ、そしてもちろんモックなど、さまざまな種類があります！詳細については[Martin Fowlerの記事](https://martinfowler.com/bliki/TestDouble.html)を参照してください。
+
+## ボーナス - Go 1.23 のイテレータの例
+
+Go 1.23で[イテレータが導入されました](https://tip.golang.org/doc/go1.23)。イテレータはさまざまな方法で使えますが、今回はカウントダウンする数値を逆順に返す`countdownFrom`イテレータを作ってみましょう。
+
+カスタムイテレータの書き方に入る前に、まずその使い方を見てみましょう。数値からカウントダウンするために、かなり命令的に見えるループを書く代わりに、カスタムの`countdownFrom`イテレータを`range`することで、このコードをより表現力豊かにできます。
+
+```go
+func Countdown(out io.Writer, sleeper Sleeper) {
+	for i := range countDownFrom(3) {
+		fmt.Fprintln(out, i)
+		sleeper.Sleep()
+	}
+
+	fmt.Fprint(out, finalWord)
+}
+```
+
+`countDownFrom`のようなイテレータを書くには、特定の方法で関数を書く必要があります。ドキュメントより：
+
+    The “range” clause in a “for-range” loop now accepts iterator functions of the following types
+        func(func() bool)
+        func(func(K) bool)
+        func(func(K, V) bool)
+
+（「for-range」ループの「range」句は、上記の型のイテレータ関数を受け付けるようになりました。`K`と`V`はそれぞれキーと値の型を表します。）
+
+今回のケースでは、キーはなく値だけです。Goには便利な型`iter.Seq[T]`も用意されており、これは`func(func(T) bool)`の型エイリアスです。
+
+```go
+func countDownFrom(from int) iter.Seq[int] {
+	return func(yield func(int) bool) {
+		for i := from; i > 0; i-- {
+			if !yield(i) {
+				return
+			}
+		}
+	}
+}
+```
+
+これはシンプルなイテレータで、`from`から始めて逆順に数値をyieldします。まさに私たちのユースケースにぴったりです。

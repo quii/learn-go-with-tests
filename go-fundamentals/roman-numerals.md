@@ -4,7 +4,7 @@ description: Intro to property based tests
 
 # プロパティベースのテスト概要
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/roman-numerals)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/roman-numerals)
 
 一部の企業は、インタビュープロセスの一環として、[ローマ数字のカタ](http://codingdojo.org/kata/RomanNumerals/)を実行するように求めます。この章では、TDDでこれに取り組む方法を示します。
 
@@ -42,7 +42,9 @@ func TestRomanNumerals(t *testing.T) {
 
 ## テストを実行してみます
 
-`./numeral_test.go:6:9: undefined: ConvertToRoman`
+```console
+./numeral_test.go:6:9: undefined: ConvertToRoman
+```
 
 コンパイラーに道を案内する
 
@@ -58,7 +60,7 @@ func ConvertToRoman(arabic int) string {
 
 今すぐ実行されます。
 
-```go
+```console
 === RUN   TestRomanNumerals
 --- FAIL: TestRomanNumerals (0.00s)
     numeral_test.go:10: got '', want 'I'
@@ -109,13 +111,13 @@ func TestRomanNumerals(t *testing.T) {
 
 ## テストを実行してみます
 
-```text
+```console
 === RUN   TestRomanNumerals/2_gets_converted_to_II
     --- FAIL: TestRomanNumerals/2_gets_converted_to_II (0.00s)
         numeral_test.go:20: got 'I', want 'II'
 ```
 
-それほど驚きはありません
+それほど驚きはありません。
 
 ## 成功させるのに十分なコードを書く
 
@@ -164,13 +166,13 @@ func TestRomanNumerals(t *testing.T) {
 
 以下をケースに追加してください
 
-```go
+```
 {"3 gets converted to III", 3, "III"},
 ```
 
 ## テストを実行してみます
 
-```text
+```console
 === RUN   TestRomanNumerals/3_gets_converted_to_III
     --- FAIL: TestRomanNumerals/3_gets_converted_to_III (0.00s)
         numeral_test.go:20: got 'I', want 'III'
@@ -213,7 +215,7 @@ func ConvertToRoman(arabic int) string {
 }
 ```
 
-これまでに[`strings.Builder`](https://golang.org/pkg/strings/#Builder)を使用したことがない可能性があります
+[`strings.Builder`](https://golang.org/pkg/strings/#Builder)は、[ベンチマーク](iteration.md#ベンチマーク)についての説明で出てきたことを覚えているかもしれません
 
 > Builderは、Writeメソッドを使用して文字列を効率的に構築するために使用されます。メモリのコピーを最小限に抑えます。
 
@@ -227,17 +229,19 @@ func ConvertToRoman(arabic int) string {
 
 代わりに、次に高いシンボルを取り、その左側にシンボルを置くことで「減算」します。すべてのシンボルを減算器として使用できるわけではありません。I（1）、X（10）、C（100）のみ。
 
-たとえば、ローマ数字の「5」は`V`です。 「4」を作成するには、 `IIII`ではなく、` IV`を実行します。
+たとえば、ローマ数字の「5」は`V`です。 「4」を作成するには、 `IIII`ではなく、`IV`を実行します。
+
+減算器は、その「系列」で次に大きい2つの記号のいずれかの前にしか置くことができません。`I`は`V`または`X`の前にのみ置くことができ（4は`IV`、9は`IX`）、`X`は`L`または`C`の前にのみ（40は`XL`、90は`XC`）、`C`は`D`または`M`の前にのみ置くことができます（400は`CD`、900は`CM`）。つまり、`I`、`X`、`C`はすべて有効な減算器ですが、自由に組み合わせることはできません。99は`IC`ではなく（`XCIX`、つまり90 + 9です）、499は`ID`ではありません（`CDXCIX`、つまり400 + 90 + 9です）。
 
 ## 最初にテストを書く
 
-```go
+```
 {"4 gets converted to IV (can't repeat more than 3 times)", 4, "IV"},
 ```
 
 ## テストを実行してみます
 
-```text
+```console
 === RUN   TestRomanNumerals/4_gets_converted_to_IV_(cant_repeat_more_than_3_times)
     --- FAIL: TestRomanNumerals/4_gets_converted_to_IV_(cant_repeat_more_than_3_times) (0.00s)
         numeral_test.go:24: got 'IIII', want 'IV'
@@ -289,13 +293,13 @@ func ConvertToRoman(arabic int) string {
 
 ## 最初にテストを書く
 
-```go
+```
 {"5 gets converted to V", 5, "V"},
 ```
 
 ## テストを実行してみます
 
-```text
+```console
 === RUN   TestRomanNumerals/5_gets_converted_to_V
     --- FAIL: TestRomanNumerals/5_gets_converted_to_V (0.00s)
         numeral_test.go:25: got 'IIV', want 'V'
@@ -365,13 +369,13 @@ func ConvertToRoman(arabic int) string {
 
 ## 最初にテストを書く
 
-```go
-{"9 gets converted to IX", 9, "IX"}
+```
+{"9 gets converted to IX", 9, "IX"},
 ```
 
 ## テストを実行してみます
 
-```text
+```console
 === RUN   TestRomanNumerals/9_gets_converted_to_IX
     --- FAIL: TestRomanNumerals/9_gets_converted_to_IX (0.00s)
         numeral_test.go:29: got 'VIV', want 'IX'
@@ -381,7 +385,7 @@ func ConvertToRoman(arabic int) string {
 
 以前と同じアプローチを採用できるはずです
 
-```go
+```
 case arabic > 8:
     result.WriteString("IX")
     arabic -= 9
@@ -395,7 +399,7 @@ case arabic > 8:
 
 「39」までのコードが機能すると確信しているので、ここに追加したいくつかのテストがあります。
 
-```go
+```
 {"10 gets converted to X", 10, "X"},
 {"14 gets converted to XIV", 14, "XIV"},
 {"18 gets converted to XVIII", 18, "XVIII"},
@@ -446,7 +450,7 @@ func ConvertToRoman(arabic int) string {
 
 ここにいくつかのテストケースがあります。
 
-```go
+```
 {"40 gets converted to XL", 40, "XL"},
 {"47 gets converted to XLVII", 47, "XLVII"},
 {"49 gets converted to XLIX", 49, "XLIX"},
@@ -570,7 +574,7 @@ func TestConvertingToArabic(t *testing.T) {
 
 ## テストを実行してみます
 
-```text
+```console
 ./numeral_test.go:60:11: undefined: ConvertToArabic
 ```
 
@@ -586,7 +590,7 @@ func ConvertToArabic(roman string) int {
 
 テストが実行され、失敗するはずです
 
-```text
+```console
 --- FAIL: TestConvertingToArabic (0.00s)
     --- FAIL: TestConvertingToArabic/'I'_gets_converted_to_1 (0.00s)
         numeral_test.go:62: got 0, want 1
@@ -637,335 +641,74 @@ func ConvertToArabic(roman string) int {
 
 ```go
 // earlier..
-type RomanNumerals []RomanNumeral
-
-func (r RomanNumerals) ValueOf(symbol string) int {
-    for _, s := range r {
-        if s.Symbol == symbol {
-            return s.Value
-        }
-    }
-
-    return 0
+var allRomanNumerals = RomanNumerals{
+	{1000, "M"},
+	{900, "CM"},
+	{500, "D"},
+	{400, "CD"},
+	{100, "C"},
+	{90, "XC"},
+	{50, "L"},
+	{40, "XL"},
+	{10, "X"},
+	{9, "IX"},
+	{5, "V"},
+	{4, "IV"},
+	{1, "I"},
 }
 
 // later..
 func ConvertToArabic(roman string) int {
-    total := 0
+	var arabic = 0
 
-    for i := 0; i < len(roman); i++ {
-        symbol := roman[i]
+	for _, numeral := range allRomanNumerals {
+		for strings.HasPrefix(roman, numeral.Symbol) {
+			arabic += numeral.Value
+			roman = strings.TrimPrefix(roman, numeral.Symbol)
+		}
+	}
 
-        // look ahead to next symbol if we can and, the current symbol is base 10 (only valid subtractors)
-        if i+1 < len(roman) && symbol == 'I' {
-            nextSymbol := roman[i+1]
-
-            // build the two character string
-            potentialNumber := string([]byte{symbol, nextSymbol})
-
-            // get the value of the two character string
-            value := allRomanNumerals.ValueOf(potentialNumber)
-
-            if value != 0 {
-                total += value
-                i++ // move past this character too for the next loop
-            } else {
-                total++
-            }
-        } else {
-            total++
-        }
-    }
-    return total
+	return arabic
 }
 ```
 
-これは恐ろしいことですが、機能します。コメントを追加する必要があると感じたのは残念です。
+これは基本的に、`ConvertToRoman(int)`のアルゴリズムを逆向きに実装したものです。ここでは、与えられたローマ数字の文字列に対してループします。
+* `allRomanNumerals`から取り出したローマ数字の記号を、大きいものから小さいものの順に、文字列の先頭で探します。
+* 接頭辞が見つかったら、その値を`arabic`に加え、接頭辞を取り除きます。
 
-* 与えられたローマ数字の整数値を検索できるようにしたいので、`RomanNumeral`の配列から型を作成し、それにメソッド`ValueOf`を追加しました
-* 次にループの中では、文字列が十分に大きくて、現在の記号が有効な減算器であるかどうか、先を見る必要があります。現時点では、 `I`（1）ですが、`X`（10）または `C`（100）にすることもできます。
-  * これらの両方の条件を満たす場合、値を検索して合計に追加する必要があります _if_ 特別な減算器の1つです。それ以外の場合は無視します
-  * 次に、このシンボルを2回カウントしないように、`i`をさらにインクリメントする必要があります。
+最後に、合計をアラビア数字として返します。
 
-## リファクタリング♪
+`HasPrefix(s, prefix)`は文字列`s`が`prefix`で始まるかどうかをチェックし、`TrimPrefix(s, prefix)`は`s`から`prefix`を取り除きます。これにより、残りのローマ数字の記号の処理を続けることができます。これは`IV`や他のすべてのテストケースで機能します。
 
-私はこれが長期的なアプローチになると完全に確信しているわけではなく、私たちができる可能性のある興味深いリファクタリングが潜在的にあるかもしれませんが、私たちのアプローチが完全に間違っている場合に備えて私はそれに抵抗します。私はむしろいくつかのテストに最初に合格して見てもらいたいです。その間、私は最初の`if`ステートメントを少し恐ろしくなくしました。
+これを再帰関数として実装することもできます。その方が（私の意見では）エレガントですが、遅くなるかもしれません。これはあなたと`Benchmark...`テストに任せることにします。
 
-```go
-func ConvertToArabic(roman string) int {
-    total := 0
-
-    for i := 0; i < len(roman); i++ {
-        symbol := roman[i]
-
-        if couldBeSubtractive(i, symbol, roman) {
-            nextSymbol := roman[i+1]
-
-            // build the two character string
-            potentialNumber := string([]byte{symbol, nextSymbol})
-
-            // get the value of the two character string
-            value := allRomanNumerals.ValueOf(potentialNumber)
-
-            if value != 0 {
-                total += value
-                i++ // move past this character too for the next loop
-            } else {
-                total++
-            }
-        } else {
-            total++
-        }
-    }
-    return total
-}
-
-func couldBeSubtractive(index int, currentSymbol uint8, roman string) bool {
-    return index+1 < len(roman) && currentSymbol == 'I'
-}
-```
-
-## 最初にテストを書く
-
-`cases[:5]`に移りましょう
-
-```text
-=== RUN   TestConvertingToArabic/'V'_gets_converted_to_5
-    --- FAIL: TestConvertingToArabic/'V'_gets_converted_to_5 (0.00s)
-        numeral_test.go:62: got 1, want 5
-```
-
-## 成功させるのに十分なコードを書く
-
-それが減算である場合を除いて、コードはすべての文字が`I`であると想定しているため、値は「1」です。これを修正するには、`ValueOf`メソッドを再利用できるはずです。
-
-```go
-func ConvertToArabic(roman string) int {
-    total := 0
-
-    for i := 0; i < len(roman); i++ {
-        symbol := roman[i]
-
-        // look ahead to next symbol if we can and, the current symbol is base 10 (only valid subtractors)
-        if couldBeSubtractive(i, symbol, roman) {
-            nextSymbol := roman[i+1]
-
-            // build the two character string
-            potentialNumber := string([]byte{symbol, nextSymbol})
-
-            if value := allRomanNumerals.ValueOf(potentialNumber); value != 0 {
-                total += value
-                i++ // move past this character too for the next loop
-            } else {
-                total++ // this is fishy...
-            }
-        } else {
-            total+=allRomanNumerals.ValueOf(string([]byte{symbol}))
-        }
-    }
-    return total
-}
-```
-
-## リファクタリング♪
-
-Goで文字列にインデックスを付けると、`byte`を取得します。これが、文字列を再度構築するときに、`string([]byte{symbol})`のようなことをしなければならない理由です。
-数回繰り返されますが、その機能を移動して、`ValueOf`が代わりに数バイトを取るようにします。
-
-```go
-func (r RomanNumerals) ValueOf(symbols ...byte) int {
-    symbol := string(symbols)
-    for _, s := range r {
-        if s.Symbol == symbol {
-            return s.Value
-        }
-    }
-
-    return 0
-}
-```
-
-次に、バイトをそのまま関数に渡すことができます
-
-```go
-func ConvertToArabic(roman string) int {
-    total := 0
-
-    for i := 0; i < len(roman); i++ {
-        symbol := roman[i]
-
-        if couldBeSubtractive(i, symbol, roman) {
-            if value := allRomanNumerals.ValueOf(symbol, roman[i+1]); value != 0 {
-                total += value
-                i++ // move past this character too for the next loop
-            } else {
-                total++ // this is fishy...
-            }
-        } else {
-            total+=allRomanNumerals.ValueOf(symbol)
-        }
-    }
-    return total
-}
-```
-
-それはまだかなり厄介ですが、そこに到達しています。
-
-`cases[:xx]`の数値を移動し始めると、かなりの数が現在通過していることがわかります。スライスオペレーターを完全に削除して、失敗するオペレーターを確認します。これが私のスイートの例です。
-
-```text
-=== RUN   TestConvertingToArabic/'XL'_gets_converted_to_40
-    --- FAIL: TestConvertingToArabic/'XL'_gets_converted_to_40 (0.00s)
-        numeral_test.go:62: got 60, want 40
-=== RUN   TestConvertingToArabic/'XLVII'_gets_converted_to_47
-    --- FAIL: TestConvertingToArabic/'XLVII'_gets_converted_to_47 (0.00s)
-        numeral_test.go:62: got 67, want 47
-=== RUN   TestConvertingToArabic/'XLIX'_gets_converted_to_49
-    --- FAIL: TestConvertingToArabic/'XLIX'_gets_converted_to_49 (0.00s)
-        numeral_test.go:62: got 69, want 49
-```
-
-私たちが見逃しているのは、`couldBeSubtractive`の更新だけなので、他の種類の減算記号を考慮に入れていると思います
-
-```go
-func couldBeSubtractive(index int, currentSymbol uint8, roman string) bool {
-    isSubtractiveSymbol := currentSymbol == 'I' || currentSymbol == 'X' || currentSymbol =='C'
-    return index+1 < len(roman) && isSubtractiveSymbol
-}
-```
-
-もう一度試してください。まだ失敗します。しかし、私たちは以前にコメントを残しました...
-
-```go
-total++ // this is fishy...
-```
-
-すべての記号が`I`であることを意味するので、`total`をインクリメントするだけではいけません。それを次のものに置き換えます。
-
-```go
-total += allRomanNumerals.ValueOf(symbol)
-```
-
-そして、すべてのテストに合格しました！
-
-これで完全に機能するソフトウェアができたので、自信を持ってリファクタリングを行うことができます。
-
-## リファクタリング♪
-
-ここに私が仕上げたすべてのコードがあります。私はいくつかの失敗した試みをしましたが、強調し続けているように、それは問題ありません、そしてテストは私が自由にコードをいじるのを助けます。
-
-```go
-import "strings"
-
-func ConvertToArabic(roman string) (total int) {
-    for _, symbols := range windowedRoman(roman).Symbols() {
-        total += allRomanNumerals.ValueOf(symbols...)
-    }
-    return
-}
-
-func ConvertToRoman(arabic int) string {
-    var result strings.Builder
-
-    for _, numeral := range allRomanNumerals {
-        for arabic >= numeral.Value {
-            result.WriteString(numeral.Symbol)
-            arabic -= numeral.Value
-        }
-    }
-
-    return result.String()
-}
-
-type romanNumeral struct {
-    Value  int
-    Symbol string
-}
-
-type romanNumerals []romanNumeral
-
-func (r romanNumerals) ValueOf(symbols ...byte) int {
-    symbol := string(symbols)
-    for _, s := range r {
-        if s.Symbol == symbol {
-            return s.Value
-        }
-    }
-
-    return 0
-}
-
-func (r romanNumerals) Exists(symbols ...byte) bool {
-    symbol := string(symbols)
-    for _, s := range r {
-        if s.Symbol == symbol {
-            return true
-        }
-    }
-    return false
-}
-
-var allRomanNumerals = romanNumerals{
-    {1000, "M"},
-    {900, "CM"},
-    {500, "D"},
-    {400, "CD"},
-    {100, "C"},
-    {90, "XC"},
-    {50, "L"},
-    {40, "XL"},
-    {10, "X"},
-    {9, "IX"},
-    {5, "V"},
-    {4, "IV"},
-    {1, "I"},
-}
-
-type windowedRoman string
-
-func (w windowedRoman) Symbols() (symbols [][]byte) {
-    for i := 0; i < len(w); i++ {
-        symbol := w[i]
-        notAtEnd := i+1 < len(w)
-
-        if notAtEnd && isSubtractive(symbol) && allRomanNumerals.Exists(symbol, w[i+1]) {
-            symbols = append(symbols, []byte{byte(symbol), byte(w[i+1])})
-            i++
-        } else {
-            symbols = append(symbols, []byte{byte(symbol)})
-        }
-    }
-    return
-}
-
-func isSubtractive(symbol uint8) bool {
-    return symbol == 'I' || symbol == 'X' || symbol == 'C'
-}
-```
-
-以前のコードの私の主な問題は、以前のリファクタリングに似ています。一緒に結合された懸念が多すぎました。文字列からローマ数字を抽出し、それらの値を検索するアルゴリズムを作成しました。
-
-そこで、数値の抽出を処理する新しいタイプの`windowedRoman`を作成し、それらをスライスとして取得するための`Symbols`メソッドを提供しました。これは、`ConvertToArabic`関数が単にシンボルを反復処理してそれらを合計できることを意味しました。
-
-いくつかの関数を抽出することでコードを少し壊しました。特に、現在処理している記号が2文字の減算記号であるかどうかを判断するために、不安定なifステートメントを中心にしています。
-
-おそらくもっとエレガントな方法があるでしょうが、私はそれを気にするつもりはありません。コードはそこにあり、動作し、テストされています。私（または他の誰か）が安全に変更できるより良い方法を見つけた場合-大変な作業は完了です。
+アラビア数字をローマ数字に変換する関数とその逆の関数ができたので、テストをさらに一歩進めることができます。
 
 ## プロパティベースのテストの概要
 
-この章で使用したローマ数字のドメインにはいくつかのルールがあります
+この章で使用したローマ数字のドメインにはいくつかのルールがあります。
 
 * 3つ以上の連続したシンボルは使用できません
 * `I` （1）、 `X` （10） 、 `C` （100） のみが「減算器」になります
 * `ConvertToRoman(N)`の結果を取得して`ConvertToArabic`に渡すと、`N`が返されます
 
-これまでに作成したテストは、「サンプル」ベースのテストとして説明できます。このテストでは、コード周辺のいくつかの例を検証するためのツールを提供します。
+これまでに作成したテストは、「例」ベースのテストとして説明できます。ツールが検証するための _例_ を私たちが提供しているからです。
 
 ドメインについて知っているこれらのルールを採用し、コードに対して何らかの方法でそれらを実行できるとしたらどうでしょうか。
 
 プロパティベースのテストは、コードにランダムデータを投げ、記述したルールが常に正しいことを確認することで、これを行うのに役立ちます。多くの人は、プロパティベースのテストは主にランダムデータについてであると考えていますが、それは間違いです。プロパティベースのテストに関する本当の課題は、ドメインをよく理解して、これらのプロパティを記述できるようにすることです。
 
-十分な言葉、いくつかのコードを見てみましょう
+説明はこれくらいにして、コードを見てみましょう。
+
+> **⚠️ Linuxユーザーの方へ:** 以下のテストを **すぐには実行しないでください**。システムがフリーズする（ハードリブートが必要になる）可能性が高いです。
+>
+> <details>
+> <summary>理由を見るにはここをクリック（技術的な説明）</summary>
+>
+> `testing/quick`パッケージは`int64`の最大値までのランダムな整数を生成します。現在の素朴な実装は、その長さの文字列（数千兆文字）をメモリ上に構築しようとします。
+>
+> macOSやWindowsではたいていうまく処理されます（UIは応答し続けます）が、Linuxカーネルでは通常「スワップスラッシング」が発生し、プロセスを強制終了する前にシステム全体がフリーズしてしまいます。
+> </details>
 
 ```go
 func TestPropertiesOfConversion(t *testing.T) {
@@ -981,7 +724,7 @@ func TestPropertiesOfConversion(t *testing.T) {
 }
 ```
 
-### 財産の根拠
+### プロパティの根拠
 
 最初のテストでは、数値をローマ数字に変換する場合に、他の関数を使用して、最初に取得した数値に変換するときにチェックします。
 
@@ -1002,9 +745,7 @@ func TestPropertiesOfConversion(t *testing.T) {
 
 ### テストを実行する
 
-実行してみてください。
-
-お使いのコンピュータがしばらくハングアップする可能性があるので、退屈したらそれを殺してください。
+実行してみてください。お使いのコンピュータがしばらくハングアップする可能性があるので、退屈したら強制終了してください :)
 
 どうしたの？
 以下をアサーションコードに追加してみてください。
@@ -1023,7 +764,7 @@ assertion := func(arabic int) bool {
 
 次のようなものが表示されます。
 
-```text
+```console
 === RUN   TestPropertiesOfConversion
 2019/07/09 14:41:27 6849766357708982977
 2019/07/09 14:41:27 -7028152357875163913
@@ -1037,7 +778,7 @@ assertion := func(arabic int) bool {
 この非常に単純なプロパティを実行するだけで、実装に欠陥が明らかになりました。入力として`int`を使用しましたが、
 
 * ローマ数字では負の数を実行できません
-* 最大3つの連続する記号という規則を考慮すると、「3999」を超える値を表すことはできません（[まあ、ちょっと](https://www.quora.com/Which-is-the-maximum-number-in -Roman-numerals)）および `int`の最大値は「3999」よりはるかに大きくなっています。
+* 最大3つの連続する記号という規則を考慮すると、「3999」を超える値を表すことはできません（[まあ、ちょっと](https://www.quora.com/Which-is-the-maximum-number-in-Roman-numerals)）および `int`の最大値は「3999」よりはるかに大きくなっています。
 
 これは素晴らしい！
 プロパティベースのテストの真の強みであるドメインについて、より深く考えることを余儀なくされました。
@@ -1053,29 +794,37 @@ Goには _unsigned integers_ の型があります。つまり、負の値には
 
 コードを更新して`int`ではなく`uint16`を使うようにしてみてください。テストの`assertion`を更新して、もう少し見やすくしました。
 
+> コード内の変数`arabic`も`uint16`に変更する必要があることに注意してください（テストが教えてくれます）。もう少し手間がかかるかもしれないのは、`arabic += numeral.Value`の行で発生するエラーです。このエラーは、`ConvertToArabic`の中で`arabic`を`var arabic = 0`と宣言したために発生します。この宣言自体は正しいのですが、`0`は`int`の値として扱われます。`int`の値と`uint16`の値を足そうとすると失敗します。Goは型付き言語なので、これはうまくいきません。そのため、`var arabic = 0`を`var arabic uint16 = 0`に変更して、変数`arabic`を`uint16`にすることを忘れないでください。
+
 ```go
 assertion := func(arabic uint16) bool {
-    if arabic > 3999 {
-        return true
-    }
-    t.Log("testing", arabic)
-    roman := ConvertToRoman(arabic)
-    fromRoman := ConvertToArabic(roman)
-    return fromRoman == arabic
+	t.Log("testing", arabic)
+	roman := ConvertToRoman(arabic)
+	fromRoman := ConvertToArabic(roman)
+	return fromRoman == arabic
 }
 ```
 
-テストを実行すると、実際に実行され、何がテストされているかを見ることができます。複数回実行して、私たちのコードが様々な値にうまく対応していることを確認することができます！これで、私たちのコードが思い通りに動作していることを確信することができます。これは、私たちのコードが私たちの望むように動作していることに大きな自信を与えてくれます。
+これで、テストフレームワークの`log`メソッドを使って入力をログ出力していることに注目してください。追加の出力を表示するために、`go test`コマンドを`-v`フラグ付きで実行してください（`go test -v`）。
 
-デフォルトでは`quick.Check`の実行回数は100回ですが、設定で変更することができます。
+テストを実行すると、実際に実行され、何がテストされているかを見ることができます。これは、私たちのコードが望むように動作していることに大きな自信を与えてくれます。
+
+しかし、まだ微妙な抜け穴があります。`uint16`は65535まで扱えますが、3999を超える値は有効なローマ数字ではありません。その範囲の値も渡されることになり、私たちの関数がそれを処理できない場合、往復変換は黙って誤った結果を生み出し、私たちはそれを検出できません。`if arabic > 3999 { return true }`のようにして防ぐこともできますが、それは問題を取り繕っているだけで、それらの反復は何もしないことになってしまいます。
+
+より良いアプローチは、私たちが実際に関心のある値だけを生成するよう`quick.Check`に指示することです。これは`quick.Config`の`Values`フィールドを使って行えます。
 
 ```go
 if err := quick.Check(assertion, &quick.Config{
-    MaxCount:1000,
+	MaxCount: 1000,
+	Values: func(args []reflect.Value, r *rand.Rand) {
+		args[0] = reflect.ValueOf(uint16(r.Intn(4000)))
+	},
 }); err != nil {
-    t.Error("failed checks", err)
+	t.Error("failed checks", err)
 }
 ```
+
+`Values`は、`quick.Check`がアサーションに渡す引数の値のスライスと、乱数のソースを受け取る関数です。`args[0]`を`[0, 3999]`の範囲から取り出した`uint16`で埋めます。これで1000回の実行のすべてが実際に変換を検証するようになり、無駄な反復はなくなります。
 
 ### さらなる作業
 
@@ -1097,7 +846,7 @@ if err := quick.Check(assertion, &quick.Config{
 
 誰かが「これはただの型だ」と皮肉を言っているのが聞こえてきます。これに異論はありませんが、私は今でも自分が取り組むすべてのプロジェクトで同じアプローチをとっています。私は最初のステップで大きな分散システムを出荷することはありません。チームが出荷できる最も単純なものを見つけて、「Hello world」というウェブサイトを出荷し、その後、管理可能な小さな断片の機能を反復していくのです。
 
-スキルは作業を分割する方法を知っていることです。
+スキルとは、作業を分割する _方法_ を知っていることです。それは練習と、手助けとなる素敵なTDDによって身につきます。
 
 ### プロパティベースのテスト
 
@@ -1105,3 +854,85 @@ if err := quick.Check(assertion, &quick.Config{
 * ドメインルールをコードで記述する方法を考えることができれば、自信をつけるための優れたツールになります。
 * ドメインについて深く考えさせられる
 * テストスイートを補完するものになる可能性があります。
+
+## 追記
+
+この本はコミュニティからの貴重なフィードバックに支えられています。
+[Dave](http://github.com/gypsydave5)は、ほぼすべての章で多大な助けとなっています。
+しかし彼は、この章で私が「アラビア数字（Arabic numerals）」という言葉を使っていることについて
+本気で熱弁をふるいました。そこで、包み隠さずお伝えするために、彼の言葉をここに載せておきます。
+
+> `int`型の値がなぜ本当は「アラビア数字（arabic numeral）」ではないのかを書いておこうと思う。
+> これは僕が細かすぎるだけかもしれないので、うるさいと言われても完全に理解するよ。
+>
+> _数字（digit）_ とは、数を表すのに使われる文字のことだ。ラテン語で「指」を意味する言葉に由来していて、
+> 僕たちは普通、指を10本持っている。アラビア（ヒンドゥー・アラビアとも呼ばれる）記数法には10個の数字がある。
+> そのアラビア数字とは次のとおりだ。
+>
+> ```console
+>   0 1 2 3 4 5 6 7 8 9
+> ```
+>
+> _数詞（numeral）_ とは、数字の集まりを使って数を表現したものだ。
+> アラビア数詞とは、10進の位取り記数法においてアラビア数字で表された数のことだ。
+> 「位取り」と言うのは、各数字が数詞の中での位置によって異なる値を持つからだ。だから
+>
+> ```console
+>   1337
+> ```
+>
+> この`1`は、4桁の数詞の最初の数字なので、千という値を持つ。
+>
+> ローマ数字は、主に数詞を作るための値として、少ない数の数字（`I`、`V`など）を使って作られる。
+> 位置に関係するものも少しはあるけど、ほとんどの場合`I`は常に「1」を表す。
+>
+> では、これを踏まえると、`int`は「アラビア数字」なのだろうか？数という概念は、
+> その表現とはまったく結びついていない。次の数の正しい表現は何かと自問してみれば、それがわかる。
+>
+> ```console
+> 255
+> 11111111
+> two-hundred and fifty-five
+> FF
+> 377
+> ```
+>
+> そう、これはひっかけ問題だ。どれも正しい。それぞれ10進数、2進数、英語、16進数、8進数の記数法で
+> 同じ数を表現したものなんだ。
+>
+> 数を数詞として表現することは、数としての性質とは _独立_ している。Goの整数リテラルを見ればそれがわかる。
+>
+> ```go
+> 	0xFF == 255 // true
+> ```
+>
+> そして、書式文字列で整数を出力する方法を見てもわかる。
+>
+> ```go
+> n := 255
+> fmt.Printf("%b %c %d %o %q %x %X %U", n, n, n, n, n, n, n, n)
+> // 11111111 ÿ 255 377 'ÿ' ff FF U+00FF
+> ```
+>
+> 同じ整数を、16進数でもアラビア（10進）数詞でも書くことができる。
+>
+> だから、関数のシグネチャが`ConvertToRoman(arabic int) string`のようになっていると、
+> それがどのように呼び出されるかについて少し思い込みをしていることになる。
+> なぜなら、`arabic`は10進の整数リテラルとして書かれることもあれば
+>
+> ```go
+> 	ConvertToRoman(255)
+> ```
+>
+> 同じように次のように書かれることもあるからだ。
+>
+> ```go
+> 	ConvertToRoman(0xFF)
+> ```
+>
+> 実際のところ、僕たちはアラビア数詞から「変換」しているのではまったくなく、`int`をローマ数字として
+> 「出力」、つまり表現しているんだ。そして`int`はアラビアであれ何であれ数詞ではなく、単なる数だ。
+> `ConvertToRoman`関数は、`int`を`string`に変えるという点で、むしろ`strconv.Itoa`に近い。
+>
+> でも、このカタの他のどのバージョンもこの区別を気にしていないから、
+> :shrug:

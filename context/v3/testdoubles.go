@@ -3,15 +3,14 @@ package context3
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
-	"testing"
 	"time"
 )
 
 // SpyStore allows you to simulate a store and see how its used.
 type SpyStore struct {
 	response string
-	t        *testing.T
 }
 
 // Fetch returns response after a short delay.
@@ -23,7 +22,7 @@ func (s *SpyStore) Fetch(ctx context.Context) (string, error) {
 		for _, c := range s.response {
 			select {
 			case <-ctx.Done():
-				s.t.Log("spy store got cancelled")
+				log.Println("spy store got cancelled")
 				return
 			default:
 				time.Sleep(10 * time.Millisecond)

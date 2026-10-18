@@ -152,7 +152,7 @@ func writeWSMessage(t testing.TB, conn *websocket.Conn, message string) {
 func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want string) {
 	t.Helper()
 	if response.Header().Get("content-type") != want {
-		t.Errorf("response did not have content-type of %s, got %v", want, response.HeaderMap)
+		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
 	}
 }
 

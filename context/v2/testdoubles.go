@@ -26,13 +26,13 @@ func (s *SpyStore) Cancel() {
 func (s *SpyStore) assertWasCancelled() {
 	s.t.Helper()
 	if !s.cancelled {
-		s.t.Errorf("store was not told to cancel")
+		s.t.Error("store was not told to cancel")
 	}
 }
 
 func (s *SpyStore) assertWasNotCancelled() {
 	s.t.Helper()
 	if s.cancelled {
-		s.t.Errorf("store was told to cancel")
+		s.t.Error("store was told to cancel")
 	}
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -55,7 +56,7 @@ func TestUpdate(t *testing.T) {
 	assertDefinition(t, dictionary, word, newDefinition)
 }
 
-func assertStrings(t *testing.T, got, want string) {
+func assertStrings(t testing.TB, got, want string) {
 	t.Helper()
 
 	if got != want {
@@ -63,15 +64,15 @@ func assertStrings(t *testing.T, got, want string) {
 	}
 }
 
-func assertError(t *testing.T, got, want error) {
+func assertError(t testing.TB, got, want error) {
 	t.Helper()
 
-	if got != want {
+	if !errors.Is(got, want) {
 		t.Errorf("got error %q want %q", got, want)
 	}
 }
 
-func assertDefinition(t *testing.T, dictionary Dictionary, word, definition string) {
+func assertDefinition(t testing.TB, dictionary Dictionary, word, definition string) {
 	t.Helper()
 
 	got, err := dictionary.Search(word)

@@ -17,10 +17,10 @@ func Hello(name string, language string) string {
 	prefix := englishHelloPrefix
 
 	switch language {
-	case french:
-		prefix = frenchHelloPrefix
 	case spanish:
 		prefix = spanishHelloPrefix
+	case french:
+		prefix = frenchHelloPrefix
 	}
 
 	return prefix + name

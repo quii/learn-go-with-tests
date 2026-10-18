@@ -4,7 +4,7 @@ description: 'JSON, routing and embedding'
 
 # JSON、ルーティング、埋め込み
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/json)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/json)
 
 [前の章](http-server.md) プレイヤーが勝ったゲームの数を保存するWebサーバーを作成しました。
 
@@ -17,44 +17,44 @@ description: 'JSON, routing and embedding'
 package main
 
 import (
-    "fmt"
-    "net/http"
+	"fmt"
+	"net/http"
 	"strings"
 )
 
 type PlayerStore interface {
-    GetPlayerScore(name string) int
-    RecordWin(name string)
+	GetPlayerScore(name string) int
+	RecordWin(name string)
 }
 
 type PlayerServer struct {
-    store PlayerStore
+	store PlayerStore
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	player := strings.TrimPrefix(r.URL.Path, "/players/")
 
-    switch r.Method {
-    case http.MethodPost:
-        p.processWin(w, player)
-    case http.MethodGet:
-        p.showScore(w, player)
-    }
+	switch r.Method {
+	case http.MethodPost:
+		p.processWin(w, player)
+	case http.MethodGet:
+		p.showScore(w, player)
+	}
 }
 
 func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
-    score := p.store.GetPlayerScore(player)
+	score := p.store.GetPlayerScore(player)
 
-    if score == 0 {
-        w.WriteHeader(http.StatusNotFound)
-    }
+	if score == 0 {
+		w.WriteHeader(http.StatusNotFound)
+	}
 
-    fmt.Fprint(w, score)
+	fmt.Fprint(w, score)
 }
 
 func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
-    p.store.RecordWin(player)
-    w.WriteHeader(http.StatusAccepted)
+	p.store.RecordWin(player)
+	w.WriteHeader(http.StatusAccepted)
 }
 ```
 
@@ -63,20 +63,21 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 package main
 
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
-    return &InMemoryPlayerStore{map[string]int{}}
+	return &InMemoryPlayerStore{map[string]int{}}
 }
 
 type InMemoryPlayerStore struct {
-    store map[string]int
+	store map[string]int
 }
 
 func (i *InMemoryPlayerStore) RecordWin(name string) {
-    i.store[name]++
+	i.store[name]++
 }
 
 func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
-    return i.store[name]
+	return i.store[name]
 }
+
 ```
 
 ```go
@@ -84,13 +85,12 @@ func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 package main
 
 import (
-    "log"
-    "net/http"
+	"log"
+	"net/http"
 )
 
 func main() {
-    server := &PlayerServer{NewInMemoryPlayerStore()}
-
+	server := &PlayerServer{NewInMemoryPlayerStore()}
 	log.Fatal(http.ListenAndServe(":5000", server))
 }
 ```
@@ -106,17 +106,17 @@ func main() {
 ```go
 //server_test.go
 func TestLeague(t *testing.T) {
-    store := StubPlayerStore{}
-    server := &PlayerServer{&store}
+	store := StubPlayerStore{}
+	server := &PlayerServer{&store}
 
-    t.Run("it returns 200 on /league", func(t *testing.T) {
-        request, _ := http.NewRequest(http.MethodGet, "/league", nil)
-        response := httptest.NewRecorder()
+	t.Run("it returns 200 on /league", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/league", nil)
+		response := httptest.NewRecorder()
 
-        server.ServeHTTP(response, request)
+		server.ServeHTTP(response, request)
 
-        assertStatus(t, response.Code, http.StatusOK)
-    })
+		assertStatus(t, response.Code, http.StatusOK)
+	})
 }
 ```
 
@@ -124,7 +124,7 @@ func TestLeague(t *testing.T) {
 
 ## テストを実行してみます
 
-```text
+```
     --- FAIL: TestLeague/it_returns_200_on_/league (0.00s)
         server_test.go:101: status code is wrong: got 404, want 200
 FAIL
@@ -150,24 +150,24 @@ Goには[`ServeMux`](https://golang.org/pkg/net/http/#ServeMux) (request multipl
 //server.go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-    router := http.NewServeMux()
+	router := http.NewServeMux()
 
-    router.Handle("/league", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusOK)
-    }))
+	router.Handle("/league", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
 
-    router.Handle("/players/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.Handle("/players/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		player := strings.TrimPrefix(r.URL.Path, "/players/")
 
-        switch r.Method {
-        case http.MethodPost:
-            p.processWin(w, player)
-        case http.MethodGet:
-            p.showScore(w, player)
-        }
-    }))
+		switch r.Method {
+		case http.MethodPost:
+			p.processWin(w, player)
+		case http.MethodGet:
+			p.showScore(w, player)
+		}
+	}))
 
-    router.ServeHTTP(w, r)
+	router.ServeHTTP(w, r)
 }
 ```
 
@@ -186,26 +186,26 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 //server.go
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-    router := http.NewServeMux()
-    router.Handle("/league", http.HandlerFunc(p.leagueHandler))
-    router.Handle("/players/", http.HandlerFunc(p.playersHandler))
+	router := http.NewServeMux()
+	router.Handle("/league", http.HandlerFunc(p.leagueHandler))
+	router.Handle("/players/", http.HandlerFunc(p.playersHandler))
 
-    router.ServeHTTP(w, r)
+	router.ServeHTTP(w, r)
 }
 
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
-    w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
 	player := strings.TrimPrefix(r.URL.Path, "/players/")
 
-    switch r.Method {
-    case http.MethodPost:
-        p.processWin(w, player)
-    case http.MethodGet:
-        p.showScore(w, player)
-    }
+	switch r.Method {
+	case http.MethodPost:
+		p.processWin(w, player)
+	case http.MethodGet:
+		p.showScore(w, player)
+	}
 }
 ```
 
@@ -214,24 +214,24 @@ func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
 ```go
 //server.go
 type PlayerServer struct {
-    store  PlayerStore
-    router *http.ServeMux
+	store  PlayerStore
+	router *http.ServeMux
 }
 
 func NewPlayerServer(store PlayerStore) *PlayerServer {
-    p := &PlayerServer{
-        store,
-        http.NewServeMux(),
-    }
+	p := &PlayerServer{
+		store,
+		http.NewServeMux(),
+	}
 
-    p.router.Handle("/league", http.HandlerFunc(p.leagueHandler))
-    p.router.Handle("/players/", http.HandlerFunc(p.playersHandler))
+	p.router.Handle("/league", http.HandlerFunc(p.leagueHandler))
+	p.router.Handle("/players/", http.HandlerFunc(p.playersHandler))
 
-    return p
+	return p
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    p.router.ServeHTTP(w, r)
+	p.router.ServeHTTP(w, r)
 }
 ```
 
@@ -245,22 +245,22 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 ```go
 type PlayerServer struct {
-    store PlayerStore
-    http.Handler
+	store PlayerStore
+	http.Handler
 }
 
 func NewPlayerServer(store PlayerStore) *PlayerServer {
-    p := new(PlayerServer)
+	p := new(PlayerServer)
 
-    p.store = store
+	p.store = store
 
-    router := http.NewServeMux()
-    router.Handle("/league", http.HandlerFunc(p.leagueHandler))
-    router.Handle("/players/", http.HandlerFunc(p.playersHandler))
+	router := http.NewServeMux()
+	router.Handle("/league", http.HandlerFunc(p.leagueHandler))
+	router.Handle("/players/", http.HandlerFunc(p.playersHandler))
 
-    p.Handler = router
+	p.Handler = router
 
-    return p
+	return p
 }
 ```
 
@@ -286,8 +286,8 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 
 ```go
 type Animal interface {
-    Eater
-    Sleeper
+	Eater
+	Sleeper
 }
 ```
 
@@ -307,7 +307,7 @@ type Animal interface {
 
 このようなJSONを返す必要があります。
 
-```javascript
+```json
 [
    {
       "Name":"Bill",
@@ -327,29 +327,29 @@ type Animal interface {
 ```go
 //server_test.go
 func TestLeague(t *testing.T) {
-    store := StubPlayerStore{}
-    server := NewPlayerServer(&store)
+	store := StubPlayerStore{}
+	server := NewPlayerServer(&store)
 
-    t.Run("it returns 200 on /league", func(t *testing.T) {
-        request, _ := http.NewRequest(http.MethodGet, "/league", nil)
-        response := httptest.NewRecorder()
+	t.Run("it returns 200 on /league", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/league", nil)
+		response := httptest.NewRecorder()
 
-        server.ServeHTTP(response, request)
+		server.ServeHTTP(response, request)
 
-        var got []Player
+		var got []Player
 
-        err := json.NewDecoder(response.Body).Decode(&got)
+		err := json.NewDecoder(response.Body).Decode(&got)
 
-        if err != nil {
-            t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", response.Body, err)
-        }
+		if err != nil {
+			t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", response.Body, err)
+		}
 
-        assertStatus(t, response.Code, http.StatusOK)
-    })
+		assertStatus(t, response.Code, http.StatusOK)
+	})
 }
 ```
 
-### SON文字列をテストしないのはなぜですか？
+### JSON文字列をテストしないのはなぜですか？
 
 より単純な最初のステップは、応答の本文に特定のJSON文字列があることを表明することだと主張できます。
 
@@ -369,8 +369,8 @@ JSONデータモデルを考えると、いくつかのフィールドを持つ`
 ```go
 //server.go
 type Player struct {
-    Name string
-    Wins int
+	Name string
+	Wins int
 }
 ```
 
@@ -388,9 +388,9 @@ JSONを解析してデータモデルにするには、 `encoding/json`パッケ
 
 JSONの解析が失敗する可能性があるため、`Decode`が`error`を返す可能性があります。それが失敗した場合にテストを続行する意味はないので、エラーを確認し、エラーが発生した場合は `t.Fatalf`でテストを停止します。テストを実行している誰かが解析できない文字列を確認することが重要であるため、エラーとともに応答本文を表示することに注意してください。
 
-## Try to run the test
+## テストを実行してみます
 
-```text
+```
 === RUN   TestLeague/it_returns_200_on_/league
     --- FAIL: TestLeague/it_returns_200_on_/league (0.00s)
         server_test.go:107: Unable to parse response from server '' into slice of Player, 'unexpected end of JSON input'
@@ -403,13 +403,13 @@ JSONの解析が失敗する可能性があるため、`Decode`が`error`を返�
 ```go
 //server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
-    leagueTable := []Player{
-        {"Chris", 20},
-    }
+	leagueTable := []Player{
+		{"Chris", 20},
+	}
 
-    json.NewEncoder(w).Encode(leagueTable)
+	json.NewEncoder(w).Encode(leagueTable)
 
-    w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusOK)
 }
 ```
 
@@ -431,14 +431,14 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 ```go
 //server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
-    json.NewEncoder(w).Encode(p.getLeagueTable())
-    w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(p.getLeagueTable())
+	w.WriteHeader(http.StatusOK)
 }
 
 func (p *PlayerServer) getLeagueTable() []Player {
-    return []Player{
-        {"Chris", 20},
-    }
+	return []Player{
+		{"Chris", 20},
+	}
 }
 ```
 
@@ -453,9 +453,9 @@ func (p *PlayerServer) getLeagueTable() []Player {
 ```go
 //server_test.go
 type StubPlayerStore struct {
-    scores   map[string]int
-    winCalls []string
-    league   []Player
+	scores   map[string]int
+	winCalls []string
+	league   []Player
 }
 ```
 
@@ -465,41 +465,41 @@ type StubPlayerStore struct {
 //server_test.go
 func TestLeague(t *testing.T) {
 
-    t.Run("it returns the league table as JSON", func(t *testing.T) {
-        wantedLeague := []Player{
-            {"Cleo", 32},
-            {"Chris", 20},
-            {"Tiest", 14},
-        }
+	t.Run("it returns the league table as JSON", func(t *testing.T) {
+		wantedLeague := []Player{
+			{"Cleo", 32},
+			{"Chris", 20},
+			{"Tiest", 14},
+		}
 
-        store := StubPlayerStore{nil, nil, wantedLeague}
-        server := NewPlayerServer(&store)
+		store := StubPlayerStore{nil, nil, wantedLeague}
+		server := NewPlayerServer(&store)
 
-        request, _ := http.NewRequest(http.MethodGet, "/league", nil)
-        response := httptest.NewRecorder()
+		request, _ := http.NewRequest(http.MethodGet, "/league", nil)
+		response := httptest.NewRecorder()
 
-        server.ServeHTTP(response, request)
+		server.ServeHTTP(response, request)
 
-        var got []Player
+		var got []Player
 
-        err := json.NewDecoder(response.Body).Decode(&got)
+		err := json.NewDecoder(response.Body).Decode(&got)
 
-        if err != nil {
-            t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", response.Body, err)
-        }
+		if err != nil {
+			t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", response.Body, err)
+		}
 
-        assertStatus(t, response.Code, http.StatusOK)
+		assertStatus(t, response.Code, http.StatusOK)
 
-        if !reflect.DeepEqual(got, wantedLeague) {
-            t.Errorf("got %v want %v", got, wantedLeague)
-        }
-    })
+		if !reflect.DeepEqual(got, wantedLeague) {
+			t.Errorf("got %v want %v", got, wantedLeague)
+		}
+	})
 }
 ```
 
 ## テストを実行してみます
 
-```text
+```
 ./server_test.go:33:3: too few values in struct initializer
 ./server_test.go:70:3: too few values in struct initializer
 ```
@@ -510,7 +510,7 @@ func TestLeague(t *testing.T) {
 
 テストをもう一度実行してみてください。
 
-```text
+```
 === RUN   TestLeague/it_returns_the_league_table_as_JSON
     --- FAIL: TestLeague/it_returns_the_league_table_as_JSON (0.00s)
         server_test.go:124: got [{Chris 20}] want [{Cleo 32} {Chris 20} {Tiest 14}]
@@ -523,9 +523,9 @@ func TestLeague(t *testing.T) {
 ```go
 //server.go
 type PlayerStore interface {
-    GetPlayerScore(name string) int
-    RecordWin(name string)
-    GetLeague() []Player
+	GetPlayerScore(name string) int
+	RecordWin(name string)
+	GetLeague() []Player
 }
 ```
 
@@ -534,14 +534,14 @@ type PlayerStore interface {
 ```go
 //server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
-    json.NewEncoder(w).Encode(p.store.GetLeague())
-    w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(p.store.GetLeague())
+	w.WriteHeader(http.StatusOK)
 }
 ```
 
 テストを実行してみてください。
 
-```text
+```
 # github.com/quii/learn-go-with-tests/json-and-io/v4
 ./main.go:9:50: cannot use NewInMemoryPlayerStore() (type *InMemoryPlayerStore) as type PlayerStore in argument to NewPlayerServer:
     *InMemoryPlayerStore does not implement PlayerStore (missing GetLeague method)
@@ -562,7 +562,7 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 ```go
 //server_test.go
 func (s *StubPlayerStore) GetLeague() []Player {
-    return s.league
+	return s.league
 }
 ```
 
@@ -571,7 +571,7 @@ func (s *StubPlayerStore) GetLeague() []Player {
 ```go
 //in_memory_player_store.go
 type InMemoryPlayerStore struct {
-    store map[string]int
+	store map[string]int
 }
 ```
 
@@ -582,7 +582,7 @@ type InMemoryPlayerStore struct {
 ```go
 //in_memory_player_store.go
 func (i *InMemoryPlayerStore) GetLeague() []Player {
-    return nil
+	return nil
 }
 ```
 
@@ -597,23 +597,23 @@ func (i *InMemoryPlayerStore) GetLeague() []Player {
 ```go
 //server_test.go
 t.Run("it returns the league table as JSON", func(t *testing.T) {
-    wantedLeague := []Player{
-        {"Cleo", 32},
-        {"Chris", 20},
-        {"Tiest", 14},
-    }
+	wantedLeague := []Player{
+		{"Cleo", 32},
+		{"Chris", 20},
+		{"Tiest", 14},
+	}
 
-    store := StubPlayerStore{nil, nil, wantedLeague}
-    server := NewPlayerServer(&store)
+	store := StubPlayerStore{nil, nil, wantedLeague}
+	server := NewPlayerServer(&store)
 
-    request := newLeagueRequest()
-    response := httptest.NewRecorder()
+	request := newLeagueRequest()
+	response := httptest.NewRecorder()
 
-    server.ServeHTTP(response, request)
+	server.ServeHTTP(response, request)
 
-    got := getLeagueFromResponse(t, response.Body)
-    assertStatus(t, response.Code, http.StatusOK)
-    assertLeague(t, got, wantedLeague)
+	got := getLeagueFromResponse(t, response.Body)
+	assertStatus(t, response.Code, http.StatusOK)
+	assertLeague(t, got, wantedLeague)
 })
 ```
 
@@ -622,26 +622,26 @@ t.Run("it returns the league table as JSON", func(t *testing.T) {
 ```go
 //server_test.go
 func getLeagueFromResponse(t testing.TB, body io.Reader) (league []Player) {
-    t.Helper()
-    err := json.NewDecoder(body).Decode(&league)
+	t.Helper()
+	err := json.NewDecoder(body).Decode(&league)
 
-    if err != nil {
-        t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", body, err)
-    }
+	if err != nil {
+		t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", body, err)
+	}
 
-    return
+	return
 }
 
 func assertLeague(t testing.TB, got, want []Player) {
-    t.Helper()
-    if !reflect.DeepEqual(got, want) {
-        t.Errorf("got %v want %v", got, want)
-    }
+	t.Helper()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v want %v", got, want)
+	}
 }
 
 func newLeagueRequest() *http.Request {
-    req, _ := http.NewRequest(http.MethodGet, "/league", nil)
-    return req
+	req, _ := http.NewRequest(http.MethodGet, "/league", nil)
+	return req
 }
 ```
 
@@ -654,13 +654,13 @@ func newLeagueRequest() *http.Request {
 ```go
 //server_test.go
 if response.Result().Header.Get("content-type") != "application/json" {
-    t.Errorf("response did not have content-type of application/json, got %v", response.Result().Header)
+	t.Errorf("response did not have content-type of application/json, got %v", response.Result().Header)
 }
 ```
 
 ## テストを実行してみます
 
-```text
+```
 === RUN   TestLeague/it_returns_the_league_table_as_JSON
     --- FAIL: TestLeague/it_returns_the_league_table_as_JSON (0.00s)
         server_test.go:124: response did not have content-type of application/json, got map[Content-Type:[text/plain; charset=utf-8]]
@@ -673,8 +673,8 @@ if response.Result().Header.Get("content-type") != "application/json" {
 ```go
 //server.go
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("content-type", "application/json")
-    json.NewEncoder(w).Encode(p.store.GetLeague())
+	w.Header().Set("content-type", "application/json")
+	json.NewEncoder(w).Encode(p.store.GetLeague())
 }
 ```
 
@@ -699,10 +699,10 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 ```go
 //server_test.go
 func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want string) {
-    t.Helper()
-    if response.Result().Header.Get("content-type") != want {
-        t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
-    }
+	t.Helper()
+	if response.Result().Header.Get("content-type") != want {
+		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
+	}
 }
 ```
 
@@ -724,39 +724,39 @@ assertContentType(t, response, jsonContentType)
 ```go
 //server_integration_test.go
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
-    store := NewInMemoryPlayerStore()
-    server := NewPlayerServer(store)
-    player := "Pepper"
+	store := NewInMemoryPlayerStore()
+	server := NewPlayerServer(store)
+	player := "Pepper"
 
-    server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-    server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-    server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
 
-    t.Run("get score", func(t *testing.T) {
-        response := httptest.NewRecorder()
-        server.ServeHTTP(response, newGetScoreRequest(player))
-        assertStatus(t, response.Code, http.StatusOK)
+	t.Run("get score", func(t *testing.T) {
+		response := httptest.NewRecorder()
+		server.ServeHTTP(response, newGetScoreRequest(player))
+		assertStatus(t, response.Code, http.StatusOK)
 
-        assertResponseBody(t, response.Body.String(), "3")
-    })
+		assertResponseBody(t, response.Body.String(), "3")
+	})
 
-    t.Run("get league", func(t *testing.T) {
-        response := httptest.NewRecorder()
-        server.ServeHTTP(response, newLeagueRequest())
-        assertStatus(t, response.Code, http.StatusOK)
+	t.Run("get league", func(t *testing.T) {
+		response := httptest.NewRecorder()
+		server.ServeHTTP(response, newLeagueRequest())
+		assertStatus(t, response.Code, http.StatusOK)
 
-        got := getLeagueFromResponse(t, response.Body)
-        want := []Player{
-            {"Pepper", 3},
-        }
-        assertLeague(t, got, want)
-    })
+		got := getLeagueFromResponse(t, response.Body)
+		want := []Player{
+			{"Pepper", 3},
+		}
+		assertLeague(t, got, want)
+	})
 }
 ```
 
 ## テストを実行してみます
 
-```text
+```
 === RUN   TestRecordingWinsAndRetrievingThem/get_league
     --- FAIL: TestRecordingWinsAndRetrievingThem/get_league (0.00s)
         server_integration_test.go:35: got [] want [{Pepper 3}]
@@ -769,11 +769,11 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 ```go
 //in_memory_player_store.go
 func (i *InMemoryPlayerStore) GetLeague() []Player {
-    var league []Player
-    for name, wins := range i.store {
-        league = append(league, Player{name, wins})
-    }
-    return league
+	var league []Player
+	for name, wins := range i.store {
+		league = append(league, Player{name, wins})
+	}
+	return league
 }
 ```
 

@@ -1,8 +1,9 @@
-module github.com/andmorefine/learn-go-with-tests
+module github.com/quii/learn-go-with-tests
 
-go 1.14
+go 1.25
 
 require (
-	github.com/gorilla/websocket v1.4.2
-	github.com/quii/learn-go-with-tests v0.0.0-20200619082038-09436e48275b
+	github.com/approvals/go-approval-tests v0.0.0-20211008131110-0c40b30e0000
+	github.com/gomarkdown/markdown v0.0.0-20240626202925-2eda941fd024
+	github.com/gorilla/websocket v1.5.3
 )

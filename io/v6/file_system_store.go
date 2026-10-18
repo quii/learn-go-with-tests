@@ -13,7 +13,7 @@ type FileSystemPlayerStore struct {
 
 // NewFileSystemPlayerStore creates a FileSystemPlayerStore.
 func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
-	database.Seek(0, 0)
+	database.Seek(0, io.SeekStart)
 	league, _ := NewLeague(database)
 
 	return &FileSystemPlayerStore{
@@ -49,6 +49,6 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 		f.league = append(f.league, Player{name, 1})
 	}
 
-	f.database.Seek(0, 0)
+	f.database.Seek(0, io.SeekStart)
 	json.NewEncoder(f.database).Encode(f.league)
 }

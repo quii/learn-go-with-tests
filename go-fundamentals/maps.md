@@ -4,7 +4,7 @@ description: Maps
 
 # マップ
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/maps)
+**[この章のすべてのコードはここにあります](https://github.com/quii/learn-go-with-tests/tree/main/maps)**
 
 [配列とスライス](arrays-and-slices.md)では、値を順番に格納する方法を見ました。
 では、`key`でアイテムを保存し、すばやく検索する方法を見てみましょう。
@@ -25,14 +25,14 @@ package main
 import "testing"
 
 func TestSearch(t *testing.T) {
-    dictionary := map[string]string{"test": "this is just a test"}
+	dictionary := map[string]string{"test": "this is just a test"}
 
-    got := Search(dictionary, "test")
-    want := "this is just a test"
+	got := Search(dictionary, "test")
+	want := "this is just a test"
 
-    if got != want {
-        t.Errorf("got %q want %q given, %q", got, want, "test")
-    }
+	if got != want {
+		t.Errorf("got %q want %q given, %q", got, want, "test")
+	}
 }
 ```
 
@@ -59,11 +59,11 @@ func TestSearch(t *testing.T) {
 package main
 
 func Search(dictionary map[string]string, word string) string {
-    return ""
+	return ""
 }
 ```
 
-テストは _clearエラーメッセージ_ で失敗するはずです。
+テストは _明確なエラーメッセージ_ で失敗するはずです。
 
 `dictionary_test.go:12: got '' want 'this is just a test' given, 'test'`.
 
@@ -71,7 +71,7 @@ func Search(dictionary map[string]string, word string) string {
 
 ```go
 func Search(dictionary map[string]string, word string) string {
-    return dictionary[word]
+	return dictionary[word]
 }
 ```
 
@@ -81,20 +81,20 @@ func Search(dictionary map[string]string, word string) string {
 
 ```go
 func TestSearch(t *testing.T) {
-    dictionary := map[string]string{"test": "this is just a test"}
+	dictionary := map[string]string{"test": "this is just a test"}
 
-    got := Search(dictionary, "test")
-    want := "this is just a test"
+	got := Search(dictionary, "test")
+	want := "this is just a test"
 
-    assertStrings(t, got, want)
+	assertStrings(t, got, want)
 }
 
-func assertStrings(t *testing.T, got, want string) {
-    t.Helper()
+func assertStrings(t testing.TB, got, want string) {
+	t.Helper()
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 }
 ```
 
@@ -108,12 +108,12 @@ func assertStrings(t *testing.T, got, want string) {
 
 ```go
 func TestSearch(t *testing.T) {
-    dictionary := Dictionary{"test": "this is just a test"}
+	dictionary := Dictionary{"test": "this is just a test"}
 
-    got := dictionary.Search("test")
-    want := "this is just a test"
+	got := dictionary.Search("test")
+	want := "this is just a test"
 
-    assertStrings(t, got, want)
+	assertStrings(t, got, want)
 }
 ```
 
@@ -127,7 +127,7 @@ func TestSearch(t *testing.T) {
 type Dictionary map[string]string
 
 func (d Dictionary) Search(word string) string {
-    return d[word]
+	return d[word]
 }
 ```
 
@@ -145,39 +145,38 @@ func (d Dictionary) Search(word string) string {
 
 ```go
 func TestSearch(t *testing.T) {
-    dictionary := Dictionary{"test": "this is just a test"}
+	dictionary := Dictionary{"test": "this is just a test"}
 
-    t.Run("known word", func(t *testing.T) {
-        got, _ := dictionary.Search("test")
-        want := "this is just a test"
+	t.Run("known word", func(t *testing.T) {
+		got, _ := dictionary.Search("test")
+		want := "this is just a test"
 
-        assertStrings(t, got, want)
-    })
+		assertStrings(t, got, want)
+	})
 
-    t.Run("unknown word", func(t *testing.T) {
-        _, err := dictionary.Search("unknown")
-        want := "could not find the word you were looking for"
+	t.Run("unknown word", func(t *testing.T) {
+		_, err := dictionary.Search("unknown")
+		want := "could not find the word you were looking for"
 
-        if err == nil {
-            t.Fatal("expected to get an error.")
-        }
+		if err == nil {
+			t.Fatal("expected to get an error.")
+		}
 
-        assertStrings(t, err.Error(), want)
-    })
+		assertStrings(t, err.Error(), want)
+	})
 }
 ```
 
 Goでこのシナリオを処理する方法は、 `Error`タイプである2番目の引数を返すことです。
 
-`Error`は、`.Error()`メソッドで文字列に変換できます。
-これは、アサーションに渡すときに行います。
-また、`nil`で`.Error()`を呼び出さないように、`assertStrings`を`if`で保護しています。
+[ポインタとエラーのセクション](./pointers-and-errors.md)で見たように、ここではエラーメッセージをアサートするために、
+まずエラーが`nil`でないことを確認し、次に`.Error()`メソッドを使って文字列を取得し、それをアサーションに渡していることに注目してください。
 
-## テストを試して実行する
+## テストを実行してみます
 
 これはコンパイルされません
 
-```text
+```
 ./dictionary_test.go:18:10: assignment mismatch: 2 variables but 1 values
 ```
 
@@ -185,7 +184,7 @@ Goでこのシナリオを処理する方法は、 `Error`タイプである2番
 
 ```go
 func (d Dictionary) Search(word string) (string, error) {
-    return d[word], nil
+	return d[word], nil
 }
 ```
 
@@ -197,12 +196,12 @@ func (d Dictionary) Search(word string) (string, error) {
 
 ```go
 func (d Dictionary) Search(word string) (string, error) {
-    definition, ok := d[word]
-    if !ok {
-        return "", errors.New("could not find the word you were looking for")
-    }
+	definition, ok := d[word]
+	if !ok {
+		return "", errors.New("could not find the word you were looking for")
+	}
 
-    return definition, nil
+	return definition, nil
 }
 ```
 
@@ -216,12 +215,12 @@ func (d Dictionary) Search(word string) (string, error) {
 var ErrNotFound = errors.New("could not find the word you were looking for")
 
 func (d Dictionary) Search(word string) (string, error) {
-    definition, ok := d[word]
-    if !ok {
-        return "", ErrNotFound
-    }
+	definition, ok := d[word]
+	if !ok {
+		return "", ErrNotFound
+	}
 
-    return definition, nil
+	return definition, nil
 }
 ```
 
@@ -230,41 +229,42 @@ func (d Dictionary) Search(word string) (string, error) {
 
 ```go
 t.Run("unknown word", func(t *testing.T) {
-    _, got := dictionary.Search("unknown")
-
-    assertError(t, got, ErrNotFound)
+	_, got := dictionary.Search("unknown")
+	if got == nil {
+		t.Fatal("expected to get an error.")
+	}
+	assertError(t, got, ErrNotFound)
 })
-}
+```
 
-func assertError(t *testing.T, got, want error) {
-    t.Helper()
+```go
+func assertError(t testing.TB, got, want error) {
+	t.Helper()
 
-    if got != want {
-        t.Errorf("got error %q want %q", got, want)
-    }
+	if !errors.Is(got, want) {
+		t.Errorf("got error %q want %q", got, want)
+	}
 }
 ```
 
 新しいヘルパーを作成することで、テストを簡素化し、 `ErrNotFound`変数の使用を開始できるため、将来エラーテキストを変更してもテストが失敗しません。
 
-## Write the test first
+## 最初にテストを書く
 
 辞書を検索するには素晴らしい方法があります。ただし、新しい単語を辞書に追加する方法はありません。
 
 ```go
 func TestAdd(t *testing.T) {
-    dictionary := Dictionary{}
-    dictionary.Add("test", "this is just a test")
+	dictionary := Dictionary{}
+	dictionary.Add("test", "this is just a test")
 
-    want := "this is just a test"
-    got, err := dictionary.Search("test")
-    if err != nil {
-        t.Fatal("should find added word:", err)
-    }
+	want := "this is just a test"
+	got, err := dictionary.Search("test")
+	if err != nil {
+		t.Fatal("should find added word:", err)
+	}
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	assertStrings(t, got, want)
 }
 ```
 
@@ -281,7 +281,7 @@ func (d Dictionary) Add(word, definition string) {
 
 これでテストは失敗するはずです
 
-```text
+```
 dictionary_test.go:31: should find added word: could not find the word you were looking for
 ```
 
@@ -289,29 +289,32 @@ dictionary_test.go:31: should find added word: could not find the word you were 
 
 ```go
 func (d Dictionary) Add(word, definition string) {
-    d[word] = definition
+	d[word] = definition
 }
 ```
 
 マップへの追加も配列に似ています。キーを指定して、値に設定するだけです。
 
-### 参照型
+### ポインタ、コピーなど
 
-マップの興味深い特性は、マップをポインタとして渡さなくても変更できることです。これは、 `map`が参照型であるためです。つまり、ポインタのように、基礎となるデータ構造への参照を保持します。
-基本的なデータ構造は`hash tables`または`hash map`であり、`hash tables`の詳細については[こちら](https://en.wikipedia.org/wiki/Hash_table)を参照してください。
+マップの興味深い特性は、アドレスとして（例：`&myMap`）渡さなくても変更できることです。
 
-マップがどれほど大きくても、コピーは1つしかないので、マップは参照として非常に適しています。
+これにより、マップが「参照型」であるかのように _感じられる_ かもしれませんが、[Dave Cheneyが説明しているように](https://dave.cheney.net/2017/04/30/if-a-map-isnt-a-reference-variable-what-is-it)、そうではありません。
 
-参照型がもたらす落とし穴は、マップが`nil`値になる可能性があることです。 `nil`マップは読み取り時に空のマップのように動作しますが、`nil`マップに書き込もうとすると、ランタイムパニックが発生します。
+> マップの値は、runtime.hmap構造体へのポインタです。（A map value is a pointer to a runtime.hmap structure.）
+
+つまり、マップを関数/メソッドに渡すと、実際にコピーされますが、コピーされるのはポインタの部分だけで、データを保持している基礎となるデータ構造はコピーされません。
+
+マップの落とし穴は、マップが`nil`値になる可能性があることです。 `nil`マップは読み取り時に空のマップのように動作しますが、`nil`マップに書き込もうとすると、ランタイムパニックが発生します。
 マップの詳細については、[こちら](https://blog.golang.org/go-maps-in-action)をご覧ください。
 
-したがって、空のマップ変数を初期化しないでください。
+したがって、nilのマップ変数を初期化しないでください。
 
 ```go
 var m map[string]string
 ```
 
-代わりに、上記のように空のマップを初期化するか、`make`キーワードを使用してマップを作成できます。
+代わりに、空のマップを初期化するか、`make`キーワードを使用してマップを作成できます。
 
 ```go
 var dictionary = map[string]string{}
@@ -329,26 +332,23 @@ var dictionary = make(map[string]string)
 
 ```go
 func TestAdd(t *testing.T) {
-    dictionary := Dictionary{}
-    word := "test"
-    definition := "this is just a test"
+	dictionary := Dictionary{}
+	word := "test"
+	definition := "this is just a test"
 
-    dictionary.Add(word, definition)
+	dictionary.Add(word, definition)
 
-    assertDefinition(t, dictionary, word, definition)
+	assertDefinition(t, dictionary, word, definition)
 }
 
-func assertDefinition(t *testing.T, dictionary Dictionary, word, definition string) {
-    t.Helper()
+func assertDefinition(t testing.TB, dictionary Dictionary, word, definition string) {
+	t.Helper()
 
-    got, err := dictionary.Search(word)
-    if err != nil {
-        t.Fatal("should find added word:", err)
-    }
-
-    if definition != got {
-        t.Errorf("got %q want %q", got, definition)
-    }
+	got, err := dictionary.Search(word)
+	if err != nil {
+		t.Fatal("should find added word:", err)
+	}
+	assertStrings(t, got, definition)
 }
 ```
 
@@ -364,50 +364,37 @@ func assertDefinition(t *testing.T, dictionary Dictionary, word, definition stri
 
 ```go
 func TestAdd(t *testing.T) {
-    t.Run("new word", func(t *testing.T) {
-        dictionary := Dictionary{}
-        word := "test"
-        definition := "this is just a test"
+	t.Run("new word", func(t *testing.T) {
+		dictionary := Dictionary{}
+		word := "test"
+		definition := "this is just a test"
 
-        err := dictionary.Add(word, definition)
+		err := dictionary.Add(word, definition)
 
-        assertError(t, err, nil)
-        assertDefinition(t, dictionary, word, definition)
-    })
+		assertError(t, err, nil)
+		assertDefinition(t, dictionary, word, definition)
+	})
 
-    t.Run("existing word", func(t *testing.T) {
-        word := "test"
-        definition := "this is just a test"
-        dictionary := Dictionary{word: definition}
-        err := dictionary.Add(word, "new test")
+	t.Run("existing word", func(t *testing.T) {
+		word := "test"
+		definition := "this is just a test"
+		dictionary := Dictionary{word: definition}
+		err := dictionary.Add(word, "new test")
 
-        assertError(t, err, ErrWordExists)
-        assertDefinition(t, dictionary, word, definition)
-    })
-}
-...
-func assertError(t *testing.T, got, want error) {
-    t.Helper()
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
-    if got == nil {
-        if want == nil {
-            return
-        }
-        t.Fatal("expected to get an error.")
-    }
+		assertError(t, err, ErrWordExists)
+		assertDefinition(t, dictionary, word, definition)
+	})
 }
 ```
 
 このテストでは、エラーを返すように`Add`を変更しました。
-これは、新しいエラー変数`ErrWordExists`に対して検証しています。また、前のテストを変更して、`nil`エラーと`assertError`関数をチェックしました。
+これは、新しいエラー変数`ErrWordExists`に対して検証しています。また、前のテストを変更して、`nil`エラーをチェックするようにしました。
 
 ## テストを実行してみます
 
 `Add`の値を返さないため、コンパイラは失敗します。
 
-```text
+```
 ./dictionary_test.go:30:13: dictionary.Add(word, definition) used as value
 ./dictionary_test.go:41:13: dictionary.Add(word, "new test") used as value
 ```
@@ -418,19 +405,19 @@ func assertError(t *testing.T, got, want error) {
 
 ```go
 var (
-    ErrNotFound   = errors.New("could not find the word you were looking for")
-    ErrWordExists = errors.New("cannot add word because it already exists")
+	ErrNotFound   = errors.New("could not find the word you were looking for")
+	ErrWordExists = errors.New("cannot add word because it already exists")
 )
 
 func (d Dictionary) Add(word, definition string) error {
-    d[word] = definition
-    return nil
+	d[word] = definition
+	return nil
 }
 ```
 
 これで、さらに2つのエラーが発生します。まだ値を変更しており、 `nil`エラーを返しています。
 
-```text
+```
 dictionary_test.go:43: got error '%!q(<nil>)' want 'cannot add word because it already exists'
 dictionary_test.go:44: got 'new test' want 'this is just a test'
 ```
@@ -439,18 +426,18 @@ dictionary_test.go:44: got 'new test' want 'this is just a test'
 
 ```go
 func (d Dictionary) Add(word, definition string) error {
-    _, err := d.Search(word)
+	_, err := d.Search(word)
 
-    switch err {
-    case ErrNotFound:
-        d[word] = definition
-    case nil:
-        return ErrWordExists
-    default:
-        return err
-    }
+	switch err {
+	case ErrNotFound:
+		d[word] = definition
+	case nil:
+		return ErrWordExists
+	default:
+		return err
+	}
 
-    return nil
+	return nil
 }
 ```
 
@@ -462,14 +449,14 @@ func (d Dictionary) Add(word, definition string) error {
 
 ```go
 const (
-    ErrNotFound   = DictionaryErr("could not find the word you were looking for")
-    ErrWordExists = DictionaryErr("cannot add word because it already exists")
+	ErrNotFound   = DictionaryErr("could not find the word you were looking for")
+	ErrWordExists = DictionaryErr("cannot add word because it already exists")
 )
 
 type DictionaryErr string
 
 func (e DictionaryErr) Error() string {
-    return string(e)
+	return string(e)
 }
 ```
 
@@ -482,22 +469,22 @@ func (e DictionaryErr) Error() string {
 
 ```go
 func TestUpdate(t *testing.T) {
-    word := "test"
-    definition := "this is just a test"
-    dictionary := Dictionary{word: definition}
-    newDefinition := "new definition"
+	word := "test"
+	definition := "this is just a test"
+	dictionary := Dictionary{word: definition}
+	newDefinition := "new definition"
 
-    dictionary.Update(word, newDefinition)
+	dictionary.Update(word, newDefinition)
 
-    assertDefinition(t, dictionary, word, newDefinition)
+	assertDefinition(t, dictionary, word, newDefinition)
 }
 ```
 
 `Update`は`Add`と非常に密接に関連しており、次の実装になります。
 
-## テストを試して実行する
+## テストを実行してみます
 
-```text
+```
 ./dictionary_test.go:53:2: dictionary.Update undefined (type Dictionary has no field or method Update)
 ```
 
@@ -511,7 +498,7 @@ func (d Dictionary) Update(word, definition string) {}
 
 これを実行すると、単語の定義を変更する必要があることがわかります。
 
-```text
+```
 dictionary_test.go:55: got 'this is just a test' want 'new definition'
 ```
 
@@ -522,7 +509,7 @@ dictionary_test.go:55: got 'this is just a test' want 'new definition'
 
 ```go
 func (d Dictionary) Update(word, definition string) {
-    d[word] = definition
+	d[word] = definition
 }
 ```
 
@@ -533,34 +520,34 @@ func (d Dictionary) Update(word, definition string) {
 
 ```go
 t.Run("existing word", func(t *testing.T) {
-    word := "test"
-    definition := "this is just a test"
-    newDefinition := "new definition"
-    dictionary := Dictionary{word: definition}
+	word := "test"
+	definition := "this is just a test"
+	dictionary := Dictionary{word: definition}
+	newDefinition := "new definition"
 
-    err := dictionary.Update(word, newDefinition)
+	err := dictionary.Update(word, newDefinition)
 
-    assertError(t, err, nil)
-    assertDefinition(t, dictionary, word, newDefinition)
+	assertError(t, err, nil)
+	assertDefinition(t, dictionary, word, newDefinition)
 })
 
 t.Run("new word", func(t *testing.T) {
-    word := "test"
-    definition := "this is just a test"
-    dictionary := Dictionary{}
+	word := "test"
+	definition := "this is just a test"
+	dictionary := Dictionary{}
 
-    err := dictionary.Update(word, definition)
+	err := dictionary.Update(word, definition)
 
-    assertError(t, err, ErrWordDoesNotExist)
+	assertError(t, err, ErrWordDoesNotExist)
 })
 ```
 
 単語が存在しない場合のエラータイプをさらに追加しました。また、`Update`を変更して`error`値を返すようにしました。
 
-## テストを試して実行する
+## テストを実行してみます
 
-```text
-./dictionary_test.go:53:16: dictionary.Update(word, "new test") used as value
+```
+./dictionary_test.go:53:16: dictionary.Update(word, newDefinition) used as value
 ./dictionary_test.go:64:16: dictionary.Update(word, definition) used as value
 ./dictionary_test.go:66:23: undefined: ErrWordDoesNotExist
 ```
@@ -571,14 +558,14 @@ t.Run("new word", func(t *testing.T) {
 
 ```go
 const (
-    ErrNotFound         = DictionaryErr("could not find the word you were looking for")
-    ErrWordExists       = DictionaryErr("cannot add word because it already exists")
-    ErrWordDoesNotExist = DictionaryErr("cannot update word because it does not exist")
+	ErrNotFound         = DictionaryErr("could not find the word you were looking for")
+	ErrWordExists       = DictionaryErr("cannot add word because it already exists")
+	ErrWordDoesNotExist = DictionaryErr("cannot perform operation on word because it does not exist")
 )
 
 func (d Dictionary) Update(word, definition string) error {
-    d[word] = definition
-    return nil
+	d[word] = definition
+	return nil
 }
 ```
 
@@ -586,26 +573,26 @@ func (d Dictionary) Update(word, definition string) error {
 
 これらの変更により、非常に明確なエラーが発生します。
 
-```text
-dictionary_test.go:66: got error '%!q(<nil>)' want 'cannot update word because it does not exist'
+```
+dictionary_test.go:66: got error '%!q(<nil>)' want 'cannot perform operation on word because it does not exist'
 ```
 
 ## 成功させるのに十分なコードを書く
 
 ```go
 func (d Dictionary) Update(word, definition string) error {
-    _, err := d.Search(word)
+	_, err := d.Search(word)
 
-    switch err {
-    case ErrNotFound:
-        return ErrWordDoesNotExist
-    case nil:
-        d[word] = definition
-    default:
-        return err
-    }
+	switch err {
+	case ErrNotFound:
+		return ErrWordDoesNotExist
+	case nil:
+		d[word] = definition
+	default:
+		return err
+	}
 
-    return nil
+	return nil
 }
 ```
 
@@ -625,25 +612,23 @@ func (d Dictionary) Update(word, definition string) error {
 
 ```go
 func TestDelete(t *testing.T) {
-    word := "test"
-    dictionary := Dictionary{word: "test definition"}
+	word := "test"
+	dictionary := Dictionary{word: "test definition"}
 
-    dictionary.Delete(word)
+	dictionary.Delete(word)
 
-    _, err := dictionary.Search(word)
-    if err != ErrNotFound {
-        t.Errorf("Expected %q to be deleted", word)
-    }
+	_, err := dictionary.Search(word)
+	assertError(t, err, ErrNotFound)
 }
 ```
 
 このテストでは、単語を含む`Dictionary`を作成し、単語が削除されているかどうかを確認します。
 
-## Try to run the test
+## テストを実行してみます
 
 `go test`を実行すると、次のようになります。
 
-```text
+```
 ./dictionary_test.go:74:6: dictionary.Delete undefined (type Dictionary has no field or method Delete)
 ```
 
@@ -657,22 +642,80 @@ func (d Dictionary) Delete(word string) {
 
 これを追加した後、テストは単語を削除しないことを通知します。
 
-```text
-dictionary_test.go:78: Expected 'test' to be deleted
+```
+dictionary_test.go:78: got error '%!q(<nil>)' want 'could not find the word you were looking for'
 ```
 
 ## 成功させるのに十分なコードを書く
 
 ```go
 func (d Dictionary) Delete(word string) {
-    delete(d, word)
+	delete(d, word)
 }
 ```
 
 Goには、マップで機能する組み込み関数`delete`があります。
-2つの引数を取ります。1つ目はマップで、2つ目は削除するキーです。
+2つの引数を取り、何も返しません。1つ目の引数はマップで、2つ目は削除するキーです。
 
-`delete`関数は何も返さず、同じ概念に基づいて`Delete`メソッドを作成しました。存在しない値を削除しても効果がないため、`Update`や`Add`メソッドとは異なり、APIを複雑にしてエラーを発生させる必要はありません。
+## リファクタリング♪
+
+リファクタリングするものはあまりありませんが、`Update`と同じロジックを実装して、単語が存在しない場合に対処できます。
+
+```go
+func TestDelete(t *testing.T) {
+	t.Run("existing word", func(t *testing.T) {
+		word := "test"
+		dictionary := Dictionary{word: "test definition"}
+
+		err := dictionary.Delete(word)
+
+		assertError(t, err, nil)
+
+		_, err = dictionary.Search(word)
+
+		assertError(t, err, ErrNotFound)
+	})
+
+	t.Run("non-existing word", func(t *testing.T) {
+		word := "test"
+		dictionary := Dictionary{}
+
+		err := dictionary.Delete(word)
+
+		assertError(t, err, ErrWordDoesNotExist)
+	})
+}
+```
+
+## テストを実行してみます
+
+`Delete`の値を返していないため、コンパイラは失敗します。
+
+```
+./dictionary_test.go:77:10: dictionary.Delete(word) (no value) used as value
+./dictionary_test.go:90:10: dictionary.Delete(word) (no value) used as value
+```
+
+## 成功させるのに十分なコードを書く
+
+```go
+func (d Dictionary) Delete(word string) error {
+	_, err := d.Search(word)
+
+	switch err {
+	case ErrNotFound:
+		return ErrWordDoesNotExist
+	case nil:
+		delete(d, word)
+	default:
+		return err
+	}
+
+	return nil
+}
+```
+
+ここでも、存在しない単語を削除しようとしたときのエラーを照合するために`switch`ステートメントを使用しています。
 
 ## まとめ
 
@@ -683,7 +726,6 @@ Goには、マップで機能する組み込み関数`delete`があります。
 * マップに新しいアイテムを追加する
 * マップのアイテムを更新する
 * マップからアイテムを削除する
-* エラーの詳細
+* エラーについてさらに学んだ
   * 定数であるエラーを作成する方法
   * エラーラッパーを書く
-

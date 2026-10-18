@@ -4,7 +4,7 @@ description: Time
 
 # 時間
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/time)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/time)
 
 製品の所有者は、[テキサス・ホールデム・ポーカー](https://ja.wikipedia.org/wiki/%E3%83%86%E3%82%AD%E3%82%B5%E3%82%B9%E3%83%BB%E3%83%9B%E3%83%BC%E3%83%AB%E3%83%87%E3%83%A0)をプレイする人々のグループを支援することで、コマンドラインアプリケーションの機能を拡張することを望んでいます。
 
@@ -27,29 +27,29 @@ description: Time
 
 ```go
 type CLI struct {
-    playerStore PlayerStore
-    in          *bufio.Scanner
+	playerStore PlayerStore
+	in          *bufio.Scanner
 }
 
 func NewCLI(store PlayerStore, in io.Reader) *CLI {
-    return &CLI{
-        playerStore: store,
-        in:          bufio.NewScanner(in),
-    }
+	return &CLI{
+		playerStore: store,
+		in:          bufio.NewScanner(in),
+	}
 }
 
 func (cli *CLI) PlayPoker() {
-    userInput := cli.readLine()
-    cli.playerStore.RecordWin(extractWinner(userInput))
+	userInput := cli.readLine()
+	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
 func extractWinner(userInput string) string {
-    return strings.Replace(userInput, " wins", "", 1)
+	return strings.Replace(userInput, " wins", "", 1)
 }
 
 func (cli *CLI) readLine() string {
-    cli.in.Scan()
-    return cli.in.Text()
+	cli.in.Scan()
+	return cli.in.Text()
 }
 ```
 
@@ -84,16 +84,16 @@ Goでは関数を比較できないため、送信された関数をテストす
 
 ```go
 t.Run("it schedules printing of blind values", func(t *testing.T) {
-    in := strings.NewReader("Chris wins\n")
-    playerStore := &poker.StubPlayerStore{}
-    blindAlerter := &SpyBlindAlerter{}
+	in := strings.NewReader("Chris wins\n")
+	playerStore := &poker.StubPlayerStore{}
+	blindAlerter := &SpyBlindAlerter{}
 
-    cli := poker.NewCLI(playerStore, in, blindAlerter)
-    cli.PlayPoker()
+	cli := poker.NewCLI(playerStore, in, blindAlerter)
+	cli.PlayPoker()
 
-    if len(blindAlerter.alerts) != 1 {
-        t.Fatal("expected a blind alert to be scheduled")
-    }
+	if len(blindAlerter.alerts) != 1 {
+		t.Fatal("expected a blind alert to be scheduled")
+	}
 })
 ```
 
@@ -105,26 +105,26 @@ t.Run("it schedules printing of blind values", func(t *testing.T) {
 
 ```go
 type SpyBlindAlerter struct {
-    alerts []struct {
-        scheduledAt time.Duration
-        amount      int
-    }
+	alerts []struct {
+		scheduledAt time.Duration
+		amount      int
+	}
 }
 
 func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
-    s.alerts = append(s.alerts, struct {
-        scheduledAt time.Duration
-        amount      int
-    }{duration,  amount})
+	s.alerts = append(s.alerts, struct {
+		scheduledAt time.Duration
+		amount      int
+	}{duration, amount})
 }
 ```
 
 ## テストを実行してみます
 
-```text
+```
 ./CLI_test.go:32:27: too many arguments in call to poker.NewCLI
-    have (*poker.StubPlayerStore, *strings.Reader, *SpyBlindAlerter)
-    want (poker.PlayerStore, io.Reader)
+	have (*poker.StubPlayerStore, *strings.Reader, *SpyBlindAlerter)
+	want (poker.PlayerStore, io.Reader)
 ```
 
 ## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
@@ -134,7 +134,7 @@ func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
 
 ```go
 type BlindAlerter interface {
-    ScheduleAlertAt(duration time.Duration, amount int)
+	ScheduleAlertAt(duration time.Duration, amount int)
 }
 ```
 
@@ -159,12 +159,12 @@ var dummySpyAlerter = &SpyBlindAlerter{}
 
 これでテストはコンパイルされ、新しいテストは失敗します。
 
-```text
+```
 === RUN   TestCLI
 === RUN   TestCLI/it_schedules_printing_of_blind_values
 --- FAIL: TestCLI (0.00s)
     --- FAIL: TestCLI/it_schedules_printing_of_blind_values (0.00s)
-        CLI_test.go:38: expected a blind alert to be scheduled
+    	CLI_test.go:38: expected a blind alert to be scheduled
 ```
 
 ## 通過するのに十分なコードを書く
@@ -173,17 +173,17 @@ var dummySpyAlerter = &SpyBlindAlerter{}
 
 ```go
 type CLI struct {
-    playerStore PlayerStore
-    in          *bufio.Scanner
-    alerter     BlindAlerter
+	playerStore PlayerStore
+	in          *bufio.Scanner
+	alerter     BlindAlerter
 }
 
 func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
-    return &CLI{
-        playerStore: store,
-        in:          bufio.NewScanner(in),
-        alerter:     alerter,
-    }
+	return &CLI{
+		playerStore: store,
+		in:          bufio.NewScanner(in),
+		alerter:     alerter,
+	}
 }
 ```
 
@@ -191,9 +191,9 @@ func NewCLI(store PlayerStore, in io.Reader, alerter BlindAlerter) *CLI {
 
 ```go
 func (cli *CLI) PlayPoker() {
-    cli.alerter.ScheduleAlertAt(5*time.Second, 100)
-    userInput := cli.readLine()
-    cli.playerStore.RecordWin(extractWinner(userInput))
+	cli.alerter.ScheduleAlertAt(5*time.Second, 100)
+	userInput := cli.readLine()
+	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 ```
 
@@ -202,52 +202,52 @@ func (cli *CLI) PlayPoker() {
 ## 最初にテストを書く
 
 ```go
-    t.Run("it schedules printing of blind values", func(t *testing.T) {
-        in := strings.NewReader("Chris wins\n")
-        playerStore := &poker.StubPlayerStore{}
-        blindAlerter := &SpyBlindAlerter{}
+	t.Run("it schedules printing of blind values", func(t *testing.T) {
+		in := strings.NewReader("Chris wins\n")
+		playerStore := &poker.StubPlayerStore{}
+		blindAlerter := &SpyBlindAlerter{}
 
-        cli := poker.NewCLI(playerStore, in, blindAlerter)
-        cli.PlayPoker()
+		cli := poker.NewCLI(playerStore, in, blindAlerter)
+		cli.PlayPoker()
 
-        cases := []struct {
-            expectedScheduleTime time.Duration
-            expectedAmount       int
-        }{
-            {0 * time.Second, 100},
-            {10 * time.Minute, 200},
-            {20 * time.Minute, 300},
-            {30 * time.Minute, 400},
-            {40 * time.Minute, 500},
-            {50 * time.Minute, 600},
-            {60 * time.Minute, 800},
-            {70 * time.Minute, 1000},
-            {80 * time.Minute, 2000},
-            {90 * time.Minute, 4000},
-            {100 * time.Minute, 8000},
-        }
+		cases := []struct {
+			expectedScheduleTime time.Duration
+			expectedAmount       int
+		}{
+			{0 * time.Second, 100},
+			{10 * time.Minute, 200},
+			{20 * time.Minute, 300},
+			{30 * time.Minute, 400},
+			{40 * time.Minute, 500},
+			{50 * time.Minute, 600},
+			{60 * time.Minute, 800},
+			{70 * time.Minute, 1000},
+			{80 * time.Minute, 2000},
+			{90 * time.Minute, 4000},
+			{100 * time.Minute, 8000},
+		}
 
-        for i, c := range cases {
-            t.Run(fmt.Sprintf("%d scheduled for %v", c.expectedAmount, c.expectedScheduleTime), func(t *testing.T) {
+		for i, c := range cases {
+			t.Run(fmt.Sprintf("%d scheduled for %v", c.expectedAmount, c.expectedScheduleTime), func(t *testing.T) {
 
-                if len(blindAlerter.alerts) <= i {
-                    t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
-                }
+				if len(blindAlerter.alerts) <= i {
+					t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.alerts)
+				}
 
-                alert := blindAlerter.alerts[i]
+				alert := blindAlerter.alerts[i]
 
-                amountGot := alert.amount
-                if amountGot != c.expectedAmount {
-                    t.Errorf("got amount %d, want %d", amountGot, c.expectedAmount)
-                }
+				amountGot := alert.amount
+				if amountGot != c.expectedAmount {
+					t.Errorf("got amount %d, want %d", amountGot, c.expectedAmount)
+				}
 
-                gotScheduledTime := alert.scheduledAt
-                if gotScheduledTime != c.expectedScheduleTime {
-                    t.Errorf("got scheduled time of %v, want %v", gotScheduledTime, c.expectedScheduleTime)
-                }
-            })
-        }
-    })
+				gotScheduledTime := alert.scheduledAt
+				if gotScheduledTime != c.expectedScheduleTime {
+					t.Errorf("got scheduled time of %v, want %v", gotScheduledTime, c.expectedScheduleTime)
+				}
+			})
+		}
+	})
 ```
 
 テーブルベースのテストはここではうまく機能し、要件が何であるかを明確に示しています。テーブルを実行し、`SpyBlindAlerter`をチェックして、アラートが正しい値でスケジュールされているかどうかを確認します。
@@ -263,10 +263,10 @@ func (cli *CLI) PlayPoker() {
     --- FAIL: TestCLI/it_schedules_printing_of_blind_values (0.00s)
 === RUN   TestCLI/it_schedules_printing_of_blind_values/100_scheduled_for_0s
         --- FAIL: TestCLI/it_schedules_printing_of_blind_values/100_scheduled_for_0s (0.00s)
-            CLI_test.go:71: got scheduled time of 5s, want 0s
+        	CLI_test.go:71: got scheduled time of 5s, want 0s
 === RUN   TestCLI/it_schedules_printing_of_blind_values/200_scheduled_for_10m0s
         --- FAIL: TestCLI/it_schedules_printing_of_blind_values/200_scheduled_for_10m0s (0.00s)
-            CLI_test.go:59: alert 1 was not scheduled [{5000000000 100}]
+        	CLI_test.go:59: alert 1 was not scheduled [{5000000000 100}]
 ```
 
 ## 通過するのに十分なコードを書く
@@ -274,15 +274,15 @@ func (cli *CLI) PlayPoker() {
 ```go
 func (cli *CLI) PlayPoker() {
 
-    blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
-    blindTime := 0 * time.Second
-    for _, blind := range blinds {
-        cli.alerter.ScheduleAlertAt(blindTime, blind)
-        blindTime = blindTime + 10*time.Minute
-    }
+	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
+	blindTime := 0 * time.Second
+	for _, blind := range blinds {
+		cli.alerter.ScheduleAlertAt(blindTime, blind)
+		blindTime = blindTime + 10*time.Minute
+	}
 
-    userInput := cli.readLine()
-    cli.playerStore.RecordWin(extractWinner(userInput))
+	userInput := cli.readLine()
+	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 ```
 
@@ -295,18 +295,18 @@ func (cli *CLI) PlayPoker() {
 
 ```go
 func (cli *CLI) PlayPoker() {
-    cli.scheduleBlindAlerts()
-    userInput := cli.readLine()
-    cli.playerStore.RecordWin(extractWinner(userInput))
+	cli.scheduleBlindAlerts()
+	userInput := cli.readLine()
+	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
 func (cli *CLI) scheduleBlindAlerts() {
-    blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
-    blindTime := 0 * time.Second
-    for _, blind := range blinds {
-        cli.alerter.ScheduleAlertAt(blindTime, blind)
-        blindTime = blindTime + 10*time.Minute
-    }
+	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
+	blindTime := 0 * time.Second
+	for _, blind := range blinds {
+		cli.alerter.ScheduleAlertAt(blindTime, blind)
+		blindTime = blindTime + 10*time.Minute
+	}
 }
 ```
 
@@ -314,20 +314,20 @@ func (cli *CLI) scheduleBlindAlerts() {
 
 ```go
 type scheduledAlert struct {
-    at time.Duration
-    amount int
+	at     time.Duration
+	amount int
 }
 
 func (s scheduledAlert) String() string {
-    return fmt.Sprintf("%d chips at %v", s.amount, s.at)
+	return fmt.Sprintf("%d chips at %v", s.amount, s.at)
 }
 
 type SpyBlindAlerter struct {
-    alerts []scheduledAlert
+	alerts []scheduledAlert
 }
 
 func (s *SpyBlindAlerter) ScheduleAlertAt(at time.Duration, amount int) {
-    s.alerts = append(s.alerts, scheduledAlert{at, amount})
+	s.alerts = append(s.alerts, scheduledAlert{at, amount})
 }
 ```
 
@@ -380,7 +380,7 @@ t.Run("it schedules printing of blind values", func(t *testing.T) {
 
 アプリケーションで使用できる`BlindAlerter`の実装を作成してみましょう。
 
-`BlindAlerter.go`を作成し、`BlindAlerter`インターフェースを移動して、以下の新しいものを追加します
+`blind_alerter.go`を作成し、`BlindAlerter`インターフェースを移動して、以下の新しいものを追加します
 
 ```go
 package poker
@@ -392,19 +392,19 @@ import (
 )
 
 type BlindAlerter interface {
-    ScheduleAlertAt(duration time.Duration, amount int)
+	ScheduleAlertAt(duration time.Duration, amount int)
 }
 
 type BlindAlerterFunc func(duration time.Duration, amount int)
 
 func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
-    a(duration, amount)
+	a(duration, amount)
 }
 
 func StdOutAlerter(duration time.Duration, amount int) {
-    time.AfterFunc(duration, func() {
-        fmt.Fprintf(os.Stdout, "Blind is now %d\n", amount)
-    })
+	time.AfterFunc(duration, func() {
+		fmt.Fprintf(os.Stdout, "Blind is now %d\n", amount)
+	})
 }
 ```
 
@@ -448,16 +448,16 @@ var dummyStdOut = &bytes.Buffer{}
 
 ```go
 t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
-    stdout := &bytes.Buffer{}
-    cli := poker.NewCLI(dummyPlayerStore, dummyStdIn, stdout, dummyBlindAlerter)
-    cli.PlayPoker()
+	stdout := &bytes.Buffer{}
+	cli := poker.NewCLI(dummyPlayerStore, dummyStdIn, stdout, dummyBlindAlerter)
+	cli.PlayPoker()
 
-    got := stdout.String()
-    want := "Please enter the number of players: "
+	got := stdout.String()
+	want := "Please enter the number of players: "
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 })
 ```
 
@@ -465,10 +465,10 @@ t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
 
 ## テストを実行してみます
 
-```text
+```
 ./CLI_test.go:38:27: too many arguments in call to poker.NewCLI
-    have (*poker.StubPlayerStore, *bytes.Buffer, *bytes.Buffer, *SpyBlindAlerter)
-    want (poker.PlayerStore, io.Reader, poker.BlindAlerter)
+	have (*poker.StubPlayerStore, *bytes.Buffer, *bytes.Buffer, *SpyBlindAlerter)
+	want (poker.PlayerStore, io.Reader, poker.BlindAlerter)
 ```
 
 ## テストを実行するための最小限のコードを記述し、失敗したテスト出力を確認します
@@ -481,16 +481,16 @@ func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter
 
 その他のテストは、`NewCLI`に渡される`io.Writer`がないため、コンパイルに失敗します。
 
-他のテスト用に「`dummyStdout`」を追加します。
+他のテスト用に「`dummyStdOut`」を追加します。
 
 新しいテストはそのように失敗するはずです。
 
-```text
+```
 === RUN   TestCLI
 --- FAIL: TestCLI (0.00s)
 === RUN   TestCLI/it_prompts_the_user_to_enter_the_number_of_players
     --- FAIL: TestCLI/it_prompts_the_user_to_enter_the_number_of_players (0.00s)
-        CLI_test.go:46: got '', want 'Please enter the number of players: '
+    	CLI_test.go:46: got '', want 'Please enter the number of players: '
 FAIL
 ```
 
@@ -500,19 +500,19 @@ FAIL
 
 ```go
 type CLI struct {
-    playerStore PlayerStore
-    in          *bufio.Scanner
-    out         io.Writer
-    alerter     BlindAlerter
+	playerStore PlayerStore
+	in          *bufio.Scanner
+	out         io.Writer
+	alerter     BlindAlerter
 }
 
 func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
-    return &CLI{
-        playerStore: store,
-        in:          bufio.NewScanner(in),
-        out:         out,
-        alerter:     alerter,
-    }
+	return &CLI{
+		playerStore: store,
+		in:          bufio.NewScanner(in),
+		out:         out,
+		alerter:     alerter,
+	}
 }
 ```
 
@@ -520,10 +520,10 @@ func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter
 
 ```go
 func (cli *CLI) PlayPoker() {
-    fmt.Fprint(cli.out, "Please enter the number of players: ")
-    cli.scheduleBlindAlerts()
-    userInput := cli.readLine()
-    cli.playerStore.RecordWin(extractWinner(userInput))
+	fmt.Fprint(cli.out, "Please enter the number of players: ")
+	cli.scheduleBlindAlerts()
+	userInput := cli.readLine()
+	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 ```
 
@@ -589,7 +589,7 @@ t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
 
 テストはコンパイルされ、失敗するはずですが、5人のプレーヤーに基づいてゲームをハードコーディングしているため、スケジュールされた時間が間違っていると報告されます。
 
-```text
+```
 === RUN   TestCLI
 --- FAIL: TestCLI (0.00s)
 === RUN   TestCLI/it_prompts_the_user_to_enter_the_number_of_players
@@ -606,25 +606,25 @@ t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
 
 ```go
 func (cli *CLI) PlayPoker() {
-    fmt.Fprint(cli.out, PlayerPrompt)
+	fmt.Fprint(cli.out, PlayerPrompt)
 
-    numberOfPlayers, _ := strconv.Atoi(cli.readLine())
+	numberOfPlayers, _ := strconv.Atoi(cli.readLine())
 
-    cli.scheduleBlindAlerts(numberOfPlayers)
+	cli.scheduleBlindAlerts(numberOfPlayers)
 
-    userInput := cli.readLine()
-    cli.playerStore.RecordWin(extractWinner(userInput))
+	userInput := cli.readLine()
+	cli.playerStore.RecordWin(extractWinner(userInput))
 }
 
 func (cli *CLI) scheduleBlindAlerts(numberOfPlayers int) {
-    blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
+	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
 
-    blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
-    blindTime := 0 * time.Second
-    for _, blind := range blinds {
-        cli.alerter.ScheduleAlertAt(blindTime, blind)
-        blindTime = blindTime + blindIncrement
-    }
+	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
+	blindTime := 0 * time.Second
+	for _, blind := range blinds {
+		cli.alerter.ScheduleAlertAt(blindTime, blind)
+		blindTime = blindTime + blindIncrement
+	}
 }
 ```
 
@@ -659,23 +659,23 @@ func (cli *CLI) scheduleBlindAlerts(numberOfPlayers int) {
 ```go
 // game.go
 type Game struct {
-    alerter BlindAlerter
-    store   PlayerStore
+	alerter BlindAlerter
+	store   PlayerStore
 }
 
 func (p *Game) Start(numberOfPlayers int) {
-    blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
+	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
 
-    blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
-    blindTime := 0 * time.Second
-    for _, blind := range blinds {
-        p.alerter.ScheduleAlertAt(blindTime, blind)
-        blindTime = blindTime + blindIncrement
-    }
+	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
+	blindTime := 0 * time.Second
+	for _, blind := range blinds {
+		p.alerter.ScheduleAlertAt(blindTime, blind)
+		blindTime = blindTime + blindIncrement
+	}
 }
 
 func (p *Game) Finish(winner string) {
-    p.store.RecordWin(winner)
+	p.store.RecordWin(winner)
 }
 
 // cli.go
@@ -686,39 +686,39 @@ type CLI struct {
 }
 
 func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
-    return &CLI{
-        in:  bufio.NewScanner(in),
-        out: out,
-        game: &Game{
-            alerter: alerter,
-            store:   store,
-        },
-    }
+	return &CLI{
+		in:  bufio.NewScanner(in),
+		out: out,
+		game: &Game{
+			alerter: alerter,
+			store:   store,
+		},
+	}
 }
 
 const PlayerPrompt = "Please enter the number of players: "
 
 func (cli *CLI) PlayPoker() {
-    fmt.Fprint(cli.out, PlayerPrompt)
+	fmt.Fprint(cli.out, PlayerPrompt)
 
-    numberOfPlayersInput := cli.readLine()
-    numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
+	numberOfPlayersInput := cli.readLine()
+	numberOfPlayers, _ := strconv.Atoi(strings.Trim(numberOfPlayersInput, "\n"))
 
-    cli.game.Start(numberOfPlayers)
+	cli.game.Start(numberOfPlayers)
 
-    winnerInput := cli.readLine()
-    winner := extractWinner(winnerInput)
+	winnerInput := cli.readLine()
+	winner := extractWinner(winnerInput)
 
-    cli.game.Finish(winner)
+	cli.game.Finish(winner)
 }
 
 func extractWinner(userInput string) string {
-    return strings.Replace(userInput, " wins\n", "", 1)
+	return strings.Replace(userInput, " wins\n", "", 1)
 }
 
 func (cli *CLI) readLine() string {
-    cli.in.Scan()
-    return cli.in.Text()
+	cli.in.Scan()
+	return cli.in.Text()
 }
 ```
 
@@ -748,11 +748,11 @@ func (cli *CLI) readLine() string {
 
 ```go
 func NewCLI(in io.Reader, out io.Writer, game *Game) *CLI {
-    return &CLI{
-        in:  bufio.NewScanner(in),
-        out: out,
-        game: game,
-    }
+	return &CLI{
+		in:   bufio.NewScanner(in),
+		out:  out,
+		game: game,
+	}
 }
 ```
 
@@ -766,10 +766,10 @@ func NewCLI(in io.Reader, out io.Writer, game *Game) *CLI {
 
 ```go
 func NewGame(alerter BlindAlerter, store PlayerStore) *Game {
-    return &Game{
-        alerter:alerter,
-        store:store,
-    }
+	return &Game{
+		alerter: alerter,
+		store:   store,
+	}
 }
 ```
 
@@ -801,54 +801,54 @@ cli.PlayPoker()
 
 ```go
 func TestGame_Start(t *testing.T) {
-    t.Run("schedules alerts on game start for 5 players", func(t *testing.T) {
-        blindAlerter := &poker.SpyBlindAlerter{}
-        game := poker.NewGame(blindAlerter, dummyPlayerStore)
+	t.Run("schedules alerts on game start for 5 players", func(t *testing.T) {
+		blindAlerter := &poker.SpyBlindAlerter{}
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
 
-        game.Start(5)
+		game.Start(5)
 
-        cases := []poker.ScheduledAlert{
-            {At: 0 * time.Second, Amount: 100},
-            {At: 10 * time.Minute, Amount: 200},
-            {At: 20 * time.Minute, Amount: 300},
-            {At: 30 * time.Minute, Amount: 400},
-            {At: 40 * time.Minute, Amount: 500},
-            {At: 50 * time.Minute, Amount: 600},
-            {At: 60 * time.Minute, Amount: 800},
-            {At: 70 * time.Minute, Amount: 1000},
-            {At: 80 * time.Minute, Amount: 2000},
-            {At: 90 * time.Minute, Amount: 4000},
-            {At: 100 * time.Minute, Amount: 8000},
-        }
+		cases := []poker.ScheduledAlert{
+			{At: 0 * time.Second, Amount: 100},
+			{At: 10 * time.Minute, Amount: 200},
+			{At: 20 * time.Minute, Amount: 300},
+			{At: 30 * time.Minute, Amount: 400},
+			{At: 40 * time.Minute, Amount: 500},
+			{At: 50 * time.Minute, Amount: 600},
+			{At: 60 * time.Minute, Amount: 800},
+			{At: 70 * time.Minute, Amount: 1000},
+			{At: 80 * time.Minute, Amount: 2000},
+			{At: 90 * time.Minute, Amount: 4000},
+			{At: 100 * time.Minute, Amount: 8000},
+		}
 
-        checkSchedulingCases(cases, t, blindAlerter)
-    })
+		checkSchedulingCases(cases, t, blindAlerter)
+	})
 
-    t.Run("schedules alerts on game start for 7 players", func(t *testing.T) {
-        blindAlerter := &poker.SpyBlindAlerter{}
-        game := poker.NewGame(blindAlerter, dummyPlayerStore)
+	t.Run("schedules alerts on game start for 7 players", func(t *testing.T) {
+		blindAlerter := &poker.SpyBlindAlerter{}
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
 
-        game.Start(7)
+		game.Start(7)
 
-        cases := []poker.ScheduledAlert{
-            {At: 0 * time.Second, Amount: 100},
-            {At: 12 * time.Minute, Amount: 200},
-            {At: 24 * time.Minute, Amount: 300},
-            {At: 36 * time.Minute, Amount: 400},
-        }
+		cases := []poker.ScheduledAlert{
+			{At: 0 * time.Second, Amount: 100},
+			{At: 12 * time.Minute, Amount: 200},
+			{At: 24 * time.Minute, Amount: 300},
+			{At: 36 * time.Minute, Amount: 400},
+		}
 
-        checkSchedulingCases(cases, t, blindAlerter)
-    })
+		checkSchedulingCases(cases, t, blindAlerter)
+	})
 
 }
 
 func TestGame_Finish(t *testing.T) {
-    store := &poker.StubPlayerStore{}
-    game := poker.NewGame(dummyBlindAlerter, store)
-    winner := "Ruth"
+	store := &poker.StubPlayerStore{}
+	game := poker.NewGame(dummyBlindAlerter, store)
+	winner := "Ruth"
 
-    game.Finish(winner)
-    poker.AssertPlayerWin(t, store, winner)
+	game.Finish(winner)
+	poker.AssertPlayerWin(t, store, winner)
 }
 ```
 
@@ -869,8 +869,8 @@ CLIテストを簡略化して、意図した責任をより明確に反映で�
 
 ```go
 type Game interface {
-    Start(numberOfPlayers int)
-    Finish(winner string)
+	Start(numberOfPlayers int)
+	Finish(winner string)
 }
 ```
 
@@ -884,16 +884,16 @@ type Game interface {
 
 ```go
 type GameSpy struct {
-    StartedWith  int
-    FinishedWith string
+	StartedWith  int
+	FinishedWith string
 }
 
 func (g *GameSpy) Start(numberOfPlayers int) {
-    g.StartedWith = numberOfPlayers
+	g.StartedWith = numberOfPlayers
 }
 
 func (g *GameSpy) Finish(winner string) {
-    g.FinishedWith = winner
+	g.FinishedWith = winner
 }
 ```
 
@@ -903,25 +903,25 @@ func (g *GameSpy) Finish(winner string) {
 残りを自分で試して、行き詰まった場合はソースコードを確認してください。
 
 ```go
-    t.Run("it prompts the user to enter the number of players and starts the game", func(t *testing.T) {
-        stdout := &bytes.Buffer{}
-        in := strings.NewReader("7\n")
-        game := &GameSpy{}
+	t.Run("it prompts the user to enter the number of players and starts the game", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		in := strings.NewReader("7\n")
+		game := &GameSpy{}
 
-        cli := poker.NewCLI(in, stdout, game)
-        cli.PlayPoker()
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
 
-        gotPrompt := stdout.String()
-        wantPrompt := poker.PlayerPrompt
+		gotPrompt := stdout.String()
+		wantPrompt := poker.PlayerPrompt
 
-        if gotPrompt != wantPrompt {
-            t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
-        }
+		if gotPrompt != wantPrompt {
+			t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
+		}
 
-        if game.StartedWith != 7 {
-            t.Errorf("wanted Start called with 7 but got %d", game.StartedWith)
-        }
-    })
+		if game.StartedWith != 7 {
+			t.Errorf("wanted Start called with 7 but got %d", game.StartedWith)
+		}
+	})
 ```
 
 懸念事項を明確に分離したので、`CLI`でIOの周辺のケースをチェックするのが簡単になります。
@@ -954,7 +954,7 @@ t.Run("it prints an error when a non numeric value is entered and does not start
 
 ## テストを実行してみます
 
-```text
+```
 === RUN   TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game
     --- FAIL: TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game (0.00s)
         CLI_test.go:62: game should not have started
@@ -968,7 +968,7 @@ t.Run("it prints an error when a non numeric value is entered and does not start
 numberOfPlayers, err := strconv.Atoi(cli.readLine())
 
 if err != nil {
-    return
+	return
 }
 ```
 
@@ -984,7 +984,7 @@ gotPrompt := stdout.String()
 wantPrompt := poker.PlayerPrompt + "you're so silly"
 
 if gotPrompt != wantPrompt {
-    t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
+	t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
 }
 ```
 
@@ -994,7 +994,7 @@ if gotPrompt != wantPrompt {
 
 ## テストを実行してみます
 
-```text
+```
 === RUN   TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game
     --- FAIL: TestCLI/it_prints_an_error_when_a_non_numeric_value_is_entered_and_does_not_start_the_game (0.00s)
         CLI_test.go:70: got 'Please enter the number of players: ', want 'Please enter the number of players: you're so silly'
@@ -1006,8 +1006,8 @@ if gotPrompt != wantPrompt {
 
 ```go
 if err != nil {
-    fmt.Fprint(cli.out, "you're so silly")
-    return
+	fmt.Fprint(cli.out, "you're so silly")
+	return
 }
 ```
 
@@ -1029,12 +1029,12 @@ const BadPlayerInputErrMsg = "Bad value received for number of players, please t
 
 ```go
 func assertMessagesSentToUser(t testing.TB, stdout *bytes.Buffer, messages ...string) {
-    t.Helper()
-    want := strings.Join(messages, "")
-    got := stdout.String()
-    if got != want {
-        t.Errorf("got %q sent to stdout but expected %+v", got, messages)
-    }
+	t.Helper()
+	want := strings.Join(messages, "")
+	got := stdout.String()
+	if got != want {
+		t.Errorf("got %q sent to stdout but expected %+v", got, messages)
+	}
 }
 ```
 
@@ -1053,44 +1053,44 @@ func assertMessagesSentToUser(t testing.TB, stdout *bytes.Buffer, messages ...st
 ```go
 func TestCLI(t *testing.T) {
 
-    t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t *testing.T) {
-        game := &GameSpy{}
-        stdout := &bytes.Buffer{}
+	t.Run("start game with 3 players and finish game with 'Chris' as winner", func(t *testing.T) {
+		game := &GameSpy{}
+		stdout := &bytes.Buffer{}
 
-        in := userSends("3", "Chris wins")
-        cli := poker.NewCLI(in, stdout, game)
+		in := userSends("3", "Chris wins")
+		cli := poker.NewCLI(in, stdout, game)
 
-        cli.PlayPoker()
+		cli.PlayPoker()
 
-        assertMessagesSentToUser(t, stdout, poker.PlayerPrompt)
-        assertGameStartedWith(t, game, 3)
-        assertFinishCalledWith(t, game, "Chris")
-    })
+		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt)
+		assertGameStartedWith(t, game, 3)
+		assertFinishCalledWith(t, game, "Chris")
+	})
 
-    t.Run("start game with 8 players and record 'Cleo' as winner", func(t *testing.T) {
-        game := &GameSpy{}
+	t.Run("start game with 8 players and record 'Cleo' as winner", func(t *testing.T) {
+		game := &GameSpy{}
 
-        in := userSends("8", "Cleo wins")
-        cli := poker.NewCLI(in, dummyStdOut, game)
+		in := userSends("8", "Cleo wins")
+		cli := poker.NewCLI(in, dummyStdOut, game)
 
-        cli.PlayPoker()
+		cli.PlayPoker()
 
-        assertGameStartedWith(t, game, 8)
-        assertFinishCalledWith(t, game, "Cleo")
-    })
+		assertGameStartedWith(t, game, 8)
+		assertFinishCalledWith(t, game, "Cleo")
+	})
 
-    t.Run("it prints an error when a non numeric value is entered and does not start the game", func(t *testing.T) {
-        game := &GameSpy{}
+	t.Run("it prints an error when a non numeric value is entered and does not start the game", func(t *testing.T) {
+		game := &GameSpy{}
 
-        stdout := &bytes.Buffer{}
-        in := userSends("pies")
+		stdout := &bytes.Buffer{}
+		in := userSends("pies")
 
-        cli := poker.NewCLI(in, stdout, game)
-        cli.PlayPoker()
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
 
-        assertGameNotStarted(t, game)
-        assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, poker.BadPlayerInputErrMsg)
-    })
+		assertGameNotStarted(t, game)
+		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, poker.BadPlayerInputErrMsg)
+	})
 }
 ```
 
@@ -1146,11 +1146,11 @@ func TestCLI(t *testing.T) {
 
 ## インターフェースを実装する関数の例
 
-1つのメソッドでインターフェースを定義するとき、ユーザーが関数だけでインターフェースを実装できるように、それを補完するために「`MyInterfaceFunc`」型を定義することを検討することができます
+1つのメソッドでインターフェースを定義するとき、ユーザーが関数だけでインターフェースを実装できるように、それを補完するために「`MyInterfaceFunc`」型を定義することを検討することができます。
 
 ```go
 type BlindAlerter interface {
-    ScheduleAlertAt(duration time.Duration, amount int)
+	ScheduleAlertAt(duration time.Duration, amount int)
 }
 
 // BlindAlerterFunc allows you to implement BlindAlerter with a function
@@ -1158,11 +1158,11 @@ type BlindAlerterFunc func(duration time.Duration, amount int)
 
 // ScheduleAlertAt is BlindAlerterFunc implementation of BlindAlerter
 func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
-    a(duration, amount)
+	a(duration, amount)
 }
 ```
 
-こうすることで、あなたのライブラリを利用する人は、関数だけであなたのインタフェースを実装することができます。彼らは [Type Conversion](https://go.dev/tour/basics/13) を使って関数を `BlindAlerterFunc` に変換し、それを BlindAlerter として使うことができます (`BlindAlerterFunc` は `BlindAlerter` を実装しているので)
+こうすることで、あなたのライブラリを利用する人は、関数だけであなたのインタフェースを実装することができます。彼らは [Type Conversion](https://go.dev/tour/basics/13) を使って関数を `BlindAlerterFunc` に変換し、それを BlindAlerter として使うことができます (`BlindAlerterFunc` は `BlindAlerter` を実装しているので)。
 
 ```go
 game := poker.NewTexasHoldem(poker.BlindAlerterFunc(poker.StdOutAlerter), store)

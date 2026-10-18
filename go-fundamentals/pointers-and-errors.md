@@ -4,7 +4,7 @@ description: Pointers & errors
 
 # ポインタとエラー
 
-[**この章のすべてのコードはここにあります**](https://github.com/andmorefine/learn-go-with-tests/tree/master/pointers)
+[**この章のすべてのコードはここにあります**](https://github.com/quii/learn-go-with-tests/tree/main/pointers)
 
 前のセクションでコンセプトに関連する、いくつかの値を取得できる「構造体」について学びました。
 
@@ -19,20 +19,20 @@ description: Pointers & errors
 ```go
 func TestWallet(t *testing.T) {
 
-    wallet := Wallet{}
+	wallet := Wallet{}
 
-    wallet.Deposit(10)
+	wallet.Deposit(10)
 
-    got := wallet.Balance()
-    want := 10
+	got := wallet.Balance()
+	want := 10
 
-    if got != want {
-        t.Errorf("got %d want %d", got, want)
-    }
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
 }
 ```
 
-[前の例](structs-methods-and-interfaces.md)では、フィールド名を使用してフィールドに直接アクセスしましたが、非常に安全なウォレットでは、内部状態を他の世界に公開したくありません。メソッドを介してアクセスを制御したい。
+[前の例](structs-methods-and-interfaces.md)では、フィールド名を使用してフィールドに直接アクセスしましたが、 _非常に安全なウォレット_ では、内部状態を外の世界に公開したくありません。メソッドを介してアクセスを制御したいのです。
 
 ## テストを実行してみます
 
@@ -43,12 +43,12 @@ func TestWallet(t *testing.T) {
 コンパイラは`Wallet`が何であるかを知らないので、それを伝えましょう。
 
 ```go
-type Wallet struct { }
+type Wallet struct{}
 ```
 
 これで財布ができました。もう一度テストを実行してください
 
-```go
+```
 ./wallet_test.go:9:8: wallet.Deposit undefined (type Wallet has no field or method Deposit)
 ./wallet_test.go:11:15: wallet.Balance undefined (type Wallet has no field or method Balance)
 ```
@@ -64,7 +64,7 @@ func (w Wallet) Deposit(amount int) {
 }
 
 func (w Wallet) Balance() int {
-    return 0
+	return 0
 }
 ```
 
@@ -80,7 +80,7 @@ func (w Wallet) Balance() int {
 
 ```go
 type Wallet struct {
-    balance int
+	balance int
 }
 ```
 
@@ -88,69 +88,66 @@ Goでは、シンボル（変数`var`、タイプ`type`、関数`func`）が小�
 
 私たちのケースでは、メソッドがこの値を操作できるようにしたいが、他の誰も操作できないようにしたい。
 
-In our case we want our methods to be able to manipulate this value but no one else.
-
 「レシーバー`receiver`」変数を使用して、構造体の内部の`balance`フィールドにアクセスできることを覚えておいてください。
 
 ```go
 func (w Wallet) Deposit(amount int) {
-    w.balance += amount
+	w.balance += amount
 }
 
 func (w Wallet) Balance() int {
-    return w.balance
+	return w.balance
 }
 ```
 
-フィンテックでのキャリアが確保されたら、テストを実行し、合格したテストを浴びます
+フィンテックでのキャリアが確保されたら、テストスイートを実行し、合格したテストを浴びます
 
 `wallet_test.go:15: got 0 want 10`
 
-### ????
+### 何かがおかしい
 
 これは混乱を招きます。
 コードは機能するように見え、新しい金額を残高に追加し、次に`balance`メソッドはその現在の状態を返す必要があります。
 
-Goでは、**関数またはメソッドを呼び出すと、引数は** _ **コピーされます**。
+Goでは、**関数またはメソッドを呼び出すと、引数は _コピーされます_**。
 
 `func (w Wallet) Deposit(amount int)`を呼び出すとき、 `w`はメソッドの呼び出し元のコピーです。
 
-あまりにもコンピュータサイエンシーにならずに、ウォレットのように値を作成すると、メモリのどこかに保存されます。そのメモリのビットの _address_ は、 `＆myVal`で確認できます。
+あまりにもコンピュータサイエンシーにならずに、ウォレットのように値を作成すると、メモリのどこかに保存されます。そのメモリのビットの _アドレス_ は、 `&myVal`で確認できます。
 
 コードにいくつかのプリントを追加して実験します
 
 ```go
 func TestWallet(t *testing.T) {
 
-    wallet := Wallet{}
+	wallet := Wallet{}
 
-    wallet.Deposit(10)
+	wallet.Deposit(10)
 
-    got := wallet.Balance()
+	got := wallet.Balance()
 
-    fmt.Printf("address of balance in test is %v \n", &wallet.balance)
+	fmt.Printf("address of balance in test is %p \n", &wallet.balance)
 
-    want := 10
+	want := 10
 
-    if got != want {
-        t.Errorf("got %d want %d", got, want)
-    }
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
 }
 ```
 
 ```go
 func (w Wallet) Deposit(amount int) {
-    fmt.Printf("address of balance in Deposit is %v \n", &w.balance)
-    w.balance += amount
+	fmt.Printf("address of balance in Deposit is %p \n", &w.balance)
+	w.balance += amount
 }
 ```
 
-`\n`エスケープ文字は、メモリアドレスの出力後に新しい行を出力します。
-`&`シンボルのアドレスを持つものへのポインタを取得します。
+`%p`プレースホルダーはメモリアドレスを先頭に`0x`の付いた16進表記で出力し、`\n`エスケープ文字は改行を出力します。何かのポインタ（メモリアドレス）は、シンボルの先頭に`&`文字を置くことで取得できることに注意してください。
 
 テストを再実行します
 
-```text
+```
 address of balance in Deposit is 0xc420012268
 address of balance in test is 0xc420012260
 ```
@@ -159,17 +156,17 @@ address of balance in test is 0xc420012260
 したがって、コード内の`balances`の値を変更する場合、テストから得られたもののコピーに取り組んでいます。
 したがって、テストのバランスは変更されません。
 
-これは _pointers_ で修正できます。
-[ポインタ]（https://gobyexample.com/pointers）をいくつかの値に _point_ させてから、それらを変更させます。
-したがって、ウォレットのコピーを取得するのではなく、ウォレットへのポインタを取得して、変更できるようにします。
+これは _ポインタ_ で修正できます。
+[ポインタ](https://gobyexample.com/pointers)を使うと、いくつかの値を _指し示し_ 、それらを変更できます。
+したがって、ウォレット全体のコピーを取得するのではなく、代わりにそのウォレットへのポインタを取得して、その中の元の値を変更できるようにします。
 
 ```go
 func (w *Wallet) Deposit(amount int) {
-    w.balance += amount
+	w.balance += amount
 }
 
 func (w *Wallet) Balance() int {
-    return w.balance
+	return w.balance
 }
 ```
 
@@ -182,13 +179,13 @@ func (w *Wallet) Balance() int {
 
 ```go
 func (w *Wallet) Balance() int {
-    return (*w).balance
+	return (*w).balance
 }
 ```
 
 一見オブジェクトに直接対処したようです。実際、 `(*w)`を使用した上記のコードは完全に有効です。
 ただし、Goの作成者はこの表記を扱いにくいと判断したため、この言語では、明示的な逆参照なしで`w.balance`を記述できます。
-構造体へのこれらのポインタには、独自の名前 _struct pointers_ があり、[自動的に逆参照されます](https://golang.org/ref/spec#Method_values)。
+構造体へのこれらのポインタには、独自の名前 _構造体ポインタ（struct pointers）_ があり、[自動的に逆参照されます](https://golang.org/ref/spec#Method_values)。
 
 技術的には、バランスのコピーを取ることは問題ないので、ポインターレシーバーを使用するために`Balance`を変更する必要はありません。
 ただし、慣例では、一貫性を保つために、メソッドレシーバーのタイプを同じに保つ必要があります。
@@ -209,36 +206,36 @@ Goでは、既存のタイプから新しいタイプを作成できます。
 type Bitcoin int
 
 type Wallet struct {
-    balance Bitcoin
+	balance Bitcoin
 }
 
 func (w *Wallet) Deposit(amount Bitcoin) {
-    w.balance += amount
+	w.balance += amount
 }
 
 func (w *Wallet) Balance() Bitcoin {
-    return w.balance
+	return w.balance
 }
 ```
 
 ```go
 func TestWallet(t *testing.T) {
 
-    wallet := Wallet{}
+	wallet := Wallet{}
 
-    wallet.Deposit(Bitcoin(10))
+	wallet.Deposit(Bitcoin(10))
 
-    got := wallet.Balance()
+	got := wallet.Balance()
 
-    want := Bitcoin(10)
+	want := Bitcoin(10)
 
-    if got != want {
-        t.Errorf("got %d want %d", got, want)
-    }
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
 }
 ```
 
-`Bitcoin`を作成するには、`Bitcoin(999) `という構文を使用します。
+`Bitcoin`を作成するには、`Bitcoin(999)`という構文を使用します。
 
 これにより、新しい型を作成し、それらに対して _methods_ を宣言できます。
 これは、既存のタイプの上にドメイン固有の機能を追加する場合に非常に役立ちます。
@@ -247,26 +244,40 @@ func TestWallet(t *testing.T) {
 
 ```go
 type Stringer interface {
-        String() string
+	String() string
 }
 ```
 
-このインターフェイスは `fmt`パッケージで定義されており、`%s`形式の文字列を _prints_ で使用したときにタイプがどのように印刷されるかを定義できます。
+このインターフェイスは `fmt`パッケージで定義されており、`%s`形式の文字列で出力したときにタイプがどのように印刷されるかを定義できます。
 
 ```go
 func (b Bitcoin) String() string {
-    return fmt.Sprintf("%d BTC", b)
+	return fmt.Sprintf("%d BTC", b)
 }
 ```
 
-ご覧のとおり、「型」エイリアスでメソッドを作成するための構文は、構造体での構文と同じです。
+ご覧のとおり、型宣言でメソッドを作成するための構文は、構造体での構文と同じです。
+
+ここでは規律が欠けていました。最初にテストを書かずにメソッドを追加してしまったのです。それでも構いません。私たちはいつも聖人君子というわけではありませんから。しかし、見逃してしまうべきでもありません。`go test -cover`を実行すれば`String`がカバーされていないことがわかり、後からでもテストする価値があるかを考え直す良いきっかけになります。カバレッジ100%をそれ自体のために追い求めるべきではありませんが、今回の`String`には固定しておく価値のある独自のロジック（`fmt.Sprintf`）があるので、テストを追加しましょう。
+
+```go
+t.Run("Bitcoin String", func(t *testing.T) {
+	btc := Bitcoin(10)
+	got := btc.String()
+	want := "10 BTC"
+
+	if got != want {
+		t.Errorf("got %s want %s", got, want)
+	}
+})
+```
 
 次にテストフォーマット文字列を更新して、代わりに `String()`を使用する必要があります。
 
 ```go
-    if got != want {
-        t.Errorf("got %s want %s", got, want)
-    }
+if got != want {
+	t.Errorf("got %s want %s", got, want)
+}
 ```
 
 この動作を確認するには、意図的にテストを中断して、確認できるようにします。
@@ -284,33 +295,33 @@ func (b Bitcoin) String() string {
 ```go
 func TestWallet(t *testing.T) {
 
-    t.Run("Deposit", func(t *testing.T) {
-        wallet := Wallet{}
+	t.Run("deposit", func(t *testing.T) {
+		wallet := Wallet{}
 
-        wallet.Deposit(Bitcoin(10))
+		wallet.Deposit(Bitcoin(10))
 
-        got := wallet.Balance()
+		got := wallet.Balance()
 
-        want := Bitcoin(10)
+		want := Bitcoin(10)
 
-        if got != want {
-            t.Errorf("got %s want %s", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %s want %s", got, want)
+		}
+	})
 
-    t.Run("Withdraw", func(t *testing.T) {
-        wallet := Wallet{balance: Bitcoin(20)}
+	t.Run("withdraw", func(t *testing.T) {
+		wallet := Wallet{balance: Bitcoin(20)}
 
-        wallet.Withdraw(Bitcoin(10))
+		wallet.Withdraw(Bitcoin(10))
 
-        got := wallet.Balance()
+		got := wallet.Balance()
 
-        want := Bitcoin(10)
+		want := Bitcoin(10)
 
-        if got != want {
-            t.Errorf("got %s want %s", got, want)
-        }
-    })
+		if got != want {
+			t.Errorf("got %s want %s", got, want)
+		}
+	})
 }
 ```
 
@@ -332,7 +343,7 @@ func (w *Wallet) Withdraw(amount Bitcoin) {
 
 ```go
 func (w *Wallet) Withdraw(amount Bitcoin) {
-    w.balance -= amount
+	w.balance -= amount
 }
 ```
 
@@ -343,26 +354,26 @@ func (w *Wallet) Withdraw(amount Bitcoin) {
 ```go
 func TestWallet(t *testing.T) {
 
-    assertBalance := func(t *testing.T, wallet Wallet, want Bitcoin) {
-        t.Helper()
-        got := wallet.Balance()
+	assertBalance := func(t testing.TB, wallet Wallet, want Bitcoin) {
+		t.Helper()
+		got := wallet.Balance()
 
-        if got != want {
-            t.Errorf("got %s want %s", got, want)
-        }
-    }
+		if got != want {
+			t.Errorf("got %s want %s", got, want)
+		}
+	}
 
-    t.Run("Deposit", func(t *testing.T) {
-        wallet := Wallet{}
-        wallet.Deposit(Bitcoin(10))
-        assertBalance(t, wallet, Bitcoin(10))
-    })
+	t.Run("deposit", func(t *testing.T) {
+		wallet := Wallet{}
+		wallet.Deposit(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-    t.Run("Withdraw", func(t *testing.T) {
-        wallet := Wallet{balance: Bitcoin(20)}
-        wallet.Withdraw(Bitcoin(10))
-        assertBalance(t, wallet, Bitcoin(10))
-    })
+	t.Run("withdraw", func(t *testing.T) {
+		wallet := Wallet{balance: Bitcoin(20)}
+		wallet.Withdraw(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
 }
 ```
@@ -379,16 +390,16 @@ Goでは、エラーを示したい場合、呼び出し側がチェックして
 ## 最初にテストを書く
 
 ```go
-t.Run("Withdraw insufficient funds", func(t *testing.T) {
-    startingBalance := Bitcoin(20)
-    wallet := Wallet{startingBalance}
-    err := wallet.Withdraw(Bitcoin(100))
+t.Run("withdraw insufficient funds", func(t *testing.T) {
+	startingBalance := Bitcoin(20)
+	wallet := Wallet{startingBalance}
+	err := wallet.Withdraw(Bitcoin(100))
 
-    assertBalance(t, wallet, startingBalance)
+	assertBalance(t, wallet, startingBalance)
 
-    if err == nil {
-        t.Error("wanted an error but didn't get one")
-    }
+	if err == nil {
+		t.Error("wanted an error but didn't get one")
+	}
 })
 ```
 
@@ -403,7 +414,7 @@ t.Run("Withdraw insufficient funds", func(t *testing.T) {
 `null`のように`nil`である値にアクセスしようとすると、**ランタイムパニック**がスローされます。
 これは悪いです！ `nil`をチェックすることを確認する必要があります。
 
-## テストを試して実行する
+## テストを実行してみます
 
 `./wallet_test.go:31:25: wallet.Withdraw(Bitcoin(100)) used as value`
 
@@ -414,8 +425,8 @@ t.Run("Withdraw insufficient funds", func(t *testing.T) {
 
 ```go
 func (w *Wallet) Withdraw(amount Bitcoin) error {
-    w.balance -= amount
-    return nil
+	w.balance -= amount
+	return nil
 }
 ```
 
@@ -428,12 +439,12 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 ```go
 func (w *Wallet) Withdraw(amount Bitcoin) error {
 
-    if amount > w.balance {
-        return errors.New("oh no")
-    }
+	if amount > w.balance {
+		return errors.New("oh no")
+	}
 
-    w.balance -= amount
-    return nil
+	w.balance -= amount
+	return nil
 }
 ```
 
@@ -443,26 +454,27 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 
 ## リファクタリング♪
 
-テストを読みやすくするために、エラーチェック用のクイックテストヘルパーを作成しましょう。
+テストの可読性を高めるために、エラーチェック用のクイックテストヘルパーを作成しましょう。
 
 ```go
-assertError := func(t *testing.T, err error) {
-    t.Helper()
-    if err == nil {
-        t.Error("wanted an error but didn't get one")
-    }
+assertError := func(t testing.TB, err error) {
+	t.Helper()
+	if err == nil {
+		t.Error("wanted an error but didn't get one")
+	}
 }
 ```
 
 そして、私たちのテストでは
 
 ```go
-t.Run("Withdraw insufficient funds", func(t *testing.T) {
-    wallet := Wallet{Bitcoin(20)}
-    err := wallet.Withdraw(Bitcoin(100))
+t.Run("withdraw insufficient funds", func(t *testing.T) {
+	startingBalance := Bitcoin(20)
+	wallet := Wallet{startingBalance}
+	err := wallet.Withdraw(Bitcoin(100))
 
-    assertBalance(t, wallet, Bitcoin(20))
-    assertError(t, err)
+	assertError(t, err)
+	assertBalance(t, wallet, startingBalance)
 })
 ```
 
@@ -470,33 +482,36 @@ t.Run("Withdraw insufficient funds", func(t *testing.T) {
 
 エラーが最終的にユーザーに返されると仮定して、エラーの存在だけでなく、何らかのエラーメッセージを評価するようにテストを更新しましょう。
 
-## Write the test first
+## 最初にテストを書く
 
 比較する `string`のヘルパーを更新します。
 
 ```go
-assertError := func(t *testing.T, got error, want string) {
-    t.Helper()
-    if got == nil {
-        t.Fatal("didn't get an error but wanted one")
-    }
+assertError := func(t testing.TB, got error, want string) {
+	t.Helper()
 
-    if got.Error() != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got == nil {
+		t.Fatal("didn't get an error but wanted one")
+	}
+
+	if got.Error() != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 ```
+
+ご覧のとおり、`Error`は`.Error()`メソッドで文字列に変換できます。ここでは、欲しい文字列と比較するためにそうしています。また、`nil`に対して`.Error()`を呼び出さないように、エラーが`nil`でないことも確認しています。
 
 そして、発信者を更新します。
 
 ```go
-t.Run("Withdraw insufficient funds", func(t *testing.T) {
-    startingBalance := Bitcoin(20)
-    wallet := Wallet{startingBalance}
-    err := wallet.Withdraw(Bitcoin(100))
+t.Run("withdraw insufficient funds", func(t *testing.T) {
+	startingBalance := Bitcoin(20)
+	wallet := Wallet{startingBalance}
+	err := wallet.Withdraw(Bitcoin(100))
 
-    assertBalance(t, wallet, startingBalance)
-    assertError(t, err, "cannot withdraw, insufficient funds")
+	assertError(t, err, "cannot withdraw, insufficient funds")
+	assertBalance(t, wallet, startingBalance)
 })
 ```
 
@@ -513,12 +528,12 @@ t.Run("Withdraw insufficient funds", func(t *testing.T) {
 ```go
 func (w *Wallet) Withdraw(amount Bitcoin) error {
 
-    if amount > w.balance {
-        return errors.New("cannot withdraw, insufficient funds")
-    }
+	if amount > w.balance {
+		return errors.New("cannot withdraw, insufficient funds")
+	}
 
-    w.balance -= amount
-    return nil
+	w.balance -= amount
+	return nil
 }
 ```
 
@@ -537,12 +552,12 @@ var ErrInsufficientFunds = errors.New("cannot withdraw, insufficient funds")
 
 func (w *Wallet) Withdraw(amount Bitcoin) error {
 
-    if amount > w.balance {
-        return ErrInsufficientFunds
-    }
+	if amount > w.balance {
+		return ErrInsufficientFunds
+	}
 
-    w.balance -= amount
-    return nil
+	w.balance -= amount
+	return nil
 }
 ```
 
@@ -555,45 +570,45 @@ func (w *Wallet) Withdraw(amount Bitcoin) error {
 ```go
 func TestWallet(t *testing.T) {
 
-    t.Run("Deposit", func(t *testing.T) {
-        wallet := Wallet{}
-        wallet.Deposit(Bitcoin(10))
-        assertBalance(t, wallet, Bitcoin(10))
-    })
+	t.Run("deposit", func(t *testing.T) {
+		wallet := Wallet{}
+		wallet.Deposit(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-    t.Run("Withdraw with funds", func(t *testing.T) {
-        wallet := Wallet{Bitcoin(20)}
-        wallet.Withdraw(Bitcoin(10))
-        assertBalance(t, wallet, Bitcoin(10))
-    })
+	t.Run("withdraw with funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		wallet.Withdraw(Bitcoin(10))
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-    t.Run("Withdraw insufficient funds", func(t *testing.T) {
-        wallet := Wallet{Bitcoin(20)}
-        err := wallet.Withdraw(Bitcoin(100))
+	t.Run("withdraw insufficient funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(100))
 
-        assertBalance(t, wallet, Bitcoin(20))
-        assertError(t, err, ErrInsufficientFunds)
-    })
+		assertError(t, err, ErrInsufficientFunds)
+		assertBalance(t, wallet, Bitcoin(20))
+	})
 }
 
-func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
-    t.Helper()
-    got := wallet.Balance()
+func assertBalance(t testing.TB, wallet Wallet, want Bitcoin) {
+	t.Helper()
+	got := wallet.Balance()
 
-    if got != want {
-        t.Errorf("got %q want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q want %q", got, want)
+	}
 }
 
-func assertError(t *testing.T, got error, want error) {
-    t.Helper()
-    if got == nil {
-        t.Fatal("didn't get an error but wanted one")
-    }
+func assertError(t testing.TB, got, want error) {
+	t.Helper()
+	if got == nil {
+		t.Fatal("didn't get an error but wanted one")
+	}
 
-    if got != want {
-        t.Errorf("got %q, want %q", got, want)
-    }
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
 }
 ```
 
@@ -601,7 +616,7 @@ func assertError(t *testing.T, got error, want error) {
 
 ヘルパーをメインのテスト関数から移動したので、誰かがファイルを開いたときに、ヘルパーではなく、最初にアサーションの読み取りを開始できます。
 
-テストのもう1つの便利な特性は、コードの _real_ の使用法を理解するのに役立ち、同情的なコードを作成できることです。ここで、開発者は単にコードを呼び出して、 `ErrInsufficientFunds`に対して等号チェックを行い、それに応じて行動できることがわかります。
+テストのもう1つの便利な特性は、コードの _実際の_ 使用法を理解するのに役立ち、同情的なコードを作成できることです。ここで、開発者は単にコードを呼び出して、 `ErrInsufficientFunds`に対して等号チェックを行い、それに応じて行動できることがわかります。
 
 ### 未チェックのエラー
 
@@ -609,7 +624,7 @@ Goコンパイラーは大いに役立ちますが、まだ見逃していて、
 
 テストしていないシナリオが1つあります。これを見つけるには、ターミナルで次のコマンドを実行して、Goで使用できる多くのリンターの1つである`errcheck`をインストールします。
 
-`go get -u github.com/kisielk/errcheck`
+`go install github.com/kisielk/errcheck@latest`
 
 次に、コードを含むディレクトリ内で `errcheck .`を実行します。
 
@@ -625,64 +640,104 @@ Goコンパイラーは大いに役立ちますが、まだ見逃していて、
 ```go
 func TestWallet(t *testing.T) {
 
-    t.Run("Deposit", func(t *testing.T) {
-        wallet := Wallet{}
-        wallet.Deposit(Bitcoin(10))
+	t.Run("deposit", func(t *testing.T) {
+		wallet := Wallet{}
+		wallet.Deposit(Bitcoin(10))
 
-        assertBalance(t, wallet, Bitcoin(10))
-    })
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-    t.Run("Withdraw with funds", func(t *testing.T) {
-        wallet := Wallet{Bitcoin(20)}
-        err := wallet.Withdraw(Bitcoin(10))
+	t.Run("withdraw with funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(10))
 
-        assertBalance(t, wallet, Bitcoin(10))
-        assertNoError(t, err)
-    })
+		assertNoError(t, err)
+		assertBalance(t, wallet, Bitcoin(10))
+	})
 
-    t.Run("Withdraw insufficient funds", func(t *testing.T) {
-        wallet := Wallet{Bitcoin(20)}
-        err := wallet.Withdraw(Bitcoin(100))
+	t.Run("withdraw insufficient funds", func(t *testing.T) {
+		wallet := Wallet{Bitcoin(20)}
+		err := wallet.Withdraw(Bitcoin(100))
 
-        assertBalance(t, wallet, Bitcoin(20))
-        assertError(t, err, ErrInsufficientFunds)
-    })
+		assertError(t, err, ErrInsufficientFunds)
+		assertBalance(t, wallet, Bitcoin(20))
+	})
 }
 
-func assertBalance(t *testing.T, wallet Wallet, want Bitcoin) {
-    t.Helper()
-    got := wallet.Balance()
+func assertBalance(t testing.TB, wallet Wallet, want Bitcoin) {
+	t.Helper()
+	got := wallet.Balance()
 
-    if got != want {
-        t.Errorf("got %s want %s", got, want)
-    }
+	if got != want {
+		t.Errorf("got %s want %s", got, want)
+	}
 }
 
-func assertNoError(t *testing.T, got error) {
-    t.Helper()
-    if got != nil {
-        t.Fatal("got an error but didn't want one")
-    }
+func assertNoError(t testing.TB, got error) {
+	t.Helper()
+	if got != nil {
+		t.Fatal("got an error but didn't want one")
+	}
 }
 
-func assertError(t *testing.T, got error, want error) {
-    t.Helper()
-    if got == nil {
-        t.Fatal("didn't get an error but wanted one")
-    }
+func assertError(t testing.TB, got error, want error) {
+	t.Helper()
+	if got == nil {
+		t.Fatal("didn't get an error but wanted one")
+	}
 
-    if got != want {
-        t.Errorf("got %s, want %s", got, want)
-    }
+	if got != want {
+		t.Errorf("got %s, want %s", got, want)
+	}
 }
 ```
+
+## エラーのラップでコンテキストを追加する
+
+ここでは`Withdraw`だけが`ErrInsufficientFunds`を生成できるので、`err`を`ErrInsufficientFunds`と比較するのはうまく機能します。しかし、実際のプログラムには層があります。`Wallet`は`Bank`から使われ、`Bank`はHTTPハンドラーから使われる、といった具合です。各層が受け取ったエラーをそのまま返すだけだと、数層上の呼び出し元に見えるのは`insufficient funds`だけで、実際にどのアカウントの、どの操作が失敗したのかはまったくわかりません。
+
+名前付きのアカウントに対して引き出しを処理する関数があるとしましょう。
+
+```go
+func ProcessWithdrawal(wallet *Wallet, accountID string, amount Bitcoin) error {
+	if err := wallet.Withdraw(amount); err != nil {
+		return fmt.Errorf("processing withdrawal for account %s: %w", accountID, err)
+	}
+	return nil
+}
+```
+
+`%w`動詞\(Go 1.13で導入\)は、`err`の文字列を埋め込むという点では`%v`と同じですが、`%v`にはないこともします。メッセージを新しい無関係な文字列にコピーするだけでなく、`fmt.Errorf`が返す新しいエラーの中に`err`を _ラップ_ するのです。試してみましょう。
+
+```go
+wallet := Wallet{Bitcoin(10)}
+err := ProcessWithdrawal(&wallet, "acc-123", Bitcoin(100))
+fmt.Println(err)
+// processing withdrawal for account acc-123: cannot withdraw, insufficient funds
+```
+
+「どのアカウントの、どの操作か」という有用なコンテキストを保ちつつ、その下で実際に何が問題だったのかという詳細も失っていません。
+
+### ラップされたエラーをチェックする
+
+`ProcessWithdrawal`は`ErrInsufficientFunds`とは _異なる_ エラー値を返すようになったので、根本的な原因は同じであっても、`==`\(や上の`assertError`ヘルパー\)で比較すると失敗してしまいます。これこそまさに[`errors.Is`](https://pkg.go.dev/errors#Is)が解決する問題です。`errors.Is`は、一番外側のエラーだけでなく、ラップされたエラーの連鎖をチェックします。
+
+```go
+if errors.Is(err, ErrInsufficientFunds) {
+	// still true, even though err's message now also mentions the account
+}
+```
+
+`errors.Is`は、一致するものが見つかるか、アンラップするエラーがなくなるまで、`err`に対して[`errors.Unwrap`](https://pkg.go.dev/errors#Unwrap)を繰り返し呼び出すことで動作します\(`%w`を指定した`fmt.Errorf`は`Unwrap() error`メソッドを持つ値を生成するので、`errors.Unwrap`はラップされたエラーを取り出す方法を知っています\)。まさにこの理由から、[マップ](maps.md)の章の`assertError`ヘルパーでも`==`の代わりに`errors.Is`が使われているのを目にするでしょう。これは、一度もラップされていないエラーに対しても機能する安全なデフォルトです。
+
+\(`ErrInsufficientFunds`のような番兵値と比較するのではなく\)ラップされたエラーの連鎖から _型付きの_ エラーを取り出す必要がある場合は、そのための同等の関数もあります。[`errors.As`](https://pkg.go.dev/errors#As)です。[エラー型](../questions-and-answers/error-types.md)の章で、これについてより詳しく説明しています。
 
 ## まとめ
 
 ### ポインタ
 
 * Goは、値を関数/メソッドに渡すときに値をコピーするので、状態を変更する必要がある関数を作成している場合は、変更したいものへのポインターを取得する必要があります。
-* Goが値のコピーを取得するという事実は、多くの場合有用ですが、システムに何かのコピーを作成させたくない場合があり、その場合は参照を渡す必要があります。例としては、非常に大きなデータや、データベース接続プールなどのインスタンスを1つだけ持つつもりのものが考えられます。
+* Goが値のコピーを取得するという事実は、多くの場合有用ですが、システムに何かのコピーを作成させたくない場合があり、その場合は参照を渡す必要があります。例としては、非常に大きなデータ構造を参照する場合や、\(データベース接続プールのように\)インスタンスが1つだけ必要なものが挙げられます。
 
 ### nil
 
@@ -693,7 +748,7 @@ func assertError(t *testing.T, got error, want error) {
 ### エラー
 
 * エラーは、関数/メソッドを呼び出すときの失敗を示す方法です。
-* テストを聞いて、エラーの文字列をチェックすると不安定なテストになると結論付けました。そのため、代わりに意味のある値を使用するようにリファクタリングしました。これにより、コードのテストが容易になり、APIのユーザーにとっても簡単になると結論付けました。
+* テストを聞いて、エラーの文字列をチェックすると不安定なテストになると結論付けました。そのため、代わりに意味のある値を使用するように実装をリファクタリングしました。これにより、コードのテストが容易になり、APIのユーザーにとっても簡単になると結論付けました。
 * これはエラー処理の話の終わりではなく、より高度なことを行うことができますが、これは単なる紹介です。以降のセクションでは、より多くの戦略について説明します。
 * [エラーをチェックするだけでなく、適切に処理する](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully)
 

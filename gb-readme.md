@@ -6,15 +6,36 @@ description: Learn Go with Tests
 
 ![](.gitbook/assets/red-green-blue-gophers-smaller.png)
 
-[Art by Denise](https://twitter.com/deniseyu21)
+[Art by Denise](https://deniseyu.io/)
 
-Go言語でテスト駆動開発を学ぶ
+## 作者を応援する
 
-翻訳:[英語](https://quii.gitbook.io/learn-go-with-tests/), [中文](https://studygolang.gitbook.io/learn-go-with-tests), [Português](https://larien.gitbook.io/aprenda-go-com-testes/), [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
+このリソースは無料で提供できることを誇りに思っていますが、もし感謝の気持ちを示していただけるなら、
+
+* [Twitter で @quii にツイートする](https://twitter.com/quii)
+* [Mastodon](https://mastodon.cloud/@quii)
+* [コーヒーをおごる](https://www.buymeacoffee.com/quii)
+* [GitHub でスポンサーになる](https://github.com/sponsors/quii)
+
+## Go言語でテスト駆動開発を学ぶ
 
 * テストを書いてGo言語を探求する
-* **テスト駆動開発\(TDD\)で基礎を身につけましょう。**GoはTDDを学習するのに適した言語です。なぜなら、学習するのが簡単な言語であり、テストが組み込まれているからです。
+* **テスト駆動開発\(TDD\)で基礎を身につけましょう。** GoはTDDを学習するのに適した言語です。なぜなら、学習するのが簡単な言語であり、テストが組み込まれているからです。
 * 堅牢で十分にテストされたシステムをGoで書き始めることができるようになることを確信しています。
+
+翻訳:
+
+* [英語（原文）](https://quii.gitbook.io/learn-go-with-tests/)
+* [中文](https://studygolang.gitbook.io/learn-go-with-tests)
+* [Português](https://larien.gitbook.io/aprenda-go-com-testes/)
+* [日本語](https://andmorefine.gitbook.io/learn-go-with-tests/)
+* [Français](https://goosegeesejeez.gitbook.io/apprendre-go-par-les-tests)
+* [한국어](https://miryang.gitbook.io/learn-go-with-tests/)
+* [Türkçe](https://halilkocaoz.gitbook.io/go-programlama-dilini-ogren/)
+* [فارسی](https://go-yaad-begir.gitbook.io/go-ba-test/)
+* [Nederlands](https://bobkosse.gitbook.io/leer-go-met-tests/)
+* [Tiếng Việt](https://sons-organization-15.gitbook.io/learn-go-with-tests)
+* [Русский](https://eda-1.gitbook.io/lgwt/)
 
 ## 背景
 
@@ -67,9 +88,13 @@ Go言語でテスト駆動開発を学ぶ
 ## 必要なもの
 
 * パソコン！
-* [インストールされたGO](https://golang.org/)
+* [インストールされたGo](https://golang.org/)
 * テキストエディター
-* プログラミングの経験がある方`if`、`変数`、`関数`などの概念を理解していること
+* プログラミングの経験。`if`、変数、関数などの概念を理解していること
 * ターミナルの使用に慣れている方
 
-[MIT license](https://github.com/andmorefine/learn-go-with-tests/tree/2705e1505f1d4426969523d3c9be643bc40ca699/LICENSE.md)
+## フィードバック
+
+* [こちら](https://github.com/quii/learn-go-with-tests)で issue を追加したり PR を送ったりするか、[Twitter で @quii にツイート](https://twitter.com/quii)してください
+
+[MIT license](LICENSE.md)
