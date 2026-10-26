@@ -18,7 +18,7 @@ A lot of people are choosing Go to build systems because it has made a number of
 - The tooling in respect to testing, benchmarking, linting & shipping is first class compared to most alternatives.
 - The standard library is brilliant.
 - Very fast compilation speed for tight feedback loops
-- The Go backward compatibility promise. It looks like Go will get generics and other features in the future but the designers have promised that even Go code you wrote 5 years ago will still build. I literally spent weeks upgrading a project from Scala 2.8 to 2.10. 
+- The Go backward compatibility promise. Go has added generics (since 1.18) and other features over the years, but the designers have promised that even Go code you wrote 5 years ago will still build. I literally spent weeks upgrading a project from Scala 2.8 to 2.10.
 
 Even with all these great properties we can still make terrible systems, so we should look to the past and understand lessons in software engineering that apply no matter how shiny (or not) your language is.
 
