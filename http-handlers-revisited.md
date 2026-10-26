@@ -127,7 +127,7 @@ When you separate these concerns:
 
 ## Go's Handlers
 
-[`http.HandlerFunc`](https://golang.org/pkg/net/http/#HandlerFunc)
+[`http.HandlerFunc`](https://pkg.go.dev/net/http#HandlerFunc)
 
 > The HandlerFunc type is an adapter to allow the use of ordinary functions as HTTP handlers.
 
@@ -143,8 +143,8 @@ It's just a function, _and we know how to test functions_.
 
 It fits in nicely with the commentary above:
 
-* It takes a [`http.Request`](https://golang.org/pkg/net/http/#Request) which is just a bundle of data for us to inspect, parse and validate.
-* > [A `http.ResponseWriter` interface is used by an HTTP handler to construct an HTTP response.](https://golang.org/pkg/net/http/#ResponseWriter)
+* It takes a [`http.Request`](https://pkg.go.dev/net/http#Request) which is just a bundle of data for us to inspect, parse and validate.
+* > [A `http.ResponseWriter` interface is used by an HTTP handler to construct an HTTP response.](https://pkg.go.dev/net/http#ResponseWriter)
 
 ### Super basic example test
 

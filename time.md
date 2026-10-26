@@ -55,11 +55,11 @@ We want to be able to schedule our program to print the blind bet values at cert
 
 To limit the scope of what we need to do, we'll forget about the number of players part for now and just assume there are 5 players so we'll test that _every 10 minutes the new value of the blind bet is printed_.
 
-As usual the standard library has us covered with [`func AfterFunc(d Duration, f func()) *Timer`](https://golang.org/pkg/time/#AfterFunc)
+As usual the standard library has us covered with [`func AfterFunc(d Duration, f func()) *Timer`](https://pkg.go.dev/time#AfterFunc)
 
 > `AfterFunc` waits for the duration to elapse and then calls f in its own goroutine. It returns a `Timer` that can be used to cancel the call using its Stop method.
 
-### [`time.Duration`](https://golang.org/pkg/time/#Duration)
+### [`time.Duration`](https://pkg.go.dev/time#Duration)
 
 > A Duration represents the elapsed time between two instants as an int64 nanosecond count.
 

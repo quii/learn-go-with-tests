@@ -93,7 +93,7 @@ func Repeat(character string) string {
 
 ### Benchmarking
 
-Writing [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks) in Go is another first-class feature of the language and it is very similar to writing tests.
+Writing [benchmarks](https://pkg.go.dev/testing#hdr-Benchmarks) in Go is another first-class feature of the language and it is very similar to writing tests.
 
 ```go
 func BenchmarkRepeat(b *testing.B) {

@@ -42,7 +42,7 @@ func GetData() string {
 
 - It uses `exec.Command` which allows you to execute an external command to the process
 - We capture the output in `cmd.StdoutPipe` which returns us a `io.ReadCloser` (this will become important)
-- The rest of the code is more or less copy and pasted from the [excellent documentation](https://golang.org/pkg/os/exec/#example_Cmd_StdoutPipe).
+- The rest of the code is more or less copy and pasted from the [excellent documentation](https://pkg.go.dev/os/exec#example-Cmd.StdoutPipe).
     - We capture any output from stdout into an `io.ReadCloser` and then we `Start` the command and then wait for all the data to be read by calling `Wait`. In between those two calls we decode the data into our `Payload` struct.
 
 Here is what is contained inside `msg.xml`

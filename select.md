@@ -74,7 +74,7 @@ func Racer(a, b string) (winner string) {
 For each URL:
 
 1. We use `time.Now()` to record just before we try and get the `URL`.
-1. Then we use [`http.Get`](https://golang.org/pkg/net/http/#Client.Get) to try and perform an HTTP `GET` request against the `URL`. This function returns an [`http.Response`](https://golang.org/pkg/net/http/#Response) and an `error`. We close the response body to avoid leaking file descriptors — if we don't, each request leaves an open connection.
+1. Then we use [`http.Get`](https://pkg.go.dev/net/http#Client.Get) to try and perform an HTTP `GET` request against the `URL`. This function returns an [`http.Response`](https://pkg.go.dev/net/http#Response) and an `error`. We close the response body to avoid leaking file descriptors — if we don't, each request leaves an open connection.
 1. `time.Since` takes the start time and returns a `time.Duration` of the difference.
 
 Once we have done this we simply compare the durations to see which is the quickest.

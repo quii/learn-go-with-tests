@@ -561,5 +561,5 @@ to make a copy of a slice after slicing a very large slice.
 
 [for]: ../iteration.md#
 [blog-slice]: https://blog.golang.org/go-slices-usage-and-internals
-[deepEqual]: https://golang.org/pkg/reflect/#DeepEqual
+[deepEqual]: https://pkg.go.dev/reflect#DeepEqual
 [slice]: https://golang.org/doc/effective_go.html#slices

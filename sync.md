@@ -140,7 +140,7 @@ t.Run("it runs safely concurrently", func(t *testing.T) {
 
 This will loop through our `wantedCount` and fire a goroutine to call `counter.Inc()`.
 
-We are using [`sync.WaitGroup`](https://golang.org/pkg/sync/#WaitGroup) which is a convenient way of synchronising concurrent processes.
+We are using [`sync.WaitGroup`](https://pkg.go.dev/sync#WaitGroup) which is a convenient way of synchronising concurrent processes.
 
 > A WaitGroup waits for a collection of goroutines to finish. The main goroutine calls Add to set the number of goroutines to wait for. Then each of the goroutines runs and calls Done when finished. At the same time, Wait can be used to block until all goroutines have finished.
 
@@ -183,7 +183,7 @@ Both goroutines called `Inc` once each, so we'd want `c.value` to end up as `2`,
 
 ## Write enough code to make it pass
 
-A simple solution is to add a lock to our `Counter`, ensuring only one goroutine can increment the counter at a time. Go's [`Mutex`](https://golang.org/pkg/sync/#Mutex) provides such a lock:
+A simple solution is to add a lock to our `Counter`, ensuring only one goroutine can increment the counter at a time. Go's [`Mutex`](https://pkg.go.dev/sync#Mutex) provides such a lock:
 
 >A Mutex is a mutual exclusion lock. The zero value for a Mutex is an unlocked mutex.
 
@@ -246,7 +246,7 @@ sync/v2/sync_test.go:16: call of assertCounter copies lock value: v1.Counter con
 sync/v2/sync_test.go:39: assertCounter passes lock by value: v1.Counter contains sync.Mutex
 ```
 
-A look at the documentation of [`sync.Mutex`](https://golang.org/pkg/sync/#Mutex) tells us why
+A look at the documentation of [`sync.Mutex`](https://pkg.go.dev/sync#Mutex) tells us why
 
 > A Mutex must not be copied after first use.
 

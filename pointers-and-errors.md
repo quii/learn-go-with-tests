@@ -223,7 +223,7 @@ To make `Bitcoin` you just use the syntax `Bitcoin(999)`.
 
 By doing this we're making a new type and we can declare _methods_ on them. This can be very useful when you want to add some domain specific functionality on top of existing types.
 
-Let's implement [Stringer](https://golang.org/pkg/fmt/#Stringer) on Bitcoin
+Let's implement [Stringer](https://pkg.go.dev/fmt#Stringer) on Bitcoin
 
 ```go
 type Stringer interface {

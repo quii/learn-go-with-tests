@@ -293,7 +293,7 @@ We want this to pass, but if you run the test it doesn't.
 
 The problem is our `Reader` has reached the end so there is nothing more to read. We need a way to tell it to go back to the start.
 
-[ReadSeeker](https://golang.org/pkg/io/#ReadSeeker) is another interface in the standard library that can help.
+[ReadSeeker](https://pkg.go.dev/io#ReadSeeker) is another interface in the standard library that can help.
 
 ```go
 type ReadSeeker interface {
@@ -302,7 +302,7 @@ type ReadSeeker interface {
 }
 ```
 
-Remember embedding? This is an interface comprised of `Reader` and [`Seeker`](https://golang.org/pkg/io/#Seeker)
+Remember embedding? This is an interface comprised of `Reader` and [`Seeker`](https://pkg.go.dev/io#Seeker)
 
 ```go
 type Seeker interface {
@@ -1257,7 +1257,7 @@ func (f *FileSystemPlayerStore) GetLeague() League {
 }
 ```
 
-[`sort.Slice`](https://golang.org/pkg/sort/#Slice)
+[`sort.Slice`](https://pkg.go.dev/sort#Slice)
 
 > Slice sorts the provided slice given the provided less function.
 

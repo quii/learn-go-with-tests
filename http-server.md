@@ -47,13 +47,13 @@ We can write a test and make it pass by returning a hard-coded value to get us s
 
 By doing this very small step, we can make the important start of getting an overall project structure working correctly without having to worry too much about our application logic.
 
-To create a web server in Go you will typically call [ListenAndServe](https://golang.org/pkg/net/http/#ListenAndServe).
+To create a web server in Go you will typically call [ListenAndServe](https://pkg.go.dev/net/http#ListenAndServe).
 
 ```go
 func ListenAndServe(addr string, handler Handler) error
 ```
 
-This will start a web server listening on a port, creating a goroutine for every request and running it against a [`Handler`](https://golang.org/pkg/net/http/#Handler).
+This will start a web server listening on a port, creating a goroutine for every request and running it against a [`Handler`](https://pkg.go.dev/net/http#Handler).
 
 ```go
 type Handler interface {
@@ -170,7 +170,7 @@ To run this, do `go build` which will take all the `.go` files in the directory 
 
 Earlier we explored that the `Handler` interface is what we need to implement in order to make a server. _Typically_ we do that by creating a `struct` and make it implement the interface by implementing its own ServeHTTP method. However the use-case for structs is for holding data but _currently_ we have no state, so it doesn't feel right to be creating one.
 
-[HandlerFunc](https://golang.org/pkg/net/http/#HandlerFunc) lets us avoid this.
+[HandlerFunc](https://pkg.go.dev/net/http#HandlerFunc) lets us avoid this.
 
 > The HandlerFunc type is an adapter to allow the use of ordinary functions as HTTP handlers. If f is a function with the appropriate signature, HandlerFunc(f) is a Handler that calls f.
 
@@ -248,7 +248,7 @@ If we had started with the store code the amount of changes we'd have to do woul
 
 We're resisting the temptation to use any routing libraries right now, just the smallest step to get our test passing.
 
-`r.URL.Path` returns the path of the request which we can then use [`strings.TrimPrefix`](https://golang.org/pkg/strings/#TrimPrefix) to trim away `/players/` to get the requested player. It's not very robust but will do the trick for now.
+`r.URL.Path` returns the path of the request which we can then use [`strings.TrimPrefix`](https://pkg.go.dev/strings#TrimPrefix) to trim away `/players/` to get the requested player. It's not very robust but will do the trick for now.
 
 ## Refactor
 

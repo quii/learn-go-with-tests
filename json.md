@@ -138,7 +138,7 @@ In the previous chapter, we mentioned this was a fairly naive way of doing our r
 
 ## Write enough code to make it pass
 
-Go has a built-in routing mechanism called [`ServeMux`](https://golang.org/pkg/net/http/#ServeMux) (request multiplexer) which lets you attach `http.Handler`s to particular request paths.
+Go has a built-in routing mechanism called [`ServeMux`](https://pkg.go.dev/net/http#ServeMux) (request multiplexer) which lets you attach `http.Handler`s to particular request paths.
 
 Let's commit some sins and get the tests passing in the quickest way we can, knowing we can refactor it with safety once we know the tests are passing.
 

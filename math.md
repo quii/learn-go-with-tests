@@ -237,7 +237,7 @@ So now we know how to get the angle of the second hand (1/60th of a circle for e
 
 ## `math`
 
-Happily the Go `math` package has both, with one small snag we'll need to get our heads around; if we look at the description of [`math.Cos`](https://golang.org/pkg/math/#Cos):
+Happily the Go `math` package has both, with one small snag we'll need to get our heads around; if we look at the description of [`math.Cos`](https://pkg.go.dev/math#Cos):
 
 > Cos returns the cosine of the radian argument x.
 

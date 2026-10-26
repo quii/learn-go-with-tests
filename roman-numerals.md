@@ -208,7 +208,7 @@ func ConvertToRoman(arabic int) string {
 }
 ```
 
-You might remember [`strings.Builder`](https://golang.org/pkg/strings/#Builder) from our discussion
+You might remember [`strings.Builder`](https://pkg.go.dev/strings#Builder) from our discussion
 about [benchmarking](iteration.md#benchmarking)
 
 > A Builder is used to efficiently build a string using Write methods. It minimizes memory copying.
@@ -771,7 +771,7 @@ This is great! We've been forced to think more deeply about our domain which is 
 
 Clearly `int` is not a great type. What if we tried something a little more appropriate?
 
-### [`uint16`](https://golang.org/pkg/builtin/#uint16)
+### [`uint16`](https://pkg.go.dev/builtin#uint16)
 
 Go has types for _unsigned integers_, which means they cannot be negative; so that rules out one class of bug in our code immediately. By adding 16, it means it is a 16 bit integer which can store a max of `65535`, which is still too big but gets us closer to what we need.
 
