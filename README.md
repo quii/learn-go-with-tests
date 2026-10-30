@@ -25,6 +25,7 @@
 - [Nederlands](https://bobkosse.gitbook.io/leer-go-met-tests/)
 - [Tiếng Việt](https://sons-organization-15.gitbook.io/learn-go-with-tests)
 - [Русский](https://eda-1.gitbook.io/lgwt/)
+- [العربية](https://youssef-abbih.gitbook.io/taallam-go-bil-ikhtibarat/)
 
 ## Support me
 
